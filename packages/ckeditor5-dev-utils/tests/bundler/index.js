@@ -3,27 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import * as bundler from '../../lib/bundler/index.js';
+import getLicenseBanner from '../../lib/bundler/getlicensebanner.js';
 
-const chai = require( 'chai' );
-const expect = chai.expect;
+vi.mock( '../../lib/bundler/getlicensebanner.js' );
 
-describe( 'bundler', () => {
-	let tasks;
-
-	beforeEach( () => {
-		tasks = require( '../../lib/bundler/index' );
-	} );
-
-	describe( 'createEntryFile()', () => {
-		it( 'should be a function', () => {
-			expect( tasks.createEntryFile ).to.be.a( 'function' );
-		} );
-	} );
-
+describe( 'bundler/index.js', () => {
 	describe( 'getLicenseBanner()', () => {
 		it( 'should be a function', () => {
-			expect( tasks.getLicenseBanner ).to.be.a( 'function' );
+			expect( bundler.getLicenseBanner ).to.be.a( 'function' );
+			expect( bundler.getLicenseBanner ).toEqual( getLicenseBanner );
 		} );
 	} );
 } );

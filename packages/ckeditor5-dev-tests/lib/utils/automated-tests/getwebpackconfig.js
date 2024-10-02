@@ -3,19 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import webpack from 'webpack';
+import { loaders } from '@ckeditor/ckeditor5-dev-utils';
+import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
+import TreatWarningsAsErrorsWebpackPlugin from './treatwarningsaserrorswebpackplugin.js';
+import { fileURLToPath } from 'url';
 
-const path = require( 'path' );
-const webpack = require( 'webpack' );
-const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
-const TreatWarningsAsErrorsWebpackPlugin = require( './treatwarningsaserrorswebpackplugin' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 /**
- * @param {Object} options
- * @returns {Object}
+ * @param {object} options
+ * @returns {object}
  */
-module.exports = function getWebpackConfigForAutomatedTests( options ) {
+export default function getWebpackConfigForAutomatedTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
 	const config = {
@@ -102,4 +104,4 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	}
 
 	return config;
-};
+}

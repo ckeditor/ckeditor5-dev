@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { ReflectionKind } = require( 'typedoc' );
-const { utils } = require( '@ckeditor/typedoc-plugins' );
+import { ReflectionKind } from 'typedoc';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 // The `@label` validator is currently not used.
 // See: https://github.com/ckeditor/ckeditor5/issues/13591.
@@ -18,10 +16,11 @@ const { utils } = require( '@ckeditor/typedoc-plugins' );
  *
  * Also, it prevents using the same name twice for overloaded structures.
  *
- * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError A callback that is executed when a validation error is detected.
+ * @param {object} project Generated output from TypeDoc to validate.
+ * @param {function} onError A callback that is executed when a validation error is detected.
  */
-module.exports = function validate( project, onError ) {
+export default function validate( project, onError ) {
+	const { utils } = typedocPlugins;
 	const kinds = ReflectionKind.Method | ReflectionKind.Constructor | ReflectionKind.Function;
 	const reflections = project.getReflectionsByKind( kinds ).filter( utils.isReflectionValid );
 
@@ -52,4 +51,4 @@ module.exports = function validate( project, onError ) {
 			}
 		}
 	}
-};
+}

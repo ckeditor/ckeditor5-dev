@@ -3,14 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
-	logger: require( './logger' ),
-	tools: require( './tools' ),
-	loaders: require( './loaders' ),
-	stream: require( './stream' ),
-	bundler: require( './bundler/index' ),
-	builds: require( './builds/index' ),
-	styles: require( './styles/index' )
-};
+export { default as logger } from './logger/index.js';
+export * as builds from './builds/index.js';
+export * as bundler from './bundler/index.js';
+export * as loaders from './loaders/index.js';
+export * as stream from './stream/index.js';
+export * as styles from './styles/index.js';
+export * as tools from './tools/index.js';

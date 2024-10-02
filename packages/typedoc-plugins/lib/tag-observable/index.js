@@ -105,12 +105,12 @@ function onEventEnd( context ) {
  * Creates and returns new type parameter reflection.
  *
  * @param {require('typedoc').Context} context Current state of the converter.
- * @param {Object} options
- * @param {String} options.name Parameter name.
+ * @param {object} options
+ * @param {string} options.name Parameter name.
  * @param {require('typedoc').Reflection} options.parent Parent reflection where the parameter should belong.
  * @param {require('ts').SyntaxKind} options.kind Kind of the parameter.
- * @param {String} options.comment Parameter comment.
- * @param {Object} options.type
+ * @param {string} options.comment Parameter comment.
+ * @param {object} options.type
  * @returns {require('typedoc').Reflection}
  */
 function typeParameterFactory( context, options ) {

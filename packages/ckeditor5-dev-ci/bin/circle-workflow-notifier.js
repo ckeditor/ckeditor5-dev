@@ -7,12 +7,9 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const { execSync } = require( 'child_process' );
-const fetch = require( 'node-fetch' );
-const minimist = require( 'minimist' );
-const processJobStatuses = require( '../lib/process-job-statuses' );
+import { execSync } from 'child_process';
+import minimist from 'minimist';
+import processJobStatuses from '../lib/process-job-statuses.js';
 
 // This script allows the creation of a new job within a workflow that will be executed
 // in the end, when all other jobs will be finished or errored.
@@ -107,7 +104,12 @@ async function waitForOtherJobsAndSendNotification() {
  */
 async function getOtherJobsData() {
 	const url = `https://circleci.com/api/v2/workflow/${ CIRCLE_WORKFLOW_ID }/job`;
-	const options = { headers: { 'Circle-Token': CKE5_CIRCLE_TOKEN } };
+	const options = {
+		method: 'GET',
+		headers: {
+			'Circle-Token': CKE5_CIRCLE_TOKEN
+		}
+	};
 
 	const response = await fetch( url, options );
 	const data = await response.json();
@@ -116,10 +118,10 @@ async function getOtherJobsData() {
 }
 
 /**
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {String} result.task
- * @returns {Array<String>} result.ignore
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {string} result.task
+ * @returns {Array.<string>} result.ignore
  */
 function parseArguments( args ) {
 	const config = {

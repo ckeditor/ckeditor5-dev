@@ -3,72 +3,46 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { loaders } from '@ckeditor/ckeditor5-dev-utils';
+import getDefinitionsFromFile from '../../../lib/utils/getdefinitionsfromfile.js';
+import getWebpackConfigForManualTests from '../../../lib/utils/manual-tests/getwebpackconfig.js';
 
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
-const { expect } = require( 'chai' );
+const stubs = vi.hoisted( () => ( {
+	translations: {
+		plugin: {
+			constructor: vi.fn()
+		}
+	}
+} ) );
+
+vi.mock( 'webpack' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
+	CKEditorTranslationsPlugin: class CKEditorTranslationsPlugin {
+		constructor( ...args ) {
+			stubs.translations.plugin.constructor( ...args );
+		}
+	}
+} ) );
+vi.mock( '../../../lib/utils/getdefinitionsfromfile.js' );
 
 describe( 'getWebpackConfigForManualTests()', () => {
-	let getWebpackConfigForManualTests, stubs;
-
 	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			getDefinitionsFromFile: sinon.stub().returns( {} ),
-			loaders: {
-				getIconsLoader: sinon.stub().returns( {} ),
-				getStylesLoader: sinon.stub().returns( {} ),
-				getTypeScriptLoader: sinon.stub().returns( {} ),
-				getFormattedTextLoader: sinon.stub().returns( {} ),
-				getCoverageLoader: sinon.stub().returns( {} ),
-				getJavaScriptLoader: sinon.stub().returns( {} )
-			},
-			logger: {},
-			webpack: {
-				DefinePlugin: sinon.stub(),
-				ProvidePlugin: sinon.stub(),
-				SourceMapDevToolPlugin: sinon.stub()
-			},
-			devTranslations: {
-				CKEditorTranslationsPlugin: class {
-					constructor( args ) {
-						this.args = args;
-					}
-				}
-			}
-		};
-
-		mockery.registerMock( 'webpack', stubs.webpack );
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-translations', stubs.devTranslations );
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			loaders: stubs.loaders,
-			logger: () => stubs.logger
-		} );
-
-		getWebpackConfigForManualTests = require( '../../../lib/utils/manual-tests/getwebpackconfig' );
-	} );
-
-	afterEach( () => {
-		sinon.restore();
-		mockery.disable();
-		mockery.deregisterAll();
+		vi.mocked( getDefinitionsFromFile ).mockReturnValue( {} );
+		vi.mocked( loaders ).getIconsLoader.mockReturnValue( {} );
+		vi.mocked( loaders ).getStylesLoader.mockReturnValue( {} );
+		vi.mocked( loaders ).getTypeScriptLoader.mockReturnValue( {} );
+		vi.mocked( loaders ).getFormattedTextLoader.mockReturnValue( {} );
+		vi.mocked( loaders ).getCoverageLoader.mockReturnValue( {} );
+		vi.mocked( loaders ).getJavaScriptLoader.mockReturnValue( {} );
 	} );
 
 	it( 'should return webpack configuration object', () => {
 		const entries = {
 			'ckeditor5/tests/manual/all-features': '/home/ckeditor/ckeditor5/tests/manual/all-features.js'
 		};
-
 		const buildDir = '/home/ckeditor/ckeditor5/build/.manual-tests';
-
 		const debug = [];
 
 		const webpackConfig = getWebpackConfigForManualTests( {
@@ -79,36 +53,41 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			tsconfig: '/tsconfig/path'
 		} );
 
-		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getIconsLoader.firstCall.args[ 0 ] ).to.have.property( 'matchExtensionOnly', true );
+		expect( vi.mocked( loaders ).getIconsLoader ).toHaveBeenCalledExactlyOnceWith( {
+			matchExtensionOnly: true
+		} );
+		expect( vi.mocked( loaders ).getStylesLoader ).toHaveBeenCalledExactlyOnceWith( {
+			themePath: '/theme/path',
+			sourceMap: true
+		} );
 
-		expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'themePath', '/theme/path' );
-		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'sourceMap', true );
+		expect( vi.mocked( loaders ).getTypeScriptLoader ).toHaveBeenCalledExactlyOnceWith( {
+			debugFlags: debug,
+			configFile: '/tsconfig/path',
+			includeDebugLoader: true
+		} );
 
-		expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
+		expect( vi.mocked( loaders ).getFormattedTextLoader ).toHaveBeenCalledOnce();
 
-		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'debugFlags', debug );
-		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'configFile', '/tsconfig/path' );
-		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'includeDebugLoader', true );
+		expect( vi.mocked( loaders ).getJavaScriptLoader ).toHaveBeenCalledExactlyOnceWith( {
+			debugFlags: debug
+		} );
 
-		expect( stubs.loaders.getFormattedTextLoader.calledOnce ).to.equal( true );
+		expect( vi.mocked( loaders ).getCoverageLoader ).not.toHaveBeenCalledOnce();
 
-		expect( stubs.loaders.getJavaScriptLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getJavaScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'debugFlags', debug );
+		expect( webpackConfig ).toEqual( expect.objectContaining( {
+			// To avoid "eval()" in files.
+			mode: 'none',
+			entry: entries,
+			output: {
+				path: buildDir
+			},
+			plugins: expect.any( Array ),
+			watch: true,
+			resolve: expect.any( Object )
+		} ) );
 
-		expect( stubs.loaders.getCoverageLoader.called ).to.equal( false );
-
-		expect( webpackConfig ).to.be.an( 'object' );
 		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
-
-		// To avoid "eval()" in files.
-		expect( webpackConfig ).to.have.property( 'mode', 'none' );
-		expect( webpackConfig ).to.have.property( 'entry', entries );
-		expect( webpackConfig ).to.have.property( 'output' );
-		expect( webpackConfig.output ).to.deep.equal( { path: buildDir } );
-		expect( webpackConfig ).to.have.property( 'plugins' );
-		expect( webpackConfig ).to.have.property( 'watch', true );
 
 		// The `devtool` property has been replaced by the `SourceMapDevToolPlugin()`.
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
@@ -125,12 +104,15 @@ describe( 'getWebpackConfigForManualTests()', () => {
 	it( 'pattern passed to CKEditorTranslationsPlugin should match paths to ckeditor5 packages', () => {
 		const webpackConfig = getWebpackConfigForManualTests( { disableWatch: true } );
 
-		expect( webpackConfig ).to.have.property( 'plugins' );
-		expect( webpackConfig.plugins ).to.be.an( 'Array' );
+		expect( stubs.translations.plugin.constructor ).toHaveBeenCalledOnce();
 
 		const CKEditorTranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
 
-		const pattern = CKEditorTranslationsPlugin.args.packageNamesPattern;
+		expect( CKEditorTranslationsPlugin ).toBeTruthy();
+
+		const [ firstCall ] = stubs.translations.plugin.constructor.mock.calls;
+		const [ firstArg ] = firstCall;
+		const { packageNamesPattern: pattern } = firstArg;
 
 		expect( 'packages/ckeditor5-foo/bar'.match( pattern )[ 0 ] ).to.equal( 'packages/ckeditor5-foo/' );
 	} );
@@ -138,12 +120,15 @@ describe( 'getWebpackConfigForManualTests()', () => {
 	it( 'pattern passed to CKEditorTranslationsPlugin should match paths to external repositories named like ckeditor5 package', () => {
 		const webpackConfig = getWebpackConfigForManualTests( { disableWatch: true } );
 
-		expect( webpackConfig ).to.have.property( 'plugins' );
-		expect( webpackConfig.plugins ).to.be.an( 'Array' );
+		expect( stubs.translations.plugin.constructor ).toHaveBeenCalledOnce();
 
 		const CKEditorTranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
 
-		const pattern = CKEditorTranslationsPlugin.args.packageNamesPattern;
+		expect( CKEditorTranslationsPlugin ).toBeTruthy();
+
+		const [ firstCall ] = stubs.translations.plugin.constructor.mock.calls;
+		const [ firstArg ] = firstCall;
+		const { packageNamesPattern: pattern } = firstArg;
 
 		expect( 'external/ckeditor5-foo/packages/ckeditor5-bar/baz'.match( pattern )[ 0 ] ).to.equal( 'packages/ckeditor5-bar/' );
 	} );

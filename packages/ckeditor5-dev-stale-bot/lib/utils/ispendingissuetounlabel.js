@@ -3,18 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Checks whether pending issue should be unlabeled, because it was answered by a community member.
  *
  * @param {PendingIssue} pendingIssue Pending issue to check.
- * @returns {Boolean}
+ * @returns {boolean}
  */
-module.exports = function isPendingIssueToUnlabel( pendingIssue ) {
+export default function isPendingIssueToUnlabel( pendingIssue ) {
 	if ( !pendingIssue.lastComment ) {
 		return false;
 	}
 
 	return pendingIssue.lastComment.isExternal;
-};
+}

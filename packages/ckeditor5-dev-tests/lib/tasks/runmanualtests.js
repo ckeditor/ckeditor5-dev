@@ -3,45 +3,43 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const chalk = require( 'chalk' );
-const { globSync } = require( 'glob' );
-const { spawn } = require( 'child_process' );
-const inquirer = require( 'inquirer' );
-const isInteractive = require( 'is-interactive' );
-const { Server: SocketServer } = require( 'socket.io' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const createManualTestServer = require( '../utils/manual-tests/createserver' );
-const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
-const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
-const copyAssets = require( '../utils/manual-tests/copyassets' );
-const removeDir = require( '../utils/manual-tests/removedir' );
-const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
-const requireDll = require( '../utils/requiredll' );
+import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
+import chalk from 'chalk';
+import { globSync } from 'glob';
+import inquirer from 'inquirer';
+import isInteractive from 'is-interactive';
+import { Server as SocketServer } from 'socket.io';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import createManualTestServer from '../utils/manual-tests/createserver.js';
+import compileManualTestScripts from '../utils/manual-tests/compilescripts.js';
+import compileManualTestHtmlFiles from '../utils/manual-tests/compilehtmlfiles.js';
+import copyAssets from '../utils/manual-tests/copyassets.js';
+import removeDir from '../utils/manual-tests/removedir.js';
+import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
+import requireDll from '../utils/requiredll.js';
 
 /**
  * Main function that runs manual tests.
  *
- * @param {Object} options
- * @param {Array.<String>} options.files Glob patterns specifying which tests to run.
- * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
- * @param {Boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
+ * @param {object} options
+ * @param {Array.<string>} options.files Glob patterns specifying which tests to run.
+ * @param {string} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
- * @param {String} [options.language] A language passed to `CKEditorTranslationsPlugin`.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
- * @param {Number} [options.port] A port number used by the `createManualTestServer`.
- * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
- * @param {String} [options.tsconfig] Path the TypeScript configuration file.
- * @param {Boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
+ * @param {string} [options.language] A language passed to `CKEditorTranslationsPlugin`.
+ * @param {Array.<string>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
+ * @param {number} [options.port] A port number used by the `createManualTestServer`.
+ * @param {string} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {string} [options.tsconfig] Path the TypeScript configuration file.
+ * @param {boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
  * If `true`, DLL builds are created automatically, if required by test files. User is not asked.
  * If `false`, DLL builds are not created. User is not asked.
- * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
+ * @param {boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
-module.exports = function runManualTests( options ) {
+export default function runManualTests( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const buildDir = path.join( cwd, 'build', '.manual-tests' );
@@ -113,7 +111,7 @@ module.exports = function runManualTests( options ) {
 	/**
 	 * Checks if building the DLLs is needed.
 	 *
-	 * @param {Array.<String>} sourceFiles
+	 * @param {Array.<string>} sourceFiles
 	 * @returns {Promise}
 	 */
 	function isDllBuildRequired( sourceFiles ) {
@@ -191,7 +189,7 @@ module.exports = function runManualTests( options ) {
 	/**
 	 * Executes the script for building DLLs in the specified repository.
 	 *
-	 * @param {String} repositoryPath
+	 * @param {string} repositoryPath
 	 * @returns {Promise}
 	 */
 	function buildDllInRepository( repositoryPath ) {
@@ -217,4 +215,4 @@ module.exports = function runManualTests( options ) {
 				} );
 		} );
 	}
-};
+}

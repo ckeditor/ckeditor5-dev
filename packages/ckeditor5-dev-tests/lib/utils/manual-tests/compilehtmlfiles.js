@@ -3,34 +3,36 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs-extra';
+import { globSync } from 'glob';
+import { uniq, debounce } from 'lodash-es';
+import chalk from 'chalk';
+import * as commonmark from 'commonmark';
+import combine from 'dom-combiner';
+import chokidar from 'chokidar';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import getRelativeFilePath from '../getrelativefilepath.js';
+import { fileURLToPath } from 'url';
 
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
-const _ = require( 'lodash' );
-const chalk = require( 'chalk' );
-const commonmark = require( 'commonmark' );
-const combine = require( 'dom-combiner' );
-const chokidar = require( 'chokidar' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getRelativeFilePath = require( '../getrelativefilepath' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
 /**
- * @param {Object} options
- * @param {String} options.buildDir A path where compiled files will be saved.
- * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
- * @param {String} options.language A language passed to `CKEditorTranslationsPlugin`.
- * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
+ * @param {object} options
+ * @param {string} options.buildDir A path where compiled files will be saved.
+ * @param {Array.<string>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
+ * @param {string} options.language A language passed to `CKEditorTranslationsPlugin`.
+ * @param {boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
- * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
+ * @param {Array.<string>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
+ * @param {boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
-module.exports = function compileHtmlFiles( options ) {
+export default function compileHtmlFiles( options ) {
 	const buildDir = options.buildDir;
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const silent = options.silent || false;
@@ -38,12 +40,12 @@ module.exports = function compileHtmlFiles( options ) {
 	const sourceMDFiles = options.sourceFiles.map( jsFile => setExtension( jsFile, 'md' ) );
 	const sourceHtmlFiles = sourceMDFiles.map( mdFile => setExtension( mdFile, 'html' ) );
 
-	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceDirs = uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
 	const sourceFilePathBases = sourceMDFiles.map( mdFile => getFilePathWithoutExtension( mdFile ) );
 
 	const staticFiles = sourceDirs
 		.flatMap( sourceDir => {
-			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( path.sep ).join( '/' );
+			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( /[\\/]/ ).join( '/' );
 
 			return globSync( globPattern );
 		} )
@@ -80,15 +82,15 @@ module.exports = function compileHtmlFiles( options ) {
 			} );
 		}, options.onTestCompilationStatus );
 	}
-};
+}
 
 /**
- * @param {String} buildDir An absolute path to the directory where the processed file should be saved.
- * @param {Object} options
- * @param {String} options.filePath An absolute path to the manual test assets without the extension.
- * @param {String} options.template The HTML template which will be merged with the manual test HTML file.
- * @param {Array.<String>} options.languages Name of translations that should be added to the manual test.
- * @param {Boolean} options.silent Whether to hide files that will be processed by the script.
+ * @param {string} buildDir An absolute path to the directory where the processed file should be saved.
+ * @param {object} options
+ * @param {string} options.filePath An absolute path to the manual test assets without the extension.
+ * @param {string} options.template The HTML template which will be merged with the manual test HTML file.
+ * @param {Array.<string>} options.languages Name of translations that should be added to the manual test.
+ * @param {boolean} options.silent Whether to hide files that will be processed by the script.
  */
 function compileHtmlFile( buildDir, options ) {
 	const sourceFilePathBase = options.filePath;
@@ -181,7 +183,7 @@ function getFilePathWithoutExtension( file ) {
 
 function watchFiles( filePaths, onChange, onTestCompilationStatus ) {
 	for ( const filePath of filePaths ) {
-		const debouncedOnChange = _.debounce( () => {
+		const debouncedOnChange = debounce( () => {
 			onChange( filePath );
 			onTestCompilationStatus( 'finished' );
 		}, 500 );

@@ -3,63 +3,71 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import chalk from 'chalk';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import getPackageJson from '../../lib/utils/getpackagejson.js';
+import displaySkippedPackages from '../../lib/utils/displayskippedpackages.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+const stubs = vi.hoisted( () => {
+	const values = {
+		logger: {
+			info: vi.fn()
+		},
+		chalk: {
+			bold: vi.fn( input => input ),
+			underline: vi.fn( input => input )
+		}
+	};
 
-describe( 'dev-release-tools/utils', () => {
-	let displaySkippedPackages, sandbox, stubs;
+	// To make `chalk.bold.yellow.red()` working.
+	for ( const rootKey of Object.keys( values.chalk ) ) {
+		for ( const nestedKey of Object.keys( values.chalk ) ) {
+			values.chalk[ rootKey ][ nestedKey ] = values.chalk[ nestedKey ];
+		}
+	}
 
-	beforeEach( () => {
-		sandbox = sinon.createSandbox();
+	return values;
+} );
 
-		stubs = {
-			logger: {
-				info: sandbox.stub(),
-				warning: sandbox.stub(),
-				error: sandbox.stub()
-			},
-			getPackageJson: sandbox.stub()
-		};
+vi.mock( 'chalk', () => ( {
+	default: stubs.chalk
+} ) );
+vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
+	logger: vi.fn( () => stubs.logger )
+} ) );
+vi.mock( '../../lib/utils/constants.js', () => ( {
+	CLI_INDENT_SIZE: 1
+} ) );
+vi.mock( '../../lib/utils/getpackagejson.js' );
 
-		displaySkippedPackages = proxyquire( '../../lib/utils/displayskippedpackages', {
-			'@ckeditor/ckeditor5-dev-utils': {
-				logger() {
-					return stubs.logger;
-				}
-			},
-			'./getpackagejson': stubs.getPackageJson
-		} );
+describe( 'displaySkippedPackages()', () => {
+	it( 'displays name of packages that have been skipped', () => {
+		vi.mocked( getPackageJson )
+			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-foo' } )
+			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-bar' } );
+
+		displaySkippedPackages( new Set( [
+			'/packages/ckeditor5-foo',
+			'/packages/ckeditor5-bar'
+		] ) );
+
+		expect( vi.mocked( logger ) ).toHaveBeenCalledOnce();
+		expect( stubs.logger.info ).toHaveBeenCalledOnce();
+
+		const [ firstCall ] = stubs.logger.info.mock.calls;
+		const [ firstArgument ] = firstCall;
+		const logMessage = firstArgument.split( '\n' );
+
+		expect( logMessage[ 0 ].includes( 'Packages listed below have been skipped:' ) ).to.equal( true );
+		expect( logMessage[ 1 ].includes( ' * @ckeditor/ckeditor5-foo' ) ).to.equal( true );
+		expect( logMessage[ 2 ].includes( ' * @ckeditor/ckeditor5-bar' ) ).to.equal( true );
+
+		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledOnce();
 	} );
 
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
-	describe( 'displaySkippedPackages()', () => {
-		it( 'displays name of packages that have been skipped', () => {
-			stubs.getPackageJson.onFirstCall().returns( { name: '@ckeditor/ckeditor5-foo' } );
-			stubs.getPackageJson.onSecondCall().returns( { name: '@ckeditor/ckeditor5-bar' } );
-
-			displaySkippedPackages( new Set( [
-				'/packages/ckeditor5-foo',
-				'/packages/ckeditor5-bar'
-			] ) );
-
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-
-			const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
-
-			expect( logMessage[ 0 ].includes( 'Packages listed below have been skipped:' ) ).to.equal( true );
-			expect( logMessage[ 1 ].includes( '  * @ckeditor/ckeditor5-foo' ) ).to.equal( true );
-			expect( logMessage[ 2 ].includes( '  * @ckeditor/ckeditor5-bar' ) ).to.equal( true );
-		} );
-
-		it( 'does not display if given list is empty', () => {
-			displaySkippedPackages( new Set() );
-			expect( stubs.logger.info.calledOnce ).to.equal( false );
-		} );
+	it( 'does not display if given list is empty', () => {
+		displaySkippedPackages( new Set() );
+		expect( stubs.logger.info ).not.toHaveBeenCalledOnce();
 	} );
 } );

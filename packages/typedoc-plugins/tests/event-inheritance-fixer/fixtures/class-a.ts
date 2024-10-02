@@ -14,7 +14,7 @@ export class ClassA {}
  *
  * @eventName ~ClassA#event-1-class-a
  *
- * @param {String} p1 Description for first param.
+ * @param {string} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.
  * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
  */

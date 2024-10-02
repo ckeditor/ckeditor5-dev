@@ -9,10 +9,10 @@
  * E.g. if the `CK_DEBUG_ENGINE` flag is set to true, then all lines starting with
  * `// @if CK_DEBUG_ENGINE //` will be uncommented.
  *
- * @param {String} source
+ * @param {string} source
  * @param {any} map
  */
-module.exports = function ckDebugLoader( source, map ) {
+export default function ckDebugLoader( source, map ) {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
 		// `this.query` comes from the webpack loader configuration specified as the loader options.
 		// {
@@ -32,4 +32,4 @@ module.exports = function ckDebugLoader( source, map ) {
 	} );
 
 	this.callback( null, source, map );
-};
+}

@@ -3,17 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const findMessages = require( '../lib/findmessages' );
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import traverse from '@babel/traverse';
 
 describe( 'findMessages', () => {
-	const sandbox = sinon.createSandbox();
+	let findMessages;
 
-	afterEach( () => {
-		sandbox.restore();
+	beforeEach( async () => {
+		findMessages = ( await import( '../lib/findmessages.js' ) ).default;
 	} );
 
 	it( 'should parse provided code and find messages from `t()` function calls on string literals', () => {
@@ -215,5 +212,38 @@ describe( 'findMessages', () => {
 		expect( errors ).to.deep.equal( [
 			'First t() call argument should be a string literal or an object literal (foo.js).'
 		] );
+	} );
+
+	describe( 'a non-type=module project support', () => {
+		beforeEach( async () => {
+			vi.resetAllMocks();
+			vi.clearAllMocks();
+			vi.resetModules();
+
+			vi.doMock( '@babel/traverse', () => ( {
+				default: {
+					default: traverse
+				}
+			} ) );
+
+			findMessages = ( await import( '../lib/findmessages.js' ) ).default;
+		} );
+
+		it( 'should parse provided code and find messages from `t()` function calls on string literals', () => {
+			const messages = [];
+
+			findMessages(
+				`function x() {
+                const t = this.t;
+                t( 'Image' );
+                t( 'CKEditor' );
+                g( 'Some other function' );
+			}`,
+				'foo.js',
+				message => messages.push( message )
+			);
+
+			expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
+		} );
 	} );
 } );

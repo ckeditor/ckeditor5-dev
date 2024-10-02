@@ -3,12 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-const chai = require( 'chai' );
-const expect = chai.expect;
-const equalMarkupFactory = require( '../../../../lib/utils/automated-tests/assertions/equal-markup' );
+import { beforeAll, describe, expect, it, chai } from 'vitest';
+import equalMarkupFactory from '../../../../lib/utils/automated-tests/assertions/equal-markup.js';
 
 describe( 'equalMarkup chai assertion', () => {
-	before( () => {
+	beforeAll( () => {
 		equalMarkupFactory( chai );
 	} );
 

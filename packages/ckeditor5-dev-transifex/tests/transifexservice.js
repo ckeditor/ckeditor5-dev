@@ -3,137 +3,131 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import transifexService from '../lib/transifexservice.js';
 
-const chai = require( 'chai' );
-const sinon = require( 'sinon' );
-const expect = chai.expect;
-const mockery = require( 'mockery' );
+const {
+	transifexApiMock
+} = vi.hoisted( () => {
+	return {
+		transifexApiMock: {}
+	};
+} );
+
+vi.mock( '@transifex/api', () => {
+	return {
+		transifexApi: transifexApiMock
+	};
+} );
 
 describe( 'dev-transifex/transifex-service', () => {
-	let stubs, mocks, transifexService;
+	let testData;
+
+	let fetchMock;
+
+	let createResourceMock;
+	let createResourceStringsAsyncUploadMock;
+	let dataResourceTranslationsMock;
+	let fetchOrganizationMock;
+	let fetchProjectMock;
+	let fetchResourceTranslationsMock;
+	let filterResourceTranslationsMock;
+	let getNextResourceTranslationsMock;
+	let getOrganizationsMock;
+	let getProjectsMock;
+	let getResourceStringsAsyncUploadMock;
+	let includeResourceTranslationsMock;
 
 	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
+		fetchMock = vi.fn();
+
+		vi.stubGlobal( 'fetch', fetchMock );
+
+		createResourceMock = vi.fn();
+		createResourceStringsAsyncUploadMock = vi.fn();
+		fetchResourceTranslationsMock = vi.fn();
+		filterResourceTranslationsMock = vi.fn();
+		getNextResourceTranslationsMock = vi.fn();
+		getResourceStringsAsyncUploadMock = vi.fn();
+		includeResourceTranslationsMock = vi.fn();
+
+		getOrganizationsMock = vi.fn().mockImplementation( () => Promise.resolve( {
+			fetch: fetchOrganizationMock
+		} ) );
+
+		fetchOrganizationMock = vi.fn().mockImplementation( () => Promise.resolve( {
+			get: getProjectsMock
+		} ) );
+
+		getProjectsMock = vi.fn().mockImplementation( () => Promise.resolve( {
+			fetch: fetchProjectMock
+		} ) );
+
+		fetchProjectMock = vi.fn().mockImplementation( resourceType => Promise.resolve( {
+			async* all() {
+				for ( const item of testData[ resourceType ] ) {
+					yield item;
+				}
+			}
+		} ) );
+
+		transifexApiMock.setup = vi.fn().mockImplementation( ( { auth } ) => {
+			transifexApiMock.auth = vi.fn().mockReturnValue( { Authorization: `Bearer ${ auth }` } );
 		} );
 
-		stubs = {
-			getOrganizations: sinon.stub().callsFake( () => Promise.resolve( {
-				fetch: stubs.fetchOrganization
-			} ) ),
-
-			fetchOrganization: sinon.stub().callsFake( () => Promise.resolve( {
-				get: stubs.getProjects
-			} ) ),
-
-			getProjects: sinon.stub().callsFake( () => Promise.resolve( {
-				fetch: stubs.fetchProject
-			} ) ),
-
-			fetchProject: sinon.stub().callsFake( resourceType => Promise.resolve( {
-				async* all() {
-					for ( const item of mocks[ resourceType ] ) {
-						yield item;
-					}
-				}
-			} ) ),
-
-			createResource: sinon.stub(),
-			createResourceStringsAsyncUpload: sinon.stub(),
-			getResourceStringsAsyncUpload: sinon.stub(),
-
-			filterResourceTranslations: sinon.stub(),
-			includeResourceTranslations: sinon.stub(),
-			fetchResourceTranslations: sinon.stub(),
-			getNextResourceTranslations: sinon.stub(),
-			dataResourceTranslations: [],
-
-			transifexApi: {
-				setup: sinon.stub().callsFake( ( { auth } ) => {
-					stubs.transifexApi.auth = sinon.stub().returns( { Authorization: `Bearer ${ auth }` } );
-				} ),
-
-				Organization: {
-					get: ( ...args ) => stubs.getOrganizations( ...args )
-				},
-
-				Resource: {
-					create: ( ...args ) => stubs.createResource( ...args )
-				},
-
-				ResourceStringsAsyncUpload: {
-					create: ( ...args ) => stubs.createResourceStringsAsyncUpload( ...args ),
-					get: ( ...args ) => stubs.getResourceStringsAsyncUpload( ...args )
-				},
-
-				...[ 'ResourceStringsAsyncDownload', 'ResourceTranslationsAsyncDownload' ].reduce( ( result, methodName ) => {
-					result[ methodName ] = {
-						create: sinon.stub().callsFake( ( { attributes, relationships, type } ) => {
-							const resourceName = relationships.resource.attributes.slug;
-							const languageCode = relationships.language ? relationships.language.attributes.code : 'en';
-
-							return Promise.resolve( {
-								attributes,
-								type,
-								links: {
-									self: `https://example.com/${ resourceName }/${ languageCode }`
-								},
-								related: relationships
-							} );
-						} )
-					};
-
-					return result;
-				}, {} ),
-
-				ResourceTranslation: {
-					filter: ( ...args ) => {
-						stubs.filterResourceTranslations( ...args );
-
-						return {
-							include: ( ...args ) => {
-								stubs.includeResourceTranslations( ...args );
-
-								return {
-									fetch: ( ...args ) => stubs.fetchResourceTranslations( ...args ),
-									get data() {
-										return stubs.dataResourceTranslations;
-									},
-									get next() {
-										return !!stubs.getNextResourceTranslations;
-									},
-									getNext: () => stubs.getNextResourceTranslations()
-								};
-							}
-						};
-					}
-				}
-			},
-
-			fetch: sinon.stub()
+		transifexApiMock.Organization = {
+			get: ( ...args ) => getOrganizationsMock( ...args )
 		};
 
-		mockery.registerMock( '@transifex/api', { transifexApi: stubs.transifexApi } );
-		mockery.registerMock( 'node-fetch', stubs.fetch );
+		transifexApiMock.Resource = {
+			create: ( ...args ) => createResourceMock( ...args )
+		};
 
-		transifexService = require( '../lib/transifexservice' );
+		transifexApiMock.ResourceStringsAsyncUpload = {
+			create: ( ...args ) => createResourceStringsAsyncUploadMock( ...args ),
+			get: ( ...args ) => getResourceStringsAsyncUploadMock( ...args )
+		};
+
+		transifexApiMock.ResourceStringsAsyncDownload = resourceAsyncDownloadMockFactory();
+		transifexApiMock.ResourceTranslationsAsyncDownload = resourceAsyncDownloadMockFactory();
+
+		transifexApiMock.ResourceTranslation = {
+			filter: ( ...args ) => {
+				filterResourceTranslationsMock( ...args );
+
+				return {
+					include: ( ...args ) => {
+						includeResourceTranslationsMock( ...args );
+
+						return {
+							fetch: ( ...args ) => fetchResourceTranslationsMock( ...args ),
+							get data() {
+								return dataResourceTranslationsMock;
+							},
+							get next() {
+								return !!getNextResourceTranslationsMock;
+							},
+							getNext: () => getNextResourceTranslationsMock()
+						};
+					}
+				};
+			}
+		};
 	} );
 
 	afterEach( () => {
-		sinon.restore();
-		mockery.deregisterAll();
-		mockery.disable();
+		vi.useRealTimers();
+
+		// Restoring mock of Transifex API.
+		Object.keys( transifexApiMock ).forEach( mockedKey => delete transifexApiMock[ mockedKey ] );
 	} );
 
 	describe( 'init()', () => {
 		it( 'should pass the token to the Transifex API', () => {
 			transifexService.init( 'secretToken' );
 
-			expect( stubs.transifexApi.auth ).to.be.a( 'function' );
-			expect( stubs.transifexApi.auth() ).to.deep.equal( { Authorization: 'Bearer secretToken' } );
+			expect( transifexApiMock.auth ).toBeInstanceOf( Function );
+			expect( transifexApiMock.auth() ).toEqual( { Authorization: 'Bearer secretToken' } );
 		} );
 
 		it( 'should pass the token to the Transifex API only once', () => {
@@ -141,16 +135,16 @@ describe( 'dev-transifex/transifex-service', () => {
 			transifexService.init( 'anotherSecretToken' );
 			transifexService.init( 'evenBetterSecretToken' );
 
-			sinon.assert.calledOnce( stubs.transifexApi.setup );
+			expect( transifexApiMock.setup ).toHaveBeenCalledTimes( 1 );
 
-			expect( stubs.transifexApi.auth ).to.be.a( 'function' );
-			expect( stubs.transifexApi.auth() ).to.deep.equal( { Authorization: 'Bearer secretToken' } );
+			expect( transifexApiMock.auth ).toBeInstanceOf( Function );
+			expect( transifexApiMock.auth() ).toEqual( { Authorization: 'Bearer secretToken' } );
 		} );
 	} );
 
 	describe( 'getProjectData()', () => {
 		it( 'should return resources and languages, with English language as the source one', async () => {
-			mocks = {
+			testData = {
 				resources: [
 					{ attributes: { slug: 'ckeditor5-core' } },
 					{ attributes: { slug: 'ckeditor5-ui' } }
@@ -165,25 +159,25 @@ describe( 'dev-transifex/transifex-service', () => {
 				'ckeditor-organization', 'ckeditor5-project', [ 'ckeditor5-core', 'ckeditor5-ui' ]
 			);
 
-			sinon.assert.calledOnce( stubs.getOrganizations );
-			sinon.assert.calledWithExactly( stubs.getOrganizations, { slug: 'ckeditor-organization' } );
+			expect( getOrganizationsMock ).toHaveBeenCalledTimes( 1 );
+			expect( getOrganizationsMock ).toHaveBeenCalledWith( { slug: 'ckeditor-organization' } );
 
-			sinon.assert.calledOnce( stubs.fetchOrganization );
-			sinon.assert.calledWithExactly( stubs.fetchOrganization, 'projects' );
+			expect( fetchOrganizationMock ).toHaveBeenCalledTimes( 1 );
+			expect( fetchOrganizationMock ).toHaveBeenCalledWith( 'projects' );
 
-			sinon.assert.calledOnce( stubs.getProjects );
-			sinon.assert.calledWithExactly( stubs.getProjects, { slug: 'ckeditor5-project' } );
+			expect( getProjectsMock ).toHaveBeenCalledTimes( 1 );
+			expect( getProjectsMock ).toHaveBeenCalledWith( { slug: 'ckeditor5-project' } );
 
-			sinon.assert.calledTwice( stubs.fetchProject );
-			sinon.assert.calledWithExactly( stubs.fetchProject.firstCall, 'resources' );
-			sinon.assert.calledWithExactly( stubs.fetchProject.secondCall, 'languages' );
+			expect( fetchProjectMock ).toHaveBeenCalledTimes( 2 );
+			expect( fetchProjectMock ).toHaveBeenNthCalledWith( 1, 'resources' );
+			expect( fetchProjectMock ).toHaveBeenNthCalledWith( 2, 'languages' );
 
-			expect( resources ).to.deep.equal( [
+			expect( resources ).toEqual( [
 				{ attributes: { slug: 'ckeditor5-core' } },
 				{ attributes: { slug: 'ckeditor5-ui' } }
 			] );
 
-			expect( languages ).to.deep.equal( [
+			expect( languages ).toEqual( [
 				{ attributes: { code: 'en' } },
 				{ attributes: { code: 'pl' } },
 				{ attributes: { code: 'de' } }
@@ -191,7 +185,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		} );
 
 		it( 'should return only the available resources that were requested', async () => {
-			mocks = {
+			testData = {
 				resources: [
 					{ attributes: { slug: 'ckeditor5-core' } },
 					{ attributes: { slug: 'ckeditor5-ui' } }
@@ -206,11 +200,11 @@ describe( 'dev-transifex/transifex-service', () => {
 				'ckeditor-organization', 'ckeditor5-project', [ 'ckeditor5-core', 'ckeditor5-non-existing' ]
 			);
 
-			expect( resources ).to.deep.equal( [
+			expect( resources ).toEqual( [
 				{ attributes: { slug: 'ckeditor5-core' } }
 			] );
 
-			expect( languages ).to.deep.equal( [
+			expect( languages ).toEqual( [
 				{ attributes: { code: 'en' } },
 				{ attributes: { code: 'pl' } },
 				{ attributes: { code: 'de' } }
@@ -220,7 +214,7 @@ describe( 'dev-transifex/transifex-service', () => {
 
 	describe( 'getTranslations()', () => {
 		beforeEach( () => {
-			mocks = {
+			testData = {
 				resources: [
 					{ attributes: { slug: 'ckeditor5-core' } },
 					{ attributes: { slug: 'ckeditor5-ui' } }
@@ -244,14 +238,14 @@ describe( 'dev-transifex/transifex-service', () => {
 		} );
 
 		it( 'should return requested translations if no retries are needed', async () => {
-			stubs.fetch.callsFake( url => Promise.resolve( {
+			vi.mocked( fetchMock ).mockImplementation( url => Promise.resolve( {
 				ok: true,
 				redirected: true,
-				text: () => Promise.resolve( mocks.translations[ url ] )
+				text: () => Promise.resolve( testData.translations[ url ] )
 			} ) );
 
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const { translations, failedDownloads } = await transifexService.getTranslations( resource, languages );
 
 			const attributes = {
@@ -261,9 +255,9 @@ describe( 'dev-transifex/transifex-service', () => {
 				pseudo: false
 			};
 
-			sinon.assert.calledOnce( stubs.transifexApi.ResourceStringsAsyncDownload.create );
+			expect( transifexApiMock.ResourceStringsAsyncDownload.create ).toHaveBeenCalledTimes( 1 );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceStringsAsyncDownload.create, {
+			expect( transifexApiMock.ResourceStringsAsyncDownload.create ).toHaveBeenCalledWith( {
 				attributes,
 				relationships: {
 					resource
@@ -271,9 +265,9 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_strings_async_downloads'
 			} );
 
-			sinon.assert.calledTwice( stubs.transifexApi.ResourceTranslationsAsyncDownload.create );
+			expect( transifexApiMock.ResourceTranslationsAsyncDownload.create ).toHaveBeenCalledTimes( 2 );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationsAsyncDownload.create.firstCall, {
+			expect( transifexApiMock.ResourceTranslationsAsyncDownload.create ).toHaveBeenNthCalledWith( 1, {
 				attributes,
 				relationships: {
 					resource,
@@ -282,7 +276,7 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_translations_async_downloads'
 			} );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationsAsyncDownload.create.secondCall, {
+			expect( transifexApiMock.ResourceTranslationsAsyncDownload.create ).toHaveBeenNthCalledWith( 2, {
 				attributes,
 				relationships: {
 					resource,
@@ -291,95 +285,94 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_translations_async_downloads'
 			} );
 
-			sinon.assert.calledThrice( stubs.fetch );
+			expect( fetchMock ).toHaveBeenCalledTimes( 3 );
 
-			sinon.assert.calledWithExactly( stubs.fetch.firstCall, 'https://example.com/ckeditor5-core/en', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 1, 'https://example.com/ckeditor5-core/en', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			sinon.assert.calledWithExactly( stubs.fetch.secondCall, 'https://example.com/ckeditor5-core/pl', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 2, 'https://example.com/ckeditor5-core/pl', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			sinon.assert.calledWithExactly( stubs.fetch.thirdCall, 'https://example.com/ckeditor5-core/de', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 3, 'https://example.com/ckeditor5-core/de', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			expect( [ ...translations.entries() ] ).to.deep.equal( [
+			expect( [ ...translations.entries() ] ).toEqual( [
 				[ 'en', 'ckeditor5-core-en-content' ],
 				[ 'pl', 'ckeditor5-core-pl-content' ],
 				[ 'de', 'ckeditor5-core-de-content' ]
 			] );
 
-			expect( failedDownloads ).to.deep.equal( [] );
+			expect( failedDownloads ).toEqual( [] );
 		} );
 
 		it( 'should return requested translations after multiple different download retries', async () => {
-			const clock = sinon.useFakeTimers();
+			vi.useFakeTimers();
 
-			const redirectFetch = () => Promise.resolve( {
-				ok: true,
-				redirected: false
+			const languageCallsBeforeResolving = {
+				en: 9,
+				pl: 4,
+				de: 7
+			};
+
+			fetchMock.mockImplementation( url => {
+				const language = url.split( '/' ).pop();
+
+				if ( languageCallsBeforeResolving[ language ] > 0 ) {
+					languageCallsBeforeResolving[ language ]--;
+
+					return Promise.resolve( {
+						ok: true,
+						redirected: false
+					} );
+				}
+
+				return Promise.resolve( {
+					ok: true,
+					redirected: true,
+					text: () => Promise.resolve( testData.translations[ url ] )
+				} );
 			} );
 
-			const resolveFetch = url => Promise.resolve( {
-				ok: true,
-				redirected: true,
-				text: () => Promise.resolve( mocks.translations[ url ] )
-			} );
-
-			stubs.fetch
-				.withArgs( 'https://example.com/ckeditor5-core/en' )
-				.callsFake( redirectFetch )
-				.onCall( 9 )
-				.callsFake( resolveFetch );
-
-			stubs.fetch
-				.withArgs( 'https://example.com/ckeditor5-core/pl' )
-				.callsFake( redirectFetch )
-				.onCall( 4 )
-				.callsFake( resolveFetch );
-
-			stubs.fetch
-				.withArgs( 'https://example.com/ckeditor5-core/de' )
-				.callsFake( redirectFetch )
-				.onCall( 7 )
-				.callsFake( resolveFetch );
-
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const translationsPromise = transifexService.getTranslations( resource, languages );
 
-			await clock.tickAsync( 30000 );
+			await vi.advanceTimersByTimeAsync( 30000 );
 
 			const { translations, failedDownloads } = await translationsPromise;
 
-			sinon.assert.callCount( stubs.fetch, 23 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 23 );
 
-			expect( [ ...translations.entries() ] ).to.deep.equal( [
+			expect( [ ...translations.entries() ] ).toEqual( [
 				[ 'en', 'ckeditor5-core-en-content' ],
 				[ 'pl', 'ckeditor5-core-pl-content' ],
 				[ 'de', 'ckeditor5-core-de-content' ]
 			] );
 
-			expect( failedDownloads ).to.deep.equal( [] );
+			expect( failedDownloads ).toEqual( [] );
 		} );
 
 		it( 'should return failed requests if all file downloads failed', async () => {
-			stubs.fetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValue( {
 				ok: false,
 				status: 500,
 				statusText: 'Internal Server Error'
 			} );
 
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const { translations, failedDownloads } = await transifexService.getTranslations( resource, languages );
 
 			const expectedFailedDownloads = [ 'en', 'pl', 'de' ].map( languageCode => ( {
@@ -388,23 +381,23 @@ describe( 'dev-transifex/transifex-service', () => {
 				errorMessage: 'Failed to download the translation file. Received response: 500 Internal Server Error'
 			} ) );
 
-			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
-			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
+			expect( failedDownloads ).toEqual( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).toEqual( [] );
 		} );
 
 		it( 'should return failed requests if the retry limit has been reached for all requests', async () => {
-			const clock = sinon.useFakeTimers();
+			vi.useFakeTimers();
 
-			stubs.fetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValue( {
 				ok: true,
 				redirected: false
 			} );
 
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const translationsPromise = transifexService.getTranslations( resource, languages );
 
-			await clock.tickAsync( 30000 );
+			await vi.advanceTimersByTimeAsync( 30000 );
 
 			const { translations, failedDownloads } = await translationsPromise;
 
@@ -415,21 +408,21 @@ describe( 'dev-transifex/transifex-service', () => {
 					'Requested file is not ready yet, but the limit of file download attempts has been reached.'
 			} ) );
 
-			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
-			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
+			expect( failedDownloads ).toEqual( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).toEqual( [] );
 		} );
 
 		it( 'should return failed requests if it is not possible to create all initial download requests', async () => {
-			const clock = sinon.useFakeTimers();
+			vi.useFakeTimers();
 
-			stubs.transifexApi.ResourceStringsAsyncDownload.create.rejects();
-			stubs.transifexApi.ResourceTranslationsAsyncDownload.create.rejects();
+			transifexApiMock.ResourceStringsAsyncDownload.create.mockRejectedValue();
+			transifexApiMock.ResourceTranslationsAsyncDownload.create.mockRejectedValue();
 
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const translationsPromise = transifexService.getTranslations( resource, languages );
 
-			await clock.tickAsync( 30000 );
+			await vi.advanceTimersByTimeAsync( 30000 );
 
 			const { translations, failedDownloads } = await translationsPromise;
 
@@ -439,67 +432,69 @@ describe( 'dev-transifex/transifex-service', () => {
 				errorMessage: 'Failed to create download request.'
 			} ) );
 
-			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
-			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
+			expect( failedDownloads ).toEqual( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).toEqual( [] );
 		} );
 
 		it( 'should return requested translations and failed downloads in multiple different download scenarios', async () => {
-			const clock = sinon.useFakeTimers();
+			vi.useFakeTimers();
 
-			const redirectFetch = () => Promise.resolve( {
-				ok: true,
-				redirected: false
+			transifexApiMock.ResourceStringsAsyncDownload.create.mockRejectedValue();
+
+			transifexApiMock.ResourceTranslationsAsyncDownload.create
+				.mockRejectedValueOnce()
+				.mockRejectedValueOnce()
+				.mockRejectedValueOnce();
+
+			const languageCallsBeforeResolving = {
+				pl: 4,
+				de: 8
+			};
+
+			fetchMock.mockImplementation( url => {
+				const language = url.split( '/' ).pop();
+
+				if ( languageCallsBeforeResolving[ language ] > 0 ) {
+					languageCallsBeforeResolving[ language ]--;
+
+					return Promise.resolve( {
+						ok: true,
+						redirected: false
+					} );
+				}
+
+				if ( language === 'pl' ) {
+					return Promise.resolve( {
+						ok: true,
+						redirected: true,
+						text: () => Promise.resolve( testData.translations[ url ] )
+					} );
+				}
+
+				if ( language === 'de' ) {
+					return Promise.resolve( {
+						ok: false,
+						status: 500,
+						statusText: 'Internal Server Error'
+					} );
+				}
 			} );
 
-			const resolveFetch = url => Promise.resolve( {
-				ok: true,
-				redirected: true,
-				text: () => Promise.resolve( mocks.translations[ url ] )
-			} );
-
-			const rejectFetch = () => Promise.resolve( {
-				ok: false,
-				status: 500,
-				statusText: 'Internal Server Error'
-			} );
-
-			stubs.transifexApi.ResourceStringsAsyncDownload.create.rejects();
-
-			stubs.transifexApi.ResourceTranslationsAsyncDownload.create
-				.onCall( 0 )
-				.rejects()
-				.onCall( 1 )
-				.rejects()
-				.onCall( 2 )
-				.rejects();
-
-			stubs.fetch
-				.withArgs( 'https://example.com/ckeditor5-core/pl' )
-				.callsFake( redirectFetch )
-				.onCall( 4 )
-				.callsFake( resolveFetch );
-
-			stubs.fetch
-				.withArgs( 'https://example.com/ckeditor5-core/de' )
-				.callsFake( redirectFetch )
-				.onCall( 8 )
-				.callsFake( rejectFetch );
-
-			const resource = mocks.resources[ 0 ];
-			const languages = [ ...mocks.languages ];
+			const resource = testData.resources[ 0 ];
+			const languages = [ ...testData.languages ];
 			const translationsPromise = transifexService.getTranslations( resource, languages );
 
-			await clock.tickAsync( 60000 );
+			await vi.advanceTimersByTimeAsync( 60000 );
 
 			const { translations, failedDownloads } = await translationsPromise;
 
-			sinon.assert.callCount( stubs.fetch, 14 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 14 );
 
-			expect( [ ...translations.entries() ] ).to.deep.equal( [
+			expect( [ ...translations.entries() ] ).toEqual( [
 				[ 'pl', 'ckeditor5-core-pl-content' ]
 			] );
 
-			expect( failedDownloads ).to.deep.equal( [
+			expect( failedDownloads ).toEqual( [
 				{
 					resourceName: 'ckeditor5-core',
 					languageCode: 'en',
@@ -516,9 +511,9 @@ describe( 'dev-transifex/transifex-service', () => {
 
 	describe( 'getResourceTranslations', () => {
 		it( 'should return all found translations', () => {
-			stubs.getNextResourceTranslations = null;
-			stubs.fetchResourceTranslations.callsFake( () => {
-				stubs.dataResourceTranslations = [
+			getNextResourceTranslationsMock = null;
+			fetchResourceTranslationsMock.mockImplementation( () => {
+				dataResourceTranslationsMock = [
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
@@ -529,22 +524,22 @@ describe( 'dev-transifex/transifex-service', () => {
 
 			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
 				.then( result => {
-					expect( result ).to.deep.equal( [
+					expect( result ).toEqual( [
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
 					] );
 
-					expect( stubs.filterResourceTranslations.callCount ).to.equal( 1 );
-					expect( stubs.filterResourceTranslations.firstCall.args[ 0 ] ).to.deep.equal( {
+					expect( filterResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
+					expect( filterResourceTranslationsMock ).toHaveBeenCalledWith( {
 						resource: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
 						language: 'l:en'
 					} );
 
-					expect( stubs.includeResourceTranslations.callCount ).to.equal( 1 );
-					expect( stubs.includeResourceTranslations.firstCall.args[ 0 ] ).to.equal( 'resource_string' );
+					expect( includeResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
+					expect( includeResourceTranslationsMock ).toHaveBeenCalledWith( 'resource_string' );
 
-					expect( stubs.fetchResourceTranslations.callCount ).to.equal( 1 );
+					expect( fetchResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
 				} );
 		} );
 
@@ -555,47 +550,47 @@ describe( 'dev-transifex/transifex-service', () => {
 				{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
 			];
 
-			stubs.getNextResourceTranslations.callsFake( () => {
-				stubs.dataResourceTranslations = [ availableTranslations.shift() ];
+			getNextResourceTranslationsMock.mockImplementation( () => {
+				dataResourceTranslationsMock = [ availableTranslations.shift() ];
 
 				return Promise.resolve( {
-					data: stubs.dataResourceTranslations,
+					data: dataResourceTranslationsMock,
 					next: availableTranslations.length > 0,
-					getNext: stubs.getNextResourceTranslations
+					getNext: getNextResourceTranslationsMock
 				} );
 			} );
 
-			stubs.fetchResourceTranslations.callsFake( () => {
-				stubs.dataResourceTranslations = [ availableTranslations.shift() ];
+			fetchResourceTranslationsMock.mockImplementation( () => {
+				dataResourceTranslationsMock = [ availableTranslations.shift() ];
 
 				return Promise.resolve();
 			} );
 
 			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
 				.then( result => {
-					expect( result ).to.deep.equal( [
+					expect( result ).toEqual( [
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
 						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
 					] );
 
-					expect( stubs.filterResourceTranslations.callCount ).to.equal( 1 );
-					expect( stubs.filterResourceTranslations.firstCall.args[ 0 ] ).to.deep.equal( {
+					expect( filterResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
+					expect( filterResourceTranslationsMock ).toHaveBeenCalledWith( {
 						resource: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
 						language: 'l:en'
 					} );
 
-					expect( stubs.includeResourceTranslations.callCount ).to.equal( 1 );
-					expect( stubs.includeResourceTranslations.firstCall.args[ 0 ] ).to.equal( 'resource_string' );
+					expect( includeResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
+					expect( includeResourceTranslationsMock ).toHaveBeenCalledWith( 'resource_string' );
 
-					expect( stubs.fetchResourceTranslations.callCount ).to.equal( 1 );
+					expect( fetchResourceTranslationsMock ).toHaveBeenCalledTimes( 1 );
 				} );
 		} );
 
 		it( 'should reject a promise if Transifex API rejected', async () => {
 			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
 
-			stubs.fetchResourceTranslations.rejects( apiError );
+			fetchResourceTranslationsMock.mockRejectedValue( apiError );
 
 			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
 				.then(
@@ -603,7 +598,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					error => {
-						expect( apiError ).to.equal( error );
+						expect( apiError ).toEqual( error );
 					}
 				);
 		} );
@@ -613,7 +608,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should extract the resource name from the resource instance', () => {
 			const resource = { attributes: { slug: 'ckeditor5-core' } };
 
-			expect( transifexService.getResourceName( resource ) ).to.equal( 'ckeditor5-core' );
+			expect( transifexService.getResourceName( resource ) ).toEqual( 'ckeditor5-core' );
 		} );
 	} );
 
@@ -621,7 +616,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should extract the language code from the language instance', () => {
 			const language = { attributes: { code: 'pl' } };
 
-			expect( transifexService.getLanguageCode( language ) ).to.equal( 'pl' );
+			expect( transifexService.getLanguageCode( language ) ).toEqual( 'pl' );
 		} );
 	} );
 
@@ -629,13 +624,13 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should return false if the language instance is not the source language', () => {
 			const language = { attributes: { code: 'pl' } };
 
-			expect( transifexService.isSourceLanguage( language ) ).to.be.false;
+			expect( transifexService.isSourceLanguage( language ) ).toEqual( false );
 		} );
 
 		it( 'should return true if the language instance is the source language', () => {
 			const language = { attributes: { code: 'en' } };
 
-			expect( transifexService.isSourceLanguage( language ) ).to.be.true;
+			expect( transifexService.isSourceLanguage( language ) ).toEqual( true );
 		} );
 	} );
 
@@ -668,12 +663,12 @@ describe( 'dev-transifex/transifex-service', () => {
 				}
 			};
 
-			stubs.createResource.resolves( apiResponse );
+			createResourceMock.mockResolvedValue( apiResponse );
 
 			return transifexService.createResource( { organizationName, projectName, resourceName } )
 				.then( response => {
-					expect( stubs.createResource.callCount ).to.equal( 1 );
-					expect( stubs.createResource.firstCall.args[ 0 ] ).to.deep.equal( {
+					expect( createResourceMock ).toHaveBeenCalledTimes( 1 );
+					expect( createResourceMock ).toHaveBeenCalledWith( {
 						name: 'ckeditor5-foo',
 						relationships: {
 							i18n_format: {
@@ -692,7 +687,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						slug: 'ckeditor5-foo'
 					} );
 
-					expect( response ).to.equal( apiResponse );
+					expect( response ).toEqual( apiResponse );
 				} );
 		} );
 
@@ -703,7 +698,7 @@ describe( 'dev-transifex/transifex-service', () => {
 
 			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
 
-			stubs.createResource.rejects( apiError );
+			createResourceMock.mockRejectedValue( apiError );
 
 			return transifexService.createResource( { organizationName, projectName, resourceName } )
 				.then(
@@ -711,7 +706,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( apiError ).to.equal( err );
+						expect( apiError ).toEqual( err );
 					}
 				);
 		} );
@@ -729,12 +724,12 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.createResourceStringsAsyncUpload.resolves( apiResponse );
+			createResourceStringsAsyncUploadMock.mockResolvedValue( apiResponse );
 
 			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
 				.then( response => {
-					expect( stubs.createResourceStringsAsyncUpload.callCount ).to.equal( 1 );
-					expect( stubs.createResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.deep.equal( {
+					expect( createResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 1 );
+					expect( createResourceStringsAsyncUploadMock ).toHaveBeenCalledWith( {
 						attributes: {
 							content: '# ckeditor5-foo',
 							content_encoding: 'text'
@@ -750,7 +745,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						type: 'resource_strings_async_uploads'
 					} );
 
-					expect( response ).to.equal( apiResponse.id );
+					expect( response ).toEqual( apiResponse.id );
 				} );
 		} );
 
@@ -762,7 +757,7 @@ describe( 'dev-transifex/transifex-service', () => {
 
 			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
 
-			stubs.createResourceStringsAsyncUpload.rejects( apiError );
+			createResourceStringsAsyncUploadMock.mockRejectedValue( apiError );
 
 			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
 				.then(
@@ -770,21 +765,15 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( apiError ).to.equal( err );
+						expect( apiError ).toEqual( err );
 					}
 				);
 		} );
 	} );
 
 	describe( 'getResourceUploadDetails', () => {
-		let clock;
-
 		beforeEach( () => {
-			clock = sinon.useFakeTimers();
-		} );
-
-		afterEach( () => {
-			clock.restore();
+			vi.useFakeTimers();
 		} );
 
 		it( 'should return a promise with resolved upload details (Transifex processed the upload)', async () => {
@@ -796,17 +785,17 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringsAsyncUpload.resolves( apiResponse );
+			getResourceStringsAsyncUploadMock.mockResolvedValue( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( promise ).toBeInstanceOf( Promise );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 1 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledWith( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			const result = await promise;
 
-			expect( result ).to.equal( apiResponse );
+			expect( result ).toEqual( apiResponse );
 		} );
 
 		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=pending)', async () => {
@@ -818,22 +807,22 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
+			getResourceStringsAsyncUploadMock.mockResolvedValueOnce( {
 				attributes: { status: 'pending' }
 			} );
-			stubs.getResourceStringsAsyncUpload.onSecondCall().resolves( apiResponse );
+			getResourceStringsAsyncUploadMock.mockResolvedValueOnce( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( promise ).toBeInstanceOf( Promise );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 1 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenNthCalledWith( 1, '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			await clock.tickAsync( 3000 );
-			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringsAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			await vi.advanceTimersByTimeAsync( 3000 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 2 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenNthCalledWith( 2, '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			expect( await promise ).to.equal( apiResponse );
+			expect( await promise ).toEqual( apiResponse );
 		} );
 
 		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=processing)', async () => {
@@ -845,28 +834,28 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
+			getResourceStringsAsyncUploadMock.mockResolvedValueOnce( {
 				attributes: { status: 'processing' }
 			} );
-			stubs.getResourceStringsAsyncUpload.onSecondCall().resolves( apiResponse );
+			getResourceStringsAsyncUploadMock.mockResolvedValueOnce( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( promise ).toBeInstanceOf( Promise );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 1 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenNthCalledWith( 1, '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			await clock.tickAsync( 3000 );
-			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringsAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			await vi.advanceTimersByTimeAsync( 3000 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenCalledTimes( 2 );
+			expect( getResourceStringsAsyncUploadMock ).toHaveBeenNthCalledWith( 2, '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			expect( await promise ).to.equal( apiResponse );
+			expect( await promise ).toEqual( apiResponse );
 		} );
 
 		it( 'should return a promise that rejects if Transifex returned an error (no-delay)', async () => {
 			const apiResponse = new Error( 'JsonApiError' );
 
-			stubs.getResourceStringsAsyncUpload.rejects( apiResponse );
+			getResourceStringsAsyncUploadMock.mockRejectedValue( apiResponse );
 
 			return transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
 				.then(
@@ -874,7 +863,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( apiResponse );
+						expect( err ).toEqual( apiResponse );
 					}
 				);
 		} );
@@ -882,10 +871,10 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should return a promise that rejects if Transifex returned an error (delay)', async () => {
 			const apiResponse = new Error( 'JsonApiError' );
 
-			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
+			getResourceStringsAsyncUploadMock.mockResolvedValueOnce( {
 				attributes: { status: 'processing' }
 			} );
-			stubs.getResourceStringsAsyncUpload.onSecondCall().rejects( apiResponse );
+			getResourceStringsAsyncUploadMock.mockRejectedValueOnce( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
 				.then(
@@ -893,13 +882,13 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( apiResponse );
+						expect( err ).toEqual( apiResponse );
 					}
 				);
 
-			expect( promise ).to.be.a( 'promise' );
+			expect( promise ).toBeInstanceOf( Promise );
 
-			await clock.tickAsync( 3000 );
+			await vi.advanceTimersByTimeAsync( 3000 );
 
 			return promise;
 		} );
@@ -907,7 +896,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should return a promise that rejects if reached the maximum number of requests to Transifex', async () => {
 			// 10 is equal to the `MAX_REQUEST_ATTEMPTS` constant.
 			for ( let i = 0; i < 10; ++i ) {
-				stubs.getResourceStringsAsyncUpload.onCall( i ).resolves( {
+				getResourceStringsAsyncUploadMock.mockResolvedValueOnce( {
 					attributes: { status: 'processing' }
 				} );
 			}
@@ -918,7 +907,7 @@ describe( 'dev-transifex/transifex-service', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.deep.equal( {
+						expect( err ).toEqual( {
 							errors: [
 								{
 									detail: 'Failed to retrieve the upload details.'
@@ -928,17 +917,35 @@ describe( 'dev-transifex/transifex-service', () => {
 					}
 				);
 
-			expect( promise ).to.be.a( 'promise' );
+			expect( promise ).toBeInstanceOf( Promise );
 
 			for ( let i = 0; i < 9; ++i ) {
 				expect(
-					stubs.getResourceStringsAsyncUpload.callCount, `getResourceStringsAsyncUpload, call: ${ i + 1 }`
-				).to.equal( i + 1 );
+					getResourceStringsAsyncUploadMock, `getResourceStringsAsyncUpload, call: ${ i + 1 }`
+				).toHaveBeenCalledTimes( i + 1 );
 
-				await clock.tickAsync( 3000 );
+				await vi.advanceTimersByTimeAsync( 3000 );
 			}
 
 			return promise;
 		} );
 	} );
 } );
+
+function resourceAsyncDownloadMockFactory() {
+	return {
+		create: vi.fn().mockImplementation( ( { attributes, relationships, type } ) => {
+			const resourceName = relationships.resource.attributes.slug;
+			const languageCode = relationships.language ? relationships.language.attributes.code : 'en';
+
+			return Promise.resolve( {
+				attributes,
+				type,
+				links: {
+					self: `https://example.com/${ resourceName }/${ languageCode }`
+				},
+				related: relationships
+			} );
+		} )
+	};
+}

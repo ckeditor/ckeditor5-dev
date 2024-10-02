@@ -5,12 +5,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const minimist = require( 'minimist' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const checkDependencies = require( '../lib/checkdependencies' );
+import path from 'path';
+import minimist from 'minimist';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import checkDependencies from '../lib/checkdependencies.js';
 
 const { packagePaths, options } = parseArguments( process.argv.slice( 2 ) );
 
@@ -24,10 +22,10 @@ checkDependencies( packagePaths, options )
 /**
  * Parses CLI arguments and options.
  *
- * @param {Array.<String>} args CLI arguments containing package paths and options.
- * @returns {Object} result
- * @returns {Set.<String>} result.packagePaths Relative package paths.
- * @returns {Object.<String, Boolean>} result.options Configuration options.
+ * @param {Array.<string>} args CLI arguments containing package paths and options.
+ * @returns {object} result
+ * @returns {Set.<string>} result.packagePaths Relative package paths.
+ * @returns {Object.<string, Boolean>} result.options Configuration options.
  */
 function parseArguments( args ) {
 	const config = {
@@ -58,8 +56,8 @@ function parseArguments( args ) {
  * Returns relative (to the current work directory) paths to packages. If the provided `args` array is empty,
  * the packages will be read from the `packages/` directory.
  *
- * @param {Array.<String>} args CLI arguments with relative or absolute package paths.
- * @returns {Set.<String>} Relative package paths.
+ * @param {Array.<string>} args CLI arguments with relative or absolute package paths.
+ * @returns {Set.<string>} Relative package paths.
  */
 function getPackagePaths( args ) {
 	if ( !args.length ) {

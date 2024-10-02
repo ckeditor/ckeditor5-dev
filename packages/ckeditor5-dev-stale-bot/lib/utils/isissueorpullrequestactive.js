@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { isAfter, parseISO } = require( 'date-fns' );
+import { isAfter, parseISO } from 'date-fns';
 
 /**
  * Verifies dates from an issue or pull request to check if some of them occurred after the provided moment, meaning that the issue or pull
@@ -21,11 +19,11 @@ const { isAfter, parseISO } = require( 'date-fns' );
  * Some activity entries may be ignored and not used in the calculation, if so specified in the configuration (e.g. the author of an event).
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
- * @param {String} staleDate Date specifying the moment of checking the activity in the issue or pull request.
+ * @param {string} staleDate Date specifying the moment of checking the activity in the issue or pull request.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
-module.exports = function isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options ) {
+export default function isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options ) {
 	const { ignoredActivityLogins, ignoredActivityLabels } = options;
 
 	const dates = [
@@ -53,4 +51,4 @@ module.exports = function isIssueOrPullRequestActive( issueOrPullRequest, staleD
 	return dates
 		.filter( Boolean )
 		.some( date => isAfter( parseISO( date ), parseISO( staleDate ) ) );
-};
+}

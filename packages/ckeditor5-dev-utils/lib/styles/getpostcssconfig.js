@@ -3,31 +3,37 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /* eslint-env node */
+
+import postCssImport from 'postcss-import';
+import postCssMixins from 'postcss-mixins';
+import postCssNesting from 'postcss-nesting';
+import cssnano from 'cssnano';
+import themeLogger from './themelogger.js';
+import themeImporter from './themeimporter.js';
 
 /**
  * Returns a PostCSS configuration to build the editor styles (e.g. used by postcss-loader).
  *
- * @param {Object} options
- * @param {Boolean} options.sourceMap When true, an inline source map will be built into the output CSS.
- * @param {Boolean} options.minify When true, the output CSS will be minified.
+ * @param {object} options
+ * @param {boolean} options.sourceMap When true, an inline source map will be built into the output CSS.
+ * @param {boolean} options.minify When true, the output CSS will be minified.
  * @param {ThemeImporterOptions} options.themeImporter Configuration of the theme-importer PostCSS plugin.
  * See the plugin to learn more.
- * @returns {Object} A PostCSS configuration object, e.g. to be used by the postcss-loader.
+ * @returns {object} A PostCSS configuration object, e.g. to be used by the postcss-loader.
  */
-module.exports = function getPostCssConfig( options = {} ) {
+export default function getPostCssConfig( options = {} ) {
 	const config = {
 		plugins: [
-			require( 'postcss-import' )(),
-			require( './themeimporter' )( options.themeImporter ),
-			require( 'postcss-mixins' )(),
-			require( 'postcss-nesting' )( {
+			postCssImport(),
+			themeImporter( options.themeImporter ),
+			postCssMixins(),
+			postCssNesting( {
 				// https://github.com/ckeditor/ckeditor5/issues/11730
-				noIsPseudoSelector: true
+				noIsPseudoSelector: true,
+				edition: '2021'
 			} ),
-			require( './themelogger' )()
+			themeLogger()
 		]
 	};
 
@@ -36,7 +42,7 @@ module.exports = function getPostCssConfig( options = {} ) {
 	}
 
 	if ( options.minify ) {
-		config.plugins.push( require( 'cssnano' )( {
+		config.plugins.push( cssnano( {
 			preset: 'default',
 			autoprefixer: false,
 			reduceIdents: false
@@ -44,4 +50,4 @@ module.exports = function getPostCssConfig( options = {} ) {
 	}
 
 	return config;
-};
+}

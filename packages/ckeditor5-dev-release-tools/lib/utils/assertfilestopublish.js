@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import { glob } from 'glob';
 
 /**
  * Checks if all files expected to be released actually exist in the package directory. Verification takes place for all packages.
  *
- * @param {String} packagePaths
- * @param {Object.<String, Array.<String>>|null} optionalEntries
+ * @param {string} packagePaths
+ * @param {Object.<string, Array.<string>>|null} optionalEntries
  * @returns {Promise}
  */
-module.exports = async function assertFilesToPublish( packagePaths, optionalEntries ) {
+export default async function assertFilesToPublish( packagePaths, optionalEntries = null ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
@@ -59,15 +57,15 @@ module.exports = async function assertFilesToPublish( packagePaths, optionalEntr
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-};
+}
 
 /**
  * Filters out the optional entries from the `files` field and returns only the required ones.
  *
- * @param {Array.<String>} entries
- * @param {String} packageName
- * @param {Object.<String, Array.<String>>|null} optionalEntries
- * @returns {Array.<String>}
+ * @param {Array.<string>} entries
+ * @param {string} packageName
+ * @param {Object.<string, Array.<string>>|null} optionalEntries
+ * @returns {Array.<string>}
  */
 function getRequiredEntries( entries, packageName, optionalEntries ) {
 	if ( !optionalEntries ) {

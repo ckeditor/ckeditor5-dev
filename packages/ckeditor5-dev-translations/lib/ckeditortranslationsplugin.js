@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const serveTranslations = require( './servetranslations' );
-const MultipleLanguageTranslationService = require( './multiplelanguagetranslationservice' );
+import chalk from 'chalk';
+import serveTranslations from './servetranslations.js';
+import MultipleLanguageTranslationService from './multiplelanguagetranslationservice.js';
 
 /**
  * CKEditorTranslationsPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
@@ -29,7 +27,7 @@ const MultipleLanguageTranslationService = require( './multiplelanguagetranslati
  * This plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
  * See https://github.com/ckeditor/ckeditor5/issues/700 for more information.
  */
-module.exports = class CKEditorTranslationsPlugin {
+export default class CKEditorTranslationsPlugin {
 	/**
 	 * @param {CKEditorTranslationsPluginOptions} options Plugin options.
 	 */
@@ -102,41 +100,41 @@ module.exports = class CKEditorTranslationsPlugin {
 
 		serveTranslations( compiler, this.options, translationService );
 	}
-};
+}
 
 /**
  * @callback AssetNamesFilter
- * @param {String} name Webpack asset name/path
- * @returns {Boolean}
+ * @param {string} name Webpack asset name/path
+ * @returns {boolean}
  */
 
 /**
- * @typedef {Object} CKEditorTranslationsPluginOptions CKEditorTranslationsPluginOptions options.
+ * @typedef {object} CKEditorTranslationsPluginOptions CKEditorTranslationsPluginOptions options.
  *
- * @property {String} language The main language for internationalization - translations for that language
+ * @property {string} language The main language for internationalization - translations for that language
  * will be added to the bundle(s).
- * @property {Array.<String>|'all'} [additionalLanguages] Additional languages. Build is optimized when this option is not set.
+ * @property {Array.<string>|'all'} [additionalLanguages] Additional languages. Build is optimized when this option is not set.
  * When `additionalLanguages` is set to 'all' then script will be looking for all languages and according translations during
  * the compilation.
- * @property {String} [outputDirectory='translations'] The output directory for the emitted translation files,
+ * @property {string} [outputDirectory='translations'] The output directory for the emitted translation files,
  * should be relative to the webpack context.
- * @property {Boolean} [strict] An option that make the plugin throw when the error is found during the compilation.
- * @property {Boolean} [verbose] An option that make this plugin log all warnings into the console.
- * @property {Boolean} [addMainLanguageTranslationsToAllAssets] An option that allows outputting translations to more than one
+ * @property {boolean} [strict] An option that make the plugin throw when the error is found during the compilation.
+ * @property {boolean} [verbose] An option that make this plugin log all warnings into the console.
+ * @property {boolean} [addMainLanguageTranslationsToAllAssets] An option that allows outputting translations to more than one
  * JS asset.
- * @property {String} [corePackageSampleResourcePath] A path (ES6 import) to the file that determines whether the `ckeditor5-core` package
+ * @property {string} [corePackageSampleResourcePath] A path (ES6 import) to the file that determines whether the `ckeditor5-core` package
  * exists. The package contains common translations used by many packages. To avoid duplications, they are shared by the core package.
- * @property {String} [corePackageContextsResourcePath] A path (ES6 import) to the file where all contexts are specified
+ * @property {string} [corePackageContextsResourcePath] A path (ES6 import) to the file where all contexts are specified
  * for the `ckeditor5-core` package.
- * @property {Boolean} [buildAllTranslationsToSeparateFiles] An option that makes all translations output to separate files.
- * @property {String} [sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
- * @property {String} [packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
- * @property {String} [corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
- * @property {String|Function|RegExp} [translationsOutputFile] An option allowing outputting all translation file to the given file.
+ * @property {boolean} [buildAllTranslationsToSeparateFiles] An option that makes all translations output to separate files.
+ * @property {string} [sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
+ * @property {string} [packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
+ * @property {string} [corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
+ * @property {string|Function|RegExp} [translationsOutputFile] An option allowing outputting all translation file to the given file.
  * If a file specified by a path (string) does not exist, then it will be created. Otherwise, translations will be outputted to the file.
- * @property {Boolean} [includeCorePackageTranslations=false] A flag that determines whether all translations found in the core package
+ * @property {boolean} [includeCorePackageTranslations=false] A flag that determines whether all translations found in the core package
  * should be added to the output bundle file. If set to true, translations from the core package will be saved even if are not
  * used in the source code (*.js files).
- * @property {Boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
+ * @property {boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
  * @property {AssetNamesFilter} [assetNamesFilter] A function to filter assets probably importing CKEditor 5 modules.
  */

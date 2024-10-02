@@ -3,23 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
-const depCheck = require( 'depcheck' );
-const chalk = require( 'chalk' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import { globSync } from 'glob';
+import depCheck from 'depcheck';
+import chalk from 'chalk';
 
 /**
  * Checks dependencies sequentially in all provided packages.
  *
- * @param {Set.<String>} packagePaths Relative paths to packages.
- * @param {Object} options Options.
- * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
- * @returns {Promise.<Boolean>} Resolves a promise with a flag informing whether detected an error.
+ * @param {Set.<string>} packagePaths Relative paths to packages.
+ * @param {object} options Options.
+ * @param {boolean} [options.quiet=false] Whether to inform about the progress.
+ * @returns {Promise.<boolean>} Resolves a promise with a flag informing whether detected an error.
  */
-module.exports = async function checkDependencies( packagePaths, options ) {
+export default async function checkDependencies( packagePaths, options ) {
 	let foundError = false;
 
 	for ( const packagePath of packagePaths ) {
@@ -34,15 +32,15 @@ module.exports = async function checkDependencies( packagePaths, options ) {
 	}
 
 	return Promise.resolve( foundError );
-};
+}
 
 /**
  * Checks dependencies in provided package. If the folder does not contain a package.json file the function quits with success.
  *
- * @param {String} packagePath Relative path to package.
- * @param {Object} options Options.
- * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
- * @returns {Promise.<Boolean>} The result of checking the dependencies in the package: true = no errors found.
+ * @param {string} packagePath Relative path to package.
+ * @param {object} options Options.
+ * @param {boolean} [options.quiet=false] Whether to inform about the progress.
+ * @returns {Promise.<boolean>} The result of checking the dependencies in the package: true = no errors found.
  */
 async function checkDependenciesInPackage( packagePath, options ) {
 	const packageAbsolutePath = upath.resolve( packagePath );
@@ -54,7 +52,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		return true;
 	}
 
-	const packageJson = require( packageJsonPath );
+	const packageJson = await fs.readJson( packageJsonPath );
 
 	const missingCSSFiles = [];
 	const onMissingCSSFile = file => missingCSSFiles.push( file );
@@ -64,6 +62,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
+			'**/*.mjs': depCheck.parser.es6,
 			'**/*.js': depCheck.parser.es6,
 			'**/*.jsx': depCheck.parser.jsx,
 			'**/*.ts': depCheck.parser.typescript,
@@ -162,10 +161,10 @@ async function checkDependenciesInPackage( packagePath, options ) {
  * Returns an array that contains list of files that import modules using full package name instead of relative path.
  *
  * @param repositoryPath An absolute path to the directory which should be checked.
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 function getInvalidItselfImports( repositoryPath ) {
-	const packageJson = require( upath.join( repositoryPath, 'package.json' ) );
+	const packageJson = fs.readJsonSync( upath.join( repositoryPath, 'package.json' ) );
 	const globPattern = upath.join( repositoryPath, '@(src|tests)/**/*.js' );
 	const invalidImportsItself = new Set();
 
@@ -194,9 +193,9 @@ function getInvalidItselfImports( repositoryPath ) {
 /**
  * Groups missing dependencies returned by `depcheck` as `dependencies` or `devDependencies`.
  *
- * @param {Object} missingPackages The `missing` value from object returned by `depcheck`.
- * @param {String} currentPackage Name of current package.
- * @returns {Promise.<Object.<String, Array.<String>>>}
+ * @param {object} missingPackages The `missing` value from object returned by `depcheck`.
+ * @param {string} currentPackage Name of current package.
+ * @returns {Promise.<Object.<string, Array.<string>>>}
  */
 async function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
@@ -221,9 +220,9 @@ async function groupMissingPackages( missingPackages, currentPackage ) {
  * Checks whether all packages that have been imported by the CSS file are defined in `package.json` as `dependencies`.
  * Returned array contains list of used packages.
  *
- * @param {String} filePath An absolute path to the checking file.
- * @param {Function} onMissingCSSFile Error handler called when a CSS file is not found.
- * @returns {Array.<String>|undefined}
+ * @param {string} filePath An absolute path to the checking file.
+ * @param {function} onMissingCSSFile Error handler called when a CSS file is not found.
+ * @returns {Array.<string>|undefined}
  */
 function parsePostCSS( filePath, onMissingCSSFile ) {
 	const fileContent = fs.readFileSync( filePath, 'utf-8' );
@@ -289,9 +288,9 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
  * Checks whether packages specified as `devDependencies` are not duplicated with items defined as `dependencies`.
  *
  * @see https://github.com/ckeditor/ckeditor5/issues/7706#issuecomment-665569410
- * @param {Object|undefined} dependencies
- * @param {Object|undefined} devDependencies
- * @returns {Array.<String>}
+ * @param {object|undefined} dependencies
+ * @param {object|undefined} devDependencies
+ * @returns {Array.<string>}
  */
 function findDuplicatedDependencies( dependencies, devDependencies ) {
 	const deps = Object.keys( dependencies || {} );
@@ -319,11 +318,11 @@ function findDuplicatedDependencies( dependencies, devDependencies ) {
  * verifies wrongly placed ones.
  *
  * @see https://github.com/ckeditor/ckeditor5/issues/8817#issuecomment-759353134
- * @param {Object|undefined} options.dependencies Defined dependencies from package.json.
- * @param {Object|undefined} options.devDependencies Defined development dependencies from package.json.
- * @param {Object} options.dependenciesToCheck All dependencies that have been found and files where they are used.
- * @param {Array} options.dependenciesToIgnore An array of package names that should not be checked.
- * @returns {Promise.<Array.<Object>>} Misplaced packages. Each array item is an object containing
+ * @param {object|undefined} options.dependencies Defined dependencies from package.json.
+ * @param {object|undefined} options.devDependencies Defined development dependencies from package.json.
+ * @param {object} options.dependenciesToCheck All dependencies that have been found and files where they are used.
+ * @param {Array.<string>} options.dependenciesToIgnore An array of package names that should not be checked.
+ * @returns {Promise.<Array.<object>>} Misplaced packages. Each array item is an object containing
  * the `description` string and `packageNames` array of strings.
  */
 async function findMisplacedDependencies( options ) {
@@ -373,9 +372,9 @@ async function findMisplacedDependencies( options ) {
  * Checks if a given package is a development-only dependency. Package is considered a dev dependency
  * if it is used only in files that are not used in the final build, such as tests, demos or typings.
  *
- * @param {String} packageName
- * @param {Array.<String>} absolutePaths Files where a given package has been imported.
- * @returns {Promise.<Boolean>}
+ * @param {string} packageName
+ * @param {Array.<string>} absolutePaths Files where a given package has been imported.
+ * @returns {Promise.<boolean>}
  */
 async function isDevDependency( packageName, absolutePaths ) {
 	if ( packageName.startsWith( '@types/' ) ) {
@@ -432,9 +431,9 @@ async function isDevDependency( packageName, absolutePaths ) {
 /**
  * Parses TS file from `absolutePath` and returns a list of import and export types from `packageName`.
  *
- * @param {String} packageName
- * @param {String} absolutePath File where a given package has been imported.
- * @returns {Promise.<Array.<String>>} Array of import kinds.
+ * @param {string} packageName
+ * @param {string} absolutePath File where a given package has been imported.
+ * @returns {Promise.<Array.<string>>} Array of import kinds.
  */
 async function getImportAndExportKinds( packageName, absolutePath ) {
 	const astContent = await depCheck.parser.typescript( absolutePath );
@@ -458,7 +457,7 @@ async function getImportAndExportKinds( packageName, absolutePath ) {
 /**
  * Displays all found errors.
  *
- * @param {Array.<String>} data Collection of errors.
+ * @param {Array.<string>} data Collection of errors.
  */
 function showErrors( data ) {
 	if ( data[ 0 ] ) {

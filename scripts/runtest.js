@@ -7,21 +7,18 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const path = require( 'path' );
-const { execSync } = require( 'child_process' );
-const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
-const minimist = require( 'minimist' );
-const chalk = require( 'chalk' );
+import path from 'path';
+import { execSync } from 'child_process';
+import fs from 'fs-extra';
+import { globSync } from 'glob';
+import minimist from 'minimist';
+import chalk from 'chalk';
 
 main();
 
 function main() {
 	let hasError = false;
 	const cwd = process.cwd();
-	const coverageFile = path.join( cwd, 'coverage', 'lcov.info' );
 	const { coverage } = parseArguments( process.argv.slice( 2 ) );
 
 	const packages = globSync( './packages/*/package.json' )
@@ -49,19 +46,10 @@ function main() {
 	}
 
 	if ( coverage ) {
-		fs.emptyDirSync( path.join( coverageFile, '..' ) );
-		fs.ensureFileSync( path.join( coverageFile ) );
-
-		// Merge separate reports into a single file that would be sent to Coveralls.
-		for ( const lcovPath of globSync( './packages/*/coverage/lcov.info' ) ) {
-			const relativePackagePath = path.join( lcovPath, '..', '..' );
-			const content = fs.readFileSync( lcovPath, 'utf-8' )
-				.replaceAll( /^(SF:)/gm, `$1${ relativePackagePath }/` );
-
-			fs.writeFileSync( coverageFile, content, { flag: 'as' } );
-		}
-
-		console.log( chalk.cyan( `\nCoverage status stored in "${ chalk.underline( coverageFile ) }".` ) );
+		execSync( 'node scripts/ci/combine-coverage-lcov.js', {
+			cwd,
+			stdio: 'inherit'
+		} );
 	}
 
 	if ( ignoredPackages.length ) {
@@ -79,16 +67,16 @@ function main() {
 
 /**
  * @param {Object} packageJson
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isTestable( packageJson ) {
 	return !!packageJson?.scripts?.test;
 }
 
 /**
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {Boolean} result.coverage
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {boolean} result.coverage
  */
 function parseArguments( args ) {
 	const config = {

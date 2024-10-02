@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import fs from 'fs';
+import path from 'path';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-
-const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
+const EXTERNAL_DIR_NAME = 'external';
 
 /**
  * Converts values of `--files` argument to proper globs. Handles both JS and TS files. These are the supported types of values:
@@ -20,11 +18,11 @@ const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
  *  * "foo/bar/" - matches all tests from a package and a subdirectory.
  *  * "foo/bar" - matches all tests from a package (or root) with specific filename.
  *
- * @param {String} pattern A path or pattern to determine the tests to execute.
- * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
- * @returns {Array.<String>}
+ * @param {string} pattern A path or pattern to determine the tests to execute.
+ * @param {boolean} [isManualTest=false] Whether the tests are manual or automated.
+ * @returns {Array.<string>}
  */
-module.exports = function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
+export default function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
 	if ( doesPatternMatchExternalRepositoryName( pattern ) ) {
 		return getExternalRepositoryGlob( pattern, { isManualTest } );
 	}
@@ -54,18 +52,20 @@ module.exports = function transformFileOptionToTestGlob( pattern, isManualTest =
 			transformedPathForExternalPackagesWithCKEditorPrefix
 		] )
 	];
-};
+}
 
 /**
- * @param {String} pattern
- * @param {Object} [options]
- * @param {Boolean} [options.isManualTest] Controlls the path for manual and automated tests.
- * @returns {Array.<String>}
+ * @param {string} pattern
+ * @param {object} [options]
+ * @param {boolean} [options.isManualTest] Controlls the path for manual and automated tests.
+ * @returns {Array.<string>}
  */
 function getExternalRepositoryGlob( pattern, { isManualTest } ) {
+	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
+
 	const repositoryGlob = isManualTest ?
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.{js,ts}' :
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.{js,ts}';
+		path.join( externalPath, pattern, 'tests', 'manual', '**', '*' ) + '.{js,ts}' :
+		path.join( externalPath, pattern, 'tests', '**', '*' ) + '.{js,ts}';
 
 	return [
 		repositoryGlob.split( path.sep ).join( path.posix.sep )
@@ -73,26 +73,28 @@ function getExternalRepositoryGlob( pattern, { isManualTest } ) {
 }
 
 /**
- * @param {String} pattern
- * @returns {Boolean}
+ * @param {string} pattern
+ * @returns {boolean}
  */
 function doesPatternMatchExternalRepositoryName( pattern ) {
-	if ( !fs.existsSync( EXTERNAL_DIR_PATH ) ) {
+	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
+
+	if ( !fs.existsSync( externalPath ) ) {
 		return false;
 	}
 
-	return fs.readdirSync( EXTERNAL_DIR_PATH )
-		.filter( externalDir => fs.statSync( path.join( EXTERNAL_DIR_PATH, externalDir ) ).isDirectory() )
+	return fs.readdirSync( externalPath )
+		.filter( externalDir => fs.statSync( path.join( externalPath, externalDir ) ).isDirectory() )
 		.includes( pattern );
 }
 
 /**
- * @param {String} pattern
- * @param {Object} [options={}]
- * @param {Boolean} [options.isManualTest=false] Whether the tests are manual or automated.
- * @param {Boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
- * @param {Boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
- * @returns {String}
+ * @param {string} pattern
+ * @param {object} [options={}]
+ * @param {boolean} [options.isManualTest=false] Whether the tests are manual or automated.
+ * @param {boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
+ * @param {boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
+ * @returns {string}
  */
 function transformSinglePattern( pattern, options ) {
 	const chunks = pattern.match( /[a-z1-9|*-]+/g );

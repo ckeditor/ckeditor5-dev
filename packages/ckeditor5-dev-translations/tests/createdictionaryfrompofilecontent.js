@@ -3,11 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chai = require( 'chai' );
-const expect = chai.expect;
-const createDictionaryFromPoFileContent = require( '../lib/createdictionaryfrompofilecontent' );
+import { describe, expect, it } from 'vitest';
+import createDictionaryFromPoFileContent from '../lib/createdictionaryfrompofilecontent.js';
 
 describe( 'translations', () => {
 	describe( 'parsePoFileContent()', () => {

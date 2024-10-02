@@ -3,10 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const checkDependencies = require( './checkdependencies' );
-
-module.exports = {
-	checkDependencies
-};
+export { default as checkDependencies } from './checkdependencies.js';

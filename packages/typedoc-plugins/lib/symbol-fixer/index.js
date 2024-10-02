@@ -39,8 +39,8 @@ function onEventCreateDeclaration() {
 }
 
 /**
- * @param {String} value
- * @returns {Boolean}
+ * @param {string} value
+ * @returns {boolean}
  */
 function isWrappedInSquareBrackets( value ) {
 	return value.startsWith( '[' ) && value.endsWith( ']' );

@@ -3,16 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /* eslint-env node */
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-const postcss = require( 'postcss' );
-const chalk = require( 'chalk' );
-const log = require( '../logger' )();
-const getPackageName = require( './utils/getpackagename' );
+import fs from 'fs';
+import path from 'path';
+import postcss from 'postcss';
+import postCssImport from 'postcss-import';
+import chalk from 'chalk';
+import logger from '../logger/index.js';
+import themeLogger from './themelogger.js';
+import getPackageName from './utils/getpackagename.js';
+
+const log = logger();
 
 /**
  * A PostCSS plugin that loads a theme files from specified path.
@@ -38,7 +40,7 @@ const getPackageName = require( './utils/getpackagename' );
  * @param {ThemeImporterOptions} pluginOptions
  * @returns {Function} A PostCSS plugin.
  */
-module.exports = ( pluginOptions = {} ) => {
+function themeImporter( pluginOptions = {} ) {
 	return {
 		postcssPlugin: 'postcss-ckeditor5-theme-importer',
 		Once( root, { result } ) {
@@ -47,8 +49,8 @@ module.exports = ( pluginOptions = {} ) => {
 				debug: pluginOptions.debug || false,
 				postCssOptions: {
 					plugins: [
-						require( 'postcss-import' )(),
-						require( './themelogger' )()
+						postCssImport(),
+						themeLogger()
 					]
 				},
 				root, result
@@ -57,9 +59,11 @@ module.exports = ( pluginOptions = {} ) => {
 			return importThemeFile( options );
 		}
 	};
-};
+}
 
-module.exports.postcss = true;
+themeImporter.postcss = true;
+
+export default themeImporter;
 
 /**
  * Imports a complementary theme file corresponding with a CSS file being processed by
@@ -154,9 +158,9 @@ function importFile( options ) {
  * `/foo/bar/ckeditor5-theme-foo/ckeditor5-qux/theme/components/button.css`
  *
  * @private
- * @param {String} themePath Path to the theme.
- * @param {String} inputFilePath Path to the CSS file which is to be themed.
- * @returns {String}
+ * @param {string} themePath Path to the theme.
+ * @param {string} inputFilePath Path to the CSS file which is to be themed.
+ * @returns {string}
  */
 function getThemeFilePath( themePath, inputFilePath ) {
 	// ckeditor5-theme-foo/theme/theme.css -> ckeditor5-theme-foo/theme
@@ -198,11 +202,11 @@ function getThemeFilePath( themePath, inputFilePath ) {
  *		...
  *	}
  *
- * @member {String} [ThemeImporterOptions#themePath]
+ * @member {string} [ThemeImporterOptions#themePath]
  */
 
 /**
  * When `true` it enables debug logs in the console.
  *
- * @member {String} [ThemeImporterOptions#debug=false]
+ * @member {string} [ThemeImporterOptions#debug=false]
  */

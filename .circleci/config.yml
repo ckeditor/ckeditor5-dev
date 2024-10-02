@@ -1,4 +1,20 @@
+# This is the based configuration required by CircleCI to run a build.
+#
+# The repository uses the dynamic configuration to generate
+# tasks for executing tests and checking the code coverage.
+#
+# This configuration aims to prepare a complete design and continue checking
+# the repository in a new workflow.
+#
+# To modify the commands to execute on CI, review the following files:
+# - scripts/ci/generate-circleci-configuration.js - the script that creates the `config-tests.yml` file used on the new workflow.
+# - .circleci/template.yml - the template filled with data to execute.
+#
+# Useful resources:
+# - https://circleci.com/docs/using-dynamic-configuration/
 version: 2.1
+
+setup: true
 
 parameters:
   triggerCommitHash:
@@ -11,16 +27,10 @@ parameters:
     type: boolean
     default: false
 
-commands:
-  bootstrap_repository_command:
-    description: "Bootstrap the repository"
-    steps:
-      - install_ssh_keys_command
-      - run:
-          name: Install dependencies
-          command: yarn install
-      - prepare_environment_variables_commands
+orbs:
+  continuation: circleci/continuation@0.1.2
 
+commands:
   install_ssh_keys_command:
     description: "Install SSH keys"
     steps:
@@ -28,242 +38,23 @@ commands:
           fingerprints:
             - "a0:41:a2:56:c8:7d:3f:29:41:d1:87:92:fd:50:2b:6b"
 
-  npm_login_command:
-    description: "Enable interacting with `npm` using an auth token"
-    steps:
-      - run:
-          name: Login to the npm registry using '.npmrc' file
-          command: echo "//registry.npmjs.org/:_authToken=\${CKE5_NPM_TOKEN}" > ~/.npmrc
-
-  git_credentials_command:
-    description: "Setup git configuration"
-    steps:
-      - run:
-          name: Setup git configuration
-          command: |
-            git config --global user.email "ckeditor-bot@cksource.com"
-            git config --global user.name "CKEditorBot"
-
-  prepare_environment_variables_commands:
-    description: "Prepare non-secret environment variables"
-    steps:
-      - run:
-          name: Prepare environment variables
-          command: |
-            #!/bin/bash
-
-            # Non-secret environment variables needed for the pipeline scripts.
-            CKE5_GITHUB_ORGANIZATION="ckeditor"
-            CKE5_GITHUB_REPOSITORY="ckeditor5-dev"
-            CKE5_CIRCLE_APPROVAL_JOB_NAME="release_approval"
-            CKE5_GITHUB_RELEASE_BRANCH="master"
-
-            echo export CKE5_CIRCLE_APPROVAL_JOB_NAME=$CKE5_CIRCLE_APPROVAL_JOB_NAME >> $BASH_ENV
-            echo export CKE5_GITHUB_RELEASE_BRANCH=$CKE5_GITHUB_RELEASE_BRANCH >> $BASH_ENV
-            echo export CKE5_GITHUB_ORGANIZATION=$CKE5_GITHUB_ORGANIZATION >> $BASH_ENV
-            echo export CKE5_GITHUB_REPOSITORY=$CKE5_GITHUB_REPOSITORY >> $BASH_ENV
-            echo export CKE5_GITHUB_REPOSITORY_SLUG="$CKE5_GITHUB_ORGANIZATION/$CKE5_GITHUB_REPOSITORY" >> $BASH_ENV
-            echo export CKE5_COMMIT_SHA1=$CIRCLE_SHA1 >> $BASH_ENV
-
 jobs:
-  notify_ci_failure:
+  generate_configuration:
     machine: true
-    parameters:
-      hideAuthor:
-        type: string
-        default: "false"
     steps:
       - checkout
-      - bootstrap_repository_command
+      - install_ssh_keys_command
       - run:
-          # In the PRs that comes from forked repositories, we do not share secret variables.
-          # Hence, some of the scripts will not be executed.
-          name: 👤 Verify if the build was triggered by community - Check if the build should continue
-          command: |
-            #!/bin/bash
-
-            if [[ -z ${COVERALLS_REPO_TOKEN} ]];
-            then
-              circleci-agent step halt
-            fi
+          name: Install dependencies
+          command: yarn install
       - run:
-          environment:
-            CKE5_SLACK_NOTIFY_HIDE_AUTHOR: << parameters.hideAuthor >>
-            CKE5_PIPELINE_NUMBER: << pipeline.number >>
-          name: Waiting for other jobs to finish and sending notification on failure
-          command: yarn ckeditor5-dev-ci-circle-workflow-notifier
-          no_output_timeout: 1h
-
-  validate_and_tests:
-    machine: true
-    resource_class: large
-    steps:
-      - checkout
-      - bootstrap_repository_command
-      - run:
-          name: Execute ESLint
-          command: yarn run lint
-      - run:
-          name: Run unit tests
-          command: yarn run coverage
-      - unless:
-          # Upload the code coverage results for non-nightly builds only.
-          condition: << pipeline.parameters.isNightly >>
-          steps:
-            - run:
-                # In the PRs that comes from forked repositories, we do not share secret variables.
-                # Hence, some of the scripts will not be executed.
-                name: 👤 Verify if the build was triggered by community - Check if the build should continue
-                command: |
-                  #!/bin/bash
-
-                  if [[ -z ${COVERALLS_REPO_TOKEN} ]];
-                  then
-                    circleci-agent step halt
-                  fi
-            - run:
-                name: Upload code coverage
-                command: cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-
-  release_prepare:
-    machine: true
-    resource_class: large
-    steps:
-      - checkout
-      - bootstrap_repository_command
-      - run:
-          name: Check if packages are ready to be released
-          command: yarn run release:prepare-packages --verbose --compile-only
-
-  trigger_release_process:
-    machine: true
-    resource_class: large
-    steps:
-      - checkout
-      - bootstrap_repository_command
-      - run:
-          name: Verify if the project is ready to release
-          command: |
-            #!/bin/bash
-
-            # Do not fail if the Node script ends with non-zero exit code.
-            set +e
-
-            node scripts/ci/is-project-ready-to-release.js
-            EXIT_CODE=$( echo $? )
-
-            if [ ${EXIT_CODE} -eq 1 ];
-            then
-              circleci-agent step halt
-            fi
-      - run:
-          name: Trigger the release pipeline
-          command: yarn ckeditor5-dev-ci-trigger-circle-build
-
-  release_project:
-    machine: true
-    resource_class: large
-    steps:
-      - checkout
-      - bootstrap_repository_command
-      - run:
-          name: Verify the trigger commit from the repository
-          command: |
-            #!/bin/bash
-
-            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
-            CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
-
-            if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
-              echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
-              circleci-agent step halt
-            fi
-      - npm_login_command
-      - git_credentials_command
-      - run:
-          name: Verify if a releaser triggered the job
-          command: |
-            #!/bin/bash
-
-            # Do not fail if the Node script ends with non-zero exit code.
-            set +e
-
-            yarn ckeditor5-dev-ci-is-job-triggered-by-member
-            EXIT_CODE=$( echo $? )
-
-            if [ ${EXIT_CODE} -ne 0 ];
-            then
-              echo "Aborting the release due to failed verification of the approver (no rights to release)."
-              circleci-agent step halt
-            fi
-      - run:
-          name: Disable the redundant workflows option
-          command: yarn ckeditor5-dev-ci-circle-disable-auto-cancel-builds
-      - run:
-          name: Prepare the new version to release
-          command: npm run release:prepare-packages -- --verbose
-      - run:
-          name: Publish the packages
-          command: npm run release:publish-packages -- --verbose
-      - run:
-          name: Enable the redundant workflows option
-          command: yarn ckeditor5-dev-ci-circle-enable-auto-cancel-builds
-          when: always
-      - run:
-          name: Pack the "release/" directory (in case of failure)
-          command: |
-            zip -r ./release.zip ./release
-          when: always
-      - store_artifacts:
-          path: ./release.zip
-          when: always
+          name: Generate a new configuration to check all packages in the repository
+          command: node scripts/ci/generate-circleci-configuration.js
+      - continuation/continue:
+          configuration_path: .circleci/config-tests.yml
 
 workflows:
   version: 2
-  main:
-    when:
-      and:
-        - equal: [ false, << pipeline.parameters.isNightly >> ]
-        - equal: [ false, << pipeline.parameters.isRelease >> ]
+  config:
     jobs:
-      - validate_and_tests
-      - release_prepare
-      - trigger_release_process:
-          requires:
-            - validate_and_tests
-            - release_prepare
-          filters:
-            branches:
-              only:
-                - master
-      - notify_ci_failure:
-          filters:
-            branches:
-              only:
-                - master
-
-  release:
-    when:
-      and:
-        - equal: [ false, << pipeline.parameters.isNightly >> ]
-        - equal: [ true, << pipeline.parameters.isRelease >> ]
-    jobs:
-      - release_approval:
-          type: approval
-      - release_project:
-          requires:
-            - release_approval
-
-  nightly:
-    when:
-      and:
-        - equal: [ true, << pipeline.parameters.isNightly >> ]
-        - equal: [ false, << pipeline.parameters.isRelease >> ]
-    jobs:
-      - validate_and_tests
-      - notify_ci_failure:
-          hideAuthor: "true"
-          filters:
-            branches:
-              only:
-                - master
+      - generate_configuration

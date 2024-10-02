@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const isIssueOrPullRequestActive = require( './isissueorpullrequestactive' );
-const findStaleDate = require( './findstaledate' );
+import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
+import findStaleDate from './findstaledate.js';
 
 /**
  * Checks whether issue or pull request should be unstaled, because it was active after it was staled.
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
-module.exports = function isIssueOrPullRequestToUnstale( issueOrPullRequest, options ) {
+export default function isIssueOrPullRequestToUnstale( issueOrPullRequest, options ) {
 	const staleDate = findStaleDate( issueOrPullRequest, options );
 
 	return isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options );
-};
+}

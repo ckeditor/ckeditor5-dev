@@ -5,29 +5,27 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
+import chalk from 'chalk';
+import columns from 'cli-columns';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import util from 'util';
+import shellEscape from 'shell-escape';
+import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
+import { exec } from 'child_process';
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const columns = require( 'cli-columns' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const util = require( 'util' );
-const shellEscape = require( 'shell-escape' );
-const exec = util.promisify( require( 'child_process' ).exec );
-const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
+const execPromise = util.promisify( exec );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
  * Each operation will be retried up to 3 times in case of failure.
  *
- * @param {Object} options
- * @param {String} options.npmOwner User that is authorized to release packages.
- * @param {String} options.version Specifies the version of packages to reassign the tags for.
- * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
+ * @param {object} options
+ * @param {string} options.npmOwner User that is authorized to release packages.
+ * @param {string} options.version Specifies the version of packages to reassign the tags for.
+ * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
-module.exports = async function reassignNpmTags( { npmOwner, version, packages } ) {
+export default async function reassignNpmTags( { npmOwner, version, packages } ) {
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];
@@ -39,7 +37,7 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 
 	const updateTagPromises = packages.map( async packageName => {
 		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } latest`;
-		const updateLatestTagRetryable = retry( () => exec( command ) );
+		const updateLatestTagRetryable = retry( () => execPromise( command ) );
 		await updateLatestTagRetryable()
 			.then( response => {
 				if ( response.stdout ) {
@@ -78,19 +76,19 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 		console.log( chalk.bold.red( '🐛 Errors found:' ) );
 		errors.forEach( msg => console.log( `* ${ msg }` ) );
 	}
-};
+}
 
 /**
- * @param {String} message
- * @returns {String}
+ * @param {string} message
+ * @returns {string}
  */
 function trimErrorMessage( message ) {
 	return message.replace( /npm ERR!.*\n/g, '' ).trim();
 }
 
 /**
- * @param {Function} callback
- * @param {Number} times
+ * @param {function} callback
+ * @param {number} times
  * @returns {RetryCallback}
  */
 function retry( callback, times = 3 ) {

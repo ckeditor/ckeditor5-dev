@@ -3,17 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Returns an array with paths to changed files for given commit.
  *
- * @param {String} commitId
- * @returns {Array.<String>}
+ * @param {string} commitId
+ * @returns {Array.<string>}
  */
-module.exports = function getChangedFilesForCommit( commitId ) {
+export default function getChangedFilesForCommit( commitId ) {
 	const gitCommand = `git log -m -1 --name-only --pretty="format:" ${ commitId }`;
 	const changedFiles = tools.shExec( gitCommand, { verbosity: 'error' } ).trim();
 
@@ -30,4 +28,4 @@ module.exports = function getChangedFilesForCommit( commitId ) {
 		.split( '\n' )
 		.map( file => file.trim() )
 		.filter( item => item );
-};
+}

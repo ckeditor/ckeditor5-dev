@@ -3,24 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
-const fs = require( 'fs-extra' );
-const { checkVersionAvailability } = require( '../utils/checkversionavailability' );
+import upath from 'upath';
+import { glob } from 'glob';
+import fs from 'fs-extra';
+import checkVersionAvailability from '../utils/checkversionavailability.js';
 
 /**
  * Npm sometimes throws incorrect error 409 while publishing, while the package uploads correctly.
  * The purpose of the script is to validate if packages that threw 409 are uploaded correctly to npm.
  *
- * @param {Object} options
- * @param {String} options.packagesDirectory Relative path to a location of packages to release.
- * @param {String} options.version Version of the current release.
- * @param {Function} options.onSuccess Callback fired when function is successful.
+ * @param {object} options
+ * @param {string} options.packagesDirectory Relative path to a location of packages to release.
+ * @param {string} options.version Version of the current release.
+ * @param {function} options.onSuccess Callback fired when function is successful.
  * @returns {Promise}
  */
-module.exports = async function verifyPackagesPublishedCorrectly( options ) {
+export default async function verifyPackagesPublishedCorrectly( options ) {
 	const { packagesDirectory, version, onSuccess } = options;
 	const packagesToVerify = await glob( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];
@@ -52,4 +50,4 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	}
 
 	onSuccess( 'All packages that returned 409 were uploaded correctly.' );
-};
+}

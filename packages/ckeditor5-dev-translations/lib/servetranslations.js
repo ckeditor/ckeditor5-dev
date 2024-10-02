@@ -3,13 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import fs from 'fs-extra';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import chalk from 'chalk';
+import { rimraf } from 'rimraf';
+import webpackSources from 'webpack-sources';
 
-const chalk = require( 'chalk' );
-const rimraf = require( 'rimraf' );
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { RawSource, ConcatSource } = require( 'webpack-sources' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
+
+const { RawSource, ConcatSource } = webpackSources;
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -17,19 +21,19 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  *
  * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/ for details about specific hooks.
  *
- * @param {Object} compiler The webpack compiler.
- * @param {Object} options Translation options.
- * @param {String} options.outputDirectory The output directory for the emitted translation files, relative to the webpack context.
- * @param {Boolean} [options.strict] An option that make this function throw when the error is found during the compilation.
- * @param {Boolean} [options.verbose] An option that make this function log everything into the console.
- * @param {String} [options.sourceFilesPattern] The source files pattern
- * @param {String} [options.packageNamesPattern] The package names pattern.
- * @param {String} [options.corePackagePattern] The core package pattern.
+ * @param {object} compiler The webpack compiler.
+ * @param {object} options Translation options.
+ * @param {string} options.outputDirectory The output directory for the emitted translation files, relative to the webpack context.
+ * @param {boolean} [options.strict] An option that make this function throw when the error is found during the compilation.
+ * @param {boolean} [options.verbose] An option that make this function log everything into the console.
+ * @param {string} [options.sourceFilesPattern] The source files pattern
+ * @param {string} [options.packageNamesPattern] The package names pattern.
+ * @param {string} [options.corePackagePattern] The core package pattern.
  * @param {AssetNamesFilter} [options.assetNamesFilter] A function to filter assets probably importing CKEditor 5 modules.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * ckeditor5 - independent without hard-to-test logic.
  */
-module.exports = function serveTranslations( compiler, options, translationService ) {
+export default function serveTranslations( compiler, options, translationService ) {
 	const cwd = process.cwd();
 
 	// A set of unique messages that prevents message duplications.
@@ -84,7 +88,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 				}
 
 				// Add all context messages found in the core package.
-				const contexts = require( pathToResource );
+				const contexts = fs.readJsonSync( pathToResource );
 
 				for ( const item of Object.keys( contexts ) ) {
 					translationService.addIdMessage( item );
@@ -103,6 +107,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 				// after any potential TypeScript file has already been compiled.
 				module.loaders.unshift( {
 					loader: path.join( __dirname, 'translatesourceloader.js' ),
+					type: 'module',
 					options: { translateSource }
 				} );
 
@@ -176,14 +181,14 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			console.warn( chalk.yellow( `[CKEditorTranslationsPlugin] Warning: ${ warning }` ) );
 		}
 	}
-};
+}
 
 /**
  * Return path to the package if the resource comes from `ckeditor5-*` package.
  *
- * @param {String} cwd Current working directory.
- * @param {String} resource Absolute path to the resource.
- * @returns {String|null}
+ * @param {string} cwd Current working directory.
+ * @param {string} resource Absolute path to the resource.
+ * @returns {string|null}
  */
 function getPathToPackage( cwd, resource, packageNamePattern ) {
 	const relativePathToResource = path.relative( cwd, resource );
@@ -204,7 +209,7 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
  *
  * @param {webpack.Compiler} compiler
  * @param {webpack.Compilation} compilation
- * @returns {Object}
+ * @returns {object}
  */
 function getCompilationHooks( compiler, compilation ) {
 	const { webpack } = compiler;
@@ -222,8 +227,8 @@ function getCompilationHooks( compiler, compilation ) {
 /**
  * Returns an object with the chunk assets depending on the Webpack version.
  *
- * @param {Object} compilation
- * @returns {Object}
+ * @param {object} compilation
+ * @returns {object}
  */
 function getChunkAssets( compilation ) {
 	// Webpack 5 vs Webpack 4.
@@ -233,7 +238,7 @@ function getChunkAssets( compilation ) {
 /**
  * Returns an array with list of loaded files depending on the Webpack version.
  *
- * @param {Object|Array} chunks
+ * @param {object|Array} chunks
  * @returns {Array}
  */
 function getFilesFromChunks( chunks ) {
@@ -258,22 +263,22 @@ function getFilesFromChunks( chunks ) {
  * Load package translations.
  *
  * @method #loadPackage
- * @param {String} pathToPackage Path to the package.
+ * @param {string} pathToPackage Path to the package.
  */
 
 /**
  * Translate file's source to the target language.
  *
  * @method #translateSource
- * @param {String} source File's source.
- * @returns {String}
+ * @param {string} source File's source.
+ * @returns {string}
  */
 
 /**
  * Get assets at the end of compilation.
  *
  * @method #getAssets
- * @returns {Array.<Object>}
+ * @returns {Array.<object>}
  */
 
 /**

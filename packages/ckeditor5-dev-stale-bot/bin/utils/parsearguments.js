@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const minimist = require( 'minimist' );
-const upath = require( 'upath' );
+import minimist from 'minimist';
+import upath from 'upath';
 
 /**
  * Parses CLI arguments.
  *
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {Boolean} result.dryRun
- * @returns {String} result.configPath
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {boolean} result.dryRun
+ * @returns {string} result.configPath
  */
-module.exports = function parseArguments( args ) {
+export default function parseArguments( args ) {
 	const config = {
 		boolean: [
 			'dry-run'
@@ -38,4 +36,4 @@ module.exports = function parseArguments( args ) {
 		dryRun: options[ 'dry-run' ],
 		configPath: upath.join( process.cwd(), options[ 'config-path' ] )
 	};
-};
+}

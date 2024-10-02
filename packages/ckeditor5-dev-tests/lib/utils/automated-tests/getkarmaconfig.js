@@ -3,10 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 
-const path = require( 'path' );
-const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
+const require = createRequire( import.meta.url );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const AVAILABLE_REPORTERS = [
 	'mocha',
@@ -14,10 +18,10 @@ const AVAILABLE_REPORTERS = [
 ];
 
 /**
- * @param {Object} options
- * @returns {Object}
+ * @param {object} options
+ * @returns {object}
  */
-module.exports = function getKarmaConfig( options ) {
+export default function getKarmaConfig( options ) {
 	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
 		throw new Error( `Specified reporter is not supported. Available reporters: ${ AVAILABLE_REPORTERS.join( ', ' ) }.` );
 	}
@@ -199,7 +203,7 @@ module.exports = function getKarmaConfig( options ) {
 	}
 
 	return karmaConfig;
-};
+}
 
 // Returns the value of Karma's browser option.
 // @returns {Array|null}
@@ -219,8 +223,8 @@ function getBrowsers( options ) {
 
 // Returns the array of configuration flags for given browser.
 //
-// @param {String} browser
-// @returns {Array.<String>}
+// @param {string} browser
+// @returns {Array.<string>}
 function getFlagsForBrowser( browser ) {
 	const commonFlags = [
 		'--disable-background-timer-throttling',

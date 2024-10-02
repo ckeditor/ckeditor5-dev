@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 const requiredFields = [
 	'GITHUB_TOKEN',
 	'REPOSITORY_SLUG',
@@ -23,7 +21,7 @@ const requiredFields = [
  * @param {Config} config Configuration options.
  * @returns {void}
  */
-module.exports = function validateConfig( config ) {
+export default function validateConfig( config ) {
 	const missingFields = requiredFields.filter( fieldName => !config[ fieldName ] );
 
 	if ( !missingFields.length ) {
@@ -31,5 +29,5 @@ module.exports = function validateConfig( config ) {
 	}
 
 	throw new Error( `Missing configuration options: ${ missingFields.join( ', ' ) }.` );
-};
+}
 

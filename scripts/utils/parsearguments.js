@@ -5,15 +5,14 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const minimist = require( 'minimist' );
+import minimist from 'minimist';
+import os from 'os';
 
 /**
- * @param {Array.<String>} cliArguments
+ * @param {Array.<string>} cliArguments
  * @returns {ReleaseOptions} options
  */
-module.exports = function parseArguments( cliArguments ) {
+export default function parseArguments( cliArguments ) {
 	const config = {
 		boolean: [
 			'verbose',
@@ -33,7 +32,7 @@ module.exports = function parseArguments( cliArguments ) {
 		],
 
 		default: {
-			concurrency: require( 'os' ).cpus().length / 2,
+			concurrency: os.cpus().length / 2,
 			packages: null,
 			ci: false,
 			verbose: false,
@@ -60,24 +59,24 @@ module.exports = function parseArguments( cliArguments ) {
 	}
 
 	return options;
-};
+}
 
 /**
  * @typedef {Object} ReleaseOptions
  *
- * @property {Number} concurrency
+ * @property {number} concurrency
  *
- * @property {String|null} [npmTag=null]
+ * @property {string|null} [npmTag=null]
  *
- * @property {Array.<String>|null} packages
+ * @property {Array.<string>|null} packages
  *
- * @property {String} [from]
+ * @property {string} [from]
  *
- * @property {String} [branch='master']
+ * @property {string} [branch='master']
  *
- * @property {Boolean} [compileOnly=false]
+ * @property {boolean} [compileOnly=false]
  *
- * @property {Boolean} [verbose=false]
+ * @property {boolean} [verbose=false]
  *
- * @property {Boolean} [ci=false]
+ * @property {boolean} [ci=false]
  */

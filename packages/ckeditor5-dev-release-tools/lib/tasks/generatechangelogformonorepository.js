@@ -3,26 +3,28 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const compareFunc = require( 'compare-func' );
-const chalk = require( 'chalk' );
-const semver = require( 'semver' );
-const changelogUtils = require( '../utils/changelog' );
-const cli = require( '../utils/cli' );
-const displayCommits = require( '../utils/displaycommits' );
-const displaySkippedPackages = require( '../utils/displayskippedpackages' );
-const generateChangelog = require( '../utils/generatechangelog' );
-const getPackageJson = require( '../utils/getpackagejson' );
-const getPackagesPaths = require( '../utils/getpackagespaths' );
-const getCommits = require( '../utils/getcommits' );
-const getNewVersionType = require( '../utils/getnewversiontype' );
-const getWriterOptions = require( '../utils/getwriteroptions' );
-const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
-const transformCommitFactory = require( '../utils/transformcommitfactory' );
+import fs from 'fs';
+import path from 'path';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import compareFunc from 'compare-func';
+import chalk from 'chalk';
+import semver from 'semver';
+import displayCommits from '../utils/displaycommits.js';
+import displaySkippedPackages from '../utils/displayskippedpackages.js';
+import generateChangelog from '../utils/generatechangelog.js';
+import getPackageJson from '../utils/getpackagejson.js';
+import getPackagesPaths from '../utils/getpackagespaths.js';
+import getCommits from '../utils/getcommits.js';
+import getNewVersionType from '../utils/getnewversiontype.js';
+import getWriterOptions from '../utils/getwriteroptions.js';
+import getFormattedDate from '../utils/getformatteddate.js';
+import getChangelog from '../utils/getchangelog.js';
+import saveChangelog from '../utils/savechangelog.js';
+import truncateChangelog from '../utils/truncatechangelog.js';
+import transformCommitFactory from '../utils/transformcommitfactory.js';
+import { getRepositoryUrl } from '../utils/transformcommitutils.js';
+import provideNewVersionForMonoRepository from '../utils/providenewversionformonorepository.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER, CLI_INDENT_SIZE } from '../utils/constants.js';
 
 const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
@@ -33,37 +35,39 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * The typed version will be the same for all packages. See: https://github.com/ckeditor/ckeditor5/issues/7323.
  *
- * @param {Object} options
+ * @param {object} options
  *
- * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
  *
- * @param {String} options.packages Where to look for packages.
+ * @param {string} options.packages Where to look for packages.
  *
- * @param {Function} options.transformScope A function that returns a URL to a package from a scope of a commit.
+ * @param {function} options.transformScope A function that returns a URL to a package from a scope of a commit.
  *
- * @param {String} [options.scope] Package names have to match to specified glob pattern in order to be processed.
+ * @param {string} [options.scope] Package names have to match to specified glob pattern in order to be processed.
  *
- * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
+ * @param {Array.<string>} [options.skipPackages=[]] Name of packages which won't be touched.
  *
- * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ * @param {boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  *
- * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
+ * @param {string} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ * @param {string} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ *
+ * @param {string} [options.mainBranch='master'] A name of the main branch in the repository.
  *
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
  * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
  *
- * @param {Boolean} [options.skipFileSave=false] Whether to resolve the changes instead of saving it to a file.
+ * @param {boolean} [options.skipFileSave=false] Whether to resolve the changes instead of saving it to a file.
  *
- * @param {String|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
+ * @param {string|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
  *
  * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
  * If not specified, the default date matches the `YYYY-MM-DD` pattern.
  *
- * @returns {Promise.<undefined|String>}
+ * @returns {Promise.<undefined|string>}
  */
-module.exports = async function generateChangelogForMonoRepository( options ) {
+export default async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const rootPkgJson = getPackageJson( options.cwd );
@@ -83,6 +87,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		cwd: options.cwd,
 		from: options.from ? options.from : 'v' + rootPkgJson.version,
 		releaseBranch: options.releaseBranch || 'master',
+		mainBranch: options.mainBranch || 'master',
 		externalRepositories: options.externalRepositories || []
 	};
 
@@ -125,11 +130,11 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	}
 
 	if ( !skipFileSave ) {
-		await saveChangelog();
+		await saveChangelogToFile();
 
 		// Make a commit from the repository where we started.
 		process.chdir( options.cwd );
-		tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+		tools.shExec( `git add ${ CHANGELOG_FILE }`, { verbosity: 'error' } );
 		tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 		logInfo( 'Committed.', { indentLevel: 1 } );
 	}
@@ -156,11 +161,11 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns collections with packages found in the `options.cwd` directory and the external repositories.
 	 *
-	 * @param {Object} options
-	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
-	 * @param {String} options.packages Where to look for packages.
-	 * @param {String} options.scope Package names have to match to specified glob pattern in order to be processed.
-	 * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
+	 * @param {object} options
+	 * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {string} options.packages Where to look for packages.
+	 * @param {string} options.scope Package names have to match to specified glob pattern in order to be processed.
+	 * @param {Array.<string>} options.skipPackages Name of packages which won't be touched.
 	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
 	 * that the function takes into consideration while gathering packages.
 	 * @returns {PathsCollection}
@@ -205,10 +210,10 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
 	 *
-	 * @param {Object} options
-	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
-	 * @param {String} options.from A commit or tag name that will be the first param of the range of commits to collect.
-	 * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
+	 * @param {object} options
+	 * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {string} options.from A commit or tag name that will be the first param of the range of commits to collect.
+	 * @param {string} options.releaseBranch A name of the branch that should be used for releasing packages.
 	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
 	 * that the function takes into consideration while gathering commits.
 	 * @returns {Promise.<Array.<Commit>>}
@@ -223,7 +228,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 
 		const commitOptions = {
 			from: options.from,
-			releaseBranch: options.releaseBranch
+			releaseBranch: options.releaseBranch,
+			mainBranch: options.mainBranch
 		};
 
 		let promise = getCommits( transformCommit, commitOptions )
@@ -295,7 +301,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			bumpType = 'patch';
 		}
 
-		return cli.provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
+		return provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
 			.then( version => {
 				nextVersion = version;
 
@@ -372,7 +378,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	 * Finds commits that touched the package under `packagePath` directory.
 	 *
 	 * @param {Array.<Commit>} commits
-	 * @param {String} packagePath
+	 * @param {string} packagePath
 	 * @returns {Array.<Commit>}
 	 */
 	function filterCommitsByPath( commits, packagePath ) {
@@ -394,7 +400,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Generates a list of changes based on the commits in the main repository.
 	 *
-	 * @returns {Promise.<String>}
+	 * @returns {Promise.<string>}
 	 */
 	function generateChangelogFromCommits() {
 		logProcess( 'Generating the changelog...' );
@@ -410,12 +416,12 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			isPatch: semver.diff( version, rootPkgJson.version ) === 'patch',
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks ),
-			date: options.formatDate ? options.formatDate( new Date() ) : changelogUtils.getFormattedDate()
+			date: options.formatDate ? options.formatDate( new Date() ) : getFormattedDate()
 		};
 
-		const writerOptions = getWriterOptions( {
+		const writerOptions = getWriterOptions( commit => {
 			// We do not allow modifying the commit hash value by the generator itself.
-			hash: hash => hash
+			return commit;
 		} );
 
 		writerOptions.commitsSort = sortFunctionFactory( 'rawScope' );
@@ -464,7 +470,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		const dependenciesSummary = generateSummaryOfChangesInPackages();
 
 		return [
-			changelogUtils.changelogHeader,
+			CHANGELOG_HEADER,
 			changesFromCommits.trim(),
 			'\n\n',
 			dependenciesSummary
@@ -474,26 +480,24 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Combines the generated changes based on commits and summary of version changes in packages.
 	 * Appends those changes at the beginning of the changelog file.
-	 *
-	 * @param {String} changesFromCommits Generated entries based on commits.
 	 */
-	async function saveChangelog() {
+	async function saveChangelogToFile() {
 		logProcess( 'Saving changelog...' );
 
-		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+		if ( !fs.existsSync( CHANGELOG_FILE ) ) {
 			logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
 
-			changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+			saveChangelog( CHANGELOG_FILE );
 		}
 
 		logInfo( 'Preparing a summary of version changes in packages.', { indentLevel: 1 } );
 
-		let currentChangelog = changelogUtils.getChangelog();
+		let currentChangelog = getChangelog();
 
 		const nextVersionChangelog = await getChangelogForNextVersion();
 
 		// Remove header from current changelog.
-		currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' ).trim();
+		currentChangelog = currentChangelog.replace( CHANGELOG_HEADER, '' ).trim();
 
 		// Concat header, new entries and old changelog to single string.
 		let newChangelog = nextVersionChangelog + '\n\n\n' + currentChangelog;
@@ -501,10 +505,10 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		newChangelog = newChangelog.trim() + '\n';
 
 		// Save the changelog.
-		changelogUtils.saveChangelog( newChangelog );
+		saveChangelog( newChangelog );
 
 		// Truncate the changelog to keep the latest five release entries.
-		changelogUtils.truncateChangelog( 5 );
+		truncateChangelog( 5 );
 
 		logInfo( 'Saved.', { indentLevel: 1 } );
 	}
@@ -512,7 +516,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Prepares a summary that describes what has changed in all dependencies.
 	 *
-	 * @returns {String}
+	 * @returns {string}
 	 */
 	function generateSummaryOfChangesInPackages() {
 		const dependencies = new Map();
@@ -593,8 +597,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	}
 
 	/**
-	 * @param {Map.<String, Version>} dependencies
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @returns {Map.<string, Version>}
 	 */
 	function getNewPackages( dependencies ) {
 		const packages = new Map();
@@ -612,9 +616,9 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns packages where scope of changes described in the commits' notes match to packages' names.
 	 *
-	 * @param {Map.<String, Version>} dependencies
-	 * @param {String} noteTitle
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @param {string} noteTitle
+	 * @returns {Map.<string, Version>}
 	 */
 	function getPackagesMatchedToScopesFromNotes( dependencies, noteTitle ) {
 		const packages = new Map();
@@ -645,8 +649,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns packages that contain new features.
 	 *
-	 * @param {Map.<String, Version>} dependencies
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @returns {Map.<string, Version>}
 	 */
 	function getPackagesWithNewFeatures( dependencies ) {
 		const packages = new Map();
@@ -668,10 +672,10 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a formatted entry (string) for the changelog.
 	 *
-	 * @param {String} packageName
-	 * @param {String} nextVersion
-	 * @param {String} currentVersion
-	 * @returns {String}
+	 * @param {string} packageName
+	 * @param {string} nextVersion
+	 * @param {string} currentVersion
+	 * @returns {string}
 	 */
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
 		const npmUrl = `https://www.npmjs.com/package/${ packageName }/v/${ nextVersion }`;
@@ -686,7 +690,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a function that is being used when sorting commits.
 	 *
-	 * @param {String} scopeField A name of the field that saves the commit's scope.
+	 * @param {string} scopeField A name of the field that saves the commit's scope.
 	 * @returns {Function}
 	 */
 	function sortFunctionFactory( scopeField ) {
@@ -710,46 +714,46 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	}
 
 	/**
-	 * @param {String} message
-	 * @param {Object} [options={}]
-	 * @param {Number} [options.indentLevel=0]
-	 * @param {Boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
-	 * @param {Boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
+	 * @param {string} message
+	 * @param {object} [options={}]
+	 * @param {number} [options.indentLevel=0]
+	 * @param {boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
+	 * @param {boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
 	 */
 	function logInfo( message, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
 		const startWithNewLine = options.startWithNewLine || false;
 		const method = options.isWarning ? 'warning' : 'info';
 
-		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
+		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * CLI_INDENT_SIZE ) }` + message );
 	}
-};
+}
 
 /**
- * @typedef {Object} Version
+ * @typedef {object} Version
  *
- * @param {Boolean} current The current version defined in the `package.json` file.
+ * @param {boolean} current The current version defined in the `package.json` file.
  *
- * @param {Boolean} next The next version defined during generating the changelog file.
+ * @param {boolean} next The next version defined during generating the changelog file.
  */
 
 /**
- * @typedef {Object} ExternalRepository
+ * @typedef {object} ExternalRepository
  *
- * @param {String} cwd An absolute path to the repository.
+ * @param {string} cwd An absolute path to the repository.
  *
- * @param {String} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
+ * @param {string} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
  *
- * @param {String} [scope] Glob pattern for package names to be processed.
+ * @param {string} [scope] Glob pattern for package names to be processed.
  *
- * @param {Array.<String>} [skipPackages] Name of packages which won't be touched.
+ * @param {Array.<string>} [skipPackages] Name of packages which won't be touched.
  *
- * @param {Boolean} [skipLinks] If set on `true`, a URL to commit (hash) will be omitted.
+ * @param {boolean} [skipLinks] If set on `true`, a URL to commit (hash) will be omitted.
  *
- * @param {String} [from] A commit or tag name that will be the first param of the range of commits to collect. If not specified,
+ * @param {string} [from] A commit or tag name that will be the first param of the range of commits to collect. If not specified,
  * the option will inherit its value from the function's `options` object.
  *
- * @param {String} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
+ * @param {string} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
  * used for the main repository will be used.
  */
 
@@ -758,5 +762,5 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
  *
  * @param {Date} now The current date.
  *
- * @returns {String} The formatted date inserted into the changelog.
+ * @returns {string} The formatted date inserted into the changelog.
  */

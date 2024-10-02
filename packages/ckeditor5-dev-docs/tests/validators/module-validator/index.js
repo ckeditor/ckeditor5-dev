@@ -3,45 +3,48 @@
  * For licensing, see LICENSE.md.
  */
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const testUtils = require( '../../utils' );
+import { describe, it, expect, vi } from 'vitest';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import testUtils from '../../_utils.js';
+import build from '../../../lib/build.js';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
+
+const stubs = vi.hoisted( () => {
+	return {
+		onErrorCallback: vi.fn()
+	};
+} );
+
+vi.stubGlobal( 'console', {
+	log: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
+} );
+
+vi.mock( '../../../lib/validators/module-validator', async () => {
+	const { default: validator } = await vi.importActual( '../../../lib/validators/module-validator' );
+
+	return {
+		default: project => validator( project, ( ...args ) => stubs.onErrorCallback( ...args ) )
+	};
+} );
 
 describe( 'dev-docs/validators/module-validator', function() {
-	this.timeout( 10 * 1000 );
-
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
-	const onErrorCallback = sinon.stub();
-
-	before( async () => {
-		const validators = proxyquire( '../../../lib/validators', {
-			'./module-validator': project => {
-				return require( '../../../lib/validators/module-validator' )( project, onErrorCallback );
-			}
-		} );
-
-		const build = proxyquire( '../../../lib/buildtypedoc', {
-			'./validators': validators
-		} );
-
-		const logStub = sinon.stub( console, 'log' );
-
+	it( 'should warn if module name is not valid', async () => {
 		await build( {
-			type: 'typedoc',
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
 			strict: false
 		} );
 
-		logStub.restore();
-	} );
-
-	it( 'should warn if module name is not valid', () => {
 		const expectedErrors = [
 			{
 				source: 'ckeditor5-example/src/modulerootinvalid1.ts:10',
@@ -69,13 +72,24 @@ describe( 'dev-docs/validators/module-validator', function() {
 			}
 		];
 
-		expect( onErrorCallback.callCount ).to.equal( expectedErrors.length );
+		expect( stubs.onErrorCallback ).toHaveBeenCalledTimes( expectedErrors.length );
 
-		for ( const error of expectedErrors ) {
-			expect( onErrorCallback ).to.be.calledWith(
-				`Invalid module name: "${ error.name }"`,
-				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
-			);
+		for ( const call of stubs.onErrorCallback.mock.calls ) {
+			expect( call ).toSatisfy( call => {
+				const [ message, reflection ] = call;
+
+				return expectedErrors.some( error => {
+					if ( message !== `Invalid module name: "${ error.name }"` ) {
+						return false;
+					}
+
+					if ( testUtils.getSource( reflection ) !== error.source ) {
+						return false;
+					}
+
+					return true;
+				} );
+			} );
 		}
 	} );
 } );

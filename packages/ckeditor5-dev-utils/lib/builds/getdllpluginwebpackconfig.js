@@ -3,34 +3,32 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
-const bundler = require( '../bundler' );
-const loaders = require( '../loaders' );
+import path from 'path';
+import fs from 'fs-extra';
+import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
+import { getLicenseBanner } from '../bundler/index.js';
+import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
  * by the package can be added to DLL builds.
  *
- * @param {Object} webpack
- * @param {Function} webpack.BannerPlugin Plugin used to add text to the top of the file.
- * @param {Function} webpack.DllReferencePlugin Plugin used to import DLLs with webpack.
- * @param {Object} options
- * @param {String} options.themePath An absolute path to the theme package.
- * @param {String} options.packagePath An absolute path to the root directory of the package.
- * @param {String} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
- * @param {String} [options.tsconfigPath] An absolute path to the TypeScript configuration file.
- * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
- * @returns {Object}
+ * @param {object} webpack
+ * @param {function} webpack.BannerPlugin Plugin used to add text to the top of the file.
+ * @param {function} webpack.DllReferencePlugin Plugin used to import DLLs with webpack.
+ * @param {object} options
+ * @param {string} options.themePath An absolute path to the theme package.
+ * @param {string} options.packagePath An absolute path to the root directory of the package.
+ * @param {string} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
+ * @param {string} [options.tsconfigPath] An absolute path to the TypeScript configuration file.
+ * @param {boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
+ * @returns {object}
  */
-module.exports = function getDllPluginWebpackConfig( webpack, options ) {
+export default async function getDllPluginWebpackConfig( webpack, options ) {
 	// Terser requires webpack. However, it's needed in runtime. To avoid the "Cannot find module 'webpack'" error,
 	// let's load the Terser dependency when `getDllPluginWebpackConfig()` is executed.
 	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
-	const TerserPlugin = require( 'terser-webpack-plugin' );
+	const TerserPlugin = ( await import( 'terser-webpack-plugin' ) ).default;
 
 	const { name: packageName } = fs.readJsonSync( path.join( options.packagePath, 'package.json' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
@@ -58,11 +56,11 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		plugins: [
 			new webpack.BannerPlugin( {
-				banner: bundler.getLicenseBanner(),
+				banner: getLicenseBanner(),
 				raw: true
 			} ),
 			new webpack.DllReferencePlugin( {
-				manifest: require( options.manifestPath ),
+				manifest: fs.readJsonSync( options.manifestPath ),
 				scope: 'ckeditor5/src',
 				name: 'CKEditor5.dll'
 			} )
@@ -77,12 +75,12 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		module: {
 			rules: [
-				loaders.getIconsLoader( { matchExtensionOnly: true } ),
-				loaders.getStylesLoader( {
+				getIconsLoader( { matchExtensionOnly: true } ),
+				getStylesLoader( {
 					themePath: options.themePath,
 					minify: true
 				} ),
-				loaders.getTypeScriptLoader( {
+				getTypeScriptLoader( {
 					configFile: options.tsconfigPath || 'tsconfig.json'
 				} )
 			]
@@ -127,14 +125,14 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	}
 
 	return webpackConfig;
-};
+}
 
 /**
  * Transforms the package name (`@ckeditor/ckeditor5-foo-bar`) to the name that will be used while
  * exporting the library into the global scope.
  *
- * @param {String} packageName
- * @returns {String}
+ * @param {string} packageName
+ * @returns {string}
  */
 function getGlobalKeyForPackage( packageName ) {
 	return packageName
@@ -146,7 +144,7 @@ function getGlobalKeyForPackage( packageName ) {
  * Extracts the main file name from the package name.
  *
  * @param packageName
- * @returns {String}
+ * @returns {string}
  */
 function getIndexFileName( packageName ) {
 	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.js';

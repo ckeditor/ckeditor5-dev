@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { isAfter, parseISO } = require( 'date-fns' );
-const isIssueOrPullRequestActive = require( './isissueorpullrequestactive' );
-const findStaleDate = require( './findstaledate' );
+import { isAfter, parseISO } from 'date-fns';
+import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
+import findStaleDate from './findstaledate.js';
 
 /**
  * Checks whether the time to close a stale issue or pull request has passed and whether it is still inactive.
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
-module.exports = function isIssueOrPullRequestToClose( issueOrPullRequest, options ) {
+export default function isIssueOrPullRequestToClose( issueOrPullRequest, options ) {
 	const staleDate = findStaleDate( issueOrPullRequest, options );
 	const hasTimeToClosePassed = isAfter( parseISO( options.closeDate ), parseISO( staleDate ) );
 
@@ -25,4 +23,4 @@ module.exports = function isIssueOrPullRequestToClose( issueOrPullRequest, optio
 	}
 
 	return !isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options );
-};
+}

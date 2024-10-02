@@ -5,10 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { generateChangelogForMonoRepository } = require( '@ckeditor/ckeditor5-dev-release-tools' );
-const parseArguments = require( './utils/parsearguments' );
+import { generateChangelogForMonoRepository } from '@ckeditor/ckeditor5-dev-release-tools';
+import parseArguments from './utils/parsearguments.js';
 
 const cliArguments = parseArguments( process.argv.slice( 2 ) );
 
@@ -17,10 +15,6 @@ const changelogOptions = {
 	packages: 'packages',
 	releaseBranch: cliArguments.branch,
 	transformScope: name => {
-		if ( name === 'jsdoc-plugins' ) {
-			return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
-		}
-
 		if ( name === 'typedoc-plugins' ) {
 			return 'https://www.npmjs.com/package/@ckeditor/typedoc-plugins';
 		}

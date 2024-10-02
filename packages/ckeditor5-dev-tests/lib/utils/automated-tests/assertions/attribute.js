@@ -8,7 +8,7 @@
  *
  * @param {Chai} chai
  */
-module.exports = chai => {
+export default chai => {
 	/**
 	 * Asserts that the target has an attribute with the given key name.
 	 *
@@ -20,8 +20,8 @@ module.exports = chai => {
 	 *
 	 * Negations works as well.
 	 *
-	 * @param {String} key Key of attribute to assert.
-	 * @param {String} [value] Attribute value to assert.
+	 * @param {string} key Key of attribute to assert.
+	 * @param {string} [value] Attribute value to assert.
 	 */
 	chai.Assertion.addMethod( 'attribute', function attributeAssertion( key, value ) {
 		const obj = this._obj;

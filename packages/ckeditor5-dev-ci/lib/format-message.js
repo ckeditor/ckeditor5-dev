@@ -5,31 +5,27 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const fetch = require( 'node-fetch' );
-const bots = require( './data/bots.json' );
-const members = require( './data/members.json' );
+import { bots, members } from './data/index.js';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
 /**
- * @param {Object} options
- * @param {String} options.slackMessageUsername
- * @param {String} options.iconUrl
- * @param {String} options.repositoryOwner
- * @param {String} options.repositoryName
- * @param {String} options.branch
- * @param {String} options.buildTitle
- * @param {String} options.buildUrl
- * @param {String} options.buildId
- * @param {String} options.githubToken
- * @param {String} options.triggeringCommitUrl
- * @param {Number} options.startTime
- * @param {Number} options.endTime
- * @param {Boolean} options.shouldHideAuthor
+ * @param {object} options
+ * @param {string} options.slackMessageUsername
+ * @param {string} options.iconUrl
+ * @param {string} options.repositoryOwner
+ * @param {string} options.repositoryName
+ * @param {string} options.branch
+ * @param {string} options.buildTitle
+ * @param {string} options.buildUrl
+ * @param {string} options.buildId
+ * @param {string} options.githubToken
+ * @param {string} options.triggeringCommitUrl
+ * @param {number} options.startTime
+ * @param {number} options.endTime
+ * @param {boolean} options.shouldHideAuthor
  */
-module.exports = async function formatMessage( options ) {
+export default async function formatMessage( options ) {
 	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
 	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
 
@@ -63,16 +59,16 @@ module.exports = async function formatMessage( options ) {
 			} ]
 		} ]
 	};
-};
+}
 
 /**
  * Returns the additional message that will be added to the notifier post.
  *
- * @param {Object} options
- * @param {Boolean} options.shouldHideAuthor
- * @param {String|null} options.githubAccount
- * @param {String} options.commitAuthor
- * @returns {String}
+ * @param {object} options
+ * @param {boolean} options.shouldHideAuthor
+ * @param {string|null} options.githubAccount
+ * @param {string} options.commitAuthor
+ * @returns {string}
  */
 function getNotifierMessage( options ) {
 	if ( options.shouldHideAuthor ) {
@@ -99,8 +95,8 @@ function getNotifierMessage( options ) {
 }
 
 /**
- * @param {String|null} githubAccount
- * @returns {String|null}
+ * @param {string|null} githubAccount
+ * @returns {string|null}
  */
 function findSlackAccount( githubAccount ) {
 	if ( !githubAccount ) {
@@ -120,9 +116,9 @@ function findSlackAccount( githubAccount ) {
  * Returns string representing amount of time passed between two timestamps.
  * Timestamps should be in seconds instead of milliseconds.
  *
- * @param {Number} startTime
- * @param {Number} endTime
- * @returns {String}
+ * @param {number} startTime
+ * @param {number} endTime
+ * @returns {string}
  */
 function getExecutionTime( startTime, endTime ) {
 	if ( !startTime || !endTime ) {
@@ -159,8 +155,8 @@ function getExecutionTime( startTime, endTime ) {
 /**
  * Replaces `#Id` and `Repo/Owner#Id` with URls to Github Issues.
  *
- * @param {String} commitMessage
- * @param {String} triggeringCommitUrl
+ * @param {string} commitMessage
+ * @param {string} triggeringCommitUrl
  * @returns {string}
  */
 function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
@@ -182,9 +178,9 @@ function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
 /**
  * Returns a promise that resolves the commit details (author and message) based on the specified GitHub URL.
  *
- * @param {String} triggeringCommitUrl The URL to the commit on GitHub.
- * @param {String} githubToken Github token used for authorization a request,
- * @returns {Promise.<Object>}
+ * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
+ * @param {string} githubToken Github token used for authorization a request,
+ * @returns {Promise.<object>}
  */
 function getCommitDetails( triggeringCommitUrl, githubToken ) {
 	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl );
@@ -209,8 +205,8 @@ function getCommitDetails( triggeringCommitUrl, githubToken ) {
 /**
  * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
  *
- * @param {String} triggeringCommitUrl The URL to the commit on GitHub.
- * @returns {String}
+ * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
+ * @returns {string}
  */
 function getGithubApiUrl( triggeringCommitUrl ) {
 	return triggeringCommitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );

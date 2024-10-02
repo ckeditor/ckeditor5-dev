@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { cloneDeepWith } = require( 'lodash' );
-const utils = require( './transformcommitutils' );
-const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
+import { cloneDeepWith } from 'lodash-es';
+import * as utils from './transformcommitutils.js';
+import getChangedFilesForCommit from './getchangedfilesforcommit.js';
 
 // Squash commit follows the pattern: "A pull request title (#{number})".
 const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
@@ -22,16 +20,16 @@ const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
  *   - normalizes notes (e.g. "MAJOR BREAKING CHANGE" will be replaced with "MAJOR BREAKING CHANGES"),
  *   - the commit is always being returned. Even, if it should not be added to the changelog.
  *
- * @param {Object} [options={}]
- * @param {Boolean} [options.treatMajorAsMinorBreakingChange=false] If set on true, all "MAJOR BREAKING CHANGES" notes will be replaced
+ * @param {object} [options={}]
+ * @param {boolean} [options.treatMajorAsMinorBreakingChange=false] If set on true, all "MAJOR BREAKING CHANGES" notes will be replaced
  * with "MINOR BREAKING CHANGES". This behaviour is being disabled automatically if `options.useExplicitBreakingChangeGroups` is
  * set on `false` because all commits will be treated as "BREAKING CHANGES".
- * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
+ * @param {boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
  * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
  * as "BREAKING CHANGES".
  * @returns {TransformCommit}
  */
-module.exports = function transformCommitFactory( options = {} ) {
+export default function transformCommitFactory( options = {} ) {
 	return rawCommit => {
 		const commit = transformCommit( rawCommit );
 
@@ -264,8 +262,8 @@ module.exports = function transformCommitFactory( options = {} ) {
 	/**
 	 * Merges multiple "Closes #x" references as "Closes #x, #y.".
 	 *
-	 * @param {String} subject
-	 * @returns {String}
+	 * @param {string} subject
+	 * @returns {string}
 	 */
 	function mergeCloseReferences( subject ) {
 		const refs = [];
@@ -355,8 +353,8 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 *
 	 * For commits with no scope, `null` will be returned instead of the array (as `scope`).
 	 *
-	 * @param {String} type First line from the commit message.
-	 * @returns {Object}
+	 * @param {string} type First line from the commit message.
+	 * @returns {object}
 	 */
 	function extractScopeFromPrefix( type ) {
 		if ( !type ) {
@@ -389,8 +387,8 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 *
 	 * For notes with no scope, `null` will be returned instead of the array (as `scope`).
 	 *
-	 * @param {String} text A text that describes a note.
-	 * @returns {Object}
+	 * @param {string} text A text that describes a note.
+	 * @returns {object}
 	 */
 	function extractScopeFromNote( text ) {
 		const scopeAsText = text.match( /\(([^)]+)\):/ );
@@ -473,7 +471,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 	/**
 	 * @param {Array.<Commit>} commits
-	 * @returns {Boolean}
+	 * @returns {boolean}
 	 */
 	function isSquashMergeCommit( commits ) {
 		const [ squashCommit ] = commits;
@@ -484,7 +482,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 		return !!squashCommit.header.match( SQUASH_COMMIT_REGEXP );
 	}
-};
+}
 
 /**
  * @callback TransformCommit
@@ -493,41 +491,41 @@ module.exports = function transformCommitFactory( options = {} ) {
  */
 
 /**
- * @typedef {Object} Commit
+ * @typedef {object} Commit
  *
- * @property {Boolean} isPublicCommit Whether the commit should be added in the changelog.
+ * @property {boolean} isPublicCommit Whether the commit should be added in the changelog.
  *
- * @property {String} rawType Type of the commit without any modifications.
+ * @property {string} rawType Type of the commit without any modifications.
  *
- * @property {String|null} type Type of the commit (it can be modified).
+ * @property {string|null} type Type of the commit (it can be modified).
  *
- * @property {String} header First line of the commit message.
+ * @property {string} header First line of the commit message.
  *
- * @property {String} subject Subject of the commit. It's the header without the type.
+ * @property {string} subject Subject of the commit. It's the header without the type.
  *
- * @property {Array.<String>|null} scope Scope of the changes.
+ * @property {Array.<string>|null} scope Scope of the changes.
  *
- * @property {Array.<String>} files A list of files tha the commit modified.
+ * @property {Array.<string>} files A list of files tha the commit modified.
  *
- * @property {String} hash The full commit SHA-1 id.
+ * @property {string} hash The full commit SHA-1 id.
  *
- * @property {String} repositoryUrl The URL to the repository where the parsed commit has been done.
+ * @property {string} repositoryUrl The URL to the repository where the parsed commit has been done.
  **
- * @property {String|null} [body] Body of the commit message.
+ * @property {string|null} [body] Body of the commit message.
  *
- * @property {String|null} [footer] Footer of the commit message.
+ * @property {string|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
  *
- * @property {Boolean} [skipCommitsLink] Whether to skip generating a URL to the commit by the generator.
+ * @property {boolean} [skipCommitsLink] Whether to skip generating a URL to the commit by the generator.
  */
 
 /**
- * @typedef {Object} CommitNote
+ * @typedef {object} CommitNote
  *
- * @property {String} title Type of the note.
+ * @property {string} title Type of the note.
  *
- * @property {String} text Text of the note.
+ * @property {string} text Text of the note.
  *
- * @property {Array.<String>} scope Scope of the note.
+ * @property {Array.<string>} scope Scope of the note.
  */

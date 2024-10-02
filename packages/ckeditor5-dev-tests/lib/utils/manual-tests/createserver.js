@@ -3,40 +3,40 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { globSync } from 'glob';
+import combine from 'dom-combiner';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
 
-const http = require( 'http' );
-const path = require( 'path' );
-const { globSync } = require( 'glob' );
-const fs = require( 'fs' );
-const combine = require( 'dom-combiner' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 /**
  * Basic HTTP server.
  *
- * @param {String} sourcePath Base path where the compiler saved the files.
- * @param {Number} [port=8125] Port to listen at.
- * @param {Function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
+ * @param {string} sourcePath Base path where the compiler saved the files.
+ * @param {number} [port=8125] Port to listen at.
+ * @param {function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
  */
-module.exports = function createManualTestServer( sourcePath, port = 8125, onCreate ) {
+export default function createManualTestServer( sourcePath, port = 8125, onCreate ) {
 	return new Promise( resolve => {
 		const server = http.createServer( ( request, response ) => {
 			onRequest( sourcePath, request, response );
 		} ).listen( port );
 
-		// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
+		// SIGINT isn't caught on Windows in process. However, `CTRL+C` can be caught
 		// by `readline` module. After that we can emit SIGINT to the process manually.
 		if ( process.platform === 'win32' ) {
-			const readline = require( 'readline' ).createInterface( {
+			const readlineInterface = readline.createInterface( {
 				input: process.stdin,
 				output: process.stdout
 			} );
 
-			// Save the reference of the stream to be able to close it in tests.
-			server._readline = readline;
-
-			readline.on( 'SIGINT', () => {
+			readlineInterface.on( 'SIGINT', () => {
 				process.emit( 'SIGINT' );
 			} );
 		}
@@ -56,20 +56,22 @@ module.exports = function createManualTestServer( sourcePath, port = 8125, onCre
 			onCreate( server );
 		}
 	} );
-};
+}
 
 function onRequest( sourcePath, request, response ) {
-	response.writeHead( 200, {
-		'Content-Type': getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) )
-	} );
+	const contentType = getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) );
 
 	// Ignore a 'favicon' request.
 	if ( request.url === '/favicon.ico' ) {
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
 		return response.end( null, 'utf-8' );
 	}
 
 	// Generate index.html with list of the tests.
 	if ( request.url === '/' ) {
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
 		return response.end( generateIndex( sourcePath ), 'utf-8' );
 	}
 
@@ -79,7 +81,9 @@ function onRequest( sourcePath, request, response ) {
 		const url = request.url.replace( /\?.+$/, '' );
 		const content = fs.readFileSync( path.join( sourcePath, url ) );
 
-		response.end( content, 'utf-8' );
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
+		return response.end( content, 'utf-8' );
 	} catch ( error ) {
 		logger().error( `[Server] Cannot find file '${ request.url }'.` );
 
@@ -90,8 +94,8 @@ function onRequest( sourcePath, request, response ) {
 
 // Returns content type based on file extension.
 //
-// @params {String} fileExtension
-// @returns {String}
+// @params {string} fileExtension
+// @returns {string}
 function getContentType( fileExtension ) {
 	switch ( fileExtension ) {
 		case '.js':
@@ -101,6 +105,7 @@ function getContentType( fileExtension ) {
 			return 'text/css';
 
 		case '.json':
+		case '.map':
 			return 'application/json';
 
 		case '.png':
@@ -119,8 +124,8 @@ function getContentType( fileExtension ) {
 
 // Generates a list with available manual tests.
 //
-// @param {String} sourcePath Base path that will be used to resolve all patterns.
-// @returns {String}
+// @param {string} sourcePath Base path that will be used to resolve all patterns.
+// @returns {string}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const globPattern = path.join( sourcePath, '**', '*.html' ).replace( /\\/g, '/' );
@@ -151,6 +156,8 @@ function generateIndex( sourcePath ) {
 			.join( '' );
 		testList += '</ul></li>';
 	}
+
+	testList += '</ul>';
 
 	const headerHtml = '<body class="manual-test-list-container"><h1>CKEditor 5 manual tests</h1></body>';
 

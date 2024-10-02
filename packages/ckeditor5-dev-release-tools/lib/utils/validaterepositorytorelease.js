@@ -3,19 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * @param {Object} options
- * @param {String|null} options.version Version of the current release.
- * @param {String} options.changes Changelog entries for the current release.
- * @param {Boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
- * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
- * @returns {Promise.<Array.<String>>}
+ * @param {object} options
+ * @param {string|null} options.version Version of the current release.
+ * @param {string} options.changes Changelog entries for the current release.
+ * @param {boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
+ * @param {string} [options.branch='master'] A name of the branch that should be used for releasing packages.
+ * @returns {Promise.<Array.<string>>}
  */
-module.exports = async function validateRepositoryToRelease( options ) {
+export default async function validateRepositoryToRelease( options ) {
 	const {
 		version,
 		changes,
@@ -56,4 +54,4 @@ module.exports = async function validateRepositoryToRelease( options ) {
 	async function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error', async: true } );
 	}
-};
+}

@@ -11,10 +11,10 @@
  * Extracts base URL from the provided page URL. Base URL consists of a protocol, a host, a port, and a path.
  * A hash and search parts are omitted, because they would have navigated to the same page if they were set.
  *
- * @param {String} url Page URL.
- * @returns {String} Base URL from page URL.
+ * @param {string} url Page URL.
+ * @returns {string} Base URL from page URL.
  */
-function getBaseUrl( url ) {
+export function getBaseUrl( url ) {
 	const { origin, pathname } = new URL( url );
 
 	return `${ origin }${ pathname }`;
@@ -23,10 +23,10 @@ function getBaseUrl( url ) {
 /**
  * Checks, if provided string is a valid URL utilizing the HTTP or HTTPS protocols.
  *
- * @param {String} url The URL to validate.
- * @returns {Boolean}
+ * @param {string} url The URL to validate.
+ * @returns {boolean}
  */
-function isUrlValid( url ) {
+export function isUrlValid( url ) {
 	try {
 		return [ 'http:', 'https:' ].includes( new URL( url ).protocol );
 	} catch ( error ) {
@@ -40,12 +40,6 @@ function isUrlValid( url ) {
  * @param {*} data The value to transform to an array.
  * @returns {Array.<*>} An array created from data.
  */
-function toArray( data ) {
+export function toArray( data ) {
 	return Array.isArray( data ) ? data : [ data ];
 }
-
-module.exports = {
-	getBaseUrl,
-	isUrlValid,
-	toArray
-};

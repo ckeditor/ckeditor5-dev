@@ -3,39 +3,28 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const upath = require( 'upath' );
-const fs = require( 'fs-extra' );
-const { GraphQLClient } = require( 'graphql-request' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const {
+import upath from 'upath';
+import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+import { GraphQLClient } from 'graphql-request';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import {
 	addSeconds,
 	fromUnixTime,
 	formatDistanceToNow,
 	differenceInSeconds
-} = require( 'date-fns' );
-const prepareSearchQuery = require( './utils/preparesearchquery' );
-const isIssueOrPullRequestToStale = require( './utils/isissueorpullrequesttostale' );
-const isIssueOrPullRequestToUnstale = require( './utils/isissueorpullrequesttounstale' );
-const isIssueOrPullRequestToClose = require( './utils/isissueorpullrequesttoclose' );
-const isPendingIssueToStale = require( './utils/ispendingissuetostale' );
-const isPendingIssueToUnlabel = require( './utils/ispendingissuetounlabel' );
+} from 'date-fns';
+import prepareSearchQuery from './utils/preparesearchquery.js';
+import isIssueOrPullRequestToStale from './utils/isissueorpullrequesttostale.js';
+import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale.js';
+import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose.js';
+import isPendingIssueToStale from './utils/ispendingissuetostale.js';
+import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel.js';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = upath.dirname( __filename );
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
-
-const queries = {
-	getViewerLogin: readGraphQL( 'getviewerlogin' ),
-	searchIssuesOrPullRequests: readGraphQL( 'searchissuesorpullrequests' ),
-	searchPendingIssues: readGraphQL( 'searchpendingissues' ),
-	getIssueOrPullRequestTimelineItems: readGraphQL( 'getissueorpullrequesttimelineitems' ),
-	addComment: readGraphQL( 'addcomment' ),
-	getLabels: readGraphQL( 'getlabels' ),
-	addLabels: readGraphQL( 'addlabels' ),
-	removeLabels: readGraphQL( 'removelabels' ),
-	closeIssue: readGraphQL( 'closeissue' ),
-	closePullRequest: readGraphQL( 'closepullrequest' )
-};
 
 /**
  * A GitHub client containing methods used to interact with GitHub using its GraphQL API.
@@ -43,7 +32,7 @@ const queries = {
  * All methods handles paginated data and it supports a case when a request has exceeded the GitHub API rate limit.
  * In such a case, the request waits until the limit is reset and it is automatically sent again.
  */
-module.exports = class GitHubRepository {
+export default class GitHubRepository {
 	constructor( authToken ) {
 		/**
 		 * @private
@@ -63,15 +52,31 @@ module.exports = class GitHubRepository {
 		 * @property {Logger}
 		 */
 		this.logger = logger();
+
+		/**
+		 * @private
+		 */
+		this.queries = {
+			getViewerLogin: readGraphQL( 'getviewerlogin' ),
+			searchIssuesOrPullRequests: readGraphQL( 'searchissuesorpullrequests' ),
+			searchPendingIssues: readGraphQL( 'searchpendingissues' ),
+			getIssueOrPullRequestTimelineItems: readGraphQL( 'getissueorpullrequesttimelineitems' ),
+			addComment: readGraphQL( 'addcomment' ),
+			getLabels: readGraphQL( 'getlabels' ),
+			addLabels: readGraphQL( 'addlabels' ),
+			removeLabels: readGraphQL( 'removelabels' ),
+			closeIssue: readGraphQL( 'closeissue' ),
+			closePullRequest: readGraphQL( 'closepullrequest' )
+		};
 	}
 
 	/**
 	 * Returns the GitHub login of the currently authenticated user.
 	 *
-	 * @returns {Promise.<String>}
+	 * @returns {Promise.<string>}
 	 */
 	async getViewerLogin() {
-		return this.sendRequest( await queries.getViewerLogin )
+		return this.sendRequest( await this.queries.getViewerLogin )
 			.then( data => data.viewer.login )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#getViewerLogin()".', error );
@@ -85,7 +90,7 @@ module.exports = class GitHubRepository {
 	 *
 	 * @param {'Issue'|'PullRequest'} type Type of resource to search.
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchIssuesOrPullRequestsToStaleResult>}
 	 */
@@ -105,7 +110,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchIssuesOrPullRequests, variables )
+		return this.sendRequest( await this.queries.searchIssuesOrPullRequests, variables )
 			.then( async data => {
 				const issuesOrPullRequests = await this.parseIssuesOrPullRequests( data.search );
 
@@ -135,7 +140,7 @@ module.exports = class GitHubRepository {
 	 * Searches for all stale issues and pull requests that should be closed or unstaled.
 	 *
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchStaleIssuesOrPullRequestsResult>}
 	 */
@@ -151,7 +156,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchIssuesOrPullRequests, variables )
+		return this.sendRequest( await this.queries.searchIssuesOrPullRequests, variables )
 			.then( async data => {
 				const issuesOrPullRequests = await this.parseIssuesOrPullRequests( data.search );
 
@@ -197,7 +202,7 @@ module.exports = class GitHubRepository {
 	 * Searches for all pending issues that should be staled or unlabeled.
 	 *
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchIssuesOrPullRequestsToStaleResult>}
 	 */
@@ -217,7 +222,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchPendingIssues, variables )
+		return this.sendRequest( await this.queries.searchPendingIssues, variables )
 			.then( async data => {
 				const pendingIssues = this.parsePendingIssues( data.search );
 
@@ -253,7 +258,7 @@ module.exports = class GitHubRepository {
 	/**
 	 * Fetches all timeline items for provided issue or pull request.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to fetch timeline items.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to fetch timeline items.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<Array.<TimelineItem>>}
 	 */
@@ -263,7 +268,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.getIssueOrPullRequestTimelineItems, variables )
+		return this.sendRequest( await this.queries.getIssueOrPullRequestTimelineItems, variables )
 			.then( async data => {
 				pageInfo = data.node.timelineItems.pageInfo;
 
@@ -285,8 +290,8 @@ module.exports = class GitHubRepository {
 	/**
 	 * Adds new comment to the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to add new comment.
-	 * @param {String} comment Comment to add.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to add new comment.
+	 * @param {string} comment Comment to add.
 	 * @returns {Promise}
 	 */
 	async addComment( nodeId, comment ) {
@@ -295,7 +300,7 @@ module.exports = class GitHubRepository {
 			comment
 		};
 
-		return this.sendRequest( await queries.addComment, variables )
+		return this.sendRequest( await this.queries.addComment, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#addComment()".', error );
 
@@ -306,9 +311,9 @@ module.exports = class GitHubRepository {
 	/**
 	 * Fetches the specified labels from GitHub.
 	 *
-	 * @param {String} repositorySlug Identifies the repository, where the provided labels exist.
-	 * @param {Array.<String>} labelNames Label names to fetch.
-	 * @returns {Promise.<Array.<String>>}
+	 * @param {string} repositorySlug Identifies the repository, where the provided labels exist.
+	 * @param {Array.<string>} labelNames Label names to fetch.
+	 * @returns {Promise.<Array.<string>>}
 	 */
 	async getLabels( repositorySlug, labelNames ) {
 		if ( !labelNames.length ) {
@@ -322,7 +327,7 @@ module.exports = class GitHubRepository {
 			labelNames: labelNames.join( ' ' )
 		};
 
-		return this.sendRequest( await queries.getLabels, variables )
+		return this.sendRequest( await this.queries.getLabels, variables )
 			.then( data => {
 				return data.repository.labels.nodes
 					// Additional filtering is needed, because GitHub endpoint may return many more results than match the query.
@@ -339,8 +344,8 @@ module.exports = class GitHubRepository {
 	/**
 	 * Adds new labels to the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to add labels.
-	 * @param {Array.<String>} labelIds Labels to add.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to add labels.
+	 * @param {Array.<string>} labelIds Labels to add.
 	 * @returns {Promise}
 	 */
 	async addLabels( nodeId, labelIds ) {
@@ -349,7 +354,7 @@ module.exports = class GitHubRepository {
 			labelIds
 		};
 
-		return this.sendRequest( await queries.addLabels, variables )
+		return this.sendRequest( await this.queries.addLabels, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#addLabels()".', error );
 
@@ -360,8 +365,8 @@ module.exports = class GitHubRepository {
 	/**
 	 * Removes labels from the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to remove labels.
-	 * @param {Array.<String>} labelIds Labels to remove.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to remove labels.
+	 * @param {Array.<string>} labelIds Labels to remove.
 	 * @returns {Promise}
 	 */
 	async removeLabels( nodeId, labelIds ) {
@@ -370,7 +375,7 @@ module.exports = class GitHubRepository {
 			labelIds
 		};
 
-		return this.sendRequest( await queries.removeLabels, variables )
+		return this.sendRequest( await this.queries.removeLabels, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#removeLabels()".', error );
 
@@ -382,7 +387,7 @@ module.exports = class GitHubRepository {
 	 * Closes issue or pull request.
 	 *
 	 * @param {'Issue'|'PullRequest'} type Type of resource to close.
-	 * @param {String} nodeId Issue or pull request identifier to close.
+	 * @param {string} nodeId Issue or pull request identifier to close.
 	 * @returns {Promise}
 	 */
 	async closeIssueOrPullRequest( type, nodeId ) {
@@ -390,7 +395,7 @@ module.exports = class GitHubRepository {
 			nodeId
 		};
 
-		const query = type === 'Issue' ? await queries.closeIssue : await queries.closePullRequest;
+		const query = type === 'Issue' ? await this.queries.closeIssue : await this.queries.closePullRequest;
 
 		return this.sendRequest( query, variables )
 			.catch( error => {
@@ -404,10 +409,10 @@ module.exports = class GitHubRepository {
 	 * Prepares the page pointers and search options for the next search request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @param {Options} options Configuration options.
 	 * @param {PageInfo} pageInfo Describes the current page of the returned result.
-	 * @returns {Object} result
+	 * @returns {object} result
 	 * @returns {PageInfo} result.nextPageInfo
 	 * @returns {Options} result.nextOptions
 	 */
@@ -452,7 +457,7 @@ module.exports = class GitHubRepository {
 	 * initial request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Promise.<Array.<IssueOrPullRequest>>}
 	 */
 	parseIssuesOrPullRequests( data ) {
@@ -479,7 +484,7 @@ module.exports = class GitHubRepository {
 	 * Parses the received array of timeline items for an issue or pull request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Array.<TimelineItem>}
 	 */
 	parseIssueOrPullRequestTimelineItems( data ) {
@@ -509,7 +514,7 @@ module.exports = class GitHubRepository {
 	 * initial request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Array.<PendingIssue>}
 	 */
 	parsePendingIssues( data ) {
@@ -532,9 +537,9 @@ module.exports = class GitHubRepository {
 	 * Then, the request is sent again.
 	 *
 	 * @private
-	 * @param {String} query The GraphQL query to send.
-	 * @param {Object} [variables={}] Variables required by the GraphQL query.
-	 * @returns {Promise.<Object>}
+	 * @param {string} query The GraphQL query to send.
+	 * @param {object} [variables={}] Variables required by the GraphQL query.
+	 * @returns {Promise.<object>}
 	 */
 	async sendRequest( query, variables = {} ) {
 		return this.graphql.request( query, variables )
@@ -556,13 +561,13 @@ module.exports = class GitHubRepository {
 				return Promise.reject( error );
 			} );
 	}
-};
+}
 
 /**
  * Reads the GraphQL query from filesystem.
  *
- * @param {String} queryName Filename of the GraphQL query to read.
- * @returns {Promise.<String>}
+ * @param {string} queryName Filename of the GraphQL query to read.
+ * @returns {Promise.<string>}
  */
 function readGraphQL( queryName ) {
 	return fs.readFile( upath.join( GRAPHQL_PATH, `${ queryName }.graphql` ), 'utf-8' );
@@ -572,7 +577,7 @@ function readGraphQL( queryName ) {
  * Parses the received error from GitHub API and checks if it concerns exceeding the API rate limit. If yes, it returns information when the
  * rate limit will be reset.
  *
- * @param {Object} error An error that was received from the GitHub API.
+ * @param {object} error An error that was received from the GitHub API.
  * @returns {RateLimitExceeded}
  */
 function checkApiRateLimit( error ) {
@@ -627,69 +632,69 @@ function mapNodeToResult( node ) {
 }
 
 /**
- * @typedef {Object} TimelineItem
- * @property {String} eventDate
- * @property {String} [author]
- * @property {String} [label]
+ * @typedef {object} TimelineItem
+ * @property {string} eventDate
+ * @property {string} [author]
+ * @property {string} [label]
  */
 
 /**
- * @typedef {Object} Comment
- * @property {String} createdAt
- * @property {Boolean} isExternal
+ * @typedef {object} Comment
+ * @property {string} createdAt
+ * @property {boolean} isExternal
  */
 
 /**
- * @typedef {Object} IssueOrPullRequest
- * @property {String} id
+ * @typedef {object} IssueOrPullRequest
+ * @property {string} id
  * @property {'Issue'|'PullRequest'} type
- * @property {Number} number
- * @property {String} title
- * @property {String} url
- * @property {String} createdAt
- * @property {String|null} lastEditedAt
- * @property {String|null} lastReactedAt
+ * @property {number} number
+ * @property {string} title
+ * @property {string} url
+ * @property {string} createdAt
+ * @property {string|null} lastEditedAt
+ * @property {string|null} lastReactedAt
  * @property {Array.<TimelineItem>} timelineItems
  */
 
 /**
- * @typedef {Object} PendingIssue
- * @property {String} id
+ * @typedef {object} PendingIssue
+ * @property {string} id
  * @property {'Issue'} type
- * @property {String} title
- * @property {String} url
- * @property {Array.<String>} labels
+ * @property {string} title
+ * @property {string} url
+ * @property {Array.<string>} labels
  * @property {Comment|null} lastComment
  */
 
 /**
- * @typedef {Object} IssueOrPullRequestResult
- * @property {String} id
+ * @typedef {object} IssueOrPullRequestResult
+ * @property {string} id
  * @property {'Issue'|'PullRequest'} type
- * @property {String} url
- * @property {String} title
+ * @property {string} url
+ * @property {string} title
  */
 
 /**
- * @typedef {Object} PageInfo
- * @property {Boolean} [hasNextPage]
- * @property {String} [cursor]
- * @property {Number} [done]
- * @property {Number} [total]
+ * @typedef {object} PageInfo
+ * @property {boolean} [hasNextPage]
+ * @property {string} [cursor]
+ * @property {number} [done]
+ * @property {number} [total]
  */
 
 /**
- * @typedef {Object} Logger
+ * @typedef {object} Logger
  * @property {Function} info
  * @property {Function} warning
  * @property {Function} error
  */
 
 /**
- * @typedef {Object} RateLimitExceeded
- * @property {Boolean} isExceeded
- * @property {String} [resetDate]
- * @property {Number} [timeToWait]
+ * @typedef {object} RateLimitExceeded
+ * @property {boolean} isExceeded
+ * @property {string} [resetDate]
+ * @property {number} [timeToWait]
  */
 
 /**
@@ -697,7 +702,7 @@ function mapNodeToResult( node ) {
  */
 
 /**
- * @typedef {Object} SearchStaleIssuesOrPullRequestsResult
+ * @typedef {object} SearchStaleIssuesOrPullRequestsResult
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
  */

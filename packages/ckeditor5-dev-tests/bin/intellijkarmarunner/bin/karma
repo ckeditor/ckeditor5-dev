@@ -33,4 +33,4 @@ const intellijConfig = process.argv.find( item => item.includes( 'intellij.conf.
 process.argv.push( '--karma-config-overrides=' + intellijConfig );
 
 // Now running the tests.
-require( '../../testautomated' );
+import(  '../../testautomated.js' );

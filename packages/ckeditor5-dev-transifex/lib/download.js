@@ -3,18 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const chalk = require( 'chalk' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-translations' );
-const transifexService = require( './transifexservice' );
-const { verifyProperties, createLogger } = require( './utils' );
-const languageCodeMap = require( './languagecodemap.json' );
-
-const logger = createLogger();
+import path from 'path';
+import fs from 'fs-extra';
+import chalk from 'chalk';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { cleanPoFileContent, createDictionaryFromPoFileContent } from '@ckeditor/ckeditor5-dev-translations';
+import transifexService from './transifexservice.js';
+import { verifyProperties, createLogger } from './utils.js';
+import { languageCodeMap } from './data/index.js';
 
 /**
  * Downloads translations from the Transifex for each localizable package. It creates `*.po` files out of the translations and replaces old
@@ -22,18 +18,20 @@ const logger = createLogger();
  * file is created, containing information about the packages and languages for which the translations could not be downloaded. This file is
  * then used next time this script is run: it will try to download translations only for packages and languages that failed previously.
  *
- * @param {Object} config
- * @param {String} config.organizationName Name of the organization to which the project belongs.
- * @param {String} config.projectName Name of the project for downloading the translations.
- * @param {String} config.token Token to the Transifex API.
- * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
+ * @param {object} config
+ * @param {string} config.organizationName Name of the organization to which the project belongs.
+ * @param {string} config.projectName Name of the project for downloading the translations.
+ * @param {string} config.token Token to the Transifex API.
+ * @param {Map.<string, string>} config.packages A resource name -> package path map for which translations should be downloaded.
  * The resource name must be the same as the name used in the Transifex service. The package path could be any local path fragment, where
  * the downloaded translation will be stored. The final path for storing the translations is a combination of the `config.cwd` with the
  * mentioned package path and the `lang/translations` subdirectory.
- * @param {String} config.cwd Current work directory.
- * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
+ * @param {string} config.cwd Current work directory.
+ * @param {boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
-module.exports = async function downloadTranslations( config ) {
+export default async function downloadTranslations( config ) {
+	const logger = createLogger();
+
 	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 
 	transifexService.init( config.token );
@@ -106,7 +104,7 @@ module.exports = async function downloadTranslations( config ) {
 	} else {
 		logger.progress( 'Saved all translations.' );
 	}
-};
+}
 
 /**
  * Saves all valid translations on the filesystem. For each translation entry:
@@ -115,11 +113,11 @@ module.exports = async function downloadTranslations( config ) {
  * (2) Check if the language code should be mapped to another string on the filesystem.
  * (3) Prepare the translation for storing on the filesystem: remove personal data and add a banner with information how to contribute.
  *
- * @param {Object} config
- * @param {String} config.pathToTranslations Path to translations.
- * @param {Map.<String,String>} config.translations The translation map: language code -> translation content.
- * @param {Boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
- * @returns {Number} Number of saved files.
+ * @param {object} config
+ * @param {string} config.pathToTranslations Path to translations.
+ * @param {Map.<string, string>} config.translations The translation map: language code -> translation content.
+ * @param {boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
+ * @returns {number} Number of saved files.
  */
 function saveNewTranslations( { pathToTranslations, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
@@ -151,13 +149,13 @@ function saveNewTranslations( { pathToTranslations, translations, simplifyLicens
  * (1) If previous download procedure ended successfully, all translations for all resources will be downloaded.
  * (2) Otherwise, only packages and their failed translation downloads defined in `.transifex-failed-downloads.json` are taken into account.
  *
- * @param {Object} config
- * @param {String} config.cwd Current work directory.
- * @param {Array.<Object>} config.resources All found resource instances for which translations could be downloaded.
- * @param {Array.<Object>} config.languages All found language instances in the project.
- * @returns {Object} result
- * @returns {Boolean} result.isFailedDownloadFileAvailable Indicates whether previous download procedure did not fetch all translations.
- * @returns {Array.<Object>} result.resourcesToProcess Resource instances and their associated language instances to use during downloading
+ * @param {object} config
+ * @param {string} config.cwd Current work directory.
+ * @param {Array.<object>} config.resources All found resource instances for which translations could be downloaded.
+ * @param {Array.<object>} config.languages All found language instances in the project.
+ * @returns {object} result
+ * @returns {boolean} result.isFailedDownloadFileAvailable Indicates whether previous download procedure did not fetch all translations.
+ * @returns {Array.<object>} result.resourcesToProcess Resource instances and their associated language instances to use during downloading
  * the translations.
  */
 function getResourcesToProcess( { cwd, resources, languages } ) {
@@ -195,9 +193,9 @@ function getResourcesToProcess( { cwd, resources, languages } ) {
 /**
  * Saves all the failed downloads to `.transifex-failed-downloads.json` file. If there are no failures, the file is removed.
  *
- * @param {Object} config
- * @param {String} config.cwd Current work directory.
- * @param {Array.<Object>} config.failedDownloads Collection of all the failed downloads.
+ * @param {object} config
+ * @param {string} config.cwd Current work directory.
+ * @param {Array.<object>} config.failedDownloads Collection of all the failed downloads.
  */
 function updateFailedDownloads( { cwd, failedDownloads } ) {
 	const pathToFailedDownloads = getPathToFailedDownloads( cwd );
@@ -226,8 +224,8 @@ function updateFailedDownloads( { cwd, failedDownloads } ) {
 /**
  * Checks if the received data is a translation.
  *
- * @param {String} poFileContent Received data.
- * @returns {Boolean}
+ * @param {string} poFileContent Received data.
+ * @returns {boolean}
  */
 function isPoFileContainingTranslations( poFileContent ) {
 	const translations = createDictionaryFromPoFileContent( poFileContent );
@@ -239,8 +237,8 @@ function isPoFileContainingTranslations( poFileContent ) {
 /**
  * Returns an absolute path to the file containing failed downloads.
  *
- * @param {String} cwd Current working directory.
- * @returns {String}
+ * @param {string} cwd Current working directory.
+ * @returns {string}
  */
 function getPathToFailedDownloads( cwd ) {
 	return path.join( cwd, '.transifex-failed-downloads.json' );

@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "43.0.0",
+  "version": "44.0.0-alpha.5",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -16,42 +16,40 @@
     "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
+  "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^43.0.0",
-    "@octokit/rest": "^19.0.0",
-    "chalk": "^4.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^44.0.0-alpha.5",
+    "@octokit/rest": "^21.0.0",
+    "chalk": "^5.0.0",
     "cli-columns": "^4.0.0",
     "compare-func": "^2.0.0",
     "concat-stream": "^2.0.0",
-    "conventional-changelog-writer": "^6.0.0",
-    "conventional-commits-filter": "^3.0.0",
-    "conventional-commits-parser": "^4.0.0",
-    "date-fns": "^2.30.0",
-    "fs-extra": "^11.2.0",
-    "git-raw-commits": "^3.0.0",
-    "glob": "^10.2.5",
-    "inquirer": "^7.1.0",
-    "lodash": "^4.17.15",
-    "minimatch": "^3.0.4",
-    "semver": "^7.5.3",
+    "conventional-changelog-writer": "^8.0.0",
+    "conventional-commits-filter": "^5.0.0",
+    "conventional-commits-parser": "^6.0.0",
+    "date-fns": "^4.0.0",
+    "fs-extra": "^11.0.0",
+    "git-raw-commits": "^5.0.0",
+    "glob": "^10.0.0",
+    "inquirer": "^11.0.0",
+    "lodash-es": "^4.17.21",
+    "minimatch": "^9.0.0",
+    "semver": "^7.6.3",
     "shell-escape": "^0.2.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "jest-extended": "^4.0.2",
+    "vitest": "^2.0.5",
     "handlebars": "^4.7.6",
-    "mocha": "^7.1.2",
-    "mockery": "^2.1.0",
-    "mock-fs": "^5.1.2",
-    "proxyquire": "^2.1.3",
-    "sinon": "^9.2.4"
+    "mock-fs": "^5.2.0"
   },
   "scripts": {
-    "test": "mocha './tests/**/*.js' --timeout 10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+    "test": "vitest run --config vitest.config.js",
+    "coverage": "vitest run --config vitest.config.js --coverage"
   }
 }

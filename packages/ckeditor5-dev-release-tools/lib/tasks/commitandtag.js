@@ -3,23 +3,23 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import upath from 'upath';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { glob } from 'glob';
+import shellEscape from 'shell-escape';
 
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const { toUnix } = require( 'upath' );
-const { glob } = require( 'glob' );
-const shellEscape = require( 'shell-escape' );
+const { toUnix } = upath;
 
 /**
  * Creates a commit and a tag for specified version.
  *
- * @param {Object} options
- * @param {String} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
- * @param {Array.<String>} options.files Array of glob patterns for files to be added to the release commit.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {object} options
+ * @param {string} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
+ * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function commitAndTag( { version, files, cwd = process.cwd() } ) {
+export default async function commitAndTag( { version, files, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
@@ -38,7 +38,11 @@ module.exports = async function commitAndTag( { version, files, cwd = process.cw
 		await tools.shExec( `git add ${ shellEscape( [ filePath ] ) }`, shExecOptions );
 	}
 
-	const escapedVersion = shellEscape( [ version ] );
-	await tools.shExec( `git commit --message "Release: v${ escapedVersion }." --no-verify`, shExecOptions );
-	await tools.shExec( `git tag v${ escapedVersion }`, shExecOptions );
-};
+	const escapedVersion = {
+		commit: shellEscape( [ `Release: v${ version }.` ] ),
+		tag: shellEscape( [ `v${ version }` ] )
+	};
+
+	await tools.shExec( `git commit --message ${ escapedVersion.commit } --no-verify`, shExecOptions );
+	await tools.shExec( `git tag ${ escapedVersion.tag }`, shExecOptions );
+}

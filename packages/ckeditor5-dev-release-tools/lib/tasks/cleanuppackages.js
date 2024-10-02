@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import { glob } from 'glob';
 
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
@@ -21,15 +19,15 @@ const { glob } = require( 'glob' );
  *   - file pointed by the `types` field from `package.json`
  * - Removes unnecessary fields from the `package.json` file.
  *
- * @param {Object} options
- * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
- * @param {Array.<String>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`.
+ * @param {object} options
+ * @param {string} options.packagesDirectory Relative path to a location of packages to be cleaned up.
+ * @param {Array.<string>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`.
  * If not set, a predefined list is used. If the callback is used, the first argument is the list with defaults.
- * @param {Boolean} [options.preservePostInstallHook] Whether to preserve the postinstall hook in `package.json`.
- * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
+ * @param {boolean} [options.preservePostInstallHook] Whether to preserve the postinstall hook in `package.json`.
+ * @param {string} [options.cwd] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function cleanUpPackages( options ) {
+export default async function cleanUpPackages( options ) {
 	const { packagesDirectory, packageJsonFieldsToRemove, preservePostInstallHook, cwd } = parseOptions( options );
 
 	const packageJsonPaths = await glob( '*/package.json', {
@@ -47,17 +45,17 @@ module.exports = async function cleanUpPackages( options ) {
 
 		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
 	}
-};
+}
 
 /**
  * Prepares the configuration options for the script.
  *
- * @param {Object} options
- * @param {String} options.packagesDirectory
- * @param {Array.<String>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove=DefaultFieldsToRemove]
- * @param {Boolean} [options.preservePostInstallHook]
- * @param {String} [options.cwd=process.cwd()]
- * @returns {Object}
+ * @param {object} options
+ * @param {string} options.packagesDirectory
+ * @param {Array.<string>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove=DefaultFieldsToRemove]
+ * @param {boolean} [options.preservePostInstallHook]
+ * @param {string} [options.cwd=process.cwd()]
+ * @returns {object}
  */
 function parseOptions( options ) {
 	const defaultPackageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ];
@@ -81,8 +79,8 @@ function parseOptions( options ) {
 /**
  * Removes unnecessary files and directories from the package directory.
  *
- * @param {Object} packageJson
- * @param {String} packagePath
+ * @param {object} packageJson
+ * @param {string} packagePath
  * @returns {Promise}
  */
 async function cleanUpPackageDirectory( packageJson, packagePath ) {
@@ -131,8 +129,8 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 /**
  * Creates an array of patterns to ignore for the `glob` calls.
  *
- * @param {Object} packageJson
- * @returns {Array.<String>}
+ * @param {object} packageJson
+ * @returns {Array.<string>}
  */
 function getIgnoredFilePatterns( packageJson ) {
 	// The patterns supported by `package.json` in the `files` field do not correspond 1:1 to the patterns expected by the `glob`.
@@ -157,9 +155,9 @@ function getIgnoredFilePatterns( packageJson ) {
 /**
  * Removes unnecessary fields from the `package.json`.
  *
- * @param {Object} packageJson
- * @param {Array.<String>} packageJsonFieldsToRemove
- * @param {Boolean} preservePostInstallHook
+ * @param {object} packageJson
+ * @param {Array.<string>} packageJsonFieldsToRemove
+ * @param {boolean} preservePostInstallHook
  */
 function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook ) {
 	for ( const key of Object.keys( packageJson ) ) {
@@ -178,9 +176,9 @@ function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePos
 /**
  * Sort function that defines the order of the paths. It sorts paths from the most nested ones first.
  *
- * @param {String} firstPath
- * @param {String} secondPath
- * @returns {Number}
+ * @param {string} firstPath
+ * @param {string} secondPath
+ * @returns {number}
  */
 function sortPathsFromDeepestFirst( firstPath, secondPath ) {
 	const firstPathSegments = firstPath.split( '/' ).length;
@@ -196,5 +194,5 @@ function sortPathsFromDeepestFirst( firstPath, secondPath ) {
 /**
  * @callback PackageJsonFieldsToRemoveCallback
  * @param {DefaultFieldsToRemove} defaults
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */

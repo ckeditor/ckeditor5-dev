@@ -3,22 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { Octokit } = require( '@octokit/rest' );
-const getJobApprover = require( './utils/get-job-approver' );
+import { Octokit } from '@octokit/rest';
+import getJobApprover from './utils/get-job-approver.js';
 
 /**
  * @param options
- * @param {String} options.circleToken
- * @param {String} options.circleWorkflowId
- * @param {String} options.circleApprovalJobName
- * @param {String} options.githubOrganization
- * @param {String} options.githubTeamSlug
- * @param {String} options.githubToken
- * @return {Promise.<Boolean>}
+ * @param {string} options.circleToken
+ * @param {string} options.circleWorkflowId
+ * @param {string} options.circleApprovalJobName
+ * @param {string} options.githubOrganization
+ * @param {string} options.githubTeamSlug
+ * @param {string} options.githubToken
+ * @returns {Promise.<boolean>}
  */
-module.exports = async function isJobTriggeredByMember( options ) {
+export default async function isJobTriggeredByMember( options ) {
 	const {
 		circleToken,
 		circleWorkflowId,
@@ -41,4 +39,4 @@ module.exports = async function isJobTriggeredByMember( options ) {
 	return data
 		.map( ( { login } ) => login )
 		.includes( login );
-};
+}

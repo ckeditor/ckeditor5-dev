@@ -5,7 +5,7 @@
 
 const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
-const glob = require( 'fast-glob' );
+const { glob } = require( 'glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );

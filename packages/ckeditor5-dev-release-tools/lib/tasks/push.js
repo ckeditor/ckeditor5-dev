@@ -3,21 +3,19 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const shellEscape = require( 'shell-escape' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
 
 /**
  * Push the local changes to a remote server.
  *
- * @param {Object} options
- * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
- * @param {String} options.version Name of tag connected with the release.
- * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
+ * @param {object} options
+ * @param {string} options.releaseBranch A name of the branch that should be used for releasing packages.
+ * @param {string} options.version Name of tag connected with the release.
+ * @param {string} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
  * @returns {Promise}
  */
-module.exports = async function push( options ) {
+export default async function push( options ) {
 	const {
 		releaseBranch,
 		version,
@@ -27,4 +25,4 @@ module.exports = async function push( options ) {
 	const command = `git push origin ${ shellEscape( [ releaseBranch ] ) } v${ shellEscape( [ version ] ) }`;
 
 	return tools.shExec( command, { cwd, verbosity: 'error', async: true } );
-};
+}

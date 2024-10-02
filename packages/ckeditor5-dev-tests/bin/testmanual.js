@@ -5,11 +5,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const path = require( 'path' );
-const tests = require( '../lib/index' );
+import chalk from 'chalk';
+import path from 'path';
+import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
@@ -26,5 +24,5 @@ tests.runManualTests( options )
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
 
-		console.log( chalk.red( error ) );
+		console.log( chalk.red( error.stack ) );
 	} );

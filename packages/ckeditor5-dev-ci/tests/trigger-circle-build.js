@@ -3,37 +3,19 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import triggerCircleBuild from '../lib/trigger-circle-build.js';
 
 describe( 'lib/triggerCircleBuild', () => {
-	let stubs, triggerCircleBuild;
+	let fetchMock;
 
 	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			fetch: sinon.stub()
-		};
-
-		mockery.registerMock( 'node-fetch', stubs.fetch );
-
-		triggerCircleBuild = require( '../lib/trigger-circle-build' );
-	} );
-
-	afterEach( () => {
-		mockery.disable();
+		fetchMock = vi.fn();
+		vi.stubGlobal( 'fetch', fetchMock );
 	} );
 
 	it( 'should send a POST request to the CircleCI service', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -46,24 +28,28 @@ describe( 'lib/triggerCircleBuild', () => {
 			repositorySlug: 'ckeditor/ckeditor5-dev'
 		} );
 
-		expect( stubs.fetch.callCount ).to.equal( 1 );
-
-		const [ url, options ] = stubs.fetch.firstCall.args;
-
-		expect( url ).to.equal( 'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline' );
-		expect( options ).to.have.property( 'method', 'post' );
-		expect( options ).to.have.property( 'headers' );
-		expect( options.headers ).to.have.property( 'Circle-Token', 'circle-token' );
-		expect( options ).to.have.property( 'body' );
-
-		const body = JSON.parse( options.body );
-		expect( body ).to.have.property( 'branch', 'master' );
-		expect( body ).to.have.property( 'parameters' );
-		expect( body.parameters ).to.have.property( 'triggerCommitHash', 'abcd1234' );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					branch: 'master',
+					parameters: {
+						triggerCommitHash: 'abcd1234'
+					}
+				} )
+			}
+		);
 	} );
 
 	it( 'should include the "isRelease=true" parameter when passing the `releaseBranch` option (the same release branch)', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -77,19 +63,29 @@ describe( 'lib/triggerCircleBuild', () => {
 			releaseBranch: 'master'
 		} );
 
-		expect( stubs.fetch.callCount ).to.equal( 1 );
-
-		const [ , options ] = stubs.fetch.firstCall.args;
-
-		expect( options ).to.have.property( 'body' );
-
-		const body = JSON.parse( options.body );
-		expect( body ).to.have.property( 'parameters' );
-		expect( body.parameters ).to.have.property( 'isRelease', true );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					branch: 'master',
+					parameters: {
+						triggerCommitHash: 'abcd1234',
+						isRelease: true
+					}
+				} )
+			}
+		);
 	} );
 
 	it( 'should include the "isRelease=false" parameter when passing the `releaseBranch` option', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -103,19 +99,29 @@ describe( 'lib/triggerCircleBuild', () => {
 			releaseBranch: 'release'
 		} );
 
-		expect( stubs.fetch.callCount ).to.equal( 1 );
-
-		const [ , options ] = stubs.fetch.firstCall.args;
-
-		expect( options ).to.have.property( 'body' );
-
-		const body = JSON.parse( options.body );
-		expect( body ).to.have.property( 'parameters' );
-		expect( body.parameters ).to.have.property( 'isRelease', false );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					branch: 'master',
+					parameters: {
+						triggerCommitHash: 'abcd1234',
+						isRelease: false
+					}
+				} )
+			}
+		);
 	} );
 
 	it( 'should include the "triggerRepositorySlug" parameter when passing the `releaseBranch` option', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -129,19 +135,29 @@ describe( 'lib/triggerCircleBuild', () => {
 			triggerRepositorySlug: 'ckeditor/ckeditor5'
 		} );
 
-		expect( stubs.fetch.callCount ).to.equal( 1 );
-
-		const [ , options ] = stubs.fetch.firstCall.args;
-
-		expect( options ).to.have.property( 'body' );
-
-		const body = JSON.parse( options.body );
-		expect( body ).to.have.property( 'parameters' );
-		expect( body.parameters ).to.have.property( 'triggerRepositorySlug', 'ckeditor/ckeditor5' );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					branch: 'master',
+					parameters: {
+						triggerCommitHash: 'abcd1234',
+						triggerRepositorySlug: 'ckeditor/ckeditor5'
+					}
+				} )
+			}
+		);
 	} );
 
 	it( 'should reject a promise when CircleCI responds with an error containing error_message property', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: 'HTTP 404'
 			} )
@@ -164,7 +180,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should reject a promise when CircleCI responds with an error containing message property', async () => {
-		stubs.fetch.resolves( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				message: 'HTTP 404'
 			} )

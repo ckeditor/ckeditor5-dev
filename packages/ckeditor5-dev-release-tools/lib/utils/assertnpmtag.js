@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const semver = require( 'semver' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import semver from 'semver';
 
 /**
  * Checks if the npm tag matches the tag calculated from the package version. Verification takes place for all packages.
  *
- * @param {Array.<String>} packagePaths
- * @param {String} npmTag
+ * @param {Array.<string>} packagePaths
+ * @param {string} npmTag
  * @returns {Promise}
  */
-module.exports = async function assertNpmTag( packagePaths, npmTag ) {
+export default async function assertNpmTag( packagePaths, npmTag ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
@@ -38,7 +36,7 @@ module.exports = async function assertNpmTag( packagePaths, npmTag ) {
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-};
+}
 
 /**
  * Returns the version tag for the package.
@@ -46,8 +44,8 @@ module.exports = async function assertNpmTag( packagePaths, npmTag ) {
  * For the official release, returns the "latest" tag. For a non-official release (pre-release), returns the version tag extracted from
  * the package version.
  *
- * @param {String} version
- * @returns {String}
+ * @param {string} version
+ * @returns {string}
  */
 function getVersionTag( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];

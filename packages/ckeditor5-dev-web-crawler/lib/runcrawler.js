@@ -7,14 +7,14 @@
 
 /* eslint-env node */
 
-const puppeteer = require( 'puppeteer' );
-const chalk = require( 'chalk' );
-const util = require( 'util' );
-const stripAnsiEscapeCodes = require( 'strip-ansi' );
-const { getBaseUrl, toArray } = require( './utils' );
-const { createSpinner, getProgressHandler } = require( './spinner' );
+import puppeteer from 'puppeteer';
+import chalk from 'chalk';
+import util from 'util';
+import stripAnsiEscapeCodes from 'strip-ansi';
+import { getBaseUrl, toArray } from './utils.js';
+import { createSpinner, getProgressHandler } from './spinner.js';
 
-const {
+import {
 	DEFAULT_TIMEOUT,
 	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
 	DEFAULT_REMAINING_ATTEMPTS,
@@ -23,7 +23,7 @@ const {
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
 	DATA_ATTRIBUTE_NAME
-} = require( './constants' );
+} from './constants.js';
 
 /**
  * Main crawler function. Its purpose is to:
@@ -31,18 +31,18 @@ const {
  * - open simultaneously (up to concurrency limit) links from the provided URL in a dedicated Puppeteer's page for each link,
  * - show error summary after all links have been visited.
  *
- * @param {Object} options Parsed CLI arguments.
- * @param {String} options.url The URL to start crawling. This argument is required.
- * @param {Number} [options.depth=Infinity] Defines how many nested page levels should be examined. Infinity by default.
- * @param {Array.<String>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @param {Number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
- * @param {Boolean} [options.quit=false] Terminates the scan as soon as an error is found. False (off) by default.
- * @param {Boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
- * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
- * @param {Boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
+ * @param {object} options Parsed CLI arguments.
+ * @param {string} options.url The URL to start crawling. This argument is required.
+ * @param {number} [options.depth=Infinity] Defines how many nested page levels should be examined. Infinity by default.
+ * @param {Array.<string>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
+ * @param {number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
+ * @param {boolean} [options.quit=false] Terminates the scan as soon as an error is found. False (off) by default.
+ * @param {boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
+ * @param {boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
-module.exports = async function runCrawler( options ) {
+export default async function runCrawler( options ) {
 	const {
 		url,
 		depth = Infinity,
@@ -101,16 +101,16 @@ module.exports = async function runCrawler( options ) {
 
 	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
 	process.exit( errors.size ? 1 : 0 );
-};
+}
 
 /**
  * Creates a new browser instance and closes the default blank page.
  *
- * @param {Object} options
- * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
- * @param {Boolean} [options.ignoreHTTPSErrors] Whether the browser should ignore invalid (self-signed) certificates.
+ * @param {object} options
+ * @param {boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {boolean} [options.ignoreHTTPSErrors] Whether the browser should ignore invalid (self-signed) certificates.
  *
- * @returns {Promise.<Object>} A promise, which resolves to the Puppeteer browser instance.
+ * @returns {Promise.<object>} A promise, which resolves to the Puppeteer browser instance.
  */
 async function createBrowser( options ) {
 	const browserOptions = {
@@ -129,10 +129,14 @@ async function createBrowser( options ) {
 
 	const browser = await puppeteer.launch( browserOptions );
 
-	const [ defaultBlankPage ] = await browser.pages();
+	// For unknown reasons, in order to be able to visit pages in Puppeteer on CI, we must close the default page that is opened when the
+	// browser starts.
+	if ( process.env.CI ) {
+		const [ defaultBlankPage ] = await browser.pages();
 
-	if ( defaultBlankPage ) {
-		await defaultBlankPage.close();
+		if ( defaultBlankPage ) {
+			await defaultBlankPage.close();
+		}
 	}
 
 	return browser;
@@ -176,16 +180,16 @@ function getErrorHandler( errors ) {
 /**
  * Searches and opens all found links in the document body from requested URL, recursively.
  *
- * @param {Object} browser The headless browser instance from Puppeteer.
- * @param {Object} data All data needed for crawling the links.
- * @param {String} data.baseUrl The base URL from the initial page URL.
+ * @param {object} browser The headless browser instance from Puppeteer.
+ * @param {object} data All data needed for crawling the links.
+ * @param {string} data.baseUrl The base URL from the initial page URL.
  * @param {Array.<Link>} data.linksQueue An array of link to crawl.
- * @param {Array.<String>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<String>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @param {Number} data.concurrency Number of concurrent pages (browser tabs) to be used during crawling.
- * @param {Boolean} data.quit Terminates the scan as soon as an error is found.
- * @param {Function} data.onError Callback called ever time an error has been found.
- * @param {Function} data.onProgress Callback called every time just before opening a new link.
+ * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
+ * @param {Array.<string>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
+ * @param {number} data.concurrency Number of concurrent pages (browser tabs) to be used during crawling.
+ * @param {boolean} data.quit Terminates the scan as soon as an error is found.
+ * @param {function} data.onError Callback called ever time an error has been found.
+ * @param {function} data.onProgress Callback called every time just before opening a new link.
  * @returns {Promise} Promise is resolved, when all links have been visited.
  */
 async function openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } ) {
@@ -250,12 +254,12 @@ async function openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions
  * excluded links are also skipped. If the requested traversing depth has been reached, nested links from this URL are not collected
  * anymore.
  *
- * @param {Object} browser The headless browser instance from Puppeteer.
- * @param {Object} data All data needed for crawling the link.
- * @param {String} data.baseUrl The base URL from the initial page URL.
+ * @param {object} browser The headless browser instance from Puppeteer.
+ * @param {object} data All data needed for crawling the link.
+ * @param {string} data.baseUrl The base URL from the initial page URL.
  * @param {Link} data.link A link to crawl.
- * @param {Array.<String>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<String>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
+ * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
+ * @param {Array.<string>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @returns {Promise.<ErrorsAndLinks>} A promise, which resolves to a collection of unique errors and links.
  */
 async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
@@ -326,12 +330,12 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 /**
  * Finds all links in opened page and filters out external, already discovered and explicitly excluded ones.
  *
- * @param {Object} page The page instance from Puppeteer.
- * @param {Object} data All data needed for crawling the link.
- * @param {String} data.baseUrl The base URL from the initial page URL.
- * @param {Array.<String>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<String>} data.exclusions An array patterns to exclude links. Empty array by default to not exclude anything.
- * @returns {Promise.<Array.<String>>} A promise, which resolves to an array of unique links.
+ * @param {object} page The page instance from Puppeteer.
+ * @param {object} data All data needed for crawling the link.
+ * @param {string} data.baseUrl The base URL from the initial page URL.
+ * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
+ * @param {Array.<string>} data.exclusions An array patterns to exclude links. Empty array by default to not exclude anything.
+ * @returns {Promise.<Array.<string>>} A promise, which resolves to an array of unique links.
  */
 async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
 	const evaluatePage = anchors => [ ...new Set( anchors
@@ -363,8 +367,8 @@ async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
 /**
  * Finds all meta tags, that contain a pattern to ignore errors, and then returns a map between error type and these patterns.
  *
- * @param {Object} page The page instance from Puppeteer.
- * @returns {Promise.<Map.<ErrorType, Set.<String>>>} A promise, which resolves to a map between an error type and a set of patterns.
+ * @param {object} page The page instance from Puppeteer.
+ * @returns {Promise.<Map.<ErrorType, Set.<string>>>} A promise, which resolves to a map between an error type and a set of patterns.
  */
 async function getErrorIgnorePatternsFromPage( page ) {
 	const metaTag = await page.$( `head > meta[name=${ META_TAG_NAME }]` );
@@ -412,7 +416,7 @@ async function getErrorIgnorePatternsFromPage( page ) {
  * Iterates over all found errors from given link and marks errors as ignored, if their message match the ignore pattern.
  *
  * @param {Array.<Error>} errors An array of errors to check.
- * @param {Map.<ErrorType, Set.<String>>} errorIgnorePatterns A map between an error type and a set of patterns.
+ * @param {Map.<ErrorType, Set.<string>>} errorIgnorePatterns A map between an error type and a set of patterns.
  */
 function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 	errors.forEach( error => {
@@ -449,11 +453,11 @@ function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 /**
  * Creates a new page in Puppeteer's browser instance.
  *
- * @param {Object} browser The headless browser instance from Puppeteer.
- * @param {Object} data All data needed for creating a new page.
+ * @param {object} browser The headless browser instance from Puppeteer.
+ * @param {object} data All data needed for creating a new page.
  * @param {Link} data.link A link to crawl.
- * @param {Function} data.onError Callback called every time just before opening a new link.
- * @returns {Promise.<Object>} A promise, which resolves to the page instance from Puppeteer.
+ * @param {function} data.onError Callback called every time just before opening a new link.
+ * @returns {Promise.<object>} A promise, which resolves to the page instance from Puppeteer.
  */
 async function createPage( browser, { link, onError } ) {
 	const page = await browser.newPage();
@@ -474,7 +478,7 @@ async function createPage( browser, { link, onError } ) {
 /**
  * Dismisses any dialogs (alert, prompt, confirm, beforeunload) that could be displayed on page load.
  *
- * @param {Object} page The page instance from Puppeteer.
+ * @param {object} page The page instance from Puppeteer.
  */
 function dismissDialogs( page ) {
 	page.on( 'dialog', async dialog => {
@@ -485,10 +489,10 @@ function dismissDialogs( page ) {
 /**
  * Registers all error handlers on given page instance.
  *
- * @param {Object} page The page instance from Puppeteer.
- * @param {Object} data All data needed for registering error handlers.
+ * @param {object} page The page instance from Puppeteer.
+ * @param {object} data All data needed for registering error handlers.
  * @param {Link} data.link A link to crawl associated with Puppeteer's page.
- * @param {Function} data.onError Called each time an error has been found.
+ * @param {function} data.onError Called each time an error has been found.
  */
 function registerErrorHandlers( page, { link, onError } ) {
 	page.on( ERROR_TYPES.PAGE_CRASH.event, error => onError( {
@@ -573,9 +577,9 @@ function registerErrorHandlers( page, { link, onError } ) {
 			return argument;
 		};
 
-		const serializeArguments = argument => argument
-			.executionContext()
-			.evaluate( serializeArgumentInPageContext, argument );
+		const serializeArguments = argument => {
+			return argument.evaluate( serializeArgumentInPageContext, argument );
+		};
 
 		const serializedArguments = await Promise.all( message.args().map( serializeArguments ) );
 
@@ -605,8 +609,8 @@ function registerErrorHandlers( page, { link, onError } ) {
  * Checks, if HTTP request was a navigation one, i.e. request that is driving frame's navigation. Requests sent from child frames
  * (i.e. from <iframe>) are not treated as a navigation. Only a request from a top-level frame is navigation.
  *
- * @param {Object} request The Puppeteer's HTTP request instance.
- * @returns {Boolean}
+ * @param {object} request The Puppeteer's HTTP request instance.
+ * @returns {boolean}
  */
 function isNavigationRequest( request ) {
 	return request.isNavigationRequest() && request.frame().parentFrame() === null;
@@ -615,8 +619,8 @@ function isNavigationRequest( request ) {
 /**
  * Checks, if the page is not hung by trying to evaluate a function within the page context in defined time.
  *
- * @param {Object} page The page instance from Puppeteer.
- * @returns {Promise.<Boolean>}
+ * @param {object} page The page instance from Puppeteer.
+ * @returns {Promise.<boolean>}
  */
 async function isPageResponding( page ) {
 	return Promise.race( [
@@ -628,7 +632,7 @@ async function isPageResponding( page ) {
 /**
  * Registers a request interception procedure to explicitly block all 'media' requests (resources loaded by a <video> or <audio> elements).
  *
- * @param {Object} page The page instance from Puppeteer.
+ * @param {object} page The page instance from Puppeteer.
  * @returns {Promise} Promise is resolved, when the request interception procedure is registered.
  */
 async function registerRequestInterception( page ) {
@@ -689,42 +693,42 @@ function logErrors( errors ) {
 }
 
 /**
- * @typedef {Object.<String, String|Number>} Link
- * @property {String} url The URL associated with the link.
- * @property {String} parentUrl The page on which the link was found.
- * @property {Number} remainingNestedLevels The remaining number of nested levels to be checked. If this value is 0, the
+ * @typedef {Object.<string, String|Number>} Link
+ * @property {string} url The URL associated with the link.
+ * @property {string} parentUrl The page on which the link was found.
+ * @property {number} remainingNestedLevels The remaining number of nested levels to be checked. If this value is 0, the
  * requested traversing depth has been reached and nested links from the URL associated with this link are not collected anymore.
- * @property {Number} remainingAttempts The total number of reopenings allowed for the given link.
+ * @property {number} remainingAttempts The total number of reopenings allowed for the given link.
  */
 
 /**
- * @typedef {Object.<String, String>} ErrorType
- * @property {String} [event] The event name emitted by Puppeteer.
- * @property {String} description Human-readable description of the error.
+ * @typedef {Object.<string, String>} ErrorType
+ * @property {string} [event] The event name emitted by Puppeteer.
+ * @property {string} description Human-readable description of the error.
  */
 
 /**
- * @typedef {Object.<String, String|Boolean|ErrorType>} Error
- * @property {String} pageUrl The URL, where error has occurred.
+ * @typedef {Object.<string, String|Boolean|ErrorType>} Error
+ * @property {string} pageUrl The URL, where error has occurred.
  * @property {ErrorType} type Error type.
- * @property {String} message Error message.
- * @property {String} [failedResourceUrl] Full resource URL, that has failed. Necessary for matching against exclusion patterns.
- * @property {Boolean} [ignored] Indicates that error should be ignored, because its message matches the exclusion pattern.
+ * @property {string} message Error message.
+ * @property {string} [failedResourceUrl] Full resource URL, that has failed. Necessary for matching against exclusion patterns.
+ * @property {boolean} [ignored] Indicates that error should be ignored, because its message matches the exclusion pattern.
  */
 
 /**
- * @typedef {Object.<String, Set.<String>>} ErrorOccurrence
- * @property {Set.<String>} pages A set of unique pages, where error has been found.
- * @property {Set.<String>} [details] Additional error details (i.e. an error stack).
+ * @typedef {Object.<string, Set.<string>>} ErrorOccurrence
+ * @property {Set.<string>} pages A set of unique pages, where error has been found.
+ * @property {Set.<string>} [details] Additional error details (i.e. an error stack).
  */
 
 /**
- * @typedef {Map.<String, ErrorOccurrence>} ErrorCollection
+ * @typedef {Map.<string, ErrorOccurrence>} ErrorCollection
  * @property {ErrorOccurrence} [*] Error message.
  */
 
 /**
- * @typedef {Object.<String, Array.<String>>} ErrorsAndLinks Collection of unique errors and links.
- * @property {Array.<String>} errors An array of errors.
- * @property {Array.<String>} links An array of links.
+ * @typedef {Object.<string, Array.<string>>} ErrorsAndLinks Collection of unique errors and links.
+ * @property {Array.<string>} errors An array of errors.
+ * @property {Array.<string>} links An array of links.
  */

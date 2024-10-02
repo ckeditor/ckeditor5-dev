@@ -3,30 +3,35 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import webpack from 'webpack';
+import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
+import { loaders } from '@ckeditor/ckeditor5-dev-utils';
+import WebpackNotifierPlugin from './webpacknotifierplugin.js';
+import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
 
-const path = require( 'path' );
-const webpack = require( 'webpack' );
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
-const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
-const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
-const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
+
+const require = createRequire( import.meta.url );
 
 /**
- * @param {Object} options
- * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
- * @param {Boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
- * @param {Object} options.entries
- * @param {String} options.buildDir
- * @param {String} options.themePath
- * @param {Boolean} options.disableWatch
- * @param {String} [options.tsconfig]
- * @param {String} [options.language]
- * @param {Array.<String>} [options.additionalLanguages]
- * @param {String|null} [options.identityFile]
- * @returns {Object}
+ * @param {object} options
+ * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
+ * @param {boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
+ * @param {object} options.entries
+ * @param {string} options.buildDir
+ * @param {string} options.themePath
+ * @param {boolean} options.disableWatch
+ * @param {string} [options.tsconfig]
+ * @param {string} [options.language]
+ * @param {Array.<string>} [options.additionalLanguages]
+ * @param {string|null} [options.identityFile]
+ * @returns {object}
  */
-module.exports = function getWebpackConfigForManualTests( options ) {
+export default function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
 	const webpackConfig = {
@@ -149,5 +154,5 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	}
 
 	return webpackConfig;
-};
+}
 

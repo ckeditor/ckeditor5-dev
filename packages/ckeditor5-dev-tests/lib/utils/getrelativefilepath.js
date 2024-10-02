@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
+import path from 'path';
 
 /**
  * Get a path to a source file which will uniquely identify this file in
@@ -17,11 +15,11 @@ const path = require( 'path' );
  *   - /work/space/packages/ckeditor5-foo/tests/manual/foo.js -> ckeditor5-foo/tests/manual/foo.js
  *   - /work/space/packages/ckeditor-foo/tests/manual/foo.js -> ckeditor-foo/tests/manual/foo.js
  *
- * @param {String} filePath
- * @param {String} [cwd=process.cwd()]
- * @returns {String}
+ * @param {string} filePath
+ * @param {string} [cwd=process.cwd()]
+ * @returns {string}
  */
-module.exports = function getRelativeFilePath( filePath, cwd = process.cwd() ) {
+export default function getRelativeFilePath( filePath, cwd = process.cwd() ) {
 	// The path ends with the directory separator.
 	const relativePath = filePath.replace( cwd, '' ).slice( 1 );
 
@@ -32,4 +30,4 @@ module.exports = function getRelativeFilePath( filePath, cwd = process.cwd() ) {
 
 	// The main repository.
 	return path.join( 'ckeditor5', relativePath );
-};
+}

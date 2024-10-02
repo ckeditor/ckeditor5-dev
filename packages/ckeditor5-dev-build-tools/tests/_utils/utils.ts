@@ -6,7 +6,7 @@
 import { expect, vi } from 'vitest';
 import swc from '@rollup/plugin-swc';
 import type { RollupOutput, OutputChunk, OutputAsset, Plugin } from 'rollup';
-import * as utils from '../../src/utils';
+import * as utils from '../../src/utils.js';
 
 /**
  * Helper function for validating Rollup asset.

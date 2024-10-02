@@ -3,30 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
 
-const path = require( 'path' );
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const fs = require( 'fs' );
+vi.mock( 'fs' );
 
-describe( 'dev-tests/utils', () => {
-	let transformFileOptionToTestGlob, sandbox, readdirSyncStub, existsSyncStub, statSyncStub;
-
+describe( 'transformFileOptionToTestGlob()', () => {
 	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
-		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
-		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
-		statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isDirectory: () => true } );
-		readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).returns( [ 'external-directory' ] );
-		existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( true );
-
-		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
+		vi.spyOn( path, 'join' ).mockImplementation( ( ...chunks ) => chunks.join( '/' ) );
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/workspace' );
+		vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => true } );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [ 'external-directory' ] );
+		vi.mocked( fs ).existsSync.mockReturnValue( true );
 	} );
 
 	describe( 'converts "ckeditor5" to pattern matching all root package tests', () => {
@@ -255,7 +245,7 @@ describe( 'dev-tests/utils', () => {
 
 	describe( 'should return correct glob for external dirs when external dir name passed', () => {
 		it( 'for automated tests', () => {
-			readdirSyncStub.returns( [ 'test-external-directory' ] );
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'test-external-directory' ] );
 
 			expect( transformFileOptionToTestGlob( 'test-external-directory' ) ).to.deep.equal( [
 				'/workspace/external/test-external-directory/tests/**/*.{js,ts}'
@@ -263,7 +253,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 
 		it( 'for manual tests', () => {
-			readdirSyncStub.returns( [ 'test-external-directory' ] );
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'test-external-directory' ] );
 
 			expect( transformFileOptionToTestGlob( 'test-external-directory', true ) ).to.deep.equal( [
 				'/workspace/external/test-external-directory/tests/manual/**/*.{js,ts}'
@@ -271,8 +261,8 @@ describe( 'dev-tests/utils', () => {
 		} );
 
 		it( 'should not match external directory when isDirectory returns false', () => {
-			statSyncStub.returns( { isDirectory: () => false } );
-			readdirSyncStub.returns( [ 'test-external-file' ] );
+			vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => false } );
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'test-external-file' ] );
 
 			expect( transformFileOptionToTestGlob( 'test-external-directory', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-test-external-directory/tests/manual/**/*.{js,ts}',
@@ -284,10 +274,10 @@ describe( 'dev-tests/utils', () => {
 	} );
 
 	it( 'should not call readdirSync if directory does not exist', () => {
-		existsSyncStub.returns( false );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
 
 		transformFileOptionToTestGlob( 'test-random-directory' );
 
-		expect( readdirSyncStub.called ).to.equal( false );
+		expect( vi.mocked( fs ).readdirSync ).not.toHaveBeenCalled();
 	} );
 } );

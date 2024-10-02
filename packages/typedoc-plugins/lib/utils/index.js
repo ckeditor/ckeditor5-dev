@@ -22,7 +22,7 @@ module.exports = {
  * Checks if the reflection can be considered as "valid" (supported). Only reflections that are not nested inside a type are supported.
  *
  * @param {require('typedoc').Reflection} reflection The reflection to check if it is valid.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isReflectionValid( reflection ) {
 	if ( reflection.name === '__type' ) {
@@ -41,8 +41,8 @@ function isReflectionValid( reflection ) {
  * The identifier can be either a relative or an absolute one.
  *
  * @param {require('typedoc').Reflection} reflection The reflection that contain given identifier.
- * @param {String} identifier An identifier to check.
- * @returns {Boolean}
+ * @param {string} identifier An identifier to check.
+ * @returns {boolean}
  */
 function isIdentifierValid( reflection, identifier ) {
 	// We don't want to validate inherited identifiers, because they should be checked only once in the base class.
@@ -57,8 +57,8 @@ function isIdentifierValid( reflection, identifier ) {
 /**
  * Checks if the identifier is an absolute one.
  *
- * @param {String} identifier An identifier to check.
- * @returns {Boolean}
+ * @param {string} identifier An identifier to check.
+ * @returns {boolean}
  */
 function isAbsoluteIdentifier( identifier ) {
 	return identifier.startsWith( 'module:' );
@@ -68,8 +68,8 @@ function isAbsoluteIdentifier( identifier ) {
  * Converts a relative identifier into an absolute one.
  *
  * @param {require('typedoc').Reflection} reflection The reflection that contain given identifier.
- * @param {String} identifier An identifier to convert.
- * @returns {String}
+ * @param {string} identifier An identifier to convert.
+ * @returns {string}
  */
 function toAbsoluteIdentifier( reflection, identifier ) {
 	const separator = identifier[ 0 ];
@@ -84,7 +84,7 @@ function toAbsoluteIdentifier( reflection, identifier ) {
  * Returns a longname for a reflection, divided into separate parts.
  *
  * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its longname.
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 function getLongNameParts( reflection ) {
 	// Kinds of reflection that affect the longname format.
@@ -118,7 +118,7 @@ function getLongNameParts( reflection ) {
  * Returns the TypeScript node from the reflection.
  *
  * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its TypeScript node.
- * @returns {Object|null}
+ * @returns {object|null}
  */
 function getNode( reflection ) {
 	let symbol = reflection.project.getSymbolFromReflection( reflection );
@@ -144,7 +144,7 @@ function getNode( reflection ) {
  * If the target is not found, returns null.
  *
  * @param {require('typedoc').Reflection} reflection The reflection that contain given identifier.
- * @param {String} identifier The identifier to locate the target reflection.
+ * @param {string} identifier The identifier to locate the target reflection.
  * @returns {require('typedoc').Reflection|null}
  */
 function getTarget( reflection, identifier ) {

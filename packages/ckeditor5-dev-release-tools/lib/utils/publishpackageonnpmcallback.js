@@ -3,30 +3,28 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
-'use strict';
-
 /**
  * Calls the npm command to publish the package. When a package is successfully published, it is removed from the filesystem.
  *
- * @param {String} packagePath
- * @param {Object} taskOptions
- * @param {String} taskOptions.npmTag
+ * @param {string} packagePath
+ * @param {object} taskOptions
+ * @param {string} taskOptions.npmTag
  * @returns {Promise}
  */
-module.exports = async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-	const upath = require( 'upath' );
-	const fs = require( 'fs-extra' );
+export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
+	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
+	const { default: fs } = await import( 'fs-extra' );
+	const { default: path } = await import( 'upath' );
 
-	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
+	const options = {
 		cwd: packagePath,
 		async: true,
 		verbosity: 'error'
-	} )
+	};
+
+	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, options )
 		.catch( e => {
-			const packageName = upath.basename( packagePath );
+			const packageName = path.basename( packagePath );
 
 			if ( e.toString().includes( 'code E409' ) ) {
 				return { shouldKeepDirectory: true };
@@ -38,4 +36,4 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 	if ( !result || !result.shouldKeepDirectory ) {
 		await fs.remove( packagePath );
 	}
-};
+}

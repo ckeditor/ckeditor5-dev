@@ -3,18 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
+import chalk from 'chalk';
+import { globSync } from 'glob';
+import { minimatch } from 'minimatch';
+import { mkdirp } from 'mkdirp';
+import karmaLogger from 'karma/lib/logger.js';
+import karma from 'karma';
+import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-const getKarmaConfig = require( '../utils/automated-tests/getkarmaconfig' );
-const chalk = require( 'chalk' );
-const { globSync } = require( 'glob' );
-const minimatch = require( 'minimatch' );
-const mkdirp = require( 'mkdirp' );
-const karmaLogger = require( 'karma/lib/logger.js' );
-const karma = require( 'karma' );
-const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 // Glob patterns that should be ignored. It means if a specified test file is located under path
 // that matches to these patterns, the file will be skipped.
@@ -28,7 +31,7 @@ const IGNORE_GLOBS = [
 // An absolute path to the entry file that will be passed to Karma.
 const ENTRY_FILE_PATH = path.posix.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
-module.exports = function runAutomatedTests( options ) {
+export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
 		if ( !options.production ) {
 			console.warn( chalk.yellow(
@@ -48,7 +51,7 @@ module.exports = function runAutomatedTests( options ) {
 
 		return runKarma( optionsForKarma );
 	} );
-};
+}
 
 function transformFilesToTestGlob( files ) {
 	if ( !Array.isArray( files ) || files.length === 0 ) {
@@ -211,7 +214,6 @@ function runKarma( options ) {
 			server.on( 'run_complete', () => {
 				// Use timeout to not write to the console in the middle of Karma's status.
 				setTimeout( () => {
-					const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 					const log = logger();
 
 					log.info( `Coverage report saved in '${ chalk.cyan( coveragePath ) }'.` );

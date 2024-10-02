@@ -3,45 +3,45 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const prepareSearchQuery = require( '../../lib/utils/preparesearchquery' );
+import { describe, it, expect } from 'vitest';
+import prepareSearchQuery from '../../lib/utils/preparesearchquery.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'prepareSearchQuery', () => {
 		it( 'should be a function', () => {
-			expect( prepareSearchQuery ).to.be.a( 'function' );
+			expect( prepareSearchQuery ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should prepare a query with repository slug', () => {
-			expect( prepareSearchQuery( { repositorySlug: 'ckeditor/ckeditor5' } ) ).to.include( 'repo:ckeditor/ckeditor5' );
+			expect( prepareSearchQuery( { repositorySlug: 'ckeditor/ckeditor5' } ) ).toContain( 'repo:ckeditor/ckeditor5' );
 		} );
 
 		it( 'should prepare a query for issue', () => {
-			expect( prepareSearchQuery( { type: 'Issue' } ) ).to.include( 'type:issue' );
+			expect( prepareSearchQuery( { type: 'Issue' } ) ).toContain( 'type:issue' );
 		} );
 
 		it( 'should prepare a query for pull request', () => {
-			expect( prepareSearchQuery( { type: 'PullRequest' } ) ).to.include( 'type:pr' );
+			expect( prepareSearchQuery( { type: 'PullRequest' } ) ).toContain( 'type:pr' );
 		} );
 
 		it( 'should prepare a query for issue or pull request', () => {
-			expect( prepareSearchQuery( {} ) ).to.not.include( 'type:' );
+			expect( prepareSearchQuery( {} ) ).not.toContain( 'type:' );
 		} );
 
 		it( 'should prepare a query from specified date', () => {
-			expect( prepareSearchQuery( { searchDate: '2022-12-01' } ) ).to.include( 'created:<2022-12-01' );
+			expect( prepareSearchQuery( { searchDate: '2022-12-01' } ) ).toContain( 'created:<2022-12-01' );
 		} );
 
 		it( 'should prepare a query without specifying a start date', () => {
-			expect( prepareSearchQuery( {} ) ).to.not.include( 'created:' );
+			expect( prepareSearchQuery( {} ) ).not.toContain( 'created:' );
 		} );
 
 		it( 'should prepare a query for open items', () => {
-			expect( prepareSearchQuery( {} ) ).to.include( 'state:open' );
+			expect( prepareSearchQuery( {} ) ).toContain( 'state:open' );
 		} );
 
 		it( 'should prepare a query sorted in descending order by creation date', () => {
-			expect( prepareSearchQuery( {} ) ).to.include( 'sort:created-desc' );
+			expect( prepareSearchQuery( {} ) ).toContain( 'sort:created-desc' );
 		} );
 
 		it( 'should prepare a query with ignored labels', () => {
@@ -53,7 +53,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				'domain:accessibility'
 			];
 
-			expect( prepareSearchQuery( { ignoredLabels } ) ).to.include(
+			expect( prepareSearchQuery( { ignoredLabels } ) ).toContain(
 				'-label:status:stale -label:support:1 -label:support:2 -label:support:3 -label:domain:accessibility'
 			);
 		} );
@@ -64,7 +64,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				'type:bug'
 			];
 
-			expect( prepareSearchQuery( { labels } ) ).to.include( 'label:status:stale label:type:bug' );
+			expect( prepareSearchQuery( { labels } ) ).toContain( 'label:status:stale label:type:bug' );
 		} );
 
 		it( 'should prepare a query with all fields separated by space', () => {
@@ -76,7 +76,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				ignoredLabels: [ 'status:stale' ]
 			};
 
-			expect( prepareSearchQuery( options ) ).to.include(
+			expect( prepareSearchQuery( options ) ).toContain(
 				'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc label:type:bug -label:status:stale'
 			);
 		} );

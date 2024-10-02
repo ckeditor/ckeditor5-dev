@@ -3,18 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Plugin for Webpack which helps to inform the developer about processes.
  */
-module.exports = class WebpackNotifierPlugin {
+export default class WebpackNotifierPlugin {
 	/**
-	 * @param {Object} options
-	 * @param {Function} options.onTestCompilationStatus
-	 * @param {String} options.processName
+	 * @param {object} options
+	 * @param {function} options.onTestCompilationStatus
+	 * @param {string} options.processName
 	 */
 	constructor( options ) {
 		this.log = logger();
@@ -56,4 +54,4 @@ module.exports = class WebpackNotifierPlugin {
 			this.onTestCompilationStatus( `finished:${ this.processName }` );
 		} );
 	}
-};
+}

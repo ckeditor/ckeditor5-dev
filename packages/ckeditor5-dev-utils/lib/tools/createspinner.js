@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const readline = require( 'readline' );
-const isInteractive = require( 'is-interactive' );
-const cliSpinners = require( 'cli-spinners' );
-const cliCursor = require( 'cli-cursor' );
+import readline from 'readline';
+import isInteractive from 'is-interactive';
+import cliSpinners from 'cli-spinners';
+import cliCursor from 'cli-cursor';
 
 // A size of default indent for a log.
 const INDENT_SIZE = 3;
@@ -18,18 +16,18 @@ const INDENT_SIZE = 3;
  *
  * The spinner improves UX when processing a time-consuming task. A developer does not have to consider whether the process hanged on.
  *
- * @param {String} title Description of the current processed task.
- * @param {Object} [options={}]
- * @param {Boolean} [options.isDisabled] Whether the spinner should be disabled.
- * @param {String} [options.emoji='📍'] An emoji that will replace the spinner when it finishes.
- * @param {Number} [options.indentLevel=1] The indent level.
- * @param {Number} [options.total] If specified, the spinner contains a counter. It starts from `0`. To increase its value,
+ * @param {string} title Description of the current processed task.
+ * @param {object} [options={}]
+ * @param {boolean} [options.isDisabled] Whether the spinner should be disabled.
+ * @param {string} [options.emoji='📍'] An emoji that will replace the spinner when it finishes.
+ * @param {number} [options.indentLevel=1] The indent level.
+ * @param {number} [options.total] If specified, the spinner contains a counter. It starts from `0`. To increase its value,
  * call the `#increase()` method on the returned instance of the spinner.
- * @param {String|CKEditor5SpinnerStatus} [options.status='[title] Status: [current]/[total].'] If a spinner is a counter,
+ * @param {string|CKEditor5SpinnerStatus} [options.status='[title] Status: [current]/[total].'] If a spinner is a counter,
  * this option allows customizing the displayed line.
  * @returns {CKEditor5Spinner}
  */
-module.exports = function createSpinner( title, options = {} ) {
+export default function createSpinner( title, options = {} ) {
 	const isEnabled = !options.isDisabled && isInteractive();
 	const indentLevel = options.indentLevel || 0;
 	const indent = ' '.repeat( indentLevel * INDENT_SIZE );
@@ -113,10 +111,10 @@ module.exports = function createSpinner( title, options = {} ) {
 		readline.clearLine( process.stdout, 1 );
 		readline.cursorTo( process.stdout, 0 );
 	}
-};
+}
 
 /**
- * @typedef {Object} CKEditor5Spinner
+ * @typedef {object} CKEditor5Spinner
  *
  * @property {CKEditor5SpinnerStart} start
  *
@@ -136,17 +134,17 @@ module.exports = function createSpinner( title, options = {} ) {
 /**
  * @callback CKEditor5SpinnerFinish
  *
- * @param {Object} [options={}]
+ * @param {object} [options={}]
  *
- * @param {String} [options.emoji]
+ * @param {string} [options.emoji]
  */
 
 /**
  * @callback CKEditor5SpinnerStatus
  *
- * @param {String} title
+ * @param {string} title
  *
- * @param {Number} current
+ * @param {number} current
  *
- * @param {Number} total
+ * @param {number} total
  */

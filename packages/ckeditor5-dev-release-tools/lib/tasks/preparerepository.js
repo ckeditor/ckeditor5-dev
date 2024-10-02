@@ -3,27 +3,25 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const glob = require( 'glob' );
-const upath = require( 'upath' );
+import fs from 'fs-extra';
+import { glob } from 'glob';
+import upath from 'upath';
 
 /**
  * The goal is to prepare the release directory containing the packages we want to publish.
  *
- * @param {Object} options
- * @param {String} options.outputDirectory Relative path to the destination directory where packages will be stored.
- * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
- * @param {String} [options.packagesDirectory] Relative path to a location of packages.
+ * @param {object} options
+ * @param {string} options.outputDirectory Relative path to the destination directory where packages will be stored.
+ * @param {string} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
+ * @param {string} [options.packagesDirectory] Relative path to a location of packages.
  * If specified, all of the found packages will be copied.
- * @param {Array.<String>} [options.packagesToCopy] List of packages that should be processed.
+ * @param {Array.<string>} [options.packagesToCopy] List of packages that should be processed.
  * If not specified, all packages found in `packagesDirectory` are considered.
  * @param {RootPackageJson} [options.rootPackageJson] Object containing values to use in the created the `package.json` file.
  * If not specified, the root package will not be created.
  * @returns {Promise}
  */
-module.exports = async function prepareRepository( options ) {
+export default async function prepareRepository( options ) {
 	const {
 		outputDirectory,
 		packagesDirectory,
@@ -70,12 +68,12 @@ module.exports = async function prepareRepository( options ) {
 	}
 
 	return Promise.all( copyPromises );
-};
+}
 
 /**
- * @param {Object} packageJson
- * @param {String} [packageJson.name]
- * @param {Array.<String>} [packageJson.files]
+ * @param {object} packageJson
+ * @param {string} [packageJson.name]
+ * @param {Array.<string>} [packageJson.files]
  */
 function validateRootPackage( packageJson ) {
 	if ( !packageJson.name ) {
@@ -88,10 +86,10 @@ function validateRootPackage( packageJson ) {
 }
 
 /**
- * @param {Object} options
- * @param {String} options.cwd
+ * @param {object} options
+ * @param {string} options.cwd
  * @param {RootPackageJson} options.rootPackageJson
- * @param {String} options.outputDirectoryPath
+ * @param {string} options.outputDirectoryPath
  * @returns {Promise}
  */
 async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath } ) {
@@ -102,20 +100,21 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
 	await fs.ensureDir( rootPackageOutputPath );
 	await fs.writeJson( pkgJsonOutputPath, rootPackageJson, { spaces: 2, EOL: '\n' } );
 
-	return glob.sync( rootPackageJson.files ).map( absoluteFilePath => {
-		const relativeFilePath = upath.relative( cwd, absoluteFilePath );
-		const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
+	return ( await glob( rootPackageJson.files ) )
+		.map( absoluteFilePath => {
+			const relativeFilePath = upath.relative( cwd, absoluteFilePath );
+			const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
 
-		return fs.copy( absoluteFilePath, absoluteFileOutputPath );
-	} );
+			return fs.copy( absoluteFilePath, absoluteFileOutputPath );
+		} );
 }
 
 /**
- * @param {Object} options
- * @param {String} options.cwd
- * @param {String} options.packagesDirectory
- * @param {String} options.outputDirectoryPath
- * @param {Array.<String>} [options.packagesToCopy]
+ * @param {object} options
+ * @param {string} options.cwd
+ * @param {string} options.packagesDirectory
+ * @param {string} options.outputDirectoryPath
+ * @param {Array.<string>} [options.packagesToCopy]
  * @returns {Promise}
  */
 async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy, outputDirectoryPath } ) {
@@ -142,9 +141,9 @@ async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy
 }
 
 /**
- * @typedef {Object} RootPackageJson
+ * @typedef {object} RootPackageJson
  *
- * @param {String} options.rootPackageJson.name Name of the package. Required value.
+ * @param {string} options.rootPackageJson.name Name of the package. Required value.
  *
- * @param {Array.<String>} options.rootPackageJson.files Array containing a list of files or directories to copy. Required value.
+ * @param {Array.<string>} options.rootPackageJson.files Array containing a list of files or directories to copy. Required value.
  */

@@ -7,15 +7,12 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
-const { name: packageName } = require( '@ckeditor/ckeditor5-dev-release-tools/package.json' );
+import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 
 const changelogVersion = releaseTools.getLastFromChangelog();
 const npmTag = releaseTools.getNpmTagFromVersion( changelogVersion );
 
-releaseTools.isVersionPublishableForTag( packageName, changelogVersion, npmTag )
+releaseTools.isVersionPublishableForTag( '@ckeditor/ckeditor5-dev-release-tools', changelogVersion, npmTag )
 	.then( result => {
 		if ( !result ) {
 			console.error( `The proposed changelog (${ changelogVersion }) version is not higher than the already published one.` );

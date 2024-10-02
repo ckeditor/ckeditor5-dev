@@ -3,12 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-const chai = require( 'chai' );
-const expect = chai.expect;
-const attributeFactory = require( '../../../../lib/utils/automated-tests/assertions/attribute' );
+import { beforeAll, describe, expect, it, chai } from 'vitest';
+import attributeFactory from '../../../../lib/utils/automated-tests/assertions/attribute.js';
 
 describe( 'attribute chai assertion', () => {
-	before( () => {
+	beforeAll( () => {
 		attributeFactory( chai );
 	} );
 

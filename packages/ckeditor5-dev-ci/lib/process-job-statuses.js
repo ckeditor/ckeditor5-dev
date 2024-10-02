@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * The function aims to determine a proper build status for children's jobs based on their parent's statuses.
  *
@@ -19,7 +17,7 @@
  * @param {Array.<WorkflowJob>} jobs
  * @returns {Array.<WorkflowJob>}
  */
-module.exports = function processJobStatuses( jobs ) {
+export default function processJobStatuses( jobs ) {
 	// To avoid modifying the original object, let's clone.
 	const jobsClone = clone( jobs );
 
@@ -55,11 +53,11 @@ module.exports = function processJobStatuses( jobs ) {
 	}
 
 	return jobsClone;
-};
+}
 
 /**
  * @param {WorkflowJob} job
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isJobFailed( job ) {
 	if ( job.status === 'failed' ) {
@@ -83,11 +81,11 @@ function clone( obj ) {
 }
 
 /**
- * @typedef {Object} WorkflowJob
+ * @typedef {object} WorkflowJob
  *
- * @property {String} id
+ * @property {string} id
  *
  * @property {'blocked'|'running'|'failed'|'failed_parent'|'success'} status
  *
- * @property {Array.<String>} dependencies
+ * @property {Array.<string>} dependencies
  */

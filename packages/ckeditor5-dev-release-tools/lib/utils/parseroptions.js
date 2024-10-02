@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
+export default {
 	mergePattern: /^Merge .*$/,
 	headerPattern: /^([^:]+): (.*)$/,
 	headerCorrespondence: [

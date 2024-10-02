@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Creates a query to search for issues or pull requests.
  *
- * @param {Object} options
- * @param {String} options.repositorySlug
- * @param {String} [options.searchDate]
+ * @param {object} options
+ * @param {string} options.repositorySlug
+ * @param {string} [options.searchDate]
  * @param {'Issue'|'PullRequest'} [options.type]
- * @param {Array.<String>} [options.labels=[]]
- * @param {Array.<String>} [options.ignoredLabels=[]]
- * @returns {String}
+ * @param {Array.<string>} [options.labels=[]]
+ * @param {Array.<string>} [options.ignoredLabels=[]]
+ * @returns {string}
  */
-module.exports = function prepareSearchQuery( options ) {
+export default function prepareSearchQuery( options ) {
 	const {
 		repositorySlug,
 		searchDate,
@@ -36,7 +34,7 @@ module.exports = function prepareSearchQuery( options ) {
 		...labels.map( label => `label:${ label }` ),
 		...ignoredLabels.map( label => `-label:${ label }` )
 	].filter( Boolean ).join( ' ' );
-};
+}
 
 function mapGitHubResourceType( type ) {
 	const resourceMap = {

@@ -3,18 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const minimist = require( 'minimist' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+import fs from 'fs-extra';
+import path from 'path';
+import minimist from 'minimist';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * @param {Array.<String>} args
- * @returns {Object}
+ * @param {Array.<string>} args
+ * @returns {object}
  */
-module.exports = function parseArguments( args ) {
+export default function parseArguments( args ) {
 	const log = logger();
 
 	const minimistConfig = {
@@ -117,8 +115,8 @@ module.exports = function parseArguments( args ) {
 	 * Replaces all kebab-case keys in the `options` object with camelCase entries.
 	 * Kebab-case keys will be removed.
 	 *
-	 * @param {Object} options
-	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 * @param {object} options
+	 * @param {Array.<string>} keys Kebab-case keys in `options` object.
 	 */
 	function replaceKebabCaseWithCamelCase( options, keys ) {
 		for ( const key of keys ) {
@@ -132,7 +130,7 @@ module.exports = function parseArguments( args ) {
 	/**
 	 * Parses the `--debug` option.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseDebugOption( options ) {
 		if ( options.debug === 'false' || options.debug === false ) {
@@ -155,7 +153,7 @@ module.exports = function parseArguments( args ) {
 	 *
 	 * The `ckeditor5-` prefix will be removed.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseRepositoriesOption( options ) {
 		if ( !options.repositories.length ) {
@@ -172,7 +170,7 @@ module.exports = function parseArguments( args ) {
 		const files = new Set( options.files );
 
 		for ( const repositoryName of options.repositories ) {
-			const cwdPackageJson = require( path.join( cwd, 'package.json' ) );
+			const cwdPackageJson = fs.readJsonSync( path.join( cwd, 'package.json' ) );
 
 			// Check the main repository.
 			if ( repositoryName === cwdPackageJson.name ) {
@@ -209,7 +207,7 @@ module.exports = function parseArguments( args ) {
 	 * Parses the `--tsconfig` options to be an absolute path. If argument is not provided,
 	 * it will check if `tsconfig.test.json` file exists and use it if it does.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseTsconfigPath( options ) {
 		if ( options.tsconfig ) {
@@ -226,8 +224,8 @@ module.exports = function parseArguments( args ) {
 	/**
 	 * Splits by a comma (`,`) all values specified under keys to array.
 	 *
-	 * @param {Object} options
-	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 * @param {object} options
+	 * @param {Array.<string>} keys Kebab-case keys in `options` object.
 	 */
 	function splitOptionsToArray( options, keys ) {
 		for ( const key of keys ) {
@@ -240,8 +238,8 @@ module.exports = function parseArguments( args ) {
 	/**
 	 * Returns a camel case value for specified kebab-case `value`.
 	 *
-	 * @param {String} value Kebab-case string.
-	 * @returns {String}
+	 * @param {string} value Kebab-case string.
+	 * @returns {string}
 	 */
 	function toCamelCase( value ) {
 		return value.split( '-' )
@@ -256,8 +254,8 @@ module.exports = function parseArguments( args ) {
 	}
 
 	/**
-	 * @param {String} path
-	 * @returns {Boolean}
+	 * @param {string} path
+	 * @returns {boolean}
 	 */
 	function isDirectory( path ) {
 		try {
@@ -266,4 +264,4 @@ module.exports = function parseArguments( args ) {
 			return false;
 		}
 	}
-};
+}

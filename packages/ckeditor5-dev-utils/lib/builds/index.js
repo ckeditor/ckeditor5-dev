@@ -3,8 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
-	getDllPluginWebpackConfig: require( './getdllpluginwebpackconfig' )
-};
+export { default as getDllPluginWebpackConfig } from './getdllpluginwebpackconfig.js';

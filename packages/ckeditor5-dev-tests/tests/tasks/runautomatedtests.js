@@ -3,95 +3,82 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { globSync } from 'glob';
+import { mkdirp } from 'mkdirp';
+import chalk from 'chalk';
+import karma from 'karma';
+import karmaLogger from 'karma/lib/logger.js';
+import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
 
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const expect = require( 'chai' ).expect;
-const chalk = require( 'chalk' );
-const path = require( 'path' );
+const stubs = vi.hoisted( () => ( {
+	log: {
+		log: vi.fn(),
+		error: vi.fn(),
+		warn: vi.fn(),
+		info: vi.fn()
+	},
+	karma: {
+		server: {
+			constructor: vi.fn(),
+			on: vi.fn(),
+			start: vi.fn()
+		}
+	}
+} ) );
 
-describe( 'runAutomatedTests', () => {
-	let sandbox, stubs, runAutomatedTests, karmaServerCallback;
-
-	beforeEach( () => {
-		karmaServerCallback = null;
-		sandbox = sinon.createSandbox();
-
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			fs: {
-				writeFileSync: sandbox.stub(),
-				utimesSync: sandbox.stub(),
-				readdirSync: sandbox.stub()
-			},
-			log: {
-				info: sandbox.stub(),
-				warn: sandbox.stub(),
-				error: sandbox.stub()
-			},
-			mkdirp: {
-				sync: sandbox.stub()
-			},
-			glob: {
-				globSync: sandbox.stub()
-			},
-			karma: {
-				Server: class KarmaServer {
-					constructor( config, callback ) {
-						karmaServerCallback = callback;
-					}
-
-					on( ...args ) {
-						return stubs.karma.karmaServerOn( ...args );
-					}
-
-					start( ...args ) {
-						return stubs.karma.karmaServerOn( ...args );
-					}
-				},
-				karmaServerOn: sandbox.stub(),
-				karmaServerStart: sandbox.stub(),
-				config: {
-					parseConfig: sandbox.stub()
-				}
-			},
-			getKarmaConfig: sandbox.stub(),
-			transformFileOptionToTestGlob: sandbox.stub()
-		};
-
-		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
-
-		mockery.registerMock( 'mkdirp', stubs.mkdirp );
-		mockery.registerMock( 'karma', stubs.karma );
-		mockery.registerMock( 'karma/lib/logger.js', {
-			setupFromConfig: sandbox.spy(),
-			create( name ) {
-				expect( name ).to.equal( 'config' );
-				return stubs.log;
+vi.mock( 'karma', () => ( {
+	default: {
+		Server: class KarmaServer {
+			constructor( ...args ) {
+				stubs.karma.server.constructor( ...args );
 			}
-		} );
-		mockery.registerMock( '../utils/automated-tests/getkarmaconfig', stubs.getKarmaConfig );
-		mockery.registerMock( '../utils/transformfileoptiontotestglob', stubs.transformFileOptionToTestGlob );
 
-		runAutomatedTests = proxyquire( '../../lib/tasks/runautomatedtests', {
-			fs: stubs.fs,
-			glob: stubs.glob
+			on( ...args ) {
+				return stubs.karma.server.on( ...args );
+			}
+
+			start( ...args ) {
+				return stubs.karma.server.start( ...args );
+			}
+		},
+		config: {
+			parseConfig: vi.fn()
+		}
+	}
+} ) );
+
+vi.mock( 'chalk', () => ( {
+	default: {
+		yellow: vi.fn()
+	}
+} ) );
+
+vi.mock( 'fs' );
+vi.mock( 'mkdirp' );
+vi.mock( 'glob' );
+vi.mock( 'karma/lib/logger.js' );
+vi.mock( '../../lib/utils/automated-tests/getkarmaconfig.js' );
+vi.mock( '../../lib/utils/transformfileoptiontotestglob.js' );
+
+describe( 'runAutomatedTests()', () => {
+	let runAutomatedTests;
+
+	beforeEach( async () => {
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/workspace' );
+
+		vi.mocked( karmaLogger ).create.mockImplementation( name => {
+			expect( name ).to.equal( 'config' );
+
+			return stubs.log;
 		} );
+
+		runAutomatedTests = ( await import( '../../lib/tasks/runautomatedtests.js' ) ).default;
 	} );
 
-	afterEach( () => {
-		sandbox.restore();
-		mockery.disable();
-	} );
-
-	it( 'should create an entry file before tests execution', done => {
+	it( 'should create an entry file before tests execution', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -99,56 +86,51 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
-
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
 		const expectedEntryPointContent = [
 			'import "/workspace/packages/ckeditor5-basic-styles/tests/bold.js";',
-			'import "/workspace/packages/ckeditor5-basic-styles/tests/italic.js";',
-			''
+			'import "/workspace/packages/ckeditor5-basic-styles/tests/italic.js";'
 		].join( '\n' );
 
+		const promise = runAutomatedTests( options );
+
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		runAutomatedTests( options )
-			.then( () => {
-				expect( stubs.mkdirp.sync.calledOnce ).to.equal( true );
-				expect( stubs.mkdirp.sync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests' );
+		await promise;
 
-				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
-
-				done();
-			} );
+		expect( vi.mocked( mkdirp ).sync ).toHaveBeenCalledExactlyOnceWith( '/workspace/build/.automated-tests' );
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			'/workspace/build/.automated-tests/entry-point.js',
+			expect.stringContaining( expectedEntryPointContent )
+		);
 	} );
 
-	it( 'throws when files are not specified', () => {
-		return runAutomatedTests( { production: true } )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				err => {
-					expect( err.message ).to.equal( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
-				}
-			);
+	it( 'throws when files are not specified', async () => {
+		await expect( runAutomatedTests( { production: true } ) )
+			.rejects.toThrow( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 	} );
 
-	it( 'throws when specified files are invalid', () => {
+	it( 'throws when specified files are invalid', async () => {
 		const options = {
 			files: [
 				'basic-foo',
@@ -157,38 +139,29 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
-			'/workspace/packages/ckeditor-basic-foo/tests/**/*.js'
-		] );
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
+				'/workspace/packages/ckeditor-basic-foo/tests/**/*.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-bar-core/tests/**/*.js',
+				'/workspace/packages/ckeditor-bar-core/tests/**/*.js'
+			] );
 
-		stubs.transformFileOptionToTestGlob.onSecondCall().returns( [
-			'/workspace/packages/ckeditor5-bar-core/tests/**/*.js',
-			'/workspace/packages/ckeditor-bar-core/tests/**/*.js'
-		] );
+		vi.mocked( globSync ).mockReturnValue( [] );
 
-		stubs.glob.globSync.returns( [] );
+		await expect( runAutomatedTests( options ) )
+			.rejects.toThrow( 'Not found files to tests. Specified patterns are invalid.' );
 
-		return runAutomatedTests( options )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				err => {
-					expect( stubs.log.warn.calledTwice ).to.equal( true );
-					expect( stubs.log.warn.firstCall.args[ 0 ] ).to.equal( 'Pattern "%s" does not match any file.' );
-					expect( stubs.log.warn.firstCall.args[ 1 ] ).to.equal( 'basic-foo' );
-					expect( stubs.log.warn.secondCall.args[ 0 ] ).to.equal( 'Pattern "%s" does not match any file.' );
-					expect( stubs.log.warn.secondCall.args[ 1 ] ).to.equal( 'bar-core' );
-
-					expect( err.message ).to.equal( 'Not found files to tests. Specified patterns are invalid.' );
-				}
-			);
+		expect( stubs.log.warn ).toHaveBeenCalledTimes( 2 );
+		expect( stubs.log.warn ).toHaveBeenCalledWith( 'Pattern "%s" does not match any file.', 'basic-foo' );
+		expect( stubs.log.warn ).toHaveBeenCalledWith( 'Pattern "%s" does not match any file.', 'bar-core' );
 	} );
 
-	it( 'throws when Karma config parser throws', () => {
+	it( 'throws when Karma config parser throws', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -196,34 +169,34 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
-			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
-		] );
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
+				'/workspace/packages/ckeditor-basic-foo/tests/**/*.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-bar-core/tests/**/*.js',
+				'/workspace/packages/ckeditor-bar-core/tests/**/*.js'
+			] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		vi.mocked( karma ).config.parseConfig.mockImplementation( () => {
+			throw new Error( 'Example error from Karma config parser.' );
+		} );
 
-		stubs.karma.config.parseConfig.throws( new Error( 'Example error from Karma config parser.' ) );
-
-		return runAutomatedTests( options )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				err => {
-					expect( err.message ).to.equal( 'Example error from Karma config parser.' );
-				}
-			);
+		await expect( runAutomatedTests( options ) )
+			.rejects.toThrow( 'Example error from Karma config parser.' );
 	} );
 
-	it( 'should warn when the `production` option is set to `false`', () => {
+	it( 'should warn when the `production` option is set to `false`', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -231,37 +204,44 @@ describe( 'runAutomatedTests', () => {
 			production: false
 		};
 
-		const consoleWarnStub = sandbox.stub( console, 'warn' );
+		const consoleWarnStub = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
 
-		stubs.fs.readdirSync.returns( [] );
+		vi.mocked( chalk ).yellow.mockReturnValue( 'chalk.yellow: warn' );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		const promise = runAutomatedTests( options );
 
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		return runAutomatedTests( options )
-			.then( () => {
-				expect( consoleWarnStub ).to.be.calledOnce;
-				expect( consoleWarnStub ).to.be.calledWith(
-					chalk.yellow( '⚠ You\'re running tests in dev mode - some error protections are loose. ' +
-						'Use the `--production` flag to use strictest verification methods.' )
-				);
-			} );
+		await promise;
+
+		expect( consoleWarnStub ).toHaveBeenCalledExactlyOnceWith( 'chalk.yellow: warn' );
+		expect( vi.mocked( chalk ).yellow ).toHaveBeenCalledExactlyOnceWith(
+			'⚠ You\'re running tests in dev mode - some error protections are loose. ' +
+			'Use the `--production` flag to use strictest verification methods.'
+		);
 	} );
 
-	it( 'should not add the code making console use throw an error when the `production` option is set to false', () => {
+	it( 'should not add the code making console use throw an error when the `production` option is set to false', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -269,33 +249,42 @@ describe( 'runAutomatedTests', () => {
 			production: false
 		};
 
-		sandbox.stub( console, 'warn' );
+		vi.spyOn( console, 'warn' ).mockImplementation( () => {
+		} );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.fs.readdirSync.returns( [] );
-
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		const promise = runAutomatedTests( options );
 
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		return runAutomatedTests( options )
-			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include( '// Make using any method from the console to fail.' );
-			} );
+		await promise;
+
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect.any( String ),
+			expect.not.stringContaining( '// Make using any method from the console to fail.' )
+		);
 	} );
 
-	it( 'should add the code making console use throw an error when the `production` option is set to true', () => {
+	it( 'should add the code making console use throw an error when the `production` option is set to true', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -303,31 +292,42 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [] );
+		vi.spyOn( console, 'warn' ).mockImplementation( () => {
+		} );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		const promise = runAutomatedTests( options );
 
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		return runAutomatedTests( options )
-			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( '// Make using any method from the console to fail.' );
-			} );
+		await promise;
+
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect.any( String ),
+			expect.stringContaining( '// Make using any method from the console to fail.' )
+		);
 	} );
 
-	it( 'should load custom assertions automatically (camelCase)', done => {
+	it( 'should load custom assertions automatically (camelCase in paths)', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -335,19 +335,19 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [ 'assertionA.js', 'assertionB.js' ] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [ 'assertionA.js', 'assertionB.js' ] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
-
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
 		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
 
@@ -355,28 +355,30 @@ describe( 'runAutomatedTests', () => {
 			`import assertionAFactory from "${ assertionsDir }/assertionA.js";`,
 			`import assertionBFactory from "${ assertionsDir }/assertionB.js";`,
 			'assertionAFactory( chai );',
-			'assertionBFactory( chai );',
-			''
+			'assertionBFactory( chai );'
 		].join( '\n' );
 
+		const promise = runAutomatedTests( options );
+
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		runAutomatedTests( options )
-			.then( () => {
-				expect( stubs.mkdirp.sync.calledOnce ).to.equal( true );
-				expect( stubs.mkdirp.sync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests' );
+		await promise;
 
-				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
-
-				done();
-			} );
+		expect( vi.mocked( mkdirp ).sync ).toHaveBeenCalledExactlyOnceWith( '/workspace/build/.automated-tests' );
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			'/workspace/build/.automated-tests/entry-point.js',
+			expect.stringContaining( expectedEntryPointContent )
+		);
 	} );
 
-	it( 'should load custom assertions automatically (kebab-case)', done => {
+	it( 'should load custom assertions automatically (kebab-case in paths)', async () => {
 		const options = {
 			files: [
 				'basic-styles'
@@ -384,19 +386,19 @@ describe( 'runAutomatedTests', () => {
 			production: true
 		};
 
-		stubs.fs.readdirSync.returns( [ 'assertion-a.js', 'assertion-b.js' ] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [ 'assertion-a.js', 'assertion-b.js' ] );
 
-		stubs.transformFileOptionToTestGlob.returns( [
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.globSync.onFirstCall().returns( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
-			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
-		] );
-
-		stubs.glob.globSync.onSecondCall().returns( [] );
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+			] );
 
 		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
 
@@ -408,20 +410,23 @@ describe( 'runAutomatedTests', () => {
 			''
 		].join( '\n' );
 
+		const promise = runAutomatedTests( options );
+
 		setTimeout( () => {
-			karmaServerCallback( 0 );
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
 		} );
 
-		runAutomatedTests( options )
-			.then( () => {
-				expect( stubs.mkdirp.sync.calledOnce ).to.equal( true );
-				expect( stubs.mkdirp.sync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests' );
+		await promise;
 
-				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
-
-				done();
-			} );
+		expect( vi.mocked( mkdirp ).sync ).toHaveBeenCalledExactlyOnceWith( '/workspace/build/.automated-tests' );
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			'/workspace/build/.automated-tests/entry-point.js',
+			expect.stringContaining( expectedEntryPointContent )
+		);
 	} );
 } );

@@ -7,14 +7,11 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const { Listr } = require( 'listr2' );
-const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
-const { provideToken } = require( '@ckeditor/ckeditor5-dev-release-tools/lib/utils/cli' );
-const parseArguments = require( './utils/parsearguments' );
-const getListrOptions = require( './utils/getlistroptions' );
-const { RELEASE_DIRECTORY } = require( './utils/constants' );
+import { Listr } from 'listr2';
+import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
+import parseArguments from './utils/parsearguments.js';
+import getListrOptions from './utils/getlistroptions.js';
+import { RELEASE_DIRECTORY } from './utils/constants.js';
 
 const cliArguments = parseArguments( process.argv.slice( 2 ) );
 const latestVersion = releaseTools.getLastFromChangelog();
@@ -92,7 +89,7 @@ const tasks = new Listr( [
 		if ( process.env.CKE5_RELEASE_TOKEN ) {
 			githubToken = process.env.CKE5_RELEASE_TOKEN;
 		} else {
-			githubToken = await provideToken();
+			githubToken = await releaseTools.provideToken();
 		}
 
 		await tasks.run();

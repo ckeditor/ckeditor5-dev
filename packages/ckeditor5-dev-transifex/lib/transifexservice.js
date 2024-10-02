@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-const { transifexApi } = require( '@transifex/api' );
-const fetch = require( 'node-fetch' );
+import { transifexApi } from '@transifex/api';
 
 const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
@@ -18,7 +17,7 @@ const REQUEST_START_OFFSET_TIMEOUT = 100;
  *
  * @see https://docs.transifex.com/api-3-0/introduction-to-api-3-0 for API documentation.
  */
-module.exports = {
+export default {
 	init,
 	getProjectData,
 	getTranslations,
@@ -34,7 +33,7 @@ module.exports = {
 /**
  * Configures the API token for Transifex service if it has not been set yet.
  *
- * @param {String} token Token for the Transifex API.
+ * @param {string} token Token for the Transifex API.
  */
 function init( token ) {
 	if ( !transifexApi.auth ) {
@@ -45,10 +44,10 @@ function init( token ) {
 /**
  * Creates a new resource on Transifex.
  *
- * @param {Object} options
- * @param {String} options.organizationName The name of the organization to which the project belongs.
- * @param {String} options.projectName The name of the project for creating the resource.
- * @param {String} options.resourceName The name of the resource to create.
+ * @param {object} options
+ * @param {string} options.organizationName The name of the organization to which the project belongs.
+ * @param {string} options.projectName The name of the project for creating the resource.
+ * @param {string} options.resourceName The name of the resource to create.
  * @returns {Promise}
  */
 async function createResource( options ) {
@@ -78,12 +77,12 @@ async function createResource( options ) {
 /**
  * Uploads a new translations source for the specified resource (package).
  *
- * @param {Object} options
- * @param {String} options.organizationName The name of the organization to which the project belongs.
- * @param {String} options.projectName The name of the project for uploading the translations entries.
- * @param {String} options.resourceName The The name of resource.
- * @param {String} options.content A content of the `*.po` file containing source for translations.
- * @returns {Promise.<String>}
+ * @param {object} options
+ * @param {string} options.organizationName The name of the organization to which the project belongs.
+ * @param {string} options.projectName The name of the project for uploading the translations entries.
+ * @param {string} options.resourceName The The name of resource.
+ * @param {string} options.content A content of the `*.po` file containing source for translations.
+ * @returns {Promise.<string>}
  */
 async function createSourceFile( options ) {
 	const { organizationName, projectName, resourceName, content } = options;
@@ -111,8 +110,8 @@ async function createSourceFile( options ) {
  * Resolves a promise containing an object with a summary of processing the uploaded source
  * file created by the Transifex service if the upload task is completed.
  *
- * @param {String} uploadId
- * @param {Number} [numberOfAttempts=1] A number containing a current attempt.
+ * @param {string} uploadId
+ * @param {number} [numberOfAttempts=1] A number containing a current attempt.
  * @returns {Promise}
  */
 async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
@@ -141,12 +140,12 @@ async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
 /**
  * Retrieves all the resources and languages associated with the requested project within given organization from the Transifex service.
  *
- * @param {String} organizationName Name of the organization to which the project belongs.
- * @param {String} projectName Name of the project for downloading the translations.
- * @param {Array.<String>} localizablePackageNames Names of all packages for which translations should be downloaded.
- * @returns {Promise.<Object>} result
- * @returns {Array.<Object>} result.resources All found resource instances for which translations could be downloaded.
- * @returns {Array.<Object>} result.languages All found language instances in the project.
+ * @param {string} organizationName Name of the organization to which the project belongs.
+ * @param {string} projectName Name of the project for downloading the translations.
+ * @param {Array.<string>} localizablePackageNames Names of all packages for which translations should be downloaded.
+ * @returns {Promise.<object>} result
+ * @returns {Array.<object>} result.resources All found resource instances for which translations could be downloaded.
+ * @returns {Array.<object>} result.languages All found language instances in the project.
  */
 async function getProjectData( organizationName, projectName, localizablePackageNames ) {
 	const organization = await transifexApi.Organization.get( { slug: organizationName } );
@@ -188,11 +187,11 @@ async function getProjectData( organizationName, projectName, localizablePackage
  * The download procedure is not interrupted when any request has failed for any reason, but continues until the end for each language.
  * Failed requests and all fetched translations are collected and returned to the caller for further processing.
  *
- * @param {Object} resource The resource instance for which translations should be downloaded.
- * @param {Array.<Object>} languages An array of all the language instances found in the project.
- * @returns {Promise.<Object>} result
- * @returns {Map.<String,String>} result.translations The translation map: language code -> translation content.
- * @returns {Array.<Object>} result.failedDownloads Collection of all the failed downloads.
+ * @param {object} resource The resource instance for which translations should be downloaded.
+ * @param {Array.<object>} languages An array of all the language instances found in the project.
+ * @returns {Promise.<object>} result
+ * @returns {Map.<string, string>} result.translations The translation map: language code -> translation content.
+ * @returns {Array.<object>} result.failedDownloads Collection of all the failed downloads.
  */
 async function getTranslations( resource, languages ) {
 	const downloadRequests = await Promise
@@ -242,9 +241,9 @@ async function getTranslations( resource, languages ) {
  * Fetches all the translations for the specified resource and language. The returned array contains translation items (objects) with
  * attributes and relationships to other Transifex entities.
  *
- * @param {String} resourceId The resource id for which translation should be downloaded.
- * @param {String} languageId The language id for which translation should be downloaded.
- * @returns {Promise.<Array.<Object>>}
+ * @param {string} resourceId The resource id for which translation should be downloaded.
+ * @param {string} languageId The language id for which translation should be downloaded.
+ * @returns {Promise.<Array.<object>>}
  */
 async function getResourceTranslations( resourceId, languageId ) {
 	const translations = transifexApi.ResourceTranslation
@@ -275,10 +274,10 @@ async function getResourceTranslations( resourceId, languageId ) {
 /**
  * Creates the download request for the given resource and the language.
  *
- * @param {Object} resource The resource instance for which translation should be downloaded.
- * @param {Object} language The language instance for which translation should be downloaded.
- * @param {Number} [numberOfAttempts=1] Current number of request attempt.
- * @returns {Promise.<Object>}
+ * @param {object} resource The resource instance for which translation should be downloaded.
+ * @param {object} language The language instance for which translation should be downloaded.
+ * @param {number} [numberOfAttempts=1] Current number of request attempt.
+ * @returns {Promise.<object>}
  */
 function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 	const attributes = {
@@ -321,24 +320,25 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
  * attempt. There are three possible cases that are handled during downloading a file:
  *
  * (1) According to the Transifex API v3.0, when the requested file is ready for download, the Transifex service returns HTTP code 303,
- * which is the redirection to the new location, where the file is available. By default, `node-fetch` follows redirections so the requested
+ * which is the redirection to the new location, where the file is available. By default, `fetch` follows redirections so the requested
  * file is downloaded automatically.
  * (2) If the requested file is not ready yet, but the response status from the Transifex service was successful and the number of retries
  * has not reached the limit yet, the request is queued and retried after the REQUEST_RETRY_TIMEOUT timeout.
  * (3) Otherwise, there is either a problem with downloading a file (the request has failed) or the number of retries has reached the limit,
  * so rejected promise is returned.
  *
- * @param {Object} downloadRequest Data that defines the requested file.
- * @param {String} downloadRequest.url URL where generated PO file will be available to download.
- * @param {String} downloadRequest.resourceName Package name for which the URL is generated.
- * @param {String} downloadRequest.languageCode Language code for which the URL is generated.
- * @param {Number} [numberOfAttempts=1] Current number of download attempt.
- * @returns {Promise.<Array.<String>>} The 2-element array: the language code at index 0 and the translation content at index 1.
+ * @param {object} downloadRequest Data that defines the requested file.
+ * @param {string} downloadRequest.url URL where generated PO file will be available to download.
+ * @param {string} downloadRequest.resourceName Package name for which the URL is generated.
+ * @param {string} downloadRequest.languageCode Language code for which the URL is generated.
+ * @param {number} [numberOfAttempts=1] Current number of download attempt.
+ * @returns {Promise.<Array.<string>>} The 2-element array: the language code at index 0 and the translation content at index 1.
  */
 async function downloadFile( downloadRequest, numberOfAttempts = 1 ) {
 	const { url, resourceName, languageCode } = downloadRequest;
 
 	const response = await fetch( url, {
+		method: 'GET',
 		headers: {
 			...transifexApi.auth()
 		}
@@ -374,8 +374,8 @@ async function downloadFile( downloadRequest, numberOfAttempts = 1 ) {
 /**
  * Retrieves the resource name (the package name) from the resource instance.
  *
- * @param {Object} resource Resource instance.
- * @returns {String}
+ * @param {object} resource Resource instance.
+ * @returns {string}
  */
 function getResourceName( resource ) {
 	return resource.attributes.slug;
@@ -384,8 +384,8 @@ function getResourceName( resource ) {
 /**
  * Retrieves the language code from the language instance.
  *
- * @param {Object} language Language instance.
- * @returns {String}
+ * @param {object} language Language instance.
+ * @returns {string}
  */
 function getLanguageCode( language ) {
 	return language.attributes.code;
@@ -395,7 +395,7 @@ function getLanguageCode( language ) {
  * Creates an artificial Transifex language instance for the source language, which is English. The language instance for the source strings
  * is needed, because Transifex service has two dedicated API resources: one for the translations and another one for the source strings.
  *
- * @returns {Object}
+ * @returns {object}
  */
 function createSourceLanguage() {
 	return {
@@ -408,8 +408,8 @@ function createSourceLanguage() {
 /**
  * Checks if the language instance is the source language, which is English.
  *
- * @param {Object} language Language instance.
- * @returns {Boolean}
+ * @param {object} language Language instance.
+ * @returns {boolean}
  */
 function isSourceLanguage( language ) {
 	return getLanguageCode( language ) === 'en';
@@ -418,7 +418,7 @@ function isSourceLanguage( language ) {
 /**
  * Returns results from each rejected promise, which are returned from the `Promise.allSettled()` method.
  *
- * @param {Array.<Object>} results Collection of objects that each describes the outcome of each promise.
+ * @param {Array.<object>} results Collection of objects that each describes the outcome of each promise.
  * @returns {Array.<*>}
  */
 function getFailedResults( results ) {
@@ -430,7 +430,7 @@ function getFailedResults( results ) {
 /**
  * Returns results from each fulfilled promise, which are returned from the `Promise.allSettled()` method.
  *
- * @param {Array.<Object>} results Collection of objects that each describes the outcome of each promise.
+ * @param {Array.<object>} results Collection of objects that each describes the outcome of each promise.
  * @returns {Array.<*>}
  */
 function getSuccessfulResults( results ) {
@@ -442,7 +442,7 @@ function getSuccessfulResults( results ) {
 /**
  * Simple promisified timeout that resolves after defined number of milliseconds.
  *
- * @param {Number} numberOfMilliseconds Number of milliseconds after which the promise will be resolved.
+ * @param {number} numberOfMilliseconds Number of milliseconds after which the promise will be resolved.
  * @returns {Promise}
  */
 function wait( numberOfMilliseconds ) {

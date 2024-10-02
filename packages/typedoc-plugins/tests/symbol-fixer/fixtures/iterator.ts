@@ -21,7 +21,7 @@ export default class Collection {
 		 * The internal list of items in the collection.
 		 *
 		 * @private
-		 * @member {Object[]}
+		 * @member {object[]}
 		 */
 		this._items = [];
 	}

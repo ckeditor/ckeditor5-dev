@@ -18,7 +18,7 @@ yarn run test --files=engine,basic-styles
 
 1. In the IDE, go to _Run_ > _Edit configurations..._:
 1. Add a new configuration of type "**Karma**" and a name of your preference.
-1. In "Configuration file", selected the "**node\_modules/ckeditor5-dev-tests/bin/intellijkarmarunner/karma.config.js**" file.
+1. In "Configuration file", selected the "**node\_modules/ckeditor5-dev-tests/bin/intellijkarmarunner/karma.config.cjs**" file.
 1. In "Karma Package", selected the "**node\_modules/ckeditor5-dev-tests/bin/intellijkarmarunner**" directory.
 1. In "Karma options", input the CKEditor 5 tests arguments. E.g. `--files=engine,basic-styles`.
 1. In "Working directory", select the base `ckeditor5` directory.

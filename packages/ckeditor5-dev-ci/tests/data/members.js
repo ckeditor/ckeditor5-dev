@@ -3,15 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
-'use strict';
-
-const members = require( '../../lib/data/members.json' );
-const expect = require( 'chai' ).expect;
+import { describe, expect, it } from 'vitest';
+import { members } from '../../lib/data/index.js';
 
 describe( 'lib/data/members', () => {
-	it( 'should be a function', () => {
+	it( 'should be an object', () => {
 		expect( members ).to.be.a( 'object' );
 	} );
 

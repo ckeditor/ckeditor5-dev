@@ -24,7 +24,7 @@ export class CustomExampleClass extends ExampleClass {
 	 *
 	 * @readonly
 	 * @observable
-	 * @member {Boolean}
+	 * @member {boolean}
 	 */
 	declare public anotherProperty: boolean;
 

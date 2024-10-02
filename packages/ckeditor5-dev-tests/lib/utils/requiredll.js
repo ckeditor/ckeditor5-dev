@@ -3,16 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Returns `true` if any of the source files represent a DLL test.
  *
- * @param {String|Array.<String>} sourceFiles
- * @returns {Boolean}
+ * @param {string|Array.<string>} sourceFiles
+ * @returns {boolean}
  */
-module.exports = function requireDll( sourceFiles ) {
+export default function requireDll( sourceFiles ) {
 	sourceFiles = Array.isArray( sourceFiles ) ? sourceFiles : [ sourceFiles ];
 
 	return sourceFiles.some( filePath => /-dll.[jt]s$/.test( filePath ) );
-};
+}

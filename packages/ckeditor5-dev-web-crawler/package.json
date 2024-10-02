@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-web-crawler",
-  "version": "43.0.0",
+  "version": "44.0.0-alpha.5",
   "description": "Used to run a web crawler that checks for errors on specified pages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -17,13 +17,14 @@
     "npm": ">=5.7.1"
   },
   "main": "lib/index.js",
+  "type": "module",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "chalk": "^4.1.0",
-    "ora": "^5.2.0",
+    "chalk": "^5.0.0",
+    "ora": "^8.0.0",
     "puppeteer": "^19.7.5",
-    "strip-ansi": "^6.0.0"
+    "strip-ansi": "^7.0.0"
   }
 }

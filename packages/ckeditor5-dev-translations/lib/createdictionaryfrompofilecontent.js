@@ -3,17 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const PO = require( 'pofile' );
+import PO from 'pofile';
 
 /**
  * Returns object with key-value pairs from parsed po file.
  *
- * @param {String} poFileContent Content of the translation file.
+ * @param {string} poFileContent Content of the translation file.
  * @returns {Object.<String,String[]>}
  */
-module.exports = function createDictionaryFromPoFileContent( poFileContent ) {
+export default function createDictionaryFromPoFileContent( poFileContent ) {
 	const po = PO.parse( poFileContent );
 
 	const keys = {};
@@ -26,4 +24,4 @@ module.exports = function createDictionaryFromPoFileContent( poFileContent ) {
 	}
 
 	return keys;
-};
+}

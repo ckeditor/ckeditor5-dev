@@ -3,9 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
-	createEntryFile: require( './createentryfile' ),
-	getLicenseBanner: require( './getlicensebanner' )
-};
+export { default as getLicenseBanner } from './getlicensebanner.js';

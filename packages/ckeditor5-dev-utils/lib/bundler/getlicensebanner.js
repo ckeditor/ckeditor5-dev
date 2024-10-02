@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = function getLicenseBanner() {
+export default function getLicenseBanner() {
 	const date = new Date();
 
 	// License banner starts with `!`. That combines with uglifyjs' `comments` /^!/ option
@@ -20,4 +18,4 @@ module.exports = function getLicenseBanner() {
  */`
 	);
 	/* eslint-enable indent */
-};
+}
