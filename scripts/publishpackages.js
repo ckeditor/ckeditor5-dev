@@ -8,6 +8,8 @@
 /* eslint-env node */
 
 import { Listr } from 'listr2';
+import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
+import { confirm } from '@inquirer/prompts';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';
@@ -37,7 +39,8 @@ const tasks = new Listr( [
 						return true;
 					}
 
-					return task.prompt( { type: 'Confirm', message: 'Do you want to continue?' } );
+					return task.prompt( ListrInquirerPromptAdapter )
+						.run( confirm, { message: 'Do you want to continue?' } );
 				}
 			} );
 		},
