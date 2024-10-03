@@ -18,6 +18,7 @@ module.exports = {
 		'**/dist/*',
 		'**/coverage/**',
 		'**/node_modules/**',
+		'**/release/**',
 
 		// ESLint does not understand `import ... with { ... }`.
 		// See: https://github.com/eslint/eslint/discussions/15305.
