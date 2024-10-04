@@ -82,7 +82,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
 
-	const missingPackages = await groupMissingPackages( result.missing, packageJson.name );
+	const missingPackages = groupMissingPackages( result.missing, packageJson.name );
 
 	const misplacedOptions = {
 		dependencies: packageJson.dependencies,
@@ -132,7 +132,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		// Misplaced `dependencies` or `devDependencies`.
 		// Checks whether any package, which is already listed in the `dependencies` or `devDependencies`,
 		// should belong to that list.
-		( await findMisplacedDependencies( misplacedOptions ) )
+		findMisplacedDependencies( misplacedOptions )
 			.reduce( ( result, group ) => {
 				return result + '\n' +
 					group.description + '\n' +
@@ -197,7 +197,7 @@ function getInvalidItselfImports( repositoryPath ) {
  * @param {string} currentPackage Name of current package.
  * @returns {Promise.<Object.<string, Array.<string>>>}
  */
-async function groupMissingPackages( missingPackages, currentPackage ) {
+function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
 
 	const dependencies = [];
@@ -206,10 +206,10 @@ async function groupMissingPackages( missingPackages, currentPackage ) {
 	for ( const packageName of Object.keys( missingPackages ) ) {
 		const absolutePaths = missingPackages[ packageName ];
 
-		if ( await isDevDependency( packageName, absolutePaths ) ) {
-			devDependencies.push( packageName );
-		} else {
+		if ( isProductionDependency( packageName, absolutePaths ) ) {
 			dependencies.push( packageName );
+		} else {
+			devDependencies.push( packageName );
 		}
 	}
 
@@ -322,10 +322,10 @@ function findDuplicatedDependencies( dependencies, devDependencies ) {
  * @param {object|undefined} options.devDependencies Defined development dependencies from package.json.
  * @param {object} options.dependenciesToCheck All dependencies that have been found and files where they are used.
  * @param {Array.<string>} options.dependenciesToIgnore An array of package names that should not be checked.
- * @returns {Promise.<Array.<object>>} Misplaced packages. Each array item is an object containing
+ * @returns {<Array.<object>} Misplaced packages. Each array item is an object containing
  * the `description` string and `packageNames` array of strings.
  */
-async function findMisplacedDependencies( options ) {
+function findMisplacedDependencies( options ) {
 	const { dependencies, devDependencies, dependenciesToCheck, dependenciesToIgnore } = options;
 	const deps = Object.keys( dependencies || {} );
 	const devDeps = Object.keys( devDependencies || {} );
@@ -346,9 +346,9 @@ async function findMisplacedDependencies( options ) {
 			continue;
 		}
 
-		const isDevDep = await isDevDependency( packageName, absolutePaths );
-		const isMissingInDependencies = !isDevDep && !deps.includes( packageName ) && devDeps.includes( packageName );
-		const isMissingInDevDependencies = isDevDep && deps.includes( packageName ) && !devDeps.includes( packageName );
+		const isProdDep = isProductionDependency( packageName, absolutePaths );
+		const isMissingInDependencies = isProdDep && !deps.includes( packageName ) && devDeps.includes( packageName );
+		const isMissingInDevDependencies = !isProdDep && deps.includes( packageName ) && !devDeps.includes( packageName );
 
 		if ( isMissingInDependencies ) {
 			misplacedPackages.missingInDependencies.packageNames.add( packageName );
@@ -369,89 +369,44 @@ async function findMisplacedDependencies( options ) {
 }
 
 /**
- * Checks if a given package is a development-only dependency. Package is considered a dev dependency
- * if it is used only in files that are not used in the final build, such as tests, demos or typings.
- *
- * @param {string} packageName
- * @param {Array.<string>} absolutePaths Files where a given package has been imported.
- * @returns {Promise.<boolean>}
+ * These folders contain code that will be shipped to npm and run in the final projects.
+ * This means that all dependencies used in these folders are production dependencies.
  */
-async function isDevDependency( packageName, absolutePaths ) {
-	if ( packageName.startsWith( '@types/' ) ) {
-		return true;
-	}
+const foldersContainingProductionCode = [
+	/**
+	 * These folders contain the source code of the packages.
+	 */
+	/[/\\]bin[/\\]/,
+	/[/\\]src[/\\]/,
+	/[/\\]lib[/\\]/,
+	/[/\\]theme[/\\]/,
 
 	/**
-	 * These folders contain code that will be shipped to npm and run in the final projects.
-	 * This means that all dependencies used in these folders are production dependencies.
+	 * This folder contains the compiled code of the packages. Most of this code is the same
+	 * as the source, but during the build process some of the imports are replaced with those
+	 * compatible with the "new installation methods", which may use different dependencies.
+	 *
+	 * For example, the `ckeditor5/src/core.js` import is replaced with `@ckeditor/ckeditor5-core/dist/index.js`.
+	 *                   ^^^^^^^^^                                       ^^^^^^^^^^^^^^^^^^^^^^^^
 	 */
-	const foldersContainingProductionCode = [
-		/**
-		 * These folders contain the source code of the packages.
-		 */
-		/[/\\]bin[/\\]/,
-		/[/\\]src[/\\]/,
-		/[/\\]lib[/\\]/,
-		/[/\\]theme[/\\]/,
-
-		/**
-		 * This folder contains the compiled code of the packages. Most of this code is the same
-		 * as the source, but during the build process some of the imports are replaced with those
-		 * compatible with the "new installation methods", which may use different dependencies.
-		 *
-		 * For example, the `ckeditor5/src/core.js` import is replaced with `@ckeditor/ckeditor5-core/dist/index.js`.
-		 *                   ^^^^^^^^^                                       ^^^^^^^^^^^^^^^^^^^^^^^^
-		 */
-		/[/\\]dist[/\\]/
-	];
-
-	for ( const absolutePath of absolutePaths ) {
-		if ( !foldersContainingProductionCode.some( folder => absolutePath.match( folder ) ) ) {
-			continue;
-		}
-
-		if ( absolutePath.endsWith( '.ts' ) ) {
-			// Verify kind of imports in TypeScript file.
-			const importKinds = await getImportAndExportKinds( packageName, absolutePath );
-
-			// There is any non type kind of import from that package so not a dev dependency.
-			if ( importKinds.some( importKind => importKind != 'type' ) ) {
-				return false;
-			}
-		} else {
-			// Import from some other file from src/ or theme/ - package is not dev dependency.
-			return false;
-		}
-	}
-
-	// There were no value imports, so it is a dev dependency.
-	return true;
-}
+	/[/\\]dist[/\\]/
+];
 
 /**
- * Parses TS file from `absolutePath` and returns a list of import and export types from `packageName`.
+ * Checks if a given package is a production dependency, i.e., it's used in build files or their typings.
  *
- * @param {string} packageName
- * @param {string} absolutePath File where a given package has been imported.
- * @returns {Promise.<Array.<string>>} Array of import kinds.
+ * @param {string} packageName Name of the package.
+ * @param {Array.<string>} paths Files where a given package has been imported.
+ * @returns {boolean}
  */
-async function getImportAndExportKinds( packageName, absolutePath ) {
-	const astContent = await depCheck.parser.typescript( absolutePath );
-
-	if ( !astContent || !astContent.program || !astContent.program.body ) {
-		return [];
+function isProductionDependency( packageName, paths ) {
+	if ( packageName.startsWith( '@types/' ) ) {
+		return false;
 	}
 
-	const types = [
-		'ImportDeclaration',
-		'ExportAllDeclaration',
-		'ExportNamedDeclaration'
-	];
-
-	return astContent.program.body
-		.filter( node => types.includes( node.type ) )
-		.filter( node => node.source?.value?.startsWith( packageName ) )
-		.map( node => node.importKind || node.exportKind );
+	return paths.some(
+		path => foldersContainingProductionCode.some( folder => path.match( folder ) )
+	);
 }
 
 /**
