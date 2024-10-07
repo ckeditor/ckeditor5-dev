@@ -3,67 +3,49 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { describe, expect, it, vi } from 'vitest';
+import pacote from 'pacote';
 import semver from 'semver';
-import shellEscape from 'shell-escape';
 
 import isVersionPublishableForTag from '../../lib/utils/isversionpublishablefortag.js';
 
-vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'pacote' );
 vi.mock( 'semver' );
-vi.mock( 'shell-escape' );
 
 describe( 'isVersionPublishableForTag()', () => {
-	beforeEach( () => {
-		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
-	} );
-
-	it( 'should return true if given version is available', async () => {
-		vi.mocked( semver.lte ).mockReturnValue( false );
-		vi.mocked( tools.shExec ).mockResolvedValue( '1.0.0\n' );
-
-		const result = await isVersionPublishableForTag( 'package-name', '1.0.1', 'latest' );
-
-		expect( result ).to.equal( true );
-		expect( semver.lte ).toHaveBeenCalledTimes( 1 );
-		expect( semver.lte ).toHaveBeenCalledWith( '1.0.1', '1.0.0' );
-		expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'npm view package-name@latest version --silent', expect.anything() );
-	} );
-
 	it( 'should return false if given version is not available', async () => {
 		vi.mocked( semver.lte ).mockReturnValue( true );
-		vi.mocked( tools.shExec ).mockResolvedValue( '1.0.0\n' );
+		vi.mocked( pacote.manifest ).mockResolvedValue( ( {
+			version: '1.0.0'
+		} ) );
 
 		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'latest' );
 
 		expect( result ).to.equal( false );
-		expect( semver.lte ).toHaveBeenCalledTimes( 1 );
-		expect( semver.lte ).toHaveBeenCalledWith( '1.0.0', '1.0.0' );
-		expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'npm view package-name@latest version --silent', expect.anything() );
+		expect( semver.lte ).toHaveBeenCalledExactlyOnceWith( '1.0.0', '1.0.0' );
+		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
+	} );
+
+	it( 'should return false if given version is not higher than the latest published', async () => {
+		vi.mocked( semver.lte ).mockReturnValue( true );
+
+		vi.mocked( pacote.manifest ).mockResolvedValue( ( {
+			version: '1.0.1'
+		} ) );
+
+		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'latest' );
+
+		expect( result ).to.equal( false );
+		expect( semver.lte ).toHaveBeenCalledExactlyOnceWith( '1.0.0', '1.0.1' );
 	} );
 
 	it( 'should return true if given npm tag is not published yet', async () => {
-		vi.mocked( tools.shExec ).mockRejectedValue( 'E404' );
+		vi.mocked( pacote.manifest ).mockRejectedValue( 'E404' );
 
 		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
 
 		expect( result ).to.equal( true );
 		expect( semver.lte ).not.toHaveBeenCalled();
-		expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'npm view package-name@alpha version --silent', expect.anything() );
-	} );
-
-	it( 'should escape arguments passed to a shell command', async () => {
-		vi.mocked( semver.lte ).mockReturnValue( false );
-		vi.mocked( tools.shExec ).mockResolvedValue( '1.0.0\n' );
-
-		await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
-
-		expect( shellEscape ).toHaveBeenCalledTimes( 2 );
-		expect( shellEscape ).toHaveBeenNthCalledWith( 1, [ 'package-name' ] );
-		expect( shellEscape ).toHaveBeenNthCalledWith( 2, [ 'alpha' ] );
+		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@alpha' );
 	} );
 } );

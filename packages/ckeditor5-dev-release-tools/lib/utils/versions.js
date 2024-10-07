@@ -4,6 +4,7 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import pacote from 'pacote';
 import getChangelog from './getchangelog.js';
 import getPackageJson from './getpackagejson.js';
 
@@ -37,9 +38,9 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
 export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	const packageName = getPackageJson( cwd ).name;
 
-	return tools.shExec( `npm view ${ packageName } versions --json`, { verbosity: 'silent', async: true } )
+	return pacote.packument( packageName )
 		.then( result => {
-			const lastVersion = JSON.parse( result )
+			const lastVersion = Object.keys( result.versions )
 				.filter( version => version.startsWith( releaseIdentifier ) )
 				.sort( ( a, b ) => a.localeCompare( b, undefined, { numeric: true } ) )
 				.pop();

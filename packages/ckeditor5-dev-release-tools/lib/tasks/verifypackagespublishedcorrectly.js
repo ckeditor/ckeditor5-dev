@@ -32,16 +32,12 @@ export default async function verifyPackagesPublishedCorrectly( options ) {
 	for ( const packageToVerify of packagesToVerify ) {
 		const packageJson = await fs.readJson( upath.join( packageToVerify, 'package.json' ) );
 
-		try {
-			const packageWasUploadedCorrectly = !await checkVersionAvailability( version, packageJson.name );
+		const isPackageVersionAvailable = await checkVersionAvailability( version, packageJson.name );
 
-			if ( packageWasUploadedCorrectly ) {
-				await fs.remove( packageToVerify );
-			} else {
-				errors.push( packageJson.name );
-			}
-		} catch {
+		if ( isPackageVersionAvailable ) {
 			errors.push( packageJson.name );
+		} else {
+			await fs.remove( packageToVerify );
 		}
 	}
 

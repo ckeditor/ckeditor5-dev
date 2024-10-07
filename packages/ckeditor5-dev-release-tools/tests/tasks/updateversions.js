@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import upath from 'upath';

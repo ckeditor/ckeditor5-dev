@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import shellEscape from 'shell-escape';

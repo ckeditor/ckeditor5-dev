@@ -38,6 +38,7 @@
     "inquirer": "^11.0.0",
     "lodash-es": "^4.17.21",
     "minimatch": "^9.0.0",
+    "pacote": "^19.0.0",
     "semver": "^7.6.3",
     "shell-escape": "^0.2.0",
     "upath": "^2.0.1"
