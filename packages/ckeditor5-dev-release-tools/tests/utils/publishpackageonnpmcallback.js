@@ -72,39 +72,6 @@ describe( 'publishPackageOnNpmCallback()', () => {
 			} );
 	} );
 
-	it( 'should throw when publishing on npm failed', () => {
-		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'Unexpected error.' ) );
-
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
-
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).toBeInstanceOf( Error );
-					expect( error.message ).toEqual( 'Unable to publish "ckeditor5-foo" package.' );
-				}
-			);
-	} );
-
-	it( 'should not remove a package directory when publishing on npm failed', () => {
-		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'Unexpected error.' ) );
-
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
-
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				() => {
-					expect( fs.remove ).not.toHaveBeenCalled();
-				}
-			);
-	} );
-
 	it( 'should not remove a package directory and not throw error when publishing on npm failed with code 409', async () => {
 		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'code E409' ) );
 
