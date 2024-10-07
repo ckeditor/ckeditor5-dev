@@ -9,7 +9,6 @@ import pacote from 'pacote';
  * Checks if the provided version for the package exists in the npm registry.
  *
  * Returns a promise that resolves to `true` if the provided version does not exist or resolves the promise to `false` otherwise.
- * If the `npm show` command exits with an error, it is re-thrown.
  *
  * @param {string} version
  * @param {string} packageName
