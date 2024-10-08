@@ -7,12 +7,19 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import PO from 'pofile';
 import { glob } from 'glob';
+import { fileURLToPath } from 'url';
+import { getNPlurals, getFormula } from 'plural-forms';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import cleanPoFileContent from './cleanpofilecontent.js';
 import findMessages from './findmessages.js';
+import { getLanguages } from './getlanguages.js';
 
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = upath.dirname( __filename );
+
+const EMPTY_TRANSLATION_TEMPLATE = upath.join( __dirname, 'templates', 'empty.po' );
 const CONTEXT_FILE_PATH = upath.join( 'lang', 'contexts.json' );
-const TRANSLATIONS_FILES_PATTERN = upath.join( 'lang', 'translations', '*.po' );
+const TRANSLATION_FILES_PATH = upath.join( 'lang', 'translations' );
 
 /**
  * Synchronizes translations in provided packages by performing the following steps:
@@ -128,12 +135,14 @@ function updatePackageTranslations( { packageContexts, sourceMessages } ) {
 			.map( messageId => sourceMessages.find( message => message.id === messageId ) )
 			.filter( Boolean );
 
+		createMissingPackageTranslations( { packagePath } );
+
 		// (2) Find all translation files (*.po files).
-		const translationsFiles = glob.sync( upath.join( packagePath, TRANSLATIONS_FILES_PATTERN ) );
+		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
 
 		// Then, for each translation file in a package:
-		for ( const translationsFile of translationsFiles ) {
-			const translations = PO.parse( fs.readFileSync( translationsFile, 'utf-8' ) );
+		for ( const translationFilePath of translationFilePaths ) {
+			const translations = PO.parse( fs.readFileSync( translationFilePath, 'utf-8' ) );
 
 			// (2.1) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
@@ -148,19 +157,43 @@ function updatePackageTranslations( { packageContexts, sourceMessages } ) {
 
 						item.msgctxt = contextContent[ message.id ];
 						item.msgid = message.string;
-						item.msgstr.push( message.string );
+						item.msgstr.push( '' );
 
 						if ( message.plural ) {
 							item.msgid_plural = message.plural;
-							item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( message.plural ) );
+							item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( '' ) );
 						}
 
 						return item;
 					} )
 			);
 
-			fs.writeFileSync( translationsFile, cleanPoFileContent( translations.toString() ), 'utf-8' );
+			fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
 		}
+	}
+}
+
+/**
+ * @param {object} options
+ * @param {string} options.packagePath Path to the package to check for missing translations.
+ */
+function createMissingPackageTranslations( { packagePath } ) {
+	for ( const { localeCode, languageCode, languageFileName } of getLanguages() ) {
+		const translationFilePath = upath.join( packagePath, TRANSLATION_FILES_PATH, `${ languageFileName }.po` );
+
+		if ( fs.existsSync( translationFilePath ) ) {
+			continue;
+		}
+
+		const translations = PO.parse( fs.readFileSync( EMPTY_TRANSLATION_TEMPLATE, 'utf-8' ) );
+
+		translations.headers.Language = localeCode;
+		translations.headers[ 'Plural-Forms' ] = [
+			`nplurals=${ getNPlurals( languageCode ) };`,
+			`plural=${ getFormula( languageCode ) };`
+		].join( ' ' );
+
+		fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
 	}
 }
 
