@@ -30,7 +30,6 @@ import {
 import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
 import checkVersionAvailability from '../lib/utils/checkversionavailability.js';
-import verifyPackagesPublishedCorrectly from '../lib/tasks/verifypackagespublishedcorrectly.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 import provideToken from '../lib/utils/providetoken.js';
@@ -236,13 +235,6 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( isVersionPublishableForTag ).to.be.a( 'function' );
 			expect( index.isVersionPublishableForTag ).to.equal( isVersionPublishableForTag );
-		} );
-	} );
-
-	describe( 'verifyPackagesPublishedCorrectly()', () => {
-		it( 'should be a function', () => {
-			expect( verifyPackagesPublishedCorrectly ).to.be.a( 'function' );
-			expect( index.verifyPackagesPublishedCorrectly ).to.equal( verifyPackagesPublishedCorrectly );
 		} );
 	} );
 
