@@ -5,10 +5,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+/* eslint-env node */
 
 /**
- * This script checks if the provided workflow has been restarted.
+ * This script checks if the provided workflow has been restarted. If so, it exits with a zero error code.
  *
  * In order to integrate the action in your pipeline, you need prepare a few environment variables:
  *
@@ -36,6 +36,11 @@ const requestOptions = {
 fetch( requestUrl, requestOptions )
 	.then( res => res.json() )
 	.then( response => {
-		console.log( 'status = ', response.status );
-		console.log( 'tag = ', response.tag );
+		const { tag = '' } = response;
+
+		if ( tag.startsWith( 'rerun' ) ) {
+			return process.exit( 0 );
+		}
+
+		return process.exit( 1 );
 	} );
