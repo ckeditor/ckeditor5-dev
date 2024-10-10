@@ -4,28 +4,20 @@
  */
 
 import upath from 'upath';
-import fs from 'fs-extra';
-import PO from 'pofile';
-import { glob } from 'glob';
-import { fileURLToPath } from 'url';
-import { getNPlurals, getFormula } from 'plural-forms';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import cleanPoFileContent from './cleanpofilecontent.js';
-import findMessages from './findmessages.js';
-import { getLanguages } from './getlanguages.js';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = upath.dirname( __filename );
-
-const EMPTY_TRANSLATION_TEMPLATE = upath.join( __dirname, 'templates', 'empty.po' );
-const CONTEXT_FILE_PATH = upath.join( 'lang', 'contexts.json' );
-const TRANSLATION_FILES_PATH = upath.join( 'lang', 'translations' );
+import getPackageContexts from './utils/getpackagecontexts.js';
+import { CONTEXT_FILE_PATH } from './utils/constants.js';
+import getSourceMessages from './utils/getsourcemessages.js';
+import updatePackageTranslations from './utils/updatepackagetranslations.js';
 
 /**
  * Synchronizes translations in provided packages by performing the following steps:
- * * Collect all i18n messages from all provided packages by finding `t()` calls.
+ * * Collect all i18n messages from all provided packages by finding `t()` calls in source files.
  * * Detect if translation context is valid, i.e. whether there is no missing, unused or duplicated context.
- * * If there are no validation errors, update all translation files (*.po files) to be in sync with the context file.
+ * * If there are no validation errors, update all translation files ("*.po" files) to be in sync with the context file:
+ *   * unused translation entries are removed,
+ *   * missing translation entries are added with empty string,
+ *   * missing translation files are created for languages that do not have own "*.po" file yet.
  *
  * @param {object} options
  * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
@@ -72,129 +64,6 @@ export default function synchronizeTranslations( options ) {
 	updatePackageTranslations( { packageContexts, sourceMessages } );
 
 	log.info( '✨ Done.' );
-}
-
-/**
- * @param {object} options
- * @param {Array.<string>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
- * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
- * @returns {Array.<Context>}
- */
-function getPackageContexts( { packagePaths, corePackagePath } ) {
-	// Add path to the core package if not included in the package paths.
-	// The core package contains common contexts shared between other packages.
-	if ( !packagePaths.includes( corePackagePath ) ) {
-		packagePaths.push( corePackagePath );
-	}
-
-	return packagePaths.map( packagePath => {
-		const contextFilePath = upath.join( packagePath, CONTEXT_FILE_PATH );
-		const contextContent = fs.existsSync( contextFilePath ) ? fs.readJsonSync( contextFilePath ) : [];
-
-		return {
-			contextContent,
-			contextFilePath,
-			packagePath
-		};
-	} );
-}
-
-/**
- * @param {object} options
- * @param {Array.<string>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
- * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
- * @param {Function} options.onErrorCallback Called when there is an error with parsing the source files.
- * @returns {Array.<Message>}
- */
-function getSourceMessages( { packagePaths, sourceFiles, onErrorCallback } ) {
-	return sourceFiles.flatMap( filePath => {
-		const fileContent = fs.readFileSync( filePath, 'utf-8' );
-		const packagePath = packagePaths.find( packagePath => filePath.includes( packagePath ) );
-		const sourceMessages = [];
-
-		const onMessageCallback = message => {
-			sourceMessages.push( { filePath, packagePath, ...message } );
-		};
-
-		findMessages( fileContent, filePath, onMessageCallback, onErrorCallback );
-
-		return sourceMessages;
-	} );
-}
-
-/**
- * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
- * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- */
-function updatePackageTranslations( { packageContexts, sourceMessages } ) {
-	// For each package:
-	for ( const { packagePath, contextContent } of packageContexts ) {
-		// (1) Find all source messages that are defined in the language context.
-		const sourceMessagesForPackage = Object.keys( contextContent )
-			.map( messageId => sourceMessages.find( message => message.id === messageId ) )
-			.filter( Boolean );
-
-		createMissingPackageTranslations( { packagePath } );
-
-		// (2) Find all translation files (*.po files).
-		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
-
-		// Then, for each translation file in a package:
-		for ( const translationFilePath of translationFilePaths ) {
-			const translations = PO.parse( fs.readFileSync( translationFilePath, 'utf-8' ) );
-
-			// (2.1) Remove unused translations.
-			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
-
-			// (2.2) Add missing translations.
-			translations.items.push(
-				...sourceMessagesForPackage
-					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
-					.map( message => {
-						const numberOfPluralForms = PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals;
-						const item = new PO.Item( { nplurals: numberOfPluralForms } );
-
-						item.msgctxt = contextContent[ message.id ];
-						item.msgid = message.string;
-						item.msgstr.push( '' );
-
-						if ( message.plural ) {
-							item.msgid_plural = message.plural;
-							item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( '' ) );
-						}
-
-						return item;
-					} )
-			);
-
-			fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
-		}
-	}
-}
-
-/**
- * @param {object} options
- * @param {string} options.packagePath Path to the package to check for missing translations.
- */
-function createMissingPackageTranslations( { packagePath } ) {
-	for ( const { localeCode, languageCode, languageFileName } of getLanguages() ) {
-		const translationFilePath = upath.join( packagePath, TRANSLATION_FILES_PATH, `${ languageFileName }.po` );
-
-		if ( fs.existsSync( translationFilePath ) ) {
-			continue;
-		}
-
-		const translations = PO.parse( fs.readFileSync( EMPTY_TRANSLATION_TEMPLATE, 'utf-8' ) );
-
-		translations.headers.Language = localeCode;
-		translations.headers[ 'Plural-Forms' ] = [
-			`nplurals=${ getNPlurals( languageCode ) };`,
-			`plural=${ getFormula( languageCode ) };`
-		].join( ' ' );
-
-		fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
-	}
 }
 
 /**
@@ -252,6 +121,10 @@ function assertAllContextUsed( { packageContexts, sourceMessages, corePackagePat
 		.filter( ( { messageId, packagePath } ) => {
 			if ( packagePath === corePackagePath ) {
 				return !sourceMessageIds.includes( messageId );
+			}
+
+			if ( !sourceMessageIdsGroupedByPackage[ packagePath ] ) {
+				return true;
 			}
 
 			return !sourceMessageIdsGroupedByPackage[ packagePath ].includes( messageId );

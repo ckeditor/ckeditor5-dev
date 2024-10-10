@@ -87,7 +87,7 @@ const LOCALES_FILENAME_MAP = {
 /**
  * @returns {Array.<Language>}
  */
-export function getLanguages() {
+export default function getLanguages() {
 	return SUPPORTED_LOCALES.map( localeCode => {
 		const languageCode = localeCode.split( /[-_@]/ )[ 0 ];
 		const languageFileName = LOCALES_FILENAME_MAP[ localeCode ] || localeCode.toLowerCase().replace( /[^a-z0-9]+/, '-' );
