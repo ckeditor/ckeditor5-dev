@@ -32,3 +32,4 @@ export { default as checkVersionAvailability } from './utils/checkversionavailab
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
 export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
 export { default as provideToken } from './utils/providetoken.js';
+export { default as findPathsToPackages } from './utils/findpathstopackages.js';

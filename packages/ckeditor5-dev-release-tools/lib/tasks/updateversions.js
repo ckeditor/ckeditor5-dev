@@ -5,8 +5,8 @@
 
 import upath from 'upath';
 import fs from 'fs-extra';
-import { glob } from 'glob';
 import semver from 'semver';
+import findPathsToPackages from '../utils/findpathstopackages.js';
 
 const { normalizeTrim } = upath;
 
@@ -37,10 +37,16 @@ export default async function updateVersions( options ) {
 		packagesDirectoryFilter = null,
 		cwd = process.cwd()
 	} = options;
-	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
 
-	const globPatterns = getGlobPatterns( normalizedPackagesDir );
-	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
+	const pkgJsonPaths = await findPathsToPackages(
+		cwd,
+		packagesDirectory ? normalizeTrim( packagesDirectory ) : null,
+		{
+			includePackageJson: true,
+			includeCwd: true,
+			packagesDirectoryFilter
+		}
+	);
 
 	checkIfVersionIsValid( version );
 
@@ -50,40 +56,6 @@ export default async function updateVersions( options ) {
 		pkgJson.version = version;
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
-}
-
-/**
- * @param {string} cwd
- * @param {Array.<string>} globPatterns
- * @param {UpdateVersionsPackagesDirectoryFilter|null} packagesDirectoryFilter
- * @returns {Promise.<Array.<string>>}
- */
-async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
-	const pkgJsonPaths = await glob( globPatterns, {
-		cwd,
-		absolute: true,
-		nodir: true
-	} );
-
-	if ( !packagesDirectoryFilter ) {
-		return pkgJsonPaths;
-	}
-
-	return pkgJsonPaths.filter( packagesDirectoryFilter );
-}
-
-/**
- * @param {string|null} packagesDirectory
- * @returns {Array.<string>}
- */
-function getGlobPatterns( packagesDirectory ) {
-	const patterns = [ 'package.json' ];
-
-	if ( packagesDirectory ) {
-		patterns.push( packagesDirectory + '/*/package.json' );
-	}
-
-	return patterns;
 }
 
 /**

@@ -5,7 +5,6 @@
 
 import upath from 'upath';
 import fs from 'fs-extra';
-import { glob } from 'glob';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
 import assertPackages from '../utils/assertpackages.js';
 import assertNpmTag from '../utils/assertnpmtag.js';
@@ -13,6 +12,7 @@ import assertFilesToPublish from '../utils/assertfilestopublish.js';
 import executeInParallel from '../utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback.js';
 import checkVersionAvailability from '../utils/checkversionavailability.js';
+import findPathsToPackages from '../utils/findpathstopackages.js';
 
 /**
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
@@ -124,13 +124,6 @@ export default async function publishPackages( options ) {
 		concurrency,
 		confirmationCallback: null, // Do not ask again if already here.
 		attempts: remainingAttempts
-	} );
-}
-
-function findPathsToPackages( cwd, packagesDirectory ) {
-	return glob( '*/', {
-		cwd: upath.join( cwd, packagesDirectory ),
-		absolute: true
 	} );
 }
 
