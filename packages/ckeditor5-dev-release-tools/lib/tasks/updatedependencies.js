@@ -4,8 +4,10 @@
  */
 
 import fs from 'fs-extra';
-import { glob } from 'glob';
 import upath from 'upath';
+import findPathsToPackages from '../utils/findpathstopackages.js';
+
+const { normalizeTrim } = upath;
 
 /**
  * The purpose of this script is to update all eligible dependencies to a version specified in the `options.version`. The following packages
@@ -38,15 +40,15 @@ export default async function updateDependencies( options ) {
 		cwd = process.cwd()
 	} = options;
 
-	const globPatterns = [ 'package.json' ];
-
-	if ( packagesDirectory ) {
-		const packagesDirectoryPattern = upath.join( packagesDirectory, '*', 'package.json' );
-
-		globPatterns.push( packagesDirectoryPattern );
-	}
-
-	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
+	const pkgJsonPaths = await findPathsToPackages(
+		cwd,
+		packagesDirectory ? normalizeTrim( packagesDirectory ) : null,
+		{
+			includePackageJson: true,
+			includeCwd: true,
+			packagesDirectoryFilter
+		}
+	);
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		const pkgJson = await fs.readJson( pkgJsonPath );
@@ -76,28 +78,6 @@ function updateVersion( version, callback, dependencies ) {
 			dependencies[ packageName ] = version;
 		}
 	}
-}
-
-/**
- * @param {string} cwd
- * @param {Array.<string>} globPatterns
- * @param {UpdateDependenciesPackagesDirectoryFilter|null} packagesDirectoryFilter
- * @returns {Promise.<Array.<string>>}
- */
-async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
-	const globOptions = {
-		cwd,
-		nodir: true,
-		absolute: true
-	};
-
-	const pkgJsonPaths = await glob( globPatterns, globOptions );
-
-	if ( !packagesDirectoryFilter ) {
-		return pkgJsonPaths;
-	}
-
-	return pkgJsonPaths.filter( packagesDirectoryFilter );
 }
 
 /**

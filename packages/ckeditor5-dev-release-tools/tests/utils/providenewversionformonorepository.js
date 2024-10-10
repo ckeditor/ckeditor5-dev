@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import provideNewVersionForMonoRepository from '../../lib/utils/providenewversionformonorepository.js';
+import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
 
 vi.mock( 'inquirer' );
 vi.mock( 'chalk', () => ( {
@@ -18,6 +19,7 @@ vi.mock( 'chalk', () => ( {
 vi.mock( '../../lib/utils/constants.js', () => ( {
 	CLI_INDENT_SIZE: 1
 } ) );
+vi.mock( '../../lib/utils/checkversionavailability.js' );
 
 describe( 'provideNewVersionForMonoRepository()', () => {
 	beforeEach( () => {
@@ -29,52 +31,66 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 	} );
 
 	it( 'bumps major version', async () => {
-		await expect( provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'major' ) )
-			.resolves.toEqual( '2.0.0' );
+		await expect( provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'major'
+		} ) ).resolves.toEqual( '2.0.0' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
 				expect.objectContaining( {
-					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/foo", suggested: "2.0.0"):',
+					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/ckeditor5-foo", suggested: "2.0.0"):',
 					default: '2.0.0'
 				} )
 			] )
 		);
-		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/foo' );
+		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/ckeditor5-foo' );
 	} );
 
 	it( 'bumps minor version', async () => {
-		await expect( provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'minor' ) )
-			.resolves.toEqual( '1.1.0' );
+		await expect( provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'minor'
+		} ) ).resolves.toEqual( '1.1.0' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
 				expect.objectContaining( {
-					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/foo", suggested: "1.1.0"):',
+					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/ckeditor5-foo", suggested: "1.1.0"):',
 					default: '1.1.0'
 				} )
 			] )
 		);
-		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/foo' );
+		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/ckeditor5-foo' );
 	} );
 
 	it( 'bumps patch version', async () => {
-		await expect( provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'patch' ) )
-			.resolves.toEqual( '1.0.1' );
+		await expect( provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'patch'
+		} ) ).resolves.toEqual( '1.0.1' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
 				expect.objectContaining( {
-					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/foo", suggested: "1.0.1"):',
+					message: 'Type the new version (current highest: "1.0.0" found in "@ckeditor/ckeditor5-foo", suggested: "1.0.1"):',
 					default: '1.0.1'
 				} )
 			] )
 		);
-		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/foo' );
+		expect( vi.mocked( chalk ).underline ).toHaveBeenCalledExactlyOnceWith( '@ckeditor/ckeditor5-foo' );
 	} );
 
 	it( 'allows attaching the helper as a part of another process (indent=0)', async () => {
-		await expect( provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'major', { indentLevel: 0 } ) );
+		await expect( provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'major',
+			indentLevel: 0
+		} ) );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -88,7 +104,12 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 	} );
 
 	it( 'allows attaching the helper as a part of another process (indent=3)', async () => {
-		await expect( provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'major', { indentLevel: 3 } ) );
+		await expect( provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'major',
+			indentLevel: 3
+		} ) );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -103,7 +124,11 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 	} );
 
 	it( 'removes spaces from provided version', async () => {
-		await provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo' );
+		await provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'major'
+		} );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -124,7 +149,11 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 	} );
 
 	it( 'validates the provided version', async () => {
-		await provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo' );
+		await provideNewVersionForMonoRepository( {
+			version: '1.0.0',
+			packageName: '@ckeditor/ckeditor5-foo',
+			bumpType: 'major'
+		} );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -139,11 +168,24 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		const [ firstQuestion ] = firstArgument;
 		const { validate } = firstQuestion;
 
-		expect( validate( '2.0.0' ) ).to.equal( true );
-		expect( validate( '1.1.0' ) ).to.equal( true );
-		expect( validate( '1.0.0' ) ).to.equal( 'Provided version must be higher than "1.0.0".' );
-		expect( validate( 'skip' ) ).to.equal( 'Please provide a valid version.' );
-		expect( validate( 'internal' ) ).to.equal( 'Please provide a valid version.' );
-		expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+
+		await expect( validate( '2.0.0' ) ).resolves.toBe( true );
+		await expect( validate( '1.1.0' ) ).resolves.toBe( true );
+		await expect( validate( '1.0.0' ) ).resolves.toBe( 'Provided version must be higher than "1.0.0".' );
+		await expect( validate( 'skip' ) ).resolves.toBe( 'Please provide a valid version.' );
+		await expect( validate( 'internal' ) ).resolves.toBe( 'Please provide a valid version.' );
+		await expect( validate( '0.1' ) ).resolves.toBe( 'Please provide a valid version.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '2.0.0', '@ckeditor/ckeditor5-foo' );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.1.0', '@ckeditor/ckeditor5-foo' );
+
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( false );
+
+		await expect( validate( '3.0.0' ) ).resolves.toBe( 'Given version is already taken.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '3.0.0', '@ckeditor/ckeditor5-foo' );
 	} );
 } );

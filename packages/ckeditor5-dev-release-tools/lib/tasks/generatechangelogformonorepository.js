@@ -301,7 +301,14 @@ export default async function generateChangelogForMonoRepository( options ) {
 			bumpType = 'patch';
 		}
 
-		return provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
+		const provideVersionOptions = {
+			packageName: packageHighestVersion,
+			version: highestVersion,
+			bumpType,
+			indentLevel: 1
+		};
+
+		return provideNewVersionForMonoRepository( provideVersionOptions )
 			.then( version => {
 				nextVersion = version;
 

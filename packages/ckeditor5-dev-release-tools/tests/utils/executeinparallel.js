@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { glob } from 'glob';
 import fs from 'fs/promises';
 import { registerAbortController, deregisterAbortController } from '../../lib/utils/abortcontroller.js';
 import executeInParallel from '../../lib/utils/executeinparallel.js';
+import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
 import os from 'os';
 
 const stubs = vi.hoisted( () => ( {
@@ -45,7 +45,7 @@ vi.mock( 'crypto', () => ( {
 	}
 } ) );
 
-vi.mock( 'glob' );
+vi.mock( '../../lib/utils/findpathstopackages.js' );
 vi.mock( 'fs/promises' );
 vi.mock( '../../lib/utils/abortcontroller.js' );
 
@@ -55,7 +55,7 @@ describe( 'executeInParallel()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/ckeditor' );
 
-		vi.mocked( glob ).mockResolvedValue( [
+		vi.mocked( findPathsToPackages ).mockResolvedValue( [
 			'/home/ckeditor/my-packages/package-01',
 			'/home/ckeditor/my-packages/package-02',
 			'/home/ckeditor/my-packages/package-03',
@@ -92,11 +92,11 @@ describe( 'executeInParallel()', () => {
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-		expect( glob ).toHaveBeenCalledTimes( 1 );
-		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-			cwd: '/home/ckeditor',
-			absolute: true
-		} ) );
+		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			'/home/ckeditor',
+			'my-packages',
+			expect.any( Object )
+		);
 
 		expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFile ).toHaveBeenCalledWith(
@@ -120,11 +120,14 @@ describe( 'executeInParallel()', () => {
 	} );
 
 	it( 'should execute the specified `taskToExecute` on packages found in the `packagesDirectory` that are not filtered', async () => {
-		const options = Object.assign( {}, defaultOptions, {
-			// Skip "package-02".
-			packagesDirectoryFilter: packageDirectory => !packageDirectory.endsWith( 'package-02' )
-		} );
+		vi.mocked( findPathsToPackages ).mockResolvedValue( [
+			'/home/ckeditor/my-packages/package-01',
+			'/home/ckeditor/my-packages/package-03',
+			'/home/ckeditor/my-packages/package-04'
+		] );
 
+		const packagesDirectoryFilter = vi.fn();
+		const options = Object.assign( {}, defaultOptions, { packagesDirectoryFilter } );
 		const promise = executeInParallel( options );
 		await delay( 0 );
 
@@ -132,6 +135,12 @@ describe( 'executeInParallel()', () => {
 		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			'/home/ckeditor',
+			'my-packages',
+			expect.objectContaining( { packagesDirectoryFilter } )
+		);
 
 		expect( firstWorker.workerData.packages ).toEqual( [
 			'/home/ckeditor/my-packages/package-01',
@@ -157,90 +166,9 @@ describe( 'executeInParallel()', () => {
 		const promise = executeInParallel( options );
 		await delay( 0 );
 
-		expect( glob ).toHaveBeenCalledTimes( 1 );
-		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-			cwd: '/custom/cwd',
-			absolute: true
-		} ) );
+		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith( '/custom/cwd', 'my-packages', expect.any( Object ) );
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-		// Workers did not emit an error.
-		getExitCallback( firstWorker )( 0 );
-		getExitCallback( secondWorker )( 0 );
-
-		await promise;
-	} );
-
-	it( 'should normalize the current working directory to unix-style (default value, Windows path)', async () => {
-		process.cwd.mockReturnValue( 'C:\\Users\\ckeditor' );
-
-		const promise = executeInParallel( defaultOptions );
-		await delay( 0 );
-
-		expect( glob ).toHaveBeenCalledTimes( 1 );
-		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-			cwd: 'C:/Users/ckeditor',
-			absolute: true
-		} ) );
-
-		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-		// Workers did not emit an error.
-		getExitCallback( firstWorker )( 0 );
-		getExitCallback( secondWorker )( 0 );
-
-		await promise;
-	} );
-
-	it( 'should normalize the current working directory to unix-style (`options.cwd`, Windows path)', async () => {
-		const options = Object.assign( {}, defaultOptions, {
-			cwd: 'C:\\Users\\ckeditor'
-		} );
-
-		const promise = executeInParallel( options );
-		await delay( 0 );
-
-		expect( glob ).toHaveBeenCalledTimes( 1 );
-		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-			cwd: 'C:/Users/ckeditor',
-			absolute: true
-		} ) );
-
-		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-		// Workers did not emit an error.
-		getExitCallback( firstWorker )( 0 );
-		getExitCallback( secondWorker )( 0 );
-
-		await promise;
-	} );
-
-	it( 'should work on normalized paths to packages', async () => {
-		vi.mocked( glob ).mockResolvedValue( [
-			'C:/Users/workspace/ckeditor/my-packages/package-01',
-			'C:/Users/workspace/ckeditor/my-packages/package-02',
-			'C:/Users/workspace/ckeditor/my-packages/package-03',
-			'C:/Users/workspace/ckeditor/my-packages/package-04'
-		] );
-
-		const promise = executeInParallel( defaultOptions );
-		await delay( 0 );
-
-		// By default the helper uses a half of available CPUs.
-		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
-
-		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-		expect( firstWorker.workerData.packages ).toEqual( [
-			'C:/Users/workspace/ckeditor/my-packages/package-01',
-			'C:/Users/workspace/ckeditor/my-packages/package-03'
-		] );
-
-		expect( secondWorker.workerData.packages ).toEqual( [
-			'C:/Users/workspace/ckeditor/my-packages/package-02',
-			'C:/Users/workspace/ckeditor/my-packages/package-04'
-		] );
 
 		// Workers did not emit an error.
 		getExitCallback( firstWorker )( 0 );

@@ -7,23 +7,29 @@ import inquirer from 'inquirer';
 import semver from 'semver';
 import chalk from 'chalk';
 import { CLI_INDENT_SIZE } from './constants.js';
+import checkVersionAvailability from './checkversionavailability.js';
 
 /**
  * Asks a user for providing the new version for a major release.
  *
- * @param {string} version
- * @param {string} foundPackage
- * @param {string} bumpType
- * @param {object} [options={}]
+ * @param {object} options
+ * @param {string} options.packageName
+ * @param {string} options.version
+ * @param {string} options.bumpType
  * @param {number} [options.indentLevel=0] The indent level.
  * @returns {Promise.<string>}
  */
-export default async function provideNewVersionForMonoRepository( version, foundPackage, bumpType, options = {} ) {
-	const indentLevel = options.indentLevel || 0;
-	const suggestedVersion = semver.inc( version, bumpType );
+export default async function provideNewVersionForMonoRepository( options ) {
+	const {
+		version,
+		packageName,
+		bumpType,
+		indentLevel = 0
+	} = options;
 
+	const suggestedVersion = semver.inc( version, bumpType );
 	const message = 'Type the new version ' +
-		`(current highest: "${ version }" found in "${ chalk.underline( foundPackage ) }", suggested: "${ suggestedVersion }"):`;
+		`(current highest: "${ version }" found in "${ chalk.underline( packageName ) }", suggested: "${ suggestedVersion }"):`;
 
 	const versionQuestion = {
 		type: 'input',
@@ -35,12 +41,22 @@ export default async function provideNewVersionForMonoRepository( version, found
 			return input.trim();
 		},
 
-		validate( input ) {
+		async validate( input ) {
 			if ( !semver.valid( input ) ) {
 				return 'Please provide a valid version.';
 			}
 
-			return semver.gt( input, version ) ? true : `Provided version must be higher than "${ version }".`;
+			if ( !semver.gt( input, version ) ) {
+				return `Provided version must be higher than "${ version }".`;
+			}
+
+			const isAvailable = await checkVersionAvailability( input, packageName );
+
+			if ( !isAvailable ) {
+				return 'Given version is already taken.';
+			}
+
+			return true;
 		},
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	};

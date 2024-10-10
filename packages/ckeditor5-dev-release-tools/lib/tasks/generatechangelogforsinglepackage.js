@@ -79,11 +79,14 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 		.then( () => {
 			logProcess( 'Preparing new version for the package...' );
 
-			const releaseType = getNewVersionType( allCommits );
-
 			displayCommits( allCommits, { indentLevel: 1 } );
 
-			return provideVersion( pkgJson.version, releaseType, { indentLevel: 1 } );
+			return provideVersion( {
+				packageName: pkgJson.name,
+				version: pkgJson.version,
+				indentLevel: 1,
+				releaseTypeOrNewVersion: getNewVersionType( allCommits )
+			} );
 		} )
 		.then( version => {
 			if ( version === 'skip' ) {

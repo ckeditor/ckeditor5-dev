@@ -5,11 +5,10 @@
 
 import upath from 'upath';
 import fs from 'fs-extra';
-import { glob } from 'glob';
 import semver from 'semver';
-import checkVersionAvailability from '../utils/checkversionavailability.js';
+import findPathsToPackages from '../utils/findpathstopackages.js';
 
-const { normalizeTrim, toUnix, dirname, join } = upath;
+const { normalizeTrim } = upath;
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working
@@ -38,24 +37,18 @@ export default async function updateVersions( options ) {
 		packagesDirectoryFilter = null,
 		cwd = process.cwd()
 	} = options;
-	const normalizedCwd = toUnix( cwd );
-	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
 
-	const globPatterns = getGlobPatterns( normalizedPackagesDir );
-	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
+	const pkgJsonPaths = await findPathsToPackages(
+		cwd,
+		packagesDirectory ? normalizeTrim( packagesDirectory ) : null,
+		{
+			includePackageJson: true,
+			includeCwd: true,
+			packagesDirectoryFilter
+		}
+	);
 
-	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
-
-	const { version: rootPackageVersion } = await readPackageJson( normalizedCwd );
-	const { name: randomPackageName } = await readPackageJson( randomPackagePath );
-
-	checkIfVersionIsValid( version, rootPackageVersion );
-
-	const isVersionAvailable = await checkVersionAvailability( version, randomPackageName );
-
-	if ( !isVersionAvailable ) {
-		throw new Error( `The "${ randomPackageName }@${ version }" already exists in the npm registry.` );
-	}
+	checkIfVersionIsValid( version );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		const pkgJson = await fs.readJson( pkgJsonPath );
@@ -66,78 +59,11 @@ export default async function updateVersions( options ) {
 }
 
 /**
- * @param {string} cwd
- * @param {Array.<string>} globPatterns
- * @param {UpdateVersionsPackagesDirectoryFilter|null} packagesDirectoryFilter
- * @returns {Promise.<Array.<string>>}
+ * @param {string} version
  */
-async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
-	const pkgJsonPaths = await glob( globPatterns, {
-		cwd,
-		absolute: true,
-		nodir: true
-	} );
-
-	if ( !packagesDirectoryFilter ) {
-		return pkgJsonPaths;
-	}
-
-	return pkgJsonPaths.filter( packagesDirectoryFilter );
-}
-
-/**
- * @param {string} packagesDirectory
- * @returns {Promise.<object>}
- */
-function readPackageJson( packagesDirectory ) {
-	const packageJsonPath = join( packagesDirectory, 'package.json' );
-
-	return fs.readJson( packageJsonPath );
-}
-
-/**
- * @param {string|null} packagesDirectory
- * @returns {Array.<string>}
- */
-function getGlobPatterns( packagesDirectory ) {
-	const patterns = [ 'package.json' ];
-
-	if ( packagesDirectory ) {
-		patterns.push( packagesDirectory + '/*/package.json' );
-	}
-
-	return patterns;
-}
-
-/**
- * @param {Array.<string>} pkgJsonPaths
- * @param {string|null} packagesDirectory
- * @returns {object}
- */
-function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
-	const randomPkgJsonPaths = packagesDirectory ?
-		pkgJsonPaths.filter( packagePath => packagePath.includes( packagesDirectory ) ) :
-		pkgJsonPaths;
-	const randomPkgJsonPath = randomPkgJsonPaths[ Math.floor( Math.random() * randomPkgJsonPaths.length ) ];
-
-	return dirname( randomPkgJsonPath );
-}
-
-/**
- * Checks if the specified version is greater than the current one.
- *
- * A nightly version is always considered as valid.
- *
- * @param {string} newVersion
- * @param {string} currentVersion
- */
-function checkIfVersionIsValid( newVersion, currentVersion ) {
-	if ( newVersion.startsWith( '0.0.0-nightly' ) ) {
-		return;
-	}
-
-	if ( !semver.gt( newVersion, currentVersion ) ) {
-		throw new Error( `Provided version ${ newVersion } must be greater than ${ currentVersion } or match pattern 0.0.0-nightly.` );
+function checkIfVersionIsValid( version ) {
+	if ( !semver.valid( version ) ) {
+		throw new Error( `Provided version ${ version } must follow the "Semantic Versioning" standard.` );
 	}
 }
 
