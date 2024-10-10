@@ -71,7 +71,7 @@ describe( 'createMissingPackageTranslations()', () => {
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.readFileSync ).toHaveBeenCalledWith(
-			expect.stringMatching( 'ckeditor5-dev/packages/ckeditor5-dev-translations/lib/templates/translation.po' ),
+			expect.stringMatching( 'ckeditor5-dev-translations/lib/templates/translation.po' ),
 			'utf-8'
 		);
 
