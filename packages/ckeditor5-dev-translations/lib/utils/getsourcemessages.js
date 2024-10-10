@@ -1,0 +1,32 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+import fs from 'fs-extra';
+import findMessages from '../findmessages.js';
+
+/**
+ * @param {object} options
+ * @param {Array.<string>} options.packagePaths An array of paths to packages that contain source files with messages to translate.
+ * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
+ * @param {Function} options.onErrorCallback Called when there is an error with parsing the source files.
+ * @returns {Array.<Message>}
+ */
+export default function getSourceMessages( { packagePaths, sourceFiles, onErrorCallback } ) {
+	return sourceFiles
+		.filter( filePath => packagePaths.some( packagePath => filePath.includes( packagePath ) ) )
+		.flatMap( filePath => {
+			const fileContent = fs.readFileSync( filePath, 'utf-8' );
+			const packagePath = packagePaths.find( packagePath => filePath.includes( packagePath ) );
+			const sourceMessages = [];
+
+			const onMessageCallback = message => {
+				sourceMessages.push( { filePath, packagePath, ...message } );
+			};
+
+			findMessages( fileContent, filePath, onMessageCallback, onErrorCallback );
+
+			return sourceMessages;
+		} );
+}
