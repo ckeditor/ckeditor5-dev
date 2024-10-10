@@ -16,7 +16,7 @@ import updatePackageTranslations from './utils/updatepackagetranslations.js';
  * * Detect if translation context is valid, i.e. whether there is no missing, unused or duplicated context.
  * * If there are no validation errors, update all translation files ("*.po" files) to be in sync with the context file:
  *   * unused translation entries are removed,
- *   * missing translation entries are added with empty string,
+ *   * missing translation entries are added with empty string as the message translation,
  *   * missing translation files are created for languages that do not have own "*.po" file yet.
  *
  * @param {object} options
