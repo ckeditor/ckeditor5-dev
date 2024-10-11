@@ -88,8 +88,8 @@ describe( 'createMissingPackageTranslations()', () => {
 		expect( cleanPoFileContent ).toHaveBeenCalledTimes( 1 );
 		expect( cleanPoFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
 
-		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.writeFileSync ).toHaveBeenCalledWith(
+		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 1 );
+		expect( fs.outputFileSync ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/lang/translations/zh-tw.po',
 			'Clean PO file content.',
 			'utf-8'

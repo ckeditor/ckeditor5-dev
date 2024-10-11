@@ -25,13 +25,16 @@ import updatePackageTranslations from './utils/updatepackagetranslations.js';
  * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
  * @param {boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to skip unused context errors related to
  * the `@ckeditor/ckeditor5-core` package.
+ * @param {boolean} [options.validateOnly=false] If set, only validates the translations contexts against the source messages without
+ * synchronizing the translations.
  */
 export default function synchronizeTranslations( options ) {
 	const {
 		sourceFiles,
 		packagePaths,
 		corePackagePath,
-		ignoreUnusedCorePackageContexts = false
+		ignoreUnusedCorePackageContexts = false,
+		validateOnly = false
 	} = options;
 
 	const errors = [];
@@ -58,6 +61,12 @@ export default function synchronizeTranslations( options ) {
 		}
 
 		process.exit( 1 );
+	}
+
+	if ( validateOnly ) {
+		log.info( '✨ No errors found.' );
+
+		return;
 	}
 
 	log.info( '📍 Synchronizing translations files...' );

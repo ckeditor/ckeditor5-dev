@@ -39,6 +39,6 @@ export default function createMissingPackageTranslations( { packagePath } ) {
 			`plural=${ getFormula( languageCode ) };`
 		].join( ' ' );
 
-		fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
+		fs.outputFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
 	}
 }

@@ -39,7 +39,8 @@ describe( 'synchronizeTranslations()', () => {
 				'packages/ckeditor5-bar'
 			],
 			corePackagePath: 'packages/ckeditor5-core',
-			ignoreUnusedCorePackageContexts: false
+			ignoreUnusedCorePackageContexts: false,
+			validateOnly: false
 		};
 
 		vi.mocked( getPackageContexts ).mockReturnValue( [] );
@@ -110,6 +111,14 @@ describe( 'synchronizeTranslations()', () => {
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
+	} );
+
+	it( 'should not synchronize translations files when validation mode is enabled', () => {
+		defaultOptions.validateOnly = true;
+		synchronizeTranslations( defaultOptions );
+
+		expect( updatePackageTranslations ).not.toHaveBeenCalled();
+		expect( stubs.logger.info ).toHaveBeenCalledWith( '✨ No errors found.' );
 	} );
 
 	describe( 'validation', () => {

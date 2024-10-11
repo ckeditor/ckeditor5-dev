@@ -19,25 +19,33 @@ import { TRANSLATION_FILES_PATH } from './constants.js';
 export default function updatePackageTranslations( { packageContexts, sourceMessages } ) {
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
-		// (1) Create missing translation files for languages that do not have own "*.po" file yet.
+		// (1) Skip packages that do not contain language context.
+		const hasContext = Object.keys( contextContent ).length > 0;
+
+		if ( !hasContext ) {
+			continue;
+		}
+
+		// (2) Create missing translation files for languages that do not have own "*.po" file yet.
 		createMissingPackageTranslations( { packagePath } );
 
-		// (2) Find all source messages that are defined in the language context.
+		// (3) Find all source messages that are defined in the language context.
 		const sourceMessagesForPackage = Object.keys( contextContent )
 			.map( messageId => sourceMessages.find( message => message.id === messageId ) )
 			.filter( Boolean );
 
-		// (3) Find all translation files ("*.po" files).
+		// (4) Find all translation files ("*.po" files).
 		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
 
 		// Then, for each translation file in a package:
 		for ( const translationFilePath of translationFilePaths ) {
-			const translations = PO.parse( fs.readFileSync( translationFilePath, 'utf-8' ) );
+			const translationFile = fs.readFileSync( translationFilePath, 'utf-8' );
+			const translations = PO.parse( translationFile );
 
-			// (3.1) Remove unused translations.
+			// (4.1) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
 
-			// (3.2) Add missing translations.
+			// (4.2) Add missing translations.
 			translations.items.push(
 				...sourceMessagesForPackage
 					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
@@ -58,7 +66,14 @@ export default function updatePackageTranslations( { packageContexts, sourceMess
 					} )
 			);
 
-			fs.writeFileSync( translationFilePath, cleanPoFileContent( translations.toString() ), 'utf-8' );
+			const translationFileUpdated = cleanPoFileContent( translations.toString() );
+
+			// (4.3) Save translation file only if it has been updated.
+			if ( translationFile === translationFileUpdated ) {
+				continue;
+			}
+
+			fs.writeFileSync( translationFilePath, translationFileUpdated, 'utf-8' );
 		}
 	}
 }

@@ -74,6 +74,8 @@ describe( 'updatePackageTranslations()', () => {
 
 		vi.mocked( glob.sync ).mockImplementation( pattern => [ pattern.replace( '*', 'en' ) ] );
 
+		vi.mocked( fs.readFileSync ).mockReturnValue( 'Raw PO file content.' );
+
 		vi.mocked( cleanPoFileContent ).mockReturnValue( 'Clean PO file content.' );
 	} );
 
@@ -86,6 +88,20 @@ describe( 'updatePackageTranslations()', () => {
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( { packagePath: 'packages/ckeditor5-foo' } );
+	} );
+
+	it( 'should not update any files when package does not contain translation context', () => {
+		defaultOptions.packageContexts = [
+			{
+				packagePath: 'packages/ckeditor5-foo',
+				contextContent: {}
+			}
+		];
+
+		updatePackageTranslations( defaultOptions );
+
+		expect( createMissingPackageTranslations ).not.toHaveBeenCalled();
+		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should search for translation files', () => {
@@ -154,5 +170,13 @@ describe( 'updatePackageTranslations()', () => {
 			'Clean PO file content.',
 			'utf-8'
 		);
+	} );
+
+	it( 'should not save translation files on filesystem if their content is not updated', () => {
+		vi.mocked( cleanPoFileContent ).mockImplementation( input => input );
+
+		updatePackageTranslations( defaultOptions );
+
+		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );
 } );
