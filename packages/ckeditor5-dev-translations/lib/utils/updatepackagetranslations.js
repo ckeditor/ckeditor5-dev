@@ -7,16 +7,17 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import PO from 'pofile';
 import { glob } from 'glob';
-import cleanPoFileContent from '../cleanpofilecontent.js';
 import createMissingPackageTranslations from './createmissingpackagetranslations.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
+import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 
 /**
  * @param {object} options
  * @param {Array.<Context>} options.packageContexts An array of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
-export default function updatePackageTranslations( { packageContexts, sourceMessages } ) {
+export default function updatePackageTranslations( { packageContexts, sourceMessages, skipLicenseHeader } ) {
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		// (1) Skip packages that do not contain language context.
@@ -27,7 +28,7 @@ export default function updatePackageTranslations( { packageContexts, sourceMess
 		}
 
 		// (2) Create missing translation files for languages that do not have own "*.po" file yet.
-		createMissingPackageTranslations( { packagePath } );
+		createMissingPackageTranslations( { packagePath, skipLicenseHeader } );
 
 		// (3) Find all source messages that are defined in the language context.
 		const sourceMessagesForPackage = Object.keys( contextContent )
@@ -66,7 +67,7 @@ export default function updatePackageTranslations( { packageContexts, sourceMess
 					} )
 			);
 
-			const translationFileUpdated = cleanPoFileContent( translations.toString() );
+			const translationFileUpdated = cleanTranslationFileContent( translations.toString() );
 
 			// (4.3) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {

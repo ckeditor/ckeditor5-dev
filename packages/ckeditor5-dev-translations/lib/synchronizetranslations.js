@@ -27,6 +27,7 @@ import updatePackageTranslations from './utils/updatepackagetranslations.js';
  * the `@ckeditor/ckeditor5-core` package.
  * @param {boolean} [options.validateOnly=false] If set, only validates the translations contexts against the source messages without
  * synchronizing the translations.
+ * @param {boolean} [options.skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
  */
 export default function synchronizeTranslations( options ) {
 	const {
@@ -34,7 +35,8 @@ export default function synchronizeTranslations( options ) {
 		packagePaths,
 		corePackagePath,
 		ignoreUnusedCorePackageContexts = false,
-		validateOnly = false
+		validateOnly = false,
+		skipLicenseHeader = false
 	} = options;
 
 	const errors = [];
@@ -70,7 +72,7 @@ export default function synchronizeTranslations( options ) {
 	}
 
 	log.info( '📍 Synchronizing translations files...' );
-	updatePackageTranslations( { packageContexts, sourceMessages } );
+	updatePackageTranslations( { packageContexts, sourceMessages, skipLicenseHeader } );
 
 	log.info( '✨ Done.' );
 }

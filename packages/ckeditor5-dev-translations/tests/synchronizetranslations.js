@@ -40,7 +40,8 @@ describe( 'synchronizeTranslations()', () => {
 			],
 			corePackagePath: 'packages/ckeditor5-core',
 			ignoreUnusedCorePackageContexts: false,
-			validateOnly: false
+			validateOnly: false,
+			skipLicenseHeader: false
 		};
 
 		vi.mocked( getPackageContexts ).mockReturnValue( [] );
@@ -107,7 +108,23 @@ describe( 'synchronizeTranslations()', () => {
 		expect( updatePackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( updatePackageTranslations ).toHaveBeenCalledWith( {
 			packageContexts: [],
-			sourceMessages: []
+			sourceMessages: [],
+			skipLicenseHeader: false
+		} );
+
+		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
+	} );
+
+	it( 'should synchronize translations files with skipping the license header', () => {
+		defaultOptions.skipLicenseHeader = true;
+
+		synchronizeTranslations( defaultOptions );
+
+		expect( updatePackageTranslations ).toHaveBeenCalledTimes( 1 );
+		expect( updatePackageTranslations ).toHaveBeenCalledWith( {
+			packageContexts: [],
+			sourceMessages: [],
+			skipLicenseHeader: true
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );

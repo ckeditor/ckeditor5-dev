@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import PO from 'pofile';
 import { glob } from 'glob';
-import cleanPoFileContent from '../../lib/cleanpofilecontent.js';
+import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 import updatePackageTranslations from '../../lib/utils/updatepackagetranslations.js';
 
@@ -15,7 +15,7 @@ vi.mock( 'fs-extra' );
 vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );
-vi.mock( '../../lib/cleanpofilecontent.js' );
+vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 
 describe( 'updatePackageTranslations()', () => {
 	let defaultOptions, translations, stubs;
@@ -41,7 +41,8 @@ describe( 'updatePackageTranslations()', () => {
 					string: 'Example message 2',
 					plural: 'Example message 2 - plural form'
 				}
-			]
+			],
+			skipLicenseHeader: false
 		};
 
 		translations = {
@@ -76,7 +77,7 @@ describe( 'updatePackageTranslations()', () => {
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( 'Raw PO file content.' );
 
-		vi.mocked( cleanPoFileContent ).mockReturnValue( 'Clean PO file content.' );
+		vi.mocked( cleanTranslationFileContent ).mockReturnValue( 'Clean PO file content.' );
 	} );
 
 	it( 'should be a function', () => {
@@ -87,7 +88,22 @@ describe( 'updatePackageTranslations()', () => {
 		updatePackageTranslations( defaultOptions );
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
-		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( { packagePath: 'packages/ckeditor5-foo' } );
+		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
+			packagePath: 'packages/ckeditor5-foo',
+			skipLicenseHeader: false
+		} );
+	} );
+
+	it( 'should create missing translations with skipping the license header', () => {
+		defaultOptions.skipLicenseHeader = true;
+
+		updatePackageTranslations( defaultOptions );
+
+		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
+		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
+			packagePath: 'packages/ckeditor5-foo',
+			skipLicenseHeader: true
+		} );
 	} );
 
 	it( 'should not update any files when package does not contain translation context', () => {
@@ -161,8 +177,8 @@ describe( 'updatePackageTranslations()', () => {
 	it( 'should save updated translation files on filesystem after cleaning the content', () => {
 		updatePackageTranslations( defaultOptions );
 
-		expect( cleanPoFileContent ).toHaveBeenCalledTimes( 1 );
-		expect( cleanPoFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
+		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
+		expect( cleanTranslationFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
 
 		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFileSync ).toHaveBeenCalledWith(
@@ -173,7 +189,7 @@ describe( 'updatePackageTranslations()', () => {
 	} );
 
 	it( 'should not save translation files on filesystem if their content is not updated', () => {
-		vi.mocked( cleanPoFileContent ).mockImplementation( input => input );
+		vi.mocked( cleanTranslationFileContent ).mockImplementation( input => input );
 
 		updatePackageTranslations( defaultOptions );
 

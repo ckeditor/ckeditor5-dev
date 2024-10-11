@@ -7,23 +7,28 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import PO from 'pofile';
 import { getNPlurals, getFormula } from 'plural-forms';
-import cleanPoFileContent from '../../lib/cleanpofilecontent.js';
+import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import getLanguages from '../../lib/utils/getlanguages.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'pofile' );
 vi.mock( 'plural-forms' );
-vi.mock( '../../lib/cleanpofilecontent.js' );
+vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );
 
 describe( 'createMissingPackageTranslations()', () => {
-	let translations;
+	let translations, defaultOptions;
 
 	beforeEach( () => {
 		translations = {
 			headers: {},
 			toString: () => 'Raw PO file content.'
+		};
+
+		defaultOptions = {
+			packagePath: 'packages/ckeditor5-foo',
+			skipLicenseHeader: false
 		};
 
 		vi.mocked( PO.parse ).mockReturnValue( translations );
@@ -36,7 +41,7 @@ describe( 'createMissingPackageTranslations()', () => {
 			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
 		] );
 
-		vi.mocked( cleanPoFileContent ).mockReturnValue( 'Clean PO file content.' );
+		vi.mocked( cleanTranslationFileContent ).mockReturnValue( 'Clean PO file content.' );
 
 		vi.mocked( fs.existsSync ).mockImplementation( path => {
 			if ( path === 'packages/ckeditor5-foo/lang/translations/en.po' ) {
@@ -59,7 +64,7 @@ describe( 'createMissingPackageTranslations()', () => {
 	} );
 
 	it( 'should check if translation files exist for each language', () => {
-		createMissingPackageTranslations( { packagePath: 'packages/ckeditor5-foo' } );
+		createMissingPackageTranslations( defaultOptions );
 
 		expect( fs.existsSync ).toHaveBeenCalledTimes( 2 );
 		expect( fs.existsSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po' );
@@ -67,7 +72,7 @@ describe( 'createMissingPackageTranslations()', () => {
 	} );
 
 	it( 'should create missing translation files from the template', () => {
-		createMissingPackageTranslations( { packagePath: 'packages/ckeditor5-foo' } );
+		createMissingPackageTranslations( defaultOptions );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.readFileSync ).toHaveBeenCalledWith(
@@ -82,11 +87,25 @@ describe( 'createMissingPackageTranslations()', () => {
 		expect( translations.headers[ 'Plural-Forms' ] ).toEqual( 'nplurals=4; plural=example plural formula;' );
 	} );
 
-	it( 'should save missing translation files on filesystem after cleaning the content', () => {
-		createMissingPackageTranslations( { packagePath: 'packages/ckeditor5-foo' } );
+	it( 'should not read the template if `skipLicenseHeader` flag is set', () => {
+		defaultOptions.skipLicenseHeader = true;
 
-		expect( cleanPoFileContent ).toHaveBeenCalledTimes( 1 );
-		expect( cleanPoFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
+		createMissingPackageTranslations( defaultOptions );
+
+		expect( fs.readFileSync ).not.toHaveBeenCalled();
+
+		expect( getNPlurals ).toHaveBeenCalledWith( 'zh' );
+		expect( getFormula ).toHaveBeenCalledWith( 'zh' );
+
+		expect( translations.headers.Language ).toEqual( 'zh_TW' );
+		expect( translations.headers[ 'Plural-Forms' ] ).toEqual( 'nplurals=4; plural=example plural formula;' );
+	} );
+
+	it( 'should save missing translation files on filesystem after cleaning the content', () => {
+		createMissingPackageTranslations( defaultOptions );
+
+		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
+		expect( cleanTranslationFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
 
 		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
