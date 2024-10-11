@@ -67,7 +67,7 @@ export default function updatePackageTranslations( { packageContexts, sourceMess
 					} )
 			);
 
-			const translationFileUpdated = cleanTranslationFileContent( translations.toString() );
+			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
 			// (4.3) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {

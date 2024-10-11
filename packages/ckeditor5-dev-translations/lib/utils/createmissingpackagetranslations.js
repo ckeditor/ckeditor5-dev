@@ -40,6 +40,6 @@ export default function createMissingPackageTranslations( { packagePath, skipLic
 			`plural=${ getFormula( languageCode ) };`
 		].join( ' ' );
 
-		fs.outputFileSync( translationFilePath, cleanTranslationFileContent( translations.toString() ), 'utf-8' );
+		fs.outputFileSync( translationFilePath, cleanTranslationFileContent( translations ).toString(), 'utf-8' );
 	}
 }

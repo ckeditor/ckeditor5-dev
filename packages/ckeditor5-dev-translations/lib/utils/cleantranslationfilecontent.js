@@ -3,22 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-import PO from 'pofile';
-
 /**
  * Removes unused headers from the translation file.
  *
- * @param {string} translationFileContent Content of the translation file.
- * @returns {string}
+ * @param {import('pofile')} translationFileContent Content of the translation file.
+ * @returns {import('pofile')}
  */
 export default function cleanTranslationFileContent( translationFileContent ) {
-	const translations = PO.parse( translationFileContent );
-
-	translations.headers = {
-		Language: translations.headers.Language,
-		'Plural-Forms': translations.headers[ 'Plural-Forms' ],
+	translationFileContent.headers = {
+		Language: translationFileContent.headers.Language,
+		'Plural-Forms': translationFileContent.headers[ 'Plural-Forms' ],
 		'Content-Type': 'text/plain; charset=UTF-8'
 	};
 
-	return translations.toString();
+	return translationFileContent;
 }

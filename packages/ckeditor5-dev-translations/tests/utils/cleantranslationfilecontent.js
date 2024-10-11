@@ -3,11 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import PO from 'pofile';
+import { beforeEach, describe, expect, it } from 'vitest';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
-
-vi.mock( 'pofile' );
 
 describe( 'cleanTranslationFileContent()', () => {
 	let translations;
@@ -25,11 +22,8 @@ describe( 'cleanTranslationFileContent()', () => {
 				'Content-Type': 'Value from Content-Type',
 				'Content-Transfer-Encoding': 'Value from Content-Transfer-Encoding',
 				'Plural-Forms': 'Value from Plural-Forms'
-			},
-			toString: () => JSON.stringify( translations )
+			}
 		};
-
-		vi.mocked( PO.parse ).mockReturnValue( translations );
 	} );
 
 	it( 'should be a function', () => {
@@ -37,10 +31,9 @@ describe( 'cleanTranslationFileContent()', () => {
 	} );
 
 	it( 'should return translation file without unneeded headers', () => {
-		const result = cleanTranslationFileContent( 'Example content.' );
+		const result = cleanTranslationFileContent( translations );
 
-		expect( PO.parse ).toHaveBeenCalledWith( 'Example content.' );
-		expect( JSON.parse( result ) ).toEqual( {
+		expect( result ).toEqual( {
 			headers: {
 				'Language': 'Value from Language',
 				'Content-Type': 'text/plain; charset=UTF-8',

@@ -77,7 +77,9 @@ describe( 'updatePackageTranslations()', () => {
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( 'Raw PO file content.' );
 
-		vi.mocked( cleanTranslationFileContent ).mockReturnValue( 'Clean PO file content.' );
+		vi.mocked( cleanTranslationFileContent ).mockReturnValue( {
+			toString: () => 'Clean PO file content.'
+		} );
 	} );
 
 	it( 'should be a function', () => {
@@ -178,7 +180,6 @@ describe( 'updatePackageTranslations()', () => {
 		updatePackageTranslations( defaultOptions );
 
 		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
-		expect( cleanTranslationFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
 
 		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFileSync ).toHaveBeenCalledWith(

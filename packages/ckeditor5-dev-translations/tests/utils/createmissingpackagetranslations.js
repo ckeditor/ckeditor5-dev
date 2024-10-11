@@ -22,8 +22,7 @@ describe( 'createMissingPackageTranslations()', () => {
 
 	beforeEach( () => {
 		translations = {
-			headers: {},
-			toString: () => 'Raw PO file content.'
+			headers: {}
 		};
 
 		defaultOptions = {
@@ -41,7 +40,9 @@ describe( 'createMissingPackageTranslations()', () => {
 			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
 		] );
 
-		vi.mocked( cleanTranslationFileContent ).mockReturnValue( 'Clean PO file content.' );
+		vi.mocked( cleanTranslationFileContent ).mockReturnValue( {
+			toString: () => 'Clean PO file content.'
+		} );
 
 		vi.mocked( fs.existsSync ).mockImplementation( path => {
 			if ( path === 'packages/ckeditor5-foo/lang/translations/en.po' ) {
@@ -105,7 +106,6 @@ describe( 'createMissingPackageTranslations()', () => {
 		createMissingPackageTranslations( defaultOptions );
 
 		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
-		expect( cleanTranslationFileContent ).toHaveBeenCalledWith( 'Raw PO file content.' );
 
 		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
