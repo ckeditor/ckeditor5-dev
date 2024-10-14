@@ -15,10 +15,10 @@ import findMessages from '../findmessages.js';
  */
 export default function getSourceMessages( { packagePaths, sourceFiles, onErrorCallback } ) {
 	return sourceFiles
-		.filter( filePath => packagePaths.some( packagePath => filePath.includes( packagePath ) ) )
+		.filter( filePath => packagePaths.some( packagePath => filePath.includes( `/${ packagePath }/` ) ) )
 		.flatMap( filePath => {
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
-			const packagePath = packagePaths.find( packagePath => filePath.includes( packagePath ) );
+			const packagePath = packagePaths.find( packagePath => filePath.includes( `/${ packagePath }/` ) );
 			const sourceMessages = [];
 
 			const onMessageCallback = message => {

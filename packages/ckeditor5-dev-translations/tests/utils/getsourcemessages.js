@@ -80,6 +80,16 @@ describe( 'getSourceMessages()', () => {
 		] );
 	} );
 
+	it( 'should not find messages if package paths do not match exactly the file path', () => {
+		defaultOptions.sourceFiles = [
+			'/absolute/path/to/packages/ckeditor5-foo-bar/src/utils/file.ts'
+		];
+
+		getSourceMessages( defaultOptions );
+
+		expect( findMessages ).not.toHaveBeenCalled();
+	} );
+
 	it( 'should call error callback in case of an error', () => {
 		vi.mocked( findMessages ).mockImplementation( ( fileContent, filePath, onMessageCallback, onErrorCallback ) => {
 			onErrorCallback( 'Example problem has been detected.' );
