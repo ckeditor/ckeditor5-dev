@@ -3,6 +3,9 @@ Changelog
 
 ## [44.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v44.0.0...v44.1.0) (2024-10-15)
 
+> [!NOTE]
+> The release channel for this release is `next`.
+
 ### Features
 
 * **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Created a new binary script called `ckeditor5-dev-ci-is-workflow-restarted` that returns with a non-zero exit code if a given workflow is executed for the first time. The restarted workflows exit with a zero exit code. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
@@ -12,10 +15,11 @@ Changelog
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `updateVersions()` task will no longer verify if the specified `version` is available on npm. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task filters out already published packages to avoid pushing the same archive twice. Thanks to that, it can be a part of a process that would be restarted. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task tries to publish the package once again when it fails independently from the returned error code. Previously, it was scheduled only when the `E409` error occurred. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `verifyPackagesPublishedCorrectly()` task is no longer available as its responsibility has been merged into the `publishPackages()` task. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task tries to publish the package once again when it fails independently of the returned error code. Previously, it was scheduled only when the `E409` error occurred. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Marked the `verifyPackagesPublishedCorrectly()` function is deprecated. Its responsibility has been merged with `publishPackages()`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` task does not commit files if a tag for the specified version is already created. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: We do not spawn an npm process to download a package manifest from the npm registry. Instead, we send an HTTP request using the `pacote` package. Closes [ckeditor/ckeditor5#17191](https://github.com/ckeditor/ckeditor5/issues/17191). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a155390a2ee45190ce6edc49ed48f8e871aa641f))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `getNpmTagFromVersion()` function returns a `'nightly'` string when passing a CKEditor 5 nightly version. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4edf71cade5c73a8f9a7dbf80994490eeb400b60))
 
 ### Released packages
 
