@@ -5,6 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import createGithubRelease from '../../lib/tasks/creategithubrelease.js';
+import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
 import * as transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 
 const stubs = vi.hoisted( () => ( {
@@ -27,6 +28,7 @@ vi.mock( '@octokit/rest', () => ( {
 } ) );
 
 vi.mock( '../../lib/utils/transformcommitutils.js' );
+vi.mock( '../../lib/utils/getnpmtagfromversion.js' );
 
 describe( 'createGithubRelease()', () => {
 	let options;
@@ -43,6 +45,7 @@ describe( 'createGithubRelease()', () => {
 		stubs.getLatestRelease.mockRejectedValue( { status: 404 } );
 		stubs.createRelease.mockResolvedValue();
 
+		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'latest' );
 		vi.mocked( transformCommitUtils.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 	} );
 
@@ -80,6 +83,8 @@ describe( 'createGithubRelease()', () => {
 	} );
 
 	it( 'creates a prerelease page when passing a major.minor.patch-prerelease version', async () => {
+		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
+
 		options.version = '1.3.5-alpha.0';
 		await createGithubRelease( options );
 
