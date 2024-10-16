@@ -29,7 +29,6 @@
     "lint-staged": "^15.0.0",
     "listr2": "^8.0.0",
     "minimist": "^1.2.8",
-    "simple-git": "^3.27.0",
     "semver": "^7.6.3",
     "upath": "^2.0.1"
   },
