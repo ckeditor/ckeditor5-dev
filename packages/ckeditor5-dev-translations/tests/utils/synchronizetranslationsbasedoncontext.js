@@ -9,7 +9,7 @@ import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
-import updatePackageTranslations from '../../lib/utils/updatepackagetranslations.js';
+import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'pofile' );
@@ -17,7 +17,7 @@ vi.mock( 'glob' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 
-describe( 'updatePackageTranslations()', () => {
+describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	let defaultOptions, translations, stubs;
 
 	beforeEach( () => {
@@ -26,8 +26,8 @@ describe( 'updatePackageTranslations()', () => {
 				{
 					packagePath: 'packages/ckeditor5-foo',
 					contextContent: {
-						'id1': 'Context for example message 1',
-						'id2': 'Context for example message 2'
+						id1: 'Context for example message 1',
+						id2: 'Context for example message 2'
 					}
 				}
 			],
@@ -83,11 +83,11 @@ describe( 'updatePackageTranslations()', () => {
 	} );
 
 	it( 'should be a function', () => {
-		expect( updatePackageTranslations ).toBeInstanceOf( Function );
+		expect( synchronizeTranslationsBasedOnContext ).toBeInstanceOf( Function );
 	} );
 
 	it( 'should create missing translations', () => {
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
@@ -99,7 +99,7 @@ describe( 'updatePackageTranslations()', () => {
 	it( 'should create missing translations with skipping the license header', () => {
 		defaultOptions.skipLicenseHeader = true;
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
@@ -116,14 +116,14 @@ describe( 'updatePackageTranslations()', () => {
 			}
 		];
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( createMissingPackageTranslations ).not.toHaveBeenCalled();
 		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should search for translation files', () => {
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( glob.sync ).toHaveBeenCalledTimes( 1 );
 		expect( glob.sync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/*.po' );
@@ -134,7 +134,7 @@ describe( 'updatePackageTranslations()', () => {
 			return [ 'en', 'pl' ].map( language => pattern.replace( '*', language ) );
 		} );
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
@@ -147,7 +147,7 @@ describe( 'updatePackageTranslations()', () => {
 			{ msgid: 'id4' }
 		);
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( translations.items ).toEqual( [
 			{ msgid: 'id1' },
@@ -158,7 +158,7 @@ describe( 'updatePackageTranslations()', () => {
 	it( 'should add missing translations', () => {
 		translations.items = [];
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( translations.items ).toEqual( [
 			{
@@ -177,7 +177,7 @@ describe( 'updatePackageTranslations()', () => {
 	} );
 
 	it( 'should save updated translation files on filesystem after cleaning the content', () => {
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
 
@@ -192,7 +192,7 @@ describe( 'updatePackageTranslations()', () => {
 	it( 'should not save translation files on filesystem if their content is not updated', () => {
 		vi.mocked( cleanTranslationFileContent ).mockImplementation( input => input );
 
-		updatePackageTranslations( defaultOptions );
+		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );

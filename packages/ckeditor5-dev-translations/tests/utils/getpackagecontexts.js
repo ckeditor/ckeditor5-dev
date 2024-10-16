@@ -4,10 +4,10 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import getPackageContext from '../../lib/utils/getpackagecontext.js';
 import getPackageContexts from '../../lib/utils/getpackagecontexts.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( '../../lib/utils/getpackagecontext.js' );
 
 describe( 'getPackageContexts()', () => {
 	let defaultOptions;
@@ -18,32 +18,22 @@ describe( 'getPackageContexts()', () => {
 			corePackagePath: 'packages/ckeditor5-core'
 		};
 
-		vi.mocked( fs.existsSync ).mockImplementation( path => {
-			if ( path === 'packages/ckeditor5-foo/lang/contexts.json' ) {
-				return true;
+		vi.mocked( getPackageContext ).mockImplementation( ( { packagePath } ) => {
+			const contextContent = {};
+
+			if ( packagePath === 'packages/ckeditor5-foo' ) {
+				contextContent.id1 = 'Context for message id1 from "ckeditor5-foo".';
 			}
 
-			if ( path === 'packages/ckeditor5-core/lang/contexts.json' ) {
-				return true;
+			if ( packagePath === 'packages/ckeditor5-core' ) {
+				contextContent.id2 = 'Context for message id2 from "ckeditor5-core".';
 			}
 
-			return false;
-		} );
-
-		vi.mocked( fs.readJsonSync ).mockImplementation( path => {
-			if ( path === 'packages/ckeditor5-foo/lang/contexts.json' ) {
-				return {
-					'Text ID in "ckeditor5-foo"': 'Example context for text in "ckeditor5-foo".'
-				};
-			}
-
-			if ( path === 'packages/ckeditor5-core/lang/contexts.json' ) {
-				return {
-					'Text ID in "ckeditor5-core"': 'Example context for text in "ckeditor5-core".'
-				};
-			}
-
-			throw new Error( `ENOENT: no such file or directory, open ${ path }` );
+			return {
+				contextContent,
+				contextFilePath: packagePath + '/lang/contexts.json',
+				packagePath
+			};
 		} );
 	} );
 
@@ -51,18 +41,13 @@ describe( 'getPackageContexts()', () => {
 		expect( getPackageContexts ).toBeInstanceOf( Function );
 	} );
 
-	it( 'should read existing context files from packages (including core package)', () => {
+	it( 'should add core package if it is not included in the packages', () => {
 		getPackageContexts( defaultOptions );
 
-		expect( defaultOptions.packagePaths ).toEqual( expect.arrayContaining( [ 'packages/ckeditor5-core' ] ) );
-
-		expect( fs.existsSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.existsSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/contexts.json' );
-		expect( fs.existsSync ).toHaveBeenCalledWith( 'packages/ckeditor5-core/lang/contexts.json' );
-
-		expect( fs.readJsonSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.readJsonSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/contexts.json' );
-		expect( fs.readJsonSync ).toHaveBeenCalledWith( 'packages/ckeditor5-core/lang/contexts.json' );
+		expect( defaultOptions.packagePaths ).toEqual( [
+			'packages/ckeditor5-foo',
+			'packages/ckeditor5-core'
+		] );
 	} );
 
 	it( 'should not duplicate core package if it is already included in the packages', () => {
@@ -70,7 +55,10 @@ describe( 'getPackageContexts()', () => {
 
 		getPackageContexts( defaultOptions );
 
-		expect( defaultOptions.packagePaths ).toHaveLength( 2 );
+		expect( defaultOptions.packagePaths ).toEqual( [
+			'packages/ckeditor5-foo',
+			'packages/ckeditor5-core'
+		] );
 	} );
 
 	it( 'should return package contexts', () => {
@@ -81,7 +69,7 @@ describe( 'getPackageContexts()', () => {
 		expect( result ).toEqual( expect.arrayContaining( [
 			{
 				contextContent: {
-					'Text ID in "ckeditor5-foo"': 'Example context for text in "ckeditor5-foo".'
+					id1: 'Context for message id1 from "ckeditor5-foo".'
 				},
 				contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
 				packagePath: 'packages/ckeditor5-foo'
@@ -90,7 +78,7 @@ describe( 'getPackageContexts()', () => {
 		expect( result ).toEqual( expect.arrayContaining( [
 			{
 				contextContent: {
-					'Text ID in "ckeditor5-core"': 'Example context for text in "ckeditor5-core".'
+					id2: 'Context for message id2 from "ckeditor5-core".'
 				},
 				contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
 				packagePath: 'packages/ckeditor5-core'

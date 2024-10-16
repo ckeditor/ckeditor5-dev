@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import upath from 'upath';
-import fs from 'fs-extra';
-import { CONTEXT_FILE_PATH } from './constants.js';
+import getPackageContext from './getpackagecontext.js';
 
 /**
  * @param {object} options
@@ -20,14 +18,5 @@ export default function getPackageContexts( { packagePaths, corePackagePath } ) 
 		packagePaths.push( corePackagePath );
 	}
 
-	return packagePaths.map( packagePath => {
-		const contextFilePath = upath.join( packagePath, CONTEXT_FILE_PATH );
-		const contextContent = fs.existsSync( contextFilePath ) ? fs.readJsonSync( contextFilePath ) : {};
-
-		return {
-			contextContent,
-			contextFilePath,
-			packagePath
-		};
-	} );
+	return packagePaths.map( packagePath => getPackageContext( { packagePath } ) );
 }

@@ -17,7 +17,7 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
-export default function updatePackageTranslations( { packageContexts, sourceMessages, skipLicenseHeader } ) {
+export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		// (1) Skip packages that do not contain language context.
