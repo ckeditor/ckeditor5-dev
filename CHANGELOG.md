@@ -3,6 +3,9 @@ Changelog
 
 ## [44.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v44.1.0...v44.1.1) (2024-10-16)
 
+> [!NOTE]
+> The release channel for this release is `next`.
+
 ### Bug fixes
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added a missing dependency (simple-git). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/914436ff2d14b8e44a767a8c66a3d36fe832158b))
