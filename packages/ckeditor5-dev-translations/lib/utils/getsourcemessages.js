@@ -30,3 +30,14 @@ export default function getSourceMessages( { packagePaths, sourceFiles, onErrorC
 			return sourceMessages;
 		} );
 }
+
+/**
+ * @typedef {object} Message
+ *
+ * @property {string} id
+ * @property {string} string
+ * @property {string} filePath
+ * @property {string} packagePath
+ * @property {string} context
+ * @property {string} [plural]
+ */
