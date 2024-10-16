@@ -6,3 +6,4 @@
 export { default as findMessages } from './findmessages.js';
 export { default as MultipleLanguageTranslationService } from './multiplelanguagetranslationservice.js';
 export { default as CKEditorTranslationsPlugin } from './ckeditortranslationsplugin.js';
+export { default as synchronizeTranslations } from './synchronizetranslations.js';
