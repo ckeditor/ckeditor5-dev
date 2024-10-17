@@ -21,5 +21,9 @@ export default function getNpmTagFromVersion( version ) {
 		return 'nightly';
 	}
 
+	if ( versionTag.startsWith( 'internal' ) ) {
+		return 'internal';
+	}
+
 	return versionTag;
 }
