@@ -3,6 +3,9 @@ Changelog
 
 ## [44.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v44.2.0...v44.2.1) (2024-10-17)
 
+> [!NOTE]
+> The release channel for this release is `next`.
+
 ### Bug fixes
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `getNpmTagFromVersion()` function handles internal releases correctly. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/baad1a6ae3b3fe0ff0b4711ae04067d44f128c92))
