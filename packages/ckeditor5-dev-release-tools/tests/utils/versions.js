@@ -15,6 +15,7 @@ import {
 	getLastNightly,
 	getNextPreRelease,
 	getNextNightly,
+	getNextInternal,
 	getLastTagFromGit,
 	getCurrent
 } from '../../lib/utils/versions.js';
@@ -351,6 +352,35 @@ describe( 'versions', () => {
 			return getNextNightly()
 				.then( result => {
 					expect( result ).to.equal( '0.0.0-nightly-20230615.1' );
+				} );
+		} );
+	} );
+
+	describe( 'getNextInternal()', () => {
+		beforeEach( () => {
+			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+
+			vi.useFakeTimers();
+			vi.setSystemTime( new Date( '2023-06-15 12:00:00' ) );
+		} );
+
+		afterEach( () => {
+			vi.useRealTimers();
+		} );
+
+		it( 'asks for a last internal pre-release version', () => {
+			vi.mocked( pacote ).packument.mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-internal-20230615.0': {},
+					'37.0.0-alpha.0': {},
+					'42.0.0': {}
+				}
+			} );
+
+			return getNextInternal()
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-internal-20230615.1' );
 				} );
 		} );
 	} );

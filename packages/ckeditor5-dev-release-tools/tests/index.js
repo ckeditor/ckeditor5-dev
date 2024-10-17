@@ -24,6 +24,7 @@ import {
 	getNextPreRelease,
 	getLastNightly,
 	getNextNightly,
+	getNextInternal,
 	getCurrent,
 	getLastTagFromGit
 } from '../lib/utils/versions.js';
@@ -176,6 +177,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( getNextNightly ).to.be.a( 'function' );
 			expect( index.getNextNightly ).to.equal( getNextNightly );
+		} );
+	} );
+
+	describe( 'getNextInternal()', () => {
+		it( 'should be a function', () => {
+			expect( getNextInternal ).to.be.a( 'function' );
+			expect( index.getNextInternal ).to.equal( getNextInternal );
 		} );
 	} );
 
