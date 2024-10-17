@@ -21,7 +21,7 @@
     "@inquirer/prompts": "^6.0.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.16",
     "eslint": "^8.21.0",
-    "eslint-config-ckeditor5": "^7.0.0",
+    "eslint-config-ckeditor5": "^8.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^10.0.0",
     "husky": "^8.0.2",

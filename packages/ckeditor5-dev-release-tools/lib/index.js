@@ -20,6 +20,7 @@ export {
 	getNextPreRelease,
 	getLastNightly,
 	getNextNightly,
+	getNextInternal,
 	getCurrent,
 	getLastTagFromGit
 } from './utils/versions.js';
