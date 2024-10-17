@@ -3,6 +3,9 @@ Changelog
 
 ## [44.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v44.1.1...v44.2.0) (2024-10-17)
 
+> [!NOTE]
+> The release channel for this release is `next`.
+
 ### Features
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Created a new util exposed as `getNextInternal()` to generate an internal release version, e.g. `0.0.0-internal-20240102.0`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/38346c679a8cb7ce328a9584a18529110f641325))
