@@ -8,7 +8,7 @@ import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getPackageContexts from './utils/getpackagecontexts.js';
 import { CONTEXT_FILE_PATH } from './utils/constants.js';
 import getSourceMessages from './utils/getsourcemessages.js';
-import updatePackageTranslations from './utils/updatepackagetranslations.js';
+import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslationsbasedoncontext.js';
 
 /**
  * Synchronizes translations in provided packages by performing the following steps:
@@ -72,7 +72,7 @@ export default function synchronizeTranslations( options ) {
 	}
 
 	log.info( '📍 Synchronizing translations files...' );
-	updatePackageTranslations( { packageContexts, sourceMessages, skipLicenseHeader } );
+	synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } );
 
 	log.info( '✨ Done.' );
 }
@@ -176,22 +176,3 @@ function assertNoRepeatedContext( { packageContexts } ) {
 			return `Duplicated context "${ messageId }" in "${ contextFilePaths.join( '", "' ) }".`;
 		} );
 }
-
-/**
- * @typedef {object} Message
- *
- * @property {string} id
- * @property {string} string
- * @property {string} filePath
- * @property {string} packagePath
- * @property {string} context
- * @property {string} [plural]
- */
-
-/**
- * @typedef {object} Context
- *
- * @property {string} contextFilePath
- * @property {object} contextContent
- * @property {string} packagePath
- */

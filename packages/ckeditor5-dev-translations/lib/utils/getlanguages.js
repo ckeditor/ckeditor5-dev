@@ -81,6 +81,7 @@ const SUPPORTED_LOCALES = [
 const LOCALES_FILENAME_MAP = {
 	'ne_NP': 'ne',
 	'si_LK': 'si',
+	'sr@latin': 'sr-latn',
 	'zh_TW': 'zh'
 };
 

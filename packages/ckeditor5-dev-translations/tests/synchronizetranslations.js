@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import getPackageContexts from '../lib/utils/getpackagecontexts.js';
 import getSourceMessages from '../lib/utils/getsourcemessages.js';
-import updatePackageTranslations from '../lib/utils/updatepackagetranslations.js';
+import synchronizeTranslationsBasedOnContext from '../lib/utils/synchronizetranslationsbasedoncontext.js';
 import synchronizeTranslations from '../lib/synchronizetranslations.js';
 
 const stubs = vi.hoisted( () => {
@@ -23,7 +23,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 } ) );
 vi.mock( '../lib/utils/getpackagecontexts.js' );
 vi.mock( '../lib/utils/getsourcemessages.js' );
-vi.mock( '../lib/utils/updatepackagetranslations.js' );
+vi.mock( '../lib/utils/synchronizetranslationsbasedoncontext.js' );
 
 describe( 'synchronizeTranslations()', () => {
 	let defaultOptions;
@@ -105,8 +105,8 @@ describe( 'synchronizeTranslations()', () => {
 	it( 'should synchronize translations files', () => {
 		synchronizeTranslations( defaultOptions );
 
-		expect( updatePackageTranslations ).toHaveBeenCalledTimes( 1 );
-		expect( updatePackageTranslations ).toHaveBeenCalledWith( {
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledTimes( 1 );
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
 			skipLicenseHeader: false
@@ -120,8 +120,8 @@ describe( 'synchronizeTranslations()', () => {
 
 		synchronizeTranslations( defaultOptions );
 
-		expect( updatePackageTranslations ).toHaveBeenCalledTimes( 1 );
-		expect( updatePackageTranslations ).toHaveBeenCalledWith( {
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledTimes( 1 );
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
 			skipLicenseHeader: true
@@ -134,7 +134,7 @@ describe( 'synchronizeTranslations()', () => {
 		defaultOptions.validateOnly = true;
 		synchronizeTranslations( defaultOptions );
 
-		expect( updatePackageTranslations ).not.toHaveBeenCalled();
+		expect( synchronizeTranslationsBasedOnContext ).not.toHaveBeenCalled();
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '✨ No errors found.' );
 	} );
 
