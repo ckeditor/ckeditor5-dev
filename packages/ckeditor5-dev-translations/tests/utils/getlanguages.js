@@ -40,7 +40,7 @@ describe( 'getLanguages()', () => {
 		expect( languageSerbianLatin ).toEqual( {
 			localeCode: 'sr@latin',
 			languageCode: 'sr',
-			languageFileName: 'sr-latin'
+			languageFileName: 'sr-latn'
 		} );
 	} );
 
