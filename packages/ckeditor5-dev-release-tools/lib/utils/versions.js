@@ -4,6 +4,7 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import pacote from 'pacote';
 import getChangelog from './getchangelog.js';
 import getPackageJson from './getpackagejson.js';
 
@@ -37,9 +38,9 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
 export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	const packageName = getPackageJson( cwd ).name;
 
-	return tools.shExec( `npm view ${ packageName } versions --json`, { verbosity: 'silent', async: true } )
+	return pacote.packument( packageName )
 		.then( result => {
-			const lastVersion = JSON.parse( result )
+			const lastVersion = Object.keys( result.versions )
 				.filter( version => version.startsWith( releaseIdentifier ) )
 				.sort( ( a, b ) => a.localeCompare( b, undefined, { numeric: true } ) )
 				.pop();
@@ -92,14 +93,22 @@ export async function getNextPreRelease( releaseIdentifier, cwd = process.cwd() 
  * @returns {Promise<string>}
  */
 export async function getNextNightly( cwd = process.cwd() ) {
-	const today = new Date();
-	const year = today.getFullYear().toString();
-	const month = ( today.getMonth() + 1 ).toString().padStart( 2, '0' );
-	const day = today.getDate().toString().padStart( 2, '0' );
-
-	const nextNightlyReleaseIdentifier = `0.0.0-nightly-${ year }${ month }${ day }`;
+	const nextNightlyReleaseIdentifier = `0.0.0-nightly-${ getDateIdentifier() }`;
 
 	return getNextPreRelease( nextNightlyReleaseIdentifier, cwd );
+}
+
+/**
+ * Returns the next available internal version in the format of "0.0.0-internal-YYYYMMDD.X", where the "YYYYMMDD" is the current date for
+ * the internal release and the "X" is the sequential number starting from 0.
+ *
+ * @param {string} [cwd=process.cwd()]
+ * @returns {Promise<string>}
+ */
+export async function getNextInternal( cwd = process.cwd() ) {
+	const nextInternalReleaseIdentifier = `0.0.0-internal-${ getDateIdentifier() }`;
+
+	return getNextPreRelease( nextInternalReleaseIdentifier, cwd );
 }
 
 /**
@@ -126,6 +135,18 @@ export function getLastTagFromGit() {
  */
 export function getCurrent( cwd = process.cwd() ) {
 	return getPackageJson( cwd ).version;
+}
+
+/**
+ * @returns {string}
+ */
+function getDateIdentifier() {
+	const today = new Date();
+	const year = today.getFullYear().toString();
+	const month = ( today.getMonth() + 1 ).toString().padStart( 2, '0' );
+	const day = today.getDate().toString().padStart( 2, '0' );
+
+	return `${ year }${ month }${ day }`;
 }
 
 /**

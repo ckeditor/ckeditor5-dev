@@ -12,7 +12,11 @@ import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 const changelogVersion = releaseTools.getLastFromChangelog();
 const npmTag = releaseTools.getNpmTagFromVersion( changelogVersion );
 
-releaseTools.isVersionPublishableForTag( '@ckeditor/ckeditor5-dev-release-tools', changelogVersion, npmTag )
+// As long as CKEditor 5 supports the old installation methods, to avoid breaking the existing configurations,
+// packages from `ckeditor5-dev` are released as `@next`.
+const temporaryTagToCheck = npmTag === 'latest' ? 'next' : npmTag;
+
+releaseTools.isVersionPublishableForTag( '@ckeditor/ckeditor5-dev-release-tools', changelogVersion, temporaryTagToCheck )
 	.then( result => {
 		if ( !result ) {
 			console.error( `The proposed changelog (${ changelogVersion }) version is not higher than the already published one.` );

@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import fs from 'fs-extra';
@@ -17,6 +15,8 @@ vi.mock( 'glob' );
 
 describe( 'verifyPackagesPublishedCorrectly()', () => {
 	beforeEach( () => {
+		vi.spyOn( process, 'emitWarning' ).mockImplementation( () => {
+		} );
 		vi.mocked( fs ).remove.mockResolvedValue();
 		vi.mocked( fs ).readJson.mockResolvedValue();
 		vi.mocked( glob ).mockResolvedValue( [] );
@@ -34,7 +34,7 @@ describe( 'verifyPackagesPublishedCorrectly()', () => {
 		expect( vi.mocked( checkVersionAvailability ) ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should verify packages and remove them from the release directory on "npm show" command success', async () => {
+	it( 'should verify packages and remove them from the release directory on if their version are already taken', async () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package1', 'package2' ] );
 		vi.mocked( fs ).readJson
 			.mockResolvedValueOnce( { name: '@namespace/package1' } )
@@ -73,23 +73,20 @@ describe( 'verifyPackagesPublishedCorrectly()', () => {
 		expect( vi.mocked( fs ).remove ).toHaveBeenCalledExactlyOnceWith( 'package2' );
 	} );
 
-	it( 'should not remove package from release directory when checking version on npm throws error', async () => {
-		vi.mocked( glob ).mockResolvedValue( [ 'package1', 'package2' ] );
-		vi.mocked( fs ).readJson
-			.mockResolvedValueOnce( { name: '@namespace/package1' } )
-			.mockResolvedValueOnce( { name: '@namespace/package2' } );
-		vi.mocked( checkVersionAvailability )
-			.mockRejectedValueOnce( )
-			.mockResolvedValueOnce( false );
-
+	it( 'should print a deprecation warning', async () => {
 		const packagesDirectory = '/workspace/ckeditor5/release/npm';
 		const version = 'latest';
 		const onSuccess = vi.fn();
 
-		await expect( verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } ) )
-			.rejects
-			.toThrow( 'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1' );
+		await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } );
 
-		expect( vi.mocked( fs ).remove ).toHaveBeenCalledExactlyOnceWith( 'package2' );
+		expect( vi.mocked( process.emitWarning ) ).toHaveBeenCalledExactlyOnceWith(
+			expect.any( String ),
+			expect.objectContaining( {
+				type: 'DeprecationWarning',
+				code: 'DEP0001',
+				detail: expect.stringContaining( 'dep0001' )
+			} )
+		);
 	} );
 } );

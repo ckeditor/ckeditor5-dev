@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "44.0.0",
+  "version": "44.2.1",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -22,7 +22,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^44.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^44.2.1",
     "@octokit/rest": "^21.0.0",
     "chalk": "^5.0.0",
     "cli-columns": "^4.0.0",
@@ -38,8 +38,10 @@
     "inquirer": "^11.0.0",
     "lodash-es": "^4.17.21",
     "minimatch": "^9.0.0",
+    "pacote": "^19.0.0",
     "semver": "^7.6.3",
     "shell-escape": "^0.2.0",
+    "simple-git": "^3.27.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {

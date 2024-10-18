@@ -6,8 +6,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import inquirer from 'inquirer';
 import provideVersion from '../../lib/utils/provideversion.js';
+import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
 
 vi.mock( 'inquirer' );
+vi.mock( '../../lib/utils/checkversionavailability.js' );
 
 describe( 'provideVersion()', () => {
 	beforeEach( () => {
@@ -19,7 +21,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should use a specified version if is matches the semver standard', async () => {
-		await expect( provideVersion( '1.0.0', '1.1.0' ) ).resolves.toEqual( '1.1.0' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: '1.1.0'
+		} ) ).resolves.toEqual( '1.1.0' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -32,7 +38,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should suggest proper "major" version for public package', async () => {
-		await expect( provideVersion( '1.0.0', 'major' ) ).resolves.toEqual( '2.0.0' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'major'
+		} ) ).resolves.toEqual( '2.0.0' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -45,7 +55,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should suggest proper "minor" version for public package', async () => {
-		await expect( provideVersion( '1.0.0', 'minor' ) ).resolves.toEqual( '1.1.0' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'minor'
+		} ) ).resolves.toEqual( '1.1.0' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -58,7 +72,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should suggest proper "patch" version for public package', async () => {
-		await expect( provideVersion( '1.0.0', 'patch' ) ).resolves.toEqual( '1.0.1' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'patch'
+		} ) ).resolves.toEqual( '1.0.1' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -71,7 +89,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should suggest "skip" version for package which does not contain changes (proposed null)', async () => {
-		await expect( provideVersion( '1.0.0', null ) ).resolves.toEqual( 'skip' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: null
+		} ) ).resolves.toEqual( 'skip' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -84,7 +106,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'should suggest "skip" version for package which does not contain changes (proposed "skip")', async () => {
-		await expect( provideVersion( '1.0.0', 'skip' ) ).resolves.toEqual( 'skip' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'skip'
+		} ) ).resolves.toEqual( 'skip' );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -96,21 +122,37 @@ describe( 'provideVersion()', () => {
 		);
 	} );
 
-	it( 'should suggest "minor" instead of "major" version for non-public package', async () => {
-		await expect( provideVersion( '0.7.0', 'minor' ) ).resolves.toEqual( '0.8.0' );
+	it( 'should suggest a "minor" bump instead of "major" version for non-public package', async () => {
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '0.7.0',
+			releaseTypeOrNewVersion: 'major'
+		} ) ).resolves.toEqual( '0.8.0' );
 	} );
 
 	it( 'should suggest proper "patch" version for non-public package', async () => {
-		await expect( provideVersion( '0.7.0', 'patch' ) ).resolves.toEqual( '0.7.1' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '0.7.0',
+			releaseTypeOrNewVersion: 'patch'
+		} ) ).resolves.toEqual( '0.7.1' );
 	} );
 
 	it( 'returns "internal" if suggested version was "internal"', async () => {
-		await expect( provideVersion( '0.1.0', 'internal' ) ).resolves.toEqual( 'internal' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '0.1.0',
+			releaseTypeOrNewVersion: 'internal'
+		} ) ).resolves.toEqual( 'internal' );
 	} );
 
 	it( 'allows disabling "internal" version', async () => {
-		await expect( provideVersion( '0.1.0', 'major', { disableInternalVersion: true } ) )
-			.resolves.toEqual( expect.any( String ) );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '0.1.0',
+			releaseTypeOrNewVersion: 'major',
+			disableInternalVersion: true
+		} ) ).resolves.toEqual( expect.any( String ) );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -123,24 +165,44 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'returns "skip" if suggested version was "internal" but it is disabled', async () => {
-		await expect( provideVersion( '0.1.0', 'internal', { disableInternalVersion: true } ) )
-			.resolves.toEqual( 'skip' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '0.1.0',
+			releaseTypeOrNewVersion: 'internal',
+			disableInternalVersion: true
+		} ) ).resolves.toEqual( 'skip' );
 	} );
 
 	it( 'should suggest proper pre-release version for pre-release package (major bump)', async () => {
-		await expect( provideVersion( '1.0.0-alpha.1', 'major' ) ).resolves.toEqual( '1.0.0-alpha.2' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0-alpha.1',
+			releaseTypeOrNewVersion: 'major'
+		} ) ).resolves.toEqual( '1.0.0-alpha.2' );
 	} );
 
 	it( 'should suggest proper pre-release version for pre-release package (minor bump)', async () => {
-		await expect( provideVersion( '1.0.0-alpha.1', 'minor' ) ).resolves.toEqual( '1.0.0-alpha.2' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0-alpha.1',
+			releaseTypeOrNewVersion: 'minor'
+		} ) ).resolves.toEqual( '1.0.0-alpha.2' );
 	} );
 
 	it( 'should suggest proper pre-release version for pre-release package (patch bump)', async () => {
-		await expect( provideVersion( '1.0.0-alpha.1', 'patch' ) ).resolves.toEqual( '1.0.0-alpha.2' );
+		await expect( provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0-alpha.1',
+			releaseTypeOrNewVersion: 'patch'
+		} ) ).resolves.toEqual( '1.0.0-alpha.2' );
 	} );
 
 	it( 'removes spaces from provided version', async () => {
-		await provideVersion( '1.0.0', 'major' );
+		await provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'major'
+		} );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -160,7 +222,11 @@ describe( 'provideVersion()', () => {
 	} );
 
 	it( 'validates the provided version (disableInternalVersion=false)', async () => {
-		await provideVersion( '1.0.0', 'major' );
+		await provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'major'
+		} );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -174,14 +240,31 @@ describe( 'provideVersion()', () => {
 		const [ firstQuestion ] = firstArgument;
 		const { validate } = firstQuestion;
 
-		expect( validate( 'skip' ) ).to.equal( true );
-		expect( validate( 'internal' ) ).to.equal( true );
-		expect( validate( '2.0.0' ) ).to.equal( true );
-		expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+
+		await expect( validate( 'skip' ) ).resolves.toBe( true );
+		await expect( validate( 'internal' ) ).resolves.toBe( true );
+		await expect( validate( '2.0.0' ) ).resolves.toBe( true );
+		await expect( validate( '0.1' ) ).resolves.toBe( 'Please provide a valid version.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '2.0.0', '@ckeditor/ckeditor5-foo' );
+
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( false );
+
+		await expect( validate( '3.0.0' ) ).resolves.toBe( 'Given version is already taken.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '3.0.0', '@ckeditor/ckeditor5-foo' );
 	} );
 
 	it( 'validates the provided version (disableInternalVersion=true)', async () => {
-		await provideVersion( '1.0.0', 'major', { disableInternalVersion: true } );
+		await provideVersion( {
+			packageName: '@ckeditor/ckeditor5-foo',
+			version: '1.0.0',
+			releaseTypeOrNewVersion: 'major',
+			disableInternalVersion: true
+		} );
 
 		expect( vi.mocked( inquirer ).prompt ).toHaveBeenCalledExactlyOnceWith(
 			expect.arrayContaining( [
@@ -195,9 +278,21 @@ describe( 'provideVersion()', () => {
 		const [ firstQuestion ] = firstArgument;
 		const { validate } = firstQuestion;
 
-		expect( validate( 'skip' ) ).to.equal( true );
-		expect( validate( 'internal' ) ).to.equal( 'Please provide a valid version.' );
-		expect( validate( '2.0.0' ) ).to.equal( true );
-		expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+
+		await expect( validate( 'skip' ) ).resolves.toBe( true );
+		await expect( validate( 'internal' ) ).resolves.toBe( 'Please provide a valid version.' );
+		await expect( validate( '2.0.0' ) ).resolves.toBe( true );
+		await expect( validate( '0.1' ) ).resolves.toBe( 'Please provide a valid version.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '2.0.0', '@ckeditor/ckeditor5-foo' );
+
+		vi.mocked( checkVersionAvailability ).mockResolvedValue( false );
+
+		await expect( validate( '3.0.0' ) ).resolves.toBe( 'Given version is already taken.' );
+
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '3.0.0', '@ckeditor/ckeditor5-foo' );
 	} );
 } );
