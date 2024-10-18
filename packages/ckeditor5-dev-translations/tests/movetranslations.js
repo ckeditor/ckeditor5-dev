@@ -110,6 +110,98 @@ describe( 'moveTranslations()', () => {
 	} );
 
 	describe( 'validation', () => {
+		describe( 'unique move entries', () => {
+			it( 'should return no error if there are unique entries (one entry, no duplicates)', () => {
+				moveTranslations( defaultOptions );
+
+				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated entry' ) );
+			} );
+
+			it( 'should return no error if there are unique entries (many entries, no duplicates)', () => {
+				defaultOptions = {
+					config: [
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						},
+						{
+							source: 'packages/ckeditor5-bar',
+							destination: 'packages/ckeditor5-foo',
+							messageId: 'id2'
+						}
+					]
+				};
+
+				moveTranslations( defaultOptions );
+
+				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated entry' ) );
+			} );
+
+			it( 'should return error if there are duplicated entries (many entries, one duplicated entry)', () => {
+				defaultOptions = {
+					config: [
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						},
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						}
+					]
+				};
+
+				moveTranslations( defaultOptions );
+
+				expect( stubs.logger.error ).toHaveBeenCalledWith(
+					'   - Duplicated entry: the "id1" message is configured to be moved multiple times.'
+				);
+
+				expect( process.exit ).toHaveBeenCalledWith( 1 );
+			} );
+
+			it( 'should return error once for each duplicated entry (many entries, many repeated duplicated entries)', () => {
+				defaultOptions = {
+					config: [
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						},
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						},
+						{
+							source: 'packages/ckeditor5-foo',
+							destination: 'packages/ckeditor5-bar',
+							messageId: 'id1'
+						}
+					]
+				};
+
+				moveTranslations( defaultOptions );
+
+				expect( stubs.logger.error ).toHaveBeenCalledWith(
+					'   - Duplicated entry: the "id1" message is configured to be moved multiple times.'
+				);
+
+				const callsWithDuplicatedEntryLog = stubs.logger.error.mock.calls.filter( call => {
+					const [ arg ] = call;
+
+					return arg.includes( 'Duplicated entry' );
+				} );
+
+				expect( callsWithDuplicatedEntryLog.length ).toEqual( 1 );
+
+				expect( process.exit ).toHaveBeenCalledWith( 1 );
+			} );
+		} );
+
 		describe( 'packages exist', () => {
 			it( 'should return no error if there is no missing package', () => {
 				moveTranslations( defaultOptions );

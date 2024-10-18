@@ -10,6 +10,7 @@ import moveTranslationsBetweenPackages from './utils/movetranslationsbetweenpack
 
 /**
  * Moves the requested translations (context and messages) between packages by performing the following steps:
+ * * Detect if translations to move are not duplicated.
  * * Detect if both source and destination packages exist.
  * * Detect if translation context to move exists in the source package. Message may not exist in the target package,
  *   but if it does, it will be overwritten.
@@ -33,6 +34,7 @@ export default function moveTranslations( options ) {
 
 	log.info( '📍 Checking provided configuration...' );
 	errors.push(
+		...assertTranslationMoveEntriesUnique( { config } ),
 		...assertPackagesExist( { config } ),
 		...assertContextsExist( { packageContexts, config } )
 	);
@@ -51,6 +53,24 @@ export default function moveTranslations( options ) {
 	moveTranslationsBetweenPackages( { packageContexts, config } );
 
 	log.info( '✨ Done.' );
+}
+
+/**
+ * @param {object} options
+ * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
+ * @returns {Array.<string>}
+ */
+function assertTranslationMoveEntriesUnique( { config } ) {
+	const moveEntriesGroupedByMessageId = config.reduce( ( result, entry ) => {
+		result[ entry.messageId ] = result[ entry.messageId ] || 0;
+		result[ entry.messageId ]++;
+
+		return result;
+	}, {} );
+
+	return Object.keys( moveEntriesGroupedByMessageId )
+		.filter( messageId => moveEntriesGroupedByMessageId[ messageId ] > 1 )
+		.map( messageId => `Duplicated entry: the "${ messageId }" message is configured to be moved multiple times.` );
 }
 
 /**
