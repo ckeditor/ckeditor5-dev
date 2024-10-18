@@ -162,13 +162,13 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		expect( translations.items ).toEqual( [
 			{
-				msgid: 'Example message 1',
+				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
 				msgstr: [ '' ]
 			},
 			{
-				msgid: 'Example message 2',
+				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
 				msgstr: [ '', '', '', '' ]

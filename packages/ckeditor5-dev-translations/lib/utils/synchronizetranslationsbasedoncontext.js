@@ -55,7 +55,7 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 						const item = new PO.Item( { nplurals: numberOfPluralForms } );
 
 						item.msgctxt = contextContent[ message.id ];
-						item.msgid = message.string;
+						item.msgid = message.id;
 						item.msgstr.push( '' );
 
 						if ( message.plural ) {
