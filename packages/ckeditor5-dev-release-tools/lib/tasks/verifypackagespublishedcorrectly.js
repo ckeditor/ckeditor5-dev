@@ -19,6 +19,16 @@ import checkVersionAvailability from '../utils/checkversionavailability.js';
  * @returns {Promise}
  */
 export default async function verifyPackagesPublishedCorrectly( options ) {
+	process.emitWarning(
+		'The `verifyPackagesPublishedCorrectly()` function is deprecated and will be removed in the upcoming release (v45). ' +
+		'Its responsibility has been merged with `publishPackages()`.',
+		{
+			type: 'DeprecationWarning',
+			code: 'DEP0001',
+			detail: 'https://github.com/ckeditor/ckeditor5-dev/blob/master/DEPRECATIONS.md#dep0001-verifypackagespublishedcorrectly'
+		}
+	);
+
 	const { packagesDirectory, version, onSuccess } = options;
 	const packagesToVerify = await glob( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];
@@ -32,16 +42,12 @@ export default async function verifyPackagesPublishedCorrectly( options ) {
 	for ( const packageToVerify of packagesToVerify ) {
 		const packageJson = await fs.readJson( upath.join( packageToVerify, 'package.json' ) );
 
-		try {
-			const packageWasUploadedCorrectly = !await checkVersionAvailability( version, packageJson.name );
+		const isPackageVersionAvailable = await checkVersionAvailability( version, packageJson.name );
 
-			if ( packageWasUploadedCorrectly ) {
-				await fs.remove( packageToVerify );
-			} else {
-				errors.push( packageJson.name );
-			}
-		} catch {
+		if ( isPackageVersionAvailable ) {
 			errors.push( packageJson.name );
+		} else {
+			await fs.remove( packageToVerify );
 		}
 	}
 

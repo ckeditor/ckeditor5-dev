@@ -7,22 +7,30 @@ import inquirer from 'inquirer';
 import semver from 'semver';
 import chalk from 'chalk';
 import { CLI_INDENT_SIZE } from './constants.js';
+import checkVersionAvailability from './checkversionavailability.js';
 
 /**
  * Asks a user for providing the new version.
  *
- * @param {string} packageVersion
- * @param {string|null} releaseTypeOrNewVersion
- * @param {object} [options]
+ * @param {object} options
+ * @param {string} options.packageName
+ * @param {string} options.version
+ * @param {string|null} options.releaseTypeOrNewVersion
  * @param {boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
  * @param {boolean} [options.disableSkipVersion=false] Whether to "skip" version is enabled.
  * @param {number} [options.indentLevel=0] The indent level.
  * @returns {Promise.<string>}
  */
-export default function provideVersion( packageVersion, releaseTypeOrNewVersion, options = {} ) {
-	const indentLevel = options.indentLevel || 0;
+export default function provideVersion( options ) {
+	const {
+		packageName,
+		version,
+		releaseTypeOrNewVersion,
+		indentLevel = 0
+	} = options;
+
 	const suggestedVersion = getSuggestedVersion( {
-		packageVersion,
+		version,
 		releaseTypeOrNewVersion,
 		disableInternalVersion: options.disableInternalVersion
 	} );
@@ -33,7 +41,7 @@ export default function provideVersion( packageVersion, releaseTypeOrNewVersion,
 		message = 'Type the new version or "skip"';
 	}
 
-	message += ` (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`;
+	message += ` (suggested: "${ suggestedVersion }", current: "${ version }"):`;
 
 	const versionQuestion = {
 		type: 'input',
@@ -45,7 +53,7 @@ export default function provideVersion( packageVersion, releaseTypeOrNewVersion,
 			return input.trim();
 		},
 
-		validate( input ) {
+		async validate( input ) {
 			if ( !options.disableSkipVersion && input === 'skip' ) {
 				return true;
 			}
@@ -54,8 +62,17 @@ export default function provideVersion( packageVersion, releaseTypeOrNewVersion,
 				return true;
 			}
 
-			// TODO: Check whether provided version is available.
-			return semver.valid( input ) ? true : 'Please provide a valid version.';
+			if ( !semver.valid( input ) ) {
+				return 'Please provide a valid version.';
+			}
+
+			const isAvailable = await checkVersionAvailability( input, packageName );
+
+			if ( !isAvailable ) {
+				return 'Given version is already taken.';
+			}
+
+			return true;
 		},
 
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
@@ -67,12 +84,12 @@ export default function provideVersion( packageVersion, releaseTypeOrNewVersion,
 
 /**
  * @param {object} options
- * @param {string} options.packageVersion
+ * @param {string} options.version
  * @param {string|null} options.releaseTypeOrNewVersion
  * @param {boolean} options.disableInternalVersion
  * @returns {string}
  */
-function getSuggestedVersion( { packageVersion, releaseTypeOrNewVersion, disableInternalVersion } ) {
+function getSuggestedVersion( { version, releaseTypeOrNewVersion, disableInternalVersion } ) {
 	if ( !releaseTypeOrNewVersion || releaseTypeOrNewVersion === 'skip' ) {
 		return 'skip';
 	}
@@ -85,14 +102,14 @@ function getSuggestedVersion( { packageVersion, releaseTypeOrNewVersion, disable
 		return disableInternalVersion ? 'skip' : 'internal';
 	}
 
-	if ( semver.prerelease( packageVersion ) ) {
+	if ( semver.prerelease( version ) ) {
 		releaseTypeOrNewVersion = 'prerelease';
 	}
 
 	// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
-	if ( releaseTypeOrNewVersion === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
-		return semver.inc( packageVersion, 'minor' );
+	if ( releaseTypeOrNewVersion === 'major' && semver.gt( '1.0.0', version ) ) {
+		return semver.inc( version, 'minor' );
 	}
 
-	return semver.inc( packageVersion, releaseTypeOrNewVersion );
+	return semver.inc( version, releaseTypeOrNewVersion );
 }

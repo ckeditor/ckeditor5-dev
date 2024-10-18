@@ -24,6 +24,7 @@ import {
 	getNextPreRelease,
 	getLastNightly,
 	getNextNightly,
+	getNextInternal,
 	getCurrent,
 	getLastTagFromGit
 } from '../lib/utils/versions.js';
@@ -34,6 +35,7 @@ import verifyPackagesPublishedCorrectly from '../lib/tasks/verifypackagespublish
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 import provideToken from '../lib/utils/providetoken.js';
+import findPathsToPackages from '../lib/utils/findpathstopackages.js';
 
 import * as index from '../lib/index.js';
 
@@ -48,13 +50,15 @@ vi.mock( '../lib/tasks/push' );
 vi.mock( '../lib/tasks/publishpackages' );
 vi.mock( '../lib/tasks/updateversions' );
 vi.mock( '../lib/tasks/cleanuppackages' );
+vi.mock( '../lib/tasks/verifypackagespublishedcorrectly' );
 vi.mock( '../lib/utils/versions' );
 vi.mock( '../lib/utils/getnpmtagfromversion' );
 vi.mock( '../lib/utils/changelog' );
 vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
 vi.mock( '../lib/utils/isversionpublishablefortag' );
-vi.mock( '../lib/utils/provideToken' );
+vi.mock( '../lib/utils/providetoken' );
+vi.mock( '../lib/utils/findpathstopackages' );
 
 describe( 'dev-release-tools/index', () => {
 	describe( 'generateChangelogForSinglePackage()', () => {
@@ -176,6 +180,13 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
+	describe( 'getNextInternal()', () => {
+		it( 'should be a function', () => {
+			expect( getNextInternal ).to.be.a( 'function' );
+			expect( index.getNextInternal ).to.equal( getNextInternal );
+		} );
+	} );
+
 	describe( 'getLastTagFromGit()', () => {
 		it( 'should be a function', () => {
 			expect( getLastTagFromGit ).to.be.a( 'function' );
@@ -232,13 +243,6 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'isVersionPublishableForTag()', () => {
-		it( 'should be a function', () => {
-			expect( isVersionPublishableForTag ).to.be.a( 'function' );
-			expect( index.isVersionPublishableForTag ).to.equal( isVersionPublishableForTag );
-		} );
-	} );
-
 	describe( 'verifyPackagesPublishedCorrectly()', () => {
 		it( 'should be a function', () => {
 			expect( verifyPackagesPublishedCorrectly ).to.be.a( 'function' );
@@ -246,10 +250,24 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
+	describe( 'isVersionPublishableForTag()', () => {
+		it( 'should be a function', () => {
+			expect( isVersionPublishableForTag ).to.be.a( 'function' );
+			expect( index.isVersionPublishableForTag ).to.equal( isVersionPublishableForTag );
+		} );
+	} );
+
 	describe( 'provideToken()', () => {
 		it( 'should be a function', () => {
 			expect( provideToken ).to.be.a( 'function' );
 			expect( index.provideToken ).to.equal( provideToken );
+		} );
+	} );
+
+	describe( 'findPathsToPackages()', () => {
+		it( 'should be a function', () => {
+			expect( findPathsToPackages ).to.be.a( 'function' );
+			expect( index.findPathsToPackages ).to.equal( findPathsToPackages );
 		} );
 	} );
 } );

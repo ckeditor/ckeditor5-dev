@@ -4,8 +4,8 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import semver from 'semver';
 import * as transformCommitUtils from '../utils/transformcommitutils.js';
+import getNpmTagFromVersion from '../utils/getnpmtagfromversion.js';
 
 const { getRepositoryUrl } = transformCommitUtils;
 
@@ -41,23 +41,11 @@ export default async function createGithubRelease( options ) {
 			owner: repositoryOwner,
 			repo: repositoryName,
 			body: description,
-			prerelease: getVersionTag( version ) !== 'latest'
+			prerelease: getNpmTagFromVersion( version ) !== 'latest'
 		} );
 	}
 
 	return `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
-}
-
-/**
- * Returns an npm tag based on the specified release version.
- *
- * @param {string} version
- * @returns {string}
- */
-function getVersionTag( version ) {
-	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
-
-	return versionTag;
 }
 
 /**

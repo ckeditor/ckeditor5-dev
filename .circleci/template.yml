@@ -204,7 +204,7 @@ jobs:
           command: npm run release:prepare-packages -- --verbose
       - run:
           name: Publish the packages
-          command: npm run release:publish-packages -- --verbose
+          command: npm run release:publish-packages -- --verbose --npm-tag next
       - run:
           name: Enable the redundant workflows option
           command: yarn ckeditor5-dev-ci-circle-enable-auto-cancel-builds
