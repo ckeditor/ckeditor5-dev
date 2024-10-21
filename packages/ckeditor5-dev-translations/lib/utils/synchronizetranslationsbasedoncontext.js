@@ -13,11 +13,11 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
- * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
-export default function updatePackageTranslations( { packageContexts, sourceMessages, skipLicenseHeader } ) {
+export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		// (1) Skip packages that do not contain language context.
@@ -55,7 +55,7 @@ export default function updatePackageTranslations( { packageContexts, sourceMess
 						const item = new PO.Item( { nplurals: numberOfPluralForms } );
 
 						item.msgctxt = contextContent[ message.id ];
-						item.msgid = message.string;
+						item.msgid = message.id;
 						item.msgstr.push( '' );
 
 						if ( message.plural ) {

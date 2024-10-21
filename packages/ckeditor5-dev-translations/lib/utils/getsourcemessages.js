@@ -11,7 +11,7 @@ import findMessages from '../findmessages.js';
  * @param {Array.<string>} options.packagePaths An array of paths to packages that contain source files with messages to translate.
  * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Function} options.onErrorCallback Called when there is an error with parsing the source files.
- * @returns {Array.<Message>}
+ * @returns {Array.<TranslatableEntry>}
  */
 export default function getSourceMessages( { packagePaths, sourceFiles, onErrorCallback } ) {
 	return sourceFiles
@@ -30,3 +30,14 @@ export default function getSourceMessages( { packagePaths, sourceFiles, onErrorC
 			return sourceMessages;
 		} );
 }
+
+/**
+ * @typedef {object} TranslatableEntry
+ *
+ * @property {string} id
+ * @property {string} string
+ * @property {string} filePath
+ * @property {string} packagePath
+ * @property {string} context
+ * @property {string} [plural]
+ */
