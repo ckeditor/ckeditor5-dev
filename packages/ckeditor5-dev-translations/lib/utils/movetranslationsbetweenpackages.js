@@ -12,7 +12,7 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
  */
 export default function moveTranslationsBetweenPackages( { packageContexts, config } ) {

@@ -13,8 +13,8 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
- * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
 export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {

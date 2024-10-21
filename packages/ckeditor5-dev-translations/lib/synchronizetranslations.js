@@ -79,8 +79,8 @@ export default function synchronizeTranslations( options ) {
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
- * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
  * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
  * @returns {Array.<string>}
  */
@@ -105,8 +105,8 @@ function assertNoMissingContext( { packageContexts, sourceMessages, corePackageP
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
- * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
  * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
  * @param {boolean} options.ignoreUnusedCorePackageContexts Whether to skip unused context errors related to the `@ckeditor/ckeditor5-core`
  * package.
@@ -152,7 +152,7 @@ function assertAllContextUsed( { packageContexts, sourceMessages, corePackagePat
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @returns {Array.<string>}
  */
 function assertNoRepeatedContext( { packageContexts } ) {

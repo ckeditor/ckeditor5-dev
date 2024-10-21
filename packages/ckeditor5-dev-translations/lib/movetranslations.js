@@ -98,7 +98,7 @@ function assertPackagesExist( { config } ) {
 
 /**
  * @param {object} options
- * @param {Array.<Context>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
  * @returns {Array.<string>}
  */

@@ -10,7 +10,7 @@ import { CONTEXT_FILE_PATH } from './constants.js';
 /**
  * @param {object} options
  * @param {string} options.packagePath Path to the package containing the context.
- * @returns {Context}
+ * @returns {TranslationsContext}
  */
 export default function getPackageContext( { packagePath } ) {
 	const contextFilePath = upath.join( packagePath, CONTEXT_FILE_PATH );
@@ -24,7 +24,7 @@ export default function getPackageContext( { packagePath } ) {
 }
 
 /**
- * @typedef {object} Context
+ * @typedef {object} TranslationsContext
  *
  * @property {string} contextFilePath
  * @property {object} contextContent

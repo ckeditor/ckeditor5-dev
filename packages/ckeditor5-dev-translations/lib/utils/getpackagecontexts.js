@@ -9,7 +9,7 @@ import getPackageContext from './getpackagecontext.js';
  * @param {object} options
  * @param {Array.<string>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
- * @returns {Array.<Context>}
+ * @returns {Array.<TranslationsContext>}
  */
 export default function getPackageContexts( { packagePaths, corePackagePath } ) {
 	// Add path to the core package if not included in the package paths.
