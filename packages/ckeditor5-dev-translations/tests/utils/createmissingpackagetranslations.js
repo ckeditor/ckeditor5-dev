@@ -6,16 +6,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import PO from 'pofile';
-import { getNPlurals, getFormula } from 'plural-forms';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import getLanguages from '../../lib/utils/getlanguages.js';
+import getHeaders from '../../lib/utils/getheaders.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'pofile' );
-vi.mock( 'plural-forms' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );
+vi.mock( '../../lib/utils/getheaders.js' );
 
 describe( 'createMissingPackageTranslations()', () => {
 	let translations, defaultOptions;
@@ -32,13 +32,18 @@ describe( 'createMissingPackageTranslations()', () => {
 
 		vi.mocked( PO.parse ).mockReturnValue( translations );
 
-		vi.mocked( getNPlurals ).mockReturnValue( 4 );
-		vi.mocked( getFormula ).mockReturnValue( 'example plural formula' );
-
 		vi.mocked( getLanguages ).mockReturnValue( [
 			{ localeCode: 'en', languageCode: 'en', languageFileName: 'en' },
 			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
 		] );
+
+		vi.mocked( getHeaders ).mockImplementation( ( languageCode, localeCode ) => {
+			return {
+				Language: localeCode,
+				'Plural-Forms': 'nplurals=4; plural=example plural formula;',
+				'Content-Type': 'text/plain; charset=UTF-8'
+			};
+		} );
 
 		vi.mocked( cleanTranslationFileContent ).mockReturnValue( {
 			toString: () => 'Clean PO file content.'
@@ -81,11 +86,11 @@ describe( 'createMissingPackageTranslations()', () => {
 			'utf-8'
 		);
 
-		expect( getNPlurals ).toHaveBeenCalledWith( 'zh' );
-		expect( getFormula ).toHaveBeenCalledWith( 'zh' );
+		expect( getHeaders ).toHaveBeenCalledWith( 'zh', 'zh_TW' );
 
 		expect( translations.headers.Language ).toEqual( 'zh_TW' );
 		expect( translations.headers[ 'Plural-Forms' ] ).toEqual( 'nplurals=4; plural=example plural formula;' );
+		expect( translations.headers[ 'Content-Type' ] ).toEqual( 'text/plain; charset=UTF-8' );
 	} );
 
 	it( 'should not read the template if `skipLicenseHeader` flag is set', () => {
@@ -94,12 +99,6 @@ describe( 'createMissingPackageTranslations()', () => {
 		createMissingPackageTranslations( defaultOptions );
 
 		expect( fs.readFileSync ).not.toHaveBeenCalled();
-
-		expect( getNPlurals ).toHaveBeenCalledWith( 'zh' );
-		expect( getFormula ).toHaveBeenCalledWith( 'zh' );
-
-		expect( translations.headers.Language ).toEqual( 'zh_TW' );
-		expect( translations.headers[ 'Plural-Forms' ] ).toEqual( 'nplurals=4; plural=example plural formula;' );
 	} );
 
 	it( 'should save missing translation files on filesystem after cleaning the content', () => {
