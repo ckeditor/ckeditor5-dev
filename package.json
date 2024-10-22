@@ -20,6 +20,7 @@
     "@ckeditor/ckeditor5-dev-bump-year": "^44.2.1",
     "@inquirer/prompts": "^6.0.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.16",
+    "@octokit/rest": "^21.0.0",
     "eslint": "^8.21.0",
     "eslint-config-ckeditor5": "^8.0.0",
     "fs-extra": "^11.0.0",
