@@ -20,7 +20,7 @@ import getLanguages from './getlanguages.js';
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
 export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
-	const allLanguages = getLanguages();
+	const languages = getLanguages();
 
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
@@ -47,10 +47,14 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 			const translationFile = fs.readFileSync( translationFilePath, 'utf-8' );
 			const translations = PO.parse( translationFile );
 
-			// (4.1) Remove unused translations.
+			// (4.1) Update file headers.
+			const { languageCode, localeCode } = languages.find( language => language.localeCode === translations.headers.Language );
+			translations.headers = getHeaders( languageCode, localeCode );
+
+			// (4.2) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
 
-			// (4.2) Add missing translations.
+			// (4.3) Add missing translations.
 			translations.items.push(
 				...sourceMessagesForPackage
 					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
@@ -71,12 +75,9 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 					} )
 			);
 
-			const languageCode = getLanguages.find();
-			translations.headers = getHeaders( languageCode, translations.headers.Language );
-
 			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
-			// (4.3) Save translation file only if it has been updated.
+			// (4.4) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {
 				continue;
 			}
