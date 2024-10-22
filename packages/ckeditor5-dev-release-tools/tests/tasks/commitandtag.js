@@ -92,11 +92,27 @@ describe( 'commitAndTag()', () => {
 		} ) );
 
 		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith(
-			'Release: v1.0.0.',
+			'Release: v1.0.0. [skip ci]',
 			[
 				'package.json',
 				'packages/ckeditor5-foo/package.json'
 			]
+		);
+	} );
+
+	it( 'should not add skip ci to the commit when skipCi is set as false', async () => {
+		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
+
+		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ], skipCi: false } );
+
+		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.anything(), expect.objectContaining( {
+			absolute: true,
+			nodir: true
+		} ) );
+
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith(
+			'Release: v1.0.0.',
+			expect.anything()
 		);
 	} );
 
