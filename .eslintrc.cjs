@@ -22,8 +22,7 @@ module.exports = {
 
 		// ESLint does not understand `import ... with { ... }`.
 		// See: https://github.com/eslint/eslint/discussions/15305.
-		'packages/ckeditor5-dev-ci/lib/data/index.js',
-		'packages/ckeditor5-dev-transifex/lib/data/index.js'
+		'packages/ckeditor5-dev-ci/lib/data/index.js'
 	],
 	rules: {
 		'no-console': 'off',
@@ -43,7 +42,7 @@ module.exports = {
 				'./packages/typedoc-plugins/**/*'
 			],
 			rules: {
-				'ckeditor5-rules/require-file-extensions-in-imports': 'off',
+				'ckeditor5-rules/require-file-extensions-in-imports': 'off'
 			}
 		}
 	]
