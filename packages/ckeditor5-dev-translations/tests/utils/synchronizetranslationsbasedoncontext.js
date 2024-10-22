@@ -205,6 +205,76 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		] );
 	} );
 
+	it( 'should remove existing plural forms if a source file contains more than a language defines', () => {
+		translations.items = [
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '3', '4', '5', '6' ]
+			}
+		];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( translations.items ).toEqual( [
+			// `id1` is not updated as it does not offer plural forms.
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '3', '4' ]
+			}
+		] );
+	} );
+
+	it( 'should remove existing plural forms if a source file contains less than a language defines', () => {
+		translations.items = [
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2' ]
+			}
+		];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( translations.items ).toEqual( [
+			// `id1` is not updated as it does not offer plural forms.
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '', '' ]
+			}
+		] );
+	} );
+
 	it( 'should save updated translation files on filesystem after cleaning the content', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 

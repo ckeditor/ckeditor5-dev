@@ -49,7 +49,10 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 
 			// (4.1) Update file headers.
 			const { languageCode, localeCode } = languages.find( language => language.localeCode === translations.headers.Language );
+
 			translations.headers = getHeaders( languageCode, localeCode );
+
+			const numberOfPluralForms = parseInt( PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals );
 
 			// (4.2) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
@@ -59,7 +62,6 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 				...sourceMessagesForPackage
 					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
 					.map( message => {
-						const numberOfPluralForms = PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals;
 						const item = new PO.Item( { nplurals: numberOfPluralForms } );
 
 						item.msgctxt = contextContent[ message.id ];
@@ -75,9 +77,19 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 					} )
 			);
 
+			// (4.4) Align the number of plural forms to plural forms defined by a language.
+			translations.items = translations.items.map( item => {
+				if ( item.msgid_plural ) {
+					item.msgstr = [ ...Array( numberOfPluralForms ) ]
+						.map( ( value, index ) => item.msgstr[ index ] || '' );
+				}
+
+				return item;
+			} );
+
 			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
-			// (4.4) Save translation file only if it has been updated.
+			// (4.5) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {
 				continue;
 			}
