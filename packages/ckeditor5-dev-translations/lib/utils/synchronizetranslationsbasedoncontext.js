@@ -10,6 +10,8 @@ import { glob } from 'glob';
 import createMissingPackageTranslations from './createmissingpackagetranslations.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
+import getHeaders from './getheaders.js';
+import getLanguages from './getlanguages.js';
 
 /**
  * @param {object} options
@@ -18,6 +20,8 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
 export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
+	const allLanguages = getLanguages();
+
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		// (1) Skip packages that do not contain language context.
@@ -66,6 +70,9 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 						return item;
 					} )
 			);
+
+			const languageCode = getLanguages.find();
+			translations.headers = getHeaders( languageCode, translations.headers.Language );
 
 			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
