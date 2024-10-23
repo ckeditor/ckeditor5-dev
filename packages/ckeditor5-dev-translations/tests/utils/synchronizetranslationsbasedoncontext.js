@@ -240,7 +240,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		] );
 	} );
 
-	it( 'should remove existing plural forms if a source file contains less than a language defines', () => {
+	it( 'should add empty plural forms if a source file contains less than a language defines', () => {
 		translations.items = [
 			{
 				msgid: 'id1',
