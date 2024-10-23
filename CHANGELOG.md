@@ -1,6 +1,43 @@
 Changelog
 =========
 
+## [45.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.0...v45.0.1) (2024-10-23)
+
+> [!NOTE]
+> The release channel for this release is `next`.
+
+### Bug fixes
+
+* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Align the number of plural forms to plural forms defined by a language in the `synchronizeTranslations()` function. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/34bf2fd9234c7b8f1c768a810d970b0f29bc7f16))
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` function understands a new parameter called `skipCi`. By default, release commits will not trigger a new workflow on CI. This behavior can be disabled when passing the `false` value. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecc5104212b4c4c96f7530db5c384ca45fa67fa8))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.1): v45.0.0 => v45.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.1): v45.0.0 => v45.0.1
+</details>
+
+
 ## [45.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v44.2.1...v45.0.0) (2024-10-22)
 
 > [!NOTE]
@@ -147,54 +184,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/44.1.1): v44.1.0 => v44.1.1
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/44.1.1): v44.1.0 => v44.1.1
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/44.1.1): v44.1.0 => v44.1.1
-</details>
-
-
-## [44.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v44.0.0...v44.1.0) (2024-10-15)
-
-> [!NOTE]
-> The release channel for this release is `next`.
-
-### Features
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Created a new binary script called `ckeditor5-dev-ci-is-workflow-restarted` that returns with a non-zero exit code if a given workflow is executed for the first time. The restarted workflows exit with a zero exit code. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: A user-provided version will be checked against npm availability while generating a changelog. If it is already taken, the tools will not allow it to be used. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `updateVersions()` task will no longer verify if the specified `version` is available on npm. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task filters out already published packages to avoid pushing the same archive twice. Thanks to that, it can be a part of a process that would be restarted. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task tries to publish the package once again when it fails independently of the returned error code. Previously, it was scheduled only when the `E409` error occurred. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Marked the `verifyPackagesPublishedCorrectly()` function is deprecated. Its responsibility has been merged with `publishPackages()`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` task does not commit files if a tag for the specified version is already created. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7d7387cc46fc24d7992178f331f29df50f7e53))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: We do not spawn an npm process to download a package manifest from the npm registry. Instead, we send an HTTP request using the `pacote` package. Closes [ckeditor/ckeditor5#17191](https://github.com/ckeditor/ckeditor5/issues/17191). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a155390a2ee45190ce6edc49ed48f8e871aa641f))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `getNpmTagFromVersion()` function returns a `'nightly'` string when passing a CKEditor 5 nightly version. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4edf71cade5c73a8f9a7dbf80994490eeb400b60))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/44.1.0): v44.0.0 => v44.1.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/44.1.0): v44.0.0 => v44.1.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/44.1.0): v44.0.0 => v44.1.0
 </details>
 
 ---
