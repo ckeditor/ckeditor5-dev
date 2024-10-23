@@ -9,6 +9,8 @@ import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
+import getLanguages from '../../lib/utils/getlanguages.js';
+import getHeaders from '../../lib/utils/getheaders.js';
 import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 
 vi.mock( 'fs-extra' );
@@ -16,6 +18,8 @@ vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
+vi.mock( '../../lib/utils/getlanguages.js' );
+vi.mock( '../../lib/utils/getheaders.js' );
 
 describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	let defaultOptions, translations, stubs;
@@ -46,7 +50,9 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		};
 
 		translations = {
-			headers: {},
+			headers: {
+				Language: 'en'
+			},
 			items: [
 				{ msgid: 'id1' },
 				{ msgid: 'id2' }
@@ -57,6 +63,19 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		stubs = {
 			poItemConstructor: vi.fn()
 		};
+
+		vi.mocked( getLanguages ).mockReturnValue( [
+			{ localeCode: 'en', languageCode: 'en', languageFileName: 'en' },
+			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
+		] );
+
+		vi.mocked( getHeaders ).mockImplementation( ( languageCode, localeCode ) => {
+			return {
+				Language: localeCode,
+				'Plural-Forms': 'nplurals=4; plural=example plural formula;',
+				'Content-Type': 'text/plain; charset=UTF-8'
+			};
+		} );
 
 		vi.mocked( PO.parse ).mockReturnValue( translations );
 
@@ -131,14 +150,24 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 	it( 'should parse each translation file', () => {
 		vi.mocked( glob.sync ).mockImplementation( pattern => {
-			return [ 'en', 'pl' ].map( language => pattern.replace( '*', language ) );
+			return [ 'en', 'zh-tw' ].map( language => pattern.replace( '*', language ) );
 		} );
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/pl.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/zh-tw.po', 'utf-8' );
+	} );
+
+	it( 'should update file header', () => {
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( translations.headers ).toEqual( {
+			Language: 'en',
+			'Plural-Forms': 'nplurals=4; plural=example plural formula;',
+			'Content-Type': 'text/plain; charset=UTF-8'
+		} );
 	} );
 
 	it( 'should remove unused translations', () => {
@@ -172,6 +201,76 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
 				msgstr: [ '', '', '', '' ]
+			}
+		] );
+	} );
+
+	it( 'should remove existing plural forms if a source file contains more than a language defines', () => {
+		translations.items = [
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '3', '4', '5', '6' ]
+			}
+		];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( translations.items ).toEqual( [
+			// `id1` is not updated as it does not offer plural forms.
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '3', '4' ]
+			}
+		] );
+	} );
+
+	it( 'should add empty plural forms if a source file contains less than a language defines', () => {
+		translations.items = [
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2' ]
+			}
+		];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( translations.items ).toEqual( [
+			// `id1` is not updated as it does not offer plural forms.
+			{
+				msgid: 'id1',
+				msgctxt: 'Context for example message 1',
+				msgid_plural: '',
+				msgstr: [ '' ]
+			},
+			{
+				msgid: 'id2',
+				msgctxt: 'Context for example message 2',
+				msgid_plural: 'Example message 2 - plural form',
+				msgstr: [ '1', '2', '', '' ]
 			}
 		] );
 	} );

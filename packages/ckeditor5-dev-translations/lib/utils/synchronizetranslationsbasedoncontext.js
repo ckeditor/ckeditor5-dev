@@ -10,6 +10,8 @@ import { glob } from 'glob';
 import createMissingPackageTranslations from './createmissingpackagetranslations.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
+import getHeaders from './getheaders.js';
+import getLanguages from './getlanguages.js';
 
 /**
  * @param {object} options
@@ -18,6 +20,8 @@ import cleanTranslationFileContent from './cleantranslationfilecontent.js';
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  */
 export default function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
+	const languages = getLanguages();
+
 	// For each package:
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		// (1) Skip packages that do not contain language context.
@@ -43,15 +47,21 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 			const translationFile = fs.readFileSync( translationFilePath, 'utf-8' );
 			const translations = PO.parse( translationFile );
 
-			// (4.1) Remove unused translations.
+			// (4.1) Update file headers.
+			const { languageCode, localeCode } = languages.find( language => language.localeCode === translations.headers.Language );
+
+			translations.headers = getHeaders( languageCode, localeCode );
+
+			const numberOfPluralForms = parseInt( PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals );
+
+			// (4.2) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
 
-			// (4.2) Add missing translations.
+			// (4.3) Add missing translations.
 			translations.items.push(
 				...sourceMessagesForPackage
 					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
 					.map( message => {
-						const numberOfPluralForms = PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals;
 						const item = new PO.Item( { nplurals: numberOfPluralForms } );
 
 						item.msgctxt = contextContent[ message.id ];
@@ -67,9 +77,19 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 					} )
 			);
 
+			// (4.4) Align the number of plural forms to plural forms defined by a language.
+			translations.items = translations.items.map( item => {
+				if ( item.msgid_plural ) {
+					item.msgstr = [ ...Array( numberOfPluralForms ) ]
+						.map( ( value, index ) => item.msgstr[ index ] || '' );
+				}
+
+				return item;
+			} );
+
 			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
-			// (4.3) Save translation file only if it has been updated.
+			// (4.5) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {
 				continue;
 			}

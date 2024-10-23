@@ -7,10 +7,10 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import PO from 'pofile';
 import { fileURLToPath } from 'url';
-import { getNPlurals, getFormula } from 'plural-forms';
 import getLanguages from './getlanguages.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
+import getHeaders from './getheaders.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = upath.dirname( __filename );
@@ -33,12 +33,7 @@ export default function createMissingPackageTranslations( { packagePath, skipLic
 		}
 
 		const translations = PO.parse( translationsTemplate );
-
-		translations.headers.Language = localeCode;
-		translations.headers[ 'Plural-Forms' ] = [
-			`nplurals=${ getNPlurals( languageCode ) };`,
-			`plural=${ getFormula( languageCode ) };`
-		].join( ' ' );
+		translations.headers = getHeaders( languageCode, localeCode );
 
 		fs.outputFileSync( translationFilePath, cleanTranslationFileContent( translations ).toString(), 'utf-8' );
 	}
