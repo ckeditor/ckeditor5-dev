@@ -16,7 +16,7 @@ const { toUnix } = upath;
  * @param {string} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
  * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @param {boolean} [options.skipCi=true] Whether to add [skip ci] to the commit.
+ * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
  * @returns {Promise}
  */
 export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true } ) {
