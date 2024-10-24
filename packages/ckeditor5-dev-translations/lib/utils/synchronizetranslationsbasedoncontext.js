@@ -66,11 +66,21 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 
 						item.msgctxt = contextContent[ message.id ];
 						item.msgid = message.id;
-						item.msgstr.push( '' );
 
-						if ( message.plural ) {
-							item.msgid_plural = message.plural;
-							item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( '' ) );
+						if ( languageCode === 'en' ) {
+							item.msgstr.push( message.string );
+
+							if ( message.plural ) {
+								item.msgid_plural = message.plural;
+								item.msgstr.push( message.plural );
+							}
+						} else {
+							item.msgstr.push( '' );
+
+							if ( message.plural ) {
+								item.msgid_plural = message.plural;
+								item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( '' ) );
+							}
 						}
 
 						return item;
