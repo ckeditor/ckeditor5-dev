@@ -12,6 +12,7 @@ import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 import getHeaders from './getheaders.js';
 import getLanguages from './getlanguages.js';
+import addTranslation from './addtranslation.js';
 
 /**
  * @param {object} options
@@ -66,12 +67,12 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 
 						item.msgctxt = contextContent[ message.id ];
 						item.msgid = message.id;
-						item.msgstr.push( '' );
 
 						if ( message.plural ) {
 							item.msgid_plural = message.plural;
-							item.msgstr.push( ...Array( numberOfPluralForms - 1 ).fill( '' ) );
 						}
+
+						item.msgstr = addTranslation( { languageCode, numberOfPluralForms, message } );
 
 						return item;
 					} )

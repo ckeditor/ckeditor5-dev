@@ -11,6 +11,7 @@ import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecon
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 import getLanguages from '../../lib/utils/getlanguages.js';
 import getHeaders from '../../lib/utils/getheaders.js';
+import addTranslation from '../../lib/utils/addtranslation.js';
 import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 
 vi.mock( 'fs-extra' );
@@ -20,6 +21,7 @@ vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );
 vi.mock( '../../lib/utils/getheaders.js' );
+vi.mock( '../../lib/utils/addtranslation.js' );
 
 describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	let defaultOptions, translations, stubs;
@@ -76,6 +78,8 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 				'Content-Type': 'text/plain; charset=UTF-8'
 			};
 		} );
+
+		vi.mocked( addTranslation ).mockReturnValue( [] );
 
 		vi.mocked( PO.parse ).mockReturnValue( translations );
 
@@ -185,22 +189,44 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	} );
 
 	it( 'should add missing translations', () => {
+		vi.mocked( addTranslation ).mockReturnValue( [ 'added missing translation' ] );
 		translations.items = [];
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( addTranslation ).toHaveBeenCalledTimes( 2 );
+
+		expect( addTranslation ).toHaveBeenCalledWith( {
+			languageCode: 'en',
+			message: {
+				id: 'id1',
+				string: 'Example message 1'
+			},
+			numberOfPluralForms: 4
+		} );
+
+		expect( addTranslation ).toHaveBeenCalledWith( {
+			languageCode: 'en',
+			message: {
+				id: 'id2',
+				plural: 'Example message 2 - plural form',
+				string: 'Example message 2'
+			},
+			numberOfPluralForms: 4
+		} );
 
 		expect( translations.items ).toEqual( [
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
-				msgstr: [ '' ]
+				msgstr: expect.arrayContaining( [ 'added missing translation' ] )
 			},
 			{
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
-				msgstr: [ '', '', '', '' ]
+				msgstr: expect.arrayContaining( [ 'added missing translation' ] )
 			}
 		] );
 	} );
