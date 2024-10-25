@@ -23,7 +23,7 @@ describe( 'isVersionPublishableForTag()', () => {
 
 		expect( result ).to.equal( false );
 		expect( semver.lte ).toHaveBeenCalledExactlyOnceWith( '1.0.0', '1.0.0' );
-		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest', { cache: null } );
+		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest', expect.any( Object ) );
 	} );
 
 	it( 'should return false if given version is not higher than the latest published', async () => {

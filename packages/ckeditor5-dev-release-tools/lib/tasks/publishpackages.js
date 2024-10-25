@@ -62,7 +62,7 @@ export default async function publishPackages( options ) {
 		requireEntryPoint = false,
 		optionalEntryPointPackages = [],
 		cwd = process.cwd(),
-		concurrency = 4,
+		concurrency = 2,
 		attempts = 3
 	} = options;
 
@@ -107,8 +107,12 @@ export default async function publishPackages( options ) {
 		throw new Error( 'Some packages could not be published.' );
 	}
 
+	listrTask.output = 'Let\'s give an npm a moment for taking a breath (~10 sec)...';
+
 	// Let's give an npm a moment for taking a breath...
-	await wait( 1000 * 15 );
+	await wait( 1000 * 10 );
+
+	listrTask.output = 'Done. Let\'s continue.';
 
 	// ...and try again.
 	return publishPackages( {

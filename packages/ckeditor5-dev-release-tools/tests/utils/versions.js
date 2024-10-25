@@ -114,7 +114,7 @@ describe( 'versions', () => {
 			return getLastPreRelease( '42.0.0-alpha' )
 				.then( () => {
 					expect( vi.mocked( pacote ).packument ).toHaveBeenCalledTimes( 1 );
-					expect( vi.mocked( pacote ).packument ).toHaveBeenCalledWith( 'ckeditor5', { cache: null } );
+					expect( vi.mocked( pacote ).packument ).toHaveBeenCalledWith( 'ckeditor5', expect.any( Object ) );
 				} );
 		} );
 

@@ -272,6 +272,14 @@ describe( 'publishPackages()', () => {
 		} ) ).rejects.toThrow( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' );
 	} );
 
+	it( 'should use two threads by default when publishing packages', async () => {
+		await publishPackages( {} );
+
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+			concurrency: 2
+		} ) );
+	} );
+
 	it( 'should pass parameters for publishing packages', async () => {
 		const listrTask = {};
 		const abortController = new AbortController();
@@ -459,7 +467,8 @@ describe( 'publishPackages()', () => {
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				confirmationCallback
+				confirmationCallback,
+				listrTask: {}
 			} );
 
 			await vi.advanceTimersToNextTimerAsync();
@@ -491,7 +500,8 @@ describe( 'publishPackages()', () => {
 
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
+				npmOwner: 'pepe',
+				listrTask: {}
 			} );
 
 			await vi.advanceTimersToNextTimerAsync();
@@ -499,7 +509,47 @@ describe( 'publishPackages()', () => {
 			await promise;
 			const dateAfter = new Date();
 
-			expect( differenceInMilliseconds( dateAfter, dateBefore ) ).toEqual( 15000 );
+			expect( differenceInMilliseconds( dateAfter, dateBefore ) ).toEqual( 10000 );
+		} );
+
+		it( 'should inform a user about a timeout that hangs the process', async () => {
+			vi.mocked( findPathsToPackages )
+				// First execution.
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-bar'
+				] )
+				// Check for failed packages.
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-bar'
+				] )
+				// Repeat execution: look for packages to release.
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-bar'
+				] )
+				// Check for failed packages.
+				.mockResolvedValue( [] );
+
+			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+
+			const listrTask = {
+				output: ''
+			};
+
+			const confirmationCallback = vi.fn().mockReturnValue( true );
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				confirmationCallback,
+				listrTask
+			} );
+
+			await vi.advanceTimersByTimeAsync( 0 );
+			expect( listrTask.output ).not.toEqual( '' );
+
+			await vi.advanceTimersToNextTimerAsync();
+			expect( listrTask.output ).toEqual( 'Done. Let\'s continue.' );
+
+			await promise;
 		} );
 
 		it( 'should try to publish packages thrice before rejecting a promise', async () => {
@@ -515,7 +565,8 @@ describe( 'publishPackages()', () => {
 
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
+				npmOwner: 'pepe',
+				listrTask: {}
 			} );
 
 			// Needed twice because the third attempt does not setup a timeout.
@@ -566,7 +617,8 @@ describe( 'publishPackages()', () => {
 
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
+				npmOwner: 'pepe',
+				listrTask: {}
 			} );
 
 			await vi.advanceTimersToNextTimerAsync();

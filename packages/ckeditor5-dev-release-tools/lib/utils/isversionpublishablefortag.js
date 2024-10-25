@@ -15,7 +15,7 @@ import pacote from 'pacote';
  * @returns {Promise.<boolean>}
  */
 export default async function isVersionPublishableForTag( packageName, version, npmTag ) {
-	const npmVersion = await pacote.manifest( `${ packageName }@${ npmTag }`, { cache: null } )
+	const npmVersion = await pacote.manifest( `${ packageName }@${ npmTag }`, { cache: null, preferOnline: true } )
 		.then( ( { version } ) => version )
 		// An `npmTag` does not exist, or it's a first release of a package.
 		.catch( () => null );

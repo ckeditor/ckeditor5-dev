@@ -165,7 +165,8 @@ function getPackagesGroupedByThreads( packages, concurrency ) {
 /**
  * @typedef {object} ListrTaskObject
  *
- * @see https://listr2.kilic.dev/api/classes/ListrTaskObject.html
+ * @see https://listr2.kilic.dev/task/title.html
+ * @see https://listr2.kilic.dev/task/output.html
  *
  * @property {string} title Title of the task.
  *
