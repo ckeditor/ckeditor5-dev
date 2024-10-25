@@ -108,7 +108,7 @@ export default async function publishPackages( options ) {
 	}
 
 	// Let's give an npm a moment for taking a breath...
-	await wait( 1000 );
+	await wait( 1000 * 15 );
 
 	// ...and try again.
 	return publishPackages( {
