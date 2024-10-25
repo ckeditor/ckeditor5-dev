@@ -499,7 +499,7 @@ describe( 'publishPackages()', () => {
 			await promise;
 			const dateAfter = new Date();
 
-			expect( differenceInMilliseconds( dateAfter, dateBefore ) ).toEqual( 1000 );
+			expect( differenceInMilliseconds( dateAfter, dateBefore ) ).toEqual( 15000 );
 		} );
 
 		it( 'should try to publish packages thrice before rejecting a promise', async () => {
