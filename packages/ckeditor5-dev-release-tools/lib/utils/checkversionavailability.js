@@ -15,7 +15,7 @@ import pacote from 'pacote';
  * @returns {Promise}
  */
 export default async function checkVersionAvailability( version, packageName ) {
-	return pacote.manifest( `${ packageName }@${ version }` )
+	return pacote.manifest( `${ packageName }@${ version }`, { cache: null } )
 		.then( () => {
 			// If `pacote.manifest` resolves, a package with the given version exists.
 			return false;
