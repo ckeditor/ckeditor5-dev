@@ -18,7 +18,7 @@ export default async function publishPackageOnNpmCallback( packagePath, taskOpti
 		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
 			cwd: packagePath,
 			async: true,
-			verbosity: 'error'
+			verbosity: 'silent'
 		} );
 
 		// Do nothing if `npm publish` says "OK". We cannot trust anything npm says.

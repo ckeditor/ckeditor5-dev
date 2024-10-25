@@ -47,7 +47,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 			} );
 	} );
 
-	it( 'should set the verbosity level to "error" during publishing packages', () => {
+	it( 'should set the verbosity level to "silent" during publishing packages', () => {
 		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
 		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
@@ -56,7 +56,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 				expect( tools.shExec ).toHaveBeenCalledWith(
 					expect.anything(),
 					expect.objectContaining( {
-						verbosity: 'error'
+						verbosity: 'silent'
 					} )
 				);
 			} );
