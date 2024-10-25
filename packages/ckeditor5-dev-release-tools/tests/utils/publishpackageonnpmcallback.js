@@ -62,18 +62,18 @@ describe( 'publishPackageOnNpmCallback()', () => {
 			} );
 	} );
 
-	it( 'should remove package directory after publishing on npm', () => {
+	// See: https://github.com/ckeditor/ckeditor5/issues/17322.
+	it( 'should not remove package directory after publishing on npm', async () => {
 		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then( () => {
-				expect( fs.remove ).toHaveBeenCalledTimes( 1 );
-				expect( fs.remove ).toHaveBeenCalledWith( packagePath );
-			} );
+		await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
+
+		expect( fs.remove ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should not remove a package directory and not throw error when publishing on npm failed with code 409', async () => {
-		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'code E409' ) );
+	// See: https://github.com/ckeditor/ckeditor5/issues/17120
+	it( 'should not remove a package directory and not throw error when publishing on npm failed', async () => {
+		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'I failed because I can' ) );
 
 		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
