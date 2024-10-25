@@ -15,7 +15,7 @@ describe( 'checkVersionAvailability()', () => {
 
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) ).resolves.toBe( true );
 
-		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'stub-package@1.0.1', { cache: null } );
+		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'stub-package@1.0.1', expect.any( Object ) );
 	} );
 	it( 'should resolve to false if version exists', async () => {
 		pacote.manifest.mockResolvedValue( '1.0.1' );

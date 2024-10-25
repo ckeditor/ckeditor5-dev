@@ -123,6 +123,36 @@ describe( 'logger()', () => {
 		} );
 	} );
 
+	describe( 'verbosity = silent', () => {
+		beforeEach( () => {
+			log = logger( 'silent' );
+		} );
+
+		describe( 'logger.info()', () => {
+			it( 'should not log any message', () => {
+				log.info( logMessage );
+
+				expect( vi.mocked( console ).log ).not.toHaveBeenCalled();
+			} );
+		} );
+
+		describe( 'logger.warning()', () => {
+			it( 'should not log any message', () => {
+				log.warning( logMessage );
+
+				expect( vi.mocked( console ).log ).not.toHaveBeenCalled();
+			} );
+		} );
+
+		describe( 'logger.error()', () => {
+			it( 'should not log any message', () => {
+				log.error( logMessage );
+
+				expect( vi.mocked( console ).log ).not.toHaveBeenCalled();
+			} );
+		} );
+	} );
+
 	describe( 'uses default verbosity', () => {
 		beforeEach( () => {
 			log = logger();
