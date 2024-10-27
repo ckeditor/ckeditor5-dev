@@ -4,7 +4,7 @@
  */
 
 import semver from 'semver';
-import pacote from 'pacote';
+import { manifest } from './pacotecacheless.js';
 
 /**
  * This util aims to verify if the given `packageName` can be published with the given `version` on the `npmTag`.
@@ -15,7 +15,7 @@ import pacote from 'pacote';
  * @returns {Promise.<boolean>}
  */
 export default async function isVersionPublishableForTag( packageName, version, npmTag ) {
-	const npmVersion = await pacote.manifest( `${ packageName }@${ npmTag }`, { cache: null, preferOnline: true } )
+	const npmVersion = await manifest( `${ packageName }@${ npmTag }` )
 		.then( ( { version } ) => version )
 		// An `npmTag` does not exist, or it's a first release of a package.
 		.catch( () => null );

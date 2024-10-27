@@ -4,21 +4,21 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import pacote from 'pacote';
 import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
+import { manifest } from '../../lib/utils/pacotecacheless.js';
 
-vi.mock( 'pacote' );
+vi.mock( '../../lib/utils/pacotecacheless.js' );
 
 describe( 'checkVersionAvailability()', () => {
 	it( 'should resolve to true if version does not exist', async () => {
-		vi.mocked( pacote.manifest ).mockRejectedValue( 'E404' );
+		vi.mocked( manifest ).mockRejectedValue( 'E404' );
 
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) ).resolves.toBe( true );
 
-		expect( pacote.manifest ).toHaveBeenCalledExactlyOnceWith( 'stub-package@1.0.1', expect.any( Object ) );
+		expect( manifest ).toHaveBeenCalledExactlyOnceWith( 'stub-package@1.0.1' );
 	} );
 	it( 'should resolve to false if version exists', async () => {
-		pacote.manifest.mockResolvedValue( '1.0.1' );
+		manifest.mockResolvedValue( '1.0.1' );
 
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) ).resolves.toBe( false );
 	} );

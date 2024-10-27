@@ -4,7 +4,7 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import pacote from 'pacote';
+import { packument } from './pacotecacheless.js';
 import getChangelog from './getchangelog.js';
 import getPackageJson from './getpackagejson.js';
 
@@ -38,7 +38,7 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
 export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	const packageName = getPackageJson( cwd ).name;
 
-	return pacote.packument( packageName, { cache: null, preferOnline: true } )
+	return packument( packageName )
 		.then( result => {
 			const lastVersion = Object.keys( result.versions )
 				.filter( version => version.startsWith( releaseIdentifier ) )
