@@ -1,6 +1,44 @@
 Changelog
 =========
 
+## [45.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.5...v45.0.6) (2024-10-28)
+
+> [!NOTE]
+> The release channel for this release is `next`.
+
+### Bug fixes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `publishPackages()` task should not throw an error after trying to publish packages after reaching an attempted limit. Instead, it should verify if the last try was successfully completed and throw the error if it wasn't. Closes [ckeditor/ckeditor5#17333](https://github.com/ckeditor/ckeditor5/issues/17333). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/937c093d9993c4a43efb9de673b2fb492c152bd0))
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Increased the attempts limit from 3 to 5. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/937c093d9993c4a43efb9de673b2fb492c152bd0))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Created a decorated version of utils (`manifest()`, `packument()`) exposed by the `pacote` package. It prevents from using any cache when checking the npm registry. Direct calls have been replaced with the decorated version. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/937c093d9993c4a43efb9de673b2fb492c152bd0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.6): v45.0.5 => v45.0.6
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.6): v45.0.5 => v45.0.6
+</details>
+
+
 ## [45.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.4...v45.0.5) (2024-10-25)
 
 > [!NOTE]
@@ -135,43 +173,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.2): v45.0.1 => v45.0.2
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.2): v45.0.1 => v45.0.2
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.2): v45.0.1 => v45.0.2
-</details>
-
-
-## [45.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.0...v45.0.1) (2024-10-23)
-
-> [!NOTE]
-> The release channel for this release is `next`.
-
-### Bug fixes
-
-* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Align the number of plural forms to plural forms defined by a language in the `synchronizeTranslations()` function. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/34bf2fd9234c7b8f1c768a810d970b0f29bc7f16))
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` function understands a new parameter called `skipCi`. By default, release commits will not trigger a new workflow on CI. This behavior can be disabled when passing the `false` value. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecc5104212b4c4c96f7530db5c384ca45fa67fa8))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.1): v45.0.0 => v45.0.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.1): v45.0.0 => v45.0.1
 </details>
 
 ---
