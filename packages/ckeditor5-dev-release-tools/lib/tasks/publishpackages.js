@@ -15,19 +15,22 @@ import checkVersionAvailability from '../utils/checkversionavailability.js';
 import findPathsToPackages from '../utils/findpathstopackages.js';
 
 /**
- * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
+ * The purpose of the script is to publish the prepared packages. However, before, it executes a few checks that
+ * prevent from publishing an incomplete package.
  *
- * The validation contains the following steps in each package:
- * - User must be logged to npm on the specified account.
- * - The package directory must contain `package.json` file.
- * - All other files expected to be released must exist in the package directory.
- * - The npm tag must match the tag calculated from the package version.
+ * The validation contains the following steps:
+ *
+ * - A user (a CLI session) must be logged to npm on the specified account (`npmOwner`).
+ * - A package directory must contain `package.json` file.
+ * - All files defined in the `optionalEntryPointPackages` option must exist in a package directory.
+ * - An npm tag (dist-tag) must match the tag calculated from the package version.
+ *   A stable release can be also published as `next` or `staging.
  *
  * When the validation for each package passes, packages are published on npm. Optional callback is called for confirmation whether to
  * continue.
  *
  * If a package has already been published, the script does not try to publish it again. Instead, it treats the package as published.
- * Whenever a communication between the script and npm fails, it tries to re-publish a package (up to three attempts).
+ * Whenever a communication between the script and npm fails, it tries to re-publish a package (up to five attempts).
  *
  * @param {object} options
  * @param {string} options.packagesDirectory Relative path to a location of packages to release.
@@ -63,25 +66,42 @@ export default async function publishPackages( options ) {
 		optionalEntryPointPackages = [],
 		cwd = process.cwd(),
 		concurrency = 2,
-		attempts = 3
+		attempts = 5
 	} = options;
 
-	const remainingAttempts = attempts - 1;
 	await assertNpmAuthorization( npmOwner );
 
+	// Find packages that would be published...
 	const packagePaths = await findPathsToPackages( cwd, packagesDirectory );
 
-	await assertPackages( packagePaths, { requireEntryPoint, optionalEntryPointPackages } );
-	await assertFilesToPublish( packagePaths, optionalEntries );
-	await assertNpmTag( packagePaths, npmTag );
+	// ...and filter out those that have already been processed.
+	// In other words, check whether a version per package (it's read from a `package.json` file)
+	// is not available. Otherwise, a package is ignored.
+	await removeAlreadyPublishedPackages( packagePaths );
+
+	// Once again, find packages to publish after the filtering operation.
+	const packagesToProcess = await findPathsToPackages( cwd, packagesDirectory );
+
+	if ( !packagesToProcess.length ) {
+		listrTask.output = 'All packages have been published.';
+
+		return Promise.resolve();
+	}
+
+	// No more attempts. Abort.
+	if ( attempts <= 0 ) {
+		throw new Error( 'Some packages could not be published.' );
+	}
+
+	await assertPackages( packagesToProcess, { requireEntryPoint, optionalEntryPointPackages } );
+	await assertFilesToPublish( packagesToProcess, optionalEntries );
+	await assertNpmTag( packagesToProcess, npmTag );
 
 	const shouldPublishPackages = confirmationCallback ? await confirmationCallback() : true;
 
 	if ( !shouldPublishPackages ) {
 		return Promise.resolve();
 	}
-
-	await removeAlreadyPublishedPackages( packagePaths );
 
 	await executeInParallel( {
 		cwd,
@@ -95,39 +115,17 @@ export default async function publishPackages( options ) {
 		concurrency
 	} );
 
-	const packagePathsAfterPublishing = await findPathsToPackages( cwd, packagesDirectory );
-
-	// All packages have been published. No need for re-executing.
-	if ( !packagePathsAfterPublishing.length ) {
-		return Promise.resolve();
-	}
-
-	// No more attempts. Abort.
-	if ( remainingAttempts <= 0 ) {
-		throw new Error( 'Some packages could not be published.' );
-	}
-
 	listrTask.output = 'Let\'s give an npm a moment for taking a breath (~10 sec)...';
 
-	// Let's give an npm a moment for taking a breath...
 	await wait( 1000 * 10 );
 
-	listrTask.output = 'Done. Let\'s continue.';
+	listrTask.output = 'Done. Let\'s continue. Re-executing.';
 
 	// ...and try again.
 	return publishPackages( {
-		packagesDirectory,
-		npmOwner,
-		listrTask,
-		signal,
-		npmTag,
-		optionalEntries,
-		requireEntryPoint,
-		optionalEntryPointPackages,
-		cwd,
-		concurrency,
+		...options,
 		confirmationCallback: null, // Do not ask again if already here.
-		attempts: remainingAttempts
+		attempts: attempts - 1
 	} );
 }
 

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import pacote from 'pacote';
+import { manifest } from './pacotecacheless.js';
 
 /**
  * Checks if the provided version for the package exists in the npm registry.
@@ -15,9 +15,9 @@ import pacote from 'pacote';
  * @returns {Promise}
  */
 export default async function checkVersionAvailability( version, packageName ) {
-	return pacote.manifest( `${ packageName }@${ version }`, { cache: null, preferOnline: true } )
+	return manifest( `${ packageName }@${ version }` )
 		.then( () => {
-			// If `pacote.manifest` resolves, a package with the given version exists.
+			// If `manifest` resolves, a package with the given version exists.
 			return false;
 		} )
 		.catch( () => {

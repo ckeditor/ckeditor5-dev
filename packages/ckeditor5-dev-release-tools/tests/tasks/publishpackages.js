@@ -30,7 +30,17 @@ describe( 'publishPackages()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/project' );
 
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [] );
+		vi.mocked( findPathsToPackages )
+			.mockResolvedValueOnce( [
+				'/work/project/packages/ckeditor5-foo',
+				'/work/project/packages/ckeditor5-bar'
+			] )
+			.mockResolvedValueOnce( [
+				'/work/project/packages/ckeditor5-foo',
+				'/work/project/packages/ckeditor5-bar'
+			] )
+			.mockResolvedValue( [] );
+
 		vi.mocked( assertNpmAuthorization ).mockResolvedValue();
 		vi.mocked( assertPackages ).mockResolvedValue();
 		vi.mocked( assertNpmTag ).mockResolvedValue();
@@ -40,408 +50,444 @@ describe( 'publishPackages()', () => {
 
 		vi.mocked( fs ).readJson.mockResolvedValue( { name: '', version: '' } );
 		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+
+		vi.useFakeTimers();
 	} );
 
-	it( 'should not throw if all assertion passes', async () => {
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} );
+	afterEach( () => {
+		vi.useRealTimers();
 	} );
 
-	it( 'should read the package directory (default `cwd`)', async () => {
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} );
+	describe( 'a package verification', () => {
+		it( 'should not throw if all assertion passes', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/project', 'packages' );
-	} );
-
-	it( 'should read the package directory (custom `cwd`)', async () => {
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			cwd: '/work/custom-dir'
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
 		} );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/custom-dir', 'packages' );
-	} );
+		it( 'should read the package directory (default `cwd`)', async () => {
+			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
-	it( 'should assert npm authorization', async () => {
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
+
+			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/project', 'packages' );
 		} );
 
-		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
-	} );
+		it( 'should read the package directory (custom `cwd`)', async () => {
+			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
-	it( 'should throw if npm authorization assertion failed', async () => {
-		vi.mocked( assertNpmAuthorization ).mockRejectedValue(
-			new Error( 'You must be logged to npm as "pepe" to execute this release step.' )
-		);
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				cwd: '/work/custom-dir'
+			} );
 
-		await expect( publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'fake-pepe'
-		} ) ).rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
-	} );
-
-	it( 'should assert that each found directory is a package', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/custom-dir', 'packages' );
 		} );
 
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			{
-				requireEntryPoint: false,
-				optionalEntryPointPackages: []
-			}
-		);
-	} );
+		it( 'should assert npm authorization', async () => {
+			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
-	// See: https://github.com/ckeditor/ckeditor5/issues/15127.
-	it( 'should allow enabling the "package entry point" validator', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			requireEntryPoint: true,
-			optionalEntryPointPackages: [
-				'ckeditor5-foo'
-			]
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
 		} );
 
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			{
+		it( 'should throw if npm authorization assertion failed', async () => {
+			vi.mocked( assertNpmAuthorization ).mockRejectedValue(
+				new Error( 'You must be logged to npm as "pepe" to execute this release step.' )
+			);
+
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'fake-pepe'
+			} ) ).rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
+
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'fake-pepe' );
+		} );
+
+		it( 'should assert that each found directory is a package', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				{
+					requireEntryPoint: false,
+					optionalEntryPointPackages: []
+				}
+			);
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/15127.
+		it( 'should allow enabling the "package entry point" validator', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
 				requireEntryPoint: true,
 				optionalEntryPointPackages: [
 					'ckeditor5-foo'
 				]
-			}
-		);
-	} );
+			} );
 
-	it( 'should throw if package assertion failed', async () => {
-		vi.mocked( assertPackages ).mockRejectedValue(
-			new Error( 'The "package.json" file is missing in the "ckeditor5-foo" package.' )
-		);
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
 
-		await expect( publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} ) ).rejects.toThrow( 'The "package.json" file is missing in the "ckeditor5-foo" package.' );
-	} );
-
-	it( 'should assert that each required file exists in the package directory (no optional entries)', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				{
+					requireEntryPoint: true,
+					optionalEntryPointPackages: [
+						'ckeditor5-foo'
+					]
+				}
+			);
 		} );
 
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			null
-		);
-	} );
+		it( 'should throw if package assertion failed', async () => {
+			vi.mocked( findPathsToPackages )
+				.mockResolvedValue( [
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				] );
 
-	it( 'should assert that each required file exists in the package directory (with optional entries)', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
+			vi.mocked( assertPackages ).mockRejectedValue(
+				new Error( 'The "package.json" file is missing in the "ckeditor5-foo" package.' )
+			);
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			optionalEntries: {
-				'ckeditor5-foo': [ 'src' ]
-			}
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} ) ).rejects.toThrow( 'The "package.json" file is missing in the "ckeditor5-foo" package.' );
 		} );
 
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			{
-				'ckeditor5-foo': [ 'src' ]
-			}
-		);
-	} );
+		it( 'should assert that each required file exists in the package directory (no optional entries)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
 
-	it( 'should throw if not all required files exist in the package directory', async () => {
-		vi.mocked( assertFilesToPublish ).mockRejectedValue(
-			new Error( 'Missing files in "ckeditor5-foo" package for entries: "src"' )
-		);
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
 
-		await expect( publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} ) ).rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src"' );
-	} );
-
-	it( 'should assert that version tag matches the npm tag (default npm tag)', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				null
+			);
 		} );
 
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			'staging'
-		);
-	} );
+		it( 'should assert that each required file exists in the package directory (with optional entries)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				optionalEntries: {
+					'ckeditor5-foo': [ 'src' ]
+				}
+			} );
 
-	it( 'should assert that version tag matches the npm tag (custom npm tag)', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			npmTag: 'nightly'
+			expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				{
+					'ckeditor5-foo': [ 'src' ]
+				}
+			);
 		} );
 
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
-			[
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			],
-			'nightly'
-		);
-	} );
+		it( 'should throw if not all required files exist in the package directory', async () => {
+			vi.mocked( assertFilesToPublish ).mockRejectedValue(
+				new Error( 'Missing files in "ckeditor5-foo" package for entries: "src"' )
+			);
 
-	it( 'should throw if version tag does not match the npm tag', async () => {
-		vi.mocked( assertNpmTag ).mockRejectedValue(
-			new Error( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' )
-		);
-
-		await expect( publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} ) ).rejects.toThrow( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' );
-	} );
-
-	it( 'should use two threads by default when publishing packages', async () => {
-		await publishPackages( {} );
-
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
-			concurrency: 2
-		} ) );
-	} );
-
-	it( 'should pass parameters for publishing packages', async () => {
-		const listrTask = {};
-		const abortController = new AbortController();
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			npmTag: 'nightly',
-			listrTask,
-			signal: abortController.signal,
-			concurrency: 3,
-			cwd: '/home/cwd'
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} ) ).rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src"' );
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( {
-			packagesDirectory: 'packages',
-			listrTask,
-			taskToExecute: publishPackageOnNpmCallback,
-			taskOptions: { npmTag: 'nightly' },
-			signal: abortController.signal,
-			concurrency: 3,
-			cwd: '/home/cwd'
+		it( 'should assert that version tag matches the npm tag (default npm tag)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				'staging'
+			);
+		} );
+
+		it( 'should assert that version tag matches the npm tag (custom npm tag)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				npmTag: 'nightly'
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				'nightly'
+			);
+		} );
+
+		it( 'should throw if version tag does not match the npm tag', async () => {
+			vi.mocked( assertNpmTag ).mockRejectedValue(
+				new Error( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' )
+			);
+
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} ) ).rejects.toThrow( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' );
 		} );
 	} );
 
-	it( 'should publish packages on npm if confirmation callback is not set', async () => {
-		const listrTask = {};
+	describe( 'publishing packages', () => {
+		it( 'should use two threads by default when publishing packages', async () => {
+			const promise = publishPackages( {
+				listrTask: {}
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			listrTask
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+				concurrency: 2
+			} ) );
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
-	} );
+		it( 'should pass parameters for publishing packages', async () => {
+			const listrTask = {};
+			const abortController = new AbortController();
 
-	it( 'should publish packages on npm if synchronous confirmation callback returns truthy value', async () => {
-		const confirmationCallback = vi.fn().mockReturnValue( true );
-		const listrTask = {};
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				npmTag: 'nightly',
+				listrTask,
+				signal: abortController.signal,
+				concurrency: 3,
+				cwd: '/home/cwd'
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			confirmationCallback,
-			listrTask
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( {
+				packagesDirectory: 'packages',
+				listrTask,
+				taskToExecute: publishPackageOnNpmCallback,
+				taskOptions: { npmTag: 'nightly' },
+				signal: abortController.signal,
+				concurrency: 3,
+				cwd: '/home/cwd'
+			} );
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
-	} );
+		it( 'should publish packages on npm if confirmation callback is not set', async () => {
+			const listrTask = {};
 
-	it( 'should publish packages on npm if asynchronous confirmation callback returns truthy value', async () => {
-		const confirmationCallback = vi.fn().mockResolvedValue( true );
-		const listrTask = {};
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			confirmationCallback,
-			listrTask
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
-	} );
+		it( 'should publish packages on npm if synchronous confirmation callback returns truthy value', async () => {
+			const confirmationCallback = vi.fn().mockReturnValue( true );
+			const listrTask = {};
 
-	it( 'should not publish packages on npm if synchronous confirmation callback returns falsy value', async () => {
-		const confirmationCallback = vi.fn().mockReturnValue( false );
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				confirmationCallback,
+				listrTask
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			confirmationCallback
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
-		expect( confirmationCallback ).toHaveBeenCalledOnce();
-	} );
+		it( 'should publish packages on npm if asynchronous confirmation callback returns truthy value', async () => {
+			const confirmationCallback = vi.fn().mockResolvedValue( true );
+			const listrTask = {};
 
-	it( 'should not publish packages on npm if asynchronous confirmation callback returns falsy value', async () => {
-		const confirmationCallback = vi.fn().mockResolvedValue( false );
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				confirmationCallback,
+				listrTask
+			} );
 
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe',
-			confirmationCallback
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
-		expect( confirmationCallback ).toHaveBeenCalledOnce();
-	} );
+		it( 'should not publish packages on npm if synchronous confirmation callback returns falsy value', async () => {
+			const confirmationCallback = vi.fn().mockReturnValue( false );
 
-	it( 'should throw if publishing packages on npm failed', async () => {
-		vi.mocked( executeInParallel ).mockRejectedValue(
-			new Error( 'Unable to publish "ckeditor5-foo" package.' )
-		);
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				confirmationCallback
+			} );
 
-		await expect( publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
-		} ) ).rejects.toThrow(
-			'Unable to publish "ckeditor5-foo" package.'
-		);
-	} );
-
-	it( 'should verify if given package can be published', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
-
-		vi.mocked( fs ).readJson
-			.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
-			.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
+			expect( confirmationCallback ).toHaveBeenCalledOnce();
 		} );
 
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json' );
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json' );
+		it( 'should not publish packages on npm if asynchronous confirmation callback returns falsy value', async () => {
+			const confirmationCallback = vi.fn().mockResolvedValue( false );
 
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-foo' );
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-bar' );
-	} );
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				confirmationCallback
+			} );
 
-	it( 'should remove a package if is already published', async () => {
-		vi.mocked( findPathsToPackages )
-			.mockResolvedValueOnce( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] )
-			.mockResolvedValue( [] );
-
-		vi.mocked( fs ).readJson
-			.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
-			.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
-
-		vi.mocked( checkVersionAvailability )
-			.mockResolvedValueOnce( false )
-			.mockResolvedValueOnce( true );
-
-		await publishPackages( {
-			packagesDirectory: 'packages',
-			npmOwner: 'pepe'
+			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
+			expect( confirmationCallback ).toHaveBeenCalledOnce();
 		} );
 
-		expect( vi.mocked( fs ).remove ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
+		it( 'should throw if publishing packages on npm failed', async () => {
+			vi.mocked( executeInParallel ).mockRejectedValue(
+				new Error( 'Unable to publish "ckeditor5-foo" package.' )
+			);
+
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe'
+			} ) ).rejects.toThrow(
+				'Unable to publish "ckeditor5-foo" package.'
+			);
+		} );
+
+		it( 'should verify if given package can be published', async () => {
+			vi.mocked( findPathsToPackages )
+				.mockReset()
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				] )
+				.mockResolvedValue( [] );
+
+			vi.mocked( fs ).readJson
+				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
+				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
+
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json' );
+			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json' );
+
+			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-foo' );
+			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-bar' );
+		} );
+
+		it( 'should remove a package if is already published', async () => {
+			vi.mocked( findPathsToPackages )
+				.mockReset()
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				] )
+				.mockResolvedValue( [] );
+
+			vi.mocked( fs ).readJson
+				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
+				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
+
+			vi.mocked( checkVersionAvailability )
+				.mockResolvedValueOnce( false )
+				.mockResolvedValueOnce( true );
+
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {}
+			} );
+
+			expect( vi.mocked( fs ).remove ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
+		} );
 	} );
 
 	describe( 're-publish packages that could not be published', () => {
 		beforeEach( () => {
-			vi.useFakeTimers();
-		} );
-
-		afterEach( () => {
-			vi.useRealTimers();
+			vi.mocked( findPathsToPackages ).mockReset();
 		} );
 
 		it( 'should not execute the specified `confirmationCallback` when re-publishing packages', async () => {
@@ -531,8 +577,11 @@ describe( 'publishPackages()', () => {
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {} );
 
+			const messages = [];
 			const listrTask = {
-				output: ''
+				set output( value ) {
+					messages.push( value );
+				}
 			};
 
 			const confirmationCallback = vi.fn().mockReturnValue( true );
@@ -543,38 +592,48 @@ describe( 'publishPackages()', () => {
 				listrTask
 			} );
 
-			await vi.advanceTimersByTimeAsync( 0 );
-			expect( listrTask.output ).not.toEqual( '' );
-
 			await vi.advanceTimersToNextTimerAsync();
-			expect( listrTask.output ).toEqual( 'Done. Let\'s continue.' );
-
 			await promise;
+
+			expect( messages[ 0 ] ).toEqual( 'Let\'s give an npm a moment for taking a breath (~10 sec)...' );
+			expect( messages[ 1 ] ).toEqual( 'Done. Let\'s continue. Re-executing.' );
 		} );
 
-		it( 'should try to publish packages thrice before rejecting a promise', async () => {
+		it( 'should try to publish packages five times before rejecting a promise', async () => {
+			// We want to simulate that the last call published the package. The previous attempts had failed.
+			for ( let i = 0; i < 5; ++i ) {
+				vi.mocked( findPathsToPackages )
+					.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
+					.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] );
+			}
+
+			// The last call before throwing an error. After comparing results with the registry,
+			// there is nothing to publish.
 			vi.mocked( findPathsToPackages )
-				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
-				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
-				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
-				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
 				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
 				.mockResolvedValue( [] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {} );
 
+			const listrTask = {
+				output: ''
+			};
+
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				listrTask: {}
+				listrTask
 			} );
 
-			// Needed twice because the third attempt does not setup a timeout.
-			await vi.advanceTimersToNextTimerAsync();
-			await vi.advanceTimersToNextTimerAsync();
+			// Each execution sets its own timer.
+			for ( let i = 0; i < 5; ++i ) {
+				await vi.advanceTimersToNextTimerAsync();
+			}
+
 			await promise;
 
-			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledTimes( 5 );
+			expect( listrTask.output ).toEqual( 'All packages have been published.' );
 		} );
 
 		it( 'should execute itself and publish the non-published packages again (integration)', async () => {
@@ -584,7 +643,7 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				] )
-				// Check for failed packages.
+				// All packages must be published.
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
@@ -594,7 +653,11 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				] )
-				// Repeat execution: Check for failed packages.
+				// Check for failed packages.
+				.mockResolvedValueOnce( [
+					'/work/project/packages/ckeditor5-foo'
+				] )
+				// Repeat execution: look for packages to release.
 				.mockResolvedValue( [] );
 
 			vi.mocked( fs ).readJson.mockImplementation( input => {
@@ -622,16 +685,17 @@ describe( 'publishPackages()', () => {
 			} );
 
 			await vi.advanceTimersToNextTimerAsync();
+			await vi.advanceTimersToNextTimerAsync();
 			await promise;
 
 			expect( vi.mocked( fs ).remove ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
 
 			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 4 );
+			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 6 );
 		} );
 
-		it( 'should reject a promise if cannot publish packages and there is no more attempting', async () => {
+		it( 'should reject a promise if cannot publish packages and there are no more attempts', async () => {
 			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
@@ -639,11 +703,18 @@ describe( 'publishPackages()', () => {
 				version: '1.0.0'
 			} );
 
-			await expect( publishPackages( {
+			const promise = safeReject( publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				attempts: 1
-			} ) ).rejects.toThrow( 'Some packages could not be published.' );
+				attempts: 1,
+				listrTask: {}
+			} ) );
+
+			await vi.advanceTimersToNextTimerAsync();
+
+			await expect( promise ).rejects.toThrow( 'Some packages could not be published.' );
+
+			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 4 );
 		} );
 
 		it( 'should reject a promise if cannot publish packages and there is no more attempting (a negative attempts value)', async () => {
@@ -659,6 +730,15 @@ describe( 'publishPackages()', () => {
 				npmOwner: 'pepe',
 				attempts: -5
 			} ) ).rejects.toThrow( 'Some packages could not be published.' );
+
+			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
 } );
+
+// To mute the "PromiseRejectionHandledWarning" warning.
+function safeReject( promise ) {
+	promise.catch( vi.fn() );
+
+	return promise;
+}
