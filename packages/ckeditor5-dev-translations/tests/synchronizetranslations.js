@@ -48,6 +48,7 @@ describe( 'synchronizeTranslations()', () => {
 		vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
 		vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/absolute/path/to' );
 	} );
 
 	it( 'should be a function', () => {
@@ -60,13 +61,28 @@ describe( 'synchronizeTranslations()', () => {
 		expect( getPackageContexts ).toHaveBeenCalledTimes( 1 );
 		expect( getPackageContexts ).toHaveBeenCalledWith( {
 			packagePaths: [
-				'packages/ckeditor5-foo',
-				'packages/ckeditor5-bar'
+				'/absolute/path/to/packages/ckeditor5-foo',
+				'/absolute/path/to/packages/ckeditor5-bar'
 			],
-			corePackagePath: 'packages/ckeditor5-core'
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core'
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Loading translations contexts...' );
+	} );
+
+	it( 'should resolve paths to packages using custom cwd', () => {
+		defaultOptions.cwd = '/another/workspace';
+
+		synchronizeTranslations( defaultOptions );
+
+		expect( getPackageContexts ).toHaveBeenCalledTimes( 1 );
+		expect( getPackageContexts ).toHaveBeenCalledWith( {
+			packagePaths: [
+				'/another/workspace/packages/ckeditor5-foo',
+				'/another/workspace/packages/ckeditor5-bar'
+			],
+			corePackagePath: '/another/workspace/packages/ckeditor5-core'
+		} );
 	} );
 
 	it( 'should load messages from source files', () => {
@@ -75,8 +91,8 @@ describe( 'synchronizeTranslations()', () => {
 		expect( getSourceMessages ).toHaveBeenCalledTimes( 1 );
 		expect( getSourceMessages ).toHaveBeenCalledWith( {
 			packagePaths: [
-				'packages/ckeditor5-foo',
-				'packages/ckeditor5-bar'
+				'/absolute/path/to/packages/ckeditor5-foo',
+				'/absolute/path/to/packages/ckeditor5-bar'
 			],
 			sourceFiles: [
 				'/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts',
@@ -143,13 +159,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (no context, no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -164,15 +180,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "foo", no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -187,8 +203,8 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "core", no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -205,15 +221,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "foo", message in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -221,7 +237,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -234,13 +250,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "core", message in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -250,7 +266,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -263,13 +279,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "core", message in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -279,7 +295,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-core',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
 						filePath: '/absolute/path/to/packages/ckeditor5-core/src/utils/file.ts'
 					}
 				] );
@@ -292,15 +308,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no missing context (context in "foo" and "core", messages in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id2: 'Example message 2.'
 						}
@@ -310,12 +326,12 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					},
 					{
 						id: 'id2',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -328,13 +344,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is missing context (no context, message in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -342,7 +358,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -359,20 +375,20 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is missing context (context in "foo", message in "bar")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-bar',
-						contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -380,7 +396,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-bar',
+						packagePath: '/absolute/path/to/packages/ckeditor5-bar',
 						filePath: '/absolute/path/to/packages/ckeditor5-bar/src/utils/file.ts'
 					}
 				] );
@@ -397,15 +413,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is missing context (context in "foo", message in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -413,7 +429,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-core',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
 						filePath: '/absolute/path/to/packages/ckeditor5-core/src/utils/file.ts'
 					}
 				] );
@@ -432,13 +448,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (no context, no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -453,15 +469,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (context in "foo", message in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -469,7 +485,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -482,13 +498,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (context in "core", message in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -498,7 +514,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -511,8 +527,8 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (context in "core", message in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -522,7 +538,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-core',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
 						filePath: '/absolute/path/to/packages/ckeditor5-core/src/utils/file.ts'
 					}
 				] );
@@ -535,15 +551,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (context in "foo" and "core", messages in "foo")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id2: 'Example message 2.'
 						}
@@ -553,12 +569,12 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					},
 					{
 						id: 'id2',
-						packagePath: 'packages/ckeditor5-foo',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 						filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts'
 					}
 				] );
@@ -571,8 +587,8 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if all context is used (context in "core", no message, ignore core)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -591,15 +607,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is unused context (context in "foo", no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -609,7 +625,7 @@ describe( 'synchronizeTranslations()', () => {
 				synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Unused context "id1" in "packages/ckeditor5-foo/lang/contexts.json".'
+					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -618,20 +634,20 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is unused context (context in "foo", message in "bar")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-bar',
-						contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -639,7 +655,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-bar',
+						packagePath: '/absolute/path/to/packages/ckeditor5-bar',
 						filePath: '/absolute/path/to/packages/ckeditor5-bar/src/utils/file.ts'
 					}
 				] );
@@ -647,7 +663,7 @@ describe( 'synchronizeTranslations()', () => {
 				synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Unused context "id1" in "packages/ckeditor5-foo/lang/contexts.json".'
+					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -656,15 +672,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is unused context (context in "foo", message in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -672,7 +688,7 @@ describe( 'synchronizeTranslations()', () => {
 				vi.mocked( getSourceMessages ).mockReturnValue( [
 					{
 						id: 'id1',
-						packagePath: 'packages/ckeditor5-core',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
 						filePath: '/absolute/path/to/packages/ckeditor5-core/src/utils/file.ts'
 					}
 				] );
@@ -680,7 +696,7 @@ describe( 'synchronizeTranslations()', () => {
 				synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Unused context "id1" in "packages/ckeditor5-foo/lang/contexts.json".'
+					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -689,8 +705,8 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is unused context (context in "core", no message)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -702,7 +718,7 @@ describe( 'synchronizeTranslations()', () => {
 				synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Unused context "id1" in "packages/ckeditor5-core/lang/contexts.json".'
+					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-core/lang/contexts.json".'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -713,13 +729,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no duplicated context (no context)', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {}
 					}
 				] );
@@ -732,13 +748,13 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no duplicated context (no context in "foo", context in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -753,15 +769,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return no error if there is no duplicated context (context in "foo", another context in "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id2: 'Example message 2.'
 						}
@@ -776,15 +792,15 @@ describe( 'synchronizeTranslations()', () => {
 			it( 'should return error if there is duplicated context (the same context in "foo" and "core")', () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
-						packagePath: 'packages/ckeditor5-foo',
-						contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
 					},
 					{
-						packagePath: 'packages/ckeditor5-core',
-						contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
+						packagePath: '/absolute/path/to/packages/ckeditor5-core',
+						contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
 						contextContent: {
 							id1: 'Example message 1.'
 						}
@@ -797,7 +813,8 @@ describe( 'synchronizeTranslations()', () => {
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Duplicated context "id1" in ' +
-					'"packages/ckeditor5-foo/lang/contexts.json", "packages/ckeditor5-core/lang/contexts.json".'
+					'"/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json", ' +
+					'"/absolute/path/to/packages/ckeditor5-core/lang/contexts.json".'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );

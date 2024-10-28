@@ -14,11 +14,11 @@ describe( 'getPackageContext()', () => {
 
 	beforeEach( () => {
 		defaultOptions = {
-			packagePath: 'packages/ckeditor5-foo'
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo'
 		};
 
 		vi.mocked( fs.readJsonSync ).mockImplementation( path => {
-			if ( path === 'packages/ckeditor5-foo/lang/contexts.json' ) {
+			if ( path === '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json' ) {
 				return {
 					id1: 'Context for message id1 from "ckeditor5-foo".'
 				};
@@ -36,7 +36,7 @@ describe( 'getPackageContext()', () => {
 		getPackageContext( defaultOptions );
 
 		expect( fs.readJsonSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.readJsonSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/contexts.json', { throws: false } );
+		expect( fs.readJsonSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json', { throws: false } );
 	} );
 
 	it( 'should return package contexts', () => {
@@ -46,20 +46,20 @@ describe( 'getPackageContext()', () => {
 			contextContent: {
 				id1: 'Context for message id1 from "ckeditor5-foo".'
 			},
-			contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
-			packagePath: 'packages/ckeditor5-foo'
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo'
 		} ) );
 	} );
 
 	it( 'should return empty context if package does not have context file', () => {
-		defaultOptions.packagePath = 'packages/ckeditor5-bar';
+		defaultOptions.packagePath = '/absolute/path/to/packages/ckeditor5-bar';
 
 		const result = getPackageContext( defaultOptions );
 
 		expect( result ).toEqual( expect.objectContaining( {
 			contextContent: {},
-			contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
-			packagePath: 'packages/ckeditor5-bar'
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar'
 		} ) );
 	} );
 } );

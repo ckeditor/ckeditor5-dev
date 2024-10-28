@@ -28,14 +28,14 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		];
 
 		packageContextFoo = {
-			packagePath: 'packages/ckeditor5-foo',
-			contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 			contextContent: Object.fromEntries( packageTranslationsFoo )
 		};
 
 		packageContextBar = {
-			packagePath: 'packages/ckeditor5-bar',
-			contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 			contextContent: Object.fromEntries( packageTranslationsBar )
 		};
 
@@ -43,8 +43,8 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 			packageContexts: [ packageContextFoo, packageContextBar ],
 			config: [
 				{
-					source: 'packages/ckeditor5-foo',
-					destination: 'packages/ckeditor5-bar',
+					source: '/absolute/path/to/packages/ckeditor5-foo',
+					destination: '/absolute/path/to/packages/ckeditor5-bar',
 					messageId: 'id1'
 				}
 			]
@@ -53,13 +53,13 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		vi.mocked( fs.existsSync ).mockReturnValue( true );
 
 		vi.mocked( fs.readFileSync ).mockImplementation( path => {
-			if ( path.startsWith( 'packages/ckeditor5-foo/lang/translations/' ) ) {
+			if ( path.startsWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/' ) ) {
 				return JSON.stringify( {
 					items: packageTranslationsFoo.map( ( [ msgid, msgctxt ] ) => ( { msgid, msgctxt } ) )
 				} );
 			}
 
-			if ( path.startsWith( 'packages/ckeditor5-bar/lang/translations/' ) ) {
+			if ( path.startsWith( '/absolute/path/to/packages/ckeditor5-bar/lang/translations/' ) ) {
 				return JSON.stringify( {
 					items: packageTranslationsBar.map( ( [ msgid, msgctxt ] ) => ( { msgid, msgctxt } ) )
 				} );
@@ -86,24 +86,24 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 	it( 'should not move translations between packages if source and destination are the same', () => {
 		defaultOptions.config = [ {
-			source: 'packages/ckeditor5-foo',
-			destination: 'packages/ckeditor5-foo',
+			source: '/absolute/path/to/packages/ckeditor5-foo',
+			destination: '/absolute/path/to/packages/ckeditor5-foo',
 			messageId: 'id1'
 		} ];
 
 		moveTranslationsBetweenPackages( defaultOptions );
 
 		expect( packageContextFoo ).toEqual( {
-			packagePath: 'packages/ckeditor5-foo',
-			contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 			contextContent: {
 				id1: 'Context for message id1 from "ckeditor5-foo".'
 			}
 		} );
 
 		expect( packageContextBar ).toEqual( {
-			packagePath: 'packages/ckeditor5-bar',
-			contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 			contextContent: {
 				id2: 'Context for message id2 from "ckeditor5-bar".'
 			}
@@ -117,14 +117,14 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
 		expect( packageContextFoo ).toEqual( {
-			packagePath: 'packages/ckeditor5-foo',
-			contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 			contextContent: {}
 		} );
 
 		expect( packageContextBar ).toEqual( {
-			packagePath: 'packages/ckeditor5-bar',
-			contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 			contextContent: {
 				id1: 'Context for message id1 from "ckeditor5-foo".',
 				id2: 'Context for message id2 from "ckeditor5-bar".'
@@ -138,14 +138,14 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
 		expect( packageContextFoo ).toEqual( {
-			packagePath: 'packages/ckeditor5-foo',
-			contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 			contextContent: {}
 		} );
 
 		expect( packageContextBar ).toEqual( {
-			packagePath: 'packages/ckeditor5-bar',
-			contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar',
+			contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 			contextContent: {
 				id1: 'Context for message id1 from "ckeditor5-foo".',
 				id2: 'Context for message id2 from "ckeditor5-bar".'
@@ -158,13 +158,13 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 		expect( fs.outputJsonSync ).toHaveBeenCalledTimes( 2 );
 		expect( fs.outputJsonSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-foo/lang/contexts.json',
+			'/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
 			{},
 			{ spaces: '\t' }
 		);
 
 		expect( fs.outputJsonSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-bar/lang/contexts.json',
+			'/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
 			{
 				id1: 'Context for message id1 from "ckeditor5-foo".',
 				id2: 'Context for message id2 from "ckeditor5-bar".'
@@ -177,17 +177,17 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
 		expect( glob.sync ).toHaveBeenCalledTimes( 1 );
-		expect( glob.sync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/*.po' );
+		expect( glob.sync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
 	} );
 
 	it( 'should parse each translation file', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 4 );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/pl.po', 'utf-8' );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-bar/lang/translations/en.po', 'utf-8' );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-bar/lang/translations/pl.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/pl.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-bar/lang/translations/en.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-bar/lang/translations/pl.po', 'utf-8' );
 
 		expect( PO.parse ).toHaveBeenCalledTimes( 4 );
 		expect( PO.parse ).toHaveBeenNthCalledWith(
@@ -260,7 +260,7 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 	it( 'should use the source translation file as a base if the destination file does not exist', () => {
 		vi.mocked( fs.existsSync ).mockImplementation( path => {
-			return path !== 'packages/ckeditor5-bar/lang/translations/pl.po';
+			return path !== '/absolute/path/to/packages/ckeditor5-bar/lang/translations/pl.po';
 		} );
 
 		moveTranslationsBetweenPackages( defaultOptions );
@@ -309,22 +309,22 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 4 );
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-foo/lang/translations/en.po',
+			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-foo/lang/translations/pl.po',
+			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/pl.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-bar/lang/translations/en.po',
+			'/absolute/path/to/packages/ckeditor5-bar/lang/translations/en.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-bar/lang/translations/pl.po',
+			'/absolute/path/to/packages/ckeditor5-bar/lang/translations/pl.po',
 			'Clean PO file content.',
 			'utf-8'
 		);

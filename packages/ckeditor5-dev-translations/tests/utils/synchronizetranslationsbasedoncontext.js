@@ -30,7 +30,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		defaultOptions = {
 			packageContexts: [
 				{
-					packagePath: 'packages/ckeditor5-foo',
+					packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 					contextContent: {
 						id1: 'Context for example message 1',
 						id2: 'Context for example message 2'
@@ -114,7 +114,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
-			packagePath: 'packages/ckeditor5-foo',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 			skipLicenseHeader: false
 		} );
 	} );
@@ -126,7 +126,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		expect( createMissingPackageTranslations ).toHaveBeenCalledTimes( 1 );
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
-			packagePath: 'packages/ckeditor5-foo',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 			skipLicenseHeader: true
 		} );
 	} );
@@ -134,7 +134,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	it( 'should not update any files when package does not contain translation context', () => {
 		defaultOptions.packageContexts = [
 			{
-				packagePath: 'packages/ckeditor5-foo',
+				packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 				contextContent: {}
 			}
 		];
@@ -149,7 +149,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( glob.sync ).toHaveBeenCalledTimes( 1 );
-		expect( glob.sync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/*.po' );
+		expect( glob.sync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
 	} );
 
 	it( 'should parse each translation file', () => {
@@ -160,8 +160,8 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/zh-tw.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po', 'utf-8' );
 	} );
 
 	it( 'should update file header', () => {
@@ -308,7 +308,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-foo/lang/translations/en.po',
+			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po',
 			'Clean PO file content.',
 			'utf-8'
 		);

@@ -19,25 +19,17 @@ import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslatio
  *   * missing translation entries are added with empty string as the message translation,
  *   * missing translation files are created for languages that do not have own "*.po" file yet.
  *
- * @param {object} options
- * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
- * @param {Array.<string>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
- * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
- * @param {boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to skip unused context errors related to
- * the `@ckeditor/ckeditor5-core` package.
- * @param {boolean} [options.validateOnly=false] If set, only validates the translations contexts against the source messages without
- * synchronizing the translations.
- * @param {boolean} [options.skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
+ * @param {SynchronizeTranslationsOptions} options
  */
 export default function synchronizeTranslations( options ) {
 	const {
 		sourceFiles,
 		packagePaths,
 		corePackagePath,
-		ignoreUnusedCorePackageContexts = false,
-		validateOnly = false,
-		skipLicenseHeader = false
-	} = options;
+		ignoreUnusedCorePackageContexts,
+		validateOnly,
+		skipLicenseHeader
+	} = normalizeOptions( options );
 
 	const errors = [];
 	const log = logger();
@@ -81,7 +73,7 @@ export default function synchronizeTranslations( options ) {
  * @param {object} options
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
- * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
+ * @param {string} options.corePackagePath A path to the `@ckeditor/ckeditor5-core` package.
  * @returns {Array.<string>}
  */
 function assertNoMissingContext( { packageContexts, sourceMessages, corePackagePath } ) {
@@ -107,7 +99,7 @@ function assertNoMissingContext( { packageContexts, sourceMessages, corePackageP
  * @param {object} options
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
- * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
+ * @param {string} options.corePackagePath A path to the `@ckeditor/ckeditor5-core` package.
  * @param {boolean} options.ignoreUnusedCorePackageContexts Whether to skip unused context errors related to the `@ckeditor/ckeditor5-core`
  * package.
  * @returns {Array.<string>}
@@ -176,3 +168,46 @@ function assertNoRepeatedContext( { packageContexts } ) {
 			return `Duplicated context "${ messageId }" in "${ contextFilePaths.join( '", "' ) }".`;
 		} );
 }
+
+/**
+ * @param {SynchronizeTranslationsOptions} options
+ */
+function normalizeOptions( options ) {
+	const {
+		sourceFiles,
+		packagePaths,
+		corePackagePath,
+		ignoreUnusedCorePackageContexts = false,
+		validateOnly = false,
+		skipLicenseHeader = false
+	} = options;
+
+	const cwd = options.cwd || process.cwd();
+	const toAbsolute = path => upath.resolve( cwd, path );
+
+	return {
+		sourceFiles: sourceFiles.map( toAbsolute ),
+		packagePaths: packagePaths.map( toAbsolute ),
+		corePackagePath: toAbsolute( corePackagePath ),
+		ignoreUnusedCorePackageContexts,
+		validateOnly,
+		skipLicenseHeader
+	};
+}
+
+/**
+ * @typedef {object} SynchronizeTranslationsOptions
+ *
+ * @property {Array.<string>} sourceFiles An array of source files that contain messages to translate.
+ * Path can be relative or absolute. Relative path is resolved using `options.cwd` (or `process.cwd()` if not set).
+ * @property {Array.<string>} packagePaths An array of paths to packages, which will be used to find message contexts.
+ * Path can be relative or absolute. Relative path is resolved using `options.cwd` (or `process.cwd()` if not set).
+ * @property {string} corePackagePath A path to the `@ckeditor/ckeditor5-core` package.
+ * Path can be relative or absolute. Relative path is resolved using `options.cwd` (or `process.cwd()` if not set).
+ * @property {string} [cwd=process.cwd()] Current working directory used to resolve paths to packages and source files.
+ * @property {boolean} [ignoreUnusedCorePackageContexts=false] Whether to skip unused context errors related to the
+ * `@ckeditor/ckeditor5-core` package.
+ * @property {boolean} [validateOnly=false] If set, only validates the translations contexts against the source messages without
+ * synchronizing the translations.
+ * @property {boolean} [skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
+ */
