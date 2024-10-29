@@ -13,6 +13,7 @@
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
 	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
+	const { default: fs } = await import( 'fs-extra' );
 
 	try {
 		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
@@ -21,7 +22,7 @@ export default async function publishPackageOnNpmCallback( packagePath, taskOpti
 			verbosity: 'silent'
 		} );
 
-		// Do nothing if `npm publish` says "OK". We cannot trust anything npm says.
+		await fs.remove( packagePath );
 	} catch {
 		// Do nothing if an error occurs. A parent task will handle it.
 	}
