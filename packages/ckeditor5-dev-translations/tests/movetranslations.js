@@ -44,11 +44,11 @@ describe( 'moveTranslations()', () => {
 		vi.mocked( getPackageContext ).mockImplementation( ( { packagePath } ) => {
 			const contextContent = {};
 
-			if ( packagePath === 'packages/ckeditor5-foo' ) {
+			if ( packagePath === '/absolute/path/to/packages/ckeditor5-foo' ) {
 				contextContent.id1 = 'Context for message id1 from "ckeditor5-foo".';
 			}
 
-			if ( packagePath === 'packages/ckeditor5-bar' ) {
+			if ( packagePath === '/absolute/path/to/packages/ckeditor5-bar' ) {
 				contextContent.id2 = 'Context for message id2 from "ckeditor5-bar".';
 			}
 
@@ -60,6 +60,7 @@ describe( 'moveTranslations()', () => {
 		} );
 
 		vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/absolute/path/to' );
 	} );
 
 	it( 'should be a function', () => {
@@ -70,10 +71,20 @@ describe( 'moveTranslations()', () => {
 		moveTranslations( defaultOptions );
 
 		expect( getPackageContext ).toHaveBeenCalledTimes( 2 );
-		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: 'packages/ckeditor5-foo' } );
-		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: 'packages/ckeditor5-bar' } );
+		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/absolute/path/to/packages/ckeditor5-foo' } );
+		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/absolute/path/to/packages/ckeditor5-bar' } );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Loading translations contexts...' );
+	} );
+
+	it( 'should resolve paths to packages using custom cwd', () => {
+		defaultOptions.cwd = '/another/workspace';
+
+		moveTranslations( defaultOptions );
+
+		expect( getPackageContext ).toHaveBeenCalledTimes( 2 );
+		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/another/workspace/packages/ckeditor5-foo' } );
+		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/another/workspace/packages/ckeditor5-bar' } );
 	} );
 
 	it( 'should move translations between packages', () => {
@@ -86,21 +97,21 @@ describe( 'moveTranslations()', () => {
 					contextContent: {
 						id1: 'Context for message id1 from "ckeditor5-foo".'
 					},
-					contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
-					packagePath: 'packages/ckeditor5-foo'
+					contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
+					packagePath: '/absolute/path/to/packages/ckeditor5-foo'
 				},
 				{
 					contextContent: {
 						id2: 'Context for message id2 from "ckeditor5-bar".'
 					},
-					contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
-					packagePath: 'packages/ckeditor5-bar'
+					contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
+					packagePath: '/absolute/path/to/packages/ckeditor5-bar'
 				}
 			],
 			config: [
 				{
-					source: 'packages/ckeditor5-foo',
-					destination: 'packages/ckeditor5-bar',
+					source: '/absolute/path/to/packages/ckeditor5-foo',
+					destination: '/absolute/path/to/packages/ckeditor5-bar',
 					messageId: 'id1'
 				}
 			]
@@ -211,13 +222,13 @@ describe( 'moveTranslations()', () => {
 
 			it( 'should return error if there is missing package (missing source package)', () => {
 				vi.mocked( fs.existsSync ).mockImplementation( path => {
-					return path !== 'packages/ckeditor5-foo';
+					return path !== '/absolute/path/to/packages/ckeditor5-foo';
 				} );
 
 				moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing package: the "packages/ckeditor5-foo" package does not exist.'
+					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-foo" package does not exist.'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -225,13 +236,13 @@ describe( 'moveTranslations()', () => {
 
 			it( 'should return error if there is missing package (missing destination package)', () => {
 				vi.mocked( fs.existsSync ).mockImplementation( path => {
-					return path !== 'packages/ckeditor5-bar';
+					return path !== '/absolute/path/to/packages/ckeditor5-bar';
 				} );
 
 				moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing package: the "packages/ckeditor5-bar" package does not exist.'
+					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-bar" package does not exist.'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -243,11 +254,11 @@ describe( 'moveTranslations()', () => {
 				moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing package: the "packages/ckeditor5-foo" package does not exist.'
+					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-foo" package does not exist.'
 				);
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing package: the "packages/ckeditor5-bar" package does not exist.'
+					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-bar" package does not exist.'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -273,7 +284,7 @@ describe( 'moveTranslations()', () => {
 				moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing context: the "id100" message does not exist in "packages/ckeditor5-foo" package.'
+					'   - Missing context: the "id100" message does not exist in "/absolute/path/to/packages/ckeditor5-foo" package.'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
@@ -291,7 +302,7 @@ describe( 'moveTranslations()', () => {
 				moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
-					'   - Missing context: the "id2" message does not exist in "packages/ckeditor5-foo" package.'
+					'   - Missing context: the "id2" message does not exist in "/absolute/path/to/packages/ckeditor5-foo" package.'
 				);
 
 				expect( process.exit ).toHaveBeenCalledWith( 1 );

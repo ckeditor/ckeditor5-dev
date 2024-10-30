@@ -26,7 +26,7 @@ describe( 'createMissingPackageTranslations()', () => {
 		};
 
 		defaultOptions = {
-			packagePath: 'packages/ckeditor5-foo',
+			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 			skipLicenseHeader: false
 		};
 
@@ -50,7 +50,7 @@ describe( 'createMissingPackageTranslations()', () => {
 		} );
 
 		vi.mocked( fs.existsSync ).mockImplementation( path => {
-			if ( path === 'packages/ckeditor5-foo/lang/translations/en.po' ) {
+			if ( path === '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po' ) {
 				return true;
 			}
 
@@ -73,8 +73,8 @@ describe( 'createMissingPackageTranslations()', () => {
 		createMissingPackageTranslations( defaultOptions );
 
 		expect( fs.existsSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.existsSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/en.po' );
-		expect( fs.existsSync ).toHaveBeenCalledWith( 'packages/ckeditor5-foo/lang/translations/zh-tw.po' );
+		expect( fs.existsSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po' );
+		expect( fs.existsSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po' );
 	} );
 
 	it( 'should create missing translation files from the template', () => {
@@ -108,7 +108,7 @@ describe( 'createMissingPackageTranslations()', () => {
 
 		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 1 );
 		expect( fs.outputFileSync ).toHaveBeenCalledWith(
-			'packages/ckeditor5-foo/lang/translations/zh-tw.po',
+			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po',
 			'Clean PO file content.',
 			'utf-8'
 		);

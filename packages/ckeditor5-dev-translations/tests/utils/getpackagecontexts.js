@@ -14,18 +14,18 @@ describe( 'getPackageContexts()', () => {
 
 	beforeEach( () => {
 		defaultOptions = {
-			packagePaths: [ 'packages/ckeditor5-foo' ],
-			corePackagePath: 'packages/ckeditor5-core'
+			packagePaths: [ '/absolute/path/to/packages/ckeditor5-foo' ],
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core'
 		};
 
 		vi.mocked( getPackageContext ).mockImplementation( ( { packagePath } ) => {
 			const contextContent = {};
 
-			if ( packagePath === 'packages/ckeditor5-foo' ) {
+			if ( packagePath === '/absolute/path/to/packages/ckeditor5-foo' ) {
 				contextContent.id1 = 'Context for message id1 from "ckeditor5-foo".';
 			}
 
-			if ( packagePath === 'packages/ckeditor5-core' ) {
+			if ( packagePath === '/absolute/path/to/packages/ckeditor5-core' ) {
 				contextContent.id2 = 'Context for message id2 from "ckeditor5-core".';
 			}
 
@@ -45,19 +45,19 @@ describe( 'getPackageContexts()', () => {
 		getPackageContexts( defaultOptions );
 
 		expect( defaultOptions.packagePaths ).toEqual( [
-			'packages/ckeditor5-foo',
-			'packages/ckeditor5-core'
+			'/absolute/path/to/packages/ckeditor5-foo',
+			'/absolute/path/to/packages/ckeditor5-core'
 		] );
 	} );
 
 	it( 'should not duplicate core package if it is already included in the packages', () => {
-		defaultOptions.packagePaths.push( 'packages/ckeditor5-core' );
+		defaultOptions.packagePaths.push( '/absolute/path/to/packages/ckeditor5-core' );
 
 		getPackageContexts( defaultOptions );
 
 		expect( defaultOptions.packagePaths ).toEqual( [
-			'packages/ckeditor5-foo',
-			'packages/ckeditor5-core'
+			'/absolute/path/to/packages/ckeditor5-foo',
+			'/absolute/path/to/packages/ckeditor5-core'
 		] );
 	} );
 
@@ -71,8 +71,8 @@ describe( 'getPackageContexts()', () => {
 				contextContent: {
 					id1: 'Context for message id1 from "ckeditor5-foo".'
 				},
-				contextFilePath: 'packages/ckeditor5-foo/lang/contexts.json',
-				packagePath: 'packages/ckeditor5-foo'
+				contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
+				packagePath: '/absolute/path/to/packages/ckeditor5-foo'
 			}
 		] ) );
 		expect( result ).toEqual( expect.arrayContaining( [
@@ -80,14 +80,14 @@ describe( 'getPackageContexts()', () => {
 				contextContent: {
 					id2: 'Context for message id2 from "ckeditor5-core".'
 				},
-				contextFilePath: 'packages/ckeditor5-core/lang/contexts.json',
-				packagePath: 'packages/ckeditor5-core'
+				contextFilePath: '/absolute/path/to/packages/ckeditor5-core/lang/contexts.json',
+				packagePath: '/absolute/path/to/packages/ckeditor5-core'
 			}
 		] ) );
 	} );
 
 	it( 'should return empty context if package does not have context file', () => {
-		defaultOptions.packagePaths.push( 'packages/ckeditor5-bar' );
+		defaultOptions.packagePaths.push( '/absolute/path/to/packages/ckeditor5-bar' );
 
 		const result = getPackageContexts( defaultOptions );
 
@@ -96,8 +96,8 @@ describe( 'getPackageContexts()', () => {
 		expect( result ).toEqual( expect.arrayContaining( [
 			{
 				contextContent: {},
-				contextFilePath: 'packages/ckeditor5-bar/lang/contexts.json',
-				packagePath: 'packages/ckeditor5-bar'
+				contextFilePath: '/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
+				packagePath: '/absolute/path/to/packages/ckeditor5-bar'
 			}
 		] ) );
 	} );

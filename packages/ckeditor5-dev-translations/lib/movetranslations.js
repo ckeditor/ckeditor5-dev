@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import upath from 'upath';
 import fs from 'fs-extra';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getPackageContext from './utils/getpackagecontext.js';
@@ -17,11 +18,11 @@ import moveTranslationsBetweenPackages from './utils/movetranslationsbetweenpack
  * * If there are no validation errors, move the requested translations between packages: the context and the translation
  *   messages for each language found in the source package.
  *
- * @param {object} options
- * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
+ * @param {MoveTranslationsOptions} options
  */
 export default function moveTranslations( options ) {
-	const { config } = options;
+	const { config } = normalizeOptions( options );
+
 	const log = logger();
 
 	log.info( '📍 Loading translations contexts...' );
@@ -113,9 +114,37 @@ function assertContextsExist( { packageContexts, config } ) {
 }
 
 /**
+ * @param {MoveTranslationsOptions} options
+ */
+function normalizeOptions( options ) {
+	const { config } = options;
+
+	const cwd = options.cwd || process.cwd();
+	const toAbsolute = path => upath.resolve( cwd, path );
+
+	return {
+		config: config.map( entry => {
+			entry.source = toAbsolute( entry.source );
+			entry.destination = toAbsolute( entry.destination );
+
+			return entry;
+		} )
+	};
+}
+
+/**
  * @typedef {object} TranslationMoveEntry
  *
- * @property {string} source Relative path to the source package from which the `messageId` should be moved.
- * @property {string} destination Relative path to the destination package to which the `messageId` should be moved.
+ * @property {string} source Path to the source package from which the `messageId` should be moved.
+ * Path can be relative or absolute. Relative path is resolved using `options.cwd` (or `process.cwd()` if not set).
+ * @property {string} destination Path to the destination package to which the `messageId` should be moved.
+ * Path can be relative or absolute. Relative path is resolved using `options.cwd` (or `process.cwd()` if not set).
  * @property {string} messageId The message identifier to move.
+ */
+
+/**
+ * @typedef {object} MoveTranslationsOptions
+ *
+ * @property {Array.<TranslationMoveEntry>} config Configuration that defines the messages to move.
+ * @property {string} [cwd=process.cwd()] Current working directory used to resolve paths to packages.
  */

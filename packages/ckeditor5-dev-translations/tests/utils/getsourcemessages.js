@@ -6,9 +6,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import findMessages from '../../lib/findmessages.js';
+import isFileInDirectory from '../../lib/utils/isfileindirectory.js';
 import getSourceMessages from '../../lib/utils/getsourcemessages.js';
 
 vi.mock( 'fs-extra' );
+vi.mock( '../../lib/utils/isfileindirectory.js' );
 vi.mock( '../../lib/findmessages.js' );
 
 describe( 'getSourceMessages()', () => {
@@ -16,7 +18,7 @@ describe( 'getSourceMessages()', () => {
 
 	beforeEach( () => {
 		defaultOptions = {
-			packagePaths: [ 'packages/ckeditor5-foo' ],
+			packagePaths: [ '/absolute/path/to/packages/ckeditor5-foo' ],
 			sourceFiles: [
 				'/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts',
 				'/absolute/path/to/packages/ckeditor5-bar/src/utils/file.ts'
@@ -31,6 +33,8 @@ describe( 'getSourceMessages()', () => {
 
 			throw new Error( `ENOENT: no such file or directory, open ${ path }` );
 		} );
+
+		vi.mocked( isFileInDirectory ).mockImplementation( ( filePath, directoryPath ) => filePath.startsWith( directoryPath ) );
 	} );
 
 	it( 'should be a function', () => {
@@ -67,13 +71,13 @@ describe( 'getSourceMessages()', () => {
 		expect( result ).toEqual( [
 			{
 				filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts',
-				packagePath: 'packages/ckeditor5-foo',
+				packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 				id: 'id1',
 				string: 'Example message 1.'
 			},
 			{
 				filePath: '/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts',
-				packagePath: 'packages/ckeditor5-foo',
+				packagePath: '/absolute/path/to/packages/ckeditor5-foo',
 				id: 'id2',
 				string: 'Example message 2.'
 			}
@@ -81,9 +85,7 @@ describe( 'getSourceMessages()', () => {
 	} );
 
 	it( 'should not find messages if package paths do not match exactly the file path', () => {
-		defaultOptions.sourceFiles = [
-			'/absolute/path/to/packages/ckeditor5-foo-bar/src/utils/file.ts'
-		];
+		vi.mocked( isFileInDirectory ).mockReturnValue( false );
 
 		getSourceMessages( defaultOptions );
 
