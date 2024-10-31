@@ -32,5 +32,8 @@
     "glob": "^10.0.0",
     "minimist": "^1.2.8",
     "upath": "^2.0.1"
+  },
+  "devDependencies": {
+    "oxc-parser": "^0.34.0"
   }
 }

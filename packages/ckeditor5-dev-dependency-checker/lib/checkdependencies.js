@@ -5,9 +5,10 @@
 
 import fs from 'fs-extra';
 import upath from 'upath';
-import { globSync } from 'glob';
-import depCheck from 'depcheck';
 import chalk from 'chalk';
+import oxc from 'oxc-parser';
+import depCheck from 'depcheck';
+import { globSync } from 'glob';
 
 /**
  * Checks dependencies sequentially in all provided packages.
@@ -62,10 +63,10 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
-			'**/*.mjs': depCheck.parser.es6,
-			'**/*.js': depCheck.parser.es6,
-			'**/*.jsx': depCheck.parser.jsx,
-			'**/*.ts': depCheck.parser.typescript,
+			'**/*.mjs': filePath => parseModule( filePath, depCheck.parser.es6 ),
+			'**/*.js': filePath => parseModule( filePath, depCheck.parser.es6 ),
+			'**/*.jsx': filePath => parseModule( filePath, depCheck.parser.jsx ),
+			'**/*.ts': filePath => parseModule( filePath, depCheck.parser.typescript ),
 			'**/*.vue': depCheck.parser.vue
 		},
 		ignorePatterns: [ 'docs', 'build', 'dist/browser' ],
@@ -81,7 +82,6 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	}
 
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
-
 	const missingPackages = groupMissingPackages( result.missing, packageJson.name );
 
 	const misplacedOptions = {
@@ -114,6 +114,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 
 		// Unused devDependencies.
 		result.devDependencies
+			.filter( entry => !entry.startsWith( '@types/' ) )
 			.map( entry => '- ' + entry )
 			.join( '\n' ),
 
@@ -282,6 +283,42 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
 		} );
 
 	return [ ...usedPackages ].sort();
+}
+
+/**
+ * Returns a list of external dependencies used in a given JavaScript module.
+ * The `fallbackParser` is used if file is not an ECMAScript module, but a CommonJS module.
+ *
+ * @param {string} filePath An absolute path to the checking file.
+ * @param {function} fallbackParser Fallback parser used when the file is not an ECMAScript module.
+ * @returns {Array.<string>}
+ */
+async function parseModule( filePath, fallbackParser ) {
+	const fileContent = await fs.readFile( filePath, 'utf-8' );
+	const result = await oxc.moduleLexerAsync( fileContent, { sourceFilename: filePath } );
+
+	if ( !result.hasModuleSyntax || result.imports.some( imp => !imp.n ) ) {
+		return fallbackParser( filePath );
+	}
+
+	return result.imports
+		// Filter out relative and absolute imports.
+		.filter( imp => !imp.n.startsWith( '.' ) && !imp.n.startsWith( '/' ) )
+		// Get package names.
+		.map( imp => {
+			const segments = imp.n.split( '/' );
+
+			// Scoped package name.
+			if ( segments[ 0 ].startsWith( '@' ) ) {
+				return segments.slice( 0, 2 ).join( '/' );
+			}
+
+			// Non-scoped package name.
+			return segments[ 0 ];
+		} )
+		// Remove duplicates.
+		.filter( ( item, index, array ) => array.indexOf( item ) === index )
+		.sort();
 }
 
 /**
