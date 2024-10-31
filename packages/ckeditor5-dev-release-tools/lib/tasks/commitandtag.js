@@ -4,9 +4,8 @@
  */
 
 import upath from 'upath';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
-import shellEscape from 'shell-escape';
+import { simpleGit } from 'simple-git';
 
 const { toUnix } = upath;
 
@@ -17,9 +16,10 @@ const { toUnix } = upath;
  * @param {string} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
  * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
  * @returns {Promise}
  */
-export default async function commitAndTag( { version, files, cwd = process.cwd() } ) {
+export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true } ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
@@ -27,22 +27,18 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 		return;
 	}
 
-	const shExecOptions = {
-		cwd: normalizedCwd,
-		async: true,
-		verbosity: 'silent'
-	};
+	const git = simpleGit( {
+		baseDir: normalizedCwd
+	} );
 
-	// Run the command separately for each file to avoid exceeding the maximum command length on Windows, which is 32767 characters.
-	for ( const filePath of filePathsToAdd ) {
-		await tools.shExec( `git add ${ shellEscape( [ filePath ] ) }`, shExecOptions );
+	const { all: availableTags } = await git.tags();
+	const tagForVersion = availableTags.find( tag => tag.endsWith( version ) );
+
+	// Do not commit and create tags if a tag is already taken. It might happen when a release job is restarted.
+	if ( tagForVersion ) {
+		return;
 	}
 
-	const escapedVersion = {
-		commit: shellEscape( [ `Release: v${ version }.` ] ),
-		tag: shellEscape( [ `v${ version }` ] )
-	};
-
-	await tools.shExec( `git commit --message ${ escapedVersion.commit } --no-verify`, shExecOptions );
-	await tools.shExec( `git tag ${ escapedVersion.tag }`, shExecOptions );
+	await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
+	await git.addTag( `v${ version }` );
 }

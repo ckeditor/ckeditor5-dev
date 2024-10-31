@@ -10,8 +10,8 @@ import upath from 'upath';
 import os from 'os';
 import fs from 'fs/promises';
 import { Worker } from 'worker_threads';
-import { glob } from 'glob';
 import { registerAbortController, deregisterAbortController } from './abortcontroller.js';
+import findPathsToPackages from './findpathstopackages.js';
 
 const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
 
@@ -49,15 +49,9 @@ export default async function executeInParallel( options ) {
 	} = options;
 
 	const concurrencyAsInteger = Math.floor( concurrency ) || 1;
-	const normalizedCwd = upath.toUnix( cwd );
-	const packages = ( await glob( `${ packagesDirectory }/*/`, {
-		cwd: normalizedCwd,
-		absolute: true
-	} ) ).map( upath.normalize );
-
-	const packagesToProcess = packagesDirectoryFilter ?
-		packages.filter( packagesDirectoryFilter ) :
-		packages;
+	const packagesToProcess = await findPathsToPackages( cwd, packagesDirectory, {
+		packagesDirectoryFilter
+	} );
 
 	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrencyAsInteger );
 
@@ -171,7 +165,8 @@ function getPackagesGroupedByThreads( packages, concurrency ) {
 /**
  * @typedef {object} ListrTaskObject
  *
- * @see https://listr2.kilic.dev/api/classes/ListrTaskObject.html
+ * @see https://listr2.kilic.dev/task/title.html
+ * @see https://listr2.kilic.dev/task/output.html
  *
  * @property {string} title Title of the task.
  *

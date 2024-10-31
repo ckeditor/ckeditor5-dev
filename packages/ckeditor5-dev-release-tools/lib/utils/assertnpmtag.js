@@ -5,7 +5,12 @@
 
 import fs from 'fs-extra';
 import upath from 'upath';
-import semver from 'semver';
+import getNpmTagFromVersion from './getnpmtagfromversion.js';
+
+const ALLOWED_NPM_LATEST_TAGS = [
+	'staging',
+	'next'
+];
 
 /**
  * Checks if the npm tag matches the tag calculated from the package version. Verification takes place for all packages.
@@ -20,13 +25,13 @@ export default async function assertNpmTag( packagePaths, npmTag ) {
 	for ( const packagePath of packagePaths ) {
 		const packageJsonPath = upath.join( packagePath, 'package.json' );
 		const packageJson = await fs.readJson( packageJsonPath );
-		const versionTag = getVersionTag( packageJson.version );
+		const versionTag = getNpmTagFromVersion( packageJson.version );
 
 		if ( versionTag === npmTag ) {
 			continue;
 		}
 
-		if ( versionTag === 'latest' && npmTag === 'staging' ) {
+		if ( versionTag === 'latest' && ALLOWED_NPM_LATEST_TAGS.includes( npmTag ) ) {
 			continue;
 		}
 
@@ -36,23 +41,4 @@ export default async function assertNpmTag( packagePaths, npmTag ) {
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-}
-
-/**
- * Returns the version tag for the package.
- *
- * For the official release, returns the "latest" tag. For a non-official release (pre-release), returns the version tag extracted from
- * the package version.
- *
- * @param {string} version
- * @returns {string}
- */
-function getVersionTag( version ) {
-	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
-
-	if ( versionTag.startsWith( 'nightly' ) ) {
-		return 'nightly';
-	}
-
-	return versionTag;
 }

@@ -10,6 +10,7 @@
 import { Listr } from 'listr2';
 import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { confirm } from '@inquirer/prompts';
+import { Octokit } from '@octokit/rest';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';
@@ -19,7 +20,7 @@ const cliArguments = parseArguments( process.argv.slice( 2 ) );
 const latestVersion = releaseTools.getLastFromChangelog();
 const versionChangelog = releaseTools.getChangesForVersion( latestVersion );
 
-let githubToken;
+const githubToken = await getGitHubToken();
 
 if ( !cliArguments.npmTag ) {
 	cliArguments.npmTag = releaseTools.getNpmTagFromVersion( latestVersion );
@@ -43,22 +44,6 @@ const tasks = new Listr( [
 						.run( confirm, { message: 'Do you want to continue?' } );
 				}
 			} );
-		},
-		retry: 3
-	},
-	{
-		title: 'Checking if packages that returned E409 error code were uploaded correctly.',
-		task: async ( _, task ) => {
-			return releaseTools.verifyPackagesPublishedCorrectly( {
-				packagesDirectory: RELEASE_DIRECTORY,
-				version: latestVersion,
-				onSuccess: text => {
-					task.output = text;
-				}
-			} );
-		},
-		options: {
-			persistentOutput: true
 		}
 	},
 	{
@@ -84,21 +69,39 @@ const tasks = new Listr( [
 		options: {
 			persistentOutput: true
 		}
+	},
+	{
+		title: 'Mark v43.0.0 as "latest" (GitHub)',
+		task: async () => {
+			const github = new Octokit( {
+				version: '3.0.0',
+				auth: `token ${ githubToken }`
+			} );
+
+			return github.request( 'PATCH /repos/{owner}/{repo}/releases/{release_id}', {
+				owner: 'ckeditor',
+				repo: 'ckeditor5-dev',
+				release_id: 174058828, // v43.0.0
+				make_latest: true
+			} );
+		}
 	}
 ], getListrOptions( cliArguments ) );
 
-( async () => {
-	try {
-		if ( process.env.CKE5_RELEASE_TOKEN ) {
-			githubToken = process.env.CKE5_RELEASE_TOKEN;
-		} else {
-			githubToken = await releaseTools.provideToken();
-		}
-
-		await tasks.run();
-	} catch ( err ) {
+tasks.run()
+	.catch( err => {
 		process.exitCode = 1;
 
 		console.error( err );
+	} );
+
+/**
+ * @returns {Promise.<string>}
+ */
+async function getGitHubToken() {
+	if ( process.env.CKE5_RELEASE_TOKEN ) {
+		return process.env.CKE5_RELEASE_TOKEN;
 	}
-} )();
+
+	return releaseTools.provideToken();
+}

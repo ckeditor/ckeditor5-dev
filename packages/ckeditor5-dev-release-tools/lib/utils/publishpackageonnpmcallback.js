@@ -14,26 +14,16 @@
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
 	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
 	const { default: fs } = await import( 'fs-extra' );
-	const { default: path } = await import( 'upath' );
 
-	const options = {
-		cwd: packagePath,
-		async: true,
-		verbosity: 'error'
-	};
-
-	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, options )
-		.catch( e => {
-			const packageName = path.basename( packagePath );
-
-			if ( e.toString().includes( 'code E409' ) ) {
-				return { shouldKeepDirectory: true };
-			}
-
-			throw new Error( `Unable to publish "${ packageName }" package.` );
+	try {
+		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
+			cwd: packagePath,
+			async: true,
+			verbosity: 'silent'
 		} );
 
-	if ( !result || !result.shouldKeepDirectory ) {
 		await fs.remove( packagePath );
+	} catch {
+		// Do nothing if an error occurs. A parent task will handle it.
 	}
 }

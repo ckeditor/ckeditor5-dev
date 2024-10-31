@@ -8,6 +8,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { glob } from 'glob';
 import mockFs from 'mock-fs';
+import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
 
 describe( 'cleanUpPackages()', () => {
 	let cleanUpPackages, stubs;
@@ -27,10 +28,14 @@ describe( 'cleanUpPackages()', () => {
 				readdir: vi.fn().mockImplementation( fs.readdir )
 			}
 		} ) );
+		vi.doMock( '../../lib/utils/findpathstopackages.js', () => ( {
+			default: vi.fn().mockImplementation( findPathsToPackages )
+		} ) );
 
 		stubs = {
 			...await import( 'glob' ),
-			...( await import( 'fs-extra' ) ).default
+			...( await import( 'fs-extra' ) ).default,
+			findPathsToPackages: ( await import( '../../lib/utils/findpathstopackages.js' ) ).default
 		};
 
 		cleanUpPackages = ( await import( '../../lib/tasks/cleanuppackages.js' ) ).default;
@@ -52,9 +57,11 @@ describe( 'cleanUpPackages()', () => {
 				cwd: '/work/another/project'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
-				cwd: '/work/another/project/release'
-			} ) );
+			expect( stubs.findPathsToPackages ).toHaveBeenCalledExactlyOnceWith(
+				'/work/another/project',
+				'release',
+				{ includePackageJson: true }
+			);
 		} );
 
 		it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
@@ -64,37 +71,11 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
-				cwd: '/work/project/release'
-			} ) );
-		} );
-
-		it( 'should match only files', async () => {
-			await cleanUpPackages( {
-				packagesDirectory: 'release'
-			} );
-
-			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
-				nodir: true
-			} ) );
-		} );
-
-		it( 'should always receive absolute paths for matched files', async () => {
-			await cleanUpPackages( {
-				packagesDirectory: 'release'
-			} );
-
-			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
-				absolute: true
-			} ) );
-		} );
-
-		it( 'should search for `package.json` in `cwd`', async () => {
-			await cleanUpPackages( {
-				packagesDirectory: 'release'
-			} );
-
-			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( '*/package.json', expect.any( Object ) );
+			expect( stubs.findPathsToPackages ).toHaveBeenCalledExactlyOnceWith(
+				'/work/project',
+				'release',
+				{ includePackageJson: true }
+			);
 		} );
 	} );
 

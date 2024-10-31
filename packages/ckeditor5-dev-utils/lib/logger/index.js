@@ -7,13 +7,9 @@ import chalk from 'chalk';
 
 const levels = new Map();
 
-// Displays everything.
+levels.set( 'silent', new Set( [] ) );
 levels.set( 'info', new Set( [ 'info' ] ) );
-
-// Displays warning and error logs.
 levels.set( 'warning', new Set( [ 'info', 'warning' ] ) );
-
-// Displays error logs only.
 levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
 
 /**
@@ -45,7 +41,7 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *
  * Additionally, the `logger#error()` method prints the error instance if provided as the second argument.
  *
- * @param {string} moduleVerbosity='info' Level of the verbosity for all log methods.
+ * @param {'info'|'warning'|'error'|'silent'} [moduleVerbosity='info'] Level of the verbosity for all log methods.
  * @returns {object} logger
  * @returns {Function} logger.info
  * @returns {Function} logger.warning
