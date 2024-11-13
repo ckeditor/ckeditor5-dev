@@ -38,7 +38,7 @@ module.exports = function parseArguments( cliArguments ) {
 			ci: false,
 			verbose: false,
 			'compile-only': false,
-			branch: 'master',
+			branch: 'master-v43',
 			'npm-tag': null
 		}
 	};
@@ -73,7 +73,7 @@ module.exports = function parseArguments( cliArguments ) {
  *
  * @property {String} [from]
  *
- * @property {String} [branch='master']
+ * @property {String} [branch='master-v43']
  *
  * @property {Boolean} [compileOnly=false]
  *
