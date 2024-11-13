@@ -56,7 +56,7 @@ commands:
             CKE5_GITHUB_ORGANIZATION="ckeditor"
             CKE5_GITHUB_REPOSITORY="ckeditor5-dev"
             CKE5_CIRCLE_APPROVAL_JOB_NAME="release_approval"
-            CKE5_GITHUB_RELEASE_BRANCH="master"
+            CKE5_GITHUB_RELEASE_BRANCH="master-v43"
 
             echo export CKE5_CIRCLE_APPROVAL_JOB_NAME=$CKE5_CIRCLE_APPROVAL_JOB_NAME >> $BASH_ENV
             echo export CKE5_GITHUB_RELEASE_BRANCH=$CKE5_GITHUB_RELEASE_BRANCH >> $BASH_ENV
@@ -171,11 +171,11 @@ jobs:
           command: |
             #!/bin/bash
 
-            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
+            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master-v43 )
             CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
 
             if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
-              echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
+              echo "There is a newer commit in the repository on the \`#master-v43\` branch. Use its build to start the release."
               circleci-agent step halt
             fi
       - npm_login_command
@@ -235,12 +235,12 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - master-v43
       - notify_ci_failure:
           filters:
             branches:
               only:
-                - master
+                - master-v43
 
   release:
     when:
@@ -266,4 +266,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - master-v43

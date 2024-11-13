@@ -71,7 +71,8 @@ describe( 'styles', () => {
 			getPostCssConfig();
 
 			sinon.assert.calledWithExactly( stubs[ 'postcss-nesting' ], {
-				noIsPseudoSelector: true
+				noIsPseudoSelector: true,
+				edition: '2021'
 			} );
 		} );
 
