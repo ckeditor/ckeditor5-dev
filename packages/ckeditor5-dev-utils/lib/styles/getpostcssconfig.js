@@ -25,7 +25,8 @@ module.exports = function getPostCssConfig( options = {} ) {
 			require( 'postcss-mixins' )(),
 			require( 'postcss-nesting' )( {
 				// https://github.com/ckeditor/ckeditor5/issues/11730
-				noIsPseudoSelector: true
+				noIsPseudoSelector: true,
+				edition: '2021'
 			} ),
 			require( './themelogger' )()
 		]
