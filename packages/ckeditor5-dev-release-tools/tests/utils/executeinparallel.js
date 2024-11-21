@@ -105,11 +105,11 @@ describe( 'executeInParallel()', () => {
 			'utf-8'
 		);
 		expect( firstWorker.workerData ).toBeInstanceOf( Object );
-		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/uuid-4.mjs' );
 		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 		expect( secondWorker.workerData ).toBeInstanceOf( Object );
-		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/uuid-4.mjs' );
 		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 		// Workers did not emit an error.
@@ -231,11 +231,11 @@ describe( 'executeInParallel()', () => {
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
 		expect( firstWorker.workerData ).toBeInstanceOf( Object );
-		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/uuid-4.mjs' );
 		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 		expect( secondWorker.workerData ).toBeInstanceOf( Object );
-		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/uuid-4.mjs' );
 		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 		// Workers did not emit an error.

@@ -70,7 +70,13 @@ export default async function executeInParallel( options ) {
 		return createWorker( {
 			signal: signal || defaultAbortController.signal,
 			onPackageDone,
-			workerData: { packages, callbackModule, taskOptions }
+			workerData: {
+				packages,
+				taskOptions,
+				// The callback module is dynamically imported inside worker script.
+				// To make it work in Windows, absolute path to a dynamically imported file must start with the "file:" protocol URL.
+				callbackModule: 'file://' + callbackModule
+			}
 		} );
 	} );
 
