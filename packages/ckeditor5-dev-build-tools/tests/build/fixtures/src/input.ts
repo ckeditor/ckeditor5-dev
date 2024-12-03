@@ -4,7 +4,7 @@
  */
 
 // Test importing JSON.
-import settings from './settings.json';
+import settings from './settings.json' with { type: 'json' };
 
 // Test importing SVG.
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
