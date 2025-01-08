@@ -5,9 +5,9 @@
 
 import fs from 'fs-extra';
 import upath from 'upath';
-import chalk from 'chalk';
-import depCheck from 'depcheck';
 import { globSync } from 'glob';
+import depCheck from 'depcheck';
+import chalk from 'chalk';
 
 /**
  * Checks dependencies sequentially in all provided packages.
@@ -113,7 +113,6 @@ async function checkDependenciesInPackage( packagePath, options ) {
 
 		// Unused devDependencies.
 		result.devDependencies
-			.filter( entry => !entry.startsWith( '@types/' ) )
 			.map( entry => '- ' + entry )
 			.join( '\n' ),
 
