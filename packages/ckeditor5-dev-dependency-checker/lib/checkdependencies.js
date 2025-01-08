@@ -6,7 +6,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
 import chalk from 'chalk';
-import oxc from 'oxc-parser';
 import depCheck from 'depcheck';
 import { globSync } from 'glob';
 
@@ -63,10 +62,10 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
-			'**/*.mjs': filePath => parseModule( filePath, depCheck.parser.es6 ),
-			'**/*.js': filePath => parseModule( filePath, depCheck.parser.es6 ),
-			'**/*.jsx': filePath => parseModule( filePath, depCheck.parser.jsx ),
-			'**/*.ts': filePath => parseModule( filePath, depCheck.parser.typescript ),
+			'**/*.mjs': depCheck.parser.es6,
+			'**/*.js': depCheck.parser.es6,
+			'**/*.jsx': depCheck.parser.jsx,
+			'**/*.ts': depCheck.parser.typescript,
 			'**/*.vue': depCheck.parser.vue
 		},
 		ignorePatterns: [ 'docs', 'build', 'dist/browser' ],
@@ -283,46 +282,6 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
 		} );
 
 	return [ ...usedPackages ].sort();
-}
-
-/**
- * Returns a list of external dependencies used in a given JavaScript module.
- * The `fallbackParser` is used if file is not an ECMAScript module, but a CommonJS module.
- *
- * @param {string} filePath An absolute path to the checking file.
- * @param {function} fallbackParser Fallback parser used when the file is not an ECMAScript module.
- * @returns {Promise.<Array.<string>>}
- */
-async function parseModule( filePath, fallbackParser ) {
-	const fileContent = await fs.readFile( filePath, 'utf-8' );
-	const { hasModuleSyntax, staticImports, staticExports } = oxc.parseSync( filePath, fileContent ).module;
-
-	if ( !hasModuleSyntax ) {
-		return fallbackParser( filePath );
-	}
-
-	return [
-		...staticImports,
-		...staticExports.flatMap( exp => exp.entries )
-	]
-		.map( statement => statement.moduleRequest?.value )
-		// Filter out relative and absolute imports.
-		.filter( path => path && !path.startsWith( '.' ) && !path.startsWith( '/' ) )
-		// Get package names.
-		.map( path => {
-			const segments = path.split( '/' );
-
-			// Scoped package name.
-			if ( segments[ 0 ].startsWith( '@' ) ) {
-				return segments.slice( 0, 2 ).join( '/' );
-			}
-
-			// Non-scoped package name.
-			return segments[ 0 ];
-		} )
-		// Remove duplicates.
-		.filter( ( item, index, array ) => array.indexOf( item ) === index )
-		.sort();
 }
 
 /**
