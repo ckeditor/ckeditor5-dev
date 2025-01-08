@@ -291,17 +291,17 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
  *
  * @param {string} filePath An absolute path to the checking file.
  * @param {function} fallbackParser Fallback parser used when the file is not an ECMAScript module.
- * @returns {Array.<string>}
+ * @returns {Promise.<Array.<string>>}
  */
 async function parseModule( filePath, fallbackParser ) {
 	const fileContent = await fs.readFile( filePath, 'utf-8' );
-	const result = await oxc.moduleLexerAsync( fileContent, { sourceFilename: filePath } );
+	const result = oxc.parseSync( filePath, fileContent );
 
-	if ( !result.hasModuleSyntax || result.imports.some( imp => !imp.n ) ) {
+	if ( !result.module.hasModuleSyntax || result.module.staticImports.some( imp => !imp.n ) ) {
 		return fallbackParser( filePath );
 	}
 
-	return result.imports
+	return result.module.staticImports
 		// Filter out relative and absolute imports.
 		.filter( imp => !imp.n.startsWith( '.' ) && !imp.n.startsWith( '/' ) )
 		// Get package names.
