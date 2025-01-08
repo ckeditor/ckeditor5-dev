@@ -202,10 +202,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			/**
 			 * Does type checking and generates `.d.ts` files.
 			 */
-			getOptionalPlugin(
-				declarations,
-				getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } )
-			),
+			getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } ),
 
 			/**
 			 * Replaces parts of the source code with the provided values.
@@ -309,7 +306,11 @@ function getTypeScriptPlugin( {
 		declaration: declarations,
 		declarationDir: declarations ? path.parse( output ).dir : undefined,
 		compilerOptions: {
-			emitDeclarationOnly: true
+			// When `declarations` is set to `true`, we only want to emit declaration files.
+			emitDeclarationOnly: !!declarations,
+
+			// Otherwise, we don't want to emit anything.
+			noEmit: !declarations
 		}
 	} );
 }

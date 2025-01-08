@@ -22,7 +22,8 @@ module.exports = {
 
 		// ESLint does not understand `import ... with { ... }`.
 		// See: https://github.com/eslint/eslint/discussions/15305.
-		'packages/ckeditor5-dev-ci/lib/data/index.js'
+		'packages/ckeditor5-dev-ci/lib/data/index.js',
+		'packages/ckeditor5-dev-build-tools/tests/build/fixtures/src/input.ts'
 	],
 	rules: {
 		'no-console': 'off',
