@@ -303,9 +303,8 @@ async function parseModule( filePath, fallbackParser ) {
 
 	return [
 		...staticImports,
-		...staticExports.map( exp => exp.entries )
+		...staticExports.flatMap( exp => exp.entries )
 	]
-		.flat()
 		.map( statement => statement.moduleRequest?.value )
 		// Filter out relative and absolute imports.
 		.filter( path => path && !path.startsWith( '.' ) && !path.startsWith( '/' ) )
