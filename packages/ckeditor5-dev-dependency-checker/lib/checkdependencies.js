@@ -295,18 +295,23 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
  */
 async function parseModule( filePath, fallbackParser ) {
 	const fileContent = await fs.readFile( filePath, 'utf-8' );
-	const result = oxc.parseSync( filePath, fileContent );
+	const { hasModuleSyntax, staticImports, staticExports } = oxc.parseSync( filePath, fileContent ).module;
 
-	if ( !result.module.hasModuleSyntax || result.module.staticImports.some( imp => !imp.n ) ) {
+	if ( !hasModuleSyntax ) {
 		return fallbackParser( filePath );
 	}
 
-	return result.module.staticImports
+	return [
+		...staticImports,
+		...staticExports.map( exp => exp.entries )
+	]
+		.flat()
+		.map( statement => statement.moduleRequest?.value )
 		// Filter out relative and absolute imports.
-		.filter( imp => !imp.n.startsWith( '.' ) && !imp.n.startsWith( '/' ) )
+		.filter( path => path && !path.startsWith( '.' ) && !path.startsWith( '/' ) )
 		// Get package names.
-		.map( imp => {
-			const segments = imp.n.split( '/' );
+		.map( path => {
+			const segments = path.split( '/' );
 
 			// Scoped package name.
 			if ( segments[ 0 ].startsWith( '@' ) ) {
