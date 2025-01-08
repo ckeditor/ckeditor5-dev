@@ -32,12 +32,7 @@ bumpYear( {
 			pattern: '.husky/*'
 		},
 		{
-			pattern: '!(coverage|.nyc_output)/**',
-			options: {
-				ignore: [
-					'**/typedoc-plugins/tests/module-fixer/fixtures/emptyfile.ts'
-				]
-			}
+			pattern: '!(coverage|.nyc_output)/**'
 		}
 	]
 } );
