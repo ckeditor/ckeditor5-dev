@@ -1,6 +1,34 @@
 Changelog
 =========
 
+## [45.0.10](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.9...v45.0.10) (2025-01-09)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.10): v45.0.9 => v45.0.10
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.10): v45.0.9 => v45.0.10
+</details>
+
+
 ## [45.0.9](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.8...v45.0.9) (2024-12-19)
 
 ### Bug fixes
@@ -133,40 +161,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.6): v45.0.5 => v45.0.6
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.6): v45.0.5 => v45.0.6
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.6): v45.0.5 => v45.0.6
-</details>
-
-
-## [45.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/v45.0.4...v45.0.5) (2024-10-25)
-
-> [!NOTE]
-> The release channel for this release is `next`.
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Slow down the `npm publish` command due to weird errors on CI. Closes [ckeditor/ckeditor5#17331](https://github.com/ckeditor/ckeditor5/issues/17331). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4cfcf41e243687af88478337faebed0cfef4ecae))
-* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Support for the `silent` logger mode. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4cfcf41e243687af88478337faebed0cfef4ecae))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/45.0.5): v45.0.4 => v45.0.5
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/45.0.5): v45.0.4 => v45.0.5
 </details>
 
 ---
