@@ -194,7 +194,7 @@ function getInvalidItselfImports( repositoryPath ) {
  *
  * @param {object} missingPackages The `missing` value from object returned by `depcheck`.
  * @param {string} currentPackage Name of current package.
- * @returns {Promise.<Object.<string, Array.<string>>>}
+ * @returns {Object.<string, Array.<string>>}
  */
 function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
@@ -321,7 +321,7 @@ function findDuplicatedDependencies( dependencies, devDependencies ) {
  * @param {object|undefined} options.devDependencies Defined development dependencies from package.json.
  * @param {object} options.dependenciesToCheck All dependencies that have been found and files where they are used.
  * @param {Array.<string>} options.dependenciesToIgnore An array of package names that should not be checked.
- * @returns {<Array.<object>} Misplaced packages. Each array item is an object containing
+ * @returns {Array.<object>} Misplaced packages. Each array item is an object containing
  * the `description` string and `packageNames` array of strings.
  */
 function findMisplacedDependencies( options ) {
