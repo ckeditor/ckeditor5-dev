@@ -81,7 +81,7 @@ const tasks = new Listr( [
 			return github.request( 'PATCH /repos/{owner}/{repo}/releases/{release_id}', {
 				owner: 'ckeditor',
 				repo: 'ckeditor5-dev',
-				release_id: 174058828, // v43.0.0
+				release_id: 185171763, // v43.0.1
 				make_latest: true
 			} );
 		}
