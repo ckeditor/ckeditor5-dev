@@ -205,7 +205,7 @@ function groupMissingPackages( missingPackages, currentPackage ) {
 	for ( const packageName of Object.keys( missingPackages ) ) {
 		const absolutePaths = missingPackages[ packageName ];
 
-		if ( isProductionDependency( packageName, absolutePaths ) ) {
+		if ( isProductionDependency( absolutePaths ) ) {
 			dependencies.push( packageName );
 		} else {
 			devDependencies.push( packageName );
@@ -345,7 +345,7 @@ function findMisplacedDependencies( options ) {
 			continue;
 		}
 
-		const isProdDep = isProductionDependency( packageName, absolutePaths );
+		const isProdDep = isProductionDependency( absolutePaths );
 		const isMissingInDependencies = isProdDep && !deps.includes( packageName ) && devDeps.includes( packageName );
 		const isMissingInDevDependencies = !isProdDep && deps.includes( packageName ) && !devDeps.includes( packageName );
 
@@ -394,15 +394,10 @@ const foldersContainingProductionCode = [
 /**
  * Checks if a given package is a production dependency, i.e., it's used in build files or their typings.
  *
- * @param {string} packageName Name of the package.
  * @param {Array.<string>} paths Files where a given package has been imported.
  * @returns {boolean}
  */
-function isProductionDependency( packageName, paths ) {
-	if ( packageName.startsWith( '@types/' ) ) {
-		return false;
-	}
-
+function isProductionDependency( paths ) {
 	return paths.some(
 		path => foldersContainingProductionCode.some( folder => path.match( folder ) )
 	);
