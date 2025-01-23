@@ -32,7 +32,21 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 			new webpack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
 				process: 'process/browser.js'
-			} )
+			} ),
+
+			/**
+			 * Disable tree-shaking because it removes tests for packages with `sideEffects` field in `package.json`.
+			 *
+			 * Workaround for https://github.com/ckeditor/ckeditor5/issues/17767#issuecomment-2598263796.
+			 */
+			{
+				apply( compiler ) {
+					compiler.options.optimization = {
+						...compiler.options.optimization,
+						sideEffects: false
+					};
+				}
+			}
 		],
 
 		resolve: {
@@ -88,6 +102,7 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 
 		// Since webpack v5 it looks like splitting out the source code into the commons and runtime chunks broke the source map support.
 		config.optimization = {
+			...config.optimization,
 			runtimeChunk: false,
 			splitChunks: false
 		};
