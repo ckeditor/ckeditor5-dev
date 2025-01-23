@@ -35,8 +35,7 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 			} ),
 
 			/**
-			 * Disable tree-shaking because it remove tests for packages with `sideEffects` field in
-			 * `package.json`.
+			 * Disable tree-shaking because it removes tests for packages with `sideEffects` field in `package.json`.
 			 *
 			 * Workaround for https://github.com/ckeditor/ckeditor5/issues/17767#issuecomment-2598263796.
 			 */
