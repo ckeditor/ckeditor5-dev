@@ -4,7 +4,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import { fileURLToPath } from 'url';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
@@ -15,21 +14,22 @@ import { mkdirp } from 'mkdirp';
 import karmaLogger from 'karma/lib/logger.js';
 import karma from 'karma';
 import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
+import upath from 'upath';
 
 const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
+const __dirname = upath.dirname( __filename );
 
 // Glob patterns that should be ignored. It means if a specified test file is located under path
 // that matches to these patterns, the file will be skipped.
 const IGNORE_GLOBS = [
 	// Ignore files which are saved in `manual/` directory. There are manual tests.
-	path.join( '**', 'tests', '**', 'manual', '**', '*.{js,ts}' ),
+	upath.join( '**', 'tests', '**', 'manual', '**', '*.{js,ts}' ),
 	// Ignore `_utils` directory as well because there are saved utils for tests.
-	path.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
+	upath.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
 // An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = path.posix.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const ENTRY_FILE_PATH = upath.posix.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
@@ -68,7 +68,7 @@ function transformFilesToTestGlob( files ) {
 }
 
 function createEntryFile( globPatterns, production ) {
-	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
+	mkdirp.sync( upath.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
 	const log = karmaLogger.create( 'config' );
@@ -99,21 +99,21 @@ function createEntryFile( globPatterns, production ) {
 	}
 
 	// Set global license key in the `before` hook.
-	allFiles.unshift( path.join( __dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ).replace( /\\/g, '/' ) );
+	allFiles.unshift( upath.join( __dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ).replace( /\\/g, '/' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
-	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
+	allFiles.splice( 0, 0, upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
+	allFiles.push( upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
 
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = path.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+	const assertionsDir = upath.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
 	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
 		return [
 			assertionFileName,
-			path.parse( assertionFileName ).name.replace( /-([a-z])/g, value => value[ 1 ].toUpperCase() )
+			upath.parse( assertionFileName ).name.replace( /-([a-z])/g, value => value[ 1 ].toUpperCase() )
 		];
 	} );
 
@@ -209,7 +209,7 @@ function runKarma( options ) {
 		} );
 
 		if ( options.coverage ) {
-			const coveragePath = path.join( process.cwd(), 'coverage' );
+			const coveragePath = upath.join( process.cwd(), 'coverage' );
 
 			server.on( 'run_complete', () => {
 				// Use timeout to not write to the console in the middle of Karma's status.
