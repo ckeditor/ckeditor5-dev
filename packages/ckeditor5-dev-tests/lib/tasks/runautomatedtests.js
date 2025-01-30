@@ -29,7 +29,7 @@ const IGNORE_GLOBS = [
 ];
 
 // An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = upath.posix.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
@@ -78,7 +78,7 @@ function createEntryFile( globPatterns, production ) {
 		let hasFiles = false;
 
 		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
-			const files = globSync( resolvedPattern ).map( file => file.replace( /\\/g, '/' ) );
+			const files = globSync( resolvedPattern );
 
 			if ( files.length ) {
 				hasFiles = true;
@@ -99,17 +99,17 @@ function createEntryFile( globPatterns, production ) {
 	}
 
 	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( __dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ).replace( /\\/g, '/' ) );
+	allFiles.unshift( upath.join( __dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
-	allFiles.push( upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
+	allFiles.splice( 0, 0, upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
+	allFiles.push( upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
 
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = upath.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+	const assertionsDir = upath.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' );
 	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
 		return [
 			assertionFileName,
