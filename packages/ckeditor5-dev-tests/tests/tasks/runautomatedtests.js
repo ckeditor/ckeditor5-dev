@@ -3,7 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
 import fs from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { globSync } from 'glob';
@@ -12,6 +11,7 @@ import chalk from 'chalk';
 import karma from 'karma';
 import karmaLogger from 'karma/lib/logger.js';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
+import upath from 'upath';
 
 const stubs = vi.hoisted( () => ( {
 	log: {
@@ -349,7 +349,7 @@ describe( 'runAutomatedTests()', () => {
 				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 			] );
 
-		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+		const assertionsDir = upath.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
 
 		const expectedEntryPointContent = [
 			`import assertionAFactory from "${ assertionsDir }/assertionA.js";`,
@@ -400,7 +400,7 @@ describe( 'runAutomatedTests()', () => {
 				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 			] );
 
-		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+		const assertionsDir = upath.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
 
 		const expectedEntryPointContent = [
 			`import assertionAFactory from "${ assertionsDir }/assertion-a.js";`,
@@ -427,6 +427,51 @@ describe( 'runAutomatedTests()', () => {
 		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 			'/workspace/build/.automated-tests/entry-point.js',
 			expect.stringContaining( expectedEntryPointContent )
+		);
+	} );
+
+	it( 'should load custom assertions automatically (Windows paths)', async () => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			production: true
+		};
+
+		vi.mocked( fs ).readdirSync.mockReturnValue( [ 'assertion-a.js', 'assertion-b.js' ] );
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'\\workspace\\packages\\ckeditor5-basic-styles\\tests\\**\\*.js',
+			'\\workspace\\packages\\ckeditor-basic-styles\\tests\\**\\*.js'
+		] );
+
+		vi.mocked( globSync )
+			.mockReturnValue( [] )
+			.mockReturnValueOnce( [
+				'\\workspace\\packages\\ckeditor5-basic-styles\\tests\\bold.js',
+				'\\workspace\\packages\\ckeditor5-basic-styles\\tests\\italic.js'
+			] );
+
+		const promise = runAutomatedTests( options );
+
+		setTimeout( () => {
+			expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
+		} );
+
+		await promise;
+
+		expect( vi.mocked( mkdirp ).sync ).toHaveBeenCalledExactlyOnceWith( '/workspace/build/.automated-tests' );
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			'/workspace/build/.automated-tests/entry-point.js',
+			expect.stringContaining( [
+				'import "/workspace/packages/ckeditor5-basic-styles/tests/bold.js";',
+				'import "/workspace/packages/ckeditor5-basic-styles/tests/italic.js";'
+			].join( '\n' ) )
 		);
 	} );
 } );
