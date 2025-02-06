@@ -26,6 +26,7 @@ import {
 	getNextNightly,
 	getNextInternal,
 	getCurrent,
+	getDateIdentifier,
 	getLastTagFromGit
 } from '../lib/utils/versions.js';
 import executeInParallel from '../lib/utils/executeinparallel.js';
@@ -147,6 +148,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( getCurrent ).to.be.a( 'function' );
 			expect( index.getCurrent ).to.equal( getCurrent );
+		} );
+	} );
+
+	describe( 'getDateIdentifier()', () => {
+		it( 'should be a function', () => {
+			expect( getDateIdentifier ).to.be.a( 'function' );
+			expect( index.getDateIdentifier ).to.equal( getDateIdentifier );
 		} );
 	} );
 

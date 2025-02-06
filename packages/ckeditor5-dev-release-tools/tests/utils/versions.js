@@ -17,7 +17,8 @@ import {
 	getNextNightly,
 	getNextInternal,
 	getLastTagFromGit,
-	getCurrent
+	getCurrent,
+	getDateIdentifier
 } from '../../lib/utils/versions.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
@@ -245,6 +246,74 @@ describe( 'versions', () => {
 					expect( result ).to.equal( '0.0.0-nightly-20230615.2' );
 				} );
 		} );
+
+		it( 'returns last version from exactly the "nightly" tag when multiple nightly tags exist', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-20230615.1': {},
+					'0.0.0-nightly-20230615.2': {},
+					'0.0.0-nightly-next-20230615.3': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-20230615.2' );
+				} );
+		} );
+
+		it( 'returns last version from exactly the "nightly-next" tag when multiple nightly tags exist', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-next-20230615.0': {},
+					'0.0.0-nightly-next-20230615.1': {},
+					'0.0.0-nightly-next-20230615.2': {},
+					'0.0.0-nightly-20230615.3': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly-next' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-next-20230615.2' );
+				} );
+		} );
+
+		it( 'returns last version from exactly the "nightly" tag when multiple nightly tags exist from a specific day', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-20230615.1': {},
+					'0.0.0-nightly-20230615.2': {},
+					'0.0.0-nightly-next-20230615.3': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly-20230615' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-20230615.2' );
+				} );
+		} );
+
+		it( 'returns last version from exactly the "nightly-next" tag when multiple nightly tags exist from a specific day', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-next-20230615.0': {},
+					'0.0.0-nightly-next-20230615.1': {},
+					'0.0.0-nightly-next-20230615.2': {},
+					'0.0.0-nightly-20230615.3': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly-next-20230615' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-next-20230615.2' );
+				} );
+		} );
 	} );
 
 	describe( 'getLastNightly()', () => {
@@ -252,7 +321,7 @@ describe( 'versions', () => {
 			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 		} );
 
-		it( 'returns last nightly pre-release version', () => {
+		it( 'returns next pre-release version from exactly the "nightly" tag', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
@@ -261,6 +330,7 @@ describe( 'versions', () => {
 					'0.0.0-nightly-20230614.1': {},
 					'0.0.0-nightly-20230614.2': {},
 					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-next-20230616.0': {},
 					'37.0.0-alpha.0': {},
 					'42.0.0': {}
 				}
@@ -310,11 +380,12 @@ describe( 'versions', () => {
 				} );
 		} );
 
-		it( 'returns nightly version with incremented id if older nightly version was already published', () => {
+		it( 'returns version with incremented id from exactly the "nightly" tag if older version was already published', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.5': {},
+					'0.0.0-nightly-next-20230616.0': {},
 					'37.0.0-alpha.0': {},
 					'42.0.0': {}
 				}
@@ -323,6 +394,23 @@ describe( 'versions', () => {
 			return getNextPreRelease( '0.0.0-nightly' )
 				.then( result => {
 					expect( result ).to.equal( '0.0.0-nightly-20230615.6' );
+				} );
+		} );
+
+		it( 'returns version with incremented id from exactly the "nightly-next" tag if older version was already published', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-next-20230615.5': {},
+					'0.0.0-nightly-20230616.0': {},
+					'37.0.0-alpha.0': {},
+					'42.0.0': {}
+				}
+			} );
+
+			return getNextPreRelease( '0.0.0-nightly-next' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-next-20230615.6' );
 				} );
 		} );
 	} );
@@ -339,11 +427,12 @@ describe( 'versions', () => {
 			vi.useRealTimers();
 		} );
 
-		it( 'asks for a last nightly pre-release version', () => {
+		it( 'returns next pre-release version from exactly the "nightly" tag', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-next-20230616.0': {},
 					'37.0.0-alpha.0': {},
 					'42.0.0': {}
 				}
@@ -368,7 +457,7 @@ describe( 'versions', () => {
 			vi.useRealTimers();
 		} );
 
-		it( 'asks for a last internal pre-release version', () => {
+		it( 'returns next internal pre-release version', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
@@ -382,6 +471,21 @@ describe( 'versions', () => {
 				.then( result => {
 					expect( result ).to.equal( '0.0.0-internal-20230615.1' );
 				} );
+		} );
+	} );
+
+	describe( 'getDateIdentifier()', () => {
+		beforeEach( () => {
+			vi.useFakeTimers();
+			vi.setSystemTime( new Date( '2023-06-15 12:00:00' ) );
+		} );
+
+		afterEach( () => {
+			vi.useRealTimers();
+		} );
+
+		it( 'returns current date in the YYYYMMDD format', () => {
+			expect( getDateIdentifier() ).to.equal( '20230615' );
 		} );
 	} );
 
