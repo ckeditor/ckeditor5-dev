@@ -432,7 +432,7 @@ describe( 'versions', () => {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
-					'0.0.0-nightly-next-20230616.0': {},
+					'0.0.0-nightly-next-20230615.5': {},
 					'37.0.0-alpha.0': {},
 					'42.0.0': {}
 				}
