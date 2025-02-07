@@ -146,6 +146,23 @@ describe( 'versions', () => {
 				} );
 		} );
 
+		it( 'returns null if pre-release version matches the release identifier only partially', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-20230615.1': {},
+					'0.0.0-nightly-20230615.2': {},
+					'0.0.0-nightly-next-20230615.3': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly-2023' )
+				.then( result => {
+					expect( result ).to.equal( null );
+				} );
+		} );
+
 		it( 'returns last pre-release version matching the release identifier', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
@@ -312,6 +329,43 @@ describe( 'versions', () => {
 			return getLastPreRelease( '0.0.0-nightly-next-20230615' )
 				.then( result => {
 					expect( result ).to.equal( '0.0.0-nightly-next-20230615.2' );
+				} );
+		} );
+
+		it( 'returns last pre-release version matching the release identifier exactly', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-20230615.0': {},
+					'37.0.0-alpha.1': {},
+					'37.0.0-alpha.2': {},
+					'41.0.0': {},
+					'37.0.0-alpha.10': {},
+					'37.0.0-alpha.11': {}
+				}
+			} );
+
+			return getLastPreRelease( '37.0.0-alpha.10' )
+				.then( result => {
+					expect( result ).to.equal( '37.0.0-alpha.10' );
+				} );
+		} );
+
+		it( 'returns last nightly version matching the release identifier exactly', () => {
+			vi.mocked( packument ).mockResolvedValue( {
+				name: 'ckeditor5',
+				versions: {
+					'0.0.0-nightly-20230615.0': {},
+					'0.0.0-nightly-20230615.1': {},
+					'0.0.0-nightly-20230615.2': {},
+					'0.0.0-nightly-next-20230615.1': {},
+					'0.0.0-nightly-next-20230615.2': {}
+				}
+			} );
+
+			return getLastPreRelease( '0.0.0-nightly-20230615.1' )
+				.then( result => {
+					expect( result ).to.equal( '0.0.0-nightly-20230615.1' );
 				} );
 		} );
 	} );
