@@ -81,7 +81,7 @@ export function swcPlugin(): Plugin {
 		include: [ '**/*.[jt]s' ],
 		swc: {
 			jsc: {
-				target: 'es2019'
+				target: 'es2022'
 			},
 			module: {
 				type: 'es6'
