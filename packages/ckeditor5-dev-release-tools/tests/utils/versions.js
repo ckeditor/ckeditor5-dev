@@ -375,7 +375,7 @@ describe( 'versions', () => {
 			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 		} );
 
-		it( 'returns next pre-release version from exactly the "nightly" tag', () => {
+		it( 'returns last pre-release version from exactly the "nightly" tag', () => {
 			vi.mocked( packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
