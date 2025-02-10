@@ -50,7 +50,7 @@ export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 			const lastVersion = Object.keys( result.versions )
 				.filter( version => {
 					const optionalDateIdentifier = '(-[0-9]{8})?';
-					const optionalSequenceNumber = '(.[0-9]+)?';
+					const optionalSequenceNumber = '(\\.[0-9]+)?';
 					const versionRegExp = new RegExp( `^${ releaseIdentifier }${ optionalDateIdentifier }${ optionalSequenceNumber }$` );
 
 					return versionRegExp.test( version );
