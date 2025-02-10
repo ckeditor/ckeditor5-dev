@@ -29,7 +29,14 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
 
 /**
  * Returns the current (latest) pre-release version that matches the provided release identifier.
+ * It takes into account and distinguishes pre-release tags with different names but starting with the same base name.
  * If the package does not have any pre-releases with the provided identifier yet, `null` is returned.
+ *
+ * Examples:
+ * 	* "0.0.0-nightly" - Matches the last "nightly" version regardless of the publication date.
+ *	  It does not match other nightly tags that start with the same "nightly" base name, e.g. "0.0.0-nightly-next-YYYYMMDD.X".
+ * 	* "0.0.0-nightly-20230615" - Matches the last "nightly" version from the 2023-06-15 day.
+ * 	* "42.0.0-alpha" - Matches the last "alpha" version for the 42.0.0 version.
  *
  * @param {ReleaseIdentifier} releaseIdentifier
  * @param {string} [cwd=process.cwd()]
@@ -41,7 +48,13 @@ export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	return packument( packageName )
 		.then( result => {
 			const lastVersion = Object.keys( result.versions )
-				.filter( version => version.startsWith( releaseIdentifier ) )
+				.filter( version => {
+					const optionalDateIdentifier = '(-[0-9]{8})?';
+					const optionalSequenceNumber = '(\\.[0-9]+)?';
+					const versionRegExp = new RegExp( `^${ releaseIdentifier }${ optionalDateIdentifier }${ optionalSequenceNumber }$` );
+
+					return versionRegExp.test( version );
+				} )
 				.sort( ( a, b ) => a.localeCompare( b, undefined, { numeric: true } ) )
 				.pop();
 
@@ -138,9 +151,11 @@ export function getCurrent( cwd = process.cwd() ) {
 }
 
 /**
+ * Returns current date in the "YYYYMMDD" format.
+ *
  * @returns {string}
  */
-function getDateIdentifier() {
+export function getDateIdentifier() {
 	const today = new Date();
 	const year = today.getFullYear().toString();
 	const month = ( today.getMonth() + 1 ).toString().padStart( 2, '0' );
@@ -152,9 +167,4 @@ function getDateIdentifier() {
 /**
  * @typedef {string} ReleaseIdentifier The pre-release identifier without the last dynamic part (the pre-release sequential number).
  * It consists of the core base version ("<major>.<minor>.<path>"), a hyphen ("-"), and a pre-release identifier name (e.g. "alpha").
- *
- * Examples:
- * 	* "0.0.0-nightly" - matches the last nightly version regardless of the publication date.
- * 	* "0.0.0-nightly-20230615" - matches the last nightly version from the 2023-06-15 day.
- * 	* "42.0.0-alpha" - matches the last alpha version for the 42.0.0 version.
  */

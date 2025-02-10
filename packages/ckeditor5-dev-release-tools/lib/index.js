@@ -22,6 +22,7 @@ export {
 	getNextNightly,
 	getNextInternal,
 	getCurrent,
+	getDateIdentifier,
 	getLastTagFromGit
 } from './utils/versions.js';
 export { default as getChangesForVersion } from './utils/getchangesforversion.js';
