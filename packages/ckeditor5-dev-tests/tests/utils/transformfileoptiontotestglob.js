@@ -60,11 +60,11 @@ describe( 'transformFileOptionToTestGlob()', () => {
 		} );
 
 		it( 'for automated tests (wildcard support)', () => {
-			expect( transformFileOptionToTestGlob( 'build-*' ) ).to.deep.equal( [
-				'/workspace/packages/ckeditor5-build-*/tests/**/*.{js,ts}',
-				'/workspace/packages/ckeditor-build-*/tests/**/*.{js,ts}',
-				'/workspace/external/*/packages/ckeditor5-build-*/tests/**/*.{js,ts}',
-				'/workspace/external/*/packages/ckeditor-build-*/tests/**/*.{js,ts}'
+			expect( transformFileOptionToTestGlob( 'editor-*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-editor-*/tests/**/*.{js,ts}',
+				'/workspace/packages/ckeditor-editor-*/tests/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5-editor-*/tests/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor-editor-*/tests/**/*.{js,ts}'
 			] );
 		} );
 
@@ -78,11 +78,11 @@ describe( 'transformFileOptionToTestGlob()', () => {
 		} );
 
 		it( 'for manual tests (wildcard support)', () => {
-			expect( transformFileOptionToTestGlob( 'build-*', true ) ).to.deep.equal( [
-				'/workspace/packages/ckeditor5-build-*/tests/manual/**/*.{js,ts}',
-				'/workspace/packages/ckeditor-build-*/tests/manual/**/*.{js,ts}',
-				'/workspace/external/*/packages/ckeditor5-build-*/tests/manual/**/*.{js,ts}',
-				'/workspace/external/*/packages/ckeditor-build-*/tests/manual/**/*.{js,ts}'
+			expect( transformFileOptionToTestGlob( 'editor-*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-editor-*/tests/manual/**/*.{js,ts}',
+				'/workspace/packages/ckeditor-editor-*/tests/manual/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5-editor-*/tests/manual/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor-editor-*/tests/manual/**/*.{js,ts}'
 			] );
 		} );
 	} );

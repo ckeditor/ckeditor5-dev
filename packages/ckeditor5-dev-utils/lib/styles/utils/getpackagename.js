@@ -20,9 +20,9 @@
  * under path which starts with `ckeditor5-`. In this case it isn't a package and it doesn't make
  * sense to return the directory name. See #381.
  *
- * E.g., for the path from the build directory to the file:
+ * E.g., for the path from the package directory to the file:
  *
- *        "/foo/ckeditor5/packages/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5-bar/baz.css"
+ *        "/foo/ckeditor5/packages/ckeditor5-editor-classic/node_modules/@ckeditor/ckeditor5-bar/baz.css"
  *
  * it outputs
  *

@@ -156,8 +156,8 @@ describe( 'compileManualTestScripts()', () => {
 			cwd: 'workspace',
 			buildDir: 'buildDir',
 			sourceFiles: [
-				'ckeditor5-build-classic/tests/manual/ckeditor.js',
-				'ckeditor5-build-classic/tests/manual/ckeditor.compcat.js',
+				'ckeditor5-editor-inline/tests/manual/ckeditor.js',
+				'ckeditor5-editor-inline/tests/manual/ckeditor.compcat.js',
 				'ckeditor5-editor-classic/tests/manual/classic.js'
 			],
 			themePath: 'path/to/theme',
@@ -169,8 +169,8 @@ describe( 'compileManualTestScripts()', () => {
 
 		expect( vi.mocked( getWebpackConfigForManualTests ) ).toHaveBeenCalledOnce();
 		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledWith( 'ckeditor5-build-classic/tests/manual/ckeditor.js' );
-		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledWith( 'ckeditor5-build-classic/tests/manual/ckeditor.compcat.js' );
+		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledWith( 'ckeditor5-editor-inline/tests/manual/ckeditor.js' );
+		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledWith( 'ckeditor5-editor-inline/tests/manual/ckeditor.compcat.js' );
 		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledWith( 'ckeditor5-editor-classic/tests/manual/classic.js' );
 	} );
 
@@ -197,7 +197,7 @@ describe( 'compileManualTestScripts()', () => {
 		await compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
-				'ckeditor5-build-classic\\tests\\manual\\ckeditor.js'
+				'ckeditor5-editor-inline\\tests\\manual\\ckeditor.js'
 			],
 			themePath: 'path/to/theme',
 			language: null,
@@ -205,7 +205,7 @@ describe( 'compileManualTestScripts()', () => {
 			additionalLanguages: null
 		} );
 
-		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledExactlyOnceWith( 'ckeditor5-build-classic\\tests\\manual\\ckeditor.js' );
+		expect( vi.mocked( getRelativeFilePath ) ).toHaveBeenCalledExactlyOnceWith( 'ckeditor5-editor-inline\\tests\\manual\\ckeditor.js' );
 	} );
 
 	it( 'should pass identity file to webpack configuration factory', async () => {

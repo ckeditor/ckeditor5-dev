@@ -21,7 +21,7 @@ describe( 'getPackageName()', () => {
 
 		it( 'returns package name for path which starts with package name (nested dependencies)', () => {
 			checkPackage(
-				'/home/foo/ckeditor5/packages/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5-foo/tests/manual/foo.js',
+				'/home/foo/ckeditor5/packages/ckeditor5-editor-classic/node_modules/@ckeditor/ckeditor5-foo/tests/manual/foo.js',
 				'ckeditor5-foo'
 			);
 		} );
@@ -29,7 +29,7 @@ describe( 'getPackageName()', () => {
 		/* eslint-disable max-len */
 		it( 'returns package name for path which starts with package name (combined workspace looks like package and nested dependencies)', () => {
 			checkPackage(
-				'/Users/foo/ckeditor5-workspace/ckeditor5/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5-foo/tests/manual/foo.js',
+				'/Users/foo/ckeditor5-workspace/ckeditor5/ckeditor5-editor-classic/node_modules/@ckeditor/ckeditor5-foo/tests/manual/foo.js',
 				'ckeditor5-foo'
 			);
 		} );
@@ -51,7 +51,7 @@ describe( 'getPackageName()', () => {
 		it( 'returns package name for path which starts with package name (nested dependencies)', () => {
 			/* eslint-disable max-len */
 			checkPackage(
-				'C:\\Document and settings\\ckeditor5\\packages\\ckeditor5-build-classic\\node_modules\\@ckeditor\\ckeditor5-foo\\tests\\manual\\foo.js',
+				'C:\\Document and settings\\ckeditor5\\packages\\ckeditor5-editor-classic\\node_modules\\@ckeditor\\ckeditor5-foo\\tests\\manual\\foo.js',
 				'ckeditor5-foo'
 			);
 			/* eslint-enable max-len */
@@ -60,7 +60,7 @@ describe( 'getPackageName()', () => {
 		/* eslint-disable max-len */
 		it( 'returns package name for path which starts with package name (combined workspace looks like package and nested dependencies)', () => {
 			checkPackage(
-				'C:\\Users\\foo\\ckeditor5-workspace\\ckeditor5\\ckeditor5-build-classic\\node_modules\\@ckeditor\\ckeditor5-foo\\tests\\manual\\foo.js',
+				'C:\\Users\\foo\\ckeditor5-workspace\\ckeditor5\\ckeditor5-editor-classic\\node_modules\\@ckeditor\\ckeditor5-foo\\tests\\manual\\foo.js',
 				'ckeditor5-foo'
 			);
 		} );
