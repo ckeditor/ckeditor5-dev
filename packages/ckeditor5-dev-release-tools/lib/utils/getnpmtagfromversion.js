@@ -17,6 +17,10 @@ import semver from 'semver';
 export default function getNpmTagFromVersion( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
 
+	if ( versionTag.startsWith( 'nightly-next' ) ) {
+		return 'nightly-next';
+	}
+
 	if ( versionTag.startsWith( 'nightly' ) ) {
 		return 'nightly';
 	}
