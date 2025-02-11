@@ -24,6 +24,10 @@ describe( 'getNpmTagFromVersion()', () => {
 		expect( getNpmTagFromVersion( '0.0.0-nightly-20230517.0' ) ).to.equal( 'nightly' );
 	} );
 
+	it( 'should return "nightly-next" when processing a 0.0.0-nightly-next-YYYYMMDD.X version', () => {
+		expect( getNpmTagFromVersion( '0.0.0-nightly-next-20230517.0' ) ).to.equal( 'nightly-next' );
+	} );
+
 	it( 'should return "internal" when processing a 0.0.0-internal-YYYYMMDD.X version', () => {
 		expect( getNpmTagFromVersion( '0.0.0-internal-20230517.0' ) ).to.equal( 'internal' );
 	} );
