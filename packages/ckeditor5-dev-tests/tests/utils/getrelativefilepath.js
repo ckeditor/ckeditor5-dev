@@ -48,16 +48,16 @@ describe( 'getRelativeFilePath()', () => {
 		it( 'returns a proper path for "ckeditor5.js" file', () => {
 			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
 			checkPath(
-				'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor5.js',
-				'ckeditor5-build-a/tests/manual/ckeditor5.js'
+				'/work/space/packages/ckeditor5-editor-a/tests/manual/ckeditor5.js',
+				'ckeditor5-editor-a/tests/manual/ckeditor5.js'
 			);
 		} );
 
 		it( 'returns a proper path for "ckeditor.js" file', () => {
 			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
 			checkPath(
-				'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor.js',
-				'ckeditor5-build-a/tests/manual/ckeditor.js' );
+				'/work/space/packages/ckeditor5-editor-a/tests/manual/ckeditor.js',
+				'ckeditor5-editor-a/tests/manual/ckeditor.js' );
 		} );
 	} );
 
@@ -104,16 +104,16 @@ describe( 'getRelativeFilePath()', () => {
 		it( 'returns a proper path for "ckeditor5.js" file', () => {
 			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
 			checkPath(
-				'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor5.js',
-				'ckeditor5-build-a\\tests\\manual\\ckeditor5.js'
+				'C:\\work\\space\\packages\\ckeditor5-editor-a\\tests\\manual\\ckeditor5.js',
+				'ckeditor5-editor-a\\tests\\manual\\ckeditor5.js'
 			);
 		} );
 
 		it( 'returns a proper path for "ckeditor.js" file', () => {
 			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
 			checkPath(
-				'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor.js',
-				'ckeditor5-build-a\\tests\\manual\\ckeditor.js'
+				'C:\\work\\space\\packages\\ckeditor5-editor-a\\tests\\manual\\ckeditor.js',
+				'ckeditor5-editor-a\\tests\\manual\\ckeditor.js'
 			);
 		} );
 	} );
