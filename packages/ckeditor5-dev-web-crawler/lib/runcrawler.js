@@ -22,8 +22,7 @@ import {
 	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
-	DATA_ATTRIBUTE_NAME,
-	SUCCESSFUL_HTTP_STATUS_CODES
+	DATA_ATTRIBUTE_NAME
 } from './constants.js';
 
 /**
@@ -511,7 +510,7 @@ function registerErrorHandlers( page, { link, onError } ) {
 	page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
 		const errorText = request.failure().errorText;
 
-		if ( SUCCESSFUL_HTTP_STATUS_CODES.includes( request.response()?.status() ) && request.method() === 'POST' ) {
+		if ( request.response()?.ok() && request.method() === 'POST' ) {
 			// Ignore a false positive due to a bug in Puppeteer.
 			// https://github.com/puppeteer/puppeteer/issues/9458
 			return;
