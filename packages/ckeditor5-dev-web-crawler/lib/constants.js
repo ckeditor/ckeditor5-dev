@@ -59,3 +59,5 @@ export const IGNORE_ALL_ERRORS_WILDCARD = '*';
 export const META_TAG_NAME = 'x-cke-crawler-ignore-patterns';
 
 export const DATA_ATTRIBUTE_NAME = 'data-cke-crawler-skip';
+
+export const SUCCESSFUL_HTTP_STATUS_CODES = [ 200, 201, 202, 203, 204, 205, 206, 207, 208, 226 ];

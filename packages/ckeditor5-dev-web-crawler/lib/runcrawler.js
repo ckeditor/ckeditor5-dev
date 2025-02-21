@@ -22,7 +22,8 @@ import {
 	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
-	DATA_ATTRIBUTE_NAME
+	DATA_ATTRIBUTE_NAME,
+	SUCCESSFUL_HTTP_STATUS_CODES
 } from './constants.js';
 
 /**
@@ -509,6 +510,12 @@ function registerErrorHandlers( page, { link, onError } ) {
 
 	page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
 		const errorText = request.failure().errorText;
+
+		if ( SUCCESSFUL_HTTP_STATUS_CODES.includes( request.response()?.status() ) && request.method() === 'POST' ) {
+			// Ignore a false positive due to a bug in Puppeteer.
+			// https://github.com/puppeteer/puppeteer/issues/9458
+			return;
+		}
 
 		// Do not log errors explicitly aborted by the crawler.
 		if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
