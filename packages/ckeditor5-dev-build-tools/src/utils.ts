@@ -4,18 +4,10 @@
  */
 
 import { createRequire } from 'module';
-import path from 'upath';
 import type { CamelCase, CamelCasedProperties } from 'type-fest';
 import type { InputPluginOption } from 'rollup';
 
 const require = createRequire( import.meta.url );
-
-/**
- * Returns path relative to the current working directory.
- */
-export function getCwdPath( ...paths: Array<string> ): string {
-	return path.resolve( process.cwd(), ...paths );
-}
 
 /**
  * Transforms `kebab-case` strings to `camelCase`.

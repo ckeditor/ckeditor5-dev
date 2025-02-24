@@ -4,12 +4,7 @@
  */
 
 import { test, expect } from 'vitest';
-import upath from 'upath';
-import { getCwdPath, camelize, camelizeObjectKeys, removeNewline } from '../src/utils.js';
-
-test( 'getPath()', () => {
-	expect( getCwdPath( 'dist', 'index.js' ) ).toBe( upath.join( process.cwd(), '/dist/index.js' ) );
-} );
+import { camelize, camelizeObjectKeys, removeNewline } from '../src/utils.js';
 
 test( 'camelize()', () => {
 	expect( camelize( 'this-is-a-test' ) ).toBe( 'thisIsATest' );

@@ -11,7 +11,7 @@ import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
 import { loadSourcemaps } from './plugins/loadSourcemaps.js';
 import { getRollupConfig } from './config.js';
-import { getCwdPath, camelizeObjectKeys, removeWhitespace, getOptionalPlugin } from './utils.js';
+import { camelizeObjectKeys, removeWhitespace, getOptionalPlugin } from './utils.js';
 
 export interface BuildOptions {
 	input: string;
@@ -28,6 +28,7 @@ export interface BuildOptions {
 	minify: boolean;
 	clean: boolean;
 	browser: boolean;
+	cwd: string;
 }
 
 export const defaultOptions: BuildOptions = {
@@ -44,7 +45,10 @@ export const defaultOptions: BuildOptions = {
 	sourceMap: false,
 	minify: false,
 	clean: false,
-	browser: false
+	browser: false,
+	get cwd() {
+		return path.normalize( process.cwd() );
+	}
 };
 
 /**
@@ -61,6 +65,7 @@ const CKEDITOR_GLOBALS: GlobalsOption = {
 function getCliArguments(): Partial<BuildOptions> {
 	const { values } = util.parseArgs( {
 		options: {
+			'cwd': { type: 'string' },
 			'input': { type: 'string' },
 			'output': { type: 'string' },
 			'tsconfig': { type: 'string' },
@@ -158,12 +163,12 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 		'banner'
 	] as const;
 
-	paths.forEach( path => {
-		if ( !normalized[ path ] ) {
+	paths.forEach( pathName => {
+		if ( !normalized[ pathName ] ) {
 			return;
 		}
 
-		normalized[ path ] = getCwdPath( normalized[ path ] );
+		normalized[ pathName ] = path.resolve( normalized.cwd, normalized[ pathName ] );
 	} );
 
 	/**
@@ -222,12 +227,12 @@ export async function build(
 			name: args.name
 		} );
 
-		if ( !args.browser ) {
+		if ( !args.browser || !args.name ) {
 			return bundle;
 		}
 
 		/**
-		 * Generate UMD bundle if the `browser` parameter is set to `true`.
+		 * Generate UMD bundle if the `browser` parameter is set to `true` and `name` is set.
 		 */
 		return generateUmdBuild( args, bundle );
 	} catch ( error: any ) {

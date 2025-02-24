@@ -67,8 +67,8 @@ function mockCliArgs( ...args: Array<string> ) {
 /**
  * Returns an absolute path to the file.
  */
-function getCwdPath( fileName: string ) {
-	return upath.join( process.cwd(), fileName );
+function getCwdPath( ...paths: Array<string> ) {
+	return upath.resolve( process.cwd(), ...paths );
 }
 
 test( 'paths are normalized', async () => {
@@ -86,13 +86,22 @@ test( 'paths are normalized', async () => {
  * CLI arguments
  */
 
+test( '--cwd', async () => {
+	const spy = getConfigMock();
+
+	mockCliArgs( '--cwd=/path/to/directory' );
+	await build();
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/path/to/directory', 'src/index.ts' ) } ) );
+} );
+
 test( '--input', async () => {
 	const spy = getConfigMock();
 
 	mockCliArgs( '--input=main.js' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/main.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( 'main.js' ) } ) );
 } );
 
 test( '--output', async () => {
@@ -101,7 +110,7 @@ test( '--output', async () => {
 	mockCliArgs( '--output=dist/test.js' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { output: getCwdPath( '/dist/test.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { output: getCwdPath( 'dist/test.js' ) } ) );
 } );
 
 test( '--tsconfig', async () => {
@@ -110,7 +119,7 @@ test( '--tsconfig', async () => {
 	mockCliArgs( '--tsconfig=tsconf.json' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( '/tsconf.json' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( 'tsconf.json' ) } ) );
 } );
 
 test( '--external', async () => {
@@ -146,7 +155,7 @@ test( '--translations', async () => {
 	mockCliArgs( '--translations=translations/**/*.po' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( '/translations/**/*.po' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'translations/**/*.po' ) } ) );
 } );
 
 test( '--source-map', async () => {
@@ -194,7 +203,7 @@ test( '.input', async () => {
 
 	await build( { input: 'main.js' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/main.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( 'main.js' ) } ) );
 } );
 
 test( '.output', async () => {
@@ -202,7 +211,7 @@ test( '.output', async () => {
 
 	await build( { input: 'dist/test.js' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/dist/test.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( 'dist/test.js' ) } ) );
 } );
 
 test( '.tsconfig', async () => {
@@ -210,7 +219,7 @@ test( '.tsconfig', async () => {
 
 	await build( { tsconfig: 'tsconf.json' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( '/tsconf.json' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( 'tsconf.json' ) } ) );
 } );
 
 test( '.external', async () => {
@@ -258,7 +267,7 @@ test( '.translations', async () => {
 
 	await build( { translations: 'translations/**/*.po' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( '/translations/**/*.po' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'translations/**/*.po' ) } ) );
 } );
 
 test( '.sourceMap', async () => {
@@ -291,7 +300,7 @@ test( '.clean removes directory based on .output', async () => {
 	await build( { output: 'custom/index.js', clean: true } );
 
 	expect( spy ).toHaveBeenCalledWith(
-		getCwdPath( '/custom' ),
+		getCwdPath( 'custom' ),
 		{ force: true, recursive: true }
 	);
 } );
