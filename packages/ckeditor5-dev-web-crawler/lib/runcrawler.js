@@ -510,6 +510,12 @@ function registerErrorHandlers( page, { link, onError } ) {
 	page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
 		const errorText = request.failure().errorText;
 
+		if ( request.response()?.ok() && request.method() === 'POST' ) {
+			// Ignore a false positive due to a bug in Puppeteer.
+			// https://github.com/puppeteer/puppeteer/issues/9458
+			return;
+		}
+
 		// Do not log errors explicitly aborted by the crawler.
 		if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
 			const url = request.url();
