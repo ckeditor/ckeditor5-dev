@@ -23,7 +23,8 @@ const defaults: Options = {
 	minify: false,
 	clean: false,
 	browser: false,
-	name: ''
+	name: '',
+	cwd: ''
 };
 
 function getConfig( config: Partial<Options> = {} ) {

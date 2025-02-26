@@ -139,7 +139,22 @@ test( 'Browser parameter set to `false`', async () => {
 	] );
 } );
 
-test( 'Browser parameter set to `true`', async () => {
+test( 'Browser parameter set to `true` and name parameter not set', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		browser: true
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'index-editor.css',
+		'index-content.css'
+	] );
+} );
+
+test( 'Browser parameter set to `true` and name parameter set', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
