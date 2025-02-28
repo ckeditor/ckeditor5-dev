@@ -27,7 +27,7 @@ export interface BuildOptions {
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
-	logLevel: LogLevelOption
+	logLevel: LogLevelOption;
 	browser: boolean;
 	cwd: string;
 }
