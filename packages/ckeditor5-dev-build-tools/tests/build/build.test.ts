@@ -372,7 +372,7 @@ test( 'Throws error with nicely formatter message when build fails', async () =>
 
 	const fn = () => build( { input: 'src/input.js' } );
 
-	expect( fn ).rejects.toThrow( /The build process failed with the following error(.*)REASON/s );
+	await expect( fn ).rejects.toThrow( /The build process failed with the following error(.*)REASON/s );
 } );
 
 test( 'Throws Rollup error with nicely formatter message when build fails', async () => {
@@ -390,7 +390,7 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 
 	const fn = () => build( { input: 'src/input.js' } );
 
-	expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FILENAME(.*)REASON/s );
+	await expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FILENAME(.*)REASON/s );
 } );
 
 test( 'Rollup error includes frame if provided', async () => {
@@ -409,7 +409,7 @@ test( 'Rollup error includes frame if provided', async () => {
 
 	const fn = () => build( { input: 'src/input.js' } );
 
-	expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FRAME/s );
+	await expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FRAME/s );
 } );
 
 /**

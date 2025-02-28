@@ -49,6 +49,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 		translations,
 		sourceMap,
 		minify,
+		logLevel,
 		browser
 	} = options;
 
@@ -88,6 +89,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 
 	return {
 		input,
+		logLevel,
 
 		/**
 		 * List of packages that will not be bundled, but their imports will be left as they are.
