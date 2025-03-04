@@ -7,9 +7,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import commitAndTag from '../../lib/tasks/commitandtag.js';
 import { simpleGit } from 'simple-git';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'commitAndTag()', () => {
 	let stubs;
@@ -19,6 +21,8 @@ describe( 'commitAndTag()', () => {
 			git: {
 				tags: vi.fn(),
 				commit: vi.fn(),
+				reset: vi.fn(),
+				add: vi.fn(),
 				addTag: vi.fn()
 			}
 		};
@@ -122,5 +126,20 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
 		expect( stubs.git.addTag ).toHaveBeenCalledExactlyOnceWith( 'v1.0.0' );
+	} );
+
+	it( 'should run in dry run mode without creating a commit and a tag', async () => {
+		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
+
+		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ], dryRun: true } );
+
+		expect( stubs.git.add ).toHaveBeenCalledWith( [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
+		expect( tools.shExec ).toHaveBeenCalledWith( 'yarn lint-staged', expect.objectContaining( { verbosity: 'error', async: true } ) );
+
+		expect( stubs.git.commit ).not.toHaveBeenCalled();
+		expect( stubs.git.addTag ).not.toHaveBeenCalled();
 	} );
 } );

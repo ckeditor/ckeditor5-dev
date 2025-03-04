@@ -6,6 +6,7 @@
 import upath from 'upath';
 import { glob } from 'glob';
 import { simpleGit } from 'simple-git';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const { toUnix } = upath;
 
@@ -17,9 +18,10 @@ const { toUnix } = upath;
  * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
+ * @param {boolean} [options.dryRun=false] In order to run pre commit checks in a dry run mode.
  * @returns {Promise}
  */
-export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true } ) {
+export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true, dryRun = false } ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
@@ -36,6 +38,19 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 
 	// Do not commit and create tags if a tag is already taken. It might happen when a release job is restarted.
 	if ( tagForVersion ) {
+		return;
+	}
+
+	if ( dryRun ) {
+		try {
+			await git.add( filePathsToAdd );
+			await tools.shExec( 'yarn lint-staged', { cwd, verbosity: 'error', async: true } );
+		} catch ( e ) {
+			throw e.message;
+		} finally {
+			await git.reset( filePathsToAdd );
+		}
+
 		return;
 	}
 
