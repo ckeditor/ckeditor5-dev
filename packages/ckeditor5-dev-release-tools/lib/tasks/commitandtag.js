@@ -19,9 +19,19 @@ const { toUnix } = upath;
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
  * @param {boolean} [options.dryRun=false] In order to run pre commit checks in a dry run mode.
+ * @param {string} [options.preCommitCommand='yarn lint-staged'] Command to run before creating a commit for the dry run mode.
+ * @param {ListrTaskObject} [options.listrTask={}] An instance of `ListrTask`.
  * @returns {Promise}
  */
-export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true, dryRun = false } ) {
+export default async function commitAndTag( {
+	version,
+	files,
+	cwd = process.cwd(),
+	skipCi = true,
+	dryRun = false,
+	preCommitCommand = 'yarn lint-staged',
+	listrTask = {}
+} ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
@@ -42,18 +52,32 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 	}
 
 	if ( dryRun ) {
-		try {
-			await git.add( filePathsToAdd );
-			await tools.shExec( 'yarn lint-staged', { cwd, verbosity: 'silent', async: true } );
-		} catch ( e ) {
-			throw e.message;
-		} finally {
-			await git.reset( filePathsToAdd );
-		}
-
-		return;
+		await dryRunGitCommit( filePathsToAdd, preCommitCommand, cwd );
+		listrTask.output = `[dry run] Creating git tag v${ tagForVersion }.`;
+	} else {
+		await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
+		await git.addTag( `v${ version }` );
 	}
+}
 
-	await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
-	await git.addTag( `v${ version }` );
+/**
+ * Function that imitates running dry run for the `git commit` command.
+ *
+ * @param {Array.<string>} filePathsToAdd File paths to run the dry run validations for.
+ * @param {string} preCommitCommand Command to run before creating a commit for the dry run mode.
+ * @param {string} cwd Current working directory from which all paths will be resolved.
+ * @returns {Promise<void>}
+ */
+async function dryRunGitCommit( filePathsToAdd, preCommitCommand, cwd ) {
+	const normalizedCwd = toUnix( cwd );
+	const git = simpleGit( { baseDir: normalizedCwd } );
+
+	try {
+		await git.add( filePathsToAdd );
+		await tools.shExec( preCommitCommand, { cwd, verbosity: 'silent', async: true } );
+	} catch ( e ) {
+		throw e.message;
+	} finally {
+		await git.reset( filePathsToAdd );
+	}
 }
