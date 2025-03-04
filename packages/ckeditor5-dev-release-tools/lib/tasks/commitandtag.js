@@ -44,7 +44,7 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 	if ( dryRun ) {
 		try {
 			await git.add( filePathsToAdd );
-			await tools.shExec( 'yarn lint-staged', { cwd, verbosity: 'error', async: true } );
+			await tools.shExec( 'yarn lint-staged', { cwd, verbosity: 'silent', async: true } );
 		} catch ( e ) {
 			throw e.message;
 		} finally {

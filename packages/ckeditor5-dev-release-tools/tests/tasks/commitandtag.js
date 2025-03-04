@@ -137,7 +137,7 @@ describe( 'commitAndTag()', () => {
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'yarn lint-staged', expect.objectContaining( { verbosity: 'error', async: true } ) );
+		expect( tools.shExec ).toHaveBeenCalledWith( 'yarn lint-staged', expect.objectContaining( { verbosity: 'silent', async: true } ) );
 
 		expect( stubs.git.commit ).not.toHaveBeenCalled();
 		expect( stubs.git.addTag ).not.toHaveBeenCalled();
