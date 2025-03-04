@@ -21,6 +21,7 @@ const defaults: Options = {
 	translations: '',
 	sourceMap: false,
 	minify: false,
+	logLevel: 'warn',
 	clean: false,
 	browser: false,
 	name: '',

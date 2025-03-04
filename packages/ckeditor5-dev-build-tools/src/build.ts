@@ -8,7 +8,7 @@ import url from 'url';
 import util from 'util';
 import chalk from 'chalk';
 import path from 'upath';
-import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
+import { rollup, type RollupOutput, type GlobalsOption, type LogLevelOption } from 'rollup';
 import { loadSourcemaps } from './plugins/loadSourcemaps.js';
 import { getRollupConfig } from './config.js';
 import { camelizeObjectKeys, removeWhitespace, getOptionalPlugin } from './utils.js';
@@ -27,6 +27,7 @@ export interface BuildOptions {
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
+	logLevel: LogLevelOption;
 	browser: boolean;
 	cwd: string;
 }
@@ -45,6 +46,7 @@ export const defaultOptions: BuildOptions = {
 	sourceMap: false,
 	minify: false,
 	clean: false,
+	logLevel: 'warn',
 	browser: false,
 	get cwd() {
 		return path.normalize( process.cwd() );
@@ -76,6 +78,7 @@ function getCliArguments(): Partial<BuildOptions> {
 			'source-map': { type: 'boolean' },
 			'minify': { type: 'boolean' },
 			'clean': { type: 'boolean' },
+			'log-level': { type: 'string' },
 			'browser': { type: 'boolean' },
 			'name': { type: 'string' },
 			'globals': { type: 'string', multiple: true }
@@ -88,7 +91,7 @@ function getCliArguments(): Partial<BuildOptions> {
 		strict: true
 	} );
 
-	return camelizeObjectKeys( values );
+	return camelizeObjectKeys( values ) as Partial<BuildOptions>;
 }
 
 /**
