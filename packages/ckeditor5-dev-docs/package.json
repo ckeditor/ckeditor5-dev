@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
-  "version": "46.0.6",
+  "version": "46.0.7",
   "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -22,8 +22,8 @@
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^46.0.6",
-    "@ckeditor/typedoc-plugins": "^46.0.6",
+    "@ckeditor/ckeditor5-dev-utils": "^46.0.7",
+    "@ckeditor/typedoc-plugins": "^46.0.7",
     "glob": "^10.0.0",
     "fs-extra": "^11.0.0",
     "tmp": "^0.2.1",
