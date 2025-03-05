@@ -131,15 +131,46 @@ describe( 'commitAndTag()', () => {
 	it( 'should run in dry run mode without creating a commit and a tag', async () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
 
-		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ], dryRun: true } );
+		const listrTaskSpy = {};
+
+		await commitAndTag( {
+			version: '1.0.0',
+			packagesDirectory: 'packages',
+			files: [ '**/package.json' ],
+			dryRun: true,
+			preCommitCommand: 'test command',
+			listrTask: listrTaskSpy
+		} );
 
 		expect( stubs.git.add ).toHaveBeenCalledWith( [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'yarn lint-staged', expect.objectContaining( { verbosity: 'silent', async: true } ) );
+		expect( tools.shExec ).toHaveBeenCalledWith( 'test command', expect.objectContaining( { verbosity: 'silent', async: true } ) );
+		expect( stubs.git.reset ).toHaveBeenCalledWith( [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
+		expect( listrTaskSpy ).toHaveProperty( 'output' );
 
 		expect( stubs.git.commit ).not.toHaveBeenCalled();
 		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should run git reset when running pre-commit command throws an error', async () => {
+		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
+		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'Error executing pre-commit command.' ) );
+
+		await expect( commitAndTag( {
+			version: '1.0.0',
+			packagesDirectory: 'packages',
+			files: [ '**/package.json' ],
+			dryRun: true
+		} ) ).rejects.toThrow( 'Error executing pre-commit command.' );
+
+		expect( stubs.git.reset ).toHaveBeenCalledWith( [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
 	} );
 } );

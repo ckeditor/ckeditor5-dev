@@ -52,7 +52,7 @@ export default async function commitAndTag( {
 	}
 
 	if ( dryRun ) {
-		await dryRunGitCommit( filePathsToAdd, preCommitCommand, cwd );
+		await executePreCommitHook( filePathsToAdd, preCommitCommand, cwd );
 		listrTask.output = `[dry run] Creating git tag v${ tagForVersion }.`;
 	} else {
 		await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
@@ -68,7 +68,7 @@ export default async function commitAndTag( {
  * @param {string} cwd Current working directory from which all paths will be resolved.
  * @returns {Promise<void>}
  */
-async function dryRunGitCommit( filePathsToAdd, preCommitCommand, cwd ) {
+async function executePreCommitHook( filePathsToAdd, preCommitCommand, cwd ) {
 	const normalizedCwd = toUnix( cwd );
 	const git = simpleGit( { baseDir: normalizedCwd } );
 
