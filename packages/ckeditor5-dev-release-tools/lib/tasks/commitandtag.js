@@ -17,9 +17,17 @@ const { toUnix } = upath;
  * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
+ * @param {boolean} [options.dryRun=false] When enabled, the function creates a commit to allow executing a pre-commit hook,
+ * then removes it using the `git reset` command.
  * @returns {Promise}
  */
-export default async function commitAndTag( { version, files, cwd = process.cwd(), skipCi = true } ) {
+export default async function commitAndTag( {
+	version,
+	files,
+	cwd = process.cwd(),
+	skipCi = true,
+	dryRun = false
+} ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
@@ -34,11 +42,18 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 	const { all: availableTags } = await git.tags();
 	const tagForVersion = availableTags.find( tag => tag.endsWith( version ) );
 
-	// Do not commit and create tags if a tag is already taken. It might happen when a release job is restarted.
-	if ( tagForVersion ) {
-		return;
-	}
+	const makeCommit = () => {
+		return git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
+	};
 
-	await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
-	await git.addTag( `v${ version }` );
+	if ( dryRun ) {
+		const lastCommit = await git.log( [ '-1' ] );
+
+		await makeCommit();
+		await git.reset( [ lastCommit.latest.hash ] );
+	} else if ( !tagForVersion ) {
+		// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
+		await makeCommit();
+		await git.addTag( `v${ version }` );
+	}
 }
