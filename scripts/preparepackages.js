@@ -155,19 +155,12 @@ const tasks = new Listr( [
 		task: () => {
 			return releaseTools.commitAndTag( {
 				version: latestVersion,
+				dryRun: cliArguments.compileOnly,
 				files: [
 					'package.json',
 					`${ PACKAGES_DIRECTORY }/*/package.json`
 				]
 			} );
-		},
-		skip: () => {
-			// When compiling the packages only, do not validate the release.
-			if ( cliArguments.compileOnly ) {
-				return true;
-			}
-
-			return false;
 		}
 	}
 ], getListrOptions( cliArguments ) );
