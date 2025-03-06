@@ -6,7 +6,6 @@
 import upath from 'upath';
 import { glob } from 'glob';
 import { simpleGit } from 'simple-git';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const { toUnix } = upath;
 
@@ -19,7 +18,6 @@ const { toUnix } = upath;
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {boolean} [options.skipCi=true] Whether to add the "[skip ci]" suffix to the commit message.
  * @param {boolean} [options.dryRun=false] In order to run pre commit checks in a dry run mode.
- * @param {string} [options.preCommitCommand='yarn lint-staged'] Command to run before creating a commit for the dry run mode.
  * @param {ListrTaskObject} [options.listrTask={}] An instance of `ListrTask`.
  * @returns {Promise}
  */
@@ -29,7 +27,6 @@ export default async function commitAndTag( {
 	cwd = process.cwd(),
 	skipCi = true,
 	dryRun = false,
-	preCommitCommand = 'yarn lint-staged',
 	listrTask = {}
 } ) {
 	const normalizedCwd = toUnix( cwd );
@@ -52,7 +49,7 @@ export default async function commitAndTag( {
 	}
 
 	if ( dryRun ) {
-		await executePreCommitHook( { filePathsToAdd, preCommitCommand, cwd } );
+		await executePreCommitHook( { filePathsToAdd, cwd } );
 		listrTask.output = `[dry run] Creating git tag v${ tagForVersion }.`;
 	} else {
 		await git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
@@ -65,20 +62,26 @@ export default async function commitAndTag( {
  *
  * @param {object} options
  * @param {Array.<string>} options.filePathsToAdd File paths to run the dry run validations for.
- * @param {string} options.preCommitCommand Command to run before creating a commit for the dry run mode.
  * @param {string} options.cwd Current working directory from which all paths will be resolved.
  * @returns {Promise<void>}
  */
-async function executePreCommitHook( { filePathsToAdd, preCommitCommand, cwd } ) {
+async function executePreCommitHook( { filePathsToAdd, cwd } ) {
 	const normalizedCwd = toUnix( cwd );
 	const git = simpleGit( { baseDir: normalizedCwd } );
 
 	try {
-		await git.add( filePathsToAdd );
-		await tools.shExec( preCommitCommand, { cwd, verbosity: 'silent', async: true } );
-	} catch ( e ) {
-		throw e.message;
-	} finally {
-		await git.reset( filePathsToAdd );
+		const preDryRunCommit = await git.log( [ '-1' ] );
+		await git.commit( '[dry run] Release.', filePathsToAdd );
+
+		try {
+			await git.reset( [ preDryRunCommit.latest.hash ] );
+		} catch {
+			throw new Error(
+				'Running `git reset` failed during `git commit` dry run. The release might be in a broken state. ' +
+				'Either fix it manually or prepare the release again.'
+			);
+		}
+	} catch ( error ) {
+		throw error.message;
 	}
 }

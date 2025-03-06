@@ -7,7 +7,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import commitAndTag from '../../lib/tasks/commitandtag.js';
 import { simpleGit } from 'simple-git';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
@@ -22,7 +21,7 @@ describe( 'commitAndTag()', () => {
 				tags: vi.fn(),
 				commit: vi.fn(),
 				reset: vi.fn(),
-				add: vi.fn(),
+				log: vi.fn(),
 				addTag: vi.fn()
 			}
 		};
@@ -128,8 +127,9 @@ describe( 'commitAndTag()', () => {
 		expect( stubs.git.addTag ).toHaveBeenCalledExactlyOnceWith( 'v1.0.0' );
 	} );
 
-	it( 'should run in dry run mode without creating a commit and a tag', async () => {
+	it( 'should create a commit in dry run mode without creating a tag and then reset it', async () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
+		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
 
 		const listrTaskSpy = {};
 
@@ -142,35 +142,61 @@ describe( 'commitAndTag()', () => {
 			listrTask: listrTaskSpy
 		} );
 
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
+		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
-		expect( tools.shExec ).toHaveBeenCalledWith( 'test command', expect.objectContaining( { verbosity: 'silent', async: true } ) );
-		expect( stubs.git.reset ).toHaveBeenCalledWith( [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
-		] );
+		expect( stubs.git.reset ).toHaveBeenCalledExactlyOnceWith( [ 'previousmockhash' ] );
 		expect( listrTaskSpy ).toHaveProperty( 'output' );
 
-		expect( stubs.git.commit ).not.toHaveBeenCalled();
 		expect( stubs.git.addTag ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should run git reset when running pre-commit command throws an error', async () => {
+	it( 'should not run git reset when commit in dry run throws an error', async () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
-		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'Error executing pre-commit command.' ) );
+		vi.mocked( stubs.git.commit ).mockRejectedValue( new Error( 'Error executing git commit in dry run mode.' ) );
+		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
 
 		await expect( commitAndTag( {
 			version: '1.0.0',
 			packagesDirectory: 'packages',
 			files: [ '**/package.json' ],
 			dryRun: true
-		} ) ).rejects.toThrow( 'Error executing pre-commit command.' );
+		} ) ).rejects.toThrow( 'Error executing git commit in dry run mode.' );
 
-		expect( stubs.git.reset ).toHaveBeenCalledWith( [
+		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
+
+		expect( stubs.git.reset ).not.toHaveBeenCalled();
+		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw informative error when running git reset fails during dry run', async () => {
+		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
+		vi.mocked( stubs.git.reset ).mockRejectedValue( new Error( 'Error executing git reset in dry run mode.' ) );
+		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
+
+		await expect( commitAndTag( {
+			version: '1.0.0',
+			packagesDirectory: 'packages',
+			files: [ '**/package.json' ],
+			dryRun: true
+		} ) ).rejects.toThrow(
+			'Running `git reset` failed during `git commit` dry run. The release might be in a broken state. ' +
+			'Either fix it manually or prepare the release again.'
+		);
+
+		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
+
+		expect( stubs.git.reset ).toHaveBeenCalled();
+		expect( stubs.git.addTag ).not.toHaveBeenCalled();
 	} );
 } );
