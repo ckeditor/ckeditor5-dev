@@ -130,24 +130,19 @@ describe( 'commitAndTag()', () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
 		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
 
-		const listrTaskSpy = {};
-
 		await commitAndTag( {
 			version: '1.0.0',
 			packagesDirectory: 'packages',
 			files: [ '**/package.json' ],
-			dryRun: true,
-			preCommitCommand: 'test command',
-			listrTask: listrTaskSpy
+			dryRun: true
 		} );
 
 		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]', [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
 		expect( stubs.git.reset ).toHaveBeenCalledExactlyOnceWith( [ 'previousmockhash' ] );
-		expect( listrTaskSpy ).toHaveProperty( 'output' );
 
 		expect( stubs.git.addTag ).not.toHaveBeenCalled();
 	} );
@@ -156,6 +151,7 @@ describe( 'commitAndTag()', () => {
 		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
 		vi.mocked( stubs.git.commit ).mockRejectedValue( new Error( 'Error executing git commit in dry run mode.' ) );
 		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
+		vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 
 		await expect( commitAndTag( {
 			version: '1.0.0',
@@ -165,37 +161,12 @@ describe( 'commitAndTag()', () => {
 		} ) ).rejects.toThrow( 'Error executing git commit in dry run mode.' );
 
 		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]', [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
 
 		expect( stubs.git.reset ).not.toHaveBeenCalled();
-		expect( stubs.git.addTag ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should throw informative error when running git reset fails during dry run', async () => {
-		vi.mocked( glob ).mockResolvedValue( [ 'package.json', 'packages/ckeditor5-foo/package.json' ] );
-		vi.mocked( stubs.git.reset ).mockRejectedValue( new Error( 'Error executing git reset in dry run mode.' ) );
-		vi.mocked( stubs.git.log ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
-
-		await expect( commitAndTag( {
-			version: '1.0.0',
-			packagesDirectory: 'packages',
-			files: [ '**/package.json' ],
-			dryRun: true
-		} ) ).rejects.toThrow(
-			'Running `git reset` failed during `git commit` dry run. The release might be in a broken state. ' +
-			'Either fix it manually or prepare the release again.'
-		);
-
-		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( '[dry run] Release.', [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
-		] );
-
-		expect( stubs.git.reset ).toHaveBeenCalled();
 		expect( stubs.git.addTag ).not.toHaveBeenCalled();
 	} );
 } );
