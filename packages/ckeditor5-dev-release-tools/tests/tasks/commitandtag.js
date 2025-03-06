@@ -10,7 +10,6 @@ import { simpleGit } from 'simple-git';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
-vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'commitAndTag()', () => {
 	let stubs;
