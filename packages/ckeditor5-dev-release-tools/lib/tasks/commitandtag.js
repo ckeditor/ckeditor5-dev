@@ -46,15 +46,10 @@ export default async function commitAndTag( {
 	};
 
 	if ( dryRun ) {
-		try {
-			const lastCommit = await git.log( [ '-1' ] );
+		const lastCommit = await git.log( [ '-1' ] );
 
-			await makeCommit();
-			await git.reset( [ lastCommit.latest.hash ] );
-		} catch ( error ) {
-			console.log( error );
-			throw error.message;
-		}
+		await makeCommit();
+		await git.reset( [ lastCommit.latest.hash ] );
 	} else if ( !tagForVersion ) {
 		// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
 		await makeCommit();
