@@ -7,6 +7,10 @@ Changelog
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added the options.dryRun parameter to the commitAndTag() function to verify if a release commit passes validation, so releasing a project will not fail due to issues while committing. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0e4779d403fbf22dd6f8a3f2a1de5d1b2183db81))
 
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added annotation to the tag created during a release process to fix the release process on the CI. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecbcfd3a6767b1251400e67659ae326fa44b868a))
+
 ### Released packages
 
 Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
