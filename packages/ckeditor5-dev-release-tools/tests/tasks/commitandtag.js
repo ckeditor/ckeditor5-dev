@@ -21,7 +21,7 @@ describe( 'commitAndTag()', () => {
 				commit: vi.fn(),
 				reset: vi.fn(),
 				log: vi.fn(),
-				addTag: vi.fn()
+				addAnnotatedTag: vi.fn()
 			}
 		};
 
@@ -40,7 +40,7 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { files: [] } );
 
 		expect( stubs.git.commit ).not.toHaveBeenCalled();
-		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should not create a commit and tag if the specified version is already tagged', async () => {
@@ -52,7 +52,7 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { files: [ 'package.json' ], version: '1.0.0' } );
 
 		expect( stubs.git.commit ).not.toHaveBeenCalled();
-		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should allow to specify custom cwd', async () => {
@@ -123,7 +123,15 @@ describe( 'commitAndTag()', () => {
 
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
-		expect( stubs.git.addTag ).toHaveBeenCalledExactlyOnceWith( 'v1.0.0' );
+		expect( stubs.git.addAnnotatedTag ).toHaveBeenCalledExactlyOnceWith( 'v1.0.0', 'Release: v1.0.0.' );
+	} );
+
+	it( 'should add a tag to the created commit with a correct message when skipCi is true', async () => {
+		vi.mocked( glob ).mockResolvedValue( [ 'package.json' ] );
+
+		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', skipCi: true } );
+
+		expect( stubs.git.addAnnotatedTag ).toHaveBeenCalledExactlyOnceWith( 'v1.0.0', 'Release: v1.0.0.' );
 	} );
 
 	it( 'should create a commit in dry run mode without creating a tag and then reset it', async () => {
@@ -144,7 +152,7 @@ describe( 'commitAndTag()', () => {
 		] );
 		expect( stubs.git.reset ).toHaveBeenCalledExactlyOnceWith( [ 'previousmockhash' ] );
 
-		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should not run git reset when commit in dry run throws an error', async () => {
@@ -167,6 +175,6 @@ describe( 'commitAndTag()', () => {
 		] );
 
 		expect( stubs.git.reset ).not.toHaveBeenCalled();
-		expect( stubs.git.addTag ).not.toHaveBeenCalled();
+		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 } );

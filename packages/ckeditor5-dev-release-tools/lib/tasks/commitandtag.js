@@ -54,6 +54,6 @@ export default async function commitAndTag( {
 	} else if ( !tagForVersion ) {
 		// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
 		await makeCommit();
-		await git.addTag( `v${ version }` );
+		await git.addAnnotatedTag( `v${ version }`, `Release: v${ version }.` );
 	}
 }
