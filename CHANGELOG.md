@@ -9,7 +9,7 @@ Changelog
 
 ### Other changes
 
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added annotation to the tag created during a release process to fix the release process on the CI. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecbcfd3a6767b1251400e67659ae326fa44b868a))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` function now uses annotated tags instead of lightweight ones to allow signing commits while preparing a release. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecbcfd3a6767b1251400e67659ae326fa44b868a))
 
 ### Released packages
 
