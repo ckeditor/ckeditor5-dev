@@ -32,6 +32,7 @@ import { translations as translationsPlugin } from './plugins/translations.js';
  */
 import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
+import { prettifyCss } from './plugins/prettifyCss.js';
 
 /**
  * Generates Rollup configurations.
@@ -267,7 +268,9 @@ export async function getRollupConfig( options: BuildOptions ) {
 			getOptionalPlugin(
 				banner,
 				addBanner( { banner } )
-			)
+			),
+
+			prettifyCss( cssFileName )
 		]
 	} as const satisfies RollupOptions;
 }
