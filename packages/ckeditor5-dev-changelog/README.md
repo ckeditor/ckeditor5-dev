@@ -8,15 +8,7 @@ A development tool for handling changelogs in CKEditor 5.
 
 ## API
 
-This package can be used as a CLI tool or via the JavaScript API.
-
-### CLI
-
-The CLI tool can be used as follows:
-
-```bash
-npx @ckeditor/ckeditor5-dev-changelog
-```
+This package can be used via the JavaScript API.
 
 ### JavaScript API
 
