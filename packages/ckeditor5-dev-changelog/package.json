@@ -1,0 +1,49 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-changelog",
+  "version": "0.0.1",
+  "description": "A CKEditor 5 development tool for handling changelogs.",
+  "keywords": [],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-changelog",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-changelog"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=5.7.1"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "bin": {
+    "ckeditor5-dev-changelog": "bin/generate-changelog.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@vitest/coverage-v8": "^2.0.0",
+    "rollup": "^4.9.5",
+    "typescript": "^5.6.0",
+    "upath": "^2.0.1",
+    "vitest": "^2.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch",
+    "test": "vitest run --config vitest.config.ts",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:dev": "vitest dev"
+  },
+  "depcheckIgnore": [
+    "@vitest/coverage-v8",
+    "typescript"
+  ]
+}
