@@ -1,7 +1,7 @@
 CKEditor 5 Changelog
 ====================
 
-[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-build-tools.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-changelog.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)
 [![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
 
 A development tool for handling changelogs in CKEditor 5.
@@ -15,7 +15,7 @@ This package can be used as a CLI tool or via the JavaScript API.
 The CLI tool can be used as follows:
 
 ```bash
-npx @ckeditor/ckeditor5-changelog
+npx @ckeditor/ckeditor5-dev-changelog
 ```
 
 ### JavaScript API
@@ -30,7 +30,7 @@ generateChangelog();
 
 ## Changelog
 
-See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-bump-year/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-changelog/CHANGELOG.md) file.
 
 ## License
 
