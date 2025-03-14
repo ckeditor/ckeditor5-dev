@@ -8,4 +8,4 @@ import { test, expect } from 'vitest';
 
 test( 'returns the expected string', () => {
 	expect( generateChangelog() ).toEqual( 'Hello from ckeditor5-dev-changelog!' );
-});
+} );
