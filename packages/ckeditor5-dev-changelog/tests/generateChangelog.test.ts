@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { generateChangelog } from '../src';
+import { generateChangelog } from '../src/index.js';
 import { test, expect } from 'vitest';
 
 test( 'returns the expected string', () => {
