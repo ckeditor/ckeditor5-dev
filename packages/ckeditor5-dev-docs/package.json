@@ -31,6 +31,7 @@
     "typedoc-plugin-rename-defaults": "0.6.6"
   },
   "devDependencies": {
+    "typescript": "5.0.4",
     "vitest": "^2.0.5"
   },
   "scripts": {
