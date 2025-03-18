@@ -176,6 +176,53 @@ describe( 'getKarmaConfig()', () => {
 		} ) );
 	} );
 
+	it( 'should use `text-summary` reporter for local development', () => {
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: karmaConfigOverrides.noop,
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			},
+			coverage: true
+		} );
+
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			reporters: expect.arrayContaining( [ 'coverage' ] ),
+			coverageReporter: {
+				reporters: expect.arrayContaining( [ { type: 'text-summary' } ] ),
+				watermarks: expect.any( Object )
+			}
+		} ) );
+	} );
+
+	it( 'should use `text` reporter on CI', () => {
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+		vi.stubEnv( 'CI', true );
+
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: karmaConfigOverrides.noop,
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			},
+			coverage: true
+		} );
+
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			reporters: expect.arrayContaining( [ 'coverage' ] ),
+			coverageReporter: {
+				reporters: expect.arrayContaining( [ { type: 'text' } ] ),
+				watermarks: expect.any( Object )
+			}
+		} ) );
+
+		vi.unstubAllEnvs();
+	} );
+
 	it( 'should remove webpack babel-loader if coverage reporter is removed by overrides', () => {
 		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( {
 			module: {
