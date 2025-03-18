@@ -153,9 +153,15 @@ export default function getKarmaConfig( options ) {
 
 		karmaConfig.coverageReporter = {
 			reporters: [
-				// Prints a table after tests result.
+				/**
+				 * Prints a table after tests result.
+				 *
+				 * Since we don't have access to the generated HTML report on CI,
+				 * we want to print all the results to the console so that it's
+				 * easier to find out which files and lines are not covered.
+				 */
 				{
-					type: 'text-summary'
+					type: process.env.CI ? 'text' : 'text-summary'
 				},
 				// Generates HTML tables with the results.
 				{
