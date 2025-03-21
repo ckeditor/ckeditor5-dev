@@ -22,7 +22,11 @@
   "files": [
     "dist"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "@ckeditor/ckeditor5-dev-release-tools": "^47.0.0",
+    "chalk": "^5.0.0",
+    "gray-matter": "^4.0.3"
+  },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",
     "@vitest/coverage-v8": "^2.0.0",
