@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { generatechangelog } from '../src/index.js';
+import { generateChangelog } from '../src/index.js';
 import { test, expect } from 'vitest';
 
 test( 'returns the expected string', () => {
-	expect( generatechangelog() ).toEqual( 'Hello from ckeditor5-dev-changelog!' );
+	expect( generateChangelog() ).toEqual( 'Hello from ckeditor5-dev-changelog!' );
 } );
