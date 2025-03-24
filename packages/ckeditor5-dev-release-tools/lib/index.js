@@ -36,3 +36,4 @@ export { default as isVersionPublishableForTag } from './utils/isversionpublisha
 export { default as provideToken } from './utils/providetoken.js';
 export { default as findPathsToPackages } from './utils/findpathstopackages.js';
 export { default as provideNewVersionForMonoRepository } from './utils/providenewversionformonorepository.js';
+export { default as truncateChangelog } from './utils/truncatechangelog.js';

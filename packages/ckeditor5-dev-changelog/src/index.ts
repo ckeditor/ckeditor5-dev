@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { generateChangelog } from './generatechangelog';
+export { generateChangelog } from './generateChangelog';
