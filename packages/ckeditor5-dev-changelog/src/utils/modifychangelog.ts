@@ -5,9 +5,9 @@
 
 import upath from 'upath';
 import fs from 'fs/promises';
-import { logInfo } from './logInfo.js';
+import { logInfo } from './loginfo.js';
 import chalk from 'chalk';
-import { truncateChangelog } from '@ckeditor/ckeditor5-dev-release-tools';
+import { truncateChangelog } from './truncatechangelog.js';
 
 // todo fix this function and handle it better
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {

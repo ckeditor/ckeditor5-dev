@@ -5,9 +5,8 @@
 
 import fsExtra from 'fs-extra';
 import upath from 'upath';
+import { PackageJson } from '../types';
 
-export async function getOldVersion( cwd: string ): Promise<string> {
-	const rootPackageJson = await fsExtra.readJson( upath.join( cwd, 'package.json' ) );
-
-	return rootPackageJson.version;
+export async function getRootPackageJson(cwd: string ): Promise<PackageJson> {
+	return await fsExtra.readJson( upath.join( cwd, 'package.json' ) );
 }

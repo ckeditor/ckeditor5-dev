@@ -4,10 +4,10 @@
  */
 
 import type { RepositoryConfig } from '../types.js';
-import { logInfo } from './logInfo.js';
+import { logInfo } from './loginfo.js';
 import chalk from 'chalk';
 import fs from 'fs/promises';
-import { removeEmptyDirs } from './removeEmptyDirs.js';
+import { removeEmptyDirs } from './removeemptydirs.js';
 import upath from 'upath';
 
 export async function removeChangesetFiles(
