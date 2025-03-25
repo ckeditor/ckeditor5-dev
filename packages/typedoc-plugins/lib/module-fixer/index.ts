@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { Converter, ReflectionKind, TypeScript, type Application } from 'typedoc';
 
-const { Converter, ReflectionKind, TypeScript } = require( 'typedoc' );
-
-module.exports = {
-	load( app ) {
+export default {
+	load( app: Readonly<Application> ): void {
 		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
 	}
 };
