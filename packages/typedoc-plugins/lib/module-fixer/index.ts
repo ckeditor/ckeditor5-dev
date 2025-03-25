@@ -12,7 +12,7 @@ import {
 	type TypeScript as ts
 } from 'typedoc';
 
-export default function ( app: Readonly<Application> ): void {
+export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
 }
 

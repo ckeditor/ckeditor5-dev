@@ -5,16 +5,10 @@
 
 import {
 	Converter,
-	// ReflectionKind,
 	type Application,
 	type Context,
-	type Reflection,
-	type TypeScript as ts
+	type Reflection
 } from 'typedoc';
-
-export default function ( app: Readonly<Application> ): void {
-	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
-}
 
 /**
  * The `typedoc-plugin-symbol-fixer` plugin renames `Symbol.*` definitions with the JSDoc style.
@@ -22,6 +16,9 @@ export default function ( app: Readonly<Application> ): void {
  *   * Typedoc: `[iterator]() → Iterator`
  *   * JSDoc: `Symbol.iterator() → Iterator`
  */
+export default function ( app: Application ): void {
+	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+}
 
 function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflection ) => void ) {
 	return ( context, reflection ) => {

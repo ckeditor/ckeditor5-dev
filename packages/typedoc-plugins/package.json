@@ -16,17 +16,22 @@
     "node": ">=20.0.0",
     "npm": ">=5.7.1"
   },
-  "main": "lib/index.js",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
   "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-swc": "^0.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/pluginutils": "^5.1.0",
+    "rollup": "^4.9.5",
     "chai": "^4.2.0",
     "glob": "^10.0.0",
-    "jest-extended": "^4.0.2",
-    "nyc": "^17.1.0",
-    "rollup": "^4.9.5",
     "typedoc": "^0.28.1",
     "typescript": "^5.6.0",
     "vitest": "^2.0.5"

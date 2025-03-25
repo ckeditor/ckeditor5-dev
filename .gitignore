@@ -15,9 +15,13 @@ executeinparallel-integration.log
 
 # Compiled TS.
 packages/ckeditor5-dev-build-tools/dist
+packages/typedoc-plugins/dist
 
 packages/ckeditor5-dev-release-tools/tests/test-fixtures/**
 !packages/ckeditor5-dev-release-tools/tests/test-fixtures/.gitkeep
+
+
+
 
 # Generated automatically via CircleCI.
 .circleci/config-tests.yml

@@ -6,6 +6,7 @@
 import { readFileSync } from 'fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 
 // Current working directory
@@ -23,7 +24,7 @@ const externals = [
 ];
 
 export default defineConfig( {
-	input: 'src/index.ts',
+	input: 'lib/index.ts',
 	output: {
 		format: 'esm',
 		file: path.join( cwd, 'dist', 'index.js' ),
@@ -31,8 +32,12 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
+		nodeResolve( {
+			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
+			preferBuiltins: true
+		} ),
 		typescript( {
-			rootDir: './src'
+			rootDir: './lib'
 		} )
 	]
 } );
