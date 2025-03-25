@@ -4,10 +4,10 @@
  */
 
 import { glob } from 'glob';
-import TypeDoc from 'typedoc';
+import { Application, TSConfigReader, TypeDocReader } from 'typedoc';
 import typedocPlugins from '@ckeditor/typedoc-plugins';
 
-import validators from './validators/index.js';
+// import validators from './validators/index.js';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -26,17 +26,14 @@ export default async function build( config ) {
 	const files = await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
 	} );
-	const typeDoc = new TypeDoc.Application();
 
-	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-
-	typeDoc.bootstrap( {
+	const app = await Application.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
-		logLevel: 'Warn',
+		logLevel: 'Error',
 		basePath: config.cwd,
+
 		blockTags: [
 			'@eventName',
 			'@default'
@@ -51,43 +48,52 @@ export default async function build( config ) {
 			'@internal'
 		],
 		plugin: [
-			// Fixes `"name": 'default" in the output project.
+			// // Fixes `"name": 'default" in the output project.
 			'typedoc-plugin-rename-defaults',
-
+			//
 			plugins[ 'typedoc-plugin-module-fixer' ],
 			plugins[ 'typedoc-plugin-symbol-fixer' ],
-			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
-			plugins[ 'typedoc-plugin-tag-error' ],
-			plugins[ 'typedoc-plugin-tag-event' ],
-			plugins[ 'typedoc-plugin-tag-observable' ],
-			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
+			// plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
+			// plugins[ 'typedoc-plugin-tag-error' ],
+			// plugins[ 'typedoc-plugin-tag-event' ],
+			// plugins[ 'typedoc-plugin-tag-observable' ],
+			// plugins[ 'typedoc-plugin-purge-private-api-docs' ],
+			//
+			// // The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
+			// plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
+			//
+			// // The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
+			// plugins[ 'typedoc-plugin-event-param-fixer' ],
 
-			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
-			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
-
-			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
-			plugins[ 'typedoc-plugin-event-param-fixer' ],
-
-			...extraPlugins
-		]
+			// ...extraPlugins
+		],
+		// out: "docs-typedoc", // Output directory
+		// theme: "default"
 	} );
+
+	// app.options.addReader( new TSConfigReader() );
+	// app.options.addReader( new TypeDocReader() );
 
 	console.log( 'Typedoc started...' );
 
-	const conversionResult = typeDoc.convert();
+	const conversionResult = await app.convert();
 
 	if ( !conversionResult ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
+	// const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
+	//
+	// if ( !validationResult && strictMode ) {
+	// 	throw 'Something went wrong with TypeDoc.';
+	// }
 
-	if ( !validationResult && strictMode ) {
-		throw 'Something went wrong with TypeDoc.';
-	}
+	// if ( config.outputPath ) {
+	// 	await typeDoc.generateJson( conversionResult, config.outputPath );
+	// }
 
 	if ( config.outputPath ) {
-		await typeDoc.generateJson( conversionResult, config.outputPath );
+		await app.generateJson( conversionResult, config.outputPath );
 	}
 
 	console.log( `Documented ${ files.length } files!` );

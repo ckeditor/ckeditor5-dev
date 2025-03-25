@@ -9,10 +9,14 @@ const utils = require( './utils' );
 
 module.exports = {
 	plugins: {
+		// Reviewed:
+		'typedoc-plugin-module-fixer': require.resolve( './module-fixer' ),
+
+
+		// To review:
 		'typedoc-plugin-event-inheritance-fixer': require.resolve( './event-inheritance-fixer' ),
 		'typedoc-plugin-event-param-fixer': require.resolve( './event-param-fixer' ),
 		'typedoc-plugin-interface-augmentation-fixer': require.resolve( './interface-augmentation-fixer' ),
-		'typedoc-plugin-module-fixer': require.resolve( './module-fixer' ),
 		'typedoc-plugin-purge-private-api-docs': require.resolve( './purge-private-api-docs' ),
 		'typedoc-plugin-symbol-fixer': require.resolve( './symbol-fixer' ),
 		'typedoc-plugin-tag-error': require.resolve( './tag-error' ),

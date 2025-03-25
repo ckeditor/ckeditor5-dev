@@ -27,8 +27,8 @@
     "glob": "^10.0.0",
     "fs-extra": "^11.0.0",
     "tmp": "^0.2.1",
-    "typedoc": "^0.23.15",
-    "typedoc-plugin-rename-defaults": "0.6.6"
+    "typedoc": "^0.28.1",
+    "typedoc-plugin-rename-defaults": "^0.7.3"
   },
   "devDependencies": {
     "vitest": "^2.0.5"

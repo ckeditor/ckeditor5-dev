@@ -5,12 +5,12 @@
 
 const { expect } = require( 'chai' );
 const { glob } = require( 'glob' );
-const TypeDoc = require( 'typedoc' );
+const { Application } = require( 'typedoc' );
 
 const utils = require( '../utils' );
 const { plugins } = require( '../../lib' );
 
-describe( 'typedoc-plugins/module-fixer', function() {
+describe( 'typedoc-plugins/module-fixer', function () {
 	this.timeout( 10 * 1000 );
 
 	let conversionResult;
@@ -23,14 +23,7 @@ describe( 'typedoc-plugins/module-fixer', function() {
 		];
 
 		const files = await glob( sourceFilePatterns );
-		const typeDoc = new TypeDoc.Application();
-
-		expect( files ).to.not.lengthOf( 0 );
-
-		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-
-		typeDoc.bootstrap( {
+		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
@@ -39,7 +32,9 @@ describe( 'typedoc-plugins/module-fixer', function() {
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
-		conversionResult = typeDoc.convert();
+		expect( files ).to.not.lengthOf( 0 );
+
+		conversionResult = await typeDoc.convert();
 
 		expect( conversionResult ).to.be.an( 'object' );
 	} );

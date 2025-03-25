@@ -7,16 +7,6 @@
 
 const { Converter, ReflectionKind, TypeScript } = require( 'typedoc' );
 
-/**
- * The `typedoc-plugin-module-fixer` reads the module name specified in the `@module` tag name.
- *
- *      @module package/file
- *
- * For the example specified above, a name of the parsed module should be equal to "package/file".
- *
- * It may happen that import statements are specified above the "@module" block code.
- * In such a case, built-in plugin in `typedoc` does not read its value properly.
- */
 module.exports = {
 	load( app ) {
 		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
@@ -29,7 +19,7 @@ function onEventCreateDeclaration() {
 			return;
 		}
 
-		const symbol = context.project.getSymbolFromReflection( reflection );
+		const symbol = context.getSymbolFromReflection( reflection );
 
 		// When processing an empty file.
 		if ( !symbol ) {
