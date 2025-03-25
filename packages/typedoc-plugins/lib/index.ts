@@ -3,6 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
+// import { createRequire } from 'module';
+//
+// const require = createRequire( import.meta.url );
+
+// export const TYPEDOC_PLUGIN_MODULE_FIXER = require.resolve( './module-fixer/index.ts' );
+
+export { default as typeDocModuleFixer } from './module-fixer/index.js';
+export { default as typeDocSymbolFixer } from './symbol-fixer/index.js';
+
 // 'use strict';
 
 // const utils = require( './utils' );

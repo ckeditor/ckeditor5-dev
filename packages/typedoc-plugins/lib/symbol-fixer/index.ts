@@ -3,9 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import {
+	Converter,
+	// ReflectionKind,
+	type Application,
+	type Context,
+	type Reflection,
+	type TypeScript as ts
+} from 'typedoc';
 
-const { Converter } = require( 'typedoc' );
+export default function ( app: Readonly<Application> ): void {
+	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+}
 
 /**
  * The `typedoc-plugin-symbol-fixer` plugin renames `Symbol.*` definitions with the JSDoc style.
@@ -13,13 +22,8 @@ const { Converter } = require( 'typedoc' );
  *   * Typedoc: `[iterator]() → Iterator`
  *   * JSDoc: `Symbol.iterator() → Iterator`
  */
-module.exports = {
-	load( app ) {
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
-	}
-};
 
-function onEventCreateDeclaration() {
+function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflection ) => void ) {
 	return ( context, reflection ) => {
 		if ( !isWrappedInSquareBrackets( reflection.name ) ) {
 			return;
@@ -27,22 +31,18 @@ function onEventCreateDeclaration() {
 
 		const symbolName = reflection.name.slice( 1, -1 );
 
-		if ( Symbol[ symbolName ] ) {
+		if ( symbolName in Symbol ) {
 			reflection.name = `Symbol.${ symbolName }`;
 		} else {
-			const symbol = context.project.getSymbolFromReflection( reflection );
-			const node = symbol.declarations[ 0 ];
+			const symbol = context.getSymbolFromReflection( reflection )!;
+			const node = symbol.declarations!.at( 0 )!;
 
 			context.logger.warn( 'Non-symbol wrapped in square brackets', node );
 		}
 	};
 }
 
-/**
- * @param {string} value
- * @returns {boolean}
- */
-function isWrappedInSquareBrackets( value ) {
+function isWrappedInSquareBrackets( value: string ): boolean {
 	return value.startsWith( '[' ) && value.endsWith( ']' );
 }
 

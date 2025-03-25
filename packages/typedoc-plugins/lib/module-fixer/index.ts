@@ -3,15 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-import { Converter, ReflectionKind, TypeScript, type Application } from 'typedoc';
+import {
+	Converter,
+	ReflectionKind,
+	type Application,
+	type Context,
+	type Reflection,
+	type TypeScript as ts
+} from 'typedoc';
 
-export default {
-	load( app: Readonly<Application> ): void {
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
-	}
-};
+export default function ( app: Readonly<Application> ): void {
+	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+}
 
-function onEventCreateDeclaration() {
+function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflection ) => void ) {
 	return ( context, reflection ) => {
 		if ( reflection.kind !== ReflectionKind.Module ) {
 			return;
@@ -24,37 +29,42 @@ function onEventCreateDeclaration() {
 			return;
 		}
 
-		const node = symbol.declarations[ 0 ];
+		const node = symbol.declarations!.at( 0 )!;
 
 		// Not a module.
-		if ( !node.statements ) {
+		if ( !( 'statements' in node ) ) {
 			return;
 		}
 
+		const { statements } = node as { statements: Array<ts.Statement> };
+
 		// Iterate over statements...
-		for ( const statement of node.statements ) {
-			// TODO: No idea how to cover this line.
-			// CKEditor 5 enters the if. However, the same code created as a fixture doesn't.
+		for ( const statement of statements ) {
+			if ( !( 'jsDoc' in statement ) ) {
+				continue;
+			}
+
 			if ( !Array.isArray( statement.jsDoc ) ) {
 				continue;
 			}
 
 			// ...to find a JSDoc block code...
 			for ( const jsDoc of statement.jsDoc ) {
+				const tags: Array<ts.JSDocTag> = jsDoc.tags || [];
+
 				// ...that represents a module definition.
-				const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
-					return tag.tagName.originalKeywordKind === TypeScript.SyntaxKind.ModuleKeyword;
+				const moduleTag = tags.find( tag => {
+					return tag.tagName.text === 'module';
 				} );
 
 				if ( !moduleTag ) {
 					continue;
 				}
 
-				// When found, use its value as a module name.
-				reflection.originalName = reflection.name;
-				reflection.name = moduleTag.comment;
+				// When found, use its value as a module name...
+				reflection.name = moduleTag.comment as string;
 
-				// Escape from the function. We achieved the goal.
+				// ...and escape from the function. We achieved the goal.
 				return;
 			}
 		}
