@@ -4,45 +4,45 @@
  */
 
 import { format } from 'date-fns';
-import type { RepositoryConfig } from './types.js';
-import { getSectionsWithEntries } from './utils/getSectionsWithEntries.js';
+import { RawDateString, RepositoryConfig, TransformScope } from './types.js';
+import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { NPM_URL, VERSIONING_POLICY_URL } from './constants.js';
-import { logChangelogFiles } from './utils/logChangelogFiles.js';
-import { removeChangesetFiles } from './utils/removeChangesetFiles.js';
-import { modifyChangelog } from './utils/modifyChangelog.js';
-import { getNewVersion } from './utils/getNewVersion.js';
-import { getReleasePackagesPkgJsons } from './utils/getReleasePackagesPkgJsons.js';
-import { getReleasedPackagesInfo } from './utils/getReleasedPackagesInfo.js';
-import { getChangesetFilePaths } from './utils/getChangesetFilePaths.js';
-import { getChangesetsParsed } from './utils/getChangesetsParsed.js';
-import { getGitHubUrl } from './utils/getGitHubUrl.js';
-import { getOldVersion } from './utils/getOldVersion.js';
-import { getSectionsToDisplay } from './utils/getSectionsToDisplay.js';
-import { logInfo } from './utils/logInfo.js';
-import { getDateFormatted } from './utils/getDateFormatted.js';
+import { logChangelogFiles } from './utils/logchangelogfiles.js';
+import { removeChangesetFiles } from './utils/removechangesetfiles';
+import { modifyChangelog } from './utils/modifychangelog.js';
+import { getNewVersion } from './utils/getnewversion.js';
+import { getReleasePackagesPkgJsons } from './utils/getreleasepackagespkgjsons.js';
+import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
+import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
+import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
+import { getGitHubUrl } from './utils/getgithuburl.js';
+import { getRootPackageJson } from './utils/getrootpackagejson';
+import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
+import { logInfo } from './utils/loginfo.js';
+import { getDateFormatted } from './utils/getdateformatted.js';
 import chalk from 'chalk';
 
 export async function generateChangelog( {
 	cwd,
+	packagesDirectory,
 	nextVersion,
-	packagesDirectory = 'packages',
 	externalRepositories = [],
-	date = format( new Date(), 'yyyy-MM-dd' ) as any,
+	transformScope,
+	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	organisationNamespace = '@ckeditor',
-	packagePrefix = 'ckeditor5-',
 	changesetsDirectory = '.changelog'
 }: RepositoryConfig & {
 	nextVersion?: string;
 	externalRepositories?: Array<RepositoryConfig>;
-	date?: `${ number }-${ number }-${ number }`;
+	transformScope: TransformScope;
+	date?: RawDateString;
 	organisationNamespace?: string;
-	packagePrefix?: string;
 	changesetsDirectory?: string;
 } ): Promise<void> {
 	// An array of package.json files of packages to be included in generated changelog.
 	const packages = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
 	const gitHubUrl = await getGitHubUrl( cwd );
-	const oldVersion = await getOldVersion( cwd );
+	const { version: oldVersion, name: rootPackageName } = await getRootPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
@@ -50,15 +50,15 @@ export async function generateChangelog( {
 		entries: parsedChangesetFiles,
 		packages,
 		organisationNamespace,
-		packagePrefix,
-		gitHubUrl
+		gitHubUrl,
+		transformScope
 	} );
 
 	// Logging changes in the console.
 	logChangelogFiles( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
-	const newVersion = nextVersion ?? await getNewVersion( sectionsWithEntries, oldVersion );
+	const newVersion = nextVersion ?? await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName );
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
 		sections: sectionsWithEntries,
@@ -75,7 +75,9 @@ export async function generateChangelog( {
 	}
 
 	const newChangelog = [
-		`## [${ newVersion }](${ gitHubUrl }/releases/tag/v${ newVersion }) (${ dateFormatted })`,
+		oldVersion === '0.0.1' ?
+			`## ${ newVersion } (${ dateFormatted })` :
+			`## [${ newVersion }](${ gitHubUrl }/compare/v${ oldVersion }...v${ newVersion }) (${ dateFormatted })`,
 		'',
 		...sectionsToDisplay.map( ( [ , { title, entries } ] ) => ( [
 			`### ${ title }`,

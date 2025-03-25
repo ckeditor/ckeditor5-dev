@@ -4,7 +4,7 @@
  */
 
 import type { PackageJson, RepositoryConfig } from '../types.js';
-import { findPathsToPackages } from '@ckeditor/ckeditor5-dev-release-tools';
+import { findPathsToPackages } from './findpathstopackages.js';
 import fsExtra from 'fs-extra';
 import upath from 'upath';
 

@@ -5,7 +5,7 @@
 
 import type { SectionsWithEntries } from '../types.js';
 import chalk from 'chalk';
-import { logInfo } from './logInfo.js';
+import { logInfo } from './loginfo.js';
 
 export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	// todo in the followup: Display invalid records differently. Add filepath, and display what is invalid:
