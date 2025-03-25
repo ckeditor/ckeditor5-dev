@@ -85,7 +85,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 	/**
 	 * Valid extensions for JavaScript and TypeScript files.
 	 */
-	const extensions = [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ];
+	const extensions = [ '.mts', '.ts', '.mjs', '.js', '.json', '.node' ];
 
 	return {
 		input,
