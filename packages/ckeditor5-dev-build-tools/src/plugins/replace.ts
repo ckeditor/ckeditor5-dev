@@ -73,7 +73,7 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 			const magic = new MagicString( source );
 			const ast = this.parse( source );
 
-			walk( ast, {
+			walk( ast as Node, {
 				enter( node ) {
 					if ( !isModule( node ) || !node.source ) {
 						return;
