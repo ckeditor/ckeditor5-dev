@@ -4,7 +4,7 @@
  */
 
 import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
-import { ORGANISATION_NAMESPACE } from '../constants';
+import { ORGANISATION_NAMESPACE } from '../constants.js';
 
 export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages }: {
 	sections: SectionsWithEntries;
@@ -15,9 +15,9 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	const versionUpgradeText = `${ oldVersion } => ${ newVersion }`;
 	const packageNames = packages.map( packageName => packageName.name );
 
-	const newVersionReleases = getNewVersionReleases(packages);
+	const newVersionReleases = getNewVersionReleases( packages );
 	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries );
-	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases} )
+	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases } );
 	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, { packagesToRemove: minorReleases } );
 
 	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
@@ -35,18 +35,18 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	].filter( release => release.packages?.length > 0 );
 }
 
-function getNewVersionReleases(packages: Array<PackageJson>) {
+function getNewVersionReleases( packages: Array<PackageJson> ) {
 	return packages
-		.filter(packageJson => packageJson.version === '0.0.1')
-		.map(packageJson => packageJson.name)
+		.filter( packageJson => packageJson.version === '0.0.1' )
+		.map( packageJson => packageJson.name )
 		.sort();
 }
 
-function getPackageNamesByEntriesScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove?: string[] } = {} ) {
+function getPackageNamesByEntriesScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove?: Array<string> } = {} ) {
 	const packageNamesDeduplicated = [ ...new Set( entries.flatMap( entry => entry.data.scope ) ) ];
-	const packagesFullNames = packageNamesDeduplicated.map(scope => `${ ORGANISATION_NAMESPACE }/` + scope );
+	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ ORGANISATION_NAMESPACE }/` + scope );
 	const packagesNamesFiltered = packagesToRemove ?
-		packagesFullNames.filter(packageName => !packagesToRemove.includes( packageName ) ) :
+		packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) ) :
 		packagesFullNames;
 
 	return packagesNamesFiltered.sort();

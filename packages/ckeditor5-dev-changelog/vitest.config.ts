@@ -19,7 +19,7 @@ export default defineConfig( {
 				'src/types.ts',
 				'src/index.ts'
 			],
-			reporter: ['text', 'json', 'html'],
+			reporter: [ 'text', 'json', 'html' ],
 			all: true
 		}
 	}

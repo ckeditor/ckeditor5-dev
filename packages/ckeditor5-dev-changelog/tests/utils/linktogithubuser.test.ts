@@ -1,5 +1,10 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { describe, it, expect } from 'vitest';
-import { linkToGithubUser } from '../../src/utils/linktogithubuser';
+import { linkToGithubUser } from '../../src/utils/linktogithubuser.js';
 
 describe( 'linkToGithubUser()', () => {
 	it( 'makes a link to GitHub profile if a user was mentioned in a comment', () => {

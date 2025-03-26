@@ -1,62 +1,67 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { removeChangesetFiles } from '../../src/utils/removechangesetfiles.js';
-import { logInfo } from '../../src/utils/loginfo';
+import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs/promises';
-import { removeEmptyDirs } from '../../src/utils/removeemptydirs';
+import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
 import upath from 'upath';
 
-vi.mock('fs/promises');
-vi.mock('../../src/utils/loginfo');
-vi.mock('../../src/utils/removeemptydirs');
+vi.mock( 'fs/promises' );
+vi.mock( '../../src/utils/loginfo' );
+vi.mock( '../../src/utils/removeemptydirs' );
 
-describe('removeChangesetFiles', () => {
+describe( 'removeChangesetFiles', () => {
 	const mockCwd = '/repo';
 	const mockChangelogDir = 'changelog';
 	const mockExternalRepositories = [
 		{ cwd: '/external-repo-1', packagesDirectory: 'packages' },
-		{ cwd: '/external-repo-2', packagesDirectory: 'packages' },
+		{ cwd: '/external-repo-2', packagesDirectory: 'packages' }
 	];
 	const mockChangesetFiles = [
 		'/repo/changelog/changeset-1.md',
-		'/repo/changelog/changeset-2.md',
+		'/repo/changelog/changeset-2.md'
 	];
 
-	beforeEach(() => {
+	beforeEach( () => {
 		vi.clearAllMocks();
-	});
+	} );
 
-	it('logs the start of the process', async () => {
-		await removeChangesetFiles(mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories);
+	it( 'logs the start of the process', async () => {
+		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		expect(logInfo).toHaveBeenCalledWith(expect.stringMatching(/Removing the changeset files/i));
-	});
+		expect( logInfo ).toHaveBeenCalledWith( expect.stringMatching( /Removing the changeset files/i ) );
+	} );
 
-	it('removes each changeset file', async () => {
-		await removeChangesetFiles(mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories);
+	it( 'removes each changeset file', async () => {
+		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		for (const file of mockChangesetFiles) {
-			expect(fs.unlink).toHaveBeenCalledWith(file);
+		for ( const file of mockChangesetFiles ) {
+			expect( fs.unlink ).toHaveBeenCalledWith( file );
 		}
-	});
+	} );
 
-	it('removes empty directories for the main repository', async () => {
-		await removeChangesetFiles(mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories);
+	it( 'removes empty directories for the main repository', async () => {
+		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		expect(removeEmptyDirs).toHaveBeenCalledWith(upath.join(mockCwd, mockChangelogDir));
-	});
+		expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( mockCwd, mockChangelogDir ) );
+	} );
 
-	it('removes empty directories for external repositories', async () => {
-		await removeChangesetFiles(mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories);
+	it( 'removes empty directories for external repositories', async () => {
+		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		for (const externalRepo of mockExternalRepositories) {
-			expect(removeEmptyDirs).toHaveBeenCalledWith(upath.join(externalRepo.cwd, mockChangelogDir));
+		for ( const externalRepo of mockExternalRepositories ) {
+			expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( externalRepo.cwd, mockChangelogDir ) );
 		}
-	});
+	} );
 
-	it('throws error when invalid file path passed to unlink', async () => {
-		vi.mocked(fs.unlink).mockRejectedValueOnce(new Error('ENOENT: no such file or directory'));
+	it( 'throws error when invalid file path passed to unlink', async () => {
+		vi.mocked( fs.unlink ).mockRejectedValueOnce( new Error( 'ENOENT: no such file or directory' ) );
 
-		await expect(removeChangesetFiles(mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories))
+		await expect( removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories ) )
 			.rejects.toThrow();
-	});
-});
+	} );
+} );

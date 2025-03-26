@@ -15,7 +15,7 @@ export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, tran
 } ): SectionsWithEntries {
 	const packagesNames = packages.map( packageJson => packageJson.name );
 
-	return parsedFiles.reduce<SectionsWithEntries>( (sections, entry ) => {
+	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
 		const breakingChange = entry.data[ 'breaking-change' ];
 		const type = entry.data.type;
 		const section = !isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE ) ? 'invalid' : breakingChange ?? type;
@@ -47,7 +47,7 @@ function getScopesLinks( scope: Array<string>, transformScope: TransformScope ):
 	}
 
 	return scope
-		.map( (scope) => transformScope(scope) )
+		.map( scope => transformScope( scope ) )
 		.map( ( { displayName, npmUrl } ) => `[${ displayName }](${ npmUrl })` )
 		.join( ', ' );
 }

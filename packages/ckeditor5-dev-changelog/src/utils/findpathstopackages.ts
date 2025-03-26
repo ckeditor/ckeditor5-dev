@@ -1,5 +1,10 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import upath from 'upath';
-import { glob, GlobOptionsWithFileTypesFalse } from 'glob';
+import { glob, type GlobOptionsWithFileTypesFalse } from 'glob';
 
 type Options = {
 	includePackageJson?: boolean;
@@ -7,7 +12,7 @@ type Options = {
 	packagesDirectoryFilter?: ( ( packageJsonPath: string ) => boolean ) | null;
 };
 
-export async function findPathsToPackages( cwd: string, packagesDirectory: string | null, options: Options = {} ) {
+export async function findPathsToPackages( cwd: string, packagesDirectory: string | null, options: Options = {} ): Promise<Array<string>> {
 	const {
 		includePackageJson = false,
 		includeCwd = false,
@@ -33,7 +38,7 @@ export async function findPathsToPackages( cwd: string, packagesDirectory: strin
 	return normalizedPaths;
 }
 
-async function getPackages( cwd: string, packagesDirectory: string | null, includePackageJson: boolean ): Promise<string[]> {
+async function getPackages( cwd: string, packagesDirectory: string | null, includePackageJson: boolean ): Promise<Array<string>> {
 	if ( !packagesDirectory ) {
 		return Promise.resolve( [] );
 	}

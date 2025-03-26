@@ -1,17 +1,22 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
-import { logChangelogFiles } from '../../src/utils/logchangelogfiles';
-import { logInfo } from '../../src/utils/loginfo';
-import type { SectionsWithEntries } from '../../src/types';
+import { logChangelogFiles } from '../../src/utils/logchangelogfiles.js';
+import { logInfo } from '../../src/utils/loginfo.js';
+import type { SectionsWithEntries } from '../../src/types.js';
 
-vi.mock('../../src/utils/loginfo');
+vi.mock( '../../src/utils/loginfo' );
 
-describe('logChangelogFiles', () => {
-	beforeEach(() => {
+describe( 'logChangelogFiles', () => {
+	beforeEach( () => {
 		vi.clearAllMocks();
-	});
+	} );
 
-	it('logs changes correctly for valid sections', () => {
+	it( 'logs changes correctly for valid sections', () => {
 		const sections: SectionsWithEntries = {
 			Feature: {
 				title: 'Features',
@@ -22,16 +27,16 @@ describe('logChangelogFiles', () => {
 					}
 				]
 			}
-		} as SectionsWithEntries;
+		} as any;
 
-		logChangelogFiles(sections);
+		logChangelogFiles( sections );
 
-		expect(logInfo).toHaveBeenCalledWith(`📍 ${chalk.cyan('Listing the changes...')}\n`);
-		expect(logInfo).toHaveBeenCalledWith(chalk.blue('🔸 Found Features:'), { indent: 2 });
-		expect(logInfo).toHaveBeenCalledWith('* "Added new feature"', { indent: 4 });
-	});
+		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
+		expect( logInfo ).toHaveBeenCalledWith( chalk.blue( '🔸 Found Features:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenCalledWith( '* "Added new feature"', { indent: 4 } );
+	} );
 
-	it('logs invalid section in red', () => {
+	it( 'logs invalid section in red', () => {
 		const sections: SectionsWithEntries = {
 			invalid: {
 				title: 'Invalid changes',
@@ -42,41 +47,41 @@ describe('logChangelogFiles', () => {
 					}
 				]
 			}
-		} as SectionsWithEntries;
+		} as any;
 
-		logChangelogFiles(sections);
+		logChangelogFiles( sections );
 
-		expect(logInfo).toHaveBeenCalledWith(chalk.red('🔸 Found Invalid changes:'), { indent: 2 });
-		expect(logInfo).toHaveBeenCalledWith('* "Invalid entry"', { indent: 4 });
-	});
+		expect( logInfo ).toHaveBeenCalledWith( chalk.red( '🔸 Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenCalledWith( '* "Invalid entry"', { indent: 4 } );
+	} );
 
-	it('logs rest content with italics', () => {
+	it( 'logs rest content with italics', () => {
 		const sections: SectionsWithEntries = {
 			Fix: {
 				title: 'Bug fixes',
 				entries: [
 					{
 						message: 'Fixed issue',
-						data: { mainContent: 'Fixed issue', restContent: ['Additional details'] }
+						data: { mainContent: 'Fixed issue', restContent: [ 'Additional details' ] }
 					}
 				]
 			}
-		} as SectionsWithEntries;
+		} as any;
 
-		logChangelogFiles(sections);
+		logChangelogFiles( sections );
 
-		expect(logInfo).toHaveBeenCalledWith('* "Fixed issue"', { indent: 4 });
-		expect(logInfo).toHaveBeenCalledWith(chalk.italic('"Additional details"'), { indent: 6 });
-	});
+		expect( logInfo ).toHaveBeenCalledWith( '* "Fixed issue"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenCalledWith( chalk.italic( '"Additional details"' ), { indent: 6 } );
+	} );
 
-	it('handles empty sections gracefully', () => {
+	it( 'handles empty sections gracefully', () => {
 		const sections: SectionsWithEntries = {
 			Feature: { title: 'Features', entries: [] } as any
-		} as SectionsWithEntries;
+		} as any;
 
-		logChangelogFiles(sections);
+		logChangelogFiles( sections );
 
-		expect(logInfo).toHaveBeenCalledTimes(1);
-		expect(logInfo).toHaveBeenCalledWith(`📍 ${chalk.cyan('Listing the changes...')}\n`);
-	});
-});
+		expect( logInfo ).toHaveBeenCalledTimes( 1 );
+		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
+	} );
+} );

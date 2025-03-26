@@ -5,7 +5,7 @@
 
 import type { Section, SectionsWithEntries } from '../types.js';
 
-export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Section[] {
+export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
 	return Object.entries( sectionsWithEntries )
 		.filter( ( [ sectionName, { entries } ] ) => entries?.length && sectionName !== 'invalid' )
 		.map( ( [ , section ] ) => section );
