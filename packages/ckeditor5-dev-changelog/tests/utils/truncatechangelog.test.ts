@@ -142,4 +142,10 @@ describe( 'truncateChangelog()', () => {
 			'utf-8'
 		);
 	} );
+
+	it( 'handles empty entries array', async () => {
+		vi.mocked(fs.readFileSync).mockReturnValue(CHANGELOG_HEADER);
+		await truncateChangelog(5, '/home/ckeditor');
+		expect(fs.writeFileSync).not.toHaveBeenCalled();
+	});
 } );
