@@ -10,32 +10,46 @@ import chalk from 'chalk';
 import { truncateChangelog } from './truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants';
 
-// todo fix this function and handle it better
-export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {
-	const changelogPath = upath.join( cwd, CHANGELOG_FILE );
-	let existingChangelog = '';
+/**
+ * Modifies the changelog file by inserting new content while preserving the existing structure.
+ * If the file doesn't exist, it creates a new one with the proper header.
+ * After modification, it truncates the changelog to keep only the most recent entries.
+ */
+export async function modifyChangelog(newChangelog: string, cwd: string): Promise<void> {
+	const changelogPath = upath.join(cwd, CHANGELOG_FILE);
+	const existingChangelog = await readExistingChangelog(changelogPath);
 
+	const updatedChangelog = prepareChangelogContent(existingChangelog, newChangelog);
+
+	logInfo(`📍 ${chalk.cyan('Appending changes to the existing changelog...\n')}`);
+
+	await fs.writeFile(changelogPath, updatedChangelog, 'utf-8');
+	await truncateChangelog(5, cwd);
+}
+
+/**
+ * Reads the existing changelog file or returns an empty string if the file doesn't exist.
+ */
+async function readExistingChangelog(changelogPath: string): Promise<string> {
 	try {
-		existingChangelog = await fs.readFile( changelogPath, 'utf-8' );
+		return await fs.readFile(changelogPath, 'utf-8');
 	} catch {
-		console.warn( 'CHANGELOG.md not found. Creating a new one.' );
+		logInfo(`📍 ${chalk.yellow('CHANGELOG.md not found. Creating a new one.')}\n`);
+		
+		return '';
+	}
+}
+
+/**
+ * Prepares the new changelog content by inserting it after the header or at the beginning if header is missing.
+ */
+function prepareChangelogContent(existingChangelog: string, newChangelog: string): string {
+	const headerIndex = existingChangelog.indexOf(CHANGELOG_HEADER);
+
+	if (headerIndex === -1) {
+		return `${CHANGELOG_HEADER}\n\n${newChangelog}${existingChangelog}`;
 	}
 
-	const insertIndex = existingChangelog.indexOf( CHANGELOG_HEADER );
-	let changelog = '';
-
-	if ( insertIndex !== -1 ) {
-		// Find where to insert: after the header line
-		const insertPosition = insertIndex + CHANGELOG_HEADER.length; // +2 for newline characters
-		changelog = existingChangelog.slice( 0, insertPosition ) + '\n\n' + newChangelog + existingChangelog.slice( insertPosition );
-	} else {
-		// If the header is missing, prepend everything
-		changelog = `${ CHANGELOG_HEADER }\n\n${ newChangelog }${ existingChangelog }`;
-	}
-
-	logInfo( `📍 ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }\n` );
-
-	await fs.writeFile( changelogPath, changelog, 'utf-8' );
-
-	await truncateChangelog( 5, cwd );
+	const insertPosition = headerIndex + CHANGELOG_HEADER.length;
+	return existingChangelog.slice(0, insertPosition) + '\n\n' + newChangelog + existingChangelog.slice(insertPosition);
 }
