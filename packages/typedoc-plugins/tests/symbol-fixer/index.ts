@@ -3,46 +3,19 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, beforeAll, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
-import { Application, Converter, ReflectionKind, type ProjectReflection, type Context, FancyConsoleLogger } from 'typedoc';
+import { Application, type ProjectReflection, ReflectionKind } from 'typedoc';
 
 import { normalizePath, ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocSymbolFixer } from '../../lib/index.js';
 
-
-class CustomLogger extends FancyConsoleLogger {
-	// logLevel: LogLevel = LogLevel.Info;
-	public seenWarnings = new Set<string>();
-
-	public error(message: string): void {
-		console.error(message);
-	}
-
-	public warn(message: string): void {
-		this.seenWarnings.add(message);
-		console.warn(message);
-	}
-
-	public info(message: string): void {
-		console.info(message);
-	}
-
-	public verbose(message: string): void {
-		console.debug(message);
-	}
-
-	public success(message: string): void {
-		console.log(message);
-	}
-}
-
-describe.only( 'typedoc-plugins/symbol-fixer', function () {
+describe( 'typedoc-plugins/symbol-fixer', () => {
 	let typeDoc: Application,
 		conversionResult: ProjectReflection,
 		warnSpy: any;
 
-	beforeAll( async () => {
+	beforeEach( async () => {
 		const FIXTURES_PATH = normalizePath( ROOT_TEST_DIRECTORY, 'symbol-fixer', 'fixtures' );
 
 		const sourceFilePatterns = [
@@ -57,10 +30,7 @@ describe.only( 'typedoc-plugins/symbol-fixer', function () {
 			tsconfig: normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
-		typeDoc.logger = new CustomLogger();
-
-		// Set up the spy to capture warnings
-		// warnSpy = vi.spyOn( typeDoc.logger, 'warn' );
+		warnSpy = vi.spyOn( typeDoc.logger, 'warn' );
 
 		typeDocSymbolFixer( typeDoc );
 
@@ -84,21 +54,8 @@ describe.only( 'typedoc-plugins/symbol-fixer', function () {
 
 		expect( iteratorReflection ).toBeTruthy();
 
-		expect( typeDoc.logger.warningCount ).to.equal( 1 );
-
-		console.log( warnSpy.mock.calls );
-		// console.log( typeDoc.logger.getWarnings() );
-
-		// `typeDoc.logger.seenWarnings` is an instance of Set.
-		const [ warning ] = [ ...typeDoc.logger.seenWarnings ];
-		//
-		// expect( warning ).to.be.a( 'string' );
-		//
-		// // Verify a message reported once find an invalid symbol.
-		// expect( warning ).to.contain( 'Non-symbol wrapped in square brackets' );
-		//
-		// // Verify whether logger shows an invalid piece of the code.
-		// expect( warning ).to.contain( 'public [ Symbol.fake ](): Iterable<any> {' );
+		expect( warnSpy ).toHaveBeenCalledOnce();
+		expect( warnSpy ).toHaveBeenCalledWith( 'Non-symbol wrapped in square brackets', expect.any( Object ) );
 	} );
 } );
 

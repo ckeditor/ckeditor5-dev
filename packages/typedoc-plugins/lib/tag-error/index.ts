@@ -3,9 +3,27 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import {
+	Comment,
+	Converter,
+	ReflectionKind,
+	TypeScript as ts,
+	type Reflection,
+	ReflectionFlag,
+	type Application,
+	type Context,
+	type CommentDisplayPart
+} from 'typedoc';
 
-const { Converter, ReflectionKind, Comment, TypeParameterReflection, TypeScript } = require( 'typedoc' );
+declare module 'typedoc' {
+	export enum ReflectionFlag {
+
+		/**
+		 * The reflection is an error.
+		 */
+		isError = 2048
+	}
+}
 
 const ERROR_TAG_NAME = 'error';
 
@@ -14,31 +32,31 @@ const ERROR_TAG_NAME = 'error';
  *
  * So far, we do not support collecting types of `@param`.
  */
-module.exports = {
-	load( app ) {
-		app.converter.on( Converter.EVENT_END, onEventEnd );
-	}
-};
+export default function ( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd );
 
-function onEventEnd( context ) {
+	app.serializer.addSerializer( new CustomFlagSerializer() as any );
+}
+
+function onEventEnd( context: Context ) {
 	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module );
 
 	// Errors are children of a module.
 	for ( const reflection of moduleReflections ) {
-		const symbol = context.project.getSymbolFromReflection( reflection );
+		const symbol = context.getSymbolFromReflection( reflection );
 
 		// Not ES6 module.
 		if ( !symbol ) {
 			continue;
 		}
 
-		const node = symbol.declarations[ 0 ];
+		const node = symbol.declarations!.at( 0 )!;
 		const sourceFile = node.getSourceFile();
 
 		// Find all `@error` occurrences.
 		const nodes = findDescendant( sourceFile, node => {
 			// Remove non-block comment codes.
-			if ( node.kind !== TypeScript.SyntaxKind.Identifier ) {
+			if ( node.kind !== ts.SyntaxKind.Identifier ) {
 				return false;
 			}
 
@@ -68,45 +86,41 @@ function onEventEnd( context ) {
 			const errorDeclaration = context
 				.withScope( reflection )
 				.createDeclarationReflection(
-					ReflectionKind.ObjectLiteral,
+					ReflectionKind.Document,
 					undefined,
 					undefined,
 					errorName
 				);
+			errorDeclaration.setFlag( ReflectionFlag.isError, true );
 
 			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
-			errorDeclaration.kindString = 'Error';
-			errorDeclaration.typeParameters = parentNode.parent.getChildren()
-				.filter( childTag => {
-					if ( !childTag.comment || !parentNode.parent.comment ) {
-						return false;
-					}
-
-					// Do not process the `@error` tag again.
-					if ( childTag === parentNode ) {
-						return false;
-					}
-
-					return true;
-				} )
-				.map( childTag => {
-					const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
-
-					typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
-					typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );
-
-					return typeParameter;
-				} );
+			// errorDeclaration.kindString = 'Error';
+			// errorDeclaration.typeParameters = parentNode.parent.getChildren()
+			// 	.filter( childTag => {
+			// 		if ( !childTag.comment || !parentNode.parent.comment ) {
+			// 			return false;
+			// 		}
+			//
+			// 		// Do not process the `@error` tag again.
+			// 		if ( childTag === parentNode ) {
+			// 			return false;
+			// 		}
+			//
+			// 		return true;
+			// 	} )
+			// 	.map( childTag => {
+			// 		const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
+			//
+			// 		typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
+			// 		typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );
+			//
+			// 		return typeParameter;
+			// 	} );
 		}
 	}
 }
 
-/**
- * @param {TypeScript.Node} sourceFileOrNode
- * @param { ( node: TypeScript.Node ) : boolean} callback
- * @returns {Array.<TypeScript.Node>}
- */
-function findDescendant( sourceFileOrNode, callback ) {
+function findDescendant( sourceFileOrNode: ts.Node, callback: ( node: ts.Node ) => boolean ): Array<ts.Node> {
 	const output = [];
 
 	for ( const node of sourceFileOrNode.getChildren() ) {
@@ -124,10 +138,8 @@ function findDescendant( sourceFileOrNode, callback ) {
 
 /**
  * Transforms a node or array of node to an array of objects that follow
- * @param {string|Object|null} commentChildrenOrValue
- * @returns {Array.<require('typedoc').CommentDisplayPart> }
  */
-function getCommentDisplayPart( commentChildrenOrValue ) {
+function getCommentDisplayPart( commentChildrenOrValue: string | Array<CommentDisplayPart> | null ): Array<CommentDisplayPart> {
 	if ( !commentChildrenOrValue ) {
 		return [];
 	}
@@ -146,7 +158,7 @@ function getCommentDisplayPart( commentChildrenOrValue ) {
 			let { text } = item;
 
 			// An inline tag inside a description.
-			if ( item.kind === TypeScript.SyntaxKind.JSDocLink ) {
+			if ( item.kind === ts.SyntaxKind.JSDocLink ) {
 				// A reference, e.g. "module:".
 				if ( item.name ) {
 					text = item.name.escapedText + text;
@@ -165,4 +177,35 @@ function getCommentDisplayPart( commentChildrenOrValue ) {
 			};
 		} )
 		.filter( ( { text } ) => text.length );
+}
+
+type PartialObject = {
+	[ key: string ]: unknown;
+	flags: {
+		[ key: string ]: boolean;
+	};
+};
+
+class CustomFlagSerializer {
+	public get priority() {
+		return 0;
+	}
+
+	public supports() {
+		return true;
+	}
+
+	public toObject( item: Reflection, obj: PartialObject ): object {
+		if ( !( 'flags' in item ) ) {
+			return obj;
+		}
+
+		const { flags } = item;
+
+		if ( flags.hasFlag( 20248 as ReflectionFlag ) ) {
+			obj.flags.isError = true;
+		}
+
+		return obj;
+	}
 }

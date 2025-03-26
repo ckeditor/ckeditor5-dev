@@ -9,3 +9,4 @@
 
 export { default as typeDocModuleFixer } from './module-fixer/index.js';
 export { default as typeDocSymbolFixer } from './symbol-fixer/index.js';
+export { default as typeDocTagError } from './tag-error/index.js';

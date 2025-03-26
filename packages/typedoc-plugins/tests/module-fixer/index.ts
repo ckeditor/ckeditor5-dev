@@ -10,7 +10,7 @@ import { Application, type ProjectReflection } from 'typedoc';
 import { normalizePath, ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocModuleFixer } from '../../lib/index.js';
 
-describe( 'typedoc-plugins/module-fixer', function () {
+describe( 'typedoc-plugins/module-fixer', () => {
 	let conversionResult: ProjectReflection;
 
 	beforeAll( async () => {
