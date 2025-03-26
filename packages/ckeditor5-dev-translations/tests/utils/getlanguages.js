@@ -33,6 +33,17 @@ describe( 'getLanguages()', () => {
 		} );
 	} );
 
+	it( 'should return Belarusian language', () => {
+		const languages = getLanguages();
+		const languagePolish = languages.find( item => item.localeCode === 'be' );
+
+		expect( languagePolish ).toEqual( {
+			localeCode: 'be',
+			languageCode: 'be',
+			languageFileName: 'be'
+		} );
+	} );
+
 	it( 'should normalize language if it contains special characters', () => {
 		const languages = getLanguages();
 		const languageSerbianLatin = languages.find( l => l.localeCode === 'sr@latin' );
