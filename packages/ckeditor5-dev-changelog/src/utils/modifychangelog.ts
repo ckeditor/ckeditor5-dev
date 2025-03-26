@@ -8,10 +8,11 @@ import fs from 'fs/promises';
 import { logInfo } from './loginfo.js';
 import chalk from 'chalk';
 import { truncateChangelog } from './truncatechangelog.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants';
 
 // todo fix this function and handle it better
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {
-	const changelogPath = upath.join( cwd, 'CHANGELOG.md' );
+	const changelogPath = upath.join( cwd, CHANGELOG_FILE );
 	let existingChangelog = '';
 
 	try {
@@ -20,22 +21,21 @@ export async function modifyChangelog( newChangelog: string, cwd: string ): Prom
 		console.warn( 'CHANGELOG.md not found. Creating a new one.' );
 	}
 
-	const header = 'Changelog\n=========';
-	const insertIndex = existingChangelog.indexOf( header );
+	const insertIndex = existingChangelog.indexOf( CHANGELOG_HEADER );
 	let changelog = '';
 
 	if ( insertIndex !== -1 ) {
 		// Find where to insert: after the header line
-		const insertPosition = insertIndex + header.length; // +2 for newline characters
+		const insertPosition = insertIndex + CHANGELOG_HEADER.length; // +2 for newline characters
 		changelog = existingChangelog.slice( 0, insertPosition ) + '\n\n' + newChangelog + existingChangelog.slice( insertPosition );
 	} else {
 		// If the header is missing, prepend everything
-		changelog = `${ header }\n\n${ newChangelog }${ existingChangelog }`;
+		changelog = `${ CHANGELOG_HEADER }\n\n${ newChangelog }${ existingChangelog }`;
 	}
 
 	logInfo( `📍 ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }\n` );
 
 	await fs.writeFile( changelogPath, changelog, 'utf-8' );
 
-	truncateChangelog( 5, cwd );
+	await truncateChangelog( 5, cwd );
 }

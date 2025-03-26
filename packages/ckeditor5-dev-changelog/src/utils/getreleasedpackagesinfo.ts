@@ -4,32 +4,26 @@
  */
 
 import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
+import { ORGANISATION_NAMESPACE } from '../constants';
 
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages, organisationNamespace }: {
+export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages }: {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
 	packages: Array<PackageJson>;
-	organisationNamespace: string;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `${ oldVersion } => ${ newVersion }`;
 	const packageNames = packages.map( packageName => packageName.name );
 
-	const newVersionReleases = packages
-		.filter( packageJson => packageJson.version === '0.0.1' )
-		.map( packageJson => packageJson.name )
-		.sort();
+	const newVersionReleases = getNewVersionReleases(packages);
+	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries );
+	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases} )
+	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, { packagesToRemove: minorReleases } );
 
-	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries, organisationNamespace );
-
-	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, organisationNamespace )
-		.filter( packageName => !majorReleases.includes( packageName ) );
-
-	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, organisationNamespace )
-		.filter( packageName => !minorReleases.includes( packageName ) );
+	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
 
 	const otherReleases = packageNames
-		.filter( packageName => ![ ...majorReleases, ...minorReleases, ...newFeaturesReleases ].includes( packageName ) )
+		.filter( packageName => !packagesToRemoveFromOtherReleases.includes( packageName ) )
 		.sort();
 
 	return [
@@ -41,10 +35,19 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	].filter( release => release.packages?.length > 0 );
 }
 
-function getPackageNamesByEntriesScope( entries: Array<Entry> = [], organisationNamespace: string ): Array<string> {
-	const packageNamesDeduplicated = [ ...new Set( entries.flatMap( entry => entry.data.scope ) ) ];
-
-	return packageNamesDeduplicated
-		.map( scope => `${ organisationNamespace }/` + scope )
+function getNewVersionReleases(packages: Array<PackageJson>) {
+	return packages
+		.filter(packageJson => packageJson.version === '0.0.1')
+		.map(packageJson => packageJson.name)
 		.sort();
+}
+
+function getPackageNamesByEntriesScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove?: string[] } = {} ) {
+	const packageNamesDeduplicated = [ ...new Set( entries.flatMap( entry => entry.data.scope ) ) ];
+	const packagesFullNames = packageNamesDeduplicated.map(scope => `${ ORGANISATION_NAMESPACE }/` + scope );
+	const packagesNamesFiltered = packagesToRemove ?
+		packagesFullNames.filter(packageName => !packagesToRemove.includes( packageName ) ) :
+		packagesFullNames;
+
+	return packagesNamesFiltered.sort();
 }

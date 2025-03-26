@@ -14,11 +14,11 @@ export async function getNewVersion( sectionsWithEntries: SectionsWithEntries, o
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( sectionsWithEntries.minor.entries || sectionsWithEntries.Feature.entries ) {
+	if ( sectionsWithEntries.minor.entries.length || sectionsWithEntries.Feature.entries.length ) {
 		bumpType = 'minor';
 	}
 
-	if ( sectionsWithEntries.major.entries ) {
+	if ( sectionsWithEntries.major.entries.length ) {
 		bumpType = 'major';
 	}
 

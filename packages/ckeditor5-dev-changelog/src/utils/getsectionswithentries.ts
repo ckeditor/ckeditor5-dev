@@ -4,22 +4,21 @@
  */
 
 import type { Entry, PackageJson, ParsedFile, SectionsWithEntries, TransformScope } from '../types.js';
-import { SECTIONS } from '../constants.js';
+import { ORGANISATION_NAMESPACE, SECTIONS } from '../constants.js';
 import { linkToGithubUser } from './linktogithubuser.js';
 
-export function getSectionsWithEntries( { entries, packages, organisationNamespace, gitHubUrl, transformScope }: {
-	entries: Array<ParsedFile>;
+export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, transformScope }: {
+	parsedFiles: Array<ParsedFile>;
 	packages: Array<PackageJson>;
-	organisationNamespace: string;
 	gitHubUrl: string;
 	transformScope: TransformScope;
 } ): SectionsWithEntries {
 	const packagesNames = packages.map( packageJson => packageJson.name );
 
-	return entries.reduce<SectionsWithEntries>( ( sections, entry ) => {
+	return parsedFiles.reduce<SectionsWithEntries>( (sections, entry ) => {
 		const breakingChange = entry.data[ 'breaking-change' ];
-		const type = entry.data.type ?? 'Other';
-		const section = !isEntryValid( entry, packagesNames, organisationNamespace ) ? 'invalid' : breakingChange ?? type;
+		const type = entry.data.type;
+		const section = !isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE ) ? 'invalid' : breakingChange ?? type;
 		const scope = getScopesLinks( entry.data.scope, transformScope );
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', gitHubUrl );
@@ -42,16 +41,24 @@ export function getSectionsWithEntries( { entries, packages, organisationNamespa
 	}, structuredClone( SECTIONS ) as SectionsWithEntries );
 }
 
-function getScopesLinks( scope: Array<string>, transformScope: TransformScope ): string {
+function getScopesLinks( scope: Array<string>, transformScope: TransformScope ): string | null {
+	if ( !scope ) {
+		return null;
+	}
+
 	return scope
-		?.map( transformScope )
+		.map( (scope) => transformScope(scope) )
 		.map( ( { displayName, npmUrl } ) => `[${ displayName }](${ npmUrl })` )
 		.join( ', ' );
 }
 
-function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string {
+function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string | null {
+	if ( !issues ) {
+		return null;
+	}
+
 	return prefix + ' ' + issues
-		?.map( id => `[#${ id }](${ gitHubUrl }/issues/${ id })` )
+		.map( id => `[#${ id }](${ gitHubUrl }/issues/${ id })` )
 		.join( ', ' ) + '.';
 }
 
@@ -63,7 +70,7 @@ function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisa
 		return false;
 	}
 
-	if ( !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
+	if ( !entry.data.scope?.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
 		return false;
 	}
 

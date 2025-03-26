@@ -16,7 +16,7 @@ import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
 import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
 import { getGitHubUrl } from './utils/getgithuburl.js';
-import { getRootPackageJson } from './utils/getrootpackagejson';
+import { getPackageJson } from './utils/getpackagejson';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
@@ -24,32 +24,29 @@ import chalk from 'chalk';
 
 export async function generateChangelog( {
 	cwd,
-	packagesDirectory,
+	packagesDirectory = 'packages',
 	nextVersion,
 	externalRepositories = [],
 	transformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
-	organisationNamespace = '@ckeditor',
 	changesetsDirectory = '.changelog'
 }: RepositoryConfig & {
 	nextVersion?: string;
 	externalRepositories?: Array<RepositoryConfig>;
 	transformScope: TransformScope;
 	date?: RawDateString;
-	organisationNamespace?: string;
 	changesetsDirectory?: string;
 } ): Promise<void> {
 	// An array of package.json files of packages to be included in generated changelog.
 	const packages = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
 	const gitHubUrl = await getGitHubUrl( cwd );
-	const { version: oldVersion, name: rootPackageName } = await getRootPackageJson( cwd );
+	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 	const sectionsWithEntries = getSectionsWithEntries( {
-		entries: parsedChangesetFiles,
+		parsedFiles: parsedChangesetFiles,
 		packages,
-		organisationNamespace,
 		gitHubUrl,
 		transformScope
 	} );
@@ -65,7 +62,6 @@ export async function generateChangelog( {
 		oldVersion,
 		newVersion,
 		packages,
-		organisationNamespace
 	} );
 
 	if ( !sectionsToDisplay.length ) {
@@ -79,7 +75,7 @@ export async function generateChangelog( {
 			`## ${ newVersion } (${ dateFormatted })` :
 			`## [${ newVersion }](${ gitHubUrl }/compare/v${ oldVersion }...v${ newVersion }) (${ dateFormatted })`,
 		'',
-		...sectionsToDisplay.map( ( [ , { title, entries } ] ) => ( [
+		...sectionsToDisplay.map( ( { title, entries } ) => ( [
 			`### ${ title }`,
 			'',
 			...entries.map( entry => entry.message ),

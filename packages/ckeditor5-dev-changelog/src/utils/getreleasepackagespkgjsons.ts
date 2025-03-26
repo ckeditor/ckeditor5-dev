@@ -17,14 +17,14 @@ export async function getReleasePackagesPkgJsons(
 		findPathsToPackages( externalRepository.cwd, externalRepository.packagesDirectory )
 	);
 
-	const packagesPaths = [
-		...await findPathsToPackages( cwd, packagesDirectory, { includeCwd: true } ),
-		...await Promise.all( externalPackagesPromises )
-	].flat();
+	const packagesPaths = ( await Promise.all( [
+		findPathsToPackages( cwd, packagesDirectory, { includeCwd: true } ),
+		...externalPackagesPromises
+	] ) ).flat();
 
 	const packagesPromises = packagesPaths.map( packagePath =>
 		fsExtra.readJson( upath.join( packagePath, 'package.json' ) )
 	);
 
-	return await Promise.all( packagesPromises );
+	return Promise.all( packagesPromises );
 }
