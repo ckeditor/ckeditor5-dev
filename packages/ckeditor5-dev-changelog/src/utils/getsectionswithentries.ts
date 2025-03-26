@@ -3,76 +3,121 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, PackageJson, ParsedFile, SectionsWithEntries, TransformScope } from '../types.js';
+import type { Entry, PackageJson, ParsedFile, SectionsWithEntries, TransformScope, SectionName } from '../types.js';
 import { ORGANISATION_NAMESPACE, SECTIONS } from '../constants.js';
 import { linkToGithubUser } from './linktogithubuser.js';
 
-export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, transformScope }: {
+interface SectionBuilderOptions {
 	parsedFiles: Array<ParsedFile>;
 	packages: Array<PackageJson>;
 	gitHubUrl: string;
 	transformScope: TransformScope;
-} ): SectionsWithEntries {
-	const packagesNames = packages.map( packageJson => packageJson.name );
+}
 
-	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const breakingChange = entry.data[ 'breaking-change' ];
-		const type = entry.data.type;
-		const section = !isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE ) ? 'invalid' : breakingChange ?? type;
-		const scope = getScopesLinks( entry.data.scope, transformScope );
-		const closes = getIssuesLinks( entry.data.closes, 'Closes', gitHubUrl );
-		const see = getIssuesLinks( entry.data.see, 'See', gitHubUrl );
-		const [ mainContent, ...restContent ] = linkToGithubUser( entry.content ).trim().split( '\n\n' );
+class SectionBuilder {
+	private readonly packagesNames: string[];
+	private readonly packagesNamesNoNamespace: string[];
+	private readonly expectedTypes = ['Feature', 'Fix', 'Other'] as const;
 
-		const changeMessage = [
-			'*',
-			scope ? `**${ scope }**:` : null,
-			mainContent,
-			see ? see : null,
-			closes ? closes : null,
-			restContent.length ? '\n\n  ' + restContent.join( '\n\n  ' ) : null
-		].filter( Boolean ).join( ' ' );
+	constructor(private readonly options: SectionBuilderOptions) {
+		this.packagesNames = options.packages.map(packageJson => packageJson.name);
+		this.packagesNamesNoNamespace = this.packagesNames.map(
+			packageName => packageName.replace(`${ORGANISATION_NAMESPACE}/`, '')
+		);
+	}
 
-		const newEntry: Entry = { message: changeMessage, data: { ...entry.data, mainContent, restContent } };
+	build(): SectionsWithEntries {
+		return this.options.parsedFiles.reduce<SectionsWithEntries>(
+			(sections, entry) => this.processEntry(sections, entry),
+			structuredClone(SECTIONS) as SectionsWithEntries
+		);
+	}
 
-		sections[ section ].entries = [ ...sections[ section ].entries ?? [], newEntry ];
+	private processEntry(sections: SectionsWithEntries, entry: ParsedFile): SectionsWithEntries {
+		const section = this.determineSection(entry);
+		const changeMessage = this.buildChangeMessage(entry);
+		const newEntry: Entry = {
+			message: changeMessage,
+			data: {
+				...entry.data,
+				mainContent: entry.content.split('\n\n')[0],
+				restContent: entry.content.split('\n\n').slice(1)
+			}
+		};
 
+		const sectionKey = section as SectionName;
+		sections[sectionKey].entries = [...sections[sectionKey].entries ?? [], newEntry];
 		return sections;
-	}, structuredClone( SECTIONS ) as SectionsWithEntries );
+	}
+
+	private determineSection(entry: ParsedFile): SectionName {
+		return !this.isEntryValid(entry)
+			? 'invalid'
+			: (entry.data['breaking-change'] ?? entry.data.type) as SectionName;
+	}
+
+	private buildChangeMessage(entry: ParsedFile): string {
+		const [mainContent, ...restContent] = linkToGithubUser(entry.content)
+			.trim()
+			.split('\n\n');
+
+		const parts = [
+			'*',
+			this.buildScopeLinks(entry.data.scope),
+			mainContent,
+			this.buildIssueLinks(entry.data.see, 'See'),
+			this.buildIssueLinks(entry.data.closes, 'Closes'),
+			this.buildRestContent(restContent)
+		].filter(Boolean);
+
+		return parts.join(' ');
+	}
+
+	private buildScopeLinks(scope: Array<string>): string | null {
+		if (!scope) {
+			return null;
+		}
+
+		return scope
+			.map(scope => this.options.transformScope(scope))
+			.map(({ displayName, npmUrl }) => `[${displayName}](${npmUrl})`)
+			.join(', ');
+	}
+
+	private buildIssueLinks(issues: Array<string>, prefix: string): string | null {
+		if (!issues) {
+			return null;
+		}
+
+		return `${prefix} ${issues
+			.map(id => `[#${id}](${this.options.gitHubUrl}/issues/${id})`)
+			.join(', ')}.`;
+	}
+
+	private buildRestContent(restContent: string[]): string | null {
+		return restContent.length
+			? '\n\n  ' + restContent.join('\n\n  ')
+			: null;
+	}
+
+	private isEntryValid(entry: ParsedFile): boolean {
+		if (!this.expectedTypes.includes(entry.data.type as typeof this.expectedTypes[number])) {
+			return false;
+		}
+
+		if (!entry.data.scope?.every(scope => this.packagesNamesNoNamespace.includes(scope))) {
+			return false;
+		}
+
+		return true;
+	}
 }
 
-function getScopesLinks( scope: Array<string>, transformScope: TransformScope ): string | null {
-	if ( !scope ) {
-		return null;
-	}
-
-	return scope
-		.map( scope => transformScope( scope ) )
-		.map( ( { displayName, npmUrl } ) => `[${ displayName }](${ npmUrl })` )
-		.join( ', ' );
-}
-
-function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string | null {
-	if ( !issues ) {
-		return null;
-	}
-
-	return prefix + ' ' + issues
-		.map( id => `[#${ id }](${ gitHubUrl }/issues/${ id })` )
-		.join( ', ' ) + '.';
-}
-
-function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisationNamespace: string ): boolean {
-	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
-	const expectedTypes = [ 'Feature', 'Fix', 'Other' ];
-
-	if ( !expectedTypes.includes( entry.data.type ) ) {
-		return false;
-	}
-
-	if ( !entry.data.scope?.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
-		return false;
-	}
-
-	return true;
+/**
+ * Processes parsed files and organizes them into sections with entries.
+ * Each entry is formatted with proper links to scopes and issues.
+ */
+export function getSectionsWithEntries(options: SectionBuilderOptions): SectionsWithEntries {
+	const builder = new SectionBuilder(options);
+	return builder.build();
 }

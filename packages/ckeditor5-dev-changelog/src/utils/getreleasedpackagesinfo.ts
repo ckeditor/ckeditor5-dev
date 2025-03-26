@@ -6,48 +6,106 @@
 import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
 import { ORGANISATION_NAMESPACE } from '../constants.js';
 
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages }: {
-	sections: SectionsWithEntries;
-	oldVersion: string;
-	newVersion: string;
-	packages: Array<PackageJson>;
-} ): Promise<Array<ReleaseInfo>> {
-	const versionUpgradeText = `${ oldVersion } => ${ newVersion }`;
-	const packageNames = packages.map( packageName => packageName.name );
-
-	const newVersionReleases = getNewVersionReleases( packages );
-	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries );
-	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases } );
-	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, { packagesToRemove: minorReleases } );
-
-	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
-
-	const otherReleases = packageNames
-		.filter( packageName => !packagesToRemoveFromOtherReleases.includes( packageName ) )
-		.sort();
-
-	return [
-		{ title: 'New packages:', version: newVersion, packages: newVersionReleases },
-		{ title: 'Major releases (contain major breaking changes):', version: versionUpgradeText, packages: majorReleases },
-		{ title: 'Minor releases (contain minor breaking changes):', version: versionUpgradeText, packages: minorReleases },
-		{ title: 'Releases containing new features:', version: versionUpgradeText, packages: newFeaturesReleases },
-		{ title: 'Other releases:', version: versionUpgradeText, packages: otherReleases }
-	].filter( release => release.packages?.length > 0 );
+interface ReleaseInfoOptions {
+    sections: SectionsWithEntries;
+    oldVersion: string;
+    newVersion: string;
+    packages: Array<PackageJson>;
 }
 
-function getNewVersionReleases( packages: Array<PackageJson> ) {
-	return packages
-		.filter( packageJson => packageJson.version === '0.0.1' )
-		.map( packageJson => packageJson.name )
-		.sort();
+interface PackageFilterOptions {
+    packagesToRemove?: Array<string>;
 }
 
-function getPackageNamesByEntriesScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove?: Array<string> } = {} ) {
-	const packageNamesDeduplicated = [ ...new Set( entries.flatMap( entry => entry.data.scope ) ) ];
-	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ ORGANISATION_NAMESPACE }/` + scope );
-	const packagesNamesFiltered = packagesToRemove ?
-		packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) ) :
-		packagesFullNames;
+class ReleaseInfoBuilder {
+    private readonly versionUpgradeText: string;
+    private readonly packageNames: string[];
+    private readonly newVersionReleases: string[];
 
-	return packagesNamesFiltered.sort();
+    constructor(private readonly options: ReleaseInfoOptions) {
+        this.versionUpgradeText = `${options.oldVersion} => ${options.newVersion}`;
+        this.packageNames = options.packages.map(packageName => packageName.name);
+        this.newVersionReleases = this.getNewVersionReleases();
+    }
+
+    build(): Array<ReleaseInfo> {
+        const majorReleases = this.getPackageNamesByEntriesScope(this.options.sections.major.entries);
+        const minorReleases = this.getPackageNamesByEntriesScope(this.options.sections.minor.entries, { packagesToRemove: majorReleases });
+        const newFeaturesReleases = this.getPackageNamesByEntriesScope(this.options.sections.Feature.entries, { packagesToRemove: minorReleases });
+
+        const packagesToRemoveFromOtherReleases = [
+            majorReleases,
+            minorReleases,
+            newFeaturesReleases,
+            this.newVersionReleases
+        ].flat();
+
+        const otherReleases = this.packageNames
+            .filter(packageName => !packagesToRemoveFromOtherReleases.includes(packageName))
+            .sort();
+
+        return this.createReleaseInfos(otherReleases, majorReleases, minorReleases, newFeaturesReleases);
+    }
+
+    private createReleaseInfos(
+        otherReleases: string[],
+        majorReleases: string[],
+        minorReleases: string[],
+        newFeaturesReleases: string[]
+    ): Array<ReleaseInfo> {
+        const releases: Array<ReleaseInfo> = [
+            {
+                title: 'New packages:',
+                version: this.options.newVersion,
+                packages: this.newVersionReleases
+            },
+            {
+                title: 'Major releases (contain major breaking changes):',
+                version: this.versionUpgradeText,
+                packages: majorReleases
+            },
+            {
+                title: 'Minor releases (contain minor breaking changes):',
+                version: this.versionUpgradeText,
+                packages: minorReleases
+            },
+            {
+                title: 'Releases containing new features:',
+                version: this.versionUpgradeText,
+                packages: newFeaturesReleases
+            },
+            {
+                title: 'Other releases:',
+                version: this.versionUpgradeText,
+                packages: otherReleases
+            }
+        ];
+
+        return releases.filter(release => release.packages?.length > 0);
+    }
+
+    private getNewVersionReleases(): string[] {
+        return this.options.packages
+            .filter(packageJson => packageJson.version === '0.0.1')
+            .map(packageJson => packageJson.name)
+            .sort();
+    }
+
+    private getPackageNamesByEntriesScope(entries: Array<Entry> = [], options: PackageFilterOptions = {}): string[] {
+        const packageNamesDeduplicated = [...new Set(entries.flatMap(entry => entry.data.scope))];
+        const packagesFullNames = packageNamesDeduplicated.map(scope => `${ORGANISATION_NAMESPACE}/${scope}`);
+        
+        return options.packagesToRemove
+            ? packagesFullNames.filter(packageName => !options.packagesToRemove!.includes(packageName))
+            : packagesFullNames;
+    }
+}
+
+/**
+ * Processes release information for packages based on their sections and versions.
+ * Returns an array of release information objects containing package names grouped by release type.
+ */
+export async function getReleasedPackagesInfo(options: ReleaseInfoOptions): Promise<Array<ReleaseInfo>> {
+    const builder = new ReleaseInfoBuilder(options);
+    return builder.build();
 }
