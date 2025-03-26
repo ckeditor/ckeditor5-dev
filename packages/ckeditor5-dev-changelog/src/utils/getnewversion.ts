@@ -4,7 +4,7 @@
  */
 
 import chalk from 'chalk';
-import { ReleaseType } from 'semver';
+import type { ReleaseType } from 'semver';
 import type { SectionsWithEntries } from '../types.js';
 import { provideNewVersionForMonoRepository } from './providenewversionformonorepository.js';
 import { logInfo } from './loginfo.js';

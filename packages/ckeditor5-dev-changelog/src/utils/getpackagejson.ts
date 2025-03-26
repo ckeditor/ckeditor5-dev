@@ -5,9 +5,9 @@
 
 import fsExtra from 'fs-extra';
 import upath from 'upath';
-import { PackageJson } from '../types';
+import type { PackageJson } from '../types.js';
 
-export async function getPackageJson(cwd = process.cwd() ): Promise<PackageJson> {
+export async function getPackageJson( cwd = process.cwd() ): Promise<PackageJson> {
 	const packageJsonPath = cwd.endsWith( 'package.json' ) ? cwd : upath.join( cwd, 'package.json' );
 
 	return fsExtra.readJson( packageJsonPath );

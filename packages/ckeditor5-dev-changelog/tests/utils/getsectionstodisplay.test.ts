@@ -1,45 +1,50 @@
-import { describe, it, expect } from 'vitest';
-import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay';
-import type { SectionsWithEntries, Section, Entry } from '../../src/types';
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
 
-const createSection = (title: string, entries: Entry[]): Section => ({
+import { describe, it, expect } from 'vitest';
+import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay.js';
+import type { SectionsWithEntries, Section, Entry } from '../../src/types.js';
+
+const createSection = ( title: string, entries: Array<Entry> ): Section => ( {
 	title,
 	entries
-});
+} );
 
-const createEntry = ( message: string ): Entry => ( { message } as Entry );
+const createEntry = ( message: string ): Entry => ( { message } ) as any;
 
-describe('getSectionsToDisplay', () => {
-	it('should return only valid sections with entries', () => {
+describe( 'getSectionsToDisplay', () => {
+	it( 'should return only valid sections with entries', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
-			major: createSection('Major Changes', [createEntry('Breaking change')]),
-			minor: createSection('Minor Changes', [createEntry('Minor change')]),
-			Feature: createSection('Features', []),
-			Fix: createSection('Fix', []),
-			Other: createSection('Other', []),
-			invalid: createSection('Invalid', [createEntry('Invalid entry')])
+			major: createSection( 'Major Changes', [ createEntry( 'Breaking change' ) ] ),
+			minor: createSection( 'Minor Changes', [ createEntry( 'Minor change' ) ] ),
+			Feature: createSection( 'Features', [] ),
+			Fix: createSection( 'Fix', [] ),
+			Other: createSection( 'Other', [] ),
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
 		};
 
-		const result = getSectionsToDisplay(sectionsWithEntries);
+		const result = getSectionsToDisplay( sectionsWithEntries );
 
-		expect(result).toEqual([
-			{ title: 'Major Changes', entries: [{ message: 'Breaking change' }] },
-			{ title: 'Minor Changes', entries: [{ message: 'Minor change' }] }
-		]);
-	});
+		expect( result ).toEqual( [
+			{ title: 'Major Changes', entries: [ { message: 'Breaking change' } ] },
+			{ title: 'Minor Changes', entries: [ { message: 'Minor change' } ] }
+		] );
+	} );
 
-	it('should return an empty array if all sections are invalid or empty', () => {
+	it( 'should return an empty array if all sections are invalid or empty', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
-			major: createSection('Major Changes', []),
-			minor: createSection('Minor Changes', []),
-			Feature: createSection('Features', []),
-			Fix: createSection('Fix', []),
-			Other: createSection('Other', []),
-			invalid: createSection('Invalid', [createEntry('Invalid entry')])
+			major: createSection( 'Major Changes', [] ),
+			minor: createSection( 'Minor Changes', [] ),
+			Feature: createSection( 'Features', [] ),
+			Fix: createSection( 'Fix', [] ),
+			Other: createSection( 'Other', [] ),
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
 		};
 
-		const result = getSectionsToDisplay(sectionsWithEntries);
+		const result = getSectionsToDisplay( sectionsWithEntries );
 
-		expect(result).toEqual([]);
-	});
-});
+		expect( result ).toEqual( [] );
+	} );
+} );

@@ -1,9 +1,14 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import fs from 'fs';
 import upath from 'upath';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants';
-import { getRepositoryUrl } from './getrepositoryurl';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
+import { getRepositoryUrl } from './getrepositoryurl.js';
 
-export async function truncateChangelog( length: number, cwd = process.cwd() ) {
+export async function truncateChangelog( length: number, cwd = process.cwd() ): Promise<void> {
 	const changelog = getChangelog( cwd );
 
 	if ( !changelog ) {

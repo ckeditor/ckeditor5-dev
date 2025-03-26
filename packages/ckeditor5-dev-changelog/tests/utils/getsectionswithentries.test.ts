@@ -1,134 +1,141 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries';
-import { linkToGithubUser } from '../../src/utils/linktogithubuser';
-import { ORGANISATION_NAMESPACE } from '../../src/constants';
-import type { ParsedFile, PackageJson } from '../../src/types';
+import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
+import { linkToGithubUser } from '../../src/utils/linktogithubuser.js';
+import { ORGANISATION_NAMESPACE } from '../../src/constants.js';
+import type { ParsedFile, PackageJson } from '../../src/types.js';
 
 type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock('../../src/utils/linktogithubuser', () => ({
-	linkToGithubUser: vi.fn((content) => content)
-}));
+vi.mock( '../../src/utils/linktogithubuser', () => ( {
+	linkToGithubUser: vi.fn( content => content )
+} ) );
 
-const createParsedFile = (overrides: RecursivePartial<ParsedFile> = {}): ParsedFile => ({
+const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
 	content: 'Some content',
 	...overrides,
 	data: {
 		type: 'Feature',
-		scope: ['package-1'],
-		closes: ['123'],
-		see: ['456'],
+		scope: [ 'package-1' ],
+		closes: [ '123' ],
+		see: [ '456' ],
 		...overrides.data
-	},
-} as ParsedFile );
+	}
+} as any );
 
-describe('getSectionsWithEntries', () => {
+describe( 'getSectionsWithEntries', () => {
 	const gitHubUrlMock = 'https://github.com/ckeditor';
-	let transformScope: (name: string) => { displayName: string; npmUrl: string };
-	let packages: PackageJson[];
+	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
+	let packages: Array<PackageJson>;
 
-	beforeEach(() => {
-		transformScope = vi.fn((name) => ({
-			displayName: `DisplayName-${name}`,
-			npmUrl: `https://npmjs.com/package/${name}`
-		}));
+	beforeEach( () => {
+		transformScope = vi.fn( name => ( {
+			displayName: `DisplayName-${ name }`,
+			npmUrl: `https://npmjs.com/package/${ name }`
+		} ) );
 
 		packages = [
-			{ name: `${ORGANISATION_NAMESPACE}/package-1`, version: '1.0.0' },
-			{ name: `${ORGANISATION_NAMESPACE}/package-2`, version: '1.0.0' }
+			{ name: `${ ORGANISATION_NAMESPACE }/package-1`, version: '1.0.0' },
+			{ name: `${ ORGANISATION_NAMESPACE }/package-2`, version: '1.0.0' }
 		];
-	});
+	} );
 
-	it('should correctly classify parsedFiles into sections', () => {
+	it( 'should correctly classify parsedFiles into sections', () => {
 		const parsedFiles = [
-			createParsedFile({ data: { 'breaking-change': 'major' } }),
-			createParsedFile({ data: { type: 'Fix' } }),
-			createParsedFile({ data: { type: 'Other' } })
+			createParsedFile( { data: { 'breaking-change': 'major' } } ),
+			createParsedFile( { data: { type: 'Fix' } } ),
+			createParsedFile( { data: { type: 'Other' } } )
 		];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect(result.major.entries).toHaveLength(1);
-		expect(result.Fix.entries).toHaveLength(1);
-		expect(result.Other.entries).toHaveLength(1);
-	});
+		expect( result.major.entries ).toHaveLength( 1 );
+		expect( result.Fix.entries ).toHaveLength( 1 );
+		expect( result.Other.entries ).toHaveLength( 1 );
+	} );
 
-	it('should classify an entry with an unknown type as invalid', () => {
-		const parsedFiles = [createParsedFile({ data: { type: 'UnknownType' as any } })];
+	it( 'should classify an entry with an unknown type as invalid', () => {
+		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType' as any } } ) ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect(result.invalid.entries).toHaveLength(1);
-	});
+		expect( result.invalid.entries ).toHaveLength( 1 );
+	} );
 
-	it('should not include see and closes when they are undefined', () => {
-		const parsedFiles = [createParsedFile({ data: { see: undefined, closes: undefined } })];
+	it( 'should not include see and closes when they are undefined', () => {
+		const parsedFiles = [ createParsedFile( { data: { see: undefined, closes: undefined } } ) ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[0].message;
+		const message = result.Feature.entries[ 0 ]!.message;
 
-		expect(message).not.toContain('Closes [#123](https://github.com/ckeditor/issues/123).');
-		expect(message).not.toContain('See [#456](https://github.com/ckeditor/issues/456).');
-	});
+		expect( message ).not.toContain( 'Closes [#123](https://github.com/ckeditor/issues/123).' );
+		expect( message ).not.toContain( 'See [#456](https://github.com/ckeditor/issues/456).' );
+	} );
 
-	it('should classify an entry as invalid if the scope is not recognized', () => {
-		const parsedFiles = [createParsedFile({ data: { scope: ['unknown-package'] } })];
+	it( 'should classify an entry as invalid if the scope is not recognized', () => {
+		const parsedFiles = [ createParsedFile( { data: { scope: [ 'unknown-package' ] } } ) ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect(result.invalid.entries).toHaveLength(1);
-	});
+		expect( result.invalid.entries ).toHaveLength( 1 );
+	} );
 
-	it('should classify an entry as invalid if the scope is not undefined', () => {
-		const parsedFiles = [createParsedFile({ data: { scope: undefined } })];
+	it( 'should classify an entry as invalid if the scope is not undefined', () => {
+		const parsedFiles = [ createParsedFile( { data: { scope: undefined } } ) ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect(result.invalid.entries).toHaveLength(1);
-	});
+		expect( result.invalid.entries ).toHaveLength( 1 );
+	} );
 
-	it('should handle an empty parsedFiles array', () => {
-		const result = getSectionsWithEntries({ parsedFiles: [], packages, gitHubUrl: gitHubUrlMock, transformScope });
+	it( 'should handle an empty parsedFiles array', () => {
+		const result = getSectionsWithEntries( { parsedFiles: [], packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		Object.values(result).forEach(section => expect(section.entries).toBeUndefined);
-	});
+		Object.values( result ).forEach( section => expect( section.entries ).toBeUndefined );
+	} );
 
-	it('should generate correct markdown links for scope and issues', () => {
-		const parsedFiles = [createParsedFile()];
+	it( 'should generate correct markdown links for scope and issues', () => {
+		const parsedFiles = [ createParsedFile() ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[0].message;
+		const message = result.Feature.entries[ 0 ]!.message;
 
-		expect(message).toContain('[DisplayName-package-1](https://npmjs.com/package/package-1)');
-		expect(message).toContain('Closes [#123](https://github.com/ckeditor/issues/123).');
-		expect(message).toContain('See [#456](https://github.com/ckeditor/issues/456).');
-	});
+		expect( message ).toContain( '[DisplayName-package-1](https://npmjs.com/package/package-1)' );
+		expect( message ).toContain( 'Closes [#123](https://github.com/ckeditor/issues/123).' );
+		expect( message ).toContain( 'See [#456](https://github.com/ckeditor/issues/456).' );
+	} );
 
-	it('should format the content properly', () => {
-		const parsedFiles = [createParsedFile({ content: 'Some content\n\nSecond line\n\nThird line' })];
+	it( 'should format the content properly', () => {
+		const parsedFiles = [ createParsedFile( { content: 'Some content\n\nSecond line\n\nThird line' } ) ];
 
-		const result = getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[0].message;
+		const message = result.Feature.entries[ 0 ]!.message;
 
-		expect(message).toEqual( [
-			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123). ',
+		expect( message ).toEqual( [
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content ' +
+				'See [#456](https://github.com/ckeditor/issues/456). ' +
+				'Closes [#123](https://github.com/ckeditor/issues/123). ',
 			'',
 			'  Second line',
 			'',
 			'  Third line'
-		].join('\n') );
-	});
+		].join( '\n' ) );
+	} );
 
-	it('should call linkToGithubUser correctly', () => {
-		const parsedFiles = [createParsedFile({ content: 'Some content' })];
+	it( 'should call linkToGithubUser correctly', () => {
+		const parsedFiles = [ createParsedFile( { content: 'Some content' } ) ];
 
-		getSectionsWithEntries({ parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope });
+		getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect(linkToGithubUser).toHaveBeenCalledWith('Some content');
-	});
-});
+		expect( linkToGithubUser ).toHaveBeenCalledWith( 'Some content' );
+	} );
+} );

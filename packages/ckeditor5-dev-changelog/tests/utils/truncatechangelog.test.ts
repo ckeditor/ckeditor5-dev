@@ -13,7 +13,7 @@ vi.mock( 'fs' );
 vi.mock( '../../src/utils/getrepositoryurl.js' );
 vi.mock( '../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',
-	CHANGELOG_FILE: 'CHANGELOG.md',
+	CHANGELOG_FILE: 'CHANGELOG.md'
 } ) );
 
 describe( 'truncateChangelog()', () => {
@@ -63,7 +63,7 @@ describe( 'truncateChangelog()', () => {
 
 		await truncateChangelog( 2 );
 
-		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/home/ckeditor/CHANGELOG.md', "utf-8" );
+		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/home/ckeditor/CHANGELOG.md', 'utf-8' );
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
 			1,
 			'/home/ckeditor/CHANGELOG.md',
@@ -106,7 +106,7 @@ describe( 'truncateChangelog()', () => {
 
 		await truncateChangelog( 2, '/custom/cwd' );
 
-		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/custom/cwd/CHANGELOG.md', "utf-8" );
+		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/custom/cwd/CHANGELOG.md', 'utf-8' );
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
 			1,
 			'/custom/cwd/CHANGELOG.md',
@@ -144,8 +144,8 @@ describe( 'truncateChangelog()', () => {
 	} );
 
 	it( 'handles empty entries array', async () => {
-		vi.mocked(fs.readFileSync).mockReturnValue(CHANGELOG_HEADER);
-		await truncateChangelog(5, '/home/ckeditor');
-		expect(fs.writeFileSync).not.toHaveBeenCalled();
-	});
+		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER );
+		await truncateChangelog( 5, '/home/ckeditor' );
+		expect( fs.writeFileSync ).not.toHaveBeenCalled();
+	} );
 } );

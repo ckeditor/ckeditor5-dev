@@ -17,11 +17,11 @@ vi.mock( 'chalk', () => ( {
 	default: {
 		cyan: ( text: string ) => text,
 		yellow: ( text: string ) => text
-	},
+	}
 } ) );
 vi.mock( '../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',
-	CHANGELOG_FILE: 'CHANGELOG.md',
+	CHANGELOG_FILE: 'CHANGELOG.md'
 } ) );
 
 describe( 'modifyChangelog()', () => {

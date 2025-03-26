@@ -4,11 +4,11 @@
  */
 
 import { format } from 'date-fns';
-import { RawDateString, RepositoryConfig, TransformScope } from './types.js';
+import type { RawDateString, RepositoryConfig, TransformScope } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { NPM_URL, VERSIONING_POLICY_URL } from './constants.js';
 import { logChangelogFiles } from './utils/logchangelogfiles.js';
-import { removeChangesetFiles } from './utils/removechangesetfiles';
+import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { modifyChangelog } from './utils/modifychangelog.js';
 import { getNewVersion } from './utils/getnewversion.js';
 import { getReleasePackagesPkgJsons } from './utils/getreleasepackagespkgjsons.js';
@@ -16,7 +16,7 @@ import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
 import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
 import { getGitHubUrl } from './utils/getgithuburl.js';
-import { getPackageJson } from './utils/getpackagejson';
+import { getPackageJson } from './utils/getpackagejson.js';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
@@ -61,7 +61,7 @@ export async function generateChangelog( {
 		sections: sectionsWithEntries,
 		oldVersion,
 		newVersion,
-		packages,
+		packages
 	} );
 
 	if ( !sectionsToDisplay.length ) {
