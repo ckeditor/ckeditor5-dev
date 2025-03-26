@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, SectionsWithEntries } from '../types.js';
+import type { Section, SectionsWithEntries } from '../types.js';
 
-export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Array<[string, {
-	entries: Array<Entry>;
-	title: string;
-}]> {
+export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Section[] {
 	return Object.entries( sectionsWithEntries )
-		.filter( ( [ section, { entries } ] ) => entries && section !== 'invalid' );
+		.filter( ( [ sectionName, { entries } ] ) => entries?.length && sectionName !== 'invalid' )
+		.map( ( [ , section ] ) => section );
 }

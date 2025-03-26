@@ -5,7 +5,7 @@
 
 import { SECTIONS } from './constants';
 
-export type Section = keyof typeof SECTIONS;
+export type SectionName = keyof typeof SECTIONS;
 
 export type Entry = {
 	message: string
@@ -16,9 +16,8 @@ export type Entry = {
 };
 
 type FileMetadata = {
-	'breaking-change': Section;
-	type: Section;
-	section: Section;
+	'breaking-change'?: SectionName;
+	type: SectionName;
 	scope: string[];
 	closes: string[];
 	see: string[];
@@ -29,10 +28,12 @@ export type ParsedFile = {
 	data: FileMetadata
 }
 
-export type SectionsWithEntries = Record<Section, {
+export type Section = {
 	entries: Entry[],
 	title: string
-}>;
+};
+
+export type SectionsWithEntries = Record<SectionName, Section>;
 
 export type ReleaseInfo = {
 	title: string;
@@ -42,7 +43,10 @@ export type ReleaseInfo = {
 
 export type PackageJson = {
 	name: string,
-	version: string
+	version: string,
+	repository?: string | {
+		url: string
+	}
 };
 
 export type RepositoryConfig = {

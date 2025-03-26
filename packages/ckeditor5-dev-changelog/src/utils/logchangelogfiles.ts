@@ -14,7 +14,7 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	logInfo( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
 
 	for ( const [ sectionName, section ] of Object.entries( sections ) ) {
-		if ( !section.entries ) {
+		if ( !section.entries?.length ) {
 			continue;
 		}
 

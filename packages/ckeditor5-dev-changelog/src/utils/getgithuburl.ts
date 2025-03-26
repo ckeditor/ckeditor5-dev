@@ -12,7 +12,9 @@ export async function getGitHubUrl( cwd: string ): Promise<any> {
 
 	if ( !githubUrl ) {
 		console.warn( 'Warning: Git repository not found in root `package.json`, under `repository.url`.' );
+
+		return '';
 	}
 
-	return githubUrl ?? '';
+	return githubUrl;
 }

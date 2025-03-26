@@ -12,12 +12,14 @@ export async function getChangesetFilePaths(
 	changesetsDirectory: string,
 	externalRepositories: Array<RepositoryConfig>
 ): Promise<Array<string>> {
-	const externalChangesetFilePaths = externalRepositories.map( repo =>
+	const externalChangesetPaths = externalRepositories.map( repo =>
 		glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } )
 	);
 
-	return [
-		...await glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
-		...await Promise.all( externalChangesetFilePaths )
-	].flat();
+	const resolvedChangesetPaths = await Promise.all( [
+		glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
+		...externalChangesetPaths
+	] );
+
+	return resolvedChangesetPaths.flat();
 }
