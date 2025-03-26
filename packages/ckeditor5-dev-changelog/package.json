@@ -25,6 +25,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-release-tools": "^47.0.0",
     "@types/pacote": "^11.1.8",
+    "@types/fs-extra": "^11.0.4",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
     "pacote": "^19.0.0",
