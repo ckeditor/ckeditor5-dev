@@ -3,36 +3,86 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
+import type { SectionsWithEntries, PackageJson, Section, Entry } from '../types.js';
 import { ORGANISATION_NAMESPACE } from '../constants.js';
 
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages }: {
+type ReleasedPackageInfo = {
+	title: string;
+	version: string;
+	packages: Array<string>;
+};
+
+/**
+ * Gets information about released packages based on changeset sections and package information.
+ *
+ * @param options - Options for getting released packages info
+ * @param options.sections - Array of changeset sections
+ * @param options.oldVersion - Current version
+ * @param options.newVersion - New version
+ * @param options.packages - Array of package.json contents
+ * @returns Array of released packages information
+ * @throws {Error} If the input data is invalid
+ */
+export async function getReleasedPackagesInfo( {
+	sections,
+	oldVersion,
+	newVersion,
+	packages
+}: {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
 	packages: Array<PackageJson>;
-} ): Promise<Array<ReleaseInfo>> {
-	const versionUpgradeText = `${ oldVersion } => ${ newVersion }`;
-	const packageNames = packages.map( packageName => packageName.name );
+} ): Promise<Array<{ title: string; version: string; packages: Array<string> }>> {
+	const releasedPackages = getReleasedPackages( sections, packages );
+	return formatReleasedPackagesInfo( releasedPackages, oldVersion, newVersion );
+}
 
-	const newVersionReleases = getNewVersionReleases( packages );
-	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries );
-	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases } );
-	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, { packagesToRemove: minorReleases } );
+/**
+ * Gets the list of packages that have been released based on changeset sections.
+ *
+ * @param sections - Array of changeset sections
+ * @param packages - Array of package.json contents
+ * @returns Array of released package names
+ */
+function getReleasedPackages( sections: SectionsWithEntries, packages: Array<PackageJson> ): Array<string> {
+	const releasedPackageNames = new Set<string>();
 
-	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
+	Object.values( sections ).forEach( ( section: Section ) => {
+		section.entries.forEach( ( entry: Entry ) => {
+			entry.data.scope.forEach( ( packageName: string ) => {
+				if ( packages.some( pkg => pkg.name === packageName ) ) {
+					releasedPackageNames.add( packageName );
+				}
+			} );
+		} );
+	} );
 
-	const otherReleases = packageNames
-		.filter( packageName => !packagesToRemoveFromOtherReleases.includes( packageName ) )
-		.sort();
+	return Array.from( releasedPackageNames );
+}
 
-	return [
-		{ title: 'New packages:', version: newVersion, packages: newVersionReleases },
-		{ title: 'Major releases (contain major breaking changes):', version: versionUpgradeText, packages: majorReleases },
-		{ title: 'Minor releases (contain minor breaking changes):', version: versionUpgradeText, packages: minorReleases },
-		{ title: 'Releases containing new features:', version: versionUpgradeText, packages: newFeaturesReleases },
-		{ title: 'Other releases:', version: versionUpgradeText, packages: otherReleases }
-	].filter( release => release.packages?.length > 0 );
+/**
+ * Formats the released packages information into a structured format.
+ *
+ * @param releasedPackages - Array of released package names
+ * @param oldVersion - Current version
+ * @param newVersion - New version
+ * @returns Array of formatted released packages information
+ */
+function formatReleasedPackagesInfo(
+	releasedPackages: Array<string>,
+	oldVersion: string,
+	newVersion: string
+): Array<{ title: string; version: string; packages: Array<string> }> {
+	if ( !releasedPackages.length ) {
+		return [];
+	}
+
+	return [ {
+		title: 'Released packages',
+		version: newVersion,
+		packages: releasedPackages
+	} ];
 }
 
 function getNewVersionReleases( packages: Array<PackageJson> ) {

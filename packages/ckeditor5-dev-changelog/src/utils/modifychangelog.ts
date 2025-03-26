@@ -14,6 +14,10 @@ import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
  * Modifies the changelog file by inserting new content while preserving the existing structure.
  * If the file doesn't exist, it creates a new one with the proper header.
  * After modification, it truncates the changelog to keep only the most recent entries.
+ *
+ * @param newChangelog - The new changelog content to insert
+ * @param cwd - Current working directory
+ * @throws {Error} If there's an error reading or writing the changelog file
  */
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {
 	const changelogPath = upath.join( cwd, CHANGELOG_FILE );
@@ -29,6 +33,10 @@ export async function modifyChangelog( newChangelog: string, cwd: string ): Prom
 
 /**
  * Reads the existing changelog file or returns an empty string if the file doesn't exist.
+ *
+ * @param changelogPath - Path to the changelog file
+ * @returns The contents of the changelog file or an empty string if it doesn't exist
+ * @throws {Error} If there's an error reading the file
  */
 async function readExistingChangelog( changelogPath: string ): Promise<string> {
 	try {
@@ -42,6 +50,10 @@ async function readExistingChangelog( changelogPath: string ): Promise<string> {
 
 /**
  * Prepares the new changelog content by inserting it after the header or at the beginning if header is missing.
+ *
+ * @param existingChangelog - The existing changelog content
+ * @param newChangelog - The new changelog content to insert
+ * @returns The combined changelog content
  */
 function prepareChangelogContent( existingChangelog: string, newChangelog: string ): string {
 	const headerIndex = existingChangelog.indexOf( CHANGELOG_HEADER );

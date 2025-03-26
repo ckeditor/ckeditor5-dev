@@ -3,18 +3,33 @@
  * For licensing, see LICENSE.md.
  */
 
-import fsExtra from 'fs-extra';
-import upath from 'upath';
+import { getRepositoryUrl } from './getrepositoryurl.js';
 
-export async function getGitHubUrl( cwd: string ): Promise<any> {
-	const rootPackageJson = await fsExtra.readJson( upath.join( cwd, 'package.json' ) );
-	const githubUrl: string | undefined = rootPackageJson?.repository?.url?.replace( /\.git$/, '' );
+/**
+ * Gets the GitHub repository URL from the package.json file.
+ *
+ * @param cwd - Current working directory (default: process.cwd())
+ * @returns The GitHub repository URL
+ * @throws {Error} If the package.json doesn't contain a valid GitHub repository URL
+ */
+export async function getGitHubUrl( cwd = process.cwd() ): Promise<string> {
+	const repositoryUrl = await getRepositoryUrl( cwd );
+	return extractGitHubUrl( repositoryUrl );
+}
 
-	if ( !githubUrl ) {
-		console.warn( 'Warning: Git repository not found in root `package.json`, under `repository.url`.' );
+/**
+ * Extracts the GitHub repository URL from a repository URL.
+ *
+ * @param repositoryUrl - The repository URL to extract from
+ * @returns The GitHub repository URL
+ * @throws {Error} If the URL is not a valid GitHub repository URL
+ */
+function extractGitHubUrl( repositoryUrl: string ): string {
+	const githubUrlMatch = repositoryUrl.match( /^https:\/\/github\.com\/([^/]+)\/([^/]+)$/ );
 
-		return '';
+	if ( !githubUrlMatch ) {
+		throw new Error( `Invalid GitHub repository URL: ${ repositoryUrl }` );
 	}
 
-	return githubUrl;
+	return repositoryUrl;
 }

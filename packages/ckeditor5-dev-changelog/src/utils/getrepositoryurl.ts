@@ -5,23 +5,46 @@
 
 import { getPackageJson } from './getpackagejson.js';
 
+/**
+ * Gets the repository URL from the package.json file.
+ *
+ * @param cwd - Current working directory (default: process.cwd())
+ * @returns The repository URL without .git suffix and /issues suffix
+ * @throws {Error} If the package.json doesn't contain a repository property
+ */
 export async function getRepositoryUrl( cwd = process.cwd() ): Promise<string> {
 	const packageJson = await getPackageJson( cwd );
+	const repositoryUrl = extractRepositoryUrl( packageJson );
+	return cleanRepositoryUrl( repositoryUrl );
+}
 
-	// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
-	// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
-	// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
-	let repositoryUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;
+/**
+ * Extracts the repository URL from the package.json.
+ *
+ * @param packageJson - The package.json content
+ * @returns The raw repository URL
+ * @throws {Error} If the package.json doesn't contain a repository property
+ */
+function extractRepositoryUrl( packageJson: { name: string; repository?: string | { url: string } } ): string {
+	const repositoryUrl = typeof packageJson.repository === 'object' ?
+		packageJson.repository.url :
+		packageJson.repository;
 
 	if ( !repositoryUrl ) {
 		throw new Error( `The package.json for "${ packageJson.name }" must contain the "repository" property.` );
 	}
 
-	// If the value ends with ".git", we need to remove it.
-	repositoryUrl = repositoryUrl.replace( /\.git$/, '' );
-
-	// Remove "/issues" suffix as well.
-	repositoryUrl = repositoryUrl.replace( /\/issues/, '' );
-
 	return repositoryUrl;
+}
+
+/**
+ * Cleans the repository URL by removing .git suffix and /issues suffix.
+ *
+ * @param url - The repository URL to clean
+ * @returns The cleaned repository URL
+ */
+function cleanRepositoryUrl( url: string ): string {
+	return url
+		.replace( /\.git$/, '' )
+		.replace( /\/issues/, '' );
 }
