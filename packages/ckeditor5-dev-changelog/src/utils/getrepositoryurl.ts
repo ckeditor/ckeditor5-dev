@@ -5,6 +5,10 @@
 
 import { getPackageJson } from './getpackagejson.js';
 
+/**
+ * Retrieves the repository URL from package.json configuration.
+ * This function extracts the repository URL for generating links in the changelog.
+ */
 export async function getRepositoryUrl( cwd = process.cwd() ): Promise<string> {
 	const packageJson = await getPackageJson( cwd );
 

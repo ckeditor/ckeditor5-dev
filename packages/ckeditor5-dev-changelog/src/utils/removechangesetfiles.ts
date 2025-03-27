@@ -10,6 +10,10 @@ import fs from 'fs/promises';
 import { removeEmptyDirs } from './removeemptydirs.js';
 import upath from 'upath';
 
+/**
+ * Removes processed changeset files after changelog generation.
+ * This function cleans up the changeset files that have been incorporated into the changelog.
+ */
 export async function removeChangesetFiles(
 	changesetFilePaths: Array<string>,
 	cwd: string,

@@ -4,7 +4,7 @@
  */
 
 import { getNewVersion } from '../../src/utils/getnewversion.js';
-import { provideNewVersionForMonoRepository } from '../../src/utils/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -14,7 +14,7 @@ vi.mock( '../../src/utils/providenewversionformonorepository' );
 vi.mock( '../../src/utils/loginfo' );
 
 describe( 'getNewVersion', () => {
-	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonoRepository );
+	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonorepository );
 	const mockedLogInfo = vi.mocked( logInfo );
 
 	const createEntry = ( message: string ): Entry => ( {

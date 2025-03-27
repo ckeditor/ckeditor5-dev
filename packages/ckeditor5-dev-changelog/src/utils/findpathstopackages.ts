@@ -12,6 +12,10 @@ type Options = {
 	packagesDirectoryFilter?: ( ( packageJsonPath: string ) => boolean ) | null;
 };
 
+/**
+ * Finds paths to all packages in the repository.
+ * This function locates package.json files for all packages in the repository structure.
+ */
 export async function findPathsToPackages( cwd: string, packagesDirectory: string | null, options: Options = {} ): Promise<Array<string>> {
 	const {
 		includePackageJson = false,

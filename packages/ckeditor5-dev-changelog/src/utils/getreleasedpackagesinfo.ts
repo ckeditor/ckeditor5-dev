@@ -6,6 +6,10 @@
 import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
 import { ORGANISATION_NAMESPACE } from '../constants.js';
 
+/**
+ * Generates information about packages being released in the new version.
+ * This function creates a summary of package versions and their changes.
+ */
 export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packages }: {
 	sections: SectionsWithEntries;
 	oldVersion: string;

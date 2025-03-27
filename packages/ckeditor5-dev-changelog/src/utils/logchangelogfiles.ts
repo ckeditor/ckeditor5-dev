@@ -7,6 +7,10 @@ import type { SectionsWithEntries } from '../types.js';
 import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
 
+/**
+ * Logs information about changelog sections and their entries to the console.
+ * This function provides a summary of changes that will be included in the changelog.
+ */
 export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	// todo in the followup: Display invalid records differently. Add filepath, and display what is invalid:
 	//  - type, scope, breaking change, closes or see.

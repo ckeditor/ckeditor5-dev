@@ -36,11 +36,10 @@ type Question = {
 const manifest = cacheLessPacoteFactory( pacote.manifest );
 
 /**
- * Prompts the user for a new version number with validation.
- * The function suggests a version based on the bump type and validates the input
- * to ensure it's a valid semver version, higher than the current version, and available in the npm registry.
+ * Handles version management for monorepository packages.
+ * This function manages versioning for multiple packages in a monorepository structure.
  */
-export async function provideNewVersionForMonoRepository( options: Options ): Promise<string> {
+export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
 	const question = createVersionQuestion( options );
 	const answers = await inquirer.prompt<{ version: string }>( question as any );
 	return answers.version;

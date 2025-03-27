@@ -8,6 +8,10 @@ import { findPathsToPackages } from './findpathstopackages.js';
 import fsExtra from 'fs-extra';
 import upath from 'upath';
 
+/**
+ * Retrieves package.json files for all packages that need to be released.
+ * This function gathers package information from both internal and external repositories.
+ */
 export async function getReleasePackagesPkgJsons(
 	cwd: string,
 	packagesDirectory: string,
