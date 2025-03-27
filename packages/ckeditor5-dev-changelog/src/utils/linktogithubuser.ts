@@ -3,6 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
+/**
+ * Converts GitHub usernames in text to GitHub profile links.
+ * This function enhances changelog entries by linking contributor usernames to their GitHub profiles.
+ */
 export function linkToGithubUser( comment: string ): string {
 	return comment.replace( /(^|[\s(])@([\w-]+)(?![/\w-])/ig, ( _, charBefore, nickName ) => {
 		return `${ charBefore }[@${ nickName }](https://github.com/${ nickName })`;

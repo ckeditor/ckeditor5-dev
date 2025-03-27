@@ -22,6 +22,11 @@ import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
 import chalk from 'chalk';
 
+/**
+ * Generates a changelog for the repository based on changeset files and package information.
+ * This function handles the entire changelog generation process including version management,
+ * package information gathering, and changelog file updates.
+ */
 export async function generateChangelog( {
 	cwd,
 	packagesDirectory = 'packages',

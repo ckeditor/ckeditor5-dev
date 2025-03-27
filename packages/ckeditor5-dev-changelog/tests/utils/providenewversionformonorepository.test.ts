@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideNewVersionForMonoRepository } from '../../src/utils/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
 import inquirer from 'inquirer';
 import pacote from 'pacote';
 import semver from 'semver';
@@ -32,7 +32,7 @@ vi.mock( 'semver', () => ( {
 	}
 } ) );
 
-describe( 'provideNewVersionForMonoRepository()', () => {
+describe( 'provideNewVersionForMonorepository()', () => {
 	const defaultOptions = {
 		packageName: 'test-package',
 		version: '1.0.0',
@@ -57,7 +57,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -74,7 +74,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( null );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.0' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -91,7 +91,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -117,7 +117,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -151,7 +151,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.2' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -170,7 +170,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-		await provideNewVersionForMonoRepository( options );
+		await provideNewVersionForMonorepository( options );
 
 		const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 		const questions = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -187,7 +187,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-		const result = await provideNewVersionForMonoRepository( options );
+		const result = await provideNewVersionForMonorepository( options );
 		expect( result ).toBe( '1.0.1' );
 	} );
 
@@ -208,7 +208,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 			vi.mocked( semver.inc ).mockReturnValue( expected );
 			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: expected } );
 
-			const result = await provideNewVersionForMonoRepository( options );
+			const result = await provideNewVersionForMonorepository( options );
 			expect( result ).toBe( expected );
 		}
 	} );

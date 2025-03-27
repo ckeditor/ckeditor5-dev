@@ -6,7 +6,11 @@
 import fsExtra from 'fs-extra';
 import upath from 'upath';
 
-export async function getGitHubUrl( cwd: string ): Promise<any> {
+/**
+ * Retrieves the GitHub repository URL from the package.json file.
+ * This function extracts the repository URL from the package.json configuration.
+ */
+export async function getGitHubUrl( cwd: string ): Promise<string> {
 	const rootPackageJson = await fsExtra.readJson( upath.join( cwd, 'package.json' ) );
 	const githubUrl: string | undefined = rootPackageJson?.repository?.url?.replace( /\.git$/, '' );
 

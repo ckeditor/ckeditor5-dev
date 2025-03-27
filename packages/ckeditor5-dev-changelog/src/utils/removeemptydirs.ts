@@ -7,6 +7,10 @@ import fsExtra from 'fs-extra';
 import fs from 'fs/promises';
 import upath from 'upath';
 
+/**
+ * Removes empty directories from the filesystem.
+ * This function cleans up any empty directories that remain after processing.
+ */
 export async function removeEmptyDirs( directory: string ): Promise<void> {
 	if ( !fsExtra.existsSync( directory ) ) {
 		return;

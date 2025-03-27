@@ -11,9 +11,8 @@ import { truncateChangelog } from './truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
 
 /**
- * Modifies the changelog file by inserting new content while preserving the existing structure.
- * If the file doesn't exist, it creates a new one with the proper header.
- * After modification, it truncates the changelog to keep only the most recent entries.
+ * Updates the CHANGELOG.md file with new changelog content.
+ * This function writes the generated changelog to the repository's changelog file.
  */
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {
 	const changelogPath = upath.join( cwd, CHANGELOG_FILE );
