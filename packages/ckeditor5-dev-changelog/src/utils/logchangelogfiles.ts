@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SectionsWithEntries } from '../types.js';
 import chalk from 'chalk';
+import type { SectionsWithEntries } from '../types.js';
 import { logInfo } from './loginfo.js';
 
 /**
@@ -15,10 +15,10 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	// todo in the followup: Display invalid records differently. Add filepath, and display what is invalid:
 	//  - type, scope, breaking change, closes or see.
 
-	logInfo( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
+	logInfo( `📍 ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	for ( const [ sectionName, section ] of Object.entries( sections ) ) {
-		if ( !section.entries?.length ) {
+		if ( !section.entries.length ) {
 			continue;
 		}
 

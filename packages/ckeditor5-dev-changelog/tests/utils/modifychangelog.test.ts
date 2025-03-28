@@ -44,7 +44,7 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
 		expect( logInfo ).toHaveBeenCalledWith( '📍 CHANGELOG.md not found. Creating a new one.\n' );
 	} );
 
@@ -61,7 +61,7 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
 	} );
 
 	it( 'prepends new changelog if header is missing', async () => {
@@ -77,7 +77,7 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
 	} );
 
 	it( 'handles empty existing changelog', async () => {
@@ -92,6 +92,6 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
 	} );
 } );

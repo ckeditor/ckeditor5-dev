@@ -18,7 +18,7 @@ export async function getNewVersion( sectionsWithEntries: SectionsWithEntries, o
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( sectionsWithEntries.minor.entries.length || sectionsWithEntries.Feature.entries.length ) {
+	if ( sectionsWithEntries.minor.entries.length || sectionsWithEntries.feature.entries.length ) {
 		bumpType = 'minor';
 	}
 

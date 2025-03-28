@@ -42,6 +42,7 @@ const manifest = cacheLessPacoteFactory( pacote.manifest );
 export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
 	const question = createVersionQuestion( options );
 	const answers = await inquirer.prompt<{ version: string }>( question as any );
+
 	return answers.version;
 }
 
@@ -52,6 +53,7 @@ function validateVersionFormat( version: string ): VersionValidationResult {
 	if ( !semver.valid( version ) ) {
 		return 'Please provide a valid version.';
 	}
+
 	return true;
 }
 
@@ -62,6 +64,7 @@ function validateVersionHigherThanCurrent( version: string, currentVersion: stri
 	if ( !semver.gt( version, currentVersion ) ) {
 		return `Provided version must be higher than "${ currentVersion }".`;
 	}
+
 	return true;
 }
 
@@ -73,6 +76,7 @@ async function validateVersionAvailability( version: string, packageName: string
 	if ( !isAvailable ) {
 		return 'Given version is already taken.';
 	}
+
 	return true;
 }
 

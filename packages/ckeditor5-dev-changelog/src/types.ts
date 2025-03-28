@@ -17,10 +17,10 @@ export type Entry = {
 
 type FileMetadata = {
 	'breaking-change'?: SectionName;
-	type: SectionName;
-	scope: Array<string>;
-	closes: Array<string>;
-	see: Array<string>;
+	type?: string;
+	scope?: Array<string>;
+	closes?: Array<string>;
+	see?: Array<string>;
 };
 
 export type ParsedFile = {

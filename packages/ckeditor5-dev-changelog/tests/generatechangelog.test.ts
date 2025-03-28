@@ -80,13 +80,13 @@ describe( 'generateChangelog()', () => {
 				title: SECTIONS.minor.title,
 				entries: []
 			},
-			Feature: {
-				title: SECTIONS.Feature.title,
+			feature: {
+				title: SECTIONS.feature.title,
 				entries: [
 					{
 						message: 'Test feature',
 						data: {
-							type: 'Feature',
+							type: 'feature',
 							scope: [ 'test-package' ],
 							closes: [],
 							see: [],
@@ -96,12 +96,12 @@ describe( 'generateChangelog()', () => {
 					}
 				]
 			},
-			Fix: {
-				title: SECTIONS.Fix.title,
+			fix: {
+				title: SECTIONS.fix.title,
 				entries: []
 			},
-			Other: {
-				title: SECTIONS.Other.title,
+			other: {
+				title: SECTIONS.other.title,
 				entries: []
 			},
 			invalid: {
@@ -112,7 +112,7 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( getNewVersion ).mockResolvedValue( '1.0.1' );
 		vi.mocked( getSectionsToDisplay ).mockReturnValue( [
 			{
-				title: SECTIONS.Feature.title,
+				title: SECTIONS.feature.title,
 				entries: [
 					{
 						message: 'Test feature',
@@ -192,7 +192,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( defaultOptions );
 
-		expect( logInfo ).toHaveBeenCalledWith( '📍 No walid packages to release found. Aborting.' );
+		expect( logInfo ).toHaveBeenCalledWith( '📍 No valid changesets in the \'.changelog\' directory found. Aborting.' );
 		expect( modifyChangelog ).not.toHaveBeenCalled();
 		expect( removeChangesetFiles ).not.toHaveBeenCalled();
 	} );
@@ -262,8 +262,8 @@ describe( 'generateChangelog()', () => {
 				title: SECTIONS.minor.title,
 				entries: []
 			},
-			Feature: {
-				title: SECTIONS.Feature.title,
+			feature: {
+				title: SECTIONS.feature.title,
 				entries: [
 					{
 						message: 'Test feature',
@@ -278,12 +278,12 @@ describe( 'generateChangelog()', () => {
 					}
 				]
 			},
-			Fix: {
-				title: SECTIONS.Fix.title,
+			fix: {
+				title: SECTIONS.fix.title,
 				entries: []
 			},
-			Other: {
-				title: SECTIONS.Other.title,
+			other: {
+				title: SECTIONS.other.title,
 				entries: []
 			},
 			invalid: {

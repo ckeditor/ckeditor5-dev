@@ -23,9 +23,9 @@ const createEntry = ( scope: Array<string>, type: SectionName, breakingChange: S
 const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
 	major: { entries: [], title: 'Major Breaking Changes' },
 	minor: { entries: [], title: 'Minor Breaking Changes' },
-	Feature: { entries: [], title: 'Features' },
-	Fix: { entries: [], title: 'Bug fixes' },
-	Other: { entries: [], title: 'Other changes' },
+	feature: { entries: [], title: 'Features' },
+	fix: { entries: [], title: 'Bug fixes' },
+	other: { entries: [], title: 'Other changes' },
 	invalid: { entries: [], title: 'Invalid changes' },
 	...overrides
 } );
@@ -35,7 +35,7 @@ describe( 'getReleasedPackagesInfo', () => {
 		const sections = createSectionsWithEntries( {
 			major: { entries: [ createEntry( [ 'core' ], 'major', 'major', 'Major change' ) ], title: 'Major Breaking Changes' },
 			minor: { entries: [ createEntry( [ 'ui' ], 'minor', 'minor', 'Minor change' ) ], title: 'Minor Breaking Changes' },
-			Feature: { entries: [ createEntry( [ 'editor' ], 'Feature', 'minor', 'Feature change' ) ], title: 'Features' }
+			feature: { entries: [ createEntry( [ 'editor' ], 'feature', 'minor', 'Feature change' ) ], title: 'Features' }
 		} );
 
 		const packages: Array<PackageJson> = [

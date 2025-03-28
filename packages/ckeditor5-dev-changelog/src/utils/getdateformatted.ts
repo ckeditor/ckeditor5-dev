@@ -6,8 +6,7 @@
 import { format, parse } from 'date-fns';
 
 /**
- * Formats a date string into a human-readable format for the changelog.
- * Converts a date string (YYYY-MM-DD) into a more readable format.
+ * Formats a date string `YYYY-MM-DD` into a human-readable format for the changelog.
  */
 export function getDateFormatted( date: string ): string {
 	return format( parse( date, 'yyyy-MM-dd', new Date() ), 'LLLL d, yyyy' );

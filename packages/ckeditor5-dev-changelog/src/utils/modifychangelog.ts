@@ -5,8 +5,8 @@
 
 import upath from 'upath';
 import fs from 'fs/promises';
-import { logInfo } from './loginfo.js';
 import chalk from 'chalk';
+import { logInfo } from './loginfo.js';
 import { truncateChangelog } from './truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
 
@@ -20,7 +20,7 @@ export async function modifyChangelog( newChangelog: string, cwd: string ): Prom
 
 	const updatedChangelog = prepareChangelogContent( existingChangelog, newChangelog );
 
-	logInfo( `📍 ${ chalk.cyan( 'Appending changes to the existing changelog...\n' ) }` );
+	logInfo( `📍 ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }` );
 
 	await fs.writeFile( changelogPath, updatedChangelog, 'utf-8' );
 	await truncateChangelog( 5, cwd );

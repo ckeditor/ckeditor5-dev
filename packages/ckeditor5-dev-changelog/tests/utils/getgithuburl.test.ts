@@ -51,7 +51,7 @@ describe( 'getGitHubUrl', () => {
 
 		expect( result ).toBe( '' );
 		expect( consoleWarnSpy ).toHaveBeenCalledWith(
-			'Warning: Git repository not found in root `package.json`, under `repository.url`.'
+			'Warning: The GitHub repository URL (`repository.url`) is not defined in root `package.json`.'
 		);
 		expect( mockedReadJson ).toHaveBeenCalledWith( upath.join( mockCwd, 'package.json' ) );
 	} );
@@ -65,7 +65,7 @@ describe( 'getGitHubUrl', () => {
 
 		expect( result ).toBe( '' );
 		expect( consoleWarnSpy ).toHaveBeenCalledWith(
-			'Warning: Git repository not found in root `package.json`, under `repository.url`.'
+			'Warning: The GitHub repository URL (`repository.url`) is not defined in root `package.json`.'
 		);
 		expect( mockedReadJson ).toHaveBeenCalledWith( upath.join( mockCwd, 'package.json' ) );
 	} );

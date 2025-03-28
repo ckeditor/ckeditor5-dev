@@ -3,10 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { RepositoryConfig } from '../types.js';
 import { glob } from 'glob';
 import upath from 'upath';
+import type { RepositoryConfig } from '../types.js';
 
+/**
+ * Retrieves paths to all changeset files (*.md) from the main repository and external repositories.
+ * This function collects markdown files that contain changelog entries for processing.
+ */
 export async function getChangesetFilePaths(
 	cwd: string,
 	changesetsDirectory: string,

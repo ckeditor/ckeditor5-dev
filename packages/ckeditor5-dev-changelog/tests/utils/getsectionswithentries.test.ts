@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGithubUser } from '../../src/utils/linktogithubuser.js';
+import { linkToGitHubUser } from '../../src/utils/linktogithubuser.js';
 import { ORGANISATION_NAMESPACE } from '../../src/constants.js';
 import type { ParsedFile, PackageJson } from '../../src/types.js';
 
@@ -14,7 +14,7 @@ type RecursivePartial<T> = {
 };
 
 vi.mock( '../../src/utils/linktogithubuser', () => ( {
-	linkToGithubUser: vi.fn( content => content )
+	linkToGitHubUser: vi.fn( content => content )
 } ) );
 
 const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
@@ -56,8 +56,8 @@ describe( 'getSectionsWithEntries', () => {
 		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
-		expect( result.Fix.entries ).toHaveLength( 1 );
-		expect( result.Other.entries ).toHaveLength( 1 );
+		expect( result.fix.entries ).toHaveLength( 1 );
+		expect( result.other.entries ).toHaveLength( 1 );
 	} );
 
 	it( 'should classify an entry with an unknown type as invalid', () => {
@@ -73,7 +73,7 @@ describe( 'getSectionsWithEntries', () => {
 
 		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[ 0 ]!.message;
+		const message = result.feature.entries[ 0 ]!.message;
 
 		expect( message ).not.toContain( 'Closes [#123](https://github.com/ckeditor/issues/123).' );
 		expect( message ).not.toContain( 'See [#456](https://github.com/ckeditor/issues/456).' );
@@ -106,7 +106,7 @@ describe( 'getSectionsWithEntries', () => {
 
 		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[ 0 ]!.message;
+		const message = result.feature.entries[ 0 ]!.message;
 
 		expect( message ).toContain( '[DisplayName-package-1](https://npmjs.com/package/package-1)' );
 		expect( message ).toContain( 'Closes [#123](https://github.com/ckeditor/issues/123).' );
@@ -118,7 +118,7 @@ describe( 'getSectionsWithEntries', () => {
 
 		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		const message = result.Feature.entries[ 0 ]!.message;
+		const message = result.feature.entries[ 0 ]!.message;
 
 		expect( message ).toEqual( [
 			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content ' +
@@ -131,11 +131,11 @@ describe( 'getSectionsWithEntries', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should call linkToGithubUser correctly', () => {
+	it( 'should call linkToGitHubUser correctly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content' } ) ];
 
 		getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
 
-		expect( linkToGithubUser ).toHaveBeenCalledWith( 'Some content' );
+		expect( linkToGitHubUser ).toHaveBeenCalledWith( 'Some content' );
 	} );
 } );
