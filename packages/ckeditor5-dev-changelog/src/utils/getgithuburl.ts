@@ -15,7 +15,7 @@ export async function getGitHubUrl( cwd: string ): Promise<string> {
 	const githubUrl: string | undefined = rootPackageJson?.repository?.url?.replace( /\.git$/, '' );
 
 	if ( !githubUrl ) {
-		console.warn( 'Warning: Git repository not found in root `package.json`, under `repository.url`.' );
+		console.warn( 'Warning: The GitHub repository URL (`repository.url`) is not defined in root `package.json`.' );
 
 		return '';
 	}

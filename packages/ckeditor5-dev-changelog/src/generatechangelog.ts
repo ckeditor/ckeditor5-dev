@@ -4,6 +4,7 @@
  */
 
 import { format } from 'date-fns';
+import chalk from 'chalk';
 import type { RawDateString, RepositoryConfig, TransformScope } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { NPM_URL, VERSIONING_POLICY_URL } from './constants.js';
@@ -20,7 +21,44 @@ import { getPackageJson } from './utils/getpackagejson.js';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
-import chalk from 'chalk';
+
+/**
+ * Configuration options for generating a changelog.
+ */
+type GenerateChangelog = {
+
+	/**
+	 * The next version number to use. If not provided, will be calculated based on changes.
+	 */
+	nextVersion?: string;
+
+	/**
+	 * Array of external repository configurations to include in the changelog.
+	 */
+	externalRepositories?: Array<RepositoryConfig>;
+
+	/**
+	 * Function to transform package scopes in the changelog entries.
+	 */
+	transformScope?: TransformScope;
+
+	/**
+	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
+	 */
+	date?: RawDateString;
+
+	/**
+	 * Directory containing the changeset files. Defaults to '.changelog'.
+	 */
+	changesetsDirectory?: string;
+};
+
+function defaultTransformScope( name: string ) {
+	return {
+		displayName: name,
+		npmUrl: `https://www.npmjs.com/package/${ name }`
+	};
+}
 
 /**
  * Generates a changelog for the repository based on changeset files and package information.
@@ -32,20 +70,14 @@ export async function generateChangelog( {
 	packagesDirectory = 'packages',
 	nextVersion,
 	externalRepositories = [],
-	transformScope,
+	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = '.changelog'
-}: RepositoryConfig & {
-	nextVersion?: string;
-	externalRepositories?: Array<RepositoryConfig>;
-	transformScope: TransformScope;
-	date?: RawDateString;
-	changesetsDirectory?: string;
-} ): Promise<void> {
-	// An array of package.json files of packages to be included in generated changelog.
+}: RepositoryConfig & GenerateChangelog ): Promise<void> {
 	const packages = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
 	const gitHubUrl = await getGitHubUrl( cwd );
-	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
+	const packageJson = await getPackageJson( cwd );
+	const { version: oldVersion, name: rootPackageName } = packageJson;
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
@@ -56,24 +88,26 @@ export async function generateChangelog( {
 		transformScope
 	} );
 
+	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
+
+	if ( !sectionsToDisplay.length ) {
+		logInfo( '📍 ' + chalk.yellow( `No valid changesets in the '${ changesetsDirectory }' directory found. Aborting.` ) );
+
+		return;
+	}
+
 	// Logging changes in the console.
 	logChangelogFiles( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
 	const newVersion = nextVersion ?? await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName );
-	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
+
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
 		sections: sectionsWithEntries,
 		oldVersion,
 		newVersion,
 		packages
 	} );
-
-	if ( !sectionsToDisplay.length ) {
-		logInfo( '📍 ' + chalk.yellow( 'No walid packages to release found. Aborting.' ) );
-
-		return;
-	}
 
 	const newChangelog = [
 		oldVersion === '0.0.1' ?

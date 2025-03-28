@@ -31,7 +31,7 @@ describe( 'logChangelogFiles', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
+		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }` );
 		expect( logInfo ).toHaveBeenCalledWith( chalk.blue( '🔸 Found Features:' ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenCalledWith( '* "Added new feature"', { indent: 4 } );
 	} );
@@ -82,6 +82,6 @@ describe( 'logChangelogFiles', () => {
 		logChangelogFiles( sections );
 
 		expect( logInfo ).toHaveBeenCalledTimes( 1 );
-		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }\n` );
+		expect( logInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Listing the changes...' ) }` );
 	} );
 } );

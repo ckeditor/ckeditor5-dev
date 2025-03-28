@@ -23,7 +23,7 @@ describe( 'getNewVersion', () => {
 			mainContent: undefined,
 			restContent: [],
 			'breaking-change': 'major',
-			type: 'Feature',
+			type: 'feature',
 			scope: [],
 			closes: [],
 			see: []
@@ -33,9 +33,9 @@ describe( 'getNewVersion', () => {
 	const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
 		major: { entries: [], title: 'Major Breaking Changes' },
 		minor: { entries: [], title: 'Minor Breaking Changes' },
-		Feature: { entries: [], title: 'Features' },
-		Fix: { entries: [], title: 'Bug fixes' },
-		Other: { entries: [], title: 'Other changes' },
+		feature: { entries: [], title: 'Features' },
+		fix: { entries: [], title: 'Bug fixes' },
+		other: { entries: [], title: 'Other changes' },
 		invalid: { entries: [], title: 'Invalid changes' },
 		...overrides
 	} );
@@ -86,7 +86,7 @@ describe( 'getNewVersion', () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 
 		const sectionsWithEntries = createSectionsWithEntries(
-			{ Feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' } }
+			{ feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' } }
 		);
 
 		const result = await getNewVersion( sectionsWithEntries, '1.0.0', 'test-package' );
@@ -122,7 +122,7 @@ describe( 'getNewVersion', () => {
 		const sectionsWithEntries = createSectionsWithEntries( {
 			minor: { entries: [ createEntry( 'Some minor change' ) ], title: 'Minor Breaking Changes' },
 			major: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' },
-			Feature: { entries: [ createEntry( 'Some feature' ) ], title: 'Features' }
+			feature: { entries: [ createEntry( 'Some feature' ) ], title: 'Features' }
 		} );
 
 		const result = await getNewVersion( sectionsWithEntries, '1.0.0', 'test-package' );

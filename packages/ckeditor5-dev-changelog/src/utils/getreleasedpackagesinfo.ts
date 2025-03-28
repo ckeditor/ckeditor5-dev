@@ -22,7 +22,7 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	const newVersionReleases = getNewVersionReleases( packages );
 	const majorReleases = getPackageNamesByEntriesScope( sections.major.entries );
 	const minorReleases = getPackageNamesByEntriesScope( sections.minor.entries, { packagesToRemove: majorReleases } );
-	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.Feature.entries, { packagesToRemove: minorReleases } );
+	const newFeaturesReleases = getPackageNamesByEntriesScope( sections.feature.entries, { packagesToRemove: minorReleases } );
 
 	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
 

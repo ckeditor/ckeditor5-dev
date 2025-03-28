@@ -3,10 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import fsExtra from 'fs-extra';
 import type { PackageJson, RepositoryConfig } from '../types.js';
 import { findPathsToPackages } from './findpathstopackages.js';
-import fsExtra from 'fs-extra';
-import upath from 'upath';
 
 /**
  * Retrieves package.json files for all packages that need to be released.
@@ -18,16 +17,16 @@ export async function getReleasePackagesPkgJsons(
 	externalRepositories: Array<RepositoryConfig>
 ): Promise<Array<PackageJson>> {
 	const externalPackagesPromises = externalRepositories.map( externalRepository =>
-		findPathsToPackages( externalRepository.cwd, externalRepository.packagesDirectory )
+		findPathsToPackages( externalRepository.cwd, externalRepository.packagesDirectory, { includePackageJson: true } )
 	);
 
 	const packagesPaths = ( await Promise.all( [
-		findPathsToPackages( cwd, packagesDirectory, { includeCwd: true } ),
+		findPathsToPackages( cwd, packagesDirectory, { includeCwd: true, includePackageJson: true } ),
 		...externalPackagesPromises
 	] ) ).flat();
 
 	const packagesPromises = packagesPaths.map( packagePath =>
-		fsExtra.readJson( upath.join( packagePath, 'package.json' ) )
+		fsExtra.readJson( packagePath )
 	);
 
 	return Promise.all( packagesPromises );

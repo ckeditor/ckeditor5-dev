@@ -3,12 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { RepositoryConfig } from '../types.js';
-import { logInfo } from './loginfo.js';
 import chalk from 'chalk';
 import fs from 'fs/promises';
-import { removeEmptyDirs } from './removeemptydirs.js';
 import upath from 'upath';
+import { removeEmptyDirs } from './removeemptydirs.js';
+import type { RepositoryConfig } from '../types.js';
+import { logInfo } from './loginfo.js';
 
 /**
  * Removes processed changeset files after changelog generation.

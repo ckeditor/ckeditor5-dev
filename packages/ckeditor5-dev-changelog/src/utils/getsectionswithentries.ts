@@ -3,9 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, PackageJson, ParsedFile, SectionsWithEntries, TransformScope } from '../types.js';
+import type {
+	Entry,
+	PackageJson,
+	ParsedFile,
+	SectionName,
+	SectionsWithEntries,
+	TransformScope
+} from '../types.js';
 import { ORGANISATION_NAMESPACE, SECTIONS } from '../constants.js';
-import { linkToGithubUser } from './linktogithubuser.js';
+import { linkToGitHubUser } from './linktogithubuser.js';
 
 /**
  * Processes changeset files and organizes entries into sections.
@@ -21,12 +28,13 @@ export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, tran
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
 		const breakingChange = entry.data[ 'breaking-change' ];
-		const type = entry.data.type;
-		const section = !isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE ) ? 'invalid' : breakingChange ?? type;
+		const type = typeToSection( entry.data.type );
 		const scope = getScopesLinks( entry.data.scope, transformScope );
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', gitHubUrl );
-		const [ mainContent, ...restContent ] = linkToGithubUser( entry.content ).trim().split( '\n\n' );
+		const isValid = isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE );
+		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
+		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
 		const changeMessage = [
 			'*',
@@ -39,13 +47,13 @@ export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, tran
 
 		const newEntry: Entry = { message: changeMessage, data: { ...entry.data, mainContent, restContent } };
 
-		sections[ section ].entries = [ ...sections[ section ].entries ?? [], newEntry ];
+		sections[ section ].entries = [ ...sections[ section ].entries, newEntry ];
 
 		return sections;
-	}, structuredClone( SECTIONS ) as SectionsWithEntries );
+	}, getInitialSectionsWithEntries() );
 }
 
-function getScopesLinks( scope: Array<string>, transformScope: TransformScope ): string | null {
+function getScopesLinks( scope: Array<string> | undefined, transformScope: TransformScope ): string | null {
 	if ( !scope ) {
 		return null;
 	}
@@ -56,7 +64,7 @@ function getScopesLinks( scope: Array<string>, transformScope: TransformScope ):
 		.join( ', ' );
 }
 
-function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string | null {
+function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitHubUrl: string ): string | null {
 	if ( !issues ) {
 		return null;
 	}
@@ -68,7 +76,7 @@ function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: strin
 
 function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisationNamespace: string ): boolean {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
-	const expectedTypes = [ 'Feature', 'Fix', 'Other' ];
+	const expectedTypes: Array<unknown> = [ 'Feature', 'Fix', 'Other' ];
 
 	if ( !expectedTypes.includes( entry.data.type ) ) {
 		return false;
@@ -79,4 +87,30 @@ function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisa
 	}
 
 	return true;
+}
+
+function typeToSection( type: string | undefined ): SectionName {
+	if ( type === 'Feature' ) {
+		return 'feature';
+	}
+
+	if ( type === 'Fix' ) {
+		return 'fix';
+	}
+
+	if ( type === 'Other' ) {
+		return 'other';
+	}
+
+	return 'invalid';
+}
+
+function getInitialSectionsWithEntries(): SectionsWithEntries {
+	const sections = structuredClone( SECTIONS ) as SectionsWithEntries;
+
+	for ( const key in sections ) {
+		sections[ key as SectionName ].entries = [];
+	}
+
+	return sections;
 }
