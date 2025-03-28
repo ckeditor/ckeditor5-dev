@@ -12,6 +12,7 @@ const SUPPORTED_LOCALES = [
 	'ast', // Asturian
 	'az', // Azerbaijani
 	'eu', // Basque
+	'be', // Belarusian
 	'bn', // Bengali
 	'bs', // Bosnian
 	'bg', // Bulgarian
