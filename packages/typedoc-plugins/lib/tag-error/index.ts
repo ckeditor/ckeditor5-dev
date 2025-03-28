@@ -7,23 +7,15 @@ import {
 	Comment,
 	Converter,
 	ReflectionKind,
+	TypeParameterReflection,
 	TypeScript as ts,
-	type Reflection,
-	ReflectionFlag,
 	type Application,
 	type Context,
 	type CommentDisplayPart
 } from 'typedoc';
 
-declare module 'typedoc' {
-	export enum ReflectionFlag {
-
-		/**
-		 * The reflection is an error.
-		 */
-		isError = 2048
-	}
-}
+import CustomFlagSerializer from './customflagserializer.js';
+import './augmentation.js';
 
 const ERROR_TAG_NAME = 'error';
 
@@ -35,7 +27,11 @@ const ERROR_TAG_NAME = 'error';
 export default function ( app: Application ): void {
 	app.converter.on( Converter.EVENT_END, onEventEnd );
 
-	app.serializer.addSerializer( new CustomFlagSerializer() as any );
+	// TODO: To resolve types.
+	// @ts-expect-error TS2345
+	// Argument of type CustomFlagSerializer is not assignable to parameter of type SerializerComponent<Reflection>
+	// The types returned by toObject(...) are incompatible between these types.
+	app.serializer.addSerializer( new CustomFlagSerializer() );
 }
 
 function onEventEnd( context: Context ) {
@@ -61,12 +57,12 @@ function onEventEnd( context: Context ) {
 			}
 
 			// Filter out non "error" nodes.
-			if ( node.escapedText !== ERROR_TAG_NAME ) {
+			if ( node.text !== ERROR_TAG_NAME ) {
 				return false;
 			}
 
 			// Remove error-like nodes, e.g. "@eventName error".
-			if ( node.parent.tagName && node.parent.tagName.escapedText !== ERROR_TAG_NAME ) {
+			if ( node.parent.tagName?.text !== ERROR_TAG_NAME ) {
 				return false;
 			}
 
@@ -81,7 +77,7 @@ function onEventEnd( context: Context ) {
 		// Create error definitions from typedoc declarations.
 		for ( const errorNode of nodes ) {
 			const parentNode = errorNode.parent;
-			const errorName = parentNode.comment;
+			const errorName = parentNode.comment!;
 
 			const errorDeclaration = context
 				.withScope( reflection )
@@ -91,9 +87,42 @@ function onEventEnd( context: Context ) {
 					undefined,
 					errorName
 				);
-			errorDeclaration.setFlag( ReflectionFlag.isError, true );
+			errorDeclaration.isCKEditor5Error = true;
 
-			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
+			// if ( errorName === 'customerror-inside-method') {
+			// 	const value = parentNode.parent.getChildren()
+			// 		.filter( childTag => {
+			// 			if ( !childTag.comment || !parentNode.parent.comment ) {
+			// 				return false;
+			// 			}
+			//
+			// 			// Do not process the `@error` tag again.
+			// 			if ( childTag === parentNode ) {
+			// 				return false;
+			// 			}
+			//
+			// 			return true;
+			// 		} )
+			// 		.map( childTag => {
+			// 			const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
+			//
+			// 			// typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
+			// 			// typeParameter.comment = new Comment( createComment( childTag.comment ) );
+			//
+			// 			// return typeParameter;
+			//
+			// 			return {
+			// 				type: context.converter.convertType( context.withScope( typeParameter ) ),
+			// 				comment: new Comment( createComment( childTag.comment ) )
+			// 			}
+			// 		} );
+			//
+			// 	console.log( value );
+			// }
+
+			const { parent } = parentNode as unknown as { parent: { comment: MaybeCommentDisplayPart } };
+
+			errorDeclaration.comment = createComment( parent.comment );
 			// errorDeclaration.kindString = 'Error';
 			// errorDeclaration.typeParameters = parentNode.parent.getChildren()
 			// 	.filter( childTag => {
@@ -112,7 +141,7 @@ function onEventEnd( context: Context ) {
 			// 		const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
 			//
 			// 		typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
-			// 		typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );
+			// 		typeParameter.comment = new Comment( createComment( childTag.comment ) );
 			//
 			// 		return typeParameter;
 			// 	} );
@@ -120,15 +149,32 @@ function onEventEnd( context: Context ) {
 	}
 }
 
-function findDescendant( sourceFileOrNode: ts.Node, callback: ( node: ts.Node ) => boolean ): Array<ts.Node> {
+type ErrorTagNode = ts.Node & {
+	text: string;
+	parent: ts.Node & {
+		tagName: ts.JSDocTag & {
+			text: string;
+		};
+		comment?: string;
+	};
+};
+
+type MaybeCommentDisplayPart = null | string | Array<CommentDisplayPart>;
+
+function findDescendant(
+	sourceFileOrNode: ts.SourceFile | ErrorTagNode,
+	callback: ( node: ErrorTagNode ) => boolean
+): Array<ErrorTagNode> {
 	const output = [];
 
 	for ( const node of sourceFileOrNode.getChildren() ) {
-		if ( node.getChildCount() ) {
-			output.push( ...findDescendant( node, callback ) );
+		const nodeAsErrorTag = node as unknown as ErrorTagNode;
+
+		if ( nodeAsErrorTag.getChildCount() ) {
+			output.push( ...findDescendant( nodeAsErrorTag, callback ) );
 		} else {
-			if ( callback( node ) ) {
-				output.push( node );
+			if ( callback( nodeAsErrorTag ) ) {
+				output.push( nodeAsErrorTag );
 			}
 		}
 	}
@@ -137,75 +183,51 @@ function findDescendant( sourceFileOrNode: ts.Node, callback: ( node: ts.Node ) 
 }
 
 /**
- * Transforms a node or array of node to an array of objects that follow
+ * Converts a comment node (or array of nodes) to a format expected by `Reflection#comment`.
  */
-function getCommentDisplayPart( commentChildrenOrValue: string | Array<CommentDisplayPart> | null ): Array<CommentDisplayPart> {
+function createComment( commentChildrenOrValue: MaybeCommentDisplayPart ): Comment {
 	if ( !commentChildrenOrValue ) {
-		return [];
+		return new Comment( [] );
 	}
 
 	if ( typeof commentChildrenOrValue === 'string' ) {
-		return [
+		return new Comment( [
 			{
 				kind: 'text',
 				text: commentChildrenOrValue
 			}
-		];
+		] );
 	}
 
-	return commentChildrenOrValue
+	const comments = commentChildrenOrValue
 		.map( item => {
-			let { text } = item;
+			// Types says it's a string, while a run-time check says it can be a number.
+			const kind = item.kind as unknown;
 
 			// An inline tag inside a description.
-			if ( item.kind === ts.SyntaxKind.JSDocLink ) {
+			if ( kind === ts.SyntaxKind.JSDocLink ) {
+				let { text } = item;
+
 				// A reference, e.g. "module:".
-				if ( item.name ) {
-					text = item.name.escapedText + text;
+				if ( 'name' in item && item.name ) {
+					const { name } = item as { name: { text: string } };
+
+					text = name.text + text;
 				}
 
 				return {
 					text,
 					kind: 'inline-tag',
 					tag: '@link'
-				};
+				} as const;
 			}
 
 			return {
-				text,
+				text: item.text,
 				kind: 'text'
-			};
+			} as const;
 		} )
 		.filter( ( { text } ) => text.length );
-}
 
-type PartialObject = {
-	[ key: string ]: unknown;
-	flags: {
-		[ key: string ]: boolean;
-	};
-};
-
-class CustomFlagSerializer {
-	public get priority() {
-		return 0;
-	}
-
-	public supports() {
-		return true;
-	}
-
-	public toObject( item: Reflection, obj: PartialObject ): object {
-		if ( !( 'flags' in item ) ) {
-			return obj;
-		}
-
-		const { flags } = item;
-
-		if ( flags.hasFlag( 20248 as ReflectionFlag ) ) {
-			obj.flags.isError = true;
-		}
-
-		return obj;
-	}
+	return new Comment( comments );
 }

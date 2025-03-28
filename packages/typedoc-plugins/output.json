@@ -50,7 +50,7 @@
 									"fileName": "error.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
 								}
 							],
 							"signatures": [
@@ -65,7 +65,7 @@
 											"fileName": "error.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
 										}
 									],
 									"parameters": [
@@ -108,15 +108,14 @@
 							"kind": 1024,
 							"flags": {
 								"isProtected": true,
-								"isInherited": true,
-								"isError": true
+								"isInherited": true
 							},
 							"sources": [
 								{
 									"fileName": "error.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L11"
 								}
 							],
 							"type": {
@@ -136,15 +135,14 @@
 							"kind": 262144,
 							"flags": {
 								"isPublic": true,
-								"isInherited": true,
-								"isError": true
+								"isInherited": true
 							},
 							"sources": [
 								{
 									"fileName": "error.ts",
 									"line": 25,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
 								}
 							],
 							"getSignature": {
@@ -153,15 +151,14 @@
 								"variant": "signature",
 								"kind": 524288,
 								"flags": {
-									"isInherited": true,
-									"isError": true
+									"isInherited": true
 								},
 								"sources": [
 									{
 										"fileName": "error.ts",
 										"line": 25,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
 									}
 								],
 								"type": {
@@ -187,15 +184,14 @@
 							"kind": 262144,
 							"flags": {
 								"isPublic": true,
-								"isInherited": true,
-								"isError": true
+								"isInherited": true
 							},
 							"sources": [
 								{
 									"fileName": "error.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -204,15 +200,14 @@
 								"variant": "signature",
 								"kind": 524288,
 								"flags": {
-									"isInherited": true,
-									"isError": true
+									"isInherited": true
 								},
 								"sources": [
 									{
 										"fileName": "error.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
 									}
 								],
 								"type": {
@@ -238,15 +233,14 @@
 							"kind": 2048,
 							"flags": {
 								"isPublic": true,
-								"isStatic": true,
-								"isError": true
+								"isStatic": true
 							},
 							"sources": [
 								{
 									"fileName": "customerror.ts",
 									"line": 41,
 									"character": 15,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L41"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L41"
 								}
 							],
 							"signatures": [
@@ -261,7 +255,7 @@
 											"fileName": "customerror.ts",
 											"line": 41,
 											"character": 15,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L41"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L41"
 										}
 									],
 									"parameters": [
@@ -320,7 +314,7 @@
 							"fileName": "customerror.ts",
 							"line": 40,
 							"character": 21,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L40"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L40"
 						}
 					],
 					"extendedTypes": [
@@ -343,7 +337,7 @@
 							"fileName": "customerror.ts",
 							"line": 61,
 							"character": 16,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L61"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L61"
 						}
 					],
 					"signatures": [
@@ -358,7 +352,7 @@
 									"fileName": "customerror.ts",
 									"line": 61,
 									"character": 16,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L61"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L61"
 								}
 							],
 							"parameters": [
@@ -397,7 +391,8 @@
 								"text": "An error statement occurring before the `@module` definition."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 42,
@@ -430,7 +425,8 @@
 								"kind": "text"
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 43,
@@ -445,7 +441,8 @@
 								"text": "An error statement occurring after the \"@module\" definition."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 44,
@@ -460,14 +457,16 @@
 								"text": "An error statement occurring before the export keyword."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 45,
 					"name": "customerror-inside-method-no-text",
 					"variant": "declaration",
 					"kind": 8388608,
-					"flags": {}
+					"flags": {},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 46,
@@ -482,7 +481,8 @@
 								"text": "An error statement occurring inside a method.\n\nIt contains a parameter."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 47,
@@ -497,7 +497,8 @@
 								"text": "An error statement occurring inside a function.\n\nIt contains parameters."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				},
 				{
 					"id": 48,
@@ -512,7 +513,8 @@
 								"text": "An error statement occurring after the export keyword."
 							}
 						]
-					}
+					},
+					"isCKEditor5Error": true
 				}
 			],
 			"groups": [
@@ -534,7 +536,7 @@
 					"fileName": "customerror.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/customerror.ts#L1"
 				}
 			]
 		},
@@ -563,7 +565,7 @@
 									"fileName": "error.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
 								}
 							],
 							"signatures": [
@@ -578,7 +580,7 @@
 											"fileName": "error.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L13"
 										}
 									],
 									"parameters": [
@@ -617,7 +619,7 @@
 									"fileName": "error.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L11"
 								}
 							],
 							"type": {
@@ -638,7 +640,7 @@
 									"fileName": "error.ts",
 									"line": 25,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
 								}
 							],
 							"getSignature": {
@@ -652,7 +654,7 @@
 										"fileName": "error.ts",
 										"line": 25,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L25"
 									}
 								],
 								"type": {
@@ -674,7 +676,7 @@
 									"fileName": "error.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -688,7 +690,7 @@
 										"fileName": "error.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L21"
 									}
 								],
 								"type": {
@@ -724,7 +726,7 @@
 							"fileName": "error.ts",
 							"line": 10,
 							"character": 21,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L10"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L10"
 						}
 					],
 					"extendedBy": [
@@ -749,7 +751,7 @@
 					"fileName": "error.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/error.ts#L1"
 				}
 			]
 		},
@@ -807,7 +809,7 @@
 									"fileName": "events.ts",
 									"line": 22,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L22"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L22"
 								}
 							],
 							"type": {
@@ -836,7 +838,7 @@
 									"fileName": "events.ts",
 									"line": 21,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L21"
 								}
 							],
 							"type": {
@@ -859,7 +861,7 @@
 							"fileName": "events.ts",
 							"line": 20,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L20"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L20"
 						}
 					]
 				},
@@ -910,7 +912,7 @@
 									"fileName": "events.ts",
 									"line": 44,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L44"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L44"
 								}
 							],
 							"type": {
@@ -939,7 +941,7 @@
 									"fileName": "events.ts",
 									"line": 43,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L43"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L43"
 								}
 							],
 							"type": {
@@ -962,7 +964,7 @@
 							"fileName": "events.ts",
 							"line": 42,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L42"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L42"
 						}
 					]
 				},
@@ -1013,7 +1015,7 @@
 									"fileName": "events.ts",
 									"line": 33,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L33"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L33"
 								}
 							],
 							"type": {
@@ -1042,7 +1044,7 @@
 									"fileName": "events.ts",
 									"line": 32,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L32"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L32"
 								}
 							],
 							"type": {
@@ -1065,7 +1067,7 @@
 							"fileName": "events.ts",
 							"line": 31,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L31"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L31"
 						}
 					]
 				}
@@ -1085,7 +1087,7 @@
 					"fileName": "events.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/a056a40b7b996b30004acb7e0c88b7e2e5688d4d/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/2685978c7af5156e323b6258fadf4406b62a4647/packages/typedoc-plugins/tests/tag-error/fixtures/events.ts#L1"
 				}
 			]
 		},
