@@ -9,7 +9,7 @@ import inquirer from 'inquirer';
 import { randomUUID } from 'crypto';
 import upath from 'upath';
 import os from 'os';
-import { ensureDir, remove } from 'fs-extra';
+import fs from 'fs-extra';
 import pacote from 'pacote';
 
 const CLI_INDENT_SIZE = 3;
@@ -137,7 +137,7 @@ function cacheLessPacoteFactory( callback: typeof pacote.manifest ) {
 		const uuid = randomUUID();
 		const cacheDir = upath.join( os.tmpdir(), `pacote--${ uuid }` );
 
-		await ensureDir( cacheDir );
+		await fs.ensureDir( cacheDir );
 
 		try {
 			return await callback( description, {
@@ -147,7 +147,7 @@ function cacheLessPacoteFactory( callback: typeof pacote.manifest ) {
 				preferOnline: true
 			} );
 		} finally {
-			await remove( cacheDir );
+			await fs.remove( cacheDir );
 		}
 	};
 }

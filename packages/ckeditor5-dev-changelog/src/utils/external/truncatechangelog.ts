@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import upath from 'upath';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../../constants.js';
 import { getRepositoryUrl } from './getrepositoryurl.js';
 
 /**

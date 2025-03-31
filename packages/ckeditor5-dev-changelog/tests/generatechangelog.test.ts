@@ -17,8 +17,8 @@ import { modifyChangelog } from '../src/utils/modifychangelog.js';
 import { removeChangesetFiles } from '../src/utils/removechangesetfiles.js';
 import { logInfo } from '../src/utils/loginfo.js';
 import { logChangelogFiles } from '../src/utils/logchangelogfiles.js';
+import { getRepositoryUrl } from '../src/utils/external/getrepositoryurl.js';
 import { SECTIONS } from '../src/constants.js';
-import { getRepositoryUrl } from '../src/utils-external/getrepositoryurl.js';
 
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
 vi.mock( '../src/utils/getpackagejson.js' );
@@ -32,7 +32,7 @@ vi.mock( '../src/utils/modifychangelog.js' );
 vi.mock( '../src/utils/removechangesetfiles.js' );
 vi.mock( '../src/utils/loginfo.js' );
 vi.mock( '../src/utils/logchangelogfiles.js' );
-vi.mock( '../src/utils-external/getrepositoryurl.js' );
+vi.mock( '../src/utils/external/getrepositoryurl.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,

@@ -7,12 +7,12 @@ import { describe, it, expect, vi } from 'vitest';
 import { getPackageJsons } from '../../src/utils/getreleasepackagespkgjsons.js';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { findPathsToPackages } from '../../src/utils-external/findpathstopackages.js';
+import { findPathsToPackages } from '../../src/utils/external/findpathstopackages.js';
 import type { RepositoryConfig } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'upath' );
-vi.mock( '../../src/utils-external/findpathstopackages' );
+vi.mock( '../../src/utils/external/findpathstopackages' );
 
 describe( 'getReleasePackagesPkgJsons', () => {
 	const cwd = '/local/directory';

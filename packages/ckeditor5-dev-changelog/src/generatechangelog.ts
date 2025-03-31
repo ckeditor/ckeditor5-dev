@@ -5,7 +5,13 @@
 
 import { format } from 'date-fns';
 import chalk from 'chalk';
-import { NPM_URL, PACKAGES_DIRECTORY_NAME, VERSIONING_POLICY_URL } from './constants.js';
+import {
+	CHANGESET_DIRECTORY,
+	NPM_URL,
+	ORGANISATION_NAMESPACE,
+	PACKAGES_DIRECTORY_NAME,
+	VERSIONING_POLICY_URL
+} from './constants.js';
 import type { GenerateChangelog, RawDateString, RepositoryConfig } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { logChangelogFiles } from './utils/logchangelogfiles.js';
@@ -22,7 +28,7 @@ import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
 import { defaultTransformScope } from './utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from './utils/getexternalrepositorieswithdefaults.js';
-import { getRepositoryUrl } from './utils-external/getrepositoryurl.js';
+import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
 
 /**
  * Generates a changelog for the repository based on changeset files and package information.
@@ -32,12 +38,12 @@ import { getRepositoryUrl } from './utils-external/getrepositoryurl.js';
 export async function generateChangelog( {
 	cwd,
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
-	organisationNamespace = '@ckeditor',
+	organisationNamespace = ORGANISATION_NAMESPACE,
 	nextVersion,
 	externalRepositories = [],
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
-	changesetsDirectory = '.changelog'
+	changesetsDirectory = CHANGESET_DIRECTORY
 }: RepositoryConfig & GenerateChangelog ): Promise<void> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );

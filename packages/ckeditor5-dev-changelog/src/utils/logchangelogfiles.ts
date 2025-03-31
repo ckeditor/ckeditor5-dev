@@ -38,7 +38,6 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 			}
 		} else {
 			for ( const entry of section.entries ) {
-				// todo list what is invalid
 				logInfo( `- "${ entry.data.mainContent }" (file://${ entry.changesetPath })`, { indent: 4 } );
 			}
 		}

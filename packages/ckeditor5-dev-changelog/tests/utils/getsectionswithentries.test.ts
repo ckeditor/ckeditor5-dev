@@ -5,15 +5,14 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGitHubUser } from '../../src/utils-external/linktogithubuser.js';
-import { ORGANISATION_NAMESPACE } from '../../src/constants.js';
+import { linkToGitHubUser } from '../../src/utils/external/linktogithubuser.js';
 import type { ParsedFile, PackageJson } from '../../src/types.js';
 
 type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock( '../../src/utils-external/linktogithubuser', () => ( {
+vi.mock( '../../src/utils/external/linktogithubuser', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
 
@@ -31,7 +30,7 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 } as any );
 
 describe( 'getSectionsWithEntries', () => {
-	const organisationNamespace = ORGANISATION_NAMESPACE;
+	const organisationNamespace = '@ckeditor';
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
 	let packages: Array<PackageJson>;
 

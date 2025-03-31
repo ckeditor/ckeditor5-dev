@@ -8,11 +8,11 @@ import upath from 'upath';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { RepositoryConfig } from '../../src/types.js';
 import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
-import { getRepositoryUrl } from '../../src/utils-external/getrepositoryurl.js';
+import { getRepositoryUrl } from '../../src/utils/external/getrepositoryurl.js';
 
 vi.mock( 'upath' );
 vi.mock( 'glob' );
-vi.mock( '../../src/utils-external/getrepositoryurl.js' );
+vi.mock( '../../src/utils/external/getrepositoryurl.js' );
 
 describe( 'getChangesetFilePaths', () => {
 	beforeEach( () => {

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getPackageJson } from '../utils/getpackagejson.js';
+import { getPackageJson } from '../../utils/getpackagejson.js';
 
 /**
  * Retrieves the repository URL from package.json configuration.

@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getRepositoryUrl } from '../../src/utils-external/getrepositoryurl.js';
-import { getPackageJson } from '../../src/utils/getpackagejson.js';
+import { getRepositoryUrl } from '../../../src/utils/external/getrepositoryurl.js';
+import { getPackageJson } from '../../../src/utils/getpackagejson.js';
 
-vi.mock( '../../src/utils/getpackagejson' );
+vi.mock( '../../../src/utils/getpackagejson' );
 
 describe( 'getRepositoryUrl', () => {
 	const mockCwd = '/test/cwd';

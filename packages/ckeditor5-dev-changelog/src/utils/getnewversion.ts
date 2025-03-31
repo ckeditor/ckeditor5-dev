@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import type { ReleaseType } from 'semver';
 import type { SectionsWithEntries } from '../types.js';
-import { provideNewVersionForMonorepository } from '../utils-external/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../utils/external/providenewversionformonorepository.js';
 import { logInfo } from './loginfo.js';
 
 /**

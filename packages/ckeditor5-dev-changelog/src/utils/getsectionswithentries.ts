@@ -12,7 +12,7 @@ import type {
 	TransformScope
 } from '../types.js';
 import { SECTIONS } from '../constants.js';
-import { linkToGitHubUser } from '../utils-external/linktogithubuser.js';
+import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
 
 /**
  * Processes changeset files and organizes entries into sections.

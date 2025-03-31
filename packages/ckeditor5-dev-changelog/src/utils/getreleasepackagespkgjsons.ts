@@ -5,7 +5,7 @@
 
 import fs from 'fs-extra';
 import type { PackageJson, RepositoryConfig } from '../types.js';
-import { findPathsToPackages } from '../utils-external/findpathstopackages.js';
+import { findPathsToPackages } from '../utils/external/findpathstopackages.js';
 
 /**
  * Retrieves package.json files for all packages that need to be released.
