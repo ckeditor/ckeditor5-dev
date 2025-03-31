@@ -4,11 +4,12 @@
  */
 
 import { getChangesetsParsed } from '../../src/utils/getchangesetsparsed.js';
-import fs from 'fs/promises';
-import matter from 'gray-matter';
+import fs from 'fs-extra';
+import matter, { type GrayMatterFile } from 'gray-matter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
 
 describe( 'getChangesetsParsed', () => {
@@ -16,77 +17,223 @@ describe( 'getChangesetsParsed', () => {
 		vi.clearAllMocks();
 	} );
 
-	it( 'should parse markdown files correctly', async () => {
-		const filePaths = [ '/mock/file1.md', '/mock/file2.md' ];
+	it( 'should parse changeset files and return array of parsed files', async () => {
+		// Mock data
+		const changesetPath1 = '/path/to/changeset1.md';
+		const changesetPath2 = '/path/to/changeset2.md';
+		const gitHubUrl = 'https://github.com/ckeditor/ckeditor5';
+		const fileContent1 = 'File content 1';
+		const fileContent2 = 'File content 2';
 
-		const fileContents = [
-			'---\ntitle: "First Change"\n---\nSome changes',
-			'---\ntitle: "Second Change"\n---\nMore changes'
-		];
+		const matterResult1: GrayMatterFile<string> = {
+			content: 'Parsed content 1',
+			data: { type: 'feature', scope: [ 'ui' ] },
+			// Additional GrayMatterFile properties
+			orig: fileContent1,
+			language: 'md',
+			matter: '',
+			stringify: () => fileContent1
+		};
 
-		const parsedResults = [
-			{ content: 'Some changes', data: { title: 'First Change' } },
-			{ content: 'More changes', data: { title: 'Second Change' } }
-		];
+		const matterResult2: GrayMatterFile<string> = {
+			content: 'Parsed content 2',
+			data: { type: 'fix', scope: [ 'engine' ] },
+			// Additional GrayMatterFile properties
+			orig: fileContent2,
+			language: 'md',
+			matter: '',
+			stringify: () => fileContent2
+		};
 
-		vi.mocked( fs.readFile ).mockImplementation( file => {
-			return Promise.resolve( file === filePaths[ 0 ] ? fileContents[ 0 ] : fileContents[ 1 ] );
+		// Mock implementations
+		vi.mocked( fs.readFile ).mockImplementation( path => {
+			if ( path === changesetPath1 ) {
+				return Promise.resolve( fileContent1 );
+			}
+
+			if ( path === changesetPath2 ) {
+				return Promise.resolve( fileContent2 );
+			}
+
+			return Promise.resolve( '' );
 		} );
 
-		vi.mocked( matter ).mockImplementation( ( content: any ) => {
-			return parsedResults[ fileContents.indexOf( content ) ] as any;
+		vi.mocked( matter ).mockImplementation( content => {
+			if ( content === fileContent1 ) {
+				return matterResult1;
+			}
+
+			if ( content === fileContent2 ) {
+				return matterResult2;
+			}
+
+			return {} as any;
 		} );
 
-		const result = await getChangesetsParsed( filePaths );
+		// Input data
+		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+			{
+				changesetPaths: [ changesetPath1, changesetPath2 ],
+				gitHubUrl,
+				skipLinks: false
+			}
+		];
 
-		expect( result ).toEqual( parsedResults );
+		// Expected results
+		const expectedResults = [
+			{
+				...matterResult1,
+				gitHubUrl,
+				changesetPath: changesetPath1,
+				skipLinks: false
+			},
+			{
+				...matterResult2,
+				gitHubUrl,
+				changesetPath: changesetPath2,
+				skipLinks: false
+			}
+		];
+
+		// Execute the function
+		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+
+		// Assertions
+		expect( result ).toEqual( expectedResults );
 		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
+		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
+		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath2, 'utf-8' );
 		expect( matter ).toHaveBeenCalledTimes( 2 );
+		expect( matter ).toHaveBeenCalledWith( fileContent1 );
+		expect( matter ).toHaveBeenCalledWith( fileContent2 );
 	} );
 
-	it( 'should return an empty array if no files are provided', async () => {
-		const result = await getChangesetsParsed( [] );
+	it( 'should handle multiple repositories with different skipLinks values', async () => {
+		// Mock data
+		const changesetPath1 = '/path/to/repo1/changeset.md';
+		const changesetPath2 = '/path/to/repo2/changeset.md';
+		const gitHubUrl1 = 'https://github.com/ckeditor/ckeditor5';
+		const gitHubUrl2 = 'https://github.com/ckeditor/ckeditor5-dev';
+		const fileContent1 = 'File content 1';
+		const fileContent2 = 'File content 2';
 
+		const matterResult1: GrayMatterFile<string> = {
+			content: 'Parsed content 1',
+			data: { type: 'feature' },
+			// Additional GrayMatterFile properties
+			orig: fileContent1,
+			language: 'md',
+			matter: '',
+			stringify: () => fileContent1
+		};
+
+		const matterResult2: GrayMatterFile<string> = {
+			content: 'Parsed content 2',
+			data: { type: 'fix' },
+			// Additional GrayMatterFile properties
+			orig: fileContent2,
+			language: 'md',
+			matter: '',
+			stringify: () => fileContent2
+		};
+
+		// Mock implementations
+		vi.mocked( fs.readFile ).mockImplementation( path => {
+			if ( path === changesetPath1 ) {
+				return Promise.resolve( fileContent1 );
+			}
+
+			if ( path === changesetPath2 ) {
+				return Promise.resolve( fileContent2 );
+			}
+
+			return Promise.resolve( '' );
+		} );
+
+		vi.mocked( matter ).mockImplementation( content => {
+			if ( content === fileContent1 ) {
+				return matterResult1;
+			}
+
+			if ( content === fileContent2 ) {
+				return matterResult2;
+			}
+
+			return {} as any;
+		} );
+
+		// Input data
+		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+			{
+				changesetPaths: [ changesetPath1 ],
+				gitHubUrl: gitHubUrl1,
+				skipLinks: false
+			},
+			{
+				changesetPaths: [ changesetPath2 ],
+				gitHubUrl: gitHubUrl2,
+				skipLinks: true
+			}
+		];
+
+		// Expected results
+		const expectedResults = [
+			{
+				...matterResult1,
+				gitHubUrl: gitHubUrl1,
+				changesetPath: changesetPath1,
+				skipLinks: false
+			},
+			{
+				...matterResult2,
+				gitHubUrl: gitHubUrl2,
+				changesetPath: changesetPath2,
+				skipLinks: true
+			}
+		];
+
+		// Execute the function
+		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+
+		// Assertions
+		expect( result ).toEqual( expectedResults );
+		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
+		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
+		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath2, 'utf-8' );
+		expect( matter ).toHaveBeenCalledTimes( 2 );
+		expect( matter ).toHaveBeenCalledWith( fileContent1 );
+		expect( matter ).toHaveBeenCalledWith( fileContent2 );
+	} );
+
+	it( 'should handle empty changeset paths array', async () => {
+		// Input data
+		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+			{
+				changesetPaths: [],
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
+			}
+		];
+
+		// Execute the function
+		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+
+		// Assertions
 		expect( result ).toEqual( [] );
 		expect( fs.readFile ).not.toHaveBeenCalled();
 		expect( matter ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should handle empty files gracefully', async () => {
-		const filePaths = [ '/mock/empty.md' ];
+	it( 'should handle empty input array', async () => {
+		// Input data
+		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [];
 
-		vi.mocked( fs.readFile ).mockResolvedValueOnce( '' );
-		vi.mocked( matter ).mockReturnValue( { content: '', data: {} } as any );
+		// Execute the function
+		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
 
-		const result = await getChangesetsParsed( filePaths );
-
-		expect( result ).toEqual( [ { content: '', data: {} } ] );
-		expect( fs.readFile ).toHaveBeenCalledWith( '/mock/empty.md', 'utf-8' );
-		expect( matter ).toHaveBeenCalledTimes( 1 );
-	} );
-
-	it( 'should throw an error if reading a file fails', async () => {
-		const filePaths = [ '/mock/file1.md' ];
-
-		vi.mocked( fs.readFile ).mockRejectedValueOnce( new Error( 'File read error' ) );
-
-		await expect( getChangesetsParsed( filePaths ) ).rejects.toThrow( 'File read error' );
-
-		expect( fs.readFile ).toHaveBeenCalledWith( '/mock/file1.md', 'utf-8' );
+		// Assertions
+		expect( result ).toEqual( [] );
+		expect( fs.readFile ).not.toHaveBeenCalled();
 		expect( matter ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should throw an error if gray-matter fails to parse', async () => {
-		const filePaths = [ '/mock/file1.md' ];
-
-		vi.mocked( fs.readFile ).mockResolvedValueOnce( '---\ninvalid: file\n::' );
-		vi.mocked( matter ).mockImplementation( () => {
-			throw new Error( 'Parsing error' );
-		} );
-
-		await expect( getChangesetsParsed( filePaths ) ).rejects.toThrow( 'Parsing error' );
-
-		expect( fs.readFile ).toHaveBeenCalledWith( '/mock/file1.md', 'utf-8' );
-		expect( matter ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

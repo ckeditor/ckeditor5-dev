@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import type { ReleaseType } from 'semver';
 import type { SectionsWithEntries } from '../types.js';
-import { provideNewVersionForMonorepository } from './providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../utils-external/providenewversionformonorepository.js';
 import { logInfo } from './loginfo.js';
 
 /**
@@ -14,7 +14,7 @@ import { logInfo } from './loginfo.js';
  * This function analyzes the changes and suggests the appropriate version bump.
  */
 export async function getNewVersion( sectionsWithEntries: SectionsWithEntries, oldVersion: string, packageName: string ): Promise<string> {
-	logInfo( `📍 ${ chalk.cyan( 'Determining the new version...' ) }\n` );
+	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }\n` );
 
 	let bumpType: ReleaseType = 'patch';
 

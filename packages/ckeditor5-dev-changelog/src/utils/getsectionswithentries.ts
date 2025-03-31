@@ -11,28 +11,28 @@ import type {
 	SectionsWithEntries,
 	TransformScope
 } from '../types.js';
-import { ORGANISATION_NAMESPACE, SECTIONS } from '../constants.js';
-import { linkToGitHubUser } from './linktogithubuser.js';
+import { SECTIONS } from '../constants.js';
+import { linkToGitHubUser } from '../utils-external/linktogithubuser.js';
 
 /**
  * Processes changeset files and organizes entries into sections.
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, transformScope }: {
+export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace }: {
 	parsedFiles: Array<ParsedFile>;
-	packages: Array<PackageJson>;
-	gitHubUrl: string;
+	packageJsons: Array<PackageJson>;
 	transformScope: TransformScope;
+	organisationNamespace: string;
 } ): SectionsWithEntries {
-	const packagesNames = packages.map( packageJson => packageJson.name );
+	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
 		const breakingChange = entry.data[ 'breaking-change' ];
 		const type = typeToSection( entry.data.type );
 		const scope = getScopesLinks( entry.data.scope, transformScope );
-		const closes = getIssuesLinks( entry.data.closes, 'Closes', gitHubUrl );
-		const see = getIssuesLinks( entry.data.see, 'See', gitHubUrl );
-		const isValid = isEntryValid( entry, packagesNames, ORGANISATION_NAMESPACE );
+		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
+		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
+		const isValid = isEntryValid( entry, packagesNames, organisationNamespace );
 		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
@@ -40,12 +40,16 @@ export function getSectionsWithEntries( { parsedFiles, packages, gitHubUrl, tran
 			'*',
 			scope ? `**${ scope }**:` : null,
 			mainContent,
-			see ? see : null,
-			closes ? closes : null,
+			!entry.skipLinks && see ? see : null,
+			!entry.skipLinks && closes ? closes : null,
 			restContent.length ? '\n\n  ' + restContent.join( '\n\n  ' ) : null
 		].filter( Boolean ).join( ' ' );
 
-		const newEntry: Entry = { message: changeMessage, data: { ...entry.data, mainContent, restContent } };
+		const newEntry: Entry = {
+			message: changeMessage,
+			data: { ...entry.data, mainContent, restContent },
+			changesetPath: entry.changesetPath
+		};
 
 		sections[ section ].entries = [ ...sections[ section ].entries, newEntry ];
 
@@ -82,7 +86,7 @@ function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisa
 		return false;
 	}
 
-	if ( !entry.data.scope?.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
+	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
 		return false;
 	}
 

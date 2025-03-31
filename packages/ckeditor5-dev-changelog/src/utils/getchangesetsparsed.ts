@@ -3,16 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import matter from 'gray-matter';
-import type { ParsedFile } from '../types.js';
+import type { ChangesetPathsWithGithubUrl, ParsedFile } from '../types.js';
 
 /**
  * Parses and returns the contents of all changeset files in the repository.
  * This function reads and processes the changeset files to extract changelog information.
  */
-export async function getChangesetsParsed( changesetFilePaths: Array<string> ): Promise<Array<ParsedFile>> {
-	const changesetFiles = await Promise.all( changesetFilePaths.map( file => fs.readFile( file, 'utf-8' ) ) );
-
-	return changesetFiles.map( file => matter( file ) ) as unknown as Array<ParsedFile>;
+export async function getChangesetsParsed( changesetsPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {
+	return await Promise.all( changesetsPathsWithGithubUrl.flatMap( ( { changesetPaths, gitHubUrl, skipLinks } ) =>
+		changesetPaths.map( async changesetPath => ( {
+			...await matter( await fs.readFile( changesetPath, 'utf-8' ) ),
+			gitHubUrl,
+			changesetPath,
+			skipLinks
+		} ) )
+	) );
 }

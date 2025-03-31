@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getRepositoryUrl } from '../../src/utils/getrepositoryurl.js';
+import { getRepositoryUrl } from '../../src/utils-external/getrepositoryurl.js';
 import { getPackageJson } from '../../src/utils/getpackagejson.js';
 
 vi.mock( '../../src/utils/getpackagejson' );
@@ -53,6 +53,19 @@ describe( 'getRepositoryUrl', () => {
 			name: mockPackageName,
 			version: '1.0.0',
 			repository: 'https://github.com/ckeditor/ckeditor5/issues'
+		};
+		vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
+
+		const result = await getRepositoryUrl( mockCwd );
+
+		expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
+	} );
+
+	it( 'should remove git+ prefix from repository URL', async () => {
+		const mockPackageJson = {
+			name: mockPackageName,
+			version: '1.0.0',
+			repository: 'git+https://github.com/ckeditor/ckeditor5'
 		};
 		vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
 

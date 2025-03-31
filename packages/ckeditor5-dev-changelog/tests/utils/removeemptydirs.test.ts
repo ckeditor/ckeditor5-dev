@@ -5,12 +5,11 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
-import fsExtra from 'fs-extra';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import upath from 'upath';
 
+// Mock the entire fs-extra module
 vi.mock( 'fs-extra' );
-vi.mock( 'fs/promises' );
 
 describe( 'removeEmptyDirs', () => {
 	const mockDir = '/some/dir';
@@ -20,7 +19,8 @@ describe( 'removeEmptyDirs', () => {
 	} );
 
 	it( 'does nothing if the directory does not exist', async () => {
-		vi.mocked( fsExtra.existsSync ).mockReturnValue( false );
+		// Setup the mock implementation for this test case
+		vi.mocked( fs.pathExists ).mockResolvedValue( false as any );
 
 		await removeEmptyDirs( mockDir );
 
@@ -29,8 +29,10 @@ describe( 'removeEmptyDirs', () => {
 	} );
 
 	it( 'removes an empty directory', async () => {
-		vi.mocked( fsExtra.existsSync ).mockReturnValue( true );
-		vi.mocked( fs.readdir ).mockResolvedValue( [] );
+		// Setup the mock implementations for this test case
+		vi.mocked( fs.pathExists ).mockResolvedValue( true as any );
+		vi.mocked( fs.readdir ).mockResolvedValue( [] as any );
+		vi.mocked( fs.rmdir ).mockResolvedValue( undefined );
 
 		await removeEmptyDirs( mockDir );
 
@@ -40,12 +42,13 @@ describe( 'removeEmptyDirs', () => {
 	it( 'recursively removes empty subdirectories', async () => {
 		const subDir = upath.join( mockDir, 'subdir' );
 
-		vi.mocked( fsExtra.existsSync ).mockReturnValue( true );
+		// Setup the mock implementations for this test case
+		vi.mocked( fs.pathExists ).mockResolvedValue( true as any );
 		vi.mocked( fs.readdir )
-			.mockResolvedValueOnce( [ 'subdir' as any ] ) // First call: `mockDir` contains `subdir`
-			.mockResolvedValue( [] ); // Second call: `subdir` is empty
-
+			.mockResolvedValueOnce( [ 'subdir' ] as any ) // First call: `mockDir` contains `subdir`
+			.mockResolvedValue( [] as any ); // Other calls: `subdir` is empty
 		vi.mocked( fs.stat ).mockResolvedValue( { isDirectory: () => true } as any );
+		vi.mocked( fs.rmdir ).mockResolvedValue( undefined );
 
 		await removeEmptyDirs( mockDir );
 
@@ -54,8 +57,9 @@ describe( 'removeEmptyDirs', () => {
 	} );
 
 	it( 'does not remove a non-empty directory', async () => {
-		vi.mocked( fsExtra.existsSync ).mockReturnValue( true );
-		vi.mocked( fs.readdir ).mockResolvedValue( [ 'file.txt' as any ] );
+		// Setup the mock implementations for this test case
+		vi.mocked( fs.pathExists ).mockResolvedValue( true as any );
+		vi.mocked( fs.readdir ).mockResolvedValue( [ 'file.txt' ] as any );
 		vi.mocked( fs.stat ).mockResolvedValue( { isDirectory: () => false } as any );
 
 		await removeEmptyDirs( mockDir );

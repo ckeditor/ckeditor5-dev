@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGitHubUser } from '../../src/utils/linktogithubuser.js';
+import { linkToGitHubUser } from '../../src/utils-external/linktogithubuser.js';
 import { ORGANISATION_NAMESPACE } from '../../src/constants.js';
 import type { ParsedFile, PackageJson } from '../../src/types.js';
 
@@ -13,12 +13,13 @@ type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock( '../../src/utils/linktogithubuser', () => ( {
+vi.mock( '../../src/utils-external/linktogithubuser', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
 
 const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
 	content: 'Some content',
+	gitHubUrl: 'https://github.com/ckeditor',
 	...overrides,
 	data: {
 		type: 'Feature',
@@ -30,7 +31,7 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 } as any );
 
 describe( 'getSectionsWithEntries', () => {
-	const gitHubUrlMock = 'https://github.com/ckeditor';
+	const organisationNamespace = ORGANISATION_NAMESPACE;
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
 	let packages: Array<PackageJson>;
 
@@ -41,8 +42,8 @@ describe( 'getSectionsWithEntries', () => {
 		} ) );
 
 		packages = [
-			{ name: `${ ORGANISATION_NAMESPACE }/package-1`, version: '1.0.0' },
-			{ name: `${ ORGANISATION_NAMESPACE }/package-2`, version: '1.0.0' }
+			{ name: `${ organisationNamespace }/package-1`, version: '1.0.0' },
+			{ name: `${ organisationNamespace }/package-2`, version: '1.0.0' }
 		];
 	} );
 
@@ -53,7 +54,7 @@ describe( 'getSectionsWithEntries', () => {
 			createParsedFile( { data: { type: 'Other' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.fix.entries ).toHaveLength( 1 );
@@ -63,7 +64,7 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should classify an entry with an unknown type as invalid', () => {
 		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType' as any } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		expect( result.invalid.entries ).toHaveLength( 1 );
 	} );
@@ -71,7 +72,7 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should not include see and closes when they are undefined', () => {
 		const parsedFiles = [ createParsedFile( { data: { see: undefined, closes: undefined } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -82,21 +83,21 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should classify an entry as invalid if the scope is not recognized', () => {
 		const parsedFiles = [ createParsedFile( { data: { scope: [ 'unknown-package' ] } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		expect( result.invalid.entries ).toHaveLength( 1 );
 	} );
 
-	it( 'should classify an entry as invalid if the scope is not undefined', () => {
+	it( 'should classify an entry as valid if the scope is not undefined', () => {
 		const parsedFiles = [ createParsedFile( { data: { scope: undefined } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
-		expect( result.invalid.entries ).toHaveLength( 1 );
+		expect( result.invalid.entries ).toHaveLength( 0 );
 	} );
 
 	it( 'should handle an empty parsedFiles array', () => {
-		const result = getSectionsWithEntries( { parsedFiles: [], packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles: [], packageJsons: packages, transformScope, organisationNamespace } );
 
 		Object.values( result ).forEach( section => expect( section.entries ).toBeUndefined );
 	} );
@@ -104,7 +105,7 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should generate correct markdown links for scope and issues', () => {
 		const parsedFiles = [ createParsedFile() ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -116,7 +117,7 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should format the content properly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content\n\nSecond line\n\nThird line' } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -134,7 +135,7 @@ describe( 'getSectionsWithEntries', () => {
 	it( 'should call linkToGitHubUser correctly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content' } ) ];
 
-		getSectionsWithEntries( { parsedFiles, packages, gitHubUrl: gitHubUrlMock, transformScope } );
+		getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		expect( linkToGitHubUser ).toHaveBeenCalledWith( 'Some content' );
 	} );

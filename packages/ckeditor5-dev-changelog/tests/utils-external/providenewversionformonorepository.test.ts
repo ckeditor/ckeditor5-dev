@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../../src/utils-external/providenewversionformonorepository.js';
 import inquirer from 'inquirer';
 import pacote from 'pacote';
 import semver from 'semver';

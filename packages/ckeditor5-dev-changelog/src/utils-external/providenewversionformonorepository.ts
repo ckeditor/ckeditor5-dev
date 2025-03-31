@@ -9,7 +9,7 @@ import inquirer from 'inquirer';
 import { randomUUID } from 'crypto';
 import upath from 'upath';
 import os from 'os';
-import fs from 'fs-extra';
+import { ensureDir, remove } from 'fs-extra';
 import pacote from 'pacote';
 
 const CLI_INDENT_SIZE = 3;
@@ -87,7 +87,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 	const { version, packageName, bumpType, indentLevel = 0 } = options;
 	const suggestedVersion = semver.inc( version, bumpType ) || version;
 	const message = 'Type the new version ' +
-		`(current highest: "${ version }" for "${ chalk.underline( packageName ) }", suggested: "${ suggestedVersion }"):`;
+		`(current: "${ version }", suggested: "${ suggestedVersion }"):`;
 
 	return [ {
 		type: 'input',
@@ -97,11 +97,13 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		filter: ( input: string ) => input.trim(),
 		async validate( input: string ): Promise<VersionValidationResult> {
 			const formatValidation = validateVersionFormat( input );
+
 			if ( formatValidation !== true ) {
 				return formatValidation;
 			}
 
 			const higherVersionValidation = validateVersionHigherThanCurrent( input, version );
+
 			if ( higherVersionValidation !== true ) {
 				return higherVersionValidation;
 			}
@@ -135,7 +137,7 @@ function cacheLessPacoteFactory( callback: typeof pacote.manifest ) {
 		const uuid = randomUUID();
 		const cacheDir = upath.join( os.tmpdir(), `pacote--${ uuid }` );
 
-		await fs.ensureDir( cacheDir );
+		await ensureDir( cacheDir );
 
 		try {
 			return await callback( description, {
@@ -145,7 +147,7 @@ function cacheLessPacoteFactory( callback: typeof pacote.manifest ) {
 				preferOnline: true
 			} );
 		} finally {
-			await fs.remove( cacheDir );
+			await remove( cacheDir );
 		}
 	};
 }

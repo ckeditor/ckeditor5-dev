@@ -5,13 +5,13 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
-import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
+import { truncateChangelog } from '../../src/utils-external/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/constants.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 
-vi.mock( 'fs/promises' );
-vi.mock( '../../src/utils/truncatechangelog.js' );
+vi.mock( 'fs-extra' );
+vi.mock( '../../src/utils-external/truncatechangelog.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
@@ -44,13 +44,13 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 CHANGELOG.md not found. Creating a new one.\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Appending changes to the existing changelog...' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ CHANGELOG.md not found. Creating a new one.\n' );
 	} );
 
 	it( 'appends new changelog after the header if it exists', async () => {
 		const existingChangelog = `${ CHANGELOG_HEADER }\n\n## [0.1.0](https://github.com) (2024-03-25)\n\n- Old feature`;
-		vi.mocked( fs.readFile ).mockResolvedValue( existingChangelog );
+		vi.mocked( fs.readFile ).mockResolvedValue( existingChangelog as any );
 
 		await modifyChangelog( newChangelog, cwd );
 
@@ -61,12 +61,12 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Appending changes to the existing changelog...' );
 	} );
 
 	it( 'prepends new changelog if header is missing', async () => {
 		const existingChangelog = '## [0.1.0](https://github.com) (2024-03-25)\n\n- Old feature';
-		vi.mocked( fs.readFile ).mockResolvedValue( existingChangelog );
+		vi.mocked( fs.readFile ).mockResolvedValue( existingChangelog as any );
 
 		await modifyChangelog( newChangelog, cwd );
 
@@ -77,11 +77,11 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Appending changes to the existing changelog...' );
 	} );
 
 	it( 'handles empty existing changelog', async () => {
-		vi.mocked( fs.readFile ).mockResolvedValue( '' );
+		vi.mocked( fs.readFile ).mockResolvedValue( '' as any );
 
 		await modifyChangelog( newChangelog, cwd );
 
@@ -92,6 +92,6 @@ describe( 'modifyChangelog()', () => {
 			'utf-8'
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Appending changes to the existing changelog...' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Appending changes to the existing changelog...' );
 	} );
 } );

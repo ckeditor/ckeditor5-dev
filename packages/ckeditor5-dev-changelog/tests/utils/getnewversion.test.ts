@@ -4,13 +4,13 @@
  */
 
 import { getNewVersion } from '../../src/utils/getnewversion.js';
-import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../../src/utils-external/providenewversionformonorepository.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 
-vi.mock( '../../src/utils/providenewversionformonorepository' );
+vi.mock( '../../src/utils-external/providenewversionformonorepository' );
 vi.mock( '../../src/utils/loginfo' );
 
 describe( 'getNewVersion', () => {
@@ -27,7 +27,8 @@ describe( 'getNewVersion', () => {
 			scope: [],
 			closes: [],
 			see: []
-		}
+		},
+		changesetPath: ''
 	} );
 
 	const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
@@ -49,7 +50,7 @@ describe( 'getNewVersion', () => {
 
 		await getNewVersion( createSectionsWithEntries(), '1.0.0', 'test-package' );
 
-		expect( mockedLogInfo ).toHaveBeenCalledWith( `📍 ${ chalk.cyan( 'Determining the new version...' ) }\n` );
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }\n` );
 	} );
 
 	it( 'should return a patch version when there are no minor, major, or feature entries', async () => {

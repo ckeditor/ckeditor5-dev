@@ -6,11 +6,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { removeChangesetFiles } from '../../src/utils/removechangesetfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
 import upath from 'upath';
+import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo' );
 vi.mock( '../../src/utils/removeemptydirs' );
 
@@ -21,9 +22,17 @@ describe( 'removeChangesetFiles', () => {
 		{ cwd: '/external-repo-1', packagesDirectory: 'packages' },
 		{ cwd: '/external-repo-2', packagesDirectory: 'packages' }
 	];
-	const mockChangesetFiles = [
-		'/repo/changelog/changeset-1.md',
-		'/repo/changelog/changeset-2.md'
+	const mockChangesetFiles: Array<ChangesetPathsWithGithubUrl> = [
+		{
+			changesetPaths: [ '/repo/changelog/changeset-1.md' ],
+			gitHubUrl: 'https://github.com/repo/changelog/changeset-1',
+			skipLinks: false
+		},
+		{
+			changesetPaths: [ '/repo/changelog/changeset-2.md' ],
+			gitHubUrl: 'https://github.com/repo/changelog/changeset-2',
+			skipLinks: false
+		}
 	];
 
 	beforeEach( () => {
@@ -39,9 +48,8 @@ describe( 'removeChangesetFiles', () => {
 	it( 'removes each changeset file', async () => {
 		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		for ( const file of mockChangesetFiles ) {
-			expect( fs.unlink ).toHaveBeenCalledWith( file );
-		}
+		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-1.md' );
+		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-2.md' );
 	} );
 
 	it( 'removes empty directories for the main repository', async () => {

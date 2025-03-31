@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getPackageJson } from './getpackagejson.js';
+import { getPackageJson } from '../utils/getpackagejson.js';
 
 /**
  * Retrieves the repository URL from package.json configuration.
@@ -23,6 +23,9 @@ export async function getRepositoryUrl( cwd = process.cwd() ): Promise<string> {
 
 	// If the value ends with ".git", we need to remove it.
 	repositoryUrl = repositoryUrl.replace( /\.git$/, '' );
+
+	// If the value starts with "git+", we need to remove it.
+	repositoryUrl = repositoryUrl.replace( /^git\+/, '' );
 
 	// Remove "/issues" suffix as well.
 	repositoryUrl = repositoryUrl.replace( /\/issues/, '' );

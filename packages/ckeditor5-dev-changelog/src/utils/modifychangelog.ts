@@ -4,10 +4,10 @@
  */
 
 import upath from 'upath';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
-import { truncateChangelog } from './truncatechangelog.js';
+import { truncateChangelog } from '../utils-external/truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
 
 /**
@@ -20,7 +20,7 @@ export async function modifyChangelog( newChangelog: string, cwd: string ): Prom
 
 	const updatedChangelog = prepareChangelogContent( existingChangelog, newChangelog );
 
-	logInfo( `📍 ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }` );
+	logInfo( `○ ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }` );
 
 	await fs.writeFile( changelogPath, updatedChangelog, 'utf-8' );
 	await truncateChangelog( 5, cwd );
@@ -33,7 +33,7 @@ async function readExistingChangelog( changelogPath: string ): Promise<string> {
 	try {
 		return await fs.readFile( changelogPath, 'utf-8' );
 	} catch {
-		logInfo( `📍 ${ chalk.yellow( 'CHANGELOG.md not found. Creating a new one.' ) }\n` );
+		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found. Creating a new one.' ) }\n` );
 
 		return '';
 	}

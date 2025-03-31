@@ -4,13 +4,13 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getRepositoryUrl } from '../../src/utils/getrepositoryurl.js';
-import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
+import { truncateChangelog } from '../../src/utils-external/truncatechangelog.js';
+import { getRepositoryUrl } from '../../src/utils-external/getrepositoryurl.js';
 import { CHANGELOG_HEADER } from '../../src/constants.js';
 import fs from 'fs';
 
 vi.mock( 'fs' );
-vi.mock( '../../src/utils/getrepositoryurl.js' );
+vi.mock( '../../src/utils-external/getrepositoryurl.js' );
 vi.mock( '../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',
 	CHANGELOG_FILE: 'CHANGELOG.md'

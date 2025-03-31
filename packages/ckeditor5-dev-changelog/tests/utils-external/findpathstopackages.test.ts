@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { findPathsToPackages } from '../../src/utils/findpathstopackages.js';
+import { findPathsToPackages } from '../../src/utils-external/findpathstopackages.js';
 import { glob } from 'glob';
 import upath from 'upath';
 

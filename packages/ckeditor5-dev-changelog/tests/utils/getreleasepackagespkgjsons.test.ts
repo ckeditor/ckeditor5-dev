@@ -4,22 +4,22 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { getReleasePackagesPkgJsons } from '../../src/utils/getreleasepackagespkgjsons.js';
-import fsExtra from 'fs-extra';
+import { getPackageJsons } from '../../src/utils/getreleasepackagespkgjsons.js';
+import fs from 'fs-extra';
 import upath from 'upath';
-import { findPathsToPackages } from '../../src/utils/findpathstopackages.js';
+import { findPathsToPackages } from '../../src/utils-external/findpathstopackages.js';
 import type { RepositoryConfig } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'upath' );
-vi.mock( '../../src/utils/findpathstopackages' );
+vi.mock( '../../src/utils-external/findpathstopackages' );
 
 describe( 'getReleasePackagesPkgJsons', () => {
 	const cwd = '/local/directory';
 	const packagesDirectory = '/local/packages';
-	const externalRepositories: Array<RepositoryConfig> = [
-		{ cwd: '/external/repo1', packagesDirectory: '/external/packages1' },
-		{ cwd: '/external/repo2', packagesDirectory: '/external/packages2' }
+	const externalRepositories: Array<Required<RepositoryConfig>> = [
+		{ cwd: '/external/repo1', packagesDirectory: '/external/packages1', skipLinks: false },
+		{ cwd: '/external/repo2', packagesDirectory: '/external/packages2', skipLinks: false }
 	];
 
 	it( 'should correctly retrieve package.json files from local and external repositories', async () => {
@@ -28,7 +28,7 @@ describe( 'getReleasePackagesPkgJsons', () => {
 			.mockResolvedValueOnce( [ '/external/package3' ] )
 			.mockResolvedValueOnce( [ '/external/package4' ] );
 
-		vi.mocked( fsExtra.readJson )
+		vi.mocked( fs.readJson )
 			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } )
 			.mockResolvedValueOnce( { name: 'package2', version: '1.0.0' } )
 			.mockResolvedValueOnce( { name: 'package3', version: '1.0.0' } )
@@ -36,7 +36,7 @@ describe( 'getReleasePackagesPkgJsons', () => {
 
 		vi.mocked( upath.join ).mockImplementation( ( ...args: Array<string> ) => args.join( '/' ) );
 
-		const result = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
+		const result = await getPackageJsons( cwd, packagesDirectory, externalRepositories );
 
 		expect( result ).toEqual( [
 			{ name: 'package1', version: '1.0.0' },
@@ -52,7 +52,7 @@ describe( 'getReleasePackagesPkgJsons', () => {
 			.mockResolvedValueOnce( [] )
 			.mockResolvedValueOnce( [] );
 
-		const result = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
+		const result = await getPackageJsons( cwd, packagesDirectory, externalRepositories );
 
 		expect( result ).toEqual( [] );
 	} );
@@ -62,11 +62,11 @@ describe( 'getReleasePackagesPkgJsons', () => {
 			.mockResolvedValueOnce( [ '/local/package1' ] )
 			.mockResolvedValueOnce( [] );
 
-		vi.mocked( fsExtra.readJson )
+		vi.mocked( fs.readJson )
 			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } )
 			.mockRejectedValueOnce( new Error( 'Error reading package.json' ) );
 
-		await expect( getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories ) )
+		await expect( getPackageJsons( cwd, packagesDirectory, externalRepositories ) )
 			.rejects
 			.toThrow( 'Error reading package.json' );
 	} );
@@ -74,10 +74,10 @@ describe( 'getReleasePackagesPkgJsons', () => {
 	it( 'should handle no external repositories', async () => {
 		vi.mocked( findPathsToPackages ).mockResolvedValueOnce( [ '/local/package1' ] );
 
-		vi.mocked( fsExtra.readJson )
+		vi.mocked( fs.readJson )
 			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } );
 
-		const result = await getReleasePackagesPkgJsons( cwd, packagesDirectory, [] );
+		const result = await getPackageJsons( cwd, packagesDirectory, [] );
 
 		expect( result ).toEqual( [ { name: 'package1', version: '1.0.0' } ] );
 	} );

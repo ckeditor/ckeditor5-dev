@@ -5,6 +5,63 @@
 
 import type { SECTIONS } from './constants.js';
 
+/**
+ * Configuration options for generating a changelog.
+ */
+export type GenerateChangelog = {
+
+	/**
+	 * The next version number to use. If not provided, will be calculated based on changes.
+	 */
+	nextVersion?: string;
+
+	/**
+	 * Array of external repository configurations to include in the changelog.
+	 */
+	externalRepositories?: Array<RepositoryConfig>;
+
+	/**
+	 * Function to transform package scopes in the changelog entries.
+	 */
+	transformScope?: TransformScope;
+
+	/**
+	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
+	 */
+	date?: RawDateString;
+
+	/**
+	 * Directory containing the changeset files. Defaults to '.changelog'.
+	 */
+	changesetsDirectory?: string;
+
+	/**
+	 * The organisation namespace to use for the changelog. Defaults to '@ckeditor'.
+	 */
+	organisationNamespace?: string;
+};
+
+/**
+ * Configuration options for a repository.
+ */
+export type RepositoryConfig = {
+
+	/**
+	 * The current working directory of the repository.
+	 */
+	cwd: string;
+
+	/**
+	 * The directory containing the packages. Defaults to 'packages'.
+	 */
+	packagesDirectory?: string;
+
+	/**
+	 * Whether to skip links in the changelog entries. Defaults to false.
+	 */
+	skipLinks?: boolean;
+};
+
 export type SectionName = keyof typeof SECTIONS;
 
 export type Entry = {
@@ -13,6 +70,7 @@ export type Entry = {
 		mainContent: string | undefined;
 		restContent: Array<string>;
 	};
+	changesetPath: string;
 };
 
 type FileMetadata = {
@@ -26,6 +84,9 @@ type FileMetadata = {
 export type ParsedFile = {
 	content: string;
 	data: FileMetadata;
+	changesetPath: string;
+	gitHubUrl: string;
+	skipLinks: boolean;
 };
 
 export type Section = {
@@ -49,14 +110,15 @@ export type PackageJson = {
 	};
 };
 
-export type RepositoryConfig = {
-	cwd: string;
-	packagesDirectory: string;
-};
-
 export type TransformScope = ( name: string ) => {
 	displayName: string;
 	npmUrl: string;
+};
+
+export type ChangesetPathsWithGithubUrl = {
+	changesetPaths: Array<string>;
+	gitHubUrl: string;
+	skipLinks: boolean;
 };
 
 type oneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;

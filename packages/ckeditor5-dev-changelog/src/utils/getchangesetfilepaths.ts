@@ -5,7 +5,8 @@
 
 import { glob } from 'glob';
 import upath from 'upath';
-import type { RepositoryConfig } from '../types.js';
+import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
+import { getRepositoryUrl } from '../utils-external/getrepositoryurl.js';
 
 /**
  * Retrieves paths to all changeset files (*.md) from the main repository and external repositories.
@@ -14,16 +15,22 @@ import type { RepositoryConfig } from '../types.js';
 export async function getChangesetFilePaths(
 	cwd: string,
 	changesetsDirectory: string,
-	externalRepositories: Array<RepositoryConfig>
-): Promise<Array<string>> {
-	const externalChangesetPaths = externalRepositories.map( repo =>
-		glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } )
-	);
+	externalRepositories: Array<Required<RepositoryConfig>>
+): Promise<Array<ChangesetPathsWithGithubUrl>> {
+	const externalChangesetPaths = await Promise.all( externalRepositories.map( async repo => ( {
+		changesetPaths: await glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } ),
+		gitHubUrl: await getRepositoryUrl( repo.cwd ),
+		skipLinks: repo.skipLinks
+	} ) ) );
 
 	const resolvedChangesetPaths = await Promise.all( [
-		glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
+		{
+			changesetPaths: await glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
+			gitHubUrl: await getRepositoryUrl( cwd ),
+			skipLinks: false
+		},
 		...externalChangesetPaths
 	] );
 
-	return resolvedChangesetPaths.flat();
+	return resolvedChangesetPaths;
 }

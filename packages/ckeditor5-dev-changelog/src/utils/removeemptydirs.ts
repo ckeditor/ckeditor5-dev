@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fsExtra from 'fs-extra';
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import upath from 'upath';
 
 /**
@@ -12,7 +11,7 @@ import upath from 'upath';
  * This function cleans up any empty directories that remain after processing.
  */
 export async function removeEmptyDirs( directory: string ): Promise<void> {
-	if ( !fsExtra.existsSync( directory ) ) {
+	if ( !await fs.pathExists( directory ) ) {
 		return;
 	}
 

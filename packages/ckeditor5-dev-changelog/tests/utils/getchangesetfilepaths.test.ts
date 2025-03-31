@@ -3,20 +3,35 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
 import { glob } from 'glob';
 import upath from 'upath';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { RepositoryConfig } from '../../src/types.js';
+import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
+import { getRepositoryUrl } from '../../src/utils-external/getrepositoryurl.js';
 
 vi.mock( 'upath' );
-vi.mock( 'glob', () => ( {
-	glob: vi.fn()
-} ) );
+vi.mock( 'glob' );
+vi.mock( '../../src/utils-external/getrepositoryurl.js' );
 
 describe( 'getChangesetFilePaths', () => {
 	beforeEach( () => {
 		vi.mocked( upath.join ).mockImplementation( ( ...paths ) => paths.join( '/' ) );
+		vi.mocked( getRepositoryUrl ).mockImplementation( cwd => {
+			if ( cwd === '/mock/current' ) {
+				return Promise.resolve( 'https://github.com/ckeditor/current' );
+			}
+
+			if ( cwd === '/mock/repo1' ) {
+				return Promise.resolve( 'https://github.com/ckeditor/repo1' );
+			}
+
+			if ( cwd === '/mock/repo2' ) {
+				return Promise.resolve( 'https://github.com/ckeditor/repo2' );
+			}
+
+			return Promise.resolve( 'https://github.com/ckeditor/unknown' );
+		} );
 
 		vi.clearAllMocks();
 	} );
@@ -24,9 +39,9 @@ describe( 'getChangesetFilePaths', () => {
 	it( 'should return file paths from both local and external repositories', async () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
-		const externalRepositories: Array<RepositoryConfig> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages' },
-			{ cwd: '/mock/repo2', packagesDirectory: 'packages' }
+		const externalRepositories: Array<Required<RepositoryConfig>> = [
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false },
+			{ cwd: '/mock/repo2', packagesDirectory: 'packages', skipLinks: false }
 		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
@@ -48,10 +63,21 @@ describe( 'getChangesetFilePaths', () => {
 		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 
 		expect( result ).toEqual( [
-			'/mock/current/changesets/file1.md',
-			'/mock/current/changesets/file2.md',
-			'/mock/repo1/changesets/file3.md',
-			'/mock/repo2/changesets/file4.md'
+			{
+				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				skipLinks: false
+			},
+			{
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/repo1',
+				skipLinks: false
+			},
+			{
+				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/repo2',
+				skipLinks: false
+			}
 		] );
 
 		expect( glob ).toHaveBeenCalledTimes( 3 );
@@ -63,13 +89,19 @@ describe( 'getChangesetFilePaths', () => {
 	it( 'should return only local changeset files if there are no external repositories', async () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
-		const externalRepositories: Array<RepositoryConfig> = [];
+		const externalRepositories: Array<Required<RepositoryConfig>> = [];
 
 		vi.mocked( glob ).mockResolvedValue( [ '/mock/current/changesets/file1.md' ] );
 
 		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 
-		expect( result ).toEqual( [ '/mock/current/changesets/file1.md' ] );
+		expect( result ).toEqual( [
+			{
+				changesetPaths: [ '/mock/current/changesets/file1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				skipLinks: false
+			}
+		] );
 
 		expect( glob ).toHaveBeenCalledTimes( 1 );
 		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/changesets', absolute: true } );
@@ -78,7 +110,9 @@ describe( 'getChangesetFilePaths', () => {
 	it( 'should return only external changeset files if there are no local files', async () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
-		const externalRepositories: Array<RepositoryConfig> = [ { cwd: '/mock/repo1', packagesDirectory: 'packages' } ];
+		const externalRepositories: Array<Required<RepositoryConfig>> = [
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
 			if ( cwd === '/mock/current/changesets' ) {
@@ -94,7 +128,19 @@ describe( 'getChangesetFilePaths', () => {
 
 		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 
-		expect( result ).toEqual( [ '/mock/repo1/changesets/file3.md' ] );
+		expect( result ).toEqual( [
+			{
+				changesetPaths: [],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				skipLinks: false
+			},
+			{
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/repo1',
+				skipLinks: false
+			}
+		] );
+
 		expect( glob ).toHaveBeenCalledTimes( 2 );
 		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/changesets', absolute: true } );
 		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo1/changesets', absolute: true } );
@@ -103,20 +149,36 @@ describe( 'getChangesetFilePaths', () => {
 	it( 'should return an empty array when no changeset files exist in any repository', async () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
-		const externalRepositories: Array<RepositoryConfig> = [ { cwd: '/mock/repo1', packagesDirectory: 'packages' } ];
+		const externalRepositories: Array<Required<RepositoryConfig>> = [
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+		];
 
 		vi.mocked( glob ).mockImplementation( () => Promise.resolve( [] ) );
 
 		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
 
-		expect( result ).toEqual( [] );
+		expect( result ).toEqual( [
+			{
+				changesetPaths: [],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				skipLinks: false
+			},
+			{
+				changesetPaths: [],
+				gitHubUrl: 'https://github.com/ckeditor/repo1',
+				skipLinks: false
+			}
+		] );
+
 		expect( glob ).toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'should handle errors gracefully by rejecting the promise', async () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
-		const externalRepositories: Array<RepositoryConfig> = [ { cwd: '/mock/repo1', packagesDirectory: 'packages' } ];
+		const externalRepositories: Array<Required<RepositoryConfig>> = [
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+		];
 
 		vi.mocked( glob ).mockRejectedValueOnce( new Error( 'Glob failed' ) );
 

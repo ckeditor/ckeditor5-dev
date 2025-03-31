@@ -12,10 +12,10 @@ import { logInfo } from './loginfo.js';
  * This function provides a summary of changes that will be included in the changelog.
  */
 export function logChangelogFiles( sections: SectionsWithEntries ): void {
-	// todo in the followup: Display invalid records differently. Add filepath, and display what is invalid:
+	// todo in the followup: Display invalid records differently. Display what is invalid:
 	//  - type, scope, breaking change, closes or see.
 
-	logInfo( `📍 ${ chalk.cyan( 'Listing the changes...' ) }` );
+	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	for ( const [ sectionName, section ] of Object.entries( sections ) ) {
 		if ( !section.entries.length ) {
@@ -24,13 +24,22 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 
 		const color = sectionName === 'invalid' ? chalk.red : chalk.blue;
 
-		logInfo( color( `🔸 Found ${ section.title }:` ), { indent: 2 } );
+		logInfo( '◌ ' + color( `Found ${ section.title }:` ), { indent: 2 } );
 
-		for ( const entry of section.entries ) {
-			logInfo( `* "${ entry.data.mainContent }"`, { indent: 4 } );
+		if ( !( sectionName === 'invalid' ) ) {
+			for ( const entry of section.entries ) {
+				const scope = entry.data.scope ? ` (${ entry.data.scope?.join( ', ' ) })` : '';
 
-			if ( entry.data.restContent.length ) {
-				entry.data.restContent.map( content => logInfo( chalk.italic( `"${ content }"` ), { indent: 6 } ) );
+				logInfo( `- "${ entry.data.type }${ scope }: ${ entry.data.mainContent }"`, { indent: 4 } );
+
+				if ( entry.data.restContent.length ) {
+					entry.data.restContent.map( content => logInfo( chalk.italic( `"${ content }"` ), { indent: 6 } ) );
+				}
+			}
+		} else {
+			for ( const entry of section.entries ) {
+				// todo list what is invalid
+				logInfo( `- "${ entry.data.mainContent }" (file://${ entry.changesetPath })`, { indent: 4 } );
 			}
 		}
 

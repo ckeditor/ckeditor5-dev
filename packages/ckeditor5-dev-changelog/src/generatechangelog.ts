@@ -5,60 +5,24 @@
 
 import { format } from 'date-fns';
 import chalk from 'chalk';
-import type { RawDateString, RepositoryConfig, TransformScope } from './types.js';
+import { NPM_URL, PACKAGES_DIRECTORY_NAME, VERSIONING_POLICY_URL } from './constants.js';
+import type { GenerateChangelog, RawDateString, RepositoryConfig } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
-import { NPM_URL, VERSIONING_POLICY_URL } from './constants.js';
 import { logChangelogFiles } from './utils/logchangelogfiles.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { modifyChangelog } from './utils/modifychangelog.js';
 import { getNewVersion } from './utils/getnewversion.js';
-import { getReleasePackagesPkgJsons } from './utils/getreleasepackagespkgjsons.js';
+import { getPackageJsons } from './utils/getreleasepackagespkgjsons.js';
 import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
 import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
-import { getGitHubUrl } from './utils/getgithuburl.js';
 import { getPackageJson } from './utils/getpackagejson.js';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
-
-/**
- * Configuration options for generating a changelog.
- */
-type GenerateChangelog = {
-
-	/**
-	 * The next version number to use. If not provided, will be calculated based on changes.
-	 */
-	nextVersion?: string;
-
-	/**
-	 * Array of external repository configurations to include in the changelog.
-	 */
-	externalRepositories?: Array<RepositoryConfig>;
-
-	/**
-	 * Function to transform package scopes in the changelog entries.
-	 */
-	transformScope?: TransformScope;
-
-	/**
-	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
-	 */
-	date?: RawDateString;
-
-	/**
-	 * Directory containing the changeset files. Defaults to '.changelog'.
-	 */
-	changesetsDirectory?: string;
-};
-
-function defaultTransformScope( name: string ) {
-	return {
-		displayName: name,
-		npmUrl: `https://www.npmjs.com/package/${ name }`
-	};
-}
+import { defaultTransformScope } from './utils/defaulttransformscope.js';
+import { getExternalRepositoriesWithDefaults } from './utils/getexternalrepositorieswithdefaults.js';
+import { getRepositoryUrl } from './utils-external/getrepositoryurl.js';
 
 /**
  * Generates a changelog for the repository based on changeset files and package information.
@@ -67,31 +31,32 @@ function defaultTransformScope( name: string ) {
  */
 export async function generateChangelog( {
 	cwd,
-	packagesDirectory = 'packages',
+	packagesDirectory = PACKAGES_DIRECTORY_NAME,
+	organisationNamespace = '@ckeditor',
 	nextVersion,
 	externalRepositories = [],
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = '.changelog'
 }: RepositoryConfig & GenerateChangelog ): Promise<void> {
-	const packages = await getReleasePackagesPkgJsons( cwd, packagesDirectory, externalRepositories );
-	const gitHubUrl = await getGitHubUrl( cwd );
-	const packageJson = await getPackageJson( cwd );
-	const { version: oldVersion, name: rootPackageName } = packageJson;
+	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
+	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
+	const gitHubUrl = await getRepositoryUrl( cwd );
+	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
-	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
+	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults );
 	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 	const sectionsWithEntries = getSectionsWithEntries( {
 		parsedFiles: parsedChangesetFiles,
-		packages,
-		gitHubUrl,
-		transformScope
+		packageJsons,
+		transformScope,
+		organisationNamespace
 	} );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
 	if ( !sectionsToDisplay.length ) {
-		logInfo( '📍 ' + chalk.yellow( `No valid changesets in the '${ changesetsDirectory }' directory found. Aborting.` ) );
+		logInfo( '○ ' + chalk.yellow( `No valid changesets in the '${ changesetsDirectory }' directory found. Aborting.` ) );
 
 		return;
 	}
@@ -106,7 +71,8 @@ export async function generateChangelog( {
 		sections: sectionsWithEntries,
 		oldVersion,
 		newVersion,
-		packages
+		packageJsons,
+		organisationNamespace
 	} );
 
 	const newChangelog = [
@@ -139,5 +105,5 @@ export async function generateChangelog( {
 	await modifyChangelog( newChangelog, cwd );
 	await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
 
-	logInfo( '📍 ' + chalk.green( 'Done!' ) );
+	logInfo( '○ ' + chalk.green( 'Done!' ) );
 }

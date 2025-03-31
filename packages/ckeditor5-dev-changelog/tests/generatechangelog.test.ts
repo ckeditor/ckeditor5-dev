@@ -5,8 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateChangelog } from '../src/generatechangelog.js';
-import { getReleasePackagesPkgJsons } from '../src/utils/getreleasepackagespkgjsons.js';
-import { getGitHubUrl } from '../src/utils/getgithuburl.js';
+import { getPackageJsons } from '../src/utils/getreleasepackagespkgjsons.js';
 import { getPackageJson } from '../src/utils/getpackagejson.js';
 import { getChangesetFilePaths } from '../src/utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from '../src/utils/getchangesetsparsed.js';
@@ -19,9 +18,9 @@ import { removeChangesetFiles } from '../src/utils/removechangesetfiles.js';
 import { logInfo } from '../src/utils/loginfo.js';
 import { logChangelogFiles } from '../src/utils/logchangelogfiles.js';
 import { SECTIONS } from '../src/constants.js';
+import { getRepositoryUrl } from '../src/utils-external/getrepositoryurl.js';
 
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
-vi.mock( '../src/utils/getgithuburl.js' );
 vi.mock( '../src/utils/getpackagejson.js' );
 vi.mock( '../src/utils/getchangesetfilepaths.js' );
 vi.mock( '../src/utils/getchangesetsparsed.js' );
@@ -33,6 +32,7 @@ vi.mock( '../src/utils/modifychangelog.js' );
 vi.mock( '../src/utils/removechangesetfiles.js' );
 vi.mock( '../src/utils/loginfo.js' );
 vi.mock( '../src/utils/logchangelogfiles.js' );
+vi.mock( '../src/utils-external/getrepositoryurl.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
@@ -54,12 +54,18 @@ describe( 'generateChangelog()', () => {
 
 	beforeEach( () => {
 		vi.clearAllMocks();
-		vi.mocked( getReleasePackagesPkgJsons ).mockResolvedValue( [
+		vi.mocked( getPackageJsons ).mockResolvedValue( [
 			{ name: 'test-package', version: '1.0.0' }
 		] );
-		vi.mocked( getGitHubUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
+		vi.mocked( getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
 		vi.mocked( getPackageJson ).mockResolvedValue( { version: '1.0.0', name: 'test-package' } );
-		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [ '/home/ckeditor/.changelog/changeset-1.md' ] );
+		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [
+			{
+				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
+			}
+		] );
 		vi.mocked( getChangesetsParsed ).mockResolvedValue( [
 			{
 				content: 'Test changeset',
@@ -68,7 +74,10 @@ describe( 'generateChangelog()', () => {
 					scope: [ 'test-package' ],
 					closes: [],
 					see: []
-				}
+				},
+				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
 			}
 		] );
 		vi.mocked( getSectionsWithEntries ).mockReturnValue( {
@@ -92,7 +101,8 @@ describe( 'generateChangelog()', () => {
 							see: [],
 							mainContent: 'Test feature',
 							restContent: []
-						}
+						},
+						changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
 					}
 				]
 			},
@@ -123,7 +133,8 @@ describe( 'generateChangelog()', () => {
 							see: [],
 							mainContent: 'Test feature',
 							restContent: []
-						}
+						},
+						changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
 					}
 				]
 			}
@@ -168,12 +179,18 @@ describe( 'generateChangelog()', () => {
 			'/home/ckeditor'
 		);
 		expect( removeChangesetFiles ).toHaveBeenCalledWith(
-			[ '/home/ckeditor/.changelog/changeset-1.md' ],
+			[
+				{
+					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+					skipLinks: false
+				}
+			],
 			'/home/ckeditor',
 			'.changelog',
 			[]
 		);
-		expect( logInfo ).toHaveBeenCalledWith( '📍 Done!' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
 	it( 'handles first release (version 0.0.1)', async () => {
@@ -192,7 +209,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( defaultOptions );
 
-		expect( logInfo ).toHaveBeenCalledWith( '📍 No valid changesets in the \'.changelog\' directory found. Aborting.' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ No valid changesets in the \'.changelog\' directory found. Aborting.' );
 		expect( modifyChangelog ).not.toHaveBeenCalled();
 		expect( removeChangesetFiles ).not.toHaveBeenCalled();
 	} );
@@ -200,7 +217,8 @@ describe( 'generateChangelog()', () => {
 	it( 'handles external repositories', async () => {
 		const externalRepositories = [ {
 			cwd: '/external/repo',
-			packagesDirectory: 'packages'
+			packagesDirectory: 'packages',
+			skipLinks: false
 		} ];
 
 		await generateChangelog( {
@@ -208,7 +226,7 @@ describe( 'generateChangelog()', () => {
 			externalRepositories
 		} );
 
-		expect( getReleasePackagesPkgJsons ).toHaveBeenCalledWith(
+		expect( getPackageJsons ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'packages',
 			externalRepositories
@@ -245,7 +263,13 @@ describe( 'generateChangelog()', () => {
 			[]
 		);
 		expect( removeChangesetFiles ).toHaveBeenCalledWith(
-			[ '/home/ckeditor/.changelog/changeset-1.md' ],
+			[
+				{
+					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+					skipLinks: false
+				}
+			],
 			'/home/ckeditor',
 			'custom/changesets',
 			[]
@@ -274,7 +298,9 @@ describe( 'generateChangelog()', () => {
 							see: [],
 							mainContent: 'Test feature',
 							restContent: []
-						}
+						},
+						changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+						skipLinks: false
 					}
 				]
 			},
