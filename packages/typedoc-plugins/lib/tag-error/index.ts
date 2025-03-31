@@ -7,14 +7,18 @@ import {
 	Comment,
 	Converter,
 	ReflectionKind,
-	TypeParameterReflection,
+	ParameterReflection,
+	IntrinsicType,
+	ReferenceType,
 	TypeScript as ts,
 	type Application,
 	type Context,
-	type CommentDisplayPart
+	type CommentDisplayPart,
+	type SomeType,
+	type UnknownType
 } from 'typedoc';
 
-import CustomFlagSerializer from './customflagserializer.js';
+import ErrorTagSerializer from './errortagserializer.js';
 import './augmentation.js';
 
 const ERROR_TAG_NAME = 'error';
@@ -24,14 +28,14 @@ const ERROR_TAG_NAME = 'error';
  *
  * So far, we do not support collecting types of `@param`.
  */
-export default function ( app: Application ): void {
+export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_END, onEventEnd );
 
 	// TODO: To resolve types.
 	// @ts-expect-error TS2345
 	// Argument of type CustomFlagSerializer is not assignable to parameter of type SerializerComponent<Reflection>
 	// The types returned by toObject(...) are incompatible between these types.
-	app.serializer.addSerializer( new CustomFlagSerializer() );
+	app.serializer.addSerializer( new ErrorTagSerializer() );
 }
 
 function onEventEnd( context: Context ) {
@@ -78,6 +82,7 @@ function onEventEnd( context: Context ) {
 		for ( const errorNode of nodes ) {
 			const parentNode = errorNode.parent;
 			const errorName = parentNode.comment!;
+			const { parent } = parentNode as unknown as { parent: { comment: MaybeCommentDisplayPart } };
 
 			const errorDeclaration = context
 				.withScope( reflection )
@@ -87,67 +92,85 @@ function onEventEnd( context: Context ) {
 					undefined,
 					errorName
 				);
+
 			errorDeclaration.isCKEditor5Error = true;
-
-			// if ( errorName === 'customerror-inside-method') {
-			// 	const value = parentNode.parent.getChildren()
-			// 		.filter( childTag => {
-			// 			if ( !childTag.comment || !parentNode.parent.comment ) {
-			// 				return false;
-			// 			}
-			//
-			// 			// Do not process the `@error` tag again.
-			// 			if ( childTag === parentNode ) {
-			// 				return false;
-			// 			}
-			//
-			// 			return true;
-			// 		} )
-			// 		.map( childTag => {
-			// 			const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
-			//
-			// 			// typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
-			// 			// typeParameter.comment = new Comment( createComment( childTag.comment ) );
-			//
-			// 			// return typeParameter;
-			//
-			// 			return {
-			// 				type: context.converter.convertType( context.withScope( typeParameter ) ),
-			// 				comment: new Comment( createComment( childTag.comment ) )
-			// 			}
-			// 		} );
-			//
-			// 	console.log( value );
-			// }
-
-			const { parent } = parentNode as unknown as { parent: { comment: MaybeCommentDisplayPart } };
-
 			errorDeclaration.comment = createComment( parent.comment );
-			// errorDeclaration.kindString = 'Error';
-			// errorDeclaration.typeParameters = parentNode.parent.getChildren()
-			// 	.filter( childTag => {
-			// 		if ( !childTag.comment || !parentNode.parent.comment ) {
-			// 			return false;
-			// 		}
-			//
-			// 		// Do not process the `@error` tag again.
-			// 		if ( childTag === parentNode ) {
-			// 			return false;
-			// 		}
-			//
-			// 		return true;
-			// 	} )
-			// 	.map( childTag => {
-			// 		const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
-			//
-			// 		typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
-			// 		typeParameter.comment = new Comment( createComment( childTag.comment ) );
-			//
-			// 		return typeParameter;
-			// 	} );
+			errorDeclaration.parameters = parentNode.parent.getChildren()
+				.filter( _childTag => {
+					const childTagAsParam = _childTag as unknown as ParamExpressionNode;
+
+					if ( !childTagAsParam.comment || !parent.comment ) {
+						return false;
+					}
+
+					// Do not process the `@error` tag again.
+					// @ts-expect-error TS2367
+					// While the types are show that there is no overlap, in run-time it occurs.
+					// Hence, let's mute a compilator here.
+					if ( childTagAsParam === parentNode ) {
+						return false;
+					}
+
+					return true;
+				} )
+				.map( _childTag => {
+					const childTagAsParam = _childTag as unknown as ParamExpressionNode;
+
+					const parameter = new ParameterReflection( childTagAsParam.name.text, ReflectionKind.Parameter, errorDeclaration );
+					parameter.comment = createComment( childTagAsParam.comment );
+
+					try {
+						parameter.type = convertType( context, childTagAsParam );
+					} catch ( err ) {
+						parameter.type = new IntrinsicType( 'any' );
+					}
+
+					return parameter;
+				} );
 		}
 	}
 }
+
+function convertType( context: Context, childTag: ParamExpressionNode ): SomeType {
+	const convertedType = context.converter.convertType( context, childTag.typeExpression );
+
+	if ( !isUnknownType( convertedType ) ) {
+		return convertedType;
+	}
+
+	const { name } = convertedType;
+
+	// A dot notation is not supported (`@param {obj.field} ...`).
+	if ( name.startsWith( '@param' ) ) {
+		throw new Error( 'Conversion a type failed.' );
+	}
+
+	// TODO: Should we support local links, e.g., `~ChildrenClass`?
+	const [ moduleName, childName ] = name.replace( 'module:', '' ).split( '~' );
+	const childReflection = context.project.getChildByName( [ moduleName!, childName! ] );
+
+	if ( !childReflection ) {
+		throw new Error( 'A module reflection cannot be found.' );
+	}
+
+	return ReferenceType.createResolvedReference(
+		childTag.name.text,
+		childReflection,
+		context.project
+	);
+}
+
+function isUnknownType( type: SomeType ): type is UnknownType {
+	return type.type === 'unknown';
+}
+
+type ParamExpressionNode = ts.Node & {
+	name: {
+		text: string;
+	};
+	comment: MaybeCommentDisplayPart;
+	typeExpression: ts.TypeNode;
+};
 
 type ErrorTagNode = ts.Node & {
 	text: string;

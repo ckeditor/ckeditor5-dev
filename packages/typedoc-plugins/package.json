@@ -29,10 +29,10 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@rollup/pluginutils": "^5.1.0",
-    "rollup": "^4.9.5",
-    "chai": "^4.2.0",
     "glob": "^10.0.0",
+    "rollup": "^4.9.5",
     "typedoc": "^0.28.1",
+    "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "^5.6.0",
     "vitest": "^2.0.5"
   },

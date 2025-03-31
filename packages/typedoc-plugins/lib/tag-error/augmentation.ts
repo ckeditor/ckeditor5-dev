@@ -4,7 +4,7 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { type Reflection } from 'typedoc';
+import type { Reflection, ParameterReflection } from 'typedoc';
 
 declare module 'typedoc' {
 
@@ -13,5 +13,6 @@ declare module 'typedoc' {
 	 */
 	export interface Reflection {
 		isCKEditor5Error: boolean;
+		parameters: Array<ParameterReflection>;
 	}
 }
