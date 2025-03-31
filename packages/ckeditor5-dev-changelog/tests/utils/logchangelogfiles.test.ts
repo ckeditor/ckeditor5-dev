@@ -77,7 +77,7 @@ describe( 'logChangelogFiles', () => {
 						message: 'Added new button',
 						data: {
 							type: 'Feature',
-							scope: ['UI', 'Button'],
+							scope: [ 'ckeditor5-ui', 'ckeditor5-core' ],
 							mainContent: 'Added new button component',
 							restContent: []
 						},
@@ -89,7 +89,11 @@ describe( 'logChangelogFiles', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Feature (UI, Button): Added new button component"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith(
+			3,
+			'- "Feature (ckeditor5-ui, ckeditor5-core): Added new button component"',
+			{ indent: 4 }
+		);
 	} );
 
 	it( 'logs entries with additional content correctly', () => {
