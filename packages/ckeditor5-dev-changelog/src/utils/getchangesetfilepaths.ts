@@ -9,7 +9,6 @@ import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js'
 import { getRepositoryUrl } from '../utils/external/getrepositoryurl.js';
 
 /**
- * Retrieves paths to all changeset files (*.md) from the main repository and external repositories.
  * This function collects markdown files that contain changelog entries for processing.
  */
 export async function getChangesetFilePaths(

@@ -11,7 +11,6 @@ import { truncateChangelog } from '../utils/external/truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
 
 /**
- * Updates the CHANGELOG.md file with new changelog content.
  * This function writes the generated changelog to the repository's changelog file.
  */
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {

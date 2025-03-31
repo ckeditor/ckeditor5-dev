@@ -8,7 +8,6 @@ import matter from 'gray-matter';
 import type { ChangesetPathsWithGithubUrl, ParsedFile } from '../types.js';
 
 /**
- * Parses and returns the contents of all changeset files in the repository.
  * This function reads and processes the changeset files to extract changelog information.
  */
 export async function getChangesetsParsed( changesetsPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {

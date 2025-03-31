@@ -10,7 +10,6 @@ import { provideNewVersionForMonorepository } from '../utils/external/providenew
 import { logInfo } from './loginfo.js';
 
 /**
- * Determines the next version number based on the changes and current version.
  * This function analyzes the changes and suggests the appropriate version bump.
  */
 export async function getNewVersion( sectionsWithEntries: SectionsWithEntries, oldVersion: string, packageName: string ): Promise<string> {

@@ -8,7 +8,6 @@ import type { SectionsWithEntries } from '../types.js';
 import { logInfo } from './loginfo.js';
 
 /**
- * Logs information about changelog sections and their entries to the console.
  * This function provides a summary of changes that will be included in the changelog.
  */
 export function logChangelogFiles( sections: SectionsWithEntries ): void {

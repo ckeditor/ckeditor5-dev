@@ -8,7 +8,6 @@ import type { PackageJson, RepositoryConfig } from '../types.js';
 import { findPathsToPackages } from '../utils/external/findpathstopackages.js';
 
 /**
- * Retrieves package.json files for all packages that need to be released.
  * This function gathers package information from both internal and external repositories.
  */
 export async function getPackageJsons(

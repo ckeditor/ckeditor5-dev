@@ -9,7 +9,6 @@ import type { PackageJson } from '../types.js';
 
 /**
  * Reads and returns the contents of the package.json file.
- * This function retrieves the package configuration from the root package.json.
  */
 export async function getPackageJson( cwd = process.cwd() ): Promise<PackageJson> {
 	return fs.readJson( upath.join( cwd, 'package.json' ) );

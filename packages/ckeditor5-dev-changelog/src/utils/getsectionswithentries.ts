@@ -15,7 +15,6 @@ import { SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
 
 /**
- * Processes changeset files and organizes entries into sections.
  * This function categorizes changelog entries based on their types and packages.
  */
 export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace }: {

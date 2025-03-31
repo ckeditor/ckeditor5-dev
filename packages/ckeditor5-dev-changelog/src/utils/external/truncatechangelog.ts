@@ -9,7 +9,6 @@ import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../../constants.js';
 import { getRepositoryUrl } from './getrepositoryurl.js';
 
 /**
- * Truncates the changelog file to keep only the most recent entries.
  * This function limits the size of the changelog by removing older entries.
  */
 export async function truncateChangelog( length: number, cwd = process.cwd() ): Promise<void> {

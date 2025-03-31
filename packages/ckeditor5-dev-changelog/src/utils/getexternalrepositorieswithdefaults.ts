@@ -8,7 +8,6 @@ import { PACKAGES_DIRECTORY_NAME } from '../constants.js';
 
 /**
  * Applies default values to the external repositories configuration.
- * Ensures that each external repository has the required properties set.
  */
 export function getExternalRepositoriesWithDefaults( externalRepositories: Array<RepositoryConfig> ): Array<Required<RepositoryConfig>> {
 	return externalRepositories.map( repo => ( {

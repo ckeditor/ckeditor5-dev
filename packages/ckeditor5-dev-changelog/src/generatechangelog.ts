@@ -31,7 +31,6 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
 
 /**
- * Generates a changelog for the repository based on changeset files and package information.
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */

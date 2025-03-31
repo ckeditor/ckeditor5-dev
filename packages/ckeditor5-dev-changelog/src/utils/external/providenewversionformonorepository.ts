@@ -36,8 +36,8 @@ type Question = {
 const manifest = cacheLessPacoteFactory( pacote.manifest );
 
 /**
- * Handles version management for monorepository packages.
- * This function manages versioning for multiple packages in a monorepository structure.
+ * This function displays a prompt to provide a new version for all packages in the repository.
+ * The version is being validated e.g. invalid version format or already used version are not accepted.
  */
 export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
 	const question = createVersionQuestion( options );

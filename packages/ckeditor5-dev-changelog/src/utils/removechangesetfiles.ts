@@ -11,7 +11,6 @@ import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js'
 import { logInfo } from './loginfo.js';
 
 /**
- * Removes processed changeset files after changelog generation.
  * This function cleans up the changeset files that have been incorporated into the changelog.
  */
 export async function removeChangesetFiles(
