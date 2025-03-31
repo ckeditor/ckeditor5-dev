@@ -31,18 +31,6 @@ describe( 'getPackageJson', () => {
 		expect( fs.readJson ).toHaveBeenCalledWith( '/my/package/dir/package.json' );
 	} );
 
-	it( 'should read the package.json when cwd is already a package.json path', async () => {
-		const cwd = '/my/package/dir/package.json';
-		const fakePackageJson: PackageJson = { name: 'my-package', version: '1.0.0' };
-
-		vi.mocked( fs.readJson ).mockResolvedValueOnce( fakePackageJson );
-
-		const result = await getPackageJson( cwd );
-
-		expect( result ).toEqual( fakePackageJson );
-		expect( fs.readJson ).toHaveBeenCalledWith( cwd );
-	} );
-
 	it( 'should throw an error when readJson fails', async () => {
 		const cwd = '/my/package/dir';
 
