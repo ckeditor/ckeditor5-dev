@@ -5,17 +5,10 @@
 
 import { format } from 'date-fns';
 import chalk from 'chalk';
-import {
-	CHANGESET_DIRECTORY,
-	NPM_URL,
-	ORGANISATION_NAMESPACE,
-	PACKAGES_DIRECTORY_NAME,
-	VERSIONING_POLICY_URL
-} from './constants.js';
+import { CHANGESET_DIRECTORY, ORGANISATION_NAMESPACE, PACKAGES_DIRECTORY_NAME } from './constants.js';
 import type { GenerateChangelog, RawDateString, RepositoryConfig } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { logChangelogFiles } from './utils/logchangelogfiles.js';
-import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { modifyChangelog } from './utils/modifychangelog.js';
 import { getNewVersion } from './utils/getnewversion.js';
 import { getPackageJsons } from './utils/getreleasepackagespkgjsons.js';
@@ -29,6 +22,8 @@ import { getDateFormatted } from './utils/getdateformatted.js';
 import { defaultTransformScope } from './utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from './utils/getexternalrepositorieswithdefaults.js';
 import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
+import { getNewChangelog } from './utils/getnewchangelog.js';
+import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 
 /**
  * This function handles the entire changelog generation process including version management,
@@ -60,17 +55,11 @@ export async function generateChangelog( {
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
-	if ( !sectionsToDisplay.length ) {
-		logInfo( '○ ' + chalk.yellow( `No valid changesets in the '${ changesetsDirectory }' directory found. Aborting.` ) );
-
-		return;
-	}
-
 	// Logging changes in the console.
 	logChangelogFiles( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
-	const newVersion = nextVersion ?? await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName );
+	const { isInternal, newVersion } = await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName, nextVersion );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
 		sections: sectionsWithEntries,
@@ -80,32 +69,16 @@ export async function generateChangelog( {
 		organisationNamespace
 	} );
 
-	const newChangelog = [
-		oldVersion === '0.0.1' ?
-			`## ${ newVersion } (${ dateFormatted })` :
-			`## [${ newVersion }](${ gitHubUrl }/compare/v${ oldVersion }...v${ newVersion }) (${ dateFormatted })`,
-		'',
-		...sectionsToDisplay.map( ( { title, entries } ) => ( [
-			`### ${ title }`,
-			'',
-			...entries.map( entry => entry.message ),
-			''
-		] ) ),
-		'### Released packages',
-		'',
-		`Check out the [Versioning policy](${ VERSIONING_POLICY_URL }) guide for more information.`,
-		'',
-		'<details>',
-		'<summary>Released packages (summary)</summary>',
-		...releasedPackagesInfo.map( ( { title, version, packages } ) => ( [
-			'',
-			title,
-			'',
-			...packages.map( packageName => `* [${ packageName }](${ NPM_URL }/${ packageName }/v/${ newVersion }): ${ version }` )
-		] ) ),
-		'</details>',
-		''
-	].flat().join( '\n' );
+	const newChangelog = getNewChangelog( {
+		oldVersion,
+		newVersion,
+		dateFormatted,
+		gitHubUrl,
+		sectionsToDisplay,
+		releasedPackagesInfo,
+		isInternal,
+		packageJsons
+	} );
 
 	await modifyChangelog( newChangelog, cwd );
 	await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );

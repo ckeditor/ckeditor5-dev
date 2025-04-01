@@ -12,8 +12,9 @@ export type GenerateChangelog = {
 
 	/**
 	 * The next version number to use. If not provided, will be calculated based on changes.
+	 * Can be a semver string or 'internal' for internal changes only.
 	 */
-	nextVersion?: string;
+	nextVersion?: string | 'internal';
 
 	/**
 	 * Array of external repository configurations to include in the changelog.

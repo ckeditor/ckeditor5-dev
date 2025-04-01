@@ -19,9 +19,9 @@ describe( 'getSectionsToDisplay', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
 			major: createSection( 'Major Changes', [ createEntry( 'Breaking change' ) ] ),
 			minor: createSection( 'Minor Changes', [ createEntry( 'Minor change' ) ] ),
-			Feature: createSection( 'Features', [] ),
-			Fix: createSection( 'Fix', [] ),
-			Other: createSection( 'Other', [] ),
+			feature: createSection( 'Features', [] ),
+			fix: createSection( 'Fix', [] ),
+			other: createSection( 'Other', [] ),
 			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
 		};
 
@@ -33,18 +33,18 @@ describe( 'getSectionsToDisplay', () => {
 		] );
 	} );
 
-	it( 'should return an empty array if all sections are invalid or empty', () => {
+	it( 'should throw an error if all sections are invalid or empty', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
 			major: createSection( 'Major Changes', [] ),
 			minor: createSection( 'Minor Changes', [] ),
-			Feature: createSection( 'Features', [] ),
-			Fix: createSection( 'Fix', [] ),
-			Other: createSection( 'Other', [] ),
+			feature: createSection( 'Features', [] ),
+			fix: createSection( 'Fix', [] ),
+			other: createSection( 'Other', [] ),
 			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
 		};
 
-		const result = getSectionsToDisplay( sectionsWithEntries );
-
-		expect( result ).toEqual( [] );
+		expect(() => {
+			getSectionsToDisplay( sectionsWithEntries );
+		}).toThrow('No valid changesets found. Aborting.');
 	} );
 } );

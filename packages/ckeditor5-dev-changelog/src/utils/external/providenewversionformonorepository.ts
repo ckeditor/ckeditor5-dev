@@ -50,17 +50,27 @@ export async function provideNewVersionForMonorepository( options: Options ): Pr
  * Validates if the provided version is valid according to semver.
  */
 function validateVersionFormat( version: string ): VersionValidationResult {
+	// Allow 'internal' as a special version
+	if ( version === 'internal' ) {
+		return true;
+	}
+
 	if ( !semver.valid( version ) ) {
-		return 'Please provide a valid version.';
+		return 'Please provide a valid version or "internal" for internal changes.';
 	}
 
 	return true;
 }
 
 /**
- * Validates if the provided version is higher than the current version.
+ * Validates if the provided version is higher than the current one.
  */
-function validateVersionHigherThanCurrent( version: string, currentVersion: string ): VersionValidationResult {
+export function validateVersionHigherThanCurrent( version: string, currentVersion: string ): VersionValidationResult {
+	// Skip this validation for 'internal' version
+	if ( version === 'internal' ) {
+		return true;
+	}
+
 	if ( !semver.gt( version, currentVersion ) ) {
 		return `Provided version must be higher than "${ currentVersion }".`;
 	}
@@ -71,7 +81,12 @@ function validateVersionHigherThanCurrent( version: string, currentVersion: stri
 /**
  * Validates if the provided version is available in the npm registry.
  */
-async function validateVersionAvailability( version: string, packageName: string ): Promise<VersionValidationResult> {
+export async function validateVersionAvailability( version: string, packageName: string ): Promise<VersionValidationResult> {
+	// Skip this validation for 'internal' version
+	if ( version === 'internal' ) {
+		return true;
+	}
+
 	const isAvailable = await checkVersionAvailability( version, packageName );
 	if ( !isAvailable ) {
 		return 'Given version is already taken.';
@@ -87,7 +102,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 	const { version, packageName, bumpType, indentLevel = 0 } = options;
 	const suggestedVersion = semver.inc( version, bumpType ) || version;
 	const message = 'Type the new version ' +
-		`(current: "${ version }", suggested: "${ suggestedVersion }"):`;
+		`(current: "${ version }", suggested: "${ suggestedVersion }", or "internal" for internal changes):`;
 
 	return [ {
 		type: 'input',
@@ -100,6 +115,11 @@ function createVersionQuestion( options: Options ): Array<Question> {
 
 			if ( formatValidation !== true ) {
 				return formatValidation;
+			}
+
+			// For 'internal', skip further validation
+			if ( input === 'internal' ) {
+				return true;
 			}
 
 			const higherVersionValidation = validateVersionHigherThanCurrent( input, version );
@@ -117,7 +137,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 /**
  * Checks if a specific version of a package is available in the npm registry.
  */
-export async function checkVersionAvailability( version: string, packageName: string ): Promise<boolean> {
+async function checkVersionAvailability( version: string, packageName: string ): Promise<boolean> {
 	return manifest( `${ packageName }@${ version }` )
 		.then( () => {
 			// If `manifest` resolves, a package with the given version exists.

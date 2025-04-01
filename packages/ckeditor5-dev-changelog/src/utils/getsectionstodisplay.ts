@@ -9,7 +9,13 @@ import type { Section, SectionsWithEntries } from '../types.js';
  * This function determines which sections contain valid entries to be shown.
  */
 export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
-	return Object.entries( sectionsWithEntries )
+	const sectionsToDisplay = Object.entries( sectionsWithEntries )
 		.filter( ( [ sectionName, { entries } ] ) => entries?.length && sectionName !== 'invalid' )
 		.map( ( [ , section ] ) => section );
+
+	if ( !sectionsToDisplay.length ) {
+		throw new Error( 'No valid changesets found. Aborting.' );
+	}
+
+	return sectionsToDisplay;
 }
