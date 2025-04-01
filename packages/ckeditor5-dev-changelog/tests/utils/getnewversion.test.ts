@@ -14,12 +14,12 @@ import * as semver from 'semver';
 vi.mock( '../../src/utils/external/providenewversionformonorepository' );
 vi.mock( '../../src/utils/loginfo' );
 vi.mock( 'semver', async () => {
-	const actual = await vi.importActual('semver');
+	const actual = await vi.importActual( 'semver' );
 	return {
 		...actual,
 		inc: vi.fn()
 	};
-});
+} );
 
 describe( 'getNewVersion', () => {
 	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonorepository );
@@ -53,12 +53,12 @@ describe( 'getNewVersion', () => {
 	beforeEach( () => {
 		vi.clearAllMocks();
 		// Restore the default mock implementation for semver.inc
-		mockedSemverInc.mockImplementation((version, releaseType) => {
-			if (version === '1.0.0' && releaseType === 'patch') {
+		mockedSemverInc.mockImplementation( ( version, releaseType ) => {
+			if ( version === '1.0.0' && releaseType === 'patch' ) {
 				return '1.0.1';
 			}
 			return null;
-		});
+		} );
 	} );
 
 	it( 'should log the process start', async () => {
@@ -178,14 +178,14 @@ describe( 'getNewVersion', () => {
 			bumpType: 'patch'
 		} );
 	} );
-	
+
 	it( 'should throw an error when semver.inc returns null', async () => {
 		// Mock semver.inc to return null for this test
-		mockedSemverInc.mockReturnValueOnce(null);
-		
+		mockedSemverInc.mockReturnValueOnce( null );
+
 		// Use an invalid version to test the error case
 		await expect(
 			getNewVersion( createSectionsWithEntries(), 'invalid-version', 'test-package', 'internal' )
-		).rejects.toThrow('Unable to determine new version based on the version in root package.json.');
+		).rejects.toThrow( 'Unable to determine new version based on the version in root package.json.' );
 	} );
 } );

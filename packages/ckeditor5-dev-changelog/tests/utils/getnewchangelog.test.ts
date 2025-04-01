@@ -163,8 +163,12 @@ describe( 'getNewChangelog', () => {
 		} );
 
 		expect( result ).toContain( SECTIONS.other.title + ':' );
-		expect( result ).toContain( `* [@ckeditor/ckeditor5-package-a](${ NPM_URL }/@ckeditor/ckeditor5-package-a/v/1.0.1): v1.0.0 => v1.0.1` );
-		expect( result ).toContain( `* [@ckeditor/ckeditor5-package-b](${ NPM_URL }/@ckeditor/ckeditor5-package-b/v/1.0.1): v1.0.0 => v1.0.1` );
+		expect( result ).toContain(
+			`* [@ckeditor/ckeditor5-package-a](${ NPM_URL }/@ckeditor/ckeditor5-package-a/v/1.0.1): v1.0.0 => v1.0.1`
+		);
+		expect( result ).toContain(
+			`* [@ckeditor/ckeditor5-package-b](${ NPM_URL }/@ckeditor/ckeditor5-package-b/v/1.0.1): v1.0.0 => v1.0.1`
+		);
 	} );
 
 	it( 'should sort package names alphabetically', () => {

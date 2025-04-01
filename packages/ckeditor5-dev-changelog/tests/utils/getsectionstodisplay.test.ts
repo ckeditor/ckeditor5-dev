@@ -43,8 +43,8 @@ describe( 'getSectionsToDisplay', () => {
 			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
 		};
 
-		expect(() => {
+		expect( () => {
 			getSectionsToDisplay( sectionsWithEntries );
-		}).toThrow('No valid changesets found. Aborting.');
+		} ).toThrow( 'No valid changesets found. Aborting.' );
 	} );
 } );
