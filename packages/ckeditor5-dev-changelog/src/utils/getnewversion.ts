@@ -23,7 +23,7 @@ export async function getNewVersion(
 	packageName: string,
 	nextVersion: string | undefined ): Promise<NewVersionObj>
 {
-	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }\n` );
+	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
 	if ( nextVersion === 'internal' ) {
 		return getInternalVersionBump( oldVersion );

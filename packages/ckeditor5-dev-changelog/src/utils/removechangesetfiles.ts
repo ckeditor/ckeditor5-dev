@@ -19,7 +19,7 @@ export async function removeChangesetFiles(
 	changelogDirectory: string,
 	externalRepositories: Array<RepositoryConfig>
 ): Promise<void> {
-	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }\n` );
+	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
 
 	await Promise.all( changesetFilePaths.flatMap( repo => repo.changesetPaths ).map( file => fs.unlink( file ) ) );
 

@@ -32,7 +32,7 @@ async function readExistingChangelog( changelogPath: string ): Promise<string> {
 	try {
 		return await fs.readFile( changelogPath, 'utf-8' );
 	} catch {
-		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found. Creating a new one.' ) }\n` );
+		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found. Creating a new one.' ) }` );
 
 		return '';
 	}

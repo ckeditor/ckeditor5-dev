@@ -14,6 +14,11 @@ import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo' );
 vi.mock( '../../src/utils/removeemptydirs' );
+vi.mock( 'chalk', () => ( {
+	default: {
+		cyan: ( text: string ) => text
+	}
+} ) );
 
 describe( 'removeChangesetFiles', () => {
 	const mockCwd = '/repo';
@@ -42,7 +47,7 @@ describe( 'removeChangesetFiles', () => {
 	it( 'logs the start of the process', async () => {
 		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );
 
-		expect( logInfo ).toHaveBeenCalledWith( expect.stringMatching( /Removing the changeset files/i ) );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Removing the changeset files...' );
 	} );
 
 	it( 'removes each changeset file', async () => {

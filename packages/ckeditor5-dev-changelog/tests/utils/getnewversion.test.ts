@@ -66,7 +66,7 @@ describe( 'getNewVersion', () => {
 
 		await getNewVersion( createSectionsWithEntries(), '1.0.0', 'test-package', undefined );
 
-		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }\n` );
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 	} );
 
 	it( 'should return a patch version when there are no minor, major, or feature entries', async () => {

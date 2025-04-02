@@ -45,7 +45,7 @@ describe( 'modifyChangelog()', () => {
 		);
 		expect( truncateChangelog ).toHaveBeenCalledWith( 5, cwd );
 		expect( logInfo ).toHaveBeenCalledWith( '○ Appending changes to the existing changelog...' );
-		expect( logInfo ).toHaveBeenCalledWith( '○ CHANGELOG.md not found. Creating a new one.\n' );
+		expect( logInfo ).toHaveBeenCalledWith( '○ CHANGELOG.md not found. Creating a new one.' );
 	} );
 
 	it( 'appends new changelog after the header if it exists', async () => {
