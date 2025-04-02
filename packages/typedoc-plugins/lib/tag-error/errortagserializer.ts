@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Reflection, Serializer } from 'typedoc';
+import type { Reflection } from 'typedoc';
 
 type PartialObject = {
 	[ key: string ]: unknown;
@@ -19,9 +19,8 @@ export default class ErrorTagSerializer {
 		return 'isCKEditor5Error' in item;
 	}
 
-	public toObject( item: Reflection, obj: PartialObject, serializer: Serializer ): object {
+	public toObject( item: Reflection, obj: PartialObject ): object {
 		obj.isCKEditor5Error = item.isCKEditor5Error;
-		obj.parameters = item.parameters.map( item => item.toObject( serializer ) );
 
 		return obj;
 	}
