@@ -32,8 +32,6 @@ describe( 'getChangesetFilePaths', () => {
 
 			return Promise.resolve( 'https://github.com/ckeditor/unknown' );
 		} );
-
-		vi.clearAllMocks();
 	} );
 
 	it( 'should return file paths from both local and external repositories', async () => {

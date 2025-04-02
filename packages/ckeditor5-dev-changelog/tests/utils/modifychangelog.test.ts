@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
 import { truncateChangelog } from '../../src/utils/external/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/constants.js';
@@ -27,10 +27,6 @@ vi.mock( '../../src/constants.js', () => ( {
 describe( 'modifyChangelog()', () => {
 	const cwd = '/home/ckeditor';
 	const newChangelog = '## [1.0.0](https://github.com) (2024-03-26)\n\n- New feature 1\n- New feature 2';
-
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
 
 	it( 'creates a new changelog file if it does not exist', async () => {
 		vi.mocked( fs.readFile ).mockRejectedValue( new Error( 'File not found' ) );

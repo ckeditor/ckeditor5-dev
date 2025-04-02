@@ -15,8 +15,6 @@ vi.mock( 'upath' );
 describe( 'getPackageJson', () => {
 	beforeEach( () => {
 		vi.mocked( upath.join ).mockImplementation( ( ...paths ) => paths.join( '/' ) );
-
-		vi.clearAllMocks();
 	} );
 
 	it( 'should read the package.json when cwd is a directory path', async () => {

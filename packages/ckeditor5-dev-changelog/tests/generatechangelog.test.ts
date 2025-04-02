@@ -55,7 +55,6 @@ describe( 'generateChangelog()', () => {
 	};
 
 	beforeEach( () => {
-		vi.clearAllMocks();
 		vi.mocked( getPackageJsons ).mockResolvedValue( [
 			{ name: 'test-package', version: '1.0.0' }
 		] );

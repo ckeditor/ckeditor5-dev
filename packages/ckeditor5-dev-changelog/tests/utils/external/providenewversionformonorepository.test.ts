@@ -39,7 +39,6 @@ describe( 'provideNewVersionForMonorepository()', () => {
 	};
 
 	beforeEach( () => {
-		vi.clearAllMocks();
 		vi.mocked( pacote.manifest ).mockRejectedValue( new Error( 'Package not found' ) );
 		vi.mocked( semver.valid ).mockReturnValue( '1.0.1' );
 		vi.mocked( semver.gt ).mockReturnValue( true );
@@ -207,8 +206,6 @@ describe( 'provideNewVersionForMonorepository()', () => {
 
 		await provideNewVersionForMonorepository( options );
 
-		// Reset and set up mocks
-		vi.clearAllMocks();
 		vi.mocked( semver.valid ).mockReturnValue( '1.0.1' );
 		vi.mocked( semver.gt ).mockReturnValue( false ); // This would fail for normal versions
 
@@ -233,8 +230,6 @@ describe( 'provideNewVersionForMonorepository()', () => {
 
 		await provideNewVersionForMonorepository( options );
 
-		// Reset and set up mocks
-		vi.clearAllMocks();
 		vi.mocked( semver.valid ).mockReturnValue( '1.0.1' );
 		vi.mocked( semver.gt ).mockReturnValue( true );
 

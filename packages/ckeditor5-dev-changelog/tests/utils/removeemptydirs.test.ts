@@ -3,20 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
 import fs from 'fs-extra';
 import upath from 'upath';
 
-// Mock the entire fs-extra module
 vi.mock( 'fs-extra' );
 
 describe( 'removeEmptyDirs', () => {
 	const mockDir = '/some/dir';
-
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
 
 	it( 'does nothing if the directory does not exist', async () => {
 		// Setup the mock implementation for this test case

@@ -19,7 +19,6 @@ describe( 'findPathsToPackages', () => {
 	];
 
 	beforeEach( () => {
-		vi.clearAllMocks();
 		vi.mocked( glob ).mockResolvedValue( getMockGlobResults() );
 	} );
 

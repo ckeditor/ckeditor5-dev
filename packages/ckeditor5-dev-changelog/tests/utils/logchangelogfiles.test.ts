@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import chalk from 'chalk';
 import { logChangelogFiles } from '../../src/utils/logchangelogfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
@@ -12,10 +12,6 @@ import type { SectionsWithEntries } from '../../src/types.js';
 vi.mock( '../../src/utils/loginfo' );
 
 describe( 'logChangelogFiles', () => {
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
-
 	it( 'logs changes correctly for valid sections', () => {
 		const sections: SectionsWithEntries = {
 			Feature: {

@@ -6,17 +6,13 @@
 import { getChangesetsParsed } from '../../src/utils/getchangesetsparsed.js';
 import fs from 'fs-extra';
 import matter, { type GrayMatterFile } from 'gray-matter';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
 
 describe( 'getChangesetsParsed', () => {
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
-
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/changeset1.md';

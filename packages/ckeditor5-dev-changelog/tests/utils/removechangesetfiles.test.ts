@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { removeChangesetFiles } from '../../src/utils/removechangesetfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
@@ -39,10 +39,6 @@ describe( 'removeChangesetFiles', () => {
 			skipLinks: false
 		}
 	];
-
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
 
 	it( 'logs the start of the process', async () => {
 		await removeChangesetFiles( mockChangesetFiles, mockCwd, mockChangelogDir, mockExternalRepositories );

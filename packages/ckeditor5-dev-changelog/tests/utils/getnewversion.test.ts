@@ -51,7 +51,6 @@ describe( 'getNewVersion', () => {
 	} );
 
 	beforeEach( () => {
-		vi.clearAllMocks();
 		// Restore the default mock implementation for semver.inc
 		mockedSemverInc.mockImplementation( ( version, releaseType ) => {
 			if ( version === '1.0.0' && releaseType === 'patch' ) {

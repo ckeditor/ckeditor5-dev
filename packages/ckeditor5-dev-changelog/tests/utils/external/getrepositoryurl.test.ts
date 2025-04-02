@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getRepositoryUrl } from '../../../src/utils/external/getrepositoryurl.js';
 import { getPackageJson } from '../../../src/utils/getpackagejson.js';
 
@@ -12,10 +12,6 @@ vi.mock( '../../../src/utils/getpackagejson' );
 describe( 'getRepositoryUrl', () => {
 	const mockCwd = '/test/cwd';
 	const mockPackageName = 'test-package';
-
-	beforeEach( () => {
-		vi.clearAllMocks();
-	} );
 
 	it( 'should extract repository URL from string format', async () => {
 		const mockPackageJson = {
