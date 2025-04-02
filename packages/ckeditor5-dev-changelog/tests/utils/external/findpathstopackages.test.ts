@@ -94,4 +94,23 @@ describe( 'findPathsToPackages', () => {
 		expect( glob ).not.toHaveBeenCalled();
 		expect( result ).toEqual( [ upath.normalize( mockCwd ) ] );
 	} );
+
+	it( 'should properly normalize Windows-style paths to POSIX format', async () => {
+		// Simulate Windows paths with backslashes
+		const windowsPaths = [
+			'C:\\test\\cwd\\packages\\package1',
+			'C:\\test\\cwd\\packages\\package2'
+		];
+
+		vi.mocked( glob ).mockResolvedValue( windowsPaths );
+
+		const result = await findPathsToPackages( mockCwd, mockPackagesDir );
+
+		// Verify that the paths were normalized
+		expect( result ).toEqual( windowsPaths.map( path => upath.normalize( path ) ) );
+		expect( result ).toEqual( [
+			'C:/test/cwd/packages/package1',
+			'C:/test/cwd/packages/package2'
+		] );
+	} );
 } );

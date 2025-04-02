@@ -4,6 +4,7 @@
  */
 
 import { glob } from 'glob';
+import upath from 'upath';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { RepositoryConfig } from '../../src/types.js';
 import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
@@ -60,17 +61,17 @@ describe( 'getChangesetFilePaths', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
+				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ].map( upath.normalize ),
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				skipLinks: true
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ].map( upath.normalize ),
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				skipLinks: true
 			},
 			{
-				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
+				changesetPaths: [ '/mock/repo2/changesets/file4.md' ].map( upath.normalize ),
 				gitHubUrl: 'https://github.com/ckeditor/repo2',
 				skipLinks: false
 			}
@@ -94,7 +95,7 @@ describe( 'getChangesetFilePaths', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md' ],
+				changesetPaths: [ '/mock/current/changesets/file1.md' ].map( upath.normalize ),
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				skipLinks: false
 			}
@@ -133,7 +134,7 @@ describe( 'getChangesetFilePaths', () => {
 				skipLinks: false
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ].map( upath.normalize ),
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				skipLinks: false
 			}
@@ -185,5 +186,34 @@ describe( 'getChangesetFilePaths', () => {
 		await expect(
 			getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks )
 		).rejects.toThrow( 'Glob failed' );
+	} );
+
+	it( 'should normalize paths from Windows-style to POSIX format', async () => {
+		const rootSkipLinks = false;
+		const cwd = '/mock/current';
+		const changesetsDirectory = 'changesets';
+		const externalRepositories: Array<Required<RepositoryConfig>> = [];
+
+		// Simulate Windows paths with backslashes
+		vi.mocked( glob ).mockResolvedValue( [ 
+			'C:\\mock\\current\\changesets\\file1.md',
+			'C:\\mock\\current\\changesets\\subfolder\\file2.md'
+		] );
+
+		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks );
+
+		expect( result ).toEqual( [
+			{
+				// upath.normalize converts backslashes to forward slashes
+				changesetPaths: [ 
+					'C:/mock/current/changesets/file1.md',
+					'C:/mock/current/changesets/subfolder/file2.md'
+				],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				skipLinks: false
+			}
+		] );
+
+		expect( glob ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

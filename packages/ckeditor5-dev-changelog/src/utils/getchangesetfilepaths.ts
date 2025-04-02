@@ -17,15 +17,21 @@ export async function getChangesetFilePaths(
 	externalRepositories: Array<Required<RepositoryConfig>>,
 	skipLinks: boolean
 ): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const externalChangesetPaths = await Promise.all( externalRepositories.map( async repo => ( {
-		changesetPaths: await glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } ),
-		gitHubUrl: await getRepositoryUrl( repo.cwd ),
-		skipLinks: repo.skipLinks
-	} ) ) );
+	const externalChangesetPaths = await Promise.all( externalRepositories.map( async repo => {
+		const changesetGlob = await glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } );
+
+		return {
+			changesetPaths: changesetGlob.map( path => upath.normalize( path ) ),
+			gitHubUrl: await getRepositoryUrl( repo.cwd ),
+			skipLinks: repo.skipLinks
+		};
+	} ) );
+
+	const mainChangesetGlob = await glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } );
 
 	const resolvedChangesetPaths = await Promise.all( [
 		{
-			changesetPaths: await glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
+			changesetPaths: mainChangesetGlob.map( path => upath.normalize( path ) ),
 			gitHubUrl: await getRepositoryUrl( cwd ),
 			skipLinks
 		},

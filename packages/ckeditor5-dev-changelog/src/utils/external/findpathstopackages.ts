@@ -58,5 +58,7 @@ async function getPackages( cwd: string, packagesDirectory: string | null, inclu
 		globOptions.nodir = true;
 	}
 
-	return glob( pattern, globOptions );
+	const paths = await glob( pattern, globOptions );
+
+	return paths.map( path => upath.normalize( path ) );
 }
