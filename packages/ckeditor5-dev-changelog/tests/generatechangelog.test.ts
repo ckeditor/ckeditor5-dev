@@ -19,6 +19,9 @@ import { logInfo } from '../src/utils/loginfo.js';
 import { logChangelogFiles } from '../src/utils/logchangelogfiles.js';
 import { getRepositoryUrl } from '../src/utils/external/getrepositoryurl.js';
 import { getNewChangelog } from '../src/utils/getnewchangelog.js';
+import { getDateFormatted } from '../src/utils/getdateformatted.js';
+import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
+import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
 import { SECTIONS } from '../src/constants.js';
 
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
@@ -35,6 +38,9 @@ vi.mock( '../src/utils/loginfo.js' );
 vi.mock( '../src/utils/logchangelogfiles.js' );
 vi.mock( '../src/utils/external/getrepositoryurl.js' );
 vi.mock( '../src/utils/getnewchangelog.js' );
+vi.mock( '../src/utils/getdateformatted.js' );
+vi.mock( '../src/utils/defaulttransformscope.js' );
+vi.mock( '../src/utils/getexternalrepositorieswithdefaults.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
@@ -60,6 +66,12 @@ describe( 'generateChangelog()', () => {
 		] );
 		vi.mocked( getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
 		vi.mocked( getPackageJson ).mockResolvedValue( { version: '1.0.0', name: 'test-package' } );
+		vi.mocked( getDateFormatted ).mockReturnValue( 'March 26, 2024' );
+		vi.mocked( defaultTransformScope ).mockImplementation( name => ( {
+			displayName: name,
+			npmUrl: `https://www.npmjs.com/package/${ name }`
+		} ) );
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( [] );
 		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [
 			{
 				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
@@ -153,6 +165,10 @@ describe( 'generateChangelog()', () => {
 	it( 'generates changelog with all required sections', async () => {
 		await generateChangelog( defaultOptions );
 
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
+		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
+
 		// Check that getNewChangelog is called with correct arguments
 		expect( getNewChangelog ).toHaveBeenCalledWith( {
 			oldVersion: '1.0.0',
@@ -228,21 +244,36 @@ describe( 'generateChangelog()', () => {
 			skipLinks: false
 		} ];
 
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( [ {
+			cwd: '/external/repo',
+			packagesDirectory: 'packages',
+			skipLinks: false
+		} ] );
+
 		await generateChangelog( {
 			...defaultOptions,
 			skipLinks: true,
 			externalRepositories
 		} );
 
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( externalRepositories );
 		expect( getPackageJsons ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'packages',
-			externalRepositories
+			[ {
+				cwd: '/external/repo',
+				packagesDirectory: 'packages',
+				skipLinks: false
+			} ]
 		);
 		expect( getChangesetFilePaths ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'.changelog',
-			externalRepositories,
+			[ {
+				cwd: '/external/repo',
+				packagesDirectory: 'packages',
+				skipLinks: false
+			} ],
 			true
 		);
 	} );
