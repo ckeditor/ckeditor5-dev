@@ -25,6 +25,7 @@ import { addBanner } from './plugins/banner.js';
 import { emitCss } from './plugins/emitCss.js';
 import { replaceImports } from './plugins/replace.js';
 import { splitCss } from './plugins/splitCss.js';
+import { loadTypeScriptSources } from './plugins/loadSources.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
@@ -85,7 +86,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 	/**
 	 * Valid extensions for JavaScript and TypeScript files.
 	 */
-	const extensions = [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ];
+	const extensions = [ '.ts', '.mts', '.mjs', '.js', '.json', '.node' ];
 
 	return {
 		input,
@@ -117,6 +118,11 @@ export async function getRollupConfig( options: BuildOptions ) {
 		},
 
 		plugins: [
+			/**
+			 * Ensures that `.ts` files are loaded over `.js` files if both exist.
+			 */
+			loadTypeScriptSources(),
+
 			/**
 			 * Converts CommonJS modules to ES6.
 			 */
@@ -204,7 +210,10 @@ export async function getRollupConfig( options: BuildOptions ) {
 			/**
 			 * Does type checking and generates `.d.ts` files.
 			 */
-			getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } ),
+			getOptionalPlugin(
+				declarations,
+				getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } )
+			),
 
 			/**
 			 * Replaces parts of the source code with the provided values.
@@ -308,11 +317,7 @@ function getTypeScriptPlugin( {
 		declaration: declarations,
 		declarationDir: declarations ? path.parse( output ).dir : undefined,
 		compilerOptions: {
-			// When `declarations` is set to `true`, we only want to emit declaration files.
-			emitDeclarationOnly: !!declarations,
-
-			// Otherwise, we don't want to emit anything.
-			noEmit: !declarations
+			emitDeclarationOnly: true
 		}
 	} );
 }
