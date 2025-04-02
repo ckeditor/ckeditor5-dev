@@ -26,11 +26,11 @@
     "@ckeditor/ckeditor5-dev-release-tools": "^47.0.0",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
-    "pacote": "^19.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^10.0.0",
     "gray-matter": "^4.0.3",
     "inquirer": "^11.0.0",
+    "pacote": "^19.0.0",
     "semver": "^7.6.3",
     "upath": "^2.0.1"
   },
