@@ -195,7 +195,7 @@ describe( 'getChangesetFilePaths', () => {
 		const externalRepositories: Array<Required<RepositoryConfig>> = [];
 
 		// Simulate Windows paths with backslashes
-		vi.mocked( glob ).mockResolvedValue( [ 
+		vi.mocked( glob ).mockResolvedValue( [
 			'C:\\mock\\current\\changesets\\file1.md',
 			'C:\\mock\\current\\changesets\\subfolder\\file2.md'
 		] );
@@ -205,7 +205,7 @@ describe( 'getChangesetFilePaths', () => {
 		expect( result ).toEqual( [
 			{
 				// upath.normalize converts backslashes to forward slashes
-				changesetPaths: [ 
+				changesetPaths: [
 					'C:/mock/current/changesets/file1.md',
 					'C:/mock/current/changesets/subfolder/file2.md'
 				],
