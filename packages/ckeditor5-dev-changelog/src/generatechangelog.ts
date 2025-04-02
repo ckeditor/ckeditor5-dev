@@ -30,21 +30,22 @@ import { removeChangesetFiles } from './utils/removechangesetfiles.js';
  * package information gathering, and changelog file updates.
  */
 export async function generateChangelog( {
-	cwd,
+	nextVersion,
+	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
 	organisationNamespace = ORGANISATION_NAMESPACE,
-	nextVersion,
 	externalRepositories = [],
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
-	changesetsDirectory = CHANGESET_DIRECTORY
+	changesetsDirectory = CHANGESET_DIRECTORY,
+	skipLinks = false
 }: RepositoryConfig & GenerateChangelog ): Promise<void> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await getRepositoryUrl( cwd );
 	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
-	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults );
+	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
 	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 	const sectionsWithEntries = getSectionsWithEntries( {
 		parsedFiles: parsedChangesetFiles,

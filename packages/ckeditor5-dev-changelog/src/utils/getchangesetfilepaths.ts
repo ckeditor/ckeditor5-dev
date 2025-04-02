@@ -14,7 +14,8 @@ import { getRepositoryUrl } from '../utils/external/getrepositoryurl.js';
 export async function getChangesetFilePaths(
 	cwd: string,
 	changesetsDirectory: string,
-	externalRepositories: Array<Required<RepositoryConfig>>
+	externalRepositories: Array<Required<RepositoryConfig>>,
+	skipLinks: boolean
 ): Promise<Array<ChangesetPathsWithGithubUrl>> {
 	const externalChangesetPaths = await Promise.all( externalRepositories.map( async repo => ( {
 		changesetPaths: await glob( '**/*.md', { cwd: upath.join( repo.cwd, changesetsDirectory ), absolute: true } ),
@@ -26,7 +27,7 @@ export async function getChangesetFilePaths(
 		{
 			changesetPaths: await glob( '**/*.md', { cwd: upath.join( cwd, changesetsDirectory ), absolute: true } ),
 			gitHubUrl: await getRepositoryUrl( cwd ),
-			skipLinks: false
+			skipLinks
 		},
 		...externalChangesetPaths
 	] );

@@ -13,7 +13,7 @@ import type { ChangesetPathsWithGithubUrl, ParsedFile } from '../types.js';
 export async function getChangesetsParsed( changesetsPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {
 	return await Promise.all( changesetsPathsWithGithubUrl.flatMap( ( { changesetPaths, gitHubUrl, skipLinks } ) =>
 		changesetPaths.map( async changesetPath => ( {
-			...await matter( await fs.readFile( changesetPath, 'utf-8' ) ),
+			...matter( await fs.readFile( changesetPath, 'utf-8' ) ),
 			gitHubUrl,
 			changesetPath,
 			skipLinks

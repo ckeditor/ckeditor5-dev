@@ -88,6 +88,7 @@ export async function validateVersionAvailability( version: string, packageName:
 	}
 
 	const isAvailable = await checkVersionAvailability( version, packageName );
+
 	if ( !isAvailable ) {
 		return 'Given version is already taken.';
 	}

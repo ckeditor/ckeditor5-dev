@@ -37,10 +37,11 @@ describe( 'getChangesetFilePaths', () => {
 	} );
 
 	it( 'should return file paths from both local and external repositories', async () => {
+		const rootSkipLinks = true;
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false },
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: true },
 			{ cwd: '/mock/repo2', packagesDirectory: 'packages', skipLinks: false }
 		];
 
@@ -60,18 +61,18 @@ describe( 'getChangesetFilePaths', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
+		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks );
 
 		expect( result ).toEqual( [
 			{
 				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false
+				skipLinks: true
 			},
 			{
 				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: false
+				skipLinks: true
 			},
 			{
 				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
@@ -87,13 +88,14 @@ describe( 'getChangesetFilePaths', () => {
 	} );
 
 	it( 'should return only local changeset files if there are no external repositories', async () => {
+		const rootSkipLinks = false;
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [];
 
 		vi.mocked( glob ).mockResolvedValue( [ '/mock/current/changesets/file1.md' ] );
 
-		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
+		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks );
 
 		expect( result ).toEqual( [
 			{
@@ -108,6 +110,7 @@ describe( 'getChangesetFilePaths', () => {
 	} );
 
 	it( 'should return only external changeset files if there are no local files', async () => {
+		const rootSkipLinks = false;
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
@@ -126,7 +129,7 @@ describe( 'getChangesetFilePaths', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
+		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks );
 
 		expect( result ).toEqual( [
 			{
@@ -147,6 +150,7 @@ describe( 'getChangesetFilePaths', () => {
 	} );
 
 	it( 'should return an empty array when no changeset files exist in any repository', async () => {
+		const rootSkipLinks = false;
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
@@ -155,7 +159,7 @@ describe( 'getChangesetFilePaths', () => {
 
 		vi.mocked( glob ).mockImplementation( () => Promise.resolve( [] ) );
 
-		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories );
+		const result = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks );
 
 		expect( result ).toEqual( [
 			{
@@ -174,6 +178,7 @@ describe( 'getChangesetFilePaths', () => {
 	} );
 
 	it( 'should handle errors gracefully by rejecting the promise', async () => {
+		const rootSkipLinks = false;
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
@@ -182,6 +187,8 @@ describe( 'getChangesetFilePaths', () => {
 
 		vi.mocked( glob ).mockRejectedValueOnce( new Error( 'Glob failed' ) );
 
-		await expect( getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories ) ).rejects.toThrow( 'Glob failed' );
+		await expect(
+			getChangesetFilePaths( cwd, changesetsDirectory, externalRepositories, rootSkipLinks )
+		).rejects.toThrow( 'Glob failed' );
 	} );
 } );

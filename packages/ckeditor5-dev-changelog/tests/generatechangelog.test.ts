@@ -231,6 +231,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( {
 			...defaultOptions,
+			skipLinks: true,
 			externalRepositories
 		} );
 
@@ -242,7 +243,8 @@ describe( 'generateChangelog()', () => {
 		expect( getChangesetFilePaths ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'.changelog',
-			externalRepositories
+			externalRepositories,
+			true
 		);
 	} );
 
@@ -255,7 +257,8 @@ describe( 'generateChangelog()', () => {
 		expect( getChangesetFilePaths ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'custom/changesets',
-			[]
+			[],
+			false
 		);
 		expect( removeChangesetFiles ).toHaveBeenCalledWith(
 			[
