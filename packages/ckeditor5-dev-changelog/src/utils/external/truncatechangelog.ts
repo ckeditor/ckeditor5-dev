@@ -11,7 +11,7 @@ import { getRepositoryUrl } from './getrepositoryurl.js';
 /**
  * This function limits the size of the changelog by removing older entries.
  */
-export async function truncateChangelog( length: number, cwd = process.cwd() ): Promise<void> {
+export async function truncateChangelog( length: number, cwd: string ): Promise<void> {
 	const changelog = getChangelog( cwd );
 
 	if ( !changelog ) {
@@ -40,7 +40,7 @@ export async function truncateChangelog( length: number, cwd = process.cwd() ): 
 	saveChangelog( truncatedChangelog, cwd );
 }
 
-function getChangelog( cwd = process.cwd() ) {
+function getChangelog( cwd: string ) {
 	const changelogFile = upath.join( cwd, CHANGELOG_FILE );
 
 	if ( !fs.existsSync( changelogFile ) ) {
@@ -50,7 +50,7 @@ function getChangelog( cwd = process.cwd() ) {
 	return fs.readFileSync( changelogFile, 'utf-8' );
 }
 
-function saveChangelog( content: string, cwd = process.cwd() ) {
+function saveChangelog( content: string, cwd: string ) {
 	const changelogFile = upath.join( cwd, CHANGELOG_FILE );
 
 	fs.writeFileSync( changelogFile, content, 'utf-8' );

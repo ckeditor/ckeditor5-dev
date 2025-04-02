@@ -25,7 +25,7 @@ describe( 'truncateChangelog()', () => {
 
 	it( 'does nothing if there is no changelog', async () => {
 		vi.mocked( fs.existsSync ).mockReturnValue( false );
-		await truncateChangelog( 5 );
+		await truncateChangelog( 5, 'cwd' );
 		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );
 
@@ -61,12 +61,12 @@ describe( 'truncateChangelog()', () => {
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + changelogEntries );
 
-		await truncateChangelog( 2 );
+		await truncateChangelog( 2, 'cwd' );
 
-		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/home/ckeditor/CHANGELOG.md', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, 'cwd/CHANGELOG.md', 'utf-8' );
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
 			1,
-			'/home/ckeditor/CHANGELOG.md',
+			'cwd/CHANGELOG.md',
 			CHANGELOG_HEADER + '\n\n' + expectedChangelogEntries + expectedChangelogFooter,
 			'utf-8'
 		);
@@ -133,7 +133,7 @@ describe( 'truncateChangelog()', () => {
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + changelogEntries );
 
-		await truncateChangelog( 2 );
+		await truncateChangelog( 2, 'cwd' );
 
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
 			1,

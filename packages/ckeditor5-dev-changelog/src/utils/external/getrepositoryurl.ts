@@ -8,7 +8,7 @@ import { getPackageJson } from '../../utils/getpackagejson.js';
 /**
  * This function extracts the repository URL for generating links in the changelog.
  */
-export async function getRepositoryUrl( cwd = process.cwd() ): Promise<string> {
+export async function getRepositoryUrl( cwd: string ): Promise<string> {
 	const packageJson = await getPackageJson( cwd );
 
 	// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.

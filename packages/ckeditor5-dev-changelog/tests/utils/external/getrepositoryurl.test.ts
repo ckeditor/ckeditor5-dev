@@ -85,17 +85,4 @@ describe( 'getRepositoryUrl', () => {
 			`The package.json for "${ mockPackageName }" must contain the "repository" property.`
 		);
 	} );
-
-	it( 'should use process.cwd() when no cwd is provided', async () => {
-		const mockPackageJson = {
-			name: mockPackageName,
-			version: '1.0.0',
-			repository: 'https://github.com/ckeditor/ckeditor5.git'
-		};
-		vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-		await getRepositoryUrl();
-
-		expect( getPackageJson ).toHaveBeenCalledWith( process.cwd() );
-	} );
 } );
