@@ -83,6 +83,14 @@ describe( 'getNewVersion', () => {
 		} );
 	} );
 
+	it( 'should return provided version if it is not undefined or internal', async () => {
+		const result = await getNewVersion( createSectionsWithEntries(), '1.0.0', 'test-package', '50.0.0' );
+
+		expect( result.newVersion ).toBe( '50.0.0' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
+	} );
+
 	it( 'should return a minor version when minor entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 

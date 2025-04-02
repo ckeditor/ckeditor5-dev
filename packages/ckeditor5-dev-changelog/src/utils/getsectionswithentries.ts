@@ -35,14 +35,15 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
-		const changeMessage = [
+		const messageFirstLine = [
 			'*',
 			scope ? `**${ scope }**:` : null,
 			mainContent,
 			!entry.skipLinks && see ? see : null,
-			!entry.skipLinks && closes ? closes : null,
-			restContent.length ? '\n\n  ' + restContent.join( '\n\n  ' ) : null
+			!entry.skipLinks && closes ? closes : null
 		].filter( Boolean ).join( ' ' );
+
+		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
 
 		const newEntry: Entry = {
 			message: changeMessage,

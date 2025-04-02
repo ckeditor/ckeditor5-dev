@@ -114,20 +114,19 @@ describe( 'getSectionsWithEntries', () => {
 	} );
 
 	it( 'should format the content properly', () => {
-		const parsedFiles = [ createParsedFile( { content: 'Some content\n\nSecond line\n\nThird line' } ) ];
+		const parsedFiles = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
 		expect( message ).toEqual( [
-			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content ' +
-				'See [#456](https://github.com/ckeditor/issues/456). ' +
-				'Closes [#123](https://github.com/ckeditor/issues/123). ',
+			// eslint-disable-next-line max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
 			'',
-			'  Second line',
+			'  Second line.',
 			'',
-			'  Third line'
+			'  Third line.'
 		].join( '\n' ) );
 	} );
 

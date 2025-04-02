@@ -29,6 +29,10 @@ export async function getNewVersion(
 		return getInternalVersionBump( oldVersion );
 	}
 
+	if ( nextVersion ) {
+		return { newVersion: nextVersion, isInternal: false };
+	}
+
 	let bumpType: ReleaseType = 'patch';
 
 	if ( sectionsWithEntries.minor.entries.length || sectionsWithEntries.feature.entries.length ) {
