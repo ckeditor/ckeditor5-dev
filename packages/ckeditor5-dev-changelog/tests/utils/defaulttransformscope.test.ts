@@ -5,10 +5,11 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { defaultTransformScope } from '../../src/utils/defaulttransformscope.js';
-import { NPM_URL } from '../../src/constants.js';
+import { NPM_URL, ORGANISATION_NAMESPACE } from '../../src/constants.js';
 
 vi.mock( '../../src/constants.js', () => ( {
-	NPM_URL: 'https://www.npmjs.com/package/'
+	NPM_URL: 'https://www.npmjs.com/package/',
+	ORGANISATION_NAMESPACE: '@org'
 } ) );
 
 describe( 'defaultTransformScope', () => {
@@ -18,7 +19,7 @@ describe( 'defaultTransformScope', () => {
 
 		expect( result ).toEqual( {
 			displayName: packageName,
-			npmUrl: `${ NPM_URL }/${ packageName }`
+			npmUrl: `${ NPM_URL }/${ ORGANISATION_NAMESPACE }/${ packageName }`
 		} );
 	} );
 
@@ -28,7 +29,7 @@ describe( 'defaultTransformScope', () => {
 
 		expect( result ).toEqual( {
 			displayName: packageName,
-			npmUrl: `${ NPM_URL }/${ packageName }`
+			npmUrl: `${ NPM_URL }/${ ORGANISATION_NAMESPACE }/${ packageName }`
 		} );
 	} );
 
@@ -38,7 +39,7 @@ describe( 'defaultTransformScope', () => {
 
 		expect( result ).toEqual( {
 			displayName: packageName,
-			npmUrl: `${ NPM_URL }/${ packageName }`
+			npmUrl: `${ NPM_URL }/${ ORGANISATION_NAMESPACE }/${ packageName }`
 		} );
 	} );
 } );
