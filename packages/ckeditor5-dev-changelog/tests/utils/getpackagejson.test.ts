@@ -3,20 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import fs from 'fs-extra';
-import upath from 'upath';
 import { getPackageJson } from '../../src/utils/getpackagejson.js';
 import type { PackageJson } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
-vi.mock( 'upath' );
 
 describe( 'getPackageJson', () => {
-	beforeEach( () => {
-		vi.mocked( upath.join ).mockImplementation( ( ...paths ) => paths.join( '/' ) );
-	} );
-
 	it( 'should read the package.json when cwd is a directory path', async () => {
 		const cwd = '/my/package/dir';
 		const fakePackageJson: PackageJson = { name: 'my-package', version: '1.0.0' };
