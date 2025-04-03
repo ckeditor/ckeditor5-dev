@@ -5,19 +5,19 @@
 
 import { describe, it, expect } from 'vitest';
 import { getReleasedPackagesInfo } from '../../src/utils/getreleasedpackagesinfo.js';
-import type { SectionsWithEntries, PackageJson, SectionName, Entry } from '../../src/types.js';
+import type { SectionsWithEntries, PackageJson, Entry } from '../../src/types.js';
 
-const createEntry = ( scope: Array<string>, type: SectionName, breakingChange: SectionName, message: string = '' ): Entry => ( {
-	message,
+const createEntry = ( scope: Array<string> ): Entry => ( {
+	message: '',
 	data: {
 		scope,
-		type,
-		'breaking-change': breakingChange,
+		type: '',
 		closes: [],
 		see: [],
 		mainContent: '',
 		restContent: []
-	}
+	},
+	changesetPath: '/path/to/changeset1.md'
 } );
 
 const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
@@ -35,9 +35,9 @@ describe( 'getReleasedPackagesInfo', () => {
 
 	it( 'should categorize new, major, minor, feature, and other releases correctly', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ], 'major', 'major', 'Major change' ) ], title: 'Major Breaking Changes' },
-			minor: { entries: [ createEntry( [ 'ui' ], 'minor', 'minor', 'Minor change' ) ], title: 'Minor Breaking Changes' },
-			feature: { entries: [ createEntry( [ 'editor' ], 'feature', 'minor', 'Feature change' ) ], title: 'Features' }
+			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
+			minor: { entries: [ createEntry( [ 'ui' ] ) ], title: 'Minor Breaking Changes' },
+			feature: { entries: [ createEntry( [ 'editor' ] ) ], title: 'Features' }
 		} );
 
 		const packageJsons: Array<PackageJson> = [
@@ -56,10 +56,97 @@ describe( 'getReleasedPackagesInfo', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: '2.0.0', packages: [ '@ckeditor/new-package' ] },
-			{ title: 'Major releases (contain major breaking changes):', version: '1.0.0 => 2.0.0', packages: [ '@ckeditor/core' ] },
-			{ title: 'Minor releases (contain minor breaking changes):', version: '1.0.0 => 2.0.0', packages: [ '@ckeditor/ui' ] },
-			{ title: 'Releases containing new features:', version: '1.0.0 => 2.0.0', packages: [ '@ckeditor/editor' ] }
+			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
+			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
+			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] },
+			{ title: 'Releases containing new features:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/editor' ] }
+		] );
+	} );
+
+	it( 'should filter out new version releases from major releases', async () => {
+		const sections = createSectionsWithEntries( {
+			major: {
+				entries: [ createEntry( [ 'core', 'new-package' ] ) ],
+				title: 'Major Breaking Changes'
+			}
+		} );
+
+		const packageJsons: Array<PackageJson> = [
+			{ name: '@ckeditor/core', version: '1.0.0' },
+			{ name: '@ckeditor/new-package', version: '0.0.1' }
+		];
+
+		const result = await getReleasedPackagesInfo( {
+			sections,
+			oldVersion: '1.0.0',
+			newVersion: '2.0.0',
+			packageJsons,
+			organisationNamespace
+		} );
+
+		expect( result ).toEqual( [
+			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
+			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] }
+		] );
+	} );
+
+	it( 'should filter out new version releases and major releases from minor releases', async () => {
+		const sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major' },
+			minor: { entries: [ createEntry( [ 'ui', 'new-package', 'core' ] ) ], title: 'Minor' }
+		} );
+
+		const packageJsons: Array<PackageJson> = [
+			{ name: '@ckeditor/core', version: '1.0.0' },
+			{ name: '@ckeditor/ui', version: '1.0.0' },
+			{ name: '@ckeditor/new-package', version: '0.0.1' }
+		];
+
+		const result = await getReleasedPackagesInfo( {
+			sections,
+			oldVersion: '1.0.0',
+			newVersion: '2.0.0',
+			packageJsons,
+			organisationNamespace
+		} );
+
+		expect( result ).toEqual( [
+			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
+			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
+			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] }
+		] );
+	} );
+
+	it( 'should filter out new version, minor, major nad new feature releases from other releases', async () => {
+		const sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( [ 'core' ] ) ], title: '' },
+			minor: { entries: [ createEntry( [ 'ui', 'new-package', 'core' ] ) ], title: '' },
+			feature: { entries: [ createEntry( [ 'editor', 'new-package' ] ) ], title: '' },
+			other: { entries: [ createEntry( [ 'other', 'ui', 'editor', 'core', 'new-package' ] ) ], title: '' }
+		} );
+
+		const packageJsons: Array<PackageJson> = [
+			{ name: '@ckeditor/core', version: '1.0.0' },
+			{ name: '@ckeditor/ui', version: '1.0.0' },
+			{ name: '@ckeditor/editor', version: '1.0.0' },
+			{ name: '@ckeditor/other', version: '1.0.0' },
+			{ name: '@ckeditor/new-package', version: '0.0.1' }
+		];
+
+		const result = await getReleasedPackagesInfo( {
+			sections,
+			oldVersion: '1.0.0',
+			newVersion: '2.0.0',
+			packageJsons,
+			organisationNamespace
+		} );
+
+		expect( result ).toEqual( [
+			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
+			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
+			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] },
+			{ title: 'Releases containing new features:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/editor' ] },
+			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/other' ] }
 		] );
 	} );
 
@@ -94,7 +181,7 @@ describe( 'getReleasedPackagesInfo', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: '2.0.0', packages: [ '@ckeditor/new-package-1', '@ckeditor/new-package-2' ] }
+			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package-1', '@ckeditor/new-package-2' ] }
 		] );
 	} );
 
@@ -111,14 +198,14 @@ describe( 'getReleasedPackagesInfo', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'Other releases:', version: '1.0.0 => 2.0.0', packages: [ '@ckeditor/uncategorized' ] }
+			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/uncategorized' ] }
 		] );
 	} );
 
 	it( 'should remove duplicate package names in scope', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ], 'major', 'major', 'Duplicate scope' ) ], title: 'Major Breaking Changes' },
-			minor: { entries: [ createEntry( [ 'core' ], 'minor', 'minor', 'Duplicate scope' ) ], title: 'Minor Breaking Changes' }
+			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
+			minor: { entries: [ createEntry( [ 'core' ] ) ], title: 'Minor Breaking Changes' }
 		} );
 		const packageJsons: Array<PackageJson> = [ { name: '@ckeditor/core', version: '1.0.0' } ];
 
@@ -131,7 +218,7 @@ describe( 'getReleasedPackagesInfo', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'Major releases (contain major breaking changes):', version: '1.0.0 => 2.0.0', packages: [ '@ckeditor/core' ] }
+			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] }
 		] );
 	} );
 } );

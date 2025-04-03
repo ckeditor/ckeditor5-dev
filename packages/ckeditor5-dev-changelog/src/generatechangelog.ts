@@ -84,5 +84,7 @@ export async function generateChangelog( {
 	await modifyChangelog( newChangelog, cwd );
 	await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
 
+	// TODO consider commiting the changes here or in a separate command.
+
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
 }

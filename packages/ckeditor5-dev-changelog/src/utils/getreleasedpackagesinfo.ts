@@ -16,14 +16,16 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	packageJsons: Array<PackageJson>;
 	organisationNamespace: string;
 } ): Promise<Array<ReleaseInfo>> {
-	const versionUpgradeText = `${ oldVersion } => ${ newVersion }`;
+	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
 	const packageNames = packageJsons.map( packageName => packageName.name );
 
 	const newVersionReleases = getNewVersionReleases( packageJsons );
-	const majorReleases = getPackageNamesByScope( sections.major.entries, { organisationNamespace } );
-	const minorReleases = getPackageNamesByScope( sections.minor.entries, { packagesToRemove: majorReleases, organisationNamespace } );
+	const majorReleases = getPackageNamesByScope( sections.major.entries, { packagesToRemove: newVersionReleases, organisationNamespace } );
+	const minorReleases = getPackageNamesByScope( sections.minor.entries, {
+		packagesToRemove: [ ...majorReleases, ...newVersionReleases ], organisationNamespace }
+	);
 	const newFeaturesReleases = getPackageNamesByScope( sections.feature.entries, {
-		packagesToRemove: minorReleases,
+		packagesToRemove: [ ...minorReleases, ...majorReleases, ...newVersionReleases ],
 		organisationNamespace
 	} );
 
@@ -34,7 +36,7 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 		.sort();
 
 	return [
-		{ title: 'New packages:', version: newVersion, packages: newVersionReleases },
+		{ title: 'New packages:', version: `v${ newVersion }`, packages: newVersionReleases },
 		{ title: 'Major releases (contain major breaking changes):', version: versionUpgradeText, packages: majorReleases },
 		{ title: 'Minor releases (contain minor breaking changes):', version: versionUpgradeText, packages: minorReleases },
 		{ title: 'Releases containing new features:', version: versionUpgradeText, packages: newFeaturesReleases },
@@ -50,14 +52,13 @@ function getNewVersionReleases( packages: Array<PackageJson> ) {
 }
 
 function getPackageNamesByScope( entries: Array<Entry> = [], { packagesToRemove, organisationNamespace }: {
-	packagesToRemove?: Array<string>;
+	packagesToRemove: Array<string>;
 	organisationNamespace: string;
 } ) {
-	const packageNamesDeduplicated = [ ...new Set( entries.flatMap( entry => entry.data.scope ) ) ];
+	const packageNames = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
+	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
 	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ organisationNamespace }/` + scope );
-	const packagesNamesFiltered = packagesToRemove ?
-		packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) ) :
-		packagesFullNames;
+	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
 
 	return packagesNamesFiltered.sort();
 }
