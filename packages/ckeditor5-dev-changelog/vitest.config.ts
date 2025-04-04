@@ -14,7 +14,13 @@ export default defineConfig( {
 			include: [
 				'src/**'
 			],
-			reporter: [ 'text', 'json', 'html', 'lcov' ]
+			exclude: [
+				'tests/**',
+				'src/types.ts',
+				'src/index.ts'
+			],
+			reporter: [ 'text', 'json', 'html' ],
+			all: true
 		}
 	}
 } );

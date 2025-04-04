@@ -7,6 +7,7 @@ import { readFileSync } from 'fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import typescript from '@rollup/plugin-typescript';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 // Current working directory
 const cwd = process.cwd();
@@ -33,6 +34,10 @@ export default defineConfig( {
 	plugins: [
 		typescript( {
 			rootDir: './src'
+		} ),
+		nodeResolve( {
+			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
+			preferBuiltins: true
 		} )
 	]
 } );
