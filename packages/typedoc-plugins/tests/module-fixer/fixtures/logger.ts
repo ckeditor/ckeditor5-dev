@@ -14,3 +14,8 @@ export default class Logger {
 		console.log( error.name );
 	}
 }
+export interface DeleteChange {
+	type: 'delete';
+	index: number;
+	howMany: number;
+}
