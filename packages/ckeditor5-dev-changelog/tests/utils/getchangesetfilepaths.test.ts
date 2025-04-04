@@ -13,7 +13,7 @@ import { getRepositoryUrl } from '../../src/utils/external/getrepositoryurl.js';
 vi.mock( 'glob' );
 vi.mock( '../../src/utils/external/getrepositoryurl.js' );
 
-describe( 'getChangesetFilePaths', () => {
+describe( 'getChangesetFilePaths()', () => {
 	beforeEach( () => {
 		vi.mocked( getRepositoryUrl ).mockImplementation( cwd => {
 			if ( cwd === '/mock/current' ) {

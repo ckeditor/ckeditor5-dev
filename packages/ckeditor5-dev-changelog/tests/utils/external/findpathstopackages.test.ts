@@ -10,7 +10,7 @@ import upath from 'upath';
 
 vi.mock( 'glob' );
 
-describe( 'findPathsToPackages', () => {
+describe( 'findPathsToPackages()', () => {
 	const mockCwd = '/test/cwd';
 	const mockPackagesDir = 'packages';
 	const getMockGlobResults = () => [

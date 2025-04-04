@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { logInfo } from '../../src/utils/loginfo.js';
 
-describe( 'logInfo', () => {
+describe( 'logInfo()', () => {
 	it( 'logs text without indentation by default', () => {
 		const consoleSpy = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 

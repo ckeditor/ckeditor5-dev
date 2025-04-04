@@ -8,7 +8,7 @@ import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/constants.js
 import type { PackageJson, ReleaseInfo, Section } from '../../src/types.js';
 import { describe, it, expect } from 'vitest';
 
-describe( 'getNewChangelog', () => {
+describe( 'getNewChangelog()', () => {
 	const createSection = ( title: string, entries: Array<{ message: string }> = [] ): Section => ( {
 		title,
 		entries: entries.map( entry => ( {

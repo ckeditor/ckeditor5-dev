@@ -29,7 +29,7 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 	}
 } as any );
 
-describe( 'getSectionsWithEntries', () => {
+describe( 'getSectionsWithEntries()', () => {
 	const organisationNamespace = '@ckeditor';
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
 	let packages: Array<PackageJson>;

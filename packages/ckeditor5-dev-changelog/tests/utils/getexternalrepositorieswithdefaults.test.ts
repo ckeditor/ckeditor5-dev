@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { getExternalRepositoriesWithDefaults } from '../../src/utils/getexternalrepositorieswithdefaults.js';
 import type { RepositoryConfig } from '../../src/types.js';
 
-describe( 'getExternalRepositoriesWithDefaults', () => {
+describe( 'getExternalRepositoriesWithDefaults()', () => {
 	it( 'should return empty array when no repositories provided', () => {
 		const result = getExternalRepositoriesWithDefaults( [] );
 		expect( result ).toEqual( [] );

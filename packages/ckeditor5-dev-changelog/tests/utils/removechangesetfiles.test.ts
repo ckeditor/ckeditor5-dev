@@ -20,7 +20,7 @@ vi.mock( 'chalk', () => ( {
 	}
 } ) );
 
-describe( 'removeChangesetFiles', () => {
+describe( 'removeChangesetFiles()', () => {
 	const mockCwd = '/repo';
 	const mockChangelogDir = 'changelog';
 	const mockExternalRepositories = [

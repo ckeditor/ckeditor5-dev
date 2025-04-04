@@ -9,7 +9,7 @@ import { getPackageJson } from '../../../src/utils/getpackagejson.js';
 
 vi.mock( '../../../src/utils/getpackagejson' );
 
-describe( 'getRepositoryUrl', () => {
+describe( 'getRepositoryUrl()', () => {
 	const mockCwd = '/test/cwd';
 	const mockPackageName = 'test-package';
 

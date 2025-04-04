@@ -11,7 +11,7 @@ import type { SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/loginfo' );
 
-describe( 'logChangelogFiles', () => {
+describe( 'logChangelogFiles()', () => {
 	it( 'logs changes correctly for valid sections', () => {
 		const sections: SectionsWithEntries = {
 			Feature: {

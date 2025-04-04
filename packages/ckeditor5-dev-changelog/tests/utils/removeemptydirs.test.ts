@@ -10,7 +10,7 @@ import upath from 'upath';
 
 vi.mock( 'fs-extra' );
 
-describe( 'removeEmptyDirs', () => {
+describe( 'removeEmptyDirs()', () => {
 	const mockDir = '/some/dir';
 
 	it( 'does nothing if the directory does not exist', async () => {

@@ -14,7 +14,7 @@ const createSection = ( title: string, entries: Array<Entry> ): Section => ( {
 
 const createEntry = ( message: string ): Entry => ( { message } ) as any;
 
-describe( 'getSectionsToDisplay', () => {
+describe( 'getSectionsToDisplay()', () => {
 	it( 'should return only valid sections with entries', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
 			major: createSection( 'Major Changes', [ createEntry( 'Breaking change' ) ] ),

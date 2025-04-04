@@ -30,9 +30,9 @@ const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {}
 	...overrides
 } );
 
-describe( 'getReleasedPackagesInfo', () => {
-	const organisationNamespace = '@ckeditor';
+const organisationNamespace = '@ckeditor';
 
+describe( 'getReleasedPackagesInfo()', () => {
 	it( 'should categorize new, major, minor, feature, and other releases correctly', async () => {
 		const sections = createSectionsWithEntries( {
 			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
@@ -65,10 +65,7 @@ describe( 'getReleasedPackagesInfo', () => {
 
 	it( 'should filter out new version releases from major releases', async () => {
 		const sections = createSectionsWithEntries( {
-			major: {
-				entries: [ createEntry( [ 'core', 'new-package' ] ) ],
-				title: 'Major Breaking Changes'
-			}
+			major: { entries: [ createEntry( [ 'core', 'new-package' ] ) ], title: 'Major Breaking Changes' }
 		} );
 
 		const packageJsons: Array<PackageJson> = [

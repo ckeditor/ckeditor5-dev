@@ -10,7 +10,7 @@ import type { PackageJson } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 
-describe( 'getPackageJson', () => {
+describe( 'getPackageJson()', () => {
 	it( 'should read the package.json when cwd is a directory path', async () => {
 		const cwd = '/my/package/dir';
 		const fakePackageJson: PackageJson = { name: 'my-package', version: '1.0.0' };

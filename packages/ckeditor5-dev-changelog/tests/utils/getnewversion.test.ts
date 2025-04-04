@@ -21,7 +21,7 @@ vi.mock( 'semver', async () => {
 	};
 } );
 
-describe( 'getNewVersion', () => {
+describe( 'getNewVersion()', () => {
 	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonorepository );
 	const mockedLogInfo = vi.mocked( logInfo );
 	const mockedSemverInc = vi.mocked( semver.inc );
@@ -56,6 +56,7 @@ describe( 'getNewVersion', () => {
 			if ( version === '1.0.0' && releaseType === 'patch' ) {
 				return '1.0.1';
 			}
+
 			return null;
 		} );
 	} );

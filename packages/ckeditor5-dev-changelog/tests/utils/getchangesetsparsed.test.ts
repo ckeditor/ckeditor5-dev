@@ -12,7 +12,7 @@ import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
 
-describe( 'getChangesetsParsed', () => {
+describe( 'getChangesetsParsed()', () => {
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/changeset1.md';

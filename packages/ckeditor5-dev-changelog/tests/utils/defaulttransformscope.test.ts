@@ -12,7 +12,7 @@ vi.mock( '../../src/constants.js', () => ( {
 	ORGANISATION_NAMESPACE: '@org'
 } ) );
 
-describe( 'defaultTransformScope', () => {
+describe( 'defaultTransformScope()', () => {
 	it( 'should return an object with displayName and npmUrl properties', () => {
 		const packageName = 'test-package';
 		const result = defaultTransformScope( packageName );

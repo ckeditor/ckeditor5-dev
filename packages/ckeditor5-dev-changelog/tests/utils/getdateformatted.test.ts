@@ -6,7 +6,7 @@
 import { getDateFormatted } from '../../src/utils/getdateformatted.js'; // Update the file path accordingly
 import { describe, it, expect } from 'vitest';
 
-describe( 'getDateFormatted', () => {
+describe( 'getDateFormatted()', () => {
 	it( 'should format a valid date correctly', () => {
 		expect( getDateFormatted( '2023-12-25' ) ).toBe( 'December 25, 2023' );
 		expect( getDateFormatted( '2024-01-01' ) ).toBe( 'January 1, 2024' );

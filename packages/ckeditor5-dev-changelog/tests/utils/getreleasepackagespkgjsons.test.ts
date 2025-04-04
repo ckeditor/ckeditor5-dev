@@ -14,7 +14,7 @@ vi.mock( 'fs-extra' );
 vi.mock( 'upath' );
 vi.mock( '../../src/utils/external/findpathstopackages' );
 
-describe( 'getReleasePackagesPkgJsons', () => {
+describe( 'getReleasePackagesPkgJsons()', () => {
 	const cwd = '/local/directory';
 	const packagesDirectory = '/local/packages';
 	const externalRepositories: Array<Required<RepositoryConfig>> = [
