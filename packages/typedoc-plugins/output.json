@@ -1,0 +1,7186 @@
+{
+	"schemaVersion": "2.0",
+	"id": 0,
+	"name": "@ckeditor/typedoc-plugins",
+	"variant": "project",
+	"kind": 1,
+	"flags": {},
+	"children": [
+		{
+			"id": 111,
+			"name": "fixtures/eventsinvalid",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 157,
+					"name": "EventsInvalidClass",
+					"variant": "declaration",
+					"kind": 128,
+					"flags": {},
+					"children": [
+						{
+							"id": 161,
+							"name": "constructor",
+							"variant": "declaration",
+							"kind": 512,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 13,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+								}
+							],
+							"signatures": [
+								{
+									"id": 162,
+									"name": "EventsInvalidClass",
+									"variant": "signature",
+									"kind": 16384,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "exampleclass.ts",
+											"line": 13,
+											"character": 1,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+										}
+									],
+									"parameters": [
+										{
+											"id": 163,
+											"name": "value",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 157,
+										"name": "EventsInvalidClass",
+										"package": "@ckeditor/typedoc-plugins",
+										"qualifiedName": "default"
+									},
+									"inheritedFrom": {
+										"type": "reference",
+										"target": 141,
+										"name": "default.constructor"
+									}
+								}
+							],
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 140,
+								"name": "default.constructor"
+							}
+						},
+						{
+							"id": 164,
+							"name": "_value",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {
+								"isProtected": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 11,
+									"character": 11,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 143,
+								"name": "default._value"
+							}
+						},
+						{
+							"id": 165,
+							"name": "value",
+							"variant": "declaration",
+							"kind": 262144,
+							"flags": {
+								"isPublic": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 17,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+								},
+								{
+									"fileName": "exampleclass.ts",
+									"line": 21,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+								}
+							],
+							"getSignature": {
+								"id": 166,
+								"name": "value",
+								"variant": "signature",
+								"kind": 524288,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 17,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "string"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"setSignature": {
+								"id": 167,
+								"name": "value",
+								"variant": "signature",
+								"kind": 1048576,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 21,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									}
+								],
+								"parameters": [
+									{
+										"id": 168,
+										"name": "value",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "void"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 144,
+								"name": "default.value"
+							}
+						},
+						{
+							"id": 158,
+							"name": "create",
+							"variant": "declaration",
+							"kind": 2048,
+							"flags": {
+								"isPublic": true,
+								"isStatic": true
+							},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 13,
+									"character": 15,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
+								}
+							],
+							"signatures": [
+								{
+									"id": 159,
+									"name": "create",
+									"variant": "signature",
+									"kind": 4096,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "eventsinvalid.ts",
+											"line": 13,
+											"character": 15,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
+										}
+									],
+									"parameters": [
+										{
+											"id": 160,
+											"name": "value",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 139,
+										"name": "ExampleClass",
+										"package": "@ckeditor/typedoc-plugins",
+										"qualifiedName": "default"
+									}
+								}
+							]
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"children": [
+								161
+							]
+						},
+						{
+							"title": "Properties",
+							"children": [
+								164
+							]
+						},
+						{
+							"title": "Accessors",
+							"children": [
+								165
+							]
+						},
+						{
+							"title": "Methods",
+							"children": [
+								158
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 12,
+							"character": 21,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L12"
+						}
+					],
+					"extendedTypes": [
+						{
+							"type": "reference",
+							"target": 139,
+							"name": "default",
+							"package": "@ckeditor/typedoc-plugins"
+						}
+					]
+				},
+				{
+					"id": 133,
+					"name": "EventFooAbsoluteInvalidClass",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "An absolute event linked to a non-existing class."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:eventsvalid~InvalidClass#event-foo-absolute-invalid-class"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 135,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 92,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L92"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								135
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 91,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L91"
+						}
+					]
+				},
+				{
+					"id": 130,
+					"name": "EventFooAbsoluteInvalidModule",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "An absolute event linked to a non-existing module."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:invalidmodule~EventsInvalidClass#event-foo-absolute-invalid-module"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 132,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 83,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L83"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								132
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 82,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L82"
+						}
+					]
+				},
+				{
+					"id": 136,
+					"name": "EventFooAbsoluteInvalidParent",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "An absolute event linked neither to a class, nor to an Observable interface."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:eventsvalid~ExampleType#event-foo-absolute-invalid-parent"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 138,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 101,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L101"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								138
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 100,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L100"
+						}
+					]
+				},
+				{
+					"id": 118,
+					"name": "EventFooRelativeInvalidClass",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "A relative event linked to a non-existing class."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~InvalidClass#event-foo-relative-invalid-class"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 120,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 51,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L51"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								120
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 50,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L50"
+						}
+					]
+				},
+				{
+					"id": 127,
+					"name": "EventFooRelativeInvalidNameWithoutSeparator",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "event-foo-relative-invalid-name-without-separator"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 129,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 74,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L74"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								129
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 73,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L73"
+						}
+					]
+				},
+				{
+					"id": 124,
+					"name": "EventFooRelativeInvalidNameWithSeparator",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "#event-foo-relative-invalid-name-with-separator"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 126,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 67,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L67"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								126
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 66,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L66"
+						}
+					]
+				},
+				{
+					"id": 121,
+					"name": "EventFooRelativeInvalidParent",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "A relative event linked neither to a class, nor to an Observable interface."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~ExampleType#event-foo-relative-invalid-parent"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 123,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 60,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L60"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								123
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 59,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L59"
+						}
+					]
+				},
+				{
+					"id": 115,
+					"name": "ExampleType",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Normal type export."
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 117,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 42,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L42"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								117
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 41,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L41"
+						}
+					]
+				},
+				{
+					"id": 112,
+					"name": "create",
+					"variant": "declaration",
+					"kind": 64,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsinvalid.ts",
+							"line": 29,
+							"character": 16,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
+						}
+					],
+					"signatures": [
+						{
+							"id": 113,
+							"name": "create",
+							"variant": "signature",
+							"kind": 4096,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsinvalid.ts",
+									"line": 29,
+									"character": 16,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
+								}
+							],
+							"parameters": [
+								{
+									"id": 114,
+									"name": "value",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "intrinsic",
+										"name": "string"
+									}
+								}
+							],
+							"type": {
+								"type": "reference",
+								"target": 139,
+								"name": "ExampleClass",
+								"package": "@ckeditor/typedoc-plugins",
+								"qualifiedName": "default"
+							}
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Classes",
+					"children": [
+						157
+					]
+				},
+				{
+					"title": "Type Aliases",
+					"children": [
+						133,
+						130,
+						136,
+						118,
+						127,
+						124,
+						121,
+						115
+					]
+				},
+				{
+					"title": "Functions",
+					"children": [
+						112
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "eventsinvalid.ts",
+					"line": 1,
+					"character": 0,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L1"
+				}
+			]
+		},
+		{
+			"id": 7,
+			"name": "fixtures/eventsvalid",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 8,
+					"name": "EventsValidAnotherClass",
+					"variant": "declaration",
+					"kind": 128,
+					"flags": {},
+					"children": [
+						{
+							"id": 9,
+							"name": "constructor",
+							"variant": "declaration",
+							"kind": 512,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 13,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+								}
+							],
+							"signatures": [
+								{
+									"id": 10,
+									"name": "EventsValidAnotherClass",
+									"variant": "signature",
+									"kind": 16384,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "exampleclass.ts",
+											"line": 13,
+											"character": 1,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+										}
+									],
+									"parameters": [
+										{
+											"id": 11,
+											"name": "value",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 8,
+										"name": "EventsValidAnotherClass",
+										"package": "@ckeditor/typedoc-plugins"
+									},
+									"inheritedFrom": {
+										"type": "reference",
+										"target": 141,
+										"name": "default.constructor"
+									}
+								}
+							],
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 140,
+								"name": "default.constructor"
+							}
+						},
+						{
+							"id": 12,
+							"name": "_value",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {
+								"isProtected": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 11,
+									"character": 11,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 143,
+								"name": "default._value"
+							}
+						},
+						{
+							"id": 13,
+							"name": "value",
+							"variant": "declaration",
+							"kind": 262144,
+							"flags": {
+								"isPublic": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 17,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+								},
+								{
+									"fileName": "exampleclass.ts",
+									"line": 21,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+								}
+							],
+							"getSignature": {
+								"id": 14,
+								"name": "value",
+								"variant": "signature",
+								"kind": 524288,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 17,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "string"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"setSignature": {
+								"id": 15,
+								"name": "value",
+								"variant": "signature",
+								"kind": 1048576,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 21,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									}
+								],
+								"parameters": [
+									{
+										"id": 16,
+										"name": "value",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "void"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 144,
+								"name": "default.value"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"children": [
+								9
+							]
+						},
+						{
+							"title": "Properties",
+							"children": [
+								12
+							]
+						},
+						{
+							"title": "Accessors",
+							"children": [
+								13
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 13,
+							"character": 13,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L13"
+						}
+					],
+					"extendedTypes": [
+						{
+							"type": "reference",
+							"target": 139,
+							"name": "default",
+							"package": "@ckeditor/typedoc-plugins"
+						}
+					],
+					"ckeditor5Events": [
+						{
+							"id": 209,
+							"name": "event-foo-multiple-names:variant:subvariant",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names:variant"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 224,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+								}
+							],
+							"parameters": []
+						}
+					]
+				},
+				{
+					"id": 148,
+					"name": "EventsValidClass",
+					"variant": "declaration",
+					"kind": 128,
+					"flags": {},
+					"children": [
+						{
+							"id": 149,
+							"name": "constructor",
+							"variant": "declaration",
+							"kind": 512,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 13,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+								}
+							],
+							"signatures": [
+								{
+									"id": 150,
+									"name": "EventsValidClass",
+									"variant": "signature",
+									"kind": 16384,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "exampleclass.ts",
+											"line": 13,
+											"character": 1,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+										}
+									],
+									"parameters": [
+										{
+											"id": 151,
+											"name": "value",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 148,
+										"name": "EventsValidClass",
+										"package": "@ckeditor/typedoc-plugins",
+										"qualifiedName": "default"
+									},
+									"inheritedFrom": {
+										"type": "reference",
+										"target": 141,
+										"name": "default.constructor"
+									}
+								}
+							],
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 140,
+								"name": "default.constructor"
+							}
+						},
+						{
+							"id": 152,
+							"name": "_value",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {
+								"isProtected": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 11,
+									"character": 11,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 143,
+								"name": "default._value"
+							}
+						},
+						{
+							"id": 153,
+							"name": "value",
+							"variant": "declaration",
+							"kind": 262144,
+							"flags": {
+								"isPublic": true,
+								"isInherited": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 17,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+								},
+								{
+									"fileName": "exampleclass.ts",
+									"line": 21,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+								}
+							],
+							"getSignature": {
+								"id": 154,
+								"name": "value",
+								"variant": "signature",
+								"kind": 524288,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 17,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "string"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"setSignature": {
+								"id": 155,
+								"name": "value",
+								"variant": "signature",
+								"kind": 1048576,
+								"flags": {
+									"isInherited": true
+								},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 21,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									}
+								],
+								"parameters": [
+									{
+										"id": 156,
+										"name": "value",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "void"
+								},
+								"inheritedFrom": {
+									"type": "reference",
+									"target": -1,
+									"name": "ExampleClass.value"
+								}
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"target": 144,
+								"name": "default.value"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"children": [
+								149
+							]
+						},
+						{
+							"title": "Properties",
+							"children": [
+								152
+							]
+						},
+						{
+							"title": "Accessors",
+							"children": [
+								153
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 12,
+							"character": 21,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L12"
+						}
+					],
+					"extendedTypes": [
+						{
+							"type": "reference",
+							"target": 139,
+							"name": "default",
+							"package": "@ckeditor/typedoc-plugins"
+						}
+					],
+					"ckeditor5Events": [
+						{
+							"id": 169,
+							"name": "event-foo-no-text",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-no-text"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 25,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 170,
+							"name": "event-foo",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "An event associated with the type."
+									}
+								],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 34,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 171,
+							"name": "event-foo-with-params",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "An event associated with the type. Event with three params.\n\nSee "
+									},
+									{
+										"kind": "inline-tag",
+										"tag": "@link",
+										"text": "~EventsValidClass"
+									},
+									{
+										"kind": "text",
+										"text": " or "
+									},
+									{
+										"kind": "inline-tag",
+										"tag": "@link",
+										"text": "module:fixtures/eventsvalid~EventsValidClass Custom label",
+										"target": {
+											"packageName": "@types/node",
+											"packagePath": "module.d.ts",
+											"qualifiedName": "__global.module"
+										},
+										"tsLinkText": ":fixtures/eventsvalid~EventsValidClass Custom label"
+									},
+									{
+										"kind": "text",
+										"text": ". A text after."
+									}
+								],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-with-params"
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p1",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p2",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Description for second param."
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p3",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Complex "
+											},
+											{
+												"kind": "inline-tag",
+												"tag": "@link",
+												"text": "module:utils/object~Object description",
+												"target": {
+													"packageName": "@types/node",
+													"packagePath": "module.d.ts",
+													"qualifiedName": "__global.module"
+												},
+												"tsLinkText": ":utils/object~Object description"
+											},
+											{
+												"kind": "text",
+												"text": " for "
+											},
+											{
+												"kind": "code",
+												"text": "`third param`"
+											},
+											{
+												"kind": "text",
+												"text": "."
+											}
+										]
+									},
+									{
+										"tag": "@deprecated",
+										"content": []
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 50,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+								}
+							],
+							"parameters": [
+								{
+									"id": 172,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 173,
+									"name": "p2",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Description for second param."
+											}
+										]
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									}
+								},
+								{
+									"id": 174,
+									"name": "p3",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Complex "
+											},
+											{
+												"kind": "inline-tag",
+												"tag": "@link",
+												"text": "module:utils/object~Object description",
+												"target": {
+													"packageName": "@types/node",
+													"packagePath": "module.d.ts",
+													"qualifiedName": "__global.module"
+												},
+												"tsLinkText": ":utils/object~Object description"
+											},
+											{
+												"kind": "text",
+												"text": " for "
+											},
+											{
+												"kind": "code",
+												"text": "`third param`"
+											},
+											{
+												"kind": "text",
+												"text": "."
+											}
+										]
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p3",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 175,
+							"name": "event-foo-no-content",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-no-content"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 63,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 176,
+							"name": "event-foo-empty-args",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-empty-args"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 68,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 177,
+							"name": "event-foo-optional-args",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-optional-args"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 75,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+								}
+							],
+							"parameters": [
+								{
+									"id": 178,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 179,
+									"name": "p2",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {
+										"isOptional": true
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": true,
+										"element": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 180,
+							"name": "event-foo-inline-args",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-inline-args"
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p1",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 87,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+								}
+							],
+							"parameters": [
+								{
+									"id": 181,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									},
+									"type": {
+										"type": "reflection",
+										"declaration": {
+											"id": 41,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 42,
+													"name": "p1",
+													"variant": "declaration",
+													"kind": 1024,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "eventsvalid.ts",
+															"line": 90,
+															"character": 3,
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
+														}
+													],
+													"type": {
+														"type": "intrinsic",
+														"name": "number"
+													}
+												}
+											],
+											"groups": [
+												{
+													"title": "Properties",
+													"children": [
+														42
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 89,
+													"character": 2,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
+												}
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 182,
+							"name": "event-foo-anonymous-args",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-anonymous-args"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 98,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+								}
+							],
+							"parameters": [
+								{
+									"id": 183,
+									"name": "<anonymous>",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "intrinsic",
+										"name": "number"
+									}
+								},
+								{
+									"id": 184,
+									"name": "<anonymous>",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "reflection",
+										"declaration": {
+											"id": 46,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 47,
+													"name": "foo",
+													"variant": "declaration",
+													"kind": 1024,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "eventsvalid.ts",
+															"line": 99,
+															"character": 19,
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+														}
+													],
+													"type": {
+														"type": "intrinsic",
+														"name": "boolean"
+													}
+												}
+											],
+											"groups": [
+												{
+													"title": "Properties",
+													"children": [
+														47
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 99,
+													"character": 17,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+												}
+											]
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 185,
+							"name": "event-foo-anonymous-optional-args",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-anonymous-optional-args"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 105,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+								}
+							],
+							"parameters": [
+								{
+									"id": 186,
+									"name": "<anonymous>",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {
+										"isOptional": true
+									},
+									"type": {
+										"type": "optional",
+										"elementType": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									}
+								},
+								{
+									"id": 187,
+									"name": "<anonymous>",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {
+										"isOptional": true
+									},
+									"type": {
+										"type": "optional",
+										"elementType": {
+											"type": "reflection",
+											"declaration": {
+												"id": 51,
+												"name": "__type",
+												"variant": "declaration",
+												"kind": 65536,
+												"flags": {},
+												"children": [
+													{
+														"id": 52,
+														"name": "foo",
+														"variant": "declaration",
+														"kind": 1024,
+														"flags": {},
+														"sources": [
+															{
+																"fileName": "eventsvalid.ts",
+																"line": 106,
+																"character": 20,
+																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+															}
+														],
+														"type": {
+															"type": "intrinsic",
+															"name": "boolean"
+														}
+													}
+												],
+												"groups": [
+													{
+														"title": "Properties",
+														"children": [
+															52
+														]
+													}
+												],
+												"sources": [
+													{
+														"fileName": "eventsvalid.ts",
+														"line": 106,
+														"character": 18,
+														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+													}
+												]
+											}
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 188,
+							"name": "event-foo-reference",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-reference"
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p1",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									},
+									{
+										"tag": "@param",
+										"name": "p2",
+										"content": [
+											{
+												"kind": "text",
+												"text": "Description for second param."
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 126,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+								}
+							],
+							"parameters": [
+								{
+									"id": 189,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Description for first param."
+											}
+										]
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 190,
+									"name": "p2",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Description for second param."
+											}
+										]
+									},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 191,
+							"name": "event-foo-generic-from-type-arg",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-generic-from-type-arg"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 143,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+								}
+							],
+							"parameters": [
+								{
+									"id": 192,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 193,
+									"name": "p2",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 194,
+							"name": "event-foo-generic-from-base-type",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-generic-from-base-type"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 169,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 195,
+							"name": "event-foo-complex",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-complex"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 174,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+								}
+							],
+							"parameters": [
+								{
+									"id": 196,
+									"name": "<anonymous>",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "intrinsic",
+										"name": "any"
+									}
+								}
+							]
+						},
+						{
+							"id": 197,
+							"name": "event-foo-absolute",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 183,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 198,
+							"name": "event-foo-absolute-with-prefix",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "module:fixtures/eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 190,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 207,
+							"name": "event-foo-multiple-names",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names:variant"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 224,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+								}
+							],
+							"parameters": []
+						},
+						{
+							"id": 208,
+							"name": "event-foo-multiple-names:variant",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidClass#event-foo-multiple-names:variant"
+											}
+										]
+									},
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 224,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+								}
+							],
+							"parameters": []
+						}
+					]
+				},
+				{
+					"id": 23,
+					"name": "EventFoo",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "An event associated with the type."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 25,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 35,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L35"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								25
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 34,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+						}
+					]
+				},
+				{
+					"id": 93,
+					"name": "EventFooAbsolute",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 95,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 184,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L184"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								95
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 183,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+						}
+					]
+				},
+				{
+					"id": 96,
+					"name": "EventFooAbsoluteWithPrefix",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:fixtures/eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 98,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 191,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L191"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								98
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 190,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+						}
+					]
+				},
+				{
+					"id": 43,
+					"name": "EventFooAnonymousArgs",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-anonymous-args"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 45,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 99,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "intrinsic",
+										"name": "number"
+									},
+									{
+										"type": "reflection",
+										"declaration": {
+											"id": 46,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 47,
+													"name": "foo",
+													"variant": "declaration",
+													"kind": 1024,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "eventsvalid.ts",
+															"line": 99,
+															"character": 19,
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+														}
+													],
+													"type": {
+														"type": "intrinsic",
+														"name": "boolean"
+													}
+												}
+											],
+											"groups": [
+												{
+													"title": "Properties",
+													"children": [
+														47
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 99,
+													"character": 17,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								45
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 98,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+						}
+					]
+				},
+				{
+					"id": 48,
+					"name": "EventFooAnonymousOptionalArgs",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-anonymous-optional-args"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 50,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 106,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "optional",
+										"elementType": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									},
+									{
+										"type": "optional",
+										"elementType": {
+											"type": "reflection",
+											"declaration": {
+												"id": 51,
+												"name": "__type",
+												"variant": "declaration",
+												"kind": 65536,
+												"flags": {},
+												"children": [
+													{
+														"id": 52,
+														"name": "foo",
+														"variant": "declaration",
+														"kind": 1024,
+														"flags": {},
+														"sources": [
+															{
+																"fileName": "eventsvalid.ts",
+																"line": 106,
+																"character": 20,
+																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+															}
+														],
+														"type": {
+															"type": "intrinsic",
+															"name": "boolean"
+														}
+													}
+												],
+												"groups": [
+													{
+														"title": "Properties",
+														"children": [
+															52
+														]
+													}
+												],
+												"sources": [
+													{
+														"fileName": "eventsvalid.ts",
+														"line": 106,
+														"character": 18,
+														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+													}
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								50
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 105,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+						}
+					]
+				},
+				{
+					"id": 89,
+					"name": "EventFooComplex",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-complex"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 91,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 175,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L175"
+								}
+							],
+							"type": {
+								"type": "conditional",
+								"checkType": {
+									"type": "reference",
+									"target": 92,
+									"name": "Param",
+									"package": "@ckeditor/typedoc-plugins",
+									"refersToTypeParameter": true
+								},
+								"extendsType": {
+									"type": "literal",
+									"value": "c"
+								},
+								"trueType": {
+									"type": "tuple",
+									"elements": [
+										{
+											"type": "namedTupleMember",
+											"name": "p1",
+											"isOptional": false,
+											"element": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										},
+										{
+											"type": "namedTupleMember",
+											"name": "p2",
+											"isOptional": false,
+											"element": {
+												"type": "reference",
+												"target": 17,
+												"name": "ExampleType",
+												"package": "@ckeditor/typedoc-plugins"
+											}
+										}
+									]
+								},
+								"falseType": {
+									"type": "tuple"
+								}
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								91
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 174,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 92,
+							"name": "Param",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"type": {
+								"type": "union",
+								"types": [
+									{
+										"type": "literal",
+										"value": "a"
+									},
+									{
+										"type": "literal",
+										"value": "b"
+									},
+									{
+										"type": "literal",
+										"value": "c"
+									}
+								]
+							},
+							"default": {
+								"type": "literal",
+								"value": "a"
+							}
+						}
+					]
+				},
+				{
+					"id": 32,
+					"name": "EventFooEmptyArgs",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-empty-args"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 34,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 69,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L69"
+								}
+							],
+							"type": {
+								"type": "tuple"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								34
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 68,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+						}
+					]
+				},
+				{
+					"id": 72,
+					"name": "EventFooGeneric",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-generic-from-type-arg"
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 143,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 68,
+						"typeArguments": [
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 73,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 74,
+											"name": "args",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 144,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L144"
+												}
+											],
+											"type": {
+												"type": "tuple",
+												"elements": [
+													{
+														"type": "namedTupleMember",
+														"name": "p1",
+														"isOptional": false,
+														"element": {
+															"type": "intrinsic",
+															"name": "string"
+														}
+													},
+													{
+														"type": "namedTupleMember",
+														"name": "p2",
+														"isOptional": false,
+														"element": {
+															"type": "reference",
+															"target": 17,
+															"name": "ExampleType",
+															"package": "@ckeditor/typedoc-plugins"
+														}
+													}
+												]
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												74
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 143,
+											"character": 46,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+										}
+									]
+								}
+							}
+						],
+						"name": "TypeGenericLvl3",
+						"package": "@ckeditor/typedoc-plugins"
+					}
+				},
+				{
+					"id": 38,
+					"name": "EventFooInlineArgs",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-inline-args"
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p1",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Description for first param."
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 40,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 88,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L88"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "reflection",
+										"declaration": {
+											"id": 41,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 42,
+													"name": "p1",
+													"variant": "declaration",
+													"kind": 1024,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "eventsvalid.ts",
+															"line": 90,
+															"character": 3,
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
+														}
+													],
+													"type": {
+														"type": "intrinsic",
+														"name": "number"
+													}
+												}
+											],
+											"groups": [
+												{
+													"title": "Properties",
+													"children": [
+														42
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 89,
+													"character": 2,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								40
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 87,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+						}
+					]
+				},
+				{
+					"id": 108,
+					"name": "EventFooMultipleNames",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-multiple-names"
+									}
+								]
+							},
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-multiple-names:variant"
+									}
+								]
+							},
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 110,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 225,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L225"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								110
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 224,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+						}
+					]
+				},
+				{
+					"id": 30,
+					"name": "EventFooNoContent",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-no-content"
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 63,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+						}
+					],
+					"type": {
+						"type": "reflection",
+						"declaration": {
+							"id": 31,
+							"name": "__type",
+							"variant": "declaration",
+							"kind": 65536,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 63,
+									"character": 32,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+								}
+							]
+						}
+					}
+				},
+				{
+					"id": 20,
+					"name": "EventFooNoText",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-no-text"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 22,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 26,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L26"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								22
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 25,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+						}
+					]
+				},
+				{
+					"id": 35,
+					"name": "EventFooOptionalArgs",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-optional-args"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 37,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 76,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L76"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": true,
+										"element": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									}
+								]
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								37
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 75,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+						}
+					]
+				},
+				{
+					"id": 59,
+					"name": "EventFooReference",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-reference"
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p1",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Description for first param."
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p2",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Description for second param."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 126,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 58,
+						"name": "TypeReferenceLvl2",
+						"package": "@ckeditor/typedoc-plugins"
+					}
+				},
+				{
+					"id": 26,
+					"name": "EventFooWithParams",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "An event associated with the type. Event with three params.\n\nSee "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "~EventsValidClass"
+							},
+							{
+								"kind": "text",
+								"text": " or "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "module:fixtures/eventsvalid~EventsValidClass Custom label",
+								"target": {
+									"packageName": "@types/node",
+									"packagePath": "module.d.ts",
+									"qualifiedName": "__global.module"
+								},
+								"tsLinkText": ":fixtures/eventsvalid~EventsValidClass Custom label"
+							},
+							{
+								"kind": "text",
+								"text": ". A text after."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-with-params"
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p1",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Description for first param."
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p2",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Description for second param."
+									}
+								]
+							},
+							{
+								"tag": "@param",
+								"name": "p3",
+								"content": [
+									{
+										"kind": "text",
+										"text": "Complex "
+									},
+									{
+										"kind": "inline-tag",
+										"tag": "@link",
+										"text": "module:utils/object~Object description",
+										"target": {
+											"packageName": "@types/node",
+											"packagePath": "module.d.ts",
+											"qualifiedName": "__global.module"
+										},
+										"tsLinkText": ":utils/object~Object description"
+									},
+									{
+										"kind": "text",
+										"text": " for "
+									},
+									{
+										"kind": "code",
+										"text": "`third param`"
+									},
+									{
+										"kind": "text",
+										"text": "."
+									}
+								]
+							},
+							{
+								"tag": "@deprecated",
+								"content": []
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 29,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 52,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L52"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "number"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "p3",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								]
+							}
+						},
+						{
+							"id": 28,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 51,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L51"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								29,
+								28
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 50,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+						}
+					]
+				},
+				{
+					"id": 17,
+					"name": "ExampleType",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Normal type export."
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 19,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 19,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L19"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								19
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 18,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L18"
+						}
+					]
+				},
+				{
+					"id": 99,
+					"name": "InterfaceChangeEvent",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:fixtures/exampleinterface~ExampleInterface#event-change:{property}"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 102,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 199,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L199"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "namedTupleMember",
+										"name": "name",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "value",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "oldValue",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								]
+							}
+						},
+						{
+							"id": 101,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 198,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L198"
+								}
+							],
+							"type": {
+								"type": "union",
+								"types": [
+									{
+										"type": "literal",
+										"value": "change"
+									},
+									{
+										"type": "templateLiteral",
+										"head": "change:",
+										"tail": [
+											[
+												{
+													"type": "intrinsic",
+													"name": "string"
+												},
+												""
+											]
+										]
+									}
+								]
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								102,
+								101
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 197,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+						}
+					]
+				},
+				{
+					"id": 103,
+					"name": "InterfaceSetEvent",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "module:fixtures/exampleinterface~ExampleInterface#event-set:{property}"
+									}
+								]
+							}
+						]
+					},
+					"children": [
+						{
+							"id": 106,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 211,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L211"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "namedTupleMember",
+										"name": "name",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "value",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "oldValue",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								]
+							}
+						},
+						{
+							"id": 105,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 210,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L210"
+								}
+							],
+							"type": {
+								"type": "union",
+								"types": [
+									{
+										"type": "literal",
+										"value": "set"
+									},
+									{
+										"type": "templateLiteral",
+										"head": "set:",
+										"tail": [
+											[
+												{
+													"type": "intrinsic",
+													"name": "string"
+												},
+												""
+											]
+										]
+									}
+								]
+							}
+						},
+						{
+							"id": 107,
+							"name": "return",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 216,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L216"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "any"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								106,
+								105,
+								107
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 209,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+						}
+					]
+				},
+				{
+					"id": 88,
+					"name": "OtherEventFooGeneric",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"comment": {
+						"summary": [],
+						"blockTags": [
+							{
+								"tag": "@eventName",
+								"content": [
+									{
+										"kind": "text",
+										"text": "~EventsValidClass#event-foo-generic-from-base-type"
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 169,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 84,
+						"name": "OtherTypeGenericLvl3",
+						"package": "@ckeditor/typedoc-plugins"
+					}
+				},
+				{
+					"id": 75,
+					"name": "OtherTypeGenericLvl1",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 150,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 79,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 79,
+								"name": "T",
+								"package": "@ckeditor/typedoc-plugins",
+								"refersToTypeParameter": true
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 76,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 78,
+											"name": "args",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 152,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L152"
+												}
+											],
+											"type": {
+												"type": "tuple",
+												"elements": [
+													{
+														"type": "namedTupleMember",
+														"name": "p1",
+														"isOptional": false,
+														"element": {
+															"type": "intrinsic",
+															"name": "string"
+														}
+													},
+													{
+														"type": "namedTupleMember",
+														"name": "p2",
+														"isOptional": false,
+														"element": {
+															"type": "reference",
+															"target": 17,
+															"name": "ExampleType",
+															"package": "@ckeditor/typedoc-plugins"
+														}
+													}
+												]
+											}
+										},
+										{
+											"id": 77,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 151,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L151"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 1"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												78,
+												77
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 150,
+											"character": 42,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 80,
+					"name": "OtherTypeGenericLvl2",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 158,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 83,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 75,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 83,
+										"name": "T",
+										"package": "@ckeditor/typedoc-plugins",
+										"refersToTypeParameter": true
+									}
+								],
+								"name": "OtherTypeGenericLvl1",
+								"package": "@ckeditor/typedoc-plugins"
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 81,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 82,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 159,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L159"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 2"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												82
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 158,
+											"character": 64,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 84,
+					"name": "OtherTypeGenericLvl3",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 162,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 87,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"default": {
+								"type": "intrinsic",
+								"name": "object"
+							}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 80,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 87,
+										"name": "T",
+										"package": "@ckeditor/typedoc-plugins",
+										"refersToTypeParameter": true
+									}
+								],
+								"name": "OtherTypeGenericLvl2",
+								"package": "@ckeditor/typedoc-plugins"
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 85,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 86,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 163,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L163"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 3"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												86
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 162,
+											"character": 73,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 60,
+					"name": "TypeGenericLvl1",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 128,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 63,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 63,
+								"name": "T",
+								"package": "@ckeditor/typedoc-plugins",
+								"refersToTypeParameter": true
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 61,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 62,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 129,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L129"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 1"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												62
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 128,
+											"character": 37,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 64,
+					"name": "TypeGenericLvl2",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 132,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 67,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 60,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 67,
+										"name": "T",
+										"package": "@ckeditor/typedoc-plugins",
+										"refersToTypeParameter": true
+									}
+								],
+								"name": "TypeGenericLvl1",
+								"package": "@ckeditor/typedoc-plugins"
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 65,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 66,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 133,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L133"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 2"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												66
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 132,
+											"character": 54,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 68,
+					"name": "TypeGenericLvl3",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 136,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 71,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						}
+					],
+					"type": {
+						"type": "intersection",
+						"types": [
+							{
+								"type": "reference",
+								"target": 64,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 71,
+										"name": "T",
+										"package": "@ckeditor/typedoc-plugins",
+										"refersToTypeParameter": true
+									}
+								],
+								"name": "TypeGenericLvl2",
+								"package": "@ckeditor/typedoc-plugins"
+							},
+							{
+								"type": "reflection",
+								"declaration": {
+									"id": 69,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"children": [
+										{
+											"id": 70,
+											"name": "name",
+											"variant": "declaration",
+											"kind": 1024,
+											"flags": {},
+											"sources": [
+												{
+													"fileName": "eventsvalid.ts",
+													"line": 137,
+													"character": 1,
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L137"
+												}
+											],
+											"type": {
+												"type": "literal",
+												"value": "Level 3"
+											}
+										}
+									],
+									"groups": [
+										{
+											"title": "Properties",
+											"children": [
+												70
+											]
+										}
+									],
+									"sources": [
+										{
+											"fileName": "eventsvalid.ts",
+											"line": 136,
+											"character": 54,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
+										}
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": 57,
+					"name": "TypeReferenceLvl1",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 117,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L117"
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 53,
+						"name": "TypeWithParams",
+						"package": "@ckeditor/typedoc-plugins"
+					}
+				},
+				{
+					"id": 58,
+					"name": "TypeReferenceLvl2",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 118,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L118"
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 57,
+						"name": "TypeReferenceLvl1",
+						"package": "@ckeditor/typedoc-plugins"
+					}
+				},
+				{
+					"id": 53,
+					"name": "TypeWithParams",
+					"variant": "declaration",
+					"kind": 2097152,
+					"flags": {},
+					"children": [
+						{
+							"id": 56,
+							"name": "args",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 111,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L111"
+								}
+							],
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									},
+									{
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								]
+							}
+						},
+						{
+							"id": 55,
+							"name": "name",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 110,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L110"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Properties",
+							"children": [
+								56,
+								55
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "eventsvalid.ts",
+							"line": 109,
+							"character": 12,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L109"
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Classes",
+					"children": [
+						8,
+						148
+					]
+				},
+				{
+					"title": "Type Aliases",
+					"children": [
+						23,
+						93,
+						96,
+						43,
+						48,
+						89,
+						32,
+						72,
+						38,
+						108,
+						30,
+						20,
+						35,
+						59,
+						26,
+						17,
+						99,
+						103,
+						88,
+						75,
+						80,
+						84,
+						60,
+						64,
+						68,
+						57,
+						58,
+						53
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 1,
+					"character": 0,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L1"
+				}
+			]
+		},
+		{
+			"id": 6,
+			"name": "fixtures/exampleclass",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 139,
+					"name": "ExampleClass",
+					"variant": "declaration",
+					"kind": 128,
+					"flags": {},
+					"children": [
+						{
+							"id": 140,
+							"name": "constructor",
+							"variant": "declaration",
+							"kind": 512,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 13,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+								}
+							],
+							"signatures": [
+								{
+									"id": 141,
+									"name": "ExampleClass",
+									"variant": "signature",
+									"kind": 16384,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "exampleclass.ts",
+											"line": 13,
+											"character": 1,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+										}
+									],
+									"parameters": [
+										{
+											"id": 142,
+											"name": "value",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "string"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 139,
+										"name": "ExampleClass",
+										"package": "@ckeditor/typedoc-plugins",
+										"qualifiedName": "default"
+									}
+								}
+							]
+						},
+						{
+							"id": 143,
+							"name": "_value",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {
+								"isProtected": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 11,
+									"character": 11,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+								}
+							],
+							"type": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						},
+						{
+							"id": 144,
+							"name": "value",
+							"variant": "declaration",
+							"kind": 262144,
+							"flags": {
+								"isPublic": true
+							},
+							"sources": [
+								{
+									"fileName": "exampleclass.ts",
+									"line": 17,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+								},
+								{
+									"fileName": "exampleclass.ts",
+									"line": 21,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+								}
+							],
+							"getSignature": {
+								"id": 145,
+								"name": "value",
+								"variant": "signature",
+								"kind": 524288,
+								"flags": {},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 17,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "string"
+								}
+							},
+							"setSignature": {
+								"id": 146,
+								"name": "value",
+								"variant": "signature",
+								"kind": 1048576,
+								"flags": {},
+								"sources": [
+									{
+										"fileName": "exampleclass.ts",
+										"line": 21,
+										"character": 12,
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									}
+								],
+								"parameters": [
+									{
+										"id": 147,
+										"name": "value",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								],
+								"type": {
+									"type": "intrinsic",
+									"name": "void"
+								}
+							}
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"children": [
+								140
+							]
+						},
+						{
+							"title": "Properties",
+							"children": [
+								143
+							]
+						},
+						{
+							"title": "Accessors",
+							"children": [
+								144
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "exampleclass.ts",
+							"line": 10,
+							"character": 21,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L10"
+						}
+					],
+					"extendedBy": [
+						{
+							"type": "reference",
+							"target": 8,
+							"name": "EventsValidAnotherClass"
+						},
+						{
+							"type": "reference",
+							"target": 148,
+							"name": "EventsValidClass"
+						},
+						{
+							"type": "reference",
+							"target": 157,
+							"name": "EventsInvalidClass"
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Classes",
+					"children": [
+						139
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "exampleclass.ts",
+					"line": 1,
+					"character": 0,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L1"
+				}
+			]
+		},
+		{
+			"id": 1,
+			"name": "fixtures/exampleinterface",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 2,
+					"name": "ExampleInterface",
+					"variant": "declaration",
+					"kind": 256,
+					"flags": {},
+					"children": [
+						{
+							"id": 3,
+							"name": "set",
+							"variant": "declaration",
+							"kind": 2048,
+							"flags": {},
+							"sources": [
+								{
+									"fileName": "exampleinterface.ts",
+									"line": 11,
+									"character": 1,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
+								}
+							],
+							"signatures": [
+								{
+									"id": 4,
+									"name": "set",
+									"variant": "signature",
+									"kind": 4096,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "exampleinterface.ts",
+											"line": 11,
+											"character": 1,
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
+										}
+									],
+									"parameters": [
+										{
+											"id": 5,
+											"name": "name",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {},
+											"type": {
+												"type": "intrinsic",
+												"name": "any"
+											}
+										}
+									],
+									"type": {
+										"type": "intrinsic",
+										"name": "void"
+									}
+								}
+							]
+						}
+					],
+					"groups": [
+						{
+							"title": "Methods",
+							"children": [
+								3
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "exampleinterface.ts",
+							"line": 10,
+							"character": 17,
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L10"
+						}
+					],
+					"ckeditor5Events": [
+						{
+							"id": 199,
+							"name": "event-change:{property}",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "module:fixtures/exampleinterface~ExampleInterface#event-change:{property}"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 197,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+								}
+							],
+							"parameters": [
+								{
+									"id": 200,
+									"name": "name",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "name",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 201,
+									"name": "value",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "value",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								},
+								{
+									"id": 202,
+									"name": "oldValue",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "oldValue",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": 203,
+							"name": "event-set:{property}",
+							"variant": "declaration",
+							"kind": 8388608,
+							"flags": {},
+							"comment": {
+								"summary": [],
+								"blockTags": [
+									{
+										"tag": "@eventName",
+										"content": [
+											{
+												"kind": "text",
+												"text": "module:fixtures/exampleinterface~ExampleInterface#event-set:{property}"
+											}
+										]
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "eventsvalid.ts",
+									"line": 209,
+									"character": 12,
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+								}
+							],
+							"parameters": [
+								{
+									"id": 204,
+									"name": "name",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "name",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 205,
+									"name": "value",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "value",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								},
+								{
+									"id": 206,
+									"name": "oldValue",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "oldValue",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "any"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Interfaces",
+					"children": [
+						2
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "exampleinterface.ts",
+					"line": 1,
+					"character": 0,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L1"
+				}
+			]
+		},
+		{
+			"id": 169,
+			"name": "event-foo-no-text",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-no-text"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 25,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+				}
+			]
+		},
+		{
+			"id": 170,
+			"name": "event-foo",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "An event associated with the type."
+					}
+				],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 34,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+				}
+			]
+		},
+		{
+			"id": 171,
+			"name": "event-foo-with-params",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "An event associated with the type. Event with three params.\n\nSee "
+					},
+					{
+						"kind": "inline-tag",
+						"tag": "@link",
+						"text": "~EventsValidClass"
+					},
+					{
+						"kind": "text",
+						"text": " or "
+					},
+					{
+						"kind": "inline-tag",
+						"tag": "@link",
+						"text": "module:fixtures/eventsvalid~EventsValidClass Custom label",
+						"target": {
+							"packageName": "@types/node",
+							"packagePath": "module.d.ts",
+							"qualifiedName": "__global.module"
+						},
+						"tsLinkText": ":fixtures/eventsvalid~EventsValidClass Custom label"
+					},
+					{
+						"kind": "text",
+						"text": ". A text after."
+					}
+				],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-with-params"
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p1",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Description for first param."
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p2",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Description for second param."
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p3",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Complex "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "module:utils/object~Object description",
+								"target": {
+									"packageName": "@types/node",
+									"packagePath": "module.d.ts",
+									"qualifiedName": "__global.module"
+								},
+								"tsLinkText": ":utils/object~Object description"
+							},
+							{
+								"kind": "text",
+								"text": " for "
+							},
+							{
+								"kind": "code",
+								"text": "`third param`"
+							},
+							{
+								"kind": "text",
+								"text": "."
+							}
+						]
+					},
+					{
+						"tag": "@deprecated",
+						"content": []
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 50,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+				}
+			]
+		},
+		{
+			"id": 175,
+			"name": "event-foo-no-content",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-no-content"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 63,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+				}
+			]
+		},
+		{
+			"id": 176,
+			"name": "event-foo-empty-args",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-empty-args"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 68,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+				}
+			]
+		},
+		{
+			"id": 177,
+			"name": "event-foo-optional-args",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-optional-args"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 75,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+				}
+			]
+		},
+		{
+			"id": 180,
+			"name": "event-foo-inline-args",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-inline-args"
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p1",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Description for first param."
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 87,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+				}
+			]
+		},
+		{
+			"id": 182,
+			"name": "event-foo-anonymous-args",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-anonymous-args"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 98,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+				}
+			]
+		},
+		{
+			"id": 185,
+			"name": "event-foo-anonymous-optional-args",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-anonymous-optional-args"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 105,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+				}
+			]
+		},
+		{
+			"id": 188,
+			"name": "event-foo-reference",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-reference"
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p1",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Description for first param."
+							}
+						]
+					},
+					{
+						"tag": "@param",
+						"name": "p2",
+						"content": [
+							{
+								"kind": "text",
+								"text": "Description for second param."
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 126,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+				}
+			]
+		},
+		{
+			"id": 191,
+			"name": "event-foo-generic-from-type-arg",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-generic-from-type-arg"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 143,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+				}
+			]
+		},
+		{
+			"id": 194,
+			"name": "event-foo-generic-from-base-type",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-generic-from-base-type"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 169,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+				}
+			]
+		},
+		{
+			"id": 195,
+			"name": "event-foo-complex",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-complex"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 174,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+				}
+			]
+		},
+		{
+			"id": 197,
+			"name": "event-foo-absolute",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 183,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+				}
+			]
+		},
+		{
+			"id": 198,
+			"name": "event-foo-absolute-with-prefix",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "module:fixtures/eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 190,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+				}
+			]
+		},
+		{
+			"id": 199,
+			"name": "event-change:{property}",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "module:fixtures/exampleinterface~ExampleInterface#event-change:{property}"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 197,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+				}
+			]
+		},
+		{
+			"id": 203,
+			"name": "event-set:{property}",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "module:fixtures/exampleinterface~ExampleInterface#event-set:{property}"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 209,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+				}
+			]
+		},
+		{
+			"id": 207,
+			"name": "event-foo-multiple-names",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names:variant"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 224,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+				}
+			]
+		},
+		{
+			"id": 208,
+			"name": "event-foo-multiple-names:variant",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names:variant"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 224,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+				}
+			]
+		},
+		{
+			"id": 209,
+			"name": "event-foo-multiple-names:variant:subvariant",
+			"variant": "declaration",
+			"kind": 8388608,
+			"flags": {},
+			"comment": {
+				"summary": [],
+				"blockTags": [
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidClass#event-foo-multiple-names:variant"
+							}
+						]
+					},
+					{
+						"tag": "@eventName",
+						"content": [
+							{
+								"kind": "text",
+								"text": "~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant"
+							}
+						]
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "eventsvalid.ts",
+					"line": 224,
+					"character": 12,
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"title": "Modules",
+			"children": [
+				111,
+				7,
+				6,
+				1
+			]
+		}
+	],
+	"packageName": "@ckeditor/typedoc-plugins",
+	"readme": [
+		{
+			"kind": "text",
+			"text": "# TypeDoc plugins overview\n\n[![npm version](https://badge.fury.io/js/%40ckeditor%2Ftypedoc-plugins.svg)](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)\n[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)\n\n## Overview\n\nThis repository consists of few plugins which extend the capabilities of [TypeDoc](https://typedoc.org/).\n\nBefore enabling plugins from the package, you need to install it first.\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```bash\nnpm install @ckeditor/typedoc-plugins\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nBelow you can find the detailed overview of available plugins.\n\n### Module fixer\n\nThe plugin reads the module name specified in the "
+		},
+		{
+			"kind": "code",
+			"text": "`@module`"
+		},
+		{
+			"kind": "text",
+			"text": " annotation.\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```ts\nimport type { TypeDefinition } from '...';\n\n/**\n * @module package/file\n */\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nFor the example specified above, a name of the parsed module should be equal to "
+		},
+		{
+			"kind": "code",
+			"text": "`package/file`"
+		},
+		{
+			"kind": "text",
+			"text": ".\n\nThe "
+		},
+		{
+			"kind": "code",
+			"text": "`import`"
+		},
+		{
+			"kind": "text",
+			"text": " statements may be specified above the \"@module\" block code. In such a case, the default module parser from "
+		},
+		{
+			"kind": "code",
+			"text": "`typedoc`"
+		},
+		{
+			"kind": "text",
+			"text": " returns the module name based on a path relative to the project root.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Symbol fixer\n\nThe plugin renames "
+		},
+		{
+			"kind": "code",
+			"text": "`Symbol.*`"
+		},
+		{
+			"kind": "text",
+			"text": " definitions with the JSDoc style.\n\n* Typedoc: "
+		},
+		{
+			"kind": "code",
+			"text": "`[iterator]() → Iterator`"
+		},
+		{
+			"kind": "text",
+			"text": "\n* JSDoc: "
+		},
+		{
+			"kind": "code",
+			"text": "`Symbol.iterator() → Iterator`"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Interface augmentation fixer\n\nThe plugin tries to fix an interface, that has been extended (augmented) from the outside (from\nanother module) in the re-exported "
+		},
+		{
+			"kind": "code",
+			"text": "`index.ts`"
+		},
+		{
+			"kind": "text",
+			"text": " file. When the extending \"declare module ...\" declaration contains the full package name, it points to the "
+		},
+		{
+			"kind": "code",
+			"text": "`index.ts`"
+		},
+		{
+			"kind": "text",
+			"text": " file instead of the actual source file. The goal is to add missing properties from interfaces to their source locations.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/interface-augmentation-fixer' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Event parameter fixer\n\nThe plugin injects the "
+		},
+		{
+			"kind": "code",
+			"text": "`eventInfo`"
+		},
+		{
+			"kind": "text",
+			"text": " parameter (an instance of the "
+		},
+		{
+			"kind": "code",
+			"text": "`EventInfo`"
+		},
+		{
+			"kind": "text",
+			"text": " class) as the first parameter for each event reflection.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Events inheritance fixer\n\nThe plugin takes care of inheriting events, which are created manually via the ["
+		},
+		{
+			"kind": "code",
+			"text": "`@eventName`"
+		},
+		{
+			"kind": "text",
+			"text": "](#tag-eventname) annotation.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Purge private API\n\nThe plugin removes reflections collected from private packages (marked as "
+		},
+		{
+			"kind": "code",
+			"text": "`\"private\": true`"
+		},
+		{
+			"kind": "text",
+			"text": " in their "
+		},
+		{
+			"kind": "code",
+			"text": "`package.json`"
+		},
+		{
+			"kind": "text",
+			"text": "). To disable the mechanism, add the "
+		},
+		{
+			"kind": "code",
+			"text": "`@publicApi`"
+		},
+		{
+			"kind": "text",
+			"text": " annotation at the beginning of a file.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Tag "
+		},
+		{
+			"kind": "code",
+			"text": "`@error`"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nThe plugin collects error definitions from the "
+		},
+		{
+			"kind": "code",
+			"text": "`@error`"
+		},
+		{
+			"kind": "text",
+			"text": " annotation.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Tag "
+		},
+		{
+			"kind": "code",
+			"text": "`@eventName`"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nThe plugin collects event definitions from the "
+		},
+		{
+			"kind": "code",
+			"text": "`@eventName`"
+		},
+		{
+			"kind": "text",
+			"text": " annotation and assigns them as the children of the class or the "
+		},
+		{
+			"kind": "code",
+			"text": "`Observable`"
+		},
+		{
+			"kind": "text",
+			"text": " interface.\n\nWe are not using the ["
+		},
+		{
+			"kind": "code",
+			"text": "`@event`"
+		},
+		{
+			"kind": "text",
+			"text": "](https://typedoc.org/tags/event/) annotation, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be difficult to get it to work as we expect.\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n### Tag "
+		},
+		{
+			"kind": "code",
+			"text": "`@observable`"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nTo enable the plugin, add the following path to available plugins:\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```js\n{\n    plugin: [\n        // ...\n        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )\n    ]\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n------------------------------------------------------------------------------------\n\n## Changelog\n\nSee the ["
+		},
+		{
+			"kind": "code",
+			"text": "`CHANGELOG.md`"
+		},
+		{
+			"kind": "text",
+			"text": "](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/typedoc-plugins/CHANGELOG.md) file."
+		}
+	],
+	"symbolIdMap": {
+		"1": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleinterface.ts",
+			"qualifiedName": ""
+		},
+		"2": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleinterface.ts",
+			"qualifiedName": "ExampleInterface"
+		},
+		"3": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleinterface.ts",
+			"qualifiedName": "ExampleInterface.set"
+		},
+		"4": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleinterface.ts",
+			"qualifiedName": "ExampleInterface.set"
+		},
+		"5": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleinterface.ts",
+			"qualifiedName": "name"
+		},
+		"6": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": ""
+		},
+		"7": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": ""
+		},
+		"8": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventsValidAnotherClass"
+		},
+		"9": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.__constructor"
+		},
+		"10": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "EventsValidAnotherClass"
+		},
+		"11": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"12": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default._value"
+		},
+		"13": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"14": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"15": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"16": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"17": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "ExampleType"
+		},
+		"19": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"20": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooNoText"
+		},
+		"22": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"23": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFoo"
+		},
+		"25": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"26": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooWithParams"
+		},
+		"28": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"29": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"30": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooNoContent"
+		},
+		"31": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"32": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooEmptyArgs"
+		},
+		"34": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"35": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooOptionalArgs"
+		},
+		"37": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"38": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooInlineArgs"
+		},
+		"40": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"41": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"42": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.p1"
+		},
+		"43": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooAnonymousArgs"
+		},
+		"45": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"46": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"47": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.foo"
+		},
+		"48": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooAnonymousOptionalArgs"
+		},
+		"50": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"51": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"52": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.foo"
+		},
+		"53": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeWithParams"
+		},
+		"55": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"56": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"57": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeReferenceLvl1"
+		},
+		"58": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeReferenceLvl2"
+		},
+		"59": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooReference"
+		},
+		"60": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeGenericLvl1"
+		},
+		"61": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"62": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"63": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"64": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeGenericLvl2"
+		},
+		"65": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"66": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"67": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"68": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "TypeGenericLvl3"
+		},
+		"69": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"70": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"71": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"72": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooGeneric"
+		},
+		"73": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"74": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"75": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "OtherTypeGenericLvl1"
+		},
+		"76": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"77": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"78": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"79": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"80": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "OtherTypeGenericLvl2"
+		},
+		"81": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"82": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"83": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"84": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "OtherTypeGenericLvl3"
+		},
+		"85": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type"
+		},
+		"86": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"87": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "T"
+		},
+		"88": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "OtherEventFooGeneric"
+		},
+		"89": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooComplex"
+		},
+		"91": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"92": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "Param"
+		},
+		"93": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooAbsolute"
+		},
+		"95": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"96": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooAbsoluteWithPrefix"
+		},
+		"98": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"99": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "InterfaceChangeEvent"
+		},
+		"101": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"102": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"103": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "InterfaceSetEvent"
+		},
+		"105": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"106": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.args"
+		},
+		"107": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.return"
+		},
+		"108": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "EventFooMultipleNames"
+		},
+		"110": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"111": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": ""
+		},
+		"112": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "create"
+		},
+		"113": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "create"
+		},
+		"114": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "value"
+		},
+		"115": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "ExampleType"
+		},
+		"117": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"118": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooRelativeInvalidClass"
+		},
+		"120": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"121": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooRelativeInvalidParent"
+		},
+		"123": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"124": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooRelativeInvalidNameWithSeparator"
+		},
+		"126": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"127": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooRelativeInvalidNameWithoutSeparator"
+		},
+		"129": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"130": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooAbsoluteInvalidModule"
+		},
+		"132": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"133": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooAbsoluteInvalidClass"
+		},
+		"135": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"136": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "EventFooAbsoluteInvalidParent"
+		},
+		"138": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "__type.name"
+		},
+		"139": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default"
+		},
+		"140": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.__constructor"
+		},
+		"141": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default"
+		},
+		"142": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"143": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default._value"
+		},
+		"144": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"145": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"146": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"147": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"148": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsvalid.ts",
+			"qualifiedName": "default"
+		},
+		"149": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.__constructor"
+		},
+		"150": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default"
+		},
+		"151": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"152": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default._value"
+		},
+		"153": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"154": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"155": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"156": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"157": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "default"
+		},
+		"158": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "default.create"
+		},
+		"159": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "default.create"
+		},
+		"160": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/eventsinvalid.ts",
+			"qualifiedName": "value"
+		},
+		"161": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.__constructor"
+		},
+		"162": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default"
+		},
+		"163": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		},
+		"164": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default._value"
+		},
+		"165": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"166": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"167": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "default.value"
+		},
+		"168": {
+			"packageName": "@ckeditor/typedoc-plugins",
+			"packagePath": "tests/tag-event/fixtures/exampleclass.ts",
+			"qualifiedName": "value"
+		}
+	},
+	"files": {
+		"entries": {
+			"1": "tests/tag-event/fixtures/exampleinterface.ts",
+			"2": "tests/tag-event/fixtures/exampleclass.ts",
+			"3": "tests/tag-event/fixtures/eventsvalid.ts",
+			"4": "tests/tag-event/fixtures/eventsinvalid.ts"
+		},
+		"reflections": {
+			"1": 1,
+			"2": 6,
+			"3": 7,
+			"4": 111
+		}
+	}
+}

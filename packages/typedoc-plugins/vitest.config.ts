@@ -11,8 +11,8 @@ export default defineConfig( {
 			// './tests/_utils/testsetup.js'
 		],
 		testTimeout: 10000,
-		mockReset: true,
-		restoreMocks: true,
+		mockReset: false,
+		restoreMocks: false,
 		include: [
 			'tests/**/*.ts'
 		],

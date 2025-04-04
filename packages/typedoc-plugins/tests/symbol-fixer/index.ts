@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import { Application, type ProjectReflection, ReflectionKind } from 'typedoc';
 
@@ -15,7 +15,7 @@ describe( 'typedoc-plugins/symbol-fixer', () => {
 		conversionResult: ProjectReflection,
 		warnSpy: any;
 
-	beforeEach( async () => {
+	beforeAll( async () => {
 		const FIXTURES_PATH = normalizePath( ROOT_TEST_DIRECTORY, 'symbol-fixer', 'fixtures' );
 
 		const sourceFilePatterns = [
@@ -39,6 +39,10 @@ describe( 'typedoc-plugins/symbol-fixer', () => {
 		conversionResult = ( await typeDoc.convert() )!;
 
 		expect( conversionResult ).to.be.an( 'object' );
+	} );
+
+	afterAll( () => {
+		vi.restoreAllMocks();
 	} );
 
 	it( 'converts symbols enclosed in square brackets', () => {
