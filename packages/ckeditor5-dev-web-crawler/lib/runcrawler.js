@@ -115,7 +115,7 @@ export default async function runCrawler( options ) {
 async function createBrowser( options ) {
 	const browserOptions = {
 		args: [],
-		headless: 'new'
+		headless: true
 	};
 
 	if ( options.disableBrowserSandbox ) {
@@ -468,7 +468,7 @@ async function createPage( browser, { link, onError } ) {
 
 	dismissDialogs( page );
 
-	registerErrorHandlers( page, { link, onError } );
+	await registerErrorHandlers( page, { link, onError } );
 
 	await registerRequestInterception( page );
 
@@ -494,7 +494,7 @@ function dismissDialogs( page ) {
  * @param {Link} data.link A link to crawl associated with Puppeteer's page.
  * @param {function} data.onError Called each time an error has been found.
  */
-function registerErrorHandlers( page, { link, onError } ) {
+async function registerErrorHandlers( page, { link, onError } ) {
 	page.on( ERROR_TYPES.PAGE_CRASH.event, error => onError( {
 		pageUrl: page.url(),
 		type: ERROR_TYPES.PAGE_CRASH,
@@ -554,59 +554,20 @@ function registerErrorHandlers( page, { link, onError } ) {
 		}
 	} );
 
-	page.on( ERROR_TYPES.CONSOLE_ERROR.event, async message => {
-		// The resource loading failure is already covered by the "request" or "response" error handlers, so it should
-		// not be also reported as the "console error".
-		const ignoredMessage = 'Failed to load resource:';
+	const session = await page.target().createCDPSession();
 
-		if ( message.text().startsWith( ignoredMessage ) ) {
-			return;
-		}
+	await session.send( 'Runtime.enable' );
 
-		if ( message.type() !== 'error' ) {
-			return;
-		}
-
-		const serializeArgumentInPageContext = argument => {
-			// Since errors are not serializable, return the message with the call stack as the output text.
-			if ( argument instanceof Error ) {
-				return argument.stack;
-			}
-
-			// Cast non-string iterable argument to an array.
-			if ( typeof argument !== 'string' && argument[ Symbol.iterator ] ) {
-				return [ ...argument ];
-			}
-
-			// Return argument right away. Since we use `executionContext().evaluate()`, it'll return JSON value of the
-			// argument if possible, or `undefined` if it fails to stringify it.
-			return argument;
-		};
-
-		const serializeArguments = argument => {
-			return argument.evaluate( serializeArgumentInPageContext, argument );
-		};
-
-		const serializedArguments = await Promise.all( message.args().map( serializeArguments ) );
-
-		const serializedMessage = serializedArguments
-			.map( argument => {
-				// Do not wrap the string in additional quotes and just return it as is.
-				if ( typeof argument === 'string' ) {
-					return argument;
-				}
-
-				return util.inspect( argument, {
-					breakLength: Infinity,
-					compact: true
-				} );
-			} )
-			.join( ' ' );
+	session.on( 'Runtime.exceptionThrown', event => {
+		const message = event.exceptionDetails.exception?.description ||
+			event.exceptionDetails.exception?.value ||
+			event.exceptionDetails.text ||
+			'(No description provided)';
 
 		onError( {
 			pageUrl: page.url(),
 			type: ERROR_TYPES.CONSOLE_ERROR,
-			message: serializedMessage || message.text() || '(empty message)'
+			message
 		} );
 	} );
 }
