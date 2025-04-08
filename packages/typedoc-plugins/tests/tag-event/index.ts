@@ -3,19 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import {
 	Application,
-	ReflectionKind,
-	type ProjectReflection,
 	type DeclarationReflection,
-	type UnionType,
-	type ReferenceType,
-	type TupleType,
 	type NamedTupleMember,
-	type ReflectionType,
-	type OptionalType
+	type OptionalType,
+	type ProjectReflection,
+	ReflectionKind,
+	type ReflectionType
 } from 'typedoc';
 
 import { normalizePath, ROOT_TEST_DIRECTORY } from '../utils.js';
@@ -48,10 +45,6 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
-			// blockTags: [
-			// 	'@eventName',
-			// 	'@default'
-			// ],
 		} );
 
 		warnSpy = vi.spyOn( typeDoc.logger, 'warn' );
@@ -63,18 +56,13 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 		conversionResult = ( await typeDoc.convert() )!;
 
 		expect( conversionResult ).to.be.an( 'object' );
-
-		await typeDoc.generateJson(
-			conversionResult,
-			'/home/pomek/Projects/ckeditor/ckeditor5/external/ckeditor5-dev/packages/typedoc-plugins/output.json'
-		);
 	} );
 
 	afterAll( () => {
 		vi.restoreAllMocks();
 	} );
 
-	it.skip( 'should find all event tags within classes', () => {
+	it( 'should find all event tags within classes', () => {
 		const eventDefinitions = conversionResult.getReflectionsByKind( ReflectionKind.Class )
 			.flatMap( classReflection => classReflection.ckeditor5Events || [] ) as Array<DeclarationReflection>;
 
@@ -101,7 +89,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 		assertEventExists( eventDefinitions, 'event-foo-multiple-names:variant:subvariant' );
 	} );
 
-	it.skip( 'should find all event tags within interfaces', () => {
+	it( 'should find all event tags within interfaces', () => {
 		const eventDefinitions = conversionResult.getReflectionsByKind( ReflectionKind.Interface )
 			.flatMap( classReflection => classReflection.ckeditor5Events || [] ) as Array<DeclarationReflection>;
 
@@ -112,7 +100,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 		assertEventExists( eventDefinitions, 'event-set:{property}' );
 	} );
 
-	it.skip( 'should inform if the class for an event has not been found', () => {
+	it( 'should inform if the class for an event has not been found', () => {
 		const invalidEventNameTags = [
 			'~InvalidClass#event-foo-relative-invalid-class',
 			'~ExampleType#event-foo-relative-invalid-parent',
@@ -138,7 +126,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				.find( entry => entry.name === 'EventsValidClass' )!;
 		} );
 
-		it.skip( 'should find an event tag without description and parameters', () => {
+		it( 'should find an event tag without description and parameters', () => {
 			const eventDefinition = classDefinition.ckeditor5Events!
 				.find( doclet => doclet.name === 'event-foo-no-text' )! as DeclarationReflection;
 
@@ -173,7 +161,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 			expect( eventDefinition.parameters ).to.lengthOf( 0 );
 		} );
 
-		it.skip( 'should find an event tag with description and without parameters', () => {
+		it( 'should find an event tag with description and without parameters', () => {
 			const eventDefinition = classDefinition.ckeditor5Events!
 				.find( doclet => doclet.name === 'event-foo' )!;
 
@@ -202,7 +190,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 			expect( eventDefinition.parameters ).to.lengthOf( 0 );
 		} );
 
-		it.skip( 'should find an event tag with description and parameters', () => {
+		it( 'should find an event tag with description and parameters', () => {
 			const eventDefinition = classDefinition.ckeditor5Events!
 				.find( doclet => doclet.name === 'event-foo-with-params' )!;
 
@@ -304,7 +292,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 		} );
 
 		describe( 'event parameters', () => {
-			it.skip( 'should convert event parameters from the "args" property', () => {
+			it( 'should convert event parameters from the "args" property', () => {
 				const eventDefinition = classDefinition.ckeditor5Events!
 					.find( doclet => doclet.name === 'event-foo-with-params' )!;
 
@@ -347,7 +335,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( thirdParam.element ).to.have.property( 'name', 'ExampleType' );
 			} );
 
-			it.skip( 'should not add type parameters for event without content', () => {
+			it( 'should not add type parameters for event without content', () => {
 				const eventDefinition = classDefinition.ckeditor5Events!
 					.find( doclet => doclet.name === 'event-foo-no-content' )!;
 
@@ -356,7 +344,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters ).to.lengthOf( 0 );
 			} );
 
-			it.skip( 'should not add type parameters for event with empty args', () => {
+			it( 'should not add type parameters for event with empty args', () => {
 				const eventDefinition = classDefinition.ckeditor5Events!
 					.find( doclet => doclet.name === 'event-foo-empty-args' )!;
 
@@ -365,7 +353,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters ).to.lengthOf( 0 );
 			} );
 
-			it.skip( 'should convert optional event parameter', () => {
+			it( 'should convert optional event parameter', () => {
 				const eventDefinition = classDefinition.ckeditor5Events!
 					.find( doclet => doclet.name === 'event-foo-optional-args' )!;
 
@@ -398,7 +386,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( secondParam.element ).to.have.property( 'name', 'number' );
 			} );
 
-			it.skip( 'should convert event parameter with name taken from @param tag', () => {
+			it( 'should convert event parameter with name taken from @param tag', () => {
 				const eventDefinition = classDefinition.ckeditor5Events!
 					.find( doclet => doclet.name === 'event-foo-inline-args' )!;
 
@@ -416,8 +404,9 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( firstParam.declaration ).to.have.property( 'kind', ReflectionKind.TypeLiteral );
 			} );
 
-			it.skip( 'should convert event parameter without a name', () => {
-				const eventDefinition = classDefinition.ckeditor5Events.find( doclet => doclet.name === 'event-foo-anonymous-args' )!;
+			it( 'should convert event parameter without a name', () => {
+				const eventDefinition = classDefinition.ckeditor5Events
+					.find( doclet => doclet.name === 'event-foo-anonymous-args' )!;
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.parameters ).to.be.an( 'array' );
@@ -438,7 +427,7 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( secondParam.declaration ).to.have.property( 'kind', ReflectionKind.TypeLiteral );
 			} );
 
-			it.skip( 'should convert optional event parameter without a name', () => {
+			it( 'should convert optional event parameter without a name', () => {
 				const eventDefinition = classDefinition.ckeditor5Events
 					.find( doclet => doclet.name === 'event-foo-anonymous-optional-args' )!;
 
@@ -472,8 +461,9 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( ( secondParam.elementType as ReflectionType ).declaration ).to.have.property( 'kind', ReflectionKind.TypeLiteral );
 			} );
 
-			it.skip( 'should convert event parameter that is a reference to another type', () => {
-				const eventDefinition = classDefinition.ckeditor5Events.find( doclet => doclet.name === 'event-foo-reference' )!;
+			it( 'should convert event parameter that is a reference to another type', () => {
+				const eventDefinition = classDefinition.ckeditor5Events
+					.find( doclet => doclet.name === 'event-foo-reference' )!;
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.parameters ).to.be.an( 'array' );
@@ -500,8 +490,9 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
 			} );
 
-			it.skip( 'should convert event parameter that came from a generic event definition (from type argument)', () => {
-				const eventDefinition = classDefinition.ckeditor5Events.find( doclet => doclet.name === 'event-foo-generic-from-type-arg' )!;
+			it( 'should convert event parameter that came from a generic event definition (from type argument)', () => {
+				const eventDefinition = classDefinition.ckeditor5Events
+					.find( doclet => doclet.name === 'event-foo-generic-from-type-arg' )!;
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.parameters ).to.be.an( 'array' );
@@ -528,46 +519,47 @@ describe.only( 'typedoc-plugins/tag-event', () => {
 				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
 			} );
 
-			// TODO: Problematic one.
-			// it( 'should convert event parameter that came from a generic event definition (from base type)', () => {
-			// 	const eventDefinition = classDefinition.ckeditor5Events.find( doclet => doclet.name === 'event-foo-generic-from-base-type' )!;
-			//
-			// 	expect( eventDefinition ).to.not.be.undefined;
-			// 	expect( eventDefinition.parameters ).to.be.an( 'array' );
-			// 	expect( eventDefinition.parameters ).to.lengthOf( 2 );
-			//
-			// 	expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
-			// 	expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-			// 	expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'namedTupleMember' );
-			// 	expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'element' );
-			//
-			// 	const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
-			//
-			// 	expect( firstParam.element ).to.have.property( 'type', 'intrinsic' );
-			// 	expect( firstParam.element ).to.have.property( 'name', 'string' );
-			//
-			// 	expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
-			// 	expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
-			// 	expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'namedTupleMember' );
-			// 	expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'element' );
-			//
-			// 	const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
-			// 	expect( secondParam.element ).to.have.property( 'type', 'reference' );
-			// 	expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
-			// } );
+			it( 'should convert event parameter that came from a generic event definition (from base type)', () => {
+				const eventDefinition = classDefinition.ckeditor5Events
+					.find( doclet => doclet.name === 'event-foo-generic-from-base-type' )!;
 
-			// it( 'should convert a complex event parameter but set its type to any', () => {
-			// 	const eventDefinition = classDefinition.ckeditor5Events.find( doclet => doclet.name === 'event-foo-complex' );
-			//
-			// 	expect( eventDefinition ).to.not.be.undefined;
-			// 	expect( eventDefinition.parameters ).to.be.an( 'array' );
-			// 	expect( eventDefinition.parameters ).to.lengthOf( 1 );
-			//
-			// 	expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
-			// 	expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-			// 	expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
-			// 	expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'name', 'any' );
-			// } );
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.parameters ).to.be.an( 'array' );
+				expect( eventDefinition.parameters ).to.lengthOf( 2 );
+
+				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
+				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'element' );
+
+				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+
+				expect( firstParam.element ).to.have.property( 'type', 'intrinsic' );
+				expect( firstParam.element ).to.have.property( 'name', 'string' );
+
+				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
+				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'element' );
+
+				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				expect( secondParam.element ).to.have.property( 'type', 'reference' );
+				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
+			} );
+
+			it( 'should convert a complex event parameter but set its type to any', () => {
+				const eventDefinition = classDefinition.ckeditor5Events
+					.find( doclet => doclet.name === 'event-foo-complex' )!;
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.parameters ).to.be.an( 'array' );
+				expect( eventDefinition.parameters ).to.lengthOf( 1 );
+
+				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
+				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'name', 'any' );
+			} );
 		} );
 	} );
 

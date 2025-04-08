@@ -4,14 +4,23 @@
  */
 
 import {
-	Converter, ReflectionKind, ParameterReflection, Comment, ReflectionFlag, IntrinsicType, ReferenceType,
-	type Context, type Application, type Reflection, type DeclarationReflection, SomeType
+	Comment,
+	Converter,
+	IntrinsicType,
+	ParameterReflection,
+	ReflectionFlag,
+	ReflectionKind,
+	type Application,
+	type Context,
+	type DeclarationReflection,
+	type Reflection,
+	type TupleType,
+	type SomeType
 } from 'typedoc';
-import { getTarget, isAbsoluteIdentifier } from '../utils/index.js';
+import { getTarget } from '../utils/index.js';
 
 import EventTagSerializer from './eventtagserializer.js';
 import './augmentation.js';
-import { EventFooGeneric } from '../../tests/tag-event/fixtures/eventsvalid';
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -56,7 +65,7 @@ import { EventFooGeneric } from '../../tests/tag-event/fixtures/eventsvalid';
  *
  * Exported type may contain multiple `@eventName` tags to re-use the same type to create many different events.
  */
-export default function ( app: Application ): void {
+export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_END, onEventEnd );
 
 	// TODO: To resolve types.
@@ -157,12 +166,12 @@ function createNewEventReflection(
 		let argName: string;
 
 		// If the parameter is not anonymous, take its name.
-		if ( arg.element ) {
+		if ( arg.type === 'namedTupleMember' ) {
 			argName = arg.name;
 		}
 		// Otherwise, take the name from the `@param` tag at the current index (if it exists).
 		else if ( paramTags[ index ] ) {
-			argName = paramTags[ index ].name;
+			argName = paramTags[ index ]!.name!;
 		}
 		// Otherwise, just set the fallback name to show something.
 		else {
@@ -173,7 +182,7 @@ function createNewEventReflection(
 		param.type = arg;
 
 		// TypeDoc does not mark an optional parameter, so let's do it manually.
-		if ( param.type.isOptional || param.type.type === 'optional' ) {
+		if ( ( arg.type === 'namedTupleMember' && arg.isOptional ) || param.type.type === 'optional' ) {
 			param.setFlag( ReflectionFlag.Optional );
 		}
 
@@ -192,126 +201,70 @@ function createNewEventReflection(
 	eventReflection.comment = sourceReflection.comment!.clone();
 
 	// Copy the source location as it is the same as the location of the reflection containing the event.
-	eventReflection.sources = [ ...sourceReflection.sources ];
+	eventReflection.sources = [ ...sourceReflection.sources! ];
 
 	return eventReflection;
 }
 
-function getTypeArgumentsFromReflection( reflection: Reflection ) {
-	if ( !( 'type' in reflection ) ) {
-		return [];
-	}
-
-	if ( !( 'typeArguments' in reflection.type! ) ) {
-		return [];
-	}
-
-	return reflection.type.typeArguments! || [];
-}
-
-function isGeneric( reflection: Reflection ) {
-	if ( !( 'type' in reflection ) ) {
-		return false;
-	}
-
-	if ( !( 'typeArguments' in reflection.type! ) ) {
-		return false;
-	}
-
-	return !!reflection.type.typeArguments;
-}
-
-function getArgsTupleInternalFn( reflection: DeclarationReflection ) {
-	if ( reflection.name === 'OtherEventFooGeneric' ) {
-		console.log( 'isGeneric', isGeneric( reflection ) );
-	}
-
-	if ( !isGeneric( reflection ) ) {
-		// The target reflection, that defines the `args` tuple, might be located in one of two (or both) places:
-		// - in the type arguments,
-		// - in the type of the reflection.
-		//
-		// Let's take the type arguments first, if they exist, because if the `args` tuple is defined there, this seems more desirable.
-		const targetTypeReflections = [
-			...( reflection.children! || [] ).flatMap( type => getTargetTypeReflections( type ) ),
-			...getTargetTypeReflections( reflection.type )
-		];
-
-		if ( reflection.name === 'EventFooReference' ) {
-			console.log( targetTypeReflections );
-		}
-
-		return targetTypeReflections;
-	}
-
-	const typeArguments = getTypeArgumentsFromReflection( reflection );
-
+/**
+ * Tries to find the `args` tuple, that is associated with the event, and it contains all event parameters.
+ */
+function getArgsTuple( reflection: DeclarationReflection ): Array<SomeType> {
 	// The target reflection, that defines the `args` tuple, might be located in one of two (or both) places:
-	// - in the type arguments,
-	// - in the type of the reflection.
+	// - in the type arguments (generic),
+	// - in the type of the reflection (children).
 	//
 	// Let's take the type arguments first, if they exist, because if the `args` tuple is defined there, this seems more desirable.
 	const targetTypeReflections = [
-		...typeArguments.flatMap( type => getTargetTypeReflections( type ) ),
-		// ...( reflection.children! || [] ).flatMap( type => getTargetTypeReflections( type ) ),
-		...getTargetTypeReflections( reflection.type )
-	];
+		// A generic type.
+		...getTypeArgumentsFromReflection( reflection ),
+		// A literal type.
+		...getChildrenFromReflection( reflection ),
+		// A direct reference to another type.
+		reflection.type!
+	].flatMap( type => getTargetTypeReflections( type ) );
 
 	// Then, try to find the `args` tuple.
-	const argsTuple = targetTypeReflections
-		.filter( type => {
-			// The `args` tuple is one of the reflection child. Filter out those that don't contain any children.
-			if ( !type.declaration || !type.declaration.children ) {
-				return false;
+	const argsTuple: DeclarationReflection | undefined = targetTypeReflections
+		.flatMap( type => {
+			if ( type.type === 'reflection' ) {
+				// The `args` tuple could be one of the reflection child.
+				return type.declaration.children || [];
 			}
 
-			return true;
+			return type as DeclarationReflection;
 		} )
-		.flatMap( type => type.declaration.children )
-
-	return argsTuple
-}
-
-/**
- * Tries to find the `args` tuple, that is associated with the event and it contains all event parameters.
- */
-function getArgsTuple( reflection: DeclarationReflection ): Array<SomeType> {
-	//
-	// if ( reflection.name === 'EventFooReference' ) {
-	// 	console.log( getArgsTupleInternalFn( reflection ) );
-	// }
-
-	const argsTuple = getArgsTupleInternalFn( reflection )
-		.find( property => {
-			return property.name === 'args';
-		} );
-
-	// if ( reflection.name === 'EventFooGeneric' ) {
-	// 	console.log( targetTypeReflections
-	// 		.filter( type => {
-	// 			// The `args` tuple is one of the reflection child. Filter out those that don't contain any children.
-	// 			if ( !type.declaration || !type.declaration.children ) {
-	// 				return false;
-	// 			}
-	//
-	// 			return true;
-	// 		} )
-	// 		.flatMap( type => type.declaration.children ) );
-	//
-	// 	console.log( argsTuple );
-	// }
+		.find( property => property.name === 'args' );
 
 	if ( !argsTuple ) {
 		return [];
 	}
 
+	const tupleType = argsTuple.type as TupleType;
+
 	// If the `args` tuple is of a "complex" type (e.g. a conditional type) without ready-to-process elements,
 	// just consider it as any type for now.
-	if ( !argsTuple.type.elements ) {
+	if ( !tupleType.elements ) {
 		return [ new IntrinsicType( 'any' ) ];
 	}
 
-	return argsTuple.type.elements;
+	return tupleType.elements;
+}
+
+function getTypeArgumentsFromReflection( reflection: DeclarationReflection ): Array<SomeType> {
+	if ( !reflection.type ) {
+		return [];
+	}
+
+	if ( reflection.type.type === 'reference' ) {
+		return reflection.type!.typeArguments || [];
+	}
+
+	return [];
+}
+
+function getChildrenFromReflection( reflection: DeclarationReflection ): Array<DeclarationReflection> {
+	return reflection.children || [];
 }
 
 /**
@@ -319,11 +272,8 @@ function getArgsTuple( reflection: DeclarationReflection ): Array<SomeType> {
  *
  * If the type reflection is a reference to another one, it recursively walks deep until the final declaration is reached.
  * If the type reflection is an intersection, all member reflections are recursively checked.
- *
- * @param {require('typedoc').Reflection} reflectionType
- * @returns {Array.<require('typedoc').Reflection>}
  */
-function getTargetTypeReflections( reflectionType ) {
+function getTargetTypeReflections( reflectionType: DeclarationReflection | SomeType | null ): Array<DeclarationReflection | SomeType> {
 	if ( !reflectionType ) {
 		return [];
 	}
@@ -333,18 +283,22 @@ function getTargetTypeReflections( reflectionType ) {
 			return [];
 		}
 
-		if ( !reflectionType.reflection.type ) {
-			return reflectionType.reflection.children || [];
+		const reflection = reflectionType.reflection as DeclarationReflection;
+
+		if ( !reflection.type ) {
+			return reflection.children || [];
 		}
 
-		return getTargetTypeReflections( reflectionType.reflection.type );
+		return getTargetTypeReflections( reflection.type );
 	}
 
 	if ( reflectionType.type === 'intersection' ) {
 		return reflectionType.types.flatMap( type => getTargetTypeReflections( type ) );
 	}
 
-	return [ reflectionType ];
+	return [
+		reflectionType
+	];
 }
 
 /**

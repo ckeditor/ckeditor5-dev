@@ -44,16 +44,7 @@ export function getTarget( context: Context, reflection: Reflection, identifier:
 		// Otherwise, restore the original identifier part.
 		parts.push( lastPart );
 	}
-
-	if ( identifier === 'module:exampleinterface~ExampleInterface') {
-		console.log( parts );
-	}
-
 	const targetReflection = context.project.getChildByName( parts ) as DeclarationReflection | null;
-
-	if ( identifier === 'module:exampleinterface~ExampleInterface') {
-		console.log( targetReflection );
-	}
 
 	// If couldn't find a reflection, perhaps we should look for properties defined in the `type` doclet.
 	if ( !targetReflection ) {

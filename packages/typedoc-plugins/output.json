@@ -31,7 +31,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 								}
 							],
 							"signatures": [
@@ -46,7 +46,7 @@
 											"fileName": "exampleclass.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 										}
 									],
 									"parameters": [
@@ -96,7 +96,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
 								}
 							],
 							"type": {
@@ -123,13 +123,13 @@
 									"fileName": "exampleclass.ts",
 									"line": 17,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 								},
 								{
 									"fileName": "exampleclass.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -145,7 +145,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 17,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 									}
 								],
 								"type": {
@@ -171,7 +171,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 									}
 								],
 								"parameters": [
@@ -217,7 +217,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 13,
 									"character": 15,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
 								}
 							],
 							"signatures": [
@@ -232,7 +232,7 @@
 											"fileName": "eventsinvalid.ts",
 											"line": 13,
 											"character": 15,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L13"
 										}
 									],
 									"parameters": [
@@ -290,7 +290,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 12,
 							"character": 21,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L12"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L12"
 						}
 					],
 					"extendedTypes": [
@@ -339,7 +339,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 92,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L92"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L92"
 								}
 							],
 							"type": {
@@ -361,7 +361,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 91,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L91"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L91"
 						}
 					]
 				},
@@ -402,7 +402,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 83,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L83"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L83"
 								}
 							],
 							"type": {
@@ -424,7 +424,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 82,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L82"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L82"
 						}
 					]
 				},
@@ -465,7 +465,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 101,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L101"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L101"
 								}
 							],
 							"type": {
@@ -487,7 +487,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 100,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L100"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L100"
 						}
 					]
 				},
@@ -528,7 +528,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 51,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L51"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L51"
 								}
 							],
 							"type": {
@@ -550,7 +550,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 50,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L50"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L50"
 						}
 					]
 				},
@@ -586,7 +586,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 74,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L74"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L74"
 								}
 							],
 							"type": {
@@ -608,7 +608,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 73,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L73"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L73"
 						}
 					]
 				},
@@ -644,7 +644,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 67,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L67"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L67"
 								}
 							],
 							"type": {
@@ -666,7 +666,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 66,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L66"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L66"
 						}
 					]
 				},
@@ -707,7 +707,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 60,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L60"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L60"
 								}
 							],
 							"type": {
@@ -729,7 +729,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 59,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L59"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L59"
 						}
 					]
 				},
@@ -759,7 +759,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 42,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L42"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L42"
 								}
 							],
 							"type": {
@@ -781,7 +781,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 41,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L41"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L41"
 						}
 					]
 				},
@@ -796,7 +796,7 @@
 							"fileName": "eventsinvalid.ts",
 							"line": 29,
 							"character": 16,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
 						}
 					],
 					"signatures": [
@@ -811,7 +811,7 @@
 									"fileName": "eventsinvalid.ts",
 									"line": 29,
 									"character": 16,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L29"
 								}
 							],
 							"parameters": [
@@ -870,7 +870,7 @@
 					"fileName": "eventsinvalid.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsinvalid.ts#L1"
 				}
 			]
 		},
@@ -899,7 +899,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 								}
 							],
 							"signatures": [
@@ -914,7 +914,7 @@
 											"fileName": "exampleclass.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 										}
 									],
 									"parameters": [
@@ -963,7 +963,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
 								}
 							],
 							"type": {
@@ -990,13 +990,13 @@
 									"fileName": "exampleclass.ts",
 									"line": 17,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 								},
 								{
 									"fileName": "exampleclass.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -1012,7 +1012,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 17,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 									}
 								],
 								"type": {
@@ -1038,7 +1038,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 									}
 								],
 								"parameters": [
@@ -1096,7 +1096,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 13,
 							"character": 13,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L13"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L13"
 						}
 					],
 					"extendedTypes": [
@@ -1109,7 +1109,7 @@
 					],
 					"ckeditor5Events": [
 						{
-							"id": 209,
+							"id": 211,
 							"name": "event-foo-multiple-names:variant:subvariant",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -1151,7 +1151,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 224,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 								}
 							],
 							"parameters": []
@@ -1176,7 +1176,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 								}
 							],
 							"signatures": [
@@ -1191,7 +1191,7 @@
 											"fileName": "exampleclass.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 										}
 									],
 									"parameters": [
@@ -1241,7 +1241,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
 								}
 							],
 							"type": {
@@ -1268,13 +1268,13 @@
 									"fileName": "exampleclass.ts",
 									"line": 17,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 								},
 								{
 									"fileName": "exampleclass.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -1290,7 +1290,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 17,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 									}
 								],
 								"type": {
@@ -1316,7 +1316,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 									}
 								],
 								"parameters": [
@@ -1374,7 +1374,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 12,
 							"character": 21,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L12"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L12"
 						}
 					],
 					"extendedTypes": [
@@ -1411,7 +1411,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 25,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
 								}
 							],
 							"parameters": []
@@ -1446,7 +1446,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 34,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
 								}
 							],
 							"parameters": []
@@ -1562,7 +1562,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 50,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
 								}
 							],
 							"parameters": [
@@ -1690,7 +1690,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 63,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
 								}
 							],
 							"parameters": []
@@ -1720,7 +1720,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 68,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
 								}
 							],
 							"parameters": []
@@ -1750,7 +1750,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 75,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
 								}
 							],
 							"parameters": [
@@ -1825,7 +1825,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 87,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
 								}
 							],
 							"parameters": [
@@ -1863,7 +1863,7 @@
 															"fileName": "eventsvalid.ts",
 															"line": 90,
 															"character": 3,
-															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
 														}
 													],
 													"type": {
@@ -1885,7 +1885,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 89,
 													"character": 2,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
 												}
 											]
 										}
@@ -1918,7 +1918,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 98,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
 								}
 							],
 							"parameters": [
@@ -1959,7 +1959,7 @@
 															"fileName": "eventsvalid.ts",
 															"line": 99,
 															"character": 19,
-															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
 														}
 													],
 													"type": {
@@ -1981,7 +1981,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 99,
 													"character": 17,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
 												}
 											]
 										}
@@ -2014,7 +2014,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 105,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
 								}
 							],
 							"parameters": [
@@ -2064,7 +2064,7 @@
 																"fileName": "eventsvalid.ts",
 																"line": 106,
 																"character": 20,
-																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
 															}
 														],
 														"type": {
@@ -2086,7 +2086,7 @@
 														"fileName": "eventsvalid.ts",
 														"line": 106,
 														"character": 18,
-														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
 													}
 												]
 											}
@@ -2140,7 +2140,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 126,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
 								}
 							],
 							"parameters": [
@@ -2221,7 +2221,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 143,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
 								}
 							],
 							"parameters": [
@@ -2286,13 +2286,48 @@
 									"fileName": "eventsvalid.ts",
 									"line": 169,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
 								}
 							],
-							"parameters": []
+							"parameters": [
+								{
+									"id": 195,
+									"name": "p1",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p1",
+										"isOptional": false,
+										"element": {
+											"type": "intrinsic",
+											"name": "string"
+										}
+									}
+								},
+								{
+									"id": 196,
+									"name": "p2",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"type": {
+										"type": "namedTupleMember",
+										"name": "p2",
+										"isOptional": false,
+										"element": {
+											"type": "reference",
+											"target": 17,
+											"name": "ExampleType",
+											"package": "@ckeditor/typedoc-plugins"
+										}
+									}
+								}
+							]
 						},
 						{
-							"id": 195,
+							"id": 197,
 							"name": "event-foo-complex",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -2316,12 +2351,12 @@
 									"fileName": "eventsvalid.ts",
 									"line": 174,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
 								}
 							],
 							"parameters": [
 								{
-									"id": 196,
+									"id": 198,
 									"name": "<anonymous>",
 									"variant": "param",
 									"kind": 32768,
@@ -2334,7 +2369,7 @@
 							]
 						},
 						{
-							"id": 197,
+							"id": 199,
 							"name": "event-foo-absolute",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -2358,13 +2393,13 @@
 									"fileName": "eventsvalid.ts",
 									"line": 183,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
 								}
 							],
 							"parameters": []
 						},
 						{
-							"id": 198,
+							"id": 200,
 							"name": "event-foo-absolute-with-prefix",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -2388,13 +2423,13 @@
 									"fileName": "eventsvalid.ts",
 									"line": 190,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
 								}
 							],
 							"parameters": []
 						},
 						{
-							"id": 207,
+							"id": 209,
 							"name": "event-foo-multiple-names",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -2436,13 +2471,13 @@
 									"fileName": "eventsvalid.ts",
 									"line": 224,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 								}
 							],
 							"parameters": []
 						},
 						{
-							"id": 208,
+							"id": 210,
 							"name": "event-foo-multiple-names:variant",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -2484,7 +2519,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 224,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 								}
 							],
 							"parameters": []
@@ -2528,7 +2563,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 35,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L35"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L35"
 								}
 							],
 							"type": {
@@ -2550,7 +2585,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 34,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
 						}
 					]
 				},
@@ -2586,7 +2621,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 184,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L184"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L184"
 								}
 							],
 							"type": {
@@ -2608,7 +2643,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 183,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
 						}
 					]
 				},
@@ -2644,7 +2679,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 191,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L191"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L191"
 								}
 							],
 							"type": {
@@ -2666,7 +2701,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 190,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
 						}
 					]
 				},
@@ -2702,7 +2737,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 99,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
 								}
 							],
 							"type": {
@@ -2732,7 +2767,7 @@
 															"fileName": "eventsvalid.ts",
 															"line": 99,
 															"character": 19,
-															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
 														}
 													],
 													"type": {
@@ -2754,7 +2789,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 99,
 													"character": 17,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L99"
 												}
 											]
 										}
@@ -2776,7 +2811,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 98,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
 						}
 					]
 				},
@@ -2812,7 +2847,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 106,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
 								}
 							],
 							"type": {
@@ -2847,7 +2882,7 @@
 																"fileName": "eventsvalid.ts",
 																"line": 106,
 																"character": 20,
-																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+																"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
 															}
 														],
 														"type": {
@@ -2869,7 +2904,7 @@
 														"fileName": "eventsvalid.ts",
 														"line": 106,
 														"character": 18,
-														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
+														"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L106"
 													}
 												]
 											}
@@ -2892,7 +2927,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 105,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
 						}
 					]
 				},
@@ -2928,7 +2963,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 175,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L175"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L175"
 								}
 							],
 							"type": {
@@ -2988,7 +3023,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 174,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
 						}
 					],
 					"typeParameters": [
@@ -3054,7 +3089,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 69,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L69"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L69"
 								}
 							],
 							"type": {
@@ -3075,7 +3110,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 68,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
 						}
 					]
 				},
@@ -3104,7 +3139,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 143,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
 						}
 					],
 					"type": {
@@ -3131,7 +3166,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 144,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L144"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L144"
 												}
 											],
 											"type": {
@@ -3174,7 +3209,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 143,
 											"character": 46,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
 										}
 									]
 								}
@@ -3226,7 +3261,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 88,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L88"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L88"
 								}
 							],
 							"type": {
@@ -3252,7 +3287,7 @@
 															"fileName": "eventsvalid.ts",
 															"line": 90,
 															"character": 3,
-															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
+															"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L90"
 														}
 													],
 													"type": {
@@ -3274,7 +3309,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 89,
 													"character": 2,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L89"
 												}
 											]
 										}
@@ -3296,7 +3331,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 87,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
 						}
 					]
 				},
@@ -3350,7 +3385,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 225,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L225"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L225"
 								}
 							],
 							"type": {
@@ -3372,7 +3407,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 224,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 						}
 					]
 				},
@@ -3401,7 +3436,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 63,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
 						}
 					],
 					"type": {
@@ -3417,7 +3452,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 63,
 									"character": 32,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
 								}
 							]
 						}
@@ -3455,7 +3490,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 26,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L26"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L26"
 								}
 							],
 							"type": {
@@ -3477,7 +3512,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 25,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
 						}
 					]
 				},
@@ -3513,7 +3548,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 76,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L76"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L76"
 								}
 							],
 							"type": {
@@ -3554,7 +3589,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 75,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
 						}
 					]
 				},
@@ -3603,7 +3638,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 126,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
 						}
 					],
 					"type": {
@@ -3731,7 +3766,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 52,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L52"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L52"
 								}
 							],
 							"type": {
@@ -3780,7 +3815,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 51,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L51"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L51"
 								}
 							],
 							"type": {
@@ -3803,7 +3838,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 50,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
 						}
 					]
 				},
@@ -3833,7 +3868,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 19,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L19"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L19"
 								}
 							],
 							"type": {
@@ -3855,7 +3890,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 18,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L18"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L18"
 						}
 					]
 				},
@@ -3891,7 +3926,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 199,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L199"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L199"
 								}
 							],
 							"type": {
@@ -3938,7 +3973,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 198,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L198"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L198"
 								}
 							],
 							"type": {
@@ -3979,7 +4014,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 197,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
 						}
 					]
 				},
@@ -4015,7 +4050,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 211,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L211"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L211"
 								}
 							],
 							"type": {
@@ -4062,7 +4097,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 210,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L210"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L210"
 								}
 							],
 							"type": {
@@ -4099,7 +4134,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 216,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L216"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L216"
 								}
 							],
 							"type": {
@@ -4123,7 +4158,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 209,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
 						}
 					]
 				},
@@ -4152,7 +4187,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 169,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
 						}
 					],
 					"type": {
@@ -4173,7 +4208,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 150,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
 						}
 					],
 					"typeParameters": [
@@ -4215,7 +4250,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 152,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L152"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L152"
 												}
 											],
 											"type": {
@@ -4255,7 +4290,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 151,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L151"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L151"
 												}
 											],
 											"type": {
@@ -4278,7 +4313,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 150,
 											"character": 42,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L150"
 										}
 									]
 								}
@@ -4297,7 +4332,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 158,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
 						}
 					],
 					"typeParameters": [
@@ -4347,7 +4382,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 159,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L159"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L159"
 												}
 											],
 											"type": {
@@ -4369,7 +4404,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 158,
 											"character": 64,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L158"
 										}
 									]
 								}
@@ -4388,7 +4423,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 162,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
 						}
 					],
 					"typeParameters": [
@@ -4442,7 +4477,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 163,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L163"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L163"
 												}
 											],
 											"type": {
@@ -4464,7 +4499,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 162,
 											"character": 73,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L162"
 										}
 									]
 								}
@@ -4483,7 +4518,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 128,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
 						}
 					],
 					"typeParameters": [
@@ -4525,7 +4560,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 129,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L129"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L129"
 												}
 											],
 											"type": {
@@ -4547,7 +4582,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 128,
 											"character": 37,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L128"
 										}
 									]
 								}
@@ -4566,7 +4601,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 132,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
 						}
 					],
 					"typeParameters": [
@@ -4616,7 +4651,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 133,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L133"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L133"
 												}
 											],
 											"type": {
@@ -4638,7 +4673,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 132,
 											"character": 54,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L132"
 										}
 									]
 								}
@@ -4657,7 +4692,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 136,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
 						}
 					],
 					"typeParameters": [
@@ -4707,7 +4742,7 @@
 													"fileName": "eventsvalid.ts",
 													"line": 137,
 													"character": 1,
-													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L137"
+													"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L137"
 												}
 											],
 											"type": {
@@ -4729,7 +4764,7 @@
 											"fileName": "eventsvalid.ts",
 											"line": 136,
 											"character": 54,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L136"
 										}
 									]
 								}
@@ -4748,7 +4783,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 117,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L117"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L117"
 						}
 					],
 					"type": {
@@ -4769,7 +4804,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 118,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L118"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L118"
 						}
 					],
 					"type": {
@@ -4797,7 +4832,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 111,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L111"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L111"
 								}
 							],
 							"type": {
@@ -4837,7 +4872,7 @@
 									"fileName": "eventsvalid.ts",
 									"line": 110,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L110"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L110"
 								}
 							],
 							"type": {
@@ -4860,7 +4895,7 @@
 							"fileName": "eventsvalid.ts",
 							"line": 109,
 							"character": 12,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L109"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L109"
 						}
 					]
 				}
@@ -4912,7 +4947,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L1"
 				}
 			]
 		},
@@ -4941,7 +4976,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 13,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 								}
 							],
 							"signatures": [
@@ -4956,7 +4991,7 @@
 											"fileName": "exampleclass.ts",
 											"line": 13,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L13"
 										}
 									],
 									"parameters": [
@@ -4995,7 +5030,7 @@
 									"fileName": "exampleclass.ts",
 									"line": 11,
 									"character": 11,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L11"
 								}
 							],
 							"type": {
@@ -5016,13 +5051,13 @@
 									"fileName": "exampleclass.ts",
 									"line": 17,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 								},
 								{
 									"fileName": "exampleclass.ts",
 									"line": 21,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 								}
 							],
 							"getSignature": {
@@ -5036,7 +5071,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 17,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L17"
 									}
 								],
 								"type": {
@@ -5055,7 +5090,7 @@
 										"fileName": "exampleclass.ts",
 										"line": 21,
 										"character": 12,
-										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
+										"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L21"
 									}
 								],
 								"parameters": [
@@ -5103,7 +5138,7 @@
 							"fileName": "exampleclass.ts",
 							"line": 10,
 							"character": 21,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L10"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L10"
 						}
 					],
 					"extendedBy": [
@@ -5138,7 +5173,7 @@
 					"fileName": "exampleclass.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleclass.ts#L1"
 				}
 			]
 		},
@@ -5167,7 +5202,7 @@
 									"fileName": "exampleinterface.ts",
 									"line": 11,
 									"character": 1,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
 								}
 							],
 							"signatures": [
@@ -5182,7 +5217,7 @@
 											"fileName": "exampleinterface.ts",
 											"line": 11,
 											"character": 1,
-											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
+											"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L11"
 										}
 									],
 									"parameters": [
@@ -5219,12 +5254,12 @@
 							"fileName": "exampleinterface.ts",
 							"line": 10,
 							"character": 17,
-							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L10"
+							"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L10"
 						}
 					],
 					"ckeditor5Events": [
 						{
-							"id": 199,
+							"id": 201,
 							"name": "event-change:{property}",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -5248,12 +5283,12 @@
 									"fileName": "eventsvalid.ts",
 									"line": 197,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
 								}
 							],
 							"parameters": [
 								{
-									"id": 200,
+									"id": 202,
 									"name": "name",
 									"variant": "param",
 									"kind": 32768,
@@ -5269,7 +5304,7 @@
 									}
 								},
 								{
-									"id": 201,
+									"id": 203,
 									"name": "value",
 									"variant": "param",
 									"kind": 32768,
@@ -5285,7 +5320,7 @@
 									}
 								},
 								{
-									"id": 202,
+									"id": 204,
 									"name": "oldValue",
 									"variant": "param",
 									"kind": 32768,
@@ -5303,7 +5338,7 @@
 							]
 						},
 						{
-							"id": 203,
+							"id": 205,
 							"name": "event-set:{property}",
 							"variant": "declaration",
 							"kind": 8388608,
@@ -5327,12 +5362,12 @@
 									"fileName": "eventsvalid.ts",
 									"line": 209,
 									"character": 12,
-									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+									"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
 								}
 							],
 							"parameters": [
 								{
-									"id": 204,
+									"id": 206,
 									"name": "name",
 									"variant": "param",
 									"kind": 32768,
@@ -5348,7 +5383,7 @@
 									}
 								},
 								{
-									"id": 205,
+									"id": 207,
 									"name": "value",
 									"variant": "param",
 									"kind": 32768,
@@ -5364,7 +5399,7 @@
 									}
 								},
 								{
-									"id": 206,
+									"id": 208,
 									"name": "oldValue",
 									"variant": "param",
 									"kind": 32768,
@@ -5397,7 +5432,7 @@
 					"fileName": "exampleinterface.ts",
 					"line": 1,
 					"character": 0,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L1"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/exampleinterface.ts#L1"
 				}
 			]
 		},
@@ -5426,7 +5461,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 25,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L25"
 				}
 			]
 		},
@@ -5460,7 +5495,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 34,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L34"
 				}
 			]
 		},
@@ -5575,7 +5610,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 50,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L50"
 				}
 			]
 		},
@@ -5604,7 +5639,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 63,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L63"
 				}
 			]
 		},
@@ -5633,7 +5668,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 68,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L68"
 				}
 			]
 		},
@@ -5662,7 +5697,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 75,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L75"
 				}
 			]
 		},
@@ -5701,7 +5736,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 87,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L87"
 				}
 			]
 		},
@@ -5730,7 +5765,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 98,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L98"
 				}
 			]
 		},
@@ -5759,7 +5794,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 105,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L105"
 				}
 			]
 		},
@@ -5808,7 +5843,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 126,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L126"
 				}
 			]
 		},
@@ -5837,7 +5872,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 143,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L143"
 				}
 			]
 		},
@@ -5866,12 +5901,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 169,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L169"
 				}
 			]
 		},
 		{
-			"id": 195,
+			"id": 197,
 			"name": "event-foo-complex",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -5895,12 +5930,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 174,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L174"
 				}
 			]
 		},
 		{
-			"id": 197,
+			"id": 199,
 			"name": "event-foo-absolute",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -5924,12 +5959,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 183,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L183"
 				}
 			]
 		},
 		{
-			"id": 198,
+			"id": 200,
 			"name": "event-foo-absolute-with-prefix",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -5953,12 +5988,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 190,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L190"
 				}
 			]
 		},
 		{
-			"id": 199,
+			"id": 201,
 			"name": "event-change:{property}",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -5982,12 +6017,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 197,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L197"
 				}
 			]
 		},
 		{
-			"id": 203,
+			"id": 205,
 			"name": "event-set:{property}",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -6011,12 +6046,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 209,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L209"
 				}
 			]
 		},
 		{
-			"id": 207,
+			"id": 209,
 			"name": "event-foo-multiple-names",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -6058,12 +6093,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 224,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 				}
 			]
 		},
 		{
-			"id": 208,
+			"id": 210,
 			"name": "event-foo-multiple-names:variant",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -6105,12 +6140,12 @@
 					"fileName": "eventsvalid.ts",
 					"line": 224,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 				}
 			]
 		},
 		{
-			"id": 209,
+			"id": 211,
 			"name": "event-foo-multiple-names:variant:subvariant",
 			"variant": "declaration",
 			"kind": 8388608,
@@ -6152,7 +6187,7 @@
 					"fileName": "eventsvalid.ts",
 					"line": 224,
 					"character": 12,
-					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/8dc9130335c068f324346b4959c181f5ce542035/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
+					"url": "https://github.com/ckeditor/ckeditor5-dev/blob/393984123ad11237493293bef7e101313184c6b7/packages/typedoc-plugins/tests/tag-event/fixtures/eventsvalid.ts#L224"
 				}
 			]
 		}

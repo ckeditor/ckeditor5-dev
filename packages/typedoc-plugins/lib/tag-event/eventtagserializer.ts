@@ -29,7 +29,7 @@ export default class EventTagSerializer {
 
 			itemObj.parameters = internalItem.parameters.map( internalParam => internalParam.toObject( serializer ) );
 
-			return itemObj
+			return itemObj;
 		} );
 
 		return obj;
