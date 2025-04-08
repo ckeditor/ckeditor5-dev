@@ -115,7 +115,7 @@ export default async function runCrawler( options ) {
 async function createBrowser( options ) {
 	const browserOptions = {
 		args: [],
-		headless: 'old'
+		headless: 'new'
 	};
 
 	if ( options.disableBrowserSandbox ) {
