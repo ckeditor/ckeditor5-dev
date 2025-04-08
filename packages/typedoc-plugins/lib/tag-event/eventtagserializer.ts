@@ -9,7 +9,7 @@ type CKEditor5Event = JSONOutput.Reflection & {
 	parameters: Array<JSONOutput.Reflection>;
 };
 
-type PartialObject = {
+export type PartialObject = {
 	[ key: string ]: unknown;
 	ckeditor5Events: Array<CKEditor5Event>;
 };

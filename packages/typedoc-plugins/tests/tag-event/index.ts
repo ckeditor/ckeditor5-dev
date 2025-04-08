@@ -26,7 +26,7 @@ const assertEventExists = ( events: Array<DeclarationReflection>, eventName: str
 	expect( event, eventName ).to.not.be.undefined;
 };
 
-describe.only( 'typedoc-plugins/tag-event', () => {
+describe( 'typedoc-plugins/tag-event', () => {
 	let conversionResult: ProjectReflection,
 		warnSpy: any;
 
