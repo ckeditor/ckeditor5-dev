@@ -99,10 +99,6 @@ function onEventEnd( context: Context ) {
 			const [ eventOwner, eventName ] = eventTag.split( '#' ) as [ string, string ];
 			const ownerReflection = getTarget( context, reflection, eventOwner )!;
 
-			// if ( reflection.name === 'InterfaceChangeEvent' ) {
-			// 	console.log( ownerReflection, eventOwner );
-			// }
-
 			// The owner for an event can be either a class or an interface.
 			if ( !isClassOrInterface( ownerReflection ) ) {
 				const symbol = context.getSymbolFromReflection( reflection )!;

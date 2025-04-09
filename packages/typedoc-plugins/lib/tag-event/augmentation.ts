@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Reflection, ParameterReflection, ReferenceType } from 'typedoc';
+import type { DeclarationReflection } from 'typedoc';
 
 declare module 'typedoc' {
 
@@ -13,6 +12,6 @@ declare module 'typedoc' {
 	 */
 	export interface Reflection {
 		isCKEditor5Event: boolean;
-		ckeditor5Events: Array<Reflection>;
+		ckeditor5Events: Array<DeclarationReflection>;
 	}
 }

@@ -5,26 +5,27 @@
 
 import { describe, it, beforeAll, expect } from 'vitest';
 import { glob } from 'glob';
+import * as upath from 'upath';
 import { Application, type ProjectReflection } from 'typedoc';
 
-import { normalizePath, ROOT_TEST_DIRECTORY } from '../utils.js';
+import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocModuleFixer } from '../../lib/index.js';
 
 describe( 'typedoc-plugins/module-fixer', () => {
 	let conversionResult: ProjectReflection;
 
 	beforeAll( async () => {
-		const FIXTURES_PATH = normalizePath( ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
+		const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
 
 		const sourceFilePatterns = [
-			normalizePath( FIXTURES_PATH, '**', '*.ts' )
+			upath.join( FIXTURES_PATH, '**', '*.ts' )
 		];
 
-		const files = await glob( sourceFilePatterns );
+		const files = ( await glob( sourceFilePatterns ) ).map( file => upath.normalize( file ) );
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: normalizePath( FIXTURES_PATH, 'tsconfig.json' )
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
 		typeDocModuleFixer( typeDoc );

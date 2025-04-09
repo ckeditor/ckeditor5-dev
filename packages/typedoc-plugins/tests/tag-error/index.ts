@@ -5,6 +5,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 import { glob } from 'glob';
+import * as upath from 'upath';
 import {
 	Application,
 	ReflectionKind,
@@ -14,26 +15,26 @@ import {
 	type ReferenceType
 } from 'typedoc';
 
-import { normalizePath, ROOT_TEST_DIRECTORY } from '../utils.js';
+import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocTagError } from '../../lib/index.js';
 
 describe( 'typedoc-plugins/tag-error', () => {
 	let conversionResult: ProjectReflection;
 
 	beforeAll( async () => {
-		const FIXTURES_PATH = normalizePath( ROOT_TEST_DIRECTORY, 'tag-error', 'fixtures' );
+		const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'tag-error', 'fixtures' );
 
 		const sourceFilePatterns = [
-			normalizePath( FIXTURES_PATH, '**', '*.ts' )
+			upath.join( FIXTURES_PATH, '**', '*.ts' )
 		];
 
-		const files = await glob( sourceFilePatterns );
+		const files = ( await glob( sourceFilePatterns ) ).map( file => upath.normalize( file ) );
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: normalizePath( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults',
+				'typedoc-plugin-rename-defaults'
 			]
 		} );
 

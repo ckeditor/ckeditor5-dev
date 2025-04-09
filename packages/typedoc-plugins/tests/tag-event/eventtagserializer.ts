@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Serializer, Reflection, ParameterReflection } from 'typedoc';
+import type { Serializer, DeclarationReflection, ParameterReflection } from 'typedoc';
 
 import EventTagSerializer, { type PartialObject } from '../../lib/tag-event/eventtagserializer';
 
@@ -23,13 +23,13 @@ describe( 'typedoc-plugins/eventtagserializer', () => {
 
 	describe( 'supports()', () => {
 		it( 'should process a reflection containing the `ckeditor5Events` property', () => {
-			expect( serializer.supports( { ckeditor5Events: true } as unknown as Reflection ) ).toBe( true );
-			expect( serializer.supports( {} as unknown as Reflection ) ).toBe( false );
+			expect( serializer.supports( { ckeditor5Events: true } as unknown as DeclarationReflection ) ).toBe( true );
+			expect( serializer.supports( {} as unknown as DeclarationReflection ) ).toBe( false );
 		} );
 	} );
 
 	describe( 'toObject()', () => {
-		let input: Reflection,
+		let input: DeclarationReflection,
 			result: PartialObject,
 			serializerCallback: Serializer;
 
@@ -38,7 +38,7 @@ describe( 'typedoc-plugins/eventtagserializer', () => {
 
 			input = {
 				ckeditor5Events: []
-			} as unknown as Reflection;
+			} as unknown as DeclarationReflection;
 
 			result = {
 				ckeditor5Events: []
@@ -59,7 +59,7 @@ describe( 'typedoc-plugins/eventtagserializer', () => {
 			const eventReflection = {
 				toObject: vi.fn( () => eventReflectionConverted ),
 				parameters: []
-			} as unknown as Reflection;
+			} as unknown as DeclarationReflection;
 
 			const result = {
 				ckeditor5Events: []
@@ -94,7 +94,7 @@ describe( 'typedoc-plugins/eventtagserializer', () => {
 			const eventReflection = {
 				toObject: vi.fn( () => eventReflectionConverted ),
 				parameters: [ eventReflectionParameter ]
-			} as unknown as Reflection;
+			} as unknown as DeclarationReflection;
 
 			const result = {
 				ckeditor5Events: []

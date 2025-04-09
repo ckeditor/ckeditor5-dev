@@ -11,3 +11,4 @@ export { default as typeDocModuleFixer } from './module-fixer/index.js';
 export { default as typeDocSymbolFixer } from './symbol-fixer/index.js';
 export { default as typeDocTagError } from './tag-error/index.js';
 export { default as typeDocTagEvent } from './tag-event/index.js';
+export { default as typeDocTagObservable } from './tag-observable/index.js';

@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import * as upath from 'upath';
 
-export const ROOT_DIRECTORY = path.join( __dirname, '..' );
-export const ROOT_TEST_DIRECTORY = path.join( ROOT_DIRECTORY, 'tests' );
+export const ROOT_DIRECTORY = upath.join( __dirname, '..' );
+export const ROOT_TEST_DIRECTORY = upath.join( ROOT_DIRECTORY, 'tests' );
 
 /**
  * Replaces Windows style paths to Unix.
