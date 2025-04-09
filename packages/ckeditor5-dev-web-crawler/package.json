@@ -25,6 +25,6 @@
     "chalk": "^5.0.0",
     "ora": "^8.0.0",
     "puppeteer": "^24.6.0",
-    "strip-ansi": "^7.0.0"
+    "puppeteer-cluster": "^0.24.0"
   }
 }

@@ -7,14 +7,14 @@
 
 /* eslint-env node */
 
-import puppeteer from 'puppeteer';
-import chalk from 'chalk';
 import util from 'util';
-import stripAnsiEscapeCodes from 'strip-ansi';
+import chalk from 'chalk';
+import { Cluster } from 'puppeteer-cluster';
 import { getBaseUrl, toArray } from './utils.js';
 import { createSpinner, getProgressHandler } from './spinner.js';
 
 import {
+	DEFAULT_CONCURRENCY,
 	DEFAULT_TIMEOUT,
 	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
 	DEFAULT_REMAINING_ATTEMPTS,
@@ -36,7 +36,6 @@ import {
  * @param {number} [options.depth=Infinity] Defines how many nested page levels should be examined. Infinity by default.
  * @param {Array.<string>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @param {number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
- * @param {boolean} [options.quit=false] Terminates the scan as soon as an error is found. False (off) by default.
  * @param {boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
  * @param {boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
  * @param {boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
@@ -47,8 +46,7 @@ export default async function runCrawler( options ) {
 		url,
 		depth = Infinity,
 		exclusions = [],
-		concurrency = 1,
-		quit = false,
+		concurrency = DEFAULT_CONCURRENCY,
 		disableBrowserSandbox = false,
 		noSpinner = false,
 		ignoreHTTPSErrors = false
@@ -67,79 +65,195 @@ export default async function runCrawler( options ) {
 		process.exit( 1 );
 	} );
 
-	const spinner = createSpinner( { noSpinner } );
+	const puppeteerOptions = {
+		args: [],
+		headless: true,
+		ignoreHTTPSErrors
+	};
+
+	if ( disableBrowserSandbox ) {
+		puppeteerOptions.args.push( '--no-sandbox' );
+		puppeteerOptions.args.push( '--disable-setuid-sandbox' );
+	}
+
 	const errors = new Map();
-	const browser = await createBrowser( { disableBrowserSandbox, ignoreHTTPSErrors } );
+	const foundLinks = [ url ];
+	const spinner = createSpinner( { noSpinner } );
+	const baseUrl = getBaseUrl( url );
+	const onError = getErrorHandler( errors );
+	const onProgress = getProgressHandler( spinner, { verbose: noSpinner } );
+
+	const cluster = await Cluster.launch( {
+		concurrency: Cluster.CONCURRENCY_CONTEXT,
+		timeout: DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
+		maxConcurrency: concurrency,
+		puppeteerOptions
+	} );
+
+	await cluster.task( async ( { page, data } ) => {
+		const errors = [];
+
+		page.setDefaultTimeout( DEFAULT_TIMEOUT );
+		await page.setCacheEnabled( false );
+		await page.setRequestInterception( true );
+
+		page.on( 'request', request => {
+			const resourceType = request.resourceType();
+
+			// Block all 'media' requests, as they are likely to fail anyway due to limitations in Puppeteer.
+			if ( resourceType === 'media' ) {
+				request.abort( 'blockedbyclient' );
+			} else {
+				request.continue();
+			}
+		} );
+
+		page.on( 'dialog', dialog => dialog.dismiss() );
+
+		page.on( ERROR_TYPES.PAGE_CRASH.event, error => errors.push( {
+			pageUrl: page.url(),
+			type: ERROR_TYPES.PAGE_CRASH,
+			message: error.message || '(empty message)'
+		} ) );
+
+		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => errors.push( {
+			pageUrl: page.url(),
+			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
+			message: error.message || '(empty message)'
+		} ) );
+
+		page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
+			const errorText = request.failure().errorText;
+
+			if ( request.response()?.ok() && request.method() === 'POST' ) {
+				// Ignore a false positive due to a bug in Puppeteer.
+				// https://github.com/puppeteer/puppeteer/issues/9458
+				return;
+			}
+
+			// Do not log errors explicitly aborted by the crawler.
+			if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
+				const url = request.url();
+				const host = new URL( url ).host;
+				const isNavigation = isNavigationRequest( request );
+				const message = isNavigation ?
+					`Failed to open link ${ chalk.bold( url ) }` :
+					`Failed to load resource from ${ chalk.bold( host ) }`;
+
+				errors.push( {
+					pageUrl: isNavigation ? data.parentUrl : page.url(),
+					type: ERROR_TYPES.REQUEST_FAILURE,
+					message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
+					failedResourceUrl: url
+				} );
+			}
+		} );
+
+		page.on( ERROR_TYPES.RESPONSE_FAILURE.event, response => {
+			const responseStatus = response.status();
+
+			if ( responseStatus > 399 ) {
+				const url = response.url();
+				const host = new URL( url ).host;
+				const isNavigation = isNavigationRequest( response.request() );
+				const message = isNavigation ?
+					`Failed to open link ${ chalk.bold( url ) }` :
+					`Failed to load resource from ${ chalk.bold( host ) }`;
+
+				errors.push( {
+					pageUrl: isNavigation ? data.parentUrl : page.url(),
+					type: ERROR_TYPES.RESPONSE_FAILURE,
+					message: `${ message } (HTTP response status code: ${ chalk.bold( responseStatus ) })`,
+					failedResourceUrl: url
+				} );
+			}
+		} );
+
+		const session = await page.target().createCDPSession();
+
+		await session.send( 'Runtime.enable' );
+
+		session.on( 'Runtime.exceptionThrown', event => {
+			const message = event.exceptionDetails.exception?.description ||
+				event.exceptionDetails.exception?.value ||
+				event.exceptionDetails.text ||
+				'(No description provided)';
+
+			errors.push( {
+				pageUrl: page.url(),
+				type: ERROR_TYPES.CONSOLE_ERROR,
+				message
+			} );
+		} );
+
+		onProgress( {
+			total: foundLinks.length
+		} );
+
+		try {
+			await page.goto( data.url, { waitUntil: [ 'load', 'networkidle0' ] } );
+		} catch ( error ) {
+			const errorMessage = error.message || '(empty message)';
+
+			// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
+			// not be also reported as the "navigation error".
+			const ignoredMessage = 'net::';
+
+			if ( !errorMessage.startsWith( ignoredMessage ) ) {
+				errors.push( {
+					pageUrl: data.url,
+					type: ERROR_TYPES.NAVIGATION_ERROR,
+					message: errorMessage
+				} );
+			}
+		}
+
+		// Create patterns from meta tags to ignore errors.
+		const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
+
+		// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
+		markErrorsAsIgnored( errors, errorIgnorePatterns );
+
+		// Skip crawling deeper, if the bottom has been reached, or get all unique links from the page body otherwise.
+		const links = data.remainingNestedLevels === 0 ?
+			[] :
+			await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
+
+		errors
+			.filter( error => !error.ignored )
+			.forEach( error => onError( error ) );
+
+		links.forEach( link => {
+			foundLinks.push( link );
+
+			cluster.queue( {
+				url: link,
+				parentUrl: data.parentUrl,
+				remainingNestedLevels: data.remainingNestedLevels - 1,
+				remainingAttempts: data.remainingAttempts
+			} );
+		} );
+	} );
 
 	spinner.start( 'Checking pages…' );
 
-	let status = 'Done';
-
-	await openLinks( browser, {
-		baseUrl: getBaseUrl( url ),
-		linksQueue: [ {
-			url,
-			parentUrl: '(none)',
-			remainingNestedLevels: depth,
-			remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
-		} ],
-		foundLinks: [ url ],
-		exclusions,
-		concurrency,
-		quit,
-		onError: getErrorHandler( errors ),
-		onProgress: getProgressHandler( spinner, { verbose: noSpinner } )
-	} ).catch( () => {
-		status = 'Terminated on first error';
+	// Queue the first link to be crawled.
+	cluster.queue( {
+		url,
+		parentUrl: '(none)',
+		remainingNestedLevels: depth,
+		remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
 	} );
 
-	spinner.succeed( `Checking pages… ${ chalk.bold( status ) }` );
+	spinner.succeed( `Checking pages… ${ chalk.bold( 'Done' ) }` );
 
-	await browser.close();
+	await cluster.idle();
+	await cluster.close();
 
 	logErrors( errors );
 
 	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
 	process.exit( errors.size ? 1 : 0 );
-}
-
-/**
- * Creates a new browser instance and closes the default blank page.
- *
- * @param {object} options
- * @param {boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
- * @param {boolean} [options.ignoreHTTPSErrors] Whether the browser should ignore invalid (self-signed) certificates.
- *
- * @returns {Promise.<object>} A promise, which resolves to the Puppeteer browser instance.
- */
-async function createBrowser( options ) {
-	const browserOptions = {
-		args: [],
-		headless: true
-	};
-
-	if ( options.disableBrowserSandbox ) {
-		browserOptions.args.push( '--no-sandbox' );
-		browserOptions.args.push( '--disable-setuid-sandbox' );
-	}
-
-	if ( options.ignoreHTTPSErrors ) {
-		browserOptions.ignoreHTTPSErrors = options.ignoreHTTPSErrors;
-	}
-
-	const browser = await puppeteer.launch( browserOptions );
-
-	// For unknown reasons, in order to be able to visit pages in Puppeteer on CI, we must close the default page that is opened when the
-	// browser starts.
-	if ( process.env.CI ) {
-		const [ defaultBlankPage ] = await browser.pages();
-
-		if ( defaultBlankPage ) {
-			await defaultBlankPage.close();
-		}
-	}
-
-	return browser;
 }
 
 /**
@@ -174,156 +288,6 @@ function getErrorHandler( errors ) {
 		}
 
 		errorCollection.get( firstMessageLine ).pages.add( error.pageUrl );
-	};
-}
-
-/**
- * Searches and opens all found links in the document body from requested URL, recursively.
- *
- * @param {object} browser The headless browser instance from Puppeteer.
- * @param {object} data All data needed for crawling the links.
- * @param {string} data.baseUrl The base URL from the initial page URL.
- * @param {Array.<Link>} data.linksQueue An array of link to crawl.
- * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<string>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @param {number} data.concurrency Number of concurrent pages (browser tabs) to be used during crawling.
- * @param {boolean} data.quit Terminates the scan as soon as an error is found.
- * @param {function} data.onError Callback called ever time an error has been found.
- * @param {function} data.onProgress Callback called every time just before opening a new link.
- * @returns {Promise} Promise is resolved, when all links have been visited.
- */
-async function openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } ) {
-	const numberOfOpenPages = ( await browser.pages() ).length;
-
-	// Check if the limit of simultaneously opened pages in the browser has been reached.
-	if ( numberOfOpenPages >= concurrency ) {
-		return;
-	}
-
-	return Promise.all(
-		linksQueue
-			// Get links from the queue, up to the concurrency limit...
-			.splice( 0, concurrency - numberOfOpenPages )
-			// ...and open each of them in a dedicated page to collect nested links and errors (if any) they contain.
-			.map( async link => {
-				let newErrors = [];
-				let newLinks = [];
-
-				onProgress( {
-					total: foundLinks.length
-				} );
-
-				// If opening a given link causes an error, try opening it again until the limit of remaining attempts is reached.
-				do {
-					const { errors, links } = await openLink( browser, { baseUrl, link, foundLinks, exclusions } );
-
-					link.remainingAttempts--;
-
-					newErrors = [ ...errors ];
-					newLinks = [ ...links ];
-				} while ( newErrors.length && link.remainingAttempts );
-
-				newErrors.forEach( newError => onError( newError ) );
-
-				newLinks.forEach( newLink => {
-					foundLinks.push( newLink );
-
-					linksQueue.push( {
-						url: newLink,
-						parentUrl: link.url,
-						remainingNestedLevels: link.remainingNestedLevels - 1,
-						remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
-					} );
-				} );
-
-				// Terminate the scan as soon as an error is found, if `--quit` or `-q` CLI argument has been set.
-				if ( newErrors.length > 0 && quit ) {
-					return Promise.reject();
-				}
-
-				// When currently examined link has been checked, try to open new links up to the concurrency limit.
-				return openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } );
-			} )
-	);
-}
-
-/**
- * Creates a dedicated Puppeteer's page for URL to be tested and collects all links from it. Only links from the same base URL
- * as the tested URL are collected. Only the base URL part consisting of a protocol, a host, a port, and a path is stored, without
- * a hash and search parts. Duplicated links, which were already found and enqueued, are skipped to avoid loops. Explicitly
- * excluded links are also skipped. If the requested traversing depth has been reached, nested links from this URL are not collected
- * anymore.
- *
- * @param {object} browser The headless browser instance from Puppeteer.
- * @param {object} data All data needed for crawling the link.
- * @param {string} data.baseUrl The base URL from the initial page URL.
- * @param {Link} data.link A link to crawl.
- * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<string>} data.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @returns {Promise.<ErrorsAndLinks>} A promise, which resolves to a collection of unique errors and links.
- */
-async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
-	const errors = [];
-
-	const onError = error => errors.push( error );
-
-	// Create dedicated page for current link.
-	const page = await createPage( browser, { link, onError } );
-
-	try {
-		// Consider navigation to be finished when the `load` event is fired and there are no network connections for at least 500 ms.
-		await page.goto( link.url, { waitUntil: [ 'load', 'networkidle0' ] } );
-	} catch ( error ) {
-		const errorMessage = error.message || '(empty message)';
-
-		// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
-		// not be also reported as the "navigation error".
-		const ignoredMessage = 'net::';
-
-		if ( !errorMessage.startsWith( ignoredMessage ) ) {
-			onError( {
-				pageUrl: link.url,
-				type: ERROR_TYPES.NAVIGATION_ERROR,
-				message: errorMessage
-			} );
-		}
-
-		const isResponding = await isPageResponding( page );
-
-		// Exit immediately and do not try to call any function in the context of the page, that is not responding or if it has not been
-		// opened. However, once the page has been opened (its URL is the same as the one requested), continue as usual and do not close
-		// the page yet, because the page may contain error exclusions, that should be taken into account. Such a case can happen when,
-		// for example, the `load` event was not fired because the external resource was not loaded yet.
-		if ( !isResponding || page.url() !== link.url ) {
-			page.removeAllListeners();
-
-			await page.close();
-
-			return {
-				errors,
-				links: []
-			};
-		}
-	}
-
-	// Create patterns from meta tags to ignore errors.
-	const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
-
-	// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
-	markErrorsAsIgnored( errors, errorIgnorePatterns );
-
-	// Skip crawling deeper, if the bottom has been reached, or get all unique links from the page body otherwise.
-	const links = link.remainingNestedLevels === 0 ?
-		[] :
-		await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
-
-	page.removeAllListeners();
-
-	await page.close();
-
-	return {
-		errors: errors.filter( error => !error.ignored ),
-		links
 	};
 }
 
@@ -432,7 +396,7 @@ function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 				return true;
 			}
 
-			if ( stripAnsiEscapeCodes( error.message ).includes( pattern ) ) {
+			if ( util.stripVTControlCharacters( error.message ).includes( pattern ) ) {
 				return true;
 			}
 
@@ -451,128 +415,6 @@ function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 }
 
 /**
- * Creates a new page in Puppeteer's browser instance.
- *
- * @param {object} browser The headless browser instance from Puppeteer.
- * @param {object} data All data needed for creating a new page.
- * @param {Link} data.link A link to crawl.
- * @param {function} data.onError Callback called every time just before opening a new link.
- * @returns {Promise.<object>} A promise, which resolves to the page instance from Puppeteer.
- */
-async function createPage( browser, { link, onError } ) {
-	const page = await browser.newPage();
-
-	await page.setDefaultTimeout( DEFAULT_TIMEOUT );
-
-	await page.setCacheEnabled( false );
-
-	dismissDialogs( page );
-
-	await registerErrorHandlers( page, { link, onError } );
-
-	await registerRequestInterception( page );
-
-	return page;
-}
-
-/**
- * Dismisses any dialogs (alert, prompt, confirm, beforeunload) that could be displayed on page load.
- *
- * @param {object} page The page instance from Puppeteer.
- */
-function dismissDialogs( page ) {
-	page.on( 'dialog', async dialog => {
-		await dialog.dismiss();
-	} );
-}
-
-/**
- * Registers all error handlers on given page instance.
- *
- * @param {object} page The page instance from Puppeteer.
- * @param {object} data All data needed for registering error handlers.
- * @param {Link} data.link A link to crawl associated with Puppeteer's page.
- * @param {function} data.onError Called each time an error has been found.
- */
-async function registerErrorHandlers( page, { link, onError } ) {
-	page.on( ERROR_TYPES.PAGE_CRASH.event, error => onError( {
-		pageUrl: page.url(),
-		type: ERROR_TYPES.PAGE_CRASH,
-		message: error.message || '(empty message)'
-	} ) );
-
-	page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => onError( {
-		pageUrl: page.url(),
-		type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
-		message: error.message || '(empty message)'
-	} ) );
-
-	page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
-		const errorText = request.failure().errorText;
-
-		if ( request.response()?.ok() && request.method() === 'POST' ) {
-			// Ignore a false positive due to a bug in Puppeteer.
-			// https://github.com/puppeteer/puppeteer/issues/9458
-			return;
-		}
-
-		// Do not log errors explicitly aborted by the crawler.
-		if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
-			const url = request.url();
-			const host = new URL( url ).host;
-			const isNavigation = isNavigationRequest( request );
-			const message = isNavigation ?
-				`Failed to open link ${ chalk.bold( url ) }` :
-				`Failed to load resource from ${ chalk.bold( host ) }`;
-
-			onError( {
-				pageUrl: isNavigation ? link.parentUrl : page.url(),
-				type: ERROR_TYPES.REQUEST_FAILURE,
-				message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
-				failedResourceUrl: url
-			} );
-		}
-	} );
-
-	page.on( ERROR_TYPES.RESPONSE_FAILURE.event, response => {
-		const responseStatus = response.status();
-
-		if ( responseStatus > 399 ) {
-			const url = response.url();
-			const host = new URL( url ).host;
-			const isNavigation = isNavigationRequest( response.request() );
-			const message = isNavigation ?
-				`Failed to open link ${ chalk.bold( url ) }` :
-				`Failed to load resource from ${ chalk.bold( host ) }`;
-
-			onError( {
-				pageUrl: isNavigation ? link.parentUrl : page.url(),
-				type: ERROR_TYPES.RESPONSE_FAILURE,
-				message: `${ message } (HTTP response status code: ${ chalk.bold( responseStatus ) })`,
-				failedResourceUrl: url
-			} );
-		}
-	} );
-
-	const session = await page.target().createCDPSession();
-
-	await session.send( 'Runtime.enable' );
-
-	session.on( 'Runtime.exceptionThrown', event => {
-		const message = event.exceptionDetails.exception?.description ||
-			event.exceptionDetails.exception?.value ||
-			event.exceptionDetails.text ||
-			'(No description provided)';
-
-		onError( {
-			pageUrl: page.url(),
-			type: ERROR_TYPES.CONSOLE_ERROR,
-			message
-		} );
-	} );
-}
-
-/**
  * Checks, if HTTP request was a navigation one, i.e. request that is driving frame's navigation. Requests sent from child frames
  * (i.e. from <iframe>) are not treated as a navigation. Only a request from a top-level frame is navigation.
  *
@@ -581,40 +423,6 @@ async function registerErrorHandlers( page, { link, onError } ) {
  */
 function isNavigationRequest( request ) {
 	return request.isNavigationRequest() && request.frame().parentFrame() === null;
-}
-
-/**
- * Checks, if the page is not hung by trying to evaluate a function within the page context in defined time.
- *
- * @param {object} page The page instance from Puppeteer.
- * @returns {Promise.<boolean>}
- */
-async function isPageResponding( page ) {
-	return Promise.race( [
-		page.title(),
-		new Promise( ( resolve, reject ) => setTimeout( () => reject(), DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT ) )
-	] ).then( () => true ).catch( () => false );
-}
-
-/**
- * Registers a request interception procedure to explicitly block all 'media' requests (resources loaded by a <video> or <audio> elements).
- *
- * @param {object} page The page instance from Puppeteer.
- * @returns {Promise} Promise is resolved, when the request interception procedure is registered.
- */
-async function registerRequestInterception( page ) {
-	await page.setRequestInterception( true );
-
-	page.on( 'request', request => {
-		const resourceType = request.resourceType();
-
-		// Block all 'media' requests, as they are likely to fail anyway due to limitations in Puppeteer.
-		if ( resourceType === 'media' ) {
-			request.abort( 'blockedbyclient' );
-		} else {
-			request.continue();
-		}
-	} );
 }
 
 /**
