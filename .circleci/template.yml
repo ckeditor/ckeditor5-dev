@@ -151,7 +151,6 @@ jobs:
 
   trigger_release_process:
     machine: true
-    resource_class: large
     steps:
       - checkout
       - bootstrap_repository_command
