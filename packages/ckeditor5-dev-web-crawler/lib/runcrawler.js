@@ -54,7 +54,7 @@ export default async function runCrawler( options ) {
 		ignoreHTTPSErrors = false
 	} = options;
 
-	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
+	console.log( chalk.bold( '\n🔎 Starting the Crawler…\n' ) );
 
 	process.on( 'unhandledRejection', reason => {
 		const error = util.inspect( reason, {
