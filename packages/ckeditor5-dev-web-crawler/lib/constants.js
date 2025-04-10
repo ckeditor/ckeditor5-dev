@@ -22,10 +22,6 @@ export const ERROR_TYPES = {
 		event: 'error',
 		description: 'Page crash'
 	},
-	UNCAUGHT_EXCEPTION: {
-		event: 'pageerror',
-		description: 'Uncaught exception'
-	},
 	REQUEST_FAILURE: {
 		event: 'requestfailed',
 		description: 'Request failure'
@@ -47,7 +43,6 @@ export const ERROR_TYPES = {
 
 export const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
 	'page-crash': ERROR_TYPES.PAGE_CRASH,
-	'uncaught-exception': ERROR_TYPES.UNCAUGHT_EXCEPTION,
 	'request-failure': ERROR_TYPES.REQUEST_FAILURE,
 	'response-failure': ERROR_TYPES.RESPONSE_FAILURE,
 	'console-error': ERROR_TYPES.CONSOLE_ERROR,

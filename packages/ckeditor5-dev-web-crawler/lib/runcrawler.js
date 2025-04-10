@@ -11,7 +11,6 @@ import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
 import { getBaseUrl, toArray } from './utils.js';
-// import { createSpinner, getProgressHandler } from './spinner.js';
 
 import {
 	DEFAULT_CONCURRENCY,
@@ -36,7 +35,6 @@ import {
  * @param {Array.<string>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @param {number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
  * @param {boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
- * @param {boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
  * @param {boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
@@ -47,7 +45,6 @@ export default async function runCrawler( options ) {
 		exclusions = [],
 		concurrency = DEFAULT_CONCURRENCY,
 		disableBrowserSandbox = false,
-		// noSpinner = false,
 		ignoreHTTPSErrors = false
 	} = options;
 
@@ -77,10 +74,8 @@ export default async function runCrawler( options ) {
 
 	const foundLinks = [ url ];
 	const errors = new Map();
-	// const spinner = createSpinner( { noSpinner } );
 	const baseUrl = getBaseUrl( url );
 	const onError = getErrorHandler( errors );
-	// const onProgress = getProgressHandler( spinner, { verbose: noSpinner } );
 
 	const cluster = await Cluster.launch( {
 		concurrency: Cluster.CONCURRENCY_PAGE,
@@ -121,12 +116,6 @@ export default async function runCrawler( options ) {
 		page.on( ERROR_TYPES.PAGE_CRASH.event, error => errors.push( {
 			pageUrl: page.url(),
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: error.message || '(empty message)'
-		} ) );
-
-		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => errors.push( {
-			pageUrl: page.url(),
-			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
 			message: error.message || '(empty message)'
 		} ) );
 
@@ -194,10 +183,6 @@ export default async function runCrawler( options ) {
 			} );
 		} );
 
-		// onProgress( {
-		// 	total: foundLinks.length
-		// } );
-
 		try {
 			await page.goto( data.url, { waitUntil: [ 'load', 'networkidle0' ] } );
 		} catch ( error ) {
@@ -222,14 +207,16 @@ export default async function runCrawler( options ) {
 		// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
 		markErrorsAsIgnored( errors, errorIgnorePatterns );
 
-		// Skip crawling deeper, if the bottom has been reached, or get all unique links from the page body otherwise.
-		const links = data.remainingNestedLevels === 0 ?
-			[] :
-			await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
-
 		errors
 			.filter( error => !error.ignored )
 			.forEach( error => onError( error ) );
+
+		if ( data.remainingNestedLevels === 0 ) {
+			// Skip crawling deeper, if the bottom has been reached
+			return;
+		}
+
+		const links = await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
 
 		links.forEach( link => {
 			foundLinks.push( link );
@@ -242,8 +229,6 @@ export default async function runCrawler( options ) {
 		} );
 	} );
 
-	// spinner.start( 'Checking pages…' );
-
 	// Queue the first link to be crawled.
 	cluster.queue( {
 		url,
@@ -251,14 +236,11 @@ export default async function runCrawler( options ) {
 		remainingNestedLevels: depth
 	} );
 
-	// spinner.succeed( `Checking pages… ${ chalk.bold( 'Done' ) }` );
-
 	await cluster.idle();
 	await cluster.close();
 
 	logErrors( errors );
 
-	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
 	process.exit( errors.size ? 1 : 0 );
 }
 
@@ -313,25 +295,13 @@ async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
 		.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
 	];
 
-	return ( await page.$$eval( `body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`, evaluatePage ) )
-		.filter( link => {
-			// Skip external link.
-			if ( !link.startsWith( baseUrl ) ) {
-				return false;
-			}
+	const links = await page.$$eval( `body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`, evaluatePage );
 
-			// Skip already discovered link.
-			if ( foundLinks.includes( link ) ) {
-				return false;
-			}
-
-			// Skip explicitly excluded link.
-			if ( exclusions.some( exclusion => link.includes( exclusion ) ) ) {
-				return false;
-			}
-
-			return true;
-		} );
+	return links.filter( link => {
+		return link.startsWith( baseUrl ) && // Skip external link.
+			!foundLinks.includes( link ) && // Skip already discovered link.
+			!exclusions.some( exclusion => link.includes( exclusion ) ); // Skip explicitly excluded link.
+	} );
 }
 
 /**
