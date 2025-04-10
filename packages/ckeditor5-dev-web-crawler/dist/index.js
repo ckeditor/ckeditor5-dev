@@ -86,7 +86,7 @@ const DATA_ATTRIBUTE_NAME = 'data-cke-crawler-skip';
  * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.
  */
 async function runCrawler(options) {
-    const { url, depth = Infinity, exclusions = [], concurrency = DEFAULT_CONCURRENCY, disableBrowserSandbox = false } = options;
+    const { url, depth = Infinity, exclusions = [], concurrency = DEFAULT_CONCURRENCY, disableBrowserSandbox = false, ignoreHTTPSErrors = false, noSpinner = false } = options;
     console.log(chalk.bold('\n🔎 Starting the Crawler…\n'));
     process.on('unhandledRejection', reason => {
         const error = util.inspect(reason, {
@@ -98,7 +98,8 @@ async function runCrawler(options) {
     });
     const puppeteerOptions = {
         args: [],
-        headless: true
+        headless: true,
+        acceptInsecureCerts: ignoreHTTPSErrors
     };
     if (disableBrowserSandbox) {
         puppeteerOptions.args.push('--no-sandbox');
@@ -115,7 +116,7 @@ async function runCrawler(options) {
         maxConcurrency: concurrency,
         puppeteerOptions,
         skipDuplicateUrls: true,
-        monitor: true
+        monitor: !noSpinner
     });
     cluster.on('taskerror', (err, data) => {
         onError({

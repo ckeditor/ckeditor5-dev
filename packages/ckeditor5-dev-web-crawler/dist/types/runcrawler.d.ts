@@ -32,6 +32,18 @@ interface CrawlerOptions {
      * @default false
      */
     disableBrowserSandbox?: boolean;
+    /**
+     * Whether the browser should ignore invalid (self-signed) certificates.
+     *
+     * @default false
+     */
+    ignoreHTTPSErrors?: boolean;
+    /**
+     * Whether to display the current progress or only the result.
+     *
+     * @default false
+     */
+    noSpinner?: boolean;
 }
 /**
  * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.

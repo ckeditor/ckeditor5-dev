@@ -59,6 +59,20 @@ interface CrawlerOptions {
 	 * @default false
 	 */
 	disableBrowserSandbox?: boolean;
+
+	/**
+	 * Whether the browser should ignore invalid (self-signed) certificates.
+	 * 
+	 * @default false
+	 */
+	ignoreHTTPSErrors?: boolean;
+
+	/**
+	 * Whether to display the current progress or only the result.
+	 * 
+	 * @default false
+	 */
+	noSpinner?: boolean;
 }
 
 interface CrawlerError {
@@ -89,7 +103,9 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		depth = Infinity,
 		exclusions = [],
 		concurrency = DEFAULT_CONCURRENCY,
-		disableBrowserSandbox = false
+		disableBrowserSandbox = false,
+		ignoreHTTPSErrors = false,
+		noSpinner = false
 	} = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler…\n' ) );
@@ -107,7 +123,8 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 
 	const puppeteerOptions = {
 		args: [] as Array<string>,
-		headless: true
+		headless: true,
+		acceptInsecureCerts: ignoreHTTPSErrors
 	} satisfies LaunchOptions;
 
 	if ( disableBrowserSandbox ) {
@@ -127,7 +144,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		maxConcurrency: concurrency,
 		puppeteerOptions,
 		skipDuplicateUrls: true,
-		monitor: true
+		monitor: !noSpinner
 	} );
 
 	cluster.on( 'taskerror', ( err, data ) => {
