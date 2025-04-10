@@ -63,7 +63,7 @@ interface CrawlerOptions {
 
 interface CrawlerError {
 	pageUrl: string;
-	type: (typeof ERROR_TYPES)[keyof typeof ERROR_TYPES];
+	type: ( typeof ERROR_TYPES )[ keyof typeof ERROR_TYPES ];
 	message: string;
 	failedResourceUrl?: string;
 	ignored?: boolean;
