@@ -13,6 +13,10 @@ export interface ErrorType {
      */
     description: string;
 }
+/**
+ * Errors from the following hosts will be ignored.
+ */
+export declare const IGNORED_HOSTS: string[];
 export declare const DEFAULT_CONCURRENCY: number;
 export declare const DEFAULT_TIMEOUT: number;
 export declare const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;

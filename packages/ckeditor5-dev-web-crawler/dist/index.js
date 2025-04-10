@@ -40,6 +40,22 @@ function toArray(data) {
  * For licensing, see LICENSE.md.
  */
 /* eslint-env node */
+/**
+ * Errors from the following hosts will be ignored.
+ */
+const IGNORED_HOSTS = [
+    'ucarecdn.com',
+    'fury.io',
+    'shields.io',
+    'coveralls.io',
+    'spotify.com',
+    'vimeo.com',
+    'facebook.com',
+    'challenges.cloudflare.com',
+    'svc.webspellchecker.net',
+    'binance.com',
+    'jsfiddle.net'
+];
 const DEFAULT_CONCURRENCY = cpus().length / 2;
 const DEFAULT_TIMEOUT = 15 * 1000;
 const DEFAULT_REMAINING_ATTEMPTS = 3;
@@ -151,9 +167,12 @@ async function runCrawler(options) {
                 // https://github.com/puppeteer/puppeteer/issues/9458
                 return;
             }
+            const url = request.url();
+            if (IGNORED_HOSTS.some(ignoredHost => url.includes(ignoredHost))) {
+                return;
+            }
             // Do not log errors explicitly aborted by the crawler.
             if (errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector') {
-                const url = request.url();
                 const host = new URL(url).host;
                 const isNavigation = isNavigationRequest(request);
                 const message = isNavigation ?
@@ -169,8 +188,11 @@ async function runCrawler(options) {
         });
         page.on(ERROR_TYPES.RESPONSE_FAILURE.event, response => {
             const responseStatus = response.status();
+            const url = response.url();
+            if (IGNORED_HOSTS.some(ignoredHost => url.includes(ignoredHost))) {
+                return;
+            }
             if (responseStatus > 399) {
-                const url = response.url();
                 const host = new URL(url).host;
                 const isNavigation = isNavigationRequest(response.request());
                 const message = isNavigation ?
@@ -333,8 +355,9 @@ function markErrorsAsIgnored(errors, errorIgnorePatterns) {
         const isIgnored = Array
             .from(errorIgnorePatterns.get(error.type))
             .some(pattern => {
+            const message = util.stripVTControlCharacters(error.message);
             return pattern === IGNORE_ALL_ERRORS_WILDCARD ||
-                util.stripVTControlCharacters(error.message).includes(pattern) ||
+                message.includes(pattern) ||
                 error.failedResourceUrl?.includes(pattern);
         });
         if (isIgnored) {

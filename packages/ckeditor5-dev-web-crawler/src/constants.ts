@@ -22,6 +22,23 @@ export interface ErrorType {
 	description: string;
 }
 
+/**
+ * Errors from the following hosts will be ignored.
+ */
+export const IGNORED_HOSTS = [
+	'ucarecdn.com',
+	'fury.io',
+	'shields.io',
+	'coveralls.io',
+	'spotify.com',
+	'vimeo.com',
+	'facebook.com',
+	'challenges.cloudflare.com',
+	'svc.webspellchecker.net',
+	'binance.com',
+	'jsfiddle.net'
+];
+
 export const DEFAULT_CONCURRENCY = cpus().length / 2;
 
 export const DEFAULT_TIMEOUT = 15 * 1000;

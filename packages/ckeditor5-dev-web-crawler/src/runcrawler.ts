@@ -22,6 +22,7 @@ import {
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
 	DATA_ATTRIBUTE_NAME,
+	IGNORED_HOSTS,
 	type ErrorType
 } from './constants.js';
 
@@ -188,9 +189,14 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 				return;
 			}
 
+			const url = request.url();
+
+			if ( IGNORED_HOSTS.some( ignoredHost => url.includes( ignoredHost ) ) ) {
+				return;
+			}
+
 			// Do not log errors explicitly aborted by the crawler.
 			if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
-				const url = request.url();
 				const host = new URL( url ).host;
 				const isNavigation = isNavigationRequest( request );
 				const message = isNavigation ?
@@ -208,9 +214,13 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 
 		page.on( ERROR_TYPES.RESPONSE_FAILURE.event, response => {
 			const responseStatus = response.status();
+			const url = response.url();
+
+			if ( IGNORED_HOSTS.some( ignoredHost => url.includes( ignoredHost ) ) ) {
+				return;
+			}
 
 			if ( responseStatus > 399 ) {
-				const url = response.url();
 				const host = new URL( url ).host;
 				const isNavigation = isNavigationRequest( response.request() );
 				const message = isNavigation ?
@@ -417,8 +427,9 @@ function markErrorsAsIgnored( errors: Array<CrawlerError>, errorIgnorePatterns: 
 		const isIgnored = Array
 			.from( errorIgnorePatterns.get( error.type )! )
 			.some( pattern => {
+				const message = util.stripVTControlCharacters( error.message );
 				return pattern === IGNORE_ALL_ERRORS_WILDCARD ||
-					util.stripVTControlCharacters( error.message ).includes( pattern ) ||
+					message.includes( pattern ) ||
 					error.failedResourceUrl?.includes( pattern );
 			} );
 
