@@ -5,7 +5,14 @@
 
 import { glob } from 'glob';
 import { Application } from 'typedoc';
-import { typeDocModuleFixer, typeDocSymbolFixer, typeDocTagError, typeDocTagEvent } from '@ckeditor/typedoc-plugins';
+import {
+	typeDocModuleFixer,
+	typeDocSymbolFixer,
+	typeDocTagError,
+	typeDocTagEvent,
+	typeDocTagObservable,
+	typeDocEventParamFixer
+} from '@ckeditor/typedoc-plugins';
 
 // import validators from './validators/index.js';
 
@@ -60,6 +67,8 @@ export default async function build( config ) {
 	typeDocSymbolFixer( app );
 	typeDocTagError( app );
 	typeDocTagEvent( app );
+	typeDocTagObservable( app );
+	typeDocEventParamFixer( app );
 
 	console.log( 'Typedoc started...' );
 

@@ -16,7 +16,7 @@ import {
  *   * Typedoc: `[iterator]() → Iterator`
  *   * JSDoc: `Symbol.iterator() → Iterator`
  */
-export default function ( app: Application ): void {
+export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
 }
 

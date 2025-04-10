@@ -26,9 +26,6 @@ export function getTarget( context: Context, reflection: Reflection, identifier:
 		// Then, split the rest of the longname into separate parts.
 		.split( /#|~|\./ );
 
-
-
-
 	// The last part of the longname may contain a colon, which can be either a part of the event name, or it indicates that the name
 	// targets a labeled signature.
 	const lastPart = parts.pop()!;
