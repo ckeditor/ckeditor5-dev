@@ -87,7 +87,8 @@ export default async function runCrawler( options ) {
 		concurrency: Cluster.CONCURRENCY_CONTEXT,
 		timeout: DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
 		maxConcurrency: concurrency,
-		puppeteerOptions
+		puppeteerOptions,
+		monitor: true
 	} );
 
 	await cluster.task( async ( { page, data } ) => {
