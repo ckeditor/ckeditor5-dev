@@ -62,14 +62,14 @@ interface CrawlerOptions {
 
 	/**
 	 * Whether the browser should ignore invalid (self-signed) certificates.
-	 * 
+	 *
 	 * @default false
 	 */
 	ignoreHTTPSErrors?: boolean;
 
 	/**
 	 * Whether to display the current progress or only the result.
-	 * 
+	 *
 	 * @default false
 	 */
 	noSpinner?: boolean;
