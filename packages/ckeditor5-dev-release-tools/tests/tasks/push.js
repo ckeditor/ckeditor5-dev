@@ -63,6 +63,6 @@ describe( 'push()', () => {
 
 		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledTimes( 2 );
 		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ 'release' ] );
-		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ '1.3.5' ] );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ 'v1.3.5' ] );
 	} );
 } );

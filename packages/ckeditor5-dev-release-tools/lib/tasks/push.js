@@ -22,7 +22,7 @@ export default async function push( options ) {
 		cwd = process.cwd()
 	} = options;
 
-	const command = `git push origin ${ shellEscape( [ releaseBranch ] ) } v${ shellEscape( [ version ] ) }`;
+	const command = `git push origin ${ shellEscape( [ releaseBranch ] ) } ${ shellEscape( [ 'v' + version ] ) }`;
 
 	return tools.shExec( command, { cwd, verbosity: 'error', async: true } );
 }
