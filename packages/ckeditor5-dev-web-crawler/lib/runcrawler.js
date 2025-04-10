@@ -11,12 +11,11 @@ import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
 import { getBaseUrl, toArray } from './utils.js';
-import { createSpinner, getProgressHandler } from './spinner.js';
+// import { createSpinner, getProgressHandler } from './spinner.js';
 
 import {
 	DEFAULT_CONCURRENCY,
 	DEFAULT_TIMEOUT,
-	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
 	DEFAULT_REMAINING_ATTEMPTS,
 	ERROR_TYPES,
 	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
@@ -48,7 +47,7 @@ export default async function runCrawler( options ) {
 		exclusions = [],
 		concurrency = DEFAULT_CONCURRENCY,
 		disableBrowserSandbox = false,
-		noSpinner = false,
+		// noSpinner = false,
 		ignoreHTTPSErrors = false
 	} = options;
 
@@ -76,27 +75,35 @@ export default async function runCrawler( options ) {
 		puppeteerOptions.args.push( '--disable-setuid-sandbox' );
 	}
 
-	const errors = new Map();
 	const foundLinks = [ url ];
-	const spinner = createSpinner( { noSpinner } );
+	const errors = new Map();
+	// const spinner = createSpinner( { noSpinner } );
 	const baseUrl = getBaseUrl( url );
 	const onError = getErrorHandler( errors );
-	const onProgress = getProgressHandler( spinner, { verbose: noSpinner } );
+	// const onProgress = getProgressHandler( spinner, { verbose: noSpinner } );
 
 	const cluster = await Cluster.launch( {
-		concurrency: Cluster.CONCURRENCY_CONTEXT,
-		timeout: DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
+		concurrency: Cluster.CONCURRENCY_PAGE,
+		timeout: DEFAULT_TIMEOUT,
+		retryLimit: DEFAULT_REMAINING_ATTEMPTS,
 		maxConcurrency: concurrency,
 		puppeteerOptions,
+		skipDuplicateUrls: true,
 		monitor: true
 	} );
 
-	await cluster.task( async ( { page, data } ) => {
-		const errors = [];
+	cluster.on( 'taskerror', ( err, data ) => {
+		errors.push( {
+			pageUrl: data.url,
+			type: ERROR_TYPES.PAGE_CRASH,
+			message: err.message ? `Error crawling ${ data.url }: ${ err.message }` : '(empty message)'
+		} );
+	} );
 
-		page.setDefaultTimeout( DEFAULT_TIMEOUT );
-		await page.setCacheEnabled( false );
+	await cluster.task( async ( { page, data } ) => {
 		await page.setRequestInterception( true );
+
+		const errors = [];
 
 		page.on( 'request', request => {
 			const resourceType = request.resourceType();
@@ -170,7 +177,7 @@ export default async function runCrawler( options ) {
 			}
 		} );
 
-		const session = await page.target().createCDPSession();
+		const session = await page.createCDPSession();
 
 		await session.send( 'Runtime.enable' );
 
@@ -187,9 +194,9 @@ export default async function runCrawler( options ) {
 			} );
 		} );
 
-		onProgress( {
-			total: foundLinks.length
-		} );
+		// onProgress( {
+		// 	total: foundLinks.length
+		// } );
 
 		try {
 			await page.goto( data.url, { waitUntil: [ 'load', 'networkidle0' ] } );
@@ -230,23 +237,21 @@ export default async function runCrawler( options ) {
 			cluster.queue( {
 				url: link,
 				parentUrl: data.parentUrl,
-				remainingNestedLevels: data.remainingNestedLevels - 1,
-				remainingAttempts: data.remainingAttempts
+				remainingNestedLevels: data.remainingNestedLevels - 1
 			} );
 		} );
 	} );
 
-	spinner.start( 'Checking pages…' );
+	// spinner.start( 'Checking pages…' );
 
 	// Queue the first link to be crawled.
 	cluster.queue( {
 		url,
 		parentUrl: '(none)',
-		remainingNestedLevels: depth,
-		remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
+		remainingNestedLevels: depth
 	} );
 
-	spinner.succeed( `Checking pages… ${ chalk.bold( 'Done' ) }` );
+	// spinner.succeed( `Checking pages… ${ chalk.bold( 'Done' ) }` );
 
 	await cluster.idle();
 	await cluster.close();
@@ -308,7 +313,7 @@ async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
 		.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
 	];
 
-	return ( await page.$$eval( `body a[href]:not([${ DATA_ATTRIBUTE_NAME }])`, evaluatePage ) )
+	return ( await page.$$eval( `body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`, evaluatePage ) )
 		.filter( link => {
 			// Skip external link.
 			if ( !link.startsWith( baseUrl ) ) {
@@ -474,7 +479,6 @@ function logErrors( errors ) {
  * @property {string} parentUrl The page on which the link was found.
  * @property {number} remainingNestedLevels The remaining number of nested levels to be checked. If this value is 0, the
  * requested traversing depth has been reached and nested links from the URL associated with this link are not collected anymore.
- * @property {number} remainingAttempts The total number of reopenings allowed for the given link.
  */
 
 /**
