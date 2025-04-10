@@ -16,14 +16,26 @@
     "node": ">=20.0.0",
     "npm": ">=5.7.1"
   },
-  "main": "lib/index.js",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js"
+  },
   "dependencies": {
     "chalk": "^5.0.0",
     "puppeteer": "^24.6.0",
     "puppeteer-cluster": "^0.24.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.9.5",
+    "typescript": "^5.6.0",
+    "upath": "^2.0.1"
   }
 }

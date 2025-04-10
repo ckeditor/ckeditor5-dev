@@ -11,6 +11,7 @@ import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
 import { getBaseUrl, toArray } from './utils.js';
+import type { LaunchOptions, Page } from 'puppeteer';
 
 import {
 	DEFAULT_CONCURRENCY,
@@ -20,32 +21,74 @@ import {
 	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
-	DATA_ATTRIBUTE_NAME
+	DATA_ATTRIBUTE_NAME,
+	type ErrorType
 } from './constants.js';
 
+interface CrawlerOptions {
+	/**
+	 * The URL to start crawling. This argument is required.
+	 */
+	url: string;
+
+	/**
+	 * Defines how many nested page levels should be examined. Infinity by default.
+	 *
+	 * @default Infinity
+	 */
+	depth?: number;
+
+	/**
+	 * An array of patterns to exclude links. Empty array by default to not exclude anything.
+	 *
+	 * @default []
+	 */
+	exclusions?: Array<string>;
+
+	/**
+	 * Number of concurrent pages (browser tabs) to be used during crawling. One by default.
+	 *
+	 * @default Half of the number of CPU cores.
+	 */
+	concurrency?: number;
+
+	/**
+	 * Whether the browser should be created with the `--no-sandbox` flag.
+	 *
+	 * @default false
+	 */
+	disableBrowserSandbox?: boolean;
+}
+
+interface CrawlerError {
+	pageUrl: string;
+	type: (typeof ERROR_TYPES)[keyof typeof ERROR_TYPES];
+	message: string;
+	failedResourceUrl?: string;
+	ignored?: boolean;
+}
+
+interface QueueData {
+	url: string;
+	parentUrl: string;
+	remainingNestedLevels: number;
+}
+
+interface ErrorCollection {
+	pages: Set<string>;
+	details?: string;
+}
+
 /**
- * Main crawler function. Its purpose is to:
- * - create Puppeteer's browser instance,
- * - open simultaneously (up to concurrency limit) links from the provided URL in a dedicated Puppeteer's page for each link,
- * - show error summary after all links have been visited.
- *
- * @param {object} options Parsed CLI arguments.
- * @param {string} options.url The URL to start crawling. This argument is required.
- * @param {number} [options.depth=Infinity] Defines how many nested page levels should be examined. Infinity by default.
- * @param {Array.<string>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @param {number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
- * @param {boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
- * @param {boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
- * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
+ * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.
  */
-export default async function runCrawler( options ) {
+export default async function runCrawler( options: CrawlerOptions ): Promise<void> {
 	const {
 		url,
 		depth = Infinity,
 		exclusions = [],
 		concurrency = DEFAULT_CONCURRENCY,
-		disableBrowserSandbox = false,
-		ignoreHTTPSErrors = false
+		disableBrowserSandbox = false
 	} = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler…\n' ) );
@@ -62,22 +105,21 @@ export default async function runCrawler( options ) {
 	} );
 
 	const puppeteerOptions = {
-		args: [],
-		headless: true,
-		ignoreHTTPSErrors
-	};
+		args: [] as Array<string>,
+		headless: true
+	} satisfies LaunchOptions;
 
 	if ( disableBrowserSandbox ) {
 		puppeteerOptions.args.push( '--no-sandbox' );
 		puppeteerOptions.args.push( '--disable-setuid-sandbox' );
 	}
 
-	const foundLinks = [ url ];
-	const errors = new Map();
+	const foundLinks: Array<string> = [ url ];
+	const errors: Map<ErrorType, Map<string, ErrorCollection>> = new Map();
 	const baseUrl = getBaseUrl( url );
 	const onError = getErrorHandler( errors );
 
-	const cluster = await Cluster.launch( {
+	const cluster: Cluster<QueueData, void> = await Cluster.launch( {
 		concurrency: Cluster.CONCURRENCY_PAGE,
 		timeout: DEFAULT_TIMEOUT,
 		retryLimit: DEFAULT_REMAINING_ATTEMPTS,
@@ -88,7 +130,7 @@ export default async function runCrawler( options ) {
 	} );
 
 	cluster.on( 'taskerror', ( err, data ) => {
-		errors.push( {
+		onError( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
 			message: err.message ? `Error crawling ${ data.url }: ${ err.message }` : '(empty message)'
@@ -98,7 +140,7 @@ export default async function runCrawler( options ) {
 	await cluster.task( async ( { page, data } ) => {
 		await page.setRequestInterception( true );
 
-		const errors = [];
+		const pageErrors: Array<CrawlerError> = [];
 
 		page.on( 'request', request => {
 			const resourceType = request.resourceType();
@@ -113,14 +155,14 @@ export default async function runCrawler( options ) {
 
 		page.on( 'dialog', dialog => dialog.dismiss() );
 
-		page.on( ERROR_TYPES.PAGE_CRASH.event, error => errors.push( {
+		page.on( ERROR_TYPES.PAGE_CRASH.event, error => pageErrors.push( {
 			pageUrl: page.url(),
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: error.message || '(empty message)'
+			message: ( error as Error ).message || '(empty message)'
 		} ) );
 
 		page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
-			const errorText = request.failure().errorText;
+			const errorText = request.failure()?.errorText;
 
 			if ( request.response()?.ok() && request.method() === 'POST' ) {
 				// Ignore a false positive due to a bug in Puppeteer.
@@ -137,7 +179,7 @@ export default async function runCrawler( options ) {
 					`Failed to open link ${ chalk.bold( url ) }` :
 					`Failed to load resource from ${ chalk.bold( host ) }`;
 
-				errors.push( {
+				pageErrors.push( {
 					pageUrl: isNavigation ? data.parentUrl : page.url(),
 					type: ERROR_TYPES.REQUEST_FAILURE,
 					message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
@@ -157,7 +199,7 @@ export default async function runCrawler( options ) {
 					`Failed to open link ${ chalk.bold( url ) }` :
 					`Failed to load resource from ${ chalk.bold( host ) }`;
 
-				errors.push( {
+				pageErrors.push( {
 					pageUrl: isNavigation ? data.parentUrl : page.url(),
 					type: ERROR_TYPES.RESPONSE_FAILURE,
 					message: `${ message } (HTTP response status code: ${ chalk.bold( responseStatus ) })`,
@@ -176,7 +218,7 @@ export default async function runCrawler( options ) {
 				event.exceptionDetails.text ||
 				'(No description provided)';
 
-			errors.push( {
+			pageErrors.push( {
 				pageUrl: page.url(),
 				type: ERROR_TYPES.CONSOLE_ERROR,
 				message
@@ -186,14 +228,14 @@ export default async function runCrawler( options ) {
 		try {
 			await page.goto( data.url, { waitUntil: [ 'load', 'networkidle0' ] } );
 		} catch ( error ) {
-			const errorMessage = error.message || '(empty message)';
+			const errorMessage = ( error as Error ).message || '(empty message)';
 
 			// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
 			// not be also reported as the "navigation error".
 			const ignoredMessage = 'net::';
 
 			if ( !errorMessage.startsWith( ignoredMessage ) ) {
-				errors.push( {
+				pageErrors.push( {
 					pageUrl: data.url,
 					type: ERROR_TYPES.NAVIGATION_ERROR,
 					message: errorMessage
@@ -205,9 +247,9 @@ export default async function runCrawler( options ) {
 		const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
 
 		// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
-		markErrorsAsIgnored( errors, errorIgnorePatterns );
+		markErrorsAsIgnored( pageErrors, errorIgnorePatterns );
 
-		errors
+		pageErrors
 			.filter( error => !error.ignored )
 			.forEach( error => onError( error ) );
 
@@ -246,11 +288,8 @@ export default async function runCrawler( options ) {
 
 /**
  * Returns an error handler, which is called every time new error is found.
- *
- * @param {Map.<ErrorType, ErrorCollection>} errors All errors grouped by their type.
- * @returns {Function} Error handler.
  */
-function getErrorHandler( errors ) {
+function getErrorHandler( errors: Map<ErrorType, Map<string, ErrorCollection>> ): ( error: CrawlerError ) => void {
 	return error => {
 		if ( !errors.has( error.type ) ) {
 			errors.set( error.type, new Map() );
@@ -262,10 +301,10 @@ function getErrorHandler( errors ) {
 		// contexts (so in a different call stacks). In order not to duplicate almost the same errors, we need to determine their common
 		// part.
 		const messageLines = error.message.split( '\n' );
-		const firstMessageLine = messageLines.shift();
+		const firstMessageLine = messageLines.shift()!;
 		const nextMessageLines = messageLines.join( '\n' );
 
-		const errorCollection = errors.get( error.type );
+		const errorCollection = errors.get( error.type )!;
 
 		if ( !errorCollection.has( firstMessageLine ) ) {
 			errorCollection.set( firstMessageLine, {
@@ -275,27 +314,24 @@ function getErrorHandler( errors ) {
 			} );
 		}
 
-		errorCollection.get( firstMessageLine ).pages.add( error.pageUrl );
+		errorCollection.get( firstMessageLine )!.pages.add( error.pageUrl );
 	};
 }
 
 /**
  * Finds all links in opened page and filters out external, already discovered and explicitly excluded ones.
- *
- * @param {object} page The page instance from Puppeteer.
- * @param {object} data All data needed for crawling the link.
- * @param {string} data.baseUrl The base URL from the initial page URL.
- * @param {Array.<string>} data.foundLinks An array of all links, which have been already discovered.
- * @param {Array.<string>} data.exclusions An array patterns to exclude links. Empty array by default to not exclude anything.
- * @returns {Promise.<Array.<string>>} A promise, which resolves to an array of unique links.
  */
-async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
-	const evaluatePage = anchors => [ ...new Set( anchors
-		.filter( anchor => /http(s)?:/.test( anchor.protocol ) )
-		.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
-	];
-
-	const links = await page.$$eval( `body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`, evaluatePage );
+async function getLinksFromPage(
+	page: Page,
+	{ baseUrl, foundLinks, exclusions }: { baseUrl: string; foundLinks: Array<string>; exclusions: Array<string> }
+): Promise<Array<string>> {
+	const links = await page.$$eval(
+		`body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`,
+		anchors => [ ...new Set( anchors
+			.filter( anchor => /http(s)?:/.test( anchor.protocol ) )
+			.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
+		]
+	);
 
 	return links.filter( link => {
 		return link.startsWith( baseUrl ) && // Skip external link.
@@ -306,11 +342,8 @@ async function getLinksFromPage( page, { baseUrl, foundLinks, exclusions } ) {
 
 /**
  * Finds all meta tags, that contain a pattern to ignore errors, and then returns a map between error type and these patterns.
- *
- * @param {object} page The page instance from Puppeteer.
- * @returns {Promise.<Map.<ErrorType, Set.<string>>>} A promise, which resolves to a map between an error type and a set of patterns.
  */
-async function getErrorIgnorePatternsFromPage( page ) {
+async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorType, Set<string>>> {
 	const metaTag = await page.$( `head > meta[name=${ META_TAG_NAME }]` );
 
 	const patterns = new Map();
@@ -344,7 +377,7 @@ async function getErrorIgnorePatternsFromPage( page ) {
 			return;
 		}
 
-		const errorType = PATTERN_TYPE_TO_ERROR_TYPE_MAP[ type ];
+		const errorType = PATTERN_TYPE_TO_ERROR_TYPE_MAP[ type as keyof typeof PATTERN_TYPE_TO_ERROR_TYPE_MAP ];
 
 		patterns.set( errorType, patternCollection );
 	} );
@@ -354,37 +387,24 @@ async function getErrorIgnorePatternsFromPage( page ) {
 
 /**
  * Iterates over all found errors from given link and marks errors as ignored, if their message match the ignore pattern.
- *
- * @param {Array.<Error>} errors An array of errors to check.
- * @param {Map.<ErrorType, Set.<string>>} errorIgnorePatterns A map between an error type and a set of patterns.
  */
-function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
+function markErrorsAsIgnored( errors: Array<CrawlerError>, errorIgnorePatterns: Map<ErrorType, Set<string>> ): void {
 	errors.forEach( error => {
 		// Skip, if there is no pattern defined for currently examined error type.
 		if ( !errorIgnorePatterns.has( error.type ) ) {
 			return;
 		}
 
-		const patterns = [ ...errorIgnorePatterns.get( error.type ) ];
-
-		const isPatternMatched = pattern => {
-			if ( pattern === IGNORE_ALL_ERRORS_WILDCARD ) {
-				return true;
-			}
-
-			if ( util.stripVTControlCharacters( error.message ).includes( pattern ) ) {
-				return true;
-			}
-
-			if ( error.failedResourceUrl && error.failedResourceUrl.includes( pattern ) ) {
-				return true;
-			}
-
-			return false;
-		};
-
 		// If at least one pattern matches the error message, mark currently examined error as ignored.
-		if ( patterns.some( isPatternMatched ) ) {
+		const isIgnored = Array
+			.from( errorIgnorePatterns.get( error.type )! )
+			.some( pattern => {
+				return pattern === IGNORE_ALL_ERRORS_WILDCARD ||
+					util.stripVTControlCharacters( error.message ).includes( pattern ) ||
+					error.failedResourceUrl?.includes( pattern );
+			} );
+
+		if ( isIgnored ) {
 			error.ignored = true;
 		}
 	} );
@@ -393,20 +413,15 @@ function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 /**
  * Checks, if HTTP request was a navigation one, i.e. request that is driving frame's navigation. Requests sent from child frames
  * (i.e. from <iframe>) are not treated as a navigation. Only a request from a top-level frame is navigation.
- *
- * @param {object} request The Puppeteer's HTTP request instance.
- * @returns {boolean}
  */
-function isNavigationRequest( request ) {
+function isNavigationRequest( request: any ): boolean {
 	return request.isNavigationRequest() && request.frame().parentFrame() === null;
 }
 
 /**
  * Analyzes collected errors and logs them in the console.
- *
- * @param {Map.<ErrorType, ErrorCollection>} errors All found errors grouped by their type.
  */
-function logErrors( errors ) {
+function logErrors( errors: Map<ErrorType, Map<string, ErrorCollection>> ): void {
 	if ( !errors.size ) {
 		console.log( chalk.green.bold( '\n✨ No errors have been found.\n' ) );
 		return;
@@ -442,43 +457,3 @@ function logErrors( errors ) {
 	// Blank message only to separate the errors output log.
 	console.log();
 }
-
-/**
- * @typedef {Object.<string, String|Number>} Link
- * @property {string} url The URL associated with the link.
- * @property {string} parentUrl The page on which the link was found.
- * @property {number} remainingNestedLevels The remaining number of nested levels to be checked. If this value is 0, the
- * requested traversing depth has been reached and nested links from the URL associated with this link are not collected anymore.
- */
-
-/**
- * @typedef {Object.<string, String>} ErrorType
- * @property {string} [event] The event name emitted by Puppeteer.
- * @property {string} description Human-readable description of the error.
- */
-
-/**
- * @typedef {Object.<string, String|Boolean|ErrorType>} Error
- * @property {string} pageUrl The URL, where error has occurred.
- * @property {ErrorType} type Error type.
- * @property {string} message Error message.
- * @property {string} [failedResourceUrl] Full resource URL, that has failed. Necessary for matching against exclusion patterns.
- * @property {boolean} [ignored] Indicates that error should be ignored, because its message matches the exclusion pattern.
- */
-
-/**
- * @typedef {Object.<string, Set.<string>>} ErrorOccurrence
- * @property {Set.<string>} pages A set of unique pages, where error has been found.
- * @property {Set.<string>} [details] Additional error details (i.e. an error stack).
- */
-
-/**
- * @typedef {Map.<string, ErrorOccurrence>} ErrorCollection
- * @property {ErrorOccurrence} [*] Error message.
- */
-
-/**
- * @typedef {Object.<string, Array.<string>>} ErrorsAndLinks Collection of unique errors and links.
- * @property {Array.<string>} errors An array of errors.
- * @property {Array.<string>} links An array of links.
- */
