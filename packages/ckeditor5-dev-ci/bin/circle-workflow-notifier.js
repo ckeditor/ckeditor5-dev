@@ -10,6 +10,7 @@
 import { execSync } from 'child_process';
 import minimist from 'minimist';
 import processJobStatuses from '../lib/process-job-statuses.js';
+import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
 
 // This script allows the creation of a new job within a workflow that will be executed
 // in the end, when all other jobs will be finished or errored.
@@ -81,16 +82,14 @@ async function waitForOtherJobsAndSendNotification() {
 	const jobs = processJobStatuses( await getOtherJobsData() )
 		.filter( job => !ignore.includes( job.name ) );
 
-	const workflowFinished = jobs.every( job => [ 'success', 'failed', 'failed_parent' ].includes( job.status ) );
-
-	// If any ignored job failed, all of its children will be marked as 'failed_parent', and thus will not trigger this check.
-	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
-
-	if ( !workflowFinished ) {
+	if ( !isWorkflowFinished( jobs ) ) {
 		await new Promise( r => setTimeout( r, 30 * 1000 ) );
 
 		return waitForOtherJobsAndSendNotification();
 	}
+
+	// If any ignored job failed, all of its children will be marked as 'failed_parent', and thus will not trigger this check.
+	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
 
 	if ( anyJobsFailed ) {
 		return execSync( task, { stdio: 'inherit' } );
