@@ -10,6 +10,7 @@
 import { cpus } from 'os';
 
 export interface ErrorType {
+
 	/**
 	 * The event name emitted by Puppeteer.
 	 */

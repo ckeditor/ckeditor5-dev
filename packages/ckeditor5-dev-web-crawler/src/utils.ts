@@ -31,6 +31,6 @@ export function isUrlValid( url: string ): boolean {
 /**
  * Transforms any value to an array. If the provided value is already an array, it is returned unchanged.
  */
-export function toArray<T extends unknown>( data: T ): Array<T> {
+export function toArray( data: any ): Array<any> {
 	return Array.isArray( data ) ? data : [ data ];
 }

@@ -26,6 +26,7 @@ import {
 } from './constants.js';
 
 interface CrawlerOptions {
+
 	/**
 	 * The URL to start crawling. This argument is required.
 	 */
