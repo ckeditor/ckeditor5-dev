@@ -19,13 +19,13 @@ import {
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocTagEvent } from '../../lib/index.js';
 
-const assertEventExists = ( events: Array<DeclarationReflection>, eventName: string ) => {
+function assertEventExists( events: Array<DeclarationReflection>, eventName: string ) {
 	const event = events.find( event => {
 		return event.name === eventName;
 	} );
 
 	expect( event, eventName ).to.not.be.undefined;
-};
+}
 
 describe( 'typedoc-plugins/tag-event', () => {
 	let conversionResult: ProjectReflection,

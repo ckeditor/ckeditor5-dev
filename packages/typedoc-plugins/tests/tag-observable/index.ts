@@ -22,7 +22,7 @@ type AssertObservableExistsType = {
 	observableName: string;
 };
 
-const assertObservableExists = ( { reflections, parentName, observableName }: AssertObservableExistsType ) => {
+function assertObservableExists( { reflections, parentName, observableName }: AssertObservableExistsType ) {
 	const observable = reflections.find( ref => {
 		const ownerReflection = ref.kind === ReflectionKind.Property ? ref.parent! : ref.parent!.parent!;
 
@@ -30,7 +30,7 @@ const assertObservableExists = ( { reflections, parentName, observableName }: As
 	} );
 
 	expect( observable, `"${ observableName }" not found in "${ parentName }"` ).to.not.be.undefined;
-};
+}
 
 describe( 'typedoc-plugins/tag-observable', function() {
 	let conversionResult: ProjectReflection;
