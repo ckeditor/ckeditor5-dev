@@ -9,6 +9,36 @@
 
 import { cpus } from 'os';
 
+export interface ErrorType {
+
+	/**
+	 * The event name emitted by Puppeteer.
+	 */
+	event?: string;
+
+	/**
+	 * Human-readable description of the error.
+	 */
+	description: string;
+}
+
+/**
+ * Errors from the following hosts will be ignored.
+ */
+export const IGNORED_HOSTS = [
+	'ucarecdn.com',
+	'fury.io',
+	'shields.io',
+	'coveralls.io',
+	'spotify.com',
+	'vimeo.com',
+	'facebook.com',
+	'challenges.cloudflare.com',
+	'svc.webspellchecker.net',
+	'binance.com',
+	'jsfiddle.net'
+];
+
 export const DEFAULT_CONCURRENCY = cpus().length / 2;
 
 export const DEFAULT_TIMEOUT = 15 * 1000;
@@ -21,10 +51,6 @@ export const ERROR_TYPES = {
 	PAGE_CRASH: {
 		event: 'error',
 		description: 'Page crash'
-	},
-	UNCAUGHT_EXCEPTION: {
-		event: 'pageerror',
-		description: 'Uncaught exception'
 	},
 	REQUEST_FAILURE: {
 		event: 'requestfailed',
@@ -43,16 +69,15 @@ export const ERROR_TYPES = {
 		// event, but it is thrown as exception from page.goto() method.
 		description: 'Navigation error'
 	}
-};
+} as const satisfies Record<string, ErrorType>;
 
 export const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
 	'page-crash': ERROR_TYPES.PAGE_CRASH,
-	'uncaught-exception': ERROR_TYPES.UNCAUGHT_EXCEPTION,
 	'request-failure': ERROR_TYPES.REQUEST_FAILURE,
 	'response-failure': ERROR_TYPES.RESPONSE_FAILURE,
 	'console-error': ERROR_TYPES.CONSOLE_ERROR,
 	'navigation-error': ERROR_TYPES.NAVIGATION_ERROR
-};
+} as const satisfies Record<string, ErrorType>;
 
 export const IGNORE_ALL_ERRORS_WILDCARD = '*';
 
