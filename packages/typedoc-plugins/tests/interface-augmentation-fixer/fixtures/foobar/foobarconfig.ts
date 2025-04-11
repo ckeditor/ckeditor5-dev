@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { FooConfig } from '..';
-
 /**
  * @module interface-augmentation/foobar
  */
+
+import type { FooConfig } from '..';
 
 // Module augmentation that points to the actual interface source file.
 declare module '../foo/fooconfig' {

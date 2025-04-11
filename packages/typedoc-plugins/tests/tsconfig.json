@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "lib": [
-      "DOM"
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ],
     "noImplicitAny": true,
     "noImplicitOverride": true,

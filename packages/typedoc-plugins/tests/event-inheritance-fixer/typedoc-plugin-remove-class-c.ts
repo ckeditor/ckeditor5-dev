@@ -3,9 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { Converter, ReflectionKind } = require( 'typedoc' );
+import {
+	Converter,
+	ReflectionKind,
+	type Context,
+	type Application
+} from 'typedoc';
 
 /**
  * The `typedoc-plugin-remove-class-c` is for TESTING PURPOSES ONLY. It removes the class reflection if its name is "ClassC".
@@ -18,13 +21,11 @@ const { Converter, ReflectionKind } = require( 'typedoc' );
  * This plugin was created to simulate dynamically removed reflections while generating the API documentation, similarly to the
  * "typedoc-plugin-purge-private-api-docs".
  */
-module.exports = {
-	load( app ) {
-		app.converter.on( Converter.EVENT_END, onEventEnd );
-	}
-};
+export default function( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd );
+}
 
-function onEventEnd( context ) {
+function onEventEnd( context: Context ) {
 	const classReflections = context.project.getReflectionsByKind( ReflectionKind.Class );
 
 	for ( const classReflection of classReflections ) {
