@@ -38,8 +38,6 @@ export default defineConfig( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
 		} ),
-		typescript( {
-			rootDir: './src'
-		} )
+		typescript()
 	]
 } );
