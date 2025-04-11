@@ -13,3 +13,4 @@ export { default as typeDocTagError } from './tag-error/index.js';
 export { default as typeDocTagEvent } from './tag-event/index.js';
 export { default as typeDocTagObservable } from './tag-observable/index.js';
 export { default as typeDocEventParamFixer } from './event-param-fixer/index.js';
+export { default as typeDocEventInheritanceFixer } from './event-inheritance-fixer/index.js';

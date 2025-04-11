@@ -36,7 +36,7 @@ function onEventEnd( context: Context ) {
 	const eventInfoClassReference = ReferenceType.createResolvedReference( 'EventInfo', eventInfoClass, context.project );
 
 	// Get all event reflections.
-	const events = context.project.getReflectionsByKind( ReflectionKind.ClassOrInterface )
+	const events = context.project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Interface )
 		.flatMap( ref => ref.ckeditor5Events || [] ) as Array<DeclarationReflection>;
 
 	for ( const eventReflection of events ) {

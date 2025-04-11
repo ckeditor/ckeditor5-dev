@@ -114,7 +114,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			eventInfoClass: DeclarationReflection;
 
 		beforeAll( () => {
-			const eventDefinitions = conversionResult.getReflectionsByKind( ReflectionKind.ClassOrInterface )
+			const eventDefinitions = conversionResult.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Interface )
 				.flatMap( ref => ref.ckeditor5Events || [] ) as Array<DeclarationReflection>;
 
 			expect( eventDefinitions ).to.lengthOf( 5 );
