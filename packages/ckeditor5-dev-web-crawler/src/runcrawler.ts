@@ -10,6 +10,7 @@
 import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
+import { getAllLinks } from './getlinks.js';
 import { getBaseUrl, toArray } from './utils.js';
 import type { LaunchOptions, Page } from 'puppeteer';
 
@@ -353,13 +354,7 @@ async function getLinksFromPage(
 	page: Page,
 	{ baseUrl, foundLinks, exclusions }: { baseUrl: string; foundLinks: Array<string>; exclusions: Array<string> }
 ): Promise<Array<string>> {
-	const links = await page.$$eval(
-		`body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`,
-		anchors => [ ...new Set( anchors
-			.filter( anchor => /http(s)?:/.test( anchor.protocol ) )
-			.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
-		]
-	);
+	const links = await page.evaluate( getAllLinks, DATA_ATTRIBUTE_NAME );
 
 	return links.filter( link => {
 		return link.startsWith( baseUrl ) && // Skip external link.
@@ -387,7 +382,7 @@ async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorTy
 
 	try {
 		// Try to parse value from meta tag...
-		content = JSON.parse( contentString );
+		content = JSON.parse( contentString as any );
 	} catch ( error ) {
 		// ...but if it is not a valid JSON, return an empty map.
 		return patterns;
