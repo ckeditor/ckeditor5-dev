@@ -15,3 +15,4 @@ export { default as typeDocTagObservable } from './tag-observable/index.js';
 export { default as typeDocEventParamFixer } from './event-param-fixer/index.js';
 export { default as typeDocEventInheritanceFixer } from './event-inheritance-fixer/index.js';
 export { default as typeDocInterfaceAugmentationFixer } from './interface-augmentation-fixer/index.js';
+export { default as typeDocPurgePrivateApiDocs } from './purge-private-api-docs/index.js';

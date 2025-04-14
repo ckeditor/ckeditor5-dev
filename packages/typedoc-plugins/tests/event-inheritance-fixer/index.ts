@@ -19,7 +19,7 @@ import {
 	typeDocEventInheritanceFixer
 } from '../../lib/index.js';
 
-import typeDocRemoveClassC from './typedoc-plugin-remove-class-c.js';
+import typeDocRemoveClassC from './utils/typedoc-plugin-remove-class-c.js';
 
 describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	let conversionResult: ProjectReflection,

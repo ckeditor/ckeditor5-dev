@@ -50,6 +50,10 @@ describe( 'typedoc-plugins/tag-observable', function() {
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			],
+			// TODO: To resolve types.
+			// @ts-expect-error TS2322
+			// Type 'boolean' is not assignable to type 'string'.
+			// For unknown reasons `excludePrivate` type is resolved as `string`.
 			excludePrivate: false
 		} );
 
