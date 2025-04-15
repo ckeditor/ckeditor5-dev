@@ -296,7 +296,10 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		} );
 
 		try {
-			await page.goto( data.url, { waitUntil: 'load' } );
+			// `networkidle0` forces loading CKEditor snippets. API pages to not contain them, so let's speed up.
+			const waitUntil = data.url.includes( '/api/' ) ? 'load' : 'networkidle0';
+
+			await page.goto( data.url, { waitUntil } );
 		} catch ( error ) {
 			const errorMessage = ( error as Error ).message || '(empty message)';
 
