@@ -30,7 +30,7 @@
     "rollup": "^4.9.5",
     "typedoc": "^0.28.1",
     "typedoc-plugin-rename-defaults": "^0.7.3",
-    "typescript": "^5.0.4",
+    "typescript": "5.0.4",
     "upath": "^2.0.1",
     "vitest": "^2.0.5"
   },
