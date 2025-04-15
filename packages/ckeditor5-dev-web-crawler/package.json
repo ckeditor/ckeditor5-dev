@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-web-crawler",
-  "version": "47.1.0",
+  "version": "47.1.1",
   "description": "Used to run a web crawler that checks for errors on specified pages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -16,15 +16,27 @@
     "node": ">=20.0.0",
     "npm": ">=5.7.1"
   },
-  "main": "lib/index.js",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch"
+  },
   "dependencies": {
     "chalk": "^5.0.0",
-    "ora": "^8.0.0",
-    "puppeteer": "^19.7.5",
-    "strip-ansi": "^7.0.0"
+    "puppeteer": "^24.6.0",
+    "puppeteer-cluster": "^0.24.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.9.5",
+    "typescript": "^5.6.0",
+    "upath": "^2.0.1"
   }
 }

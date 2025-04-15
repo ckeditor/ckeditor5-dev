@@ -1,6 +1,40 @@
 Changelog
 =========
 
+## [47.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v47.1.0...v47.1.1) (2025-04-03)
+
+### Bug fixes
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Prioritize `.ts` over `.js` files. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/747f9f3ef1ed0bcac2becf6a97198692e89efbe8))
+
+### Other changes
+
+* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Added the Belarusian language to the supported list. Closes [ckeditor/ckeditor5#18229](https://github.com/ckeditor/ckeditor5/issues/18229). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9b346cbea65a47ad21afd70a7325de638e1164ed))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/47.1.1): v47.1.0 => v47.1.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/47.1.1): v47.1.0 => v47.1.1
+</details>
+
+
 ## [47.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v47.0.0...v47.1.0) (2025-03-19)
 
 ### Features
@@ -132,37 +166,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/46.0.7): v46.0.6 => v46.0.7
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/46.0.7): v46.0.6 => v46.0.7
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/46.0.7): v46.0.6 => v46.0.7
-</details>
-
-
-## [46.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/v46.0.5...v46.0.6) (2025-02-26)
-
-### Other changes
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Added support for providing custom current working directory. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/65a3b40142ede24c581dcd4fa3e65706de35ad33))
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Do not start generating UMD build if both `browser` and `name` parameters are missing, because both are required. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/65a3b40142ede24c581dcd4fa3e65706de35ad33))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/46.0.6): v46.0.5 => v46.0.6
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/46.0.6): v46.0.5 => v46.0.6
 </details>
 
 ---

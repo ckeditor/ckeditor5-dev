@@ -420,5 +420,103 @@ describe( 'lib/process-job-statuses', () => {
 
 			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
+
+		describe( 'status=skipped', () => {
+			// Workflow:
+			// ┌─────┐
+			// │Job A│
+			// └─────┘
+			it( 'should not modify status of a single skipped job', () => {
+				const jobs = [
+					{
+						id: 'id1',
+						status: 'skipped',
+						dependencies: []
+					}
+				];
+
+				const expectedOutput = [
+					{
+						id: 'id1',
+						status: 'skipped',
+						dependencies: []
+					}
+				];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+
+			// Workflow:
+			// ┌────┐     ┌────┐
+			// │Id 1├────►│Id 2│
+			// └────┘     └────┘
+			it( 'should not modify job whose parent has status "running"', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'running',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'skipped',
+					dependencies: [ 'id1' ]
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'running',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'skipped',
+					dependencies: [ 'id1' ]
+				} ];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+
+			// Workflow:
+			// ┌────┐     ┌────┐     ┌────┐     ┌────┐
+			// │Id 1├────►│Id 2│────►│Id 3│────►│Id 4│
+			// └────┘     └────┘     └────┘     └────┘
+			it( 'should set status to "failed_parent" for all jobs (including skipped one) following parent with status "failed"', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'blocked',
+					dependencies: [ 'id1' ]
+				}, {
+					id: 'id3',
+					status: 'blocked',
+					dependencies: [ 'id2' ]
+				}, {
+					id: 'id4',
+					status: 'skipped',
+					dependencies: [ 'id3' ]
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'failed_parent',
+					dependencies: [ 'id1' ]
+				}, {
+					id: 'id3',
+					status: 'failed_parent',
+					dependencies: [ 'id2' ]
+				}, {
+					id: 'id4',
+					status: 'failed_parent',
+					dependencies: [ 'id3' ]
+				} ];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+		} );
 	} );
 } );
