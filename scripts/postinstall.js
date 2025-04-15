@@ -37,5 +37,10 @@ const ROOT_DIRECTORY = path.join( __dirname, '..' );
 			cwd: path.join( ROOT_DIRECTORY, 'packages', 'typedoc-plugins' ),
 			stdio: 'inherit'
 		} );
+
+		execSync( 'npm run build', {
+			cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-web-crawler' ),
+			stdio: 'inherit'
+		} );
 	}
 } )();
