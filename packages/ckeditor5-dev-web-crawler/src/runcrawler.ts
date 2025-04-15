@@ -10,6 +10,7 @@
 import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
+import { getAllLinks } from './getlinks.js';
 import { getBaseUrl, toArray } from './utils.js';
 import type { LaunchOptions, Page } from 'puppeteer';
 
@@ -73,7 +74,7 @@ interface CrawlerOptions {
 	 *
 	 * @default false
 	 */
-	noSpinner?: boolean;
+	silent?: boolean;
 }
 
 interface CrawlerError {
@@ -106,24 +107,26 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		concurrency = DEFAULT_CONCURRENCY,
 		disableBrowserSandbox = false,
 		ignoreHTTPSErrors = false,
-		noSpinner = false
+		silent = false
 	} = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler…\n' ) );
 
-	process.on( 'unhandledRejection', reason => {
-		const error = util.inspect( reason, {
-			breakLength: Infinity,
-			compact: true
-		} );
-
-		console.log( chalk.red.bold( `\n🔥 Caught the \`unhandledRejection\` error: ${ error }\n` ) );
-
-		process.exit( 1 );
-	} );
-
 	const puppeteerOptions = {
-		args: [] as Array<string>,
+		args: [
+			'--disable-extensions', // Disables all browser extensions.
+			'--disable-plugins', // Disables all plugins.
+			'--disable-gpu', // Disables GPU hardware acceleration.
+			'--disable-software-rasterizer', // Disables software fallback for GPU rendering.
+			'--disable-renderer-backgrounding', // Prevents throttling of background tabs renderers.
+			'--disable-background-timer-throttling', // Stops throttling of JavaScript timers in background tabs.
+			'--disable-backgrounding-occluded-windows', // Avoids deprioritizing windows that are not visible.
+			'--disable-sync', // Disables browser sync services.
+			'--disable-translate', // Disables built-in translation features.
+			'--disable-infobars', // Hides infobars (e.g., automation warnings).
+			'--no-first-run', // Skips first run tasks and setup dialogs.
+			'--no-default-browser-check' // Prevents default browser check at startup.
+		],
 		headless: true,
 		acceptInsecureCerts: ignoreHTTPSErrors
 	} satisfies LaunchOptions;
@@ -145,7 +148,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		maxConcurrency: concurrency,
 		puppeteerOptions,
 		skipDuplicateUrls: true,
-		monitor: !noSpinner
+		monitor: !silent
 	} );
 
 	cluster.on( 'taskerror', ( err, data ) => {
@@ -162,22 +165,39 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		const pageErrors: Array<CrawlerError> = [];
 
 		page.on( 'request', request => {
+			const url = request.url();
 			const resourceType = request.resourceType();
 
-			// Block all 'media' requests, as they are likely to fail anyway due to limitations in Puppeteer.
 			if ( resourceType === 'media' ) {
-				request.abort( 'blockedbyclient' );
-			} else {
-				request.continue();
+				// Block all 'media' requests, as they are likely to fail anyway due to limitations in Puppeteer.
+				return request.abort( 'blockedbyclient' );
 			}
+
+			if ( url.includes( 'visualwebsiteoptimizer' ) ) {
+				// We don't need this when doing testing.
+				return request.abort( 'blockedbyclient' );
+			}
+
+			if ( url.endsWith( 'api.json' ) ) {
+				// This file is huge and loaded on every page, but doesn't need to be tested.
+				return request.abort( 'blockedbyclient' );
+			}
+
+			return request.continue();
 		} );
 
 		page.on( 'dialog', dialog => dialog.dismiss() );
 
 		page.on( ERROR_TYPES.PAGE_CRASH.event, error => pageErrors.push( {
-			pageUrl: page.url(),
+			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
 			message: ( error as Error ).message || '(empty message)'
+		} ) );
+
+		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => onError( {
+			pageUrl: data.url,
+			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
+			message: error.message || '(empty message)'
 		} ) );
 
 		page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
@@ -204,7 +224,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 					`Failed to load resource from ${ chalk.bold( host ) }`;
 
 				pageErrors.push( {
-					pageUrl: isNavigation ? data.parentUrl : page.url(),
+					pageUrl: isNavigation ? data.parentUrl : data.url,
 					type: ERROR_TYPES.REQUEST_FAILURE,
 					message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
 					failedResourceUrl: url
@@ -228,7 +248,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 					`Failed to load resource from ${ chalk.bold( host ) }`;
 
 				pageErrors.push( {
-					pageUrl: isNavigation ? data.parentUrl : page.url(),
+					pageUrl: isNavigation ? data.parentUrl : data.url,
 					type: ERROR_TYPES.RESPONSE_FAILURE,
 					message: `${ message } (HTTP response status code: ${ chalk.bold( responseStatus ) })`,
 					failedResourceUrl: url
@@ -236,33 +256,56 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			}
 		} );
 
-		const session = await page.createCDPSession();
+		page.on( ERROR_TYPES.CONSOLE_ERROR.event, async message => {
+			if ( message.type() !== 'error' ) {
+				return;
+			}
 
-		await session.send( 'Runtime.enable' );
+			const serializedMessage = await Promise.all( message.args().map( arg => {
+				const remoteObject = arg.remoteObject();
 
-		session.on( 'Runtime.exceptionThrown', event => {
-			const message = event.exceptionDetails.exception?.description ||
-				event.exceptionDetails.exception?.value ||
-				event.exceptionDetails.text ||
-				'(No description provided)';
+				if ( remoteObject.type === 'string' ) {
+					return remoteObject.value;
+				}
+
+				if ( remoteObject.type === 'object' && remoteObject.subtype === 'error' ) {
+					return remoteObject.description;
+				}
+
+				return arg.jsonValue();
+			} ) );
+
+			const text = serializedMessage.join( ' ' ).trim();
+
+			if ( !text ) {
+				return;
+			}
+
+			if ( text.startsWith( 'Failed to load resource:' ) ) {
+				// The resource loading failure is already covered by the "request" or "response" error handlers, so it should
+				// not be also reported as the "console error".
+				return;
+			}
 
 			pageErrors.push( {
-				pageUrl: page.url(),
+				pageUrl: data.url,
 				type: ERROR_TYPES.CONSOLE_ERROR,
-				message
+				// First line of the message is the most important one, so we will use it as a message.
+				message: text.split( '\n' )[ 0 ] || '(empty message)'
 			} );
 		} );
 
 		try {
-			await page.goto( data.url, { waitUntil: [ 'load', 'networkidle0' ] } );
+			// `networkidle0` forces loading CKEditor snippets. API pages to not contain them, so let's speed up.
+			const waitUntil = data.url.includes( '/api/' ) ? 'load' : 'networkidle0';
+
+			await page.goto( data.url, { waitUntil } );
 		} catch ( error ) {
 			const errorMessage = ( error as Error ).message || '(empty message)';
 
 			// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
 			// not be also reported as the "navigation error".
-			const ignoredMessage = 'net::';
-
-			if ( !errorMessage.startsWith( ignoredMessage ) ) {
+			if ( !errorMessage.startsWith( 'net::' ) ) {
 				pageErrors.push( {
 					pageUrl: data.url,
 					type: ERROR_TYPES.NAVIGATION_ERROR,
@@ -271,15 +314,19 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			}
 		}
 
-		// Create patterns from meta tags to ignore errors.
-		const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
+		if ( pageErrors.length ) {
+			// If page contains errors, check if there are any meta tags that define patterns to ignore errors.
 
-		// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
-		markErrorsAsIgnored( pageErrors, errorIgnorePatterns );
+			// Create patterns from meta tags to ignore errors.
+			const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
 
-		pageErrors
-			.filter( error => !error.ignored )
-			.forEach( error => onError( error ) );
+			// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
+			markErrorsAsIgnored( pageErrors, errorIgnorePatterns );
+
+			pageErrors
+				.filter( error => !error.ignored )
+				.forEach( error => onError( error ) );
+		}
 
 		if ( data.remainingNestedLevels === 0 ) {
 			// Skip crawling deeper, if the bottom has been reached
@@ -353,13 +400,7 @@ async function getLinksFromPage(
 	page: Page,
 	{ baseUrl, foundLinks, exclusions }: { baseUrl: string; foundLinks: Array<string>; exclusions: Array<string> }
 ): Promise<Array<string>> {
-	const links = await page.$$eval(
-		`body a[href]:not([${ DATA_ATTRIBUTE_NAME }]):not([download])`,
-		anchors => [ ...new Set( anchors
-			.filter( anchor => /http(s)?:/.test( anchor.protocol ) )
-			.map( anchor => `${ anchor.origin }${ anchor.pathname }` ) )
-		]
-	);
+	const links = await page.evaluate( getAllLinks, DATA_ATTRIBUTE_NAME );
 
 	return links.filter( link => {
 		return link.startsWith( baseUrl ) && // Skip external link.
@@ -387,7 +428,7 @@ async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorTy
 
 	try {
 		// Try to parse value from meta tag...
-		content = JSON.parse( contentString );
+		content = JSON.parse( contentString as any );
 	} catch ( error ) {
 		// ...but if it is not a valid JSON, return an empty map.
 		return patterns;
