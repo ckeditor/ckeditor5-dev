@@ -11,7 +11,10 @@ import {
 	typeDocTagError,
 	typeDocTagEvent,
 	typeDocTagObservable,
-	typeDocEventParamFixer
+	typeDocEventParamFixer,
+	typeDocEventInheritanceFixer,
+	typeDocInterfaceAugmentationFixer,
+	typeDocPurgePrivateApiDocs
 } from '@ckeditor/typedoc-plugins';
 
 // import validators from './validators/index.js';
@@ -69,6 +72,9 @@ export default async function build( config ) {
 	typeDocTagEvent( app );
 	typeDocTagObservable( app );
 	typeDocEventParamFixer( app );
+	typeDocEventInheritanceFixer( app );
+	typeDocInterfaceAugmentationFixer( app );
+	typeDocPurgePrivateApiDocs( app );
 
 	console.log( 'Typedoc started...' );
 
