@@ -23,12 +23,9 @@
     "dist"
   ],
   "devDependencies": {
-    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-swc": "^0.3.0",
-    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@rollup/pluginutils": "^5.1.0",
     "glob": "^10.0.0",
     "rollup": "^4.9.5",
     "typedoc": "^0.28.1",
