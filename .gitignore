@@ -14,8 +14,7 @@ executeinparallel-integration.log
 /release/
 
 # Compiled TS.
-packages/ckeditor5-dev-build-tools/dist
-packages/ckeditor5-dev-web-crawler/dist
+packages/*/dist
 
 packages/ckeditor5-dev-release-tools/tests/test-fixtures/**
 !packages/ckeditor5-dev-release-tools/tests/test-fixtures/.gitkeep
