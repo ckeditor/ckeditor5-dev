@@ -3,63 +3,63 @@
  * For licensing, see LICENSE.md.
  */
 
-const { expect } = require( 'chai' );
-const { glob } = require( 'glob' );
-const TypeDoc = require( 'typedoc' );
+import { beforeAll, describe, expect, it } from 'vitest';
+import { glob } from 'glob';
+import * as upath from 'upath';
+import {
+	Application,
+	type ProjectReflection,
+	type DeclarationReflection
+} from 'typedoc';
 
-const utils = require( '../utils' );
-const { plugins } = require( '../../lib' );
+import { ROOT_TEST_DIRECTORY } from '../utils.js';
+import { typeDocPurgePrivateApiDocs } from '../../lib/index.js';
 
 describe( 'typedoc-plugins/purge-private-api-docs', function() {
-	this.timeout( 10 * 1000 );
+	let conversionResult: ProjectReflection;
 
-	let conversionResult;
+	const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'purge-private-api-docs', 'fixtures' );
 
-	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'purge-private-api-docs', 'fixtures' );
+	const sourceFilePatterns = [ upath.join( FIXTURES_PATH, '**', '*.ts' ) ];
 
-	before( async () => {
-		const sourceFilePatterns = [
-			utils.normalizePath( FIXTURES_PATH, '**', '*.ts' )
-		];
+	beforeAll( async () => {
+		const entryPoints = ( await glob( sourceFilePatterns ) ).map( file => upath.normalize( file ) );
 
-		const files = await glob( sourceFilePatterns );
-		const typeDoc = new TypeDoc.Application();
-
-		expect( files ).to.not.lengthOf( 0 );
-
-		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-
-		typeDoc.bootstrap( {
+		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
-			entryPoints: files,
-			modifierTags: [
-				'@internal'
-			],
+			entryPoints,
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
 			plugin: [
-				plugins[ 'typedoc-plugin-module-fixer' ],
-				plugins[ 'typedoc-plugin-purge-private-api-docs' ]
+				'typedoc-plugin-rename-defaults'
 			],
-			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
+			// TODO: To resolve types.
+			// @ts-expect-error TS2322
+			// Type 'boolean' is not assignable to type 'string'.
+			// For unknown reasons `excludePrivate` type is resolved as `string`.
+			excludePrivate: false
 		} );
 
-		conversionResult = typeDoc.convert();
+		typeDocPurgePrivateApiDocs( typeDoc );
+
+		expect( entryPoints ).to.not.lengthOf( 0 );
+
+		conversionResult = ( await typeDoc.convert() )!;
 
 		expect( conversionResult ).to.be.an( 'object' );
 	} );
 
 	describe( 'public packages', () => {
 		it( 'should keep reflections', () => {
-			const publicCollection = conversionResult.getChildByName( 'public-package/publiccollection' );
+			const publicCollection = conversionResult.getChildByName( 'public-package/publiccollection' ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
-			expect( publicCollection.children.length ).to.equal( 1 );
+			expect( publicCollection.children?.length ).to.equal( 1 );
 		} );
 	} );
 
 	describe( 'private packages without the `@publicApi` annotation', () => {
 		it( 'should remove reflections', () => {
-			const privateCollection = conversionResult.getChildByName( 'private-package/privatecollection' );
+			const privateCollection = conversionResult.getChildByName( 'private-package/privatecollection' ) as DeclarationReflection;
 
 			expect( privateCollection ).to.equal( undefined );
 		} );
@@ -70,12 +70,12 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPublicCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendpubliccollection',
 				'ExtendPublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			const publicCollection = conversionResult.getChildByName( [
 				'public-package/publiccollection',
 				'PublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
 			expect( extendPublicCollection ).to.not.equal( undefined );
@@ -87,8 +87,8 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of publicFields ) {
-				const parentClass = publicCollection.children.find( c => c.name === field );
-				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+				const parentClass = publicCollection.children!.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children!.find( c => c.name === field );
 
 				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
@@ -99,12 +99,12 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPublicCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendpubliccollection',
 				'ExtendPublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			const publicCollection = conversionResult.getChildByName( [
 				'public-package/publiccollection',
 				'PublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
 			expect( extendPublicCollection ).to.not.equal( undefined );
@@ -116,26 +116,26 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of protectedFields ) {
-				const parentClass = publicCollection.children.find( c => c.name === field );
-				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+				const parentClass = publicCollection.children!.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children!.find( c => c.name === field );
 
 				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
 			}
 
-			expect( extendPublicCollection.children.find( c => c.name === 'constructor' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children!.find( c => c.name === 'constructor' ) ).to.equal( undefined );
 		} );
 
 		it( 'should keep inherited internal reflections (`@internal`)', () => {
 			const extendPublicCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendpubliccollection',
 				'ExtendPublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			const publicCollection = conversionResult.getChildByName( [
 				'public-package/publiccollection',
 				'PublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
 			expect( extendPublicCollection ).to.not.equal( undefined );
@@ -147,8 +147,8 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of internalFields ) {
-				const parentClass = publicCollection.children.find( c => c.name === field );
-				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+				const parentClass = publicCollection.children!.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children!.find( c => c.name === field );
 
 				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
@@ -159,12 +159,12 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPublicCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendpubliccollection',
 				'ExtendPublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			const publicCollection = conversionResult.getChildByName( [
 				'public-package/publiccollection',
 				'PublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
 			expect( extendPublicCollection ).to.not.equal( undefined );
@@ -176,8 +176,8 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of privateFields ) {
-				const parentClass = publicCollection.children.find( c => c.name === field );
-				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+				const parentClass = publicCollection.children!.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children!.find( c => c.name === field );
 
 				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
@@ -188,12 +188,12 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPublicCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendpubliccollection',
 				'ExtendPublicCollection'
-			] );
+			] ) as DeclarationReflection;
 
-			expect( extendPublicCollection.children.find( c => c.name === 'parent' ) ).to.equal( undefined );
-			expect( extendPublicCollection.children.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
-			expect( extendPublicCollection.children.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
-			expect( extendPublicCollection.children.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children!.find( c => c.name === 'parent' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children!.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children!.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children!.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
 		} );
 	} );
 
@@ -202,7 +202,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPrivateCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendprivatecollection',
 				'ExtendPrivateCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( extendPrivateCollection ).to.not.equal( undefined );
 
@@ -213,7 +213,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of publicFields ) {
-				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPrivateCollection.children!.find( c => c.name === field );
 
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
 			}
@@ -223,7 +223,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPrivateCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendprivatecollection',
 				'ExtendPrivateCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( extendPrivateCollection ).to.not.equal( undefined );
 
@@ -234,19 +234,19 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of protectedFields ) {
-				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPrivateCollection.children!.find( c => c.name === field );
 
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
 			}
 
-			expect( extendPrivateCollection.children.find( c => c.name === 'constructor' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children!.find( c => c.name === 'constructor' ) ).to.equal( undefined );
 		} );
 
 		it( 'should not keep inherited internal reflections (`@internal`)', () => {
 			const extendPrivateCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendprivatecollection',
 				'ExtendPrivateCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( extendPrivateCollection ).to.not.equal( undefined );
 
@@ -257,7 +257,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of internalFields ) {
-				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPrivateCollection.children!.find( c => c.name === field );
 
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
 			}
@@ -267,7 +267,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPrivateCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendprivatecollection',
 				'ExtendPrivateCollection'
-			] );
+			] ) as DeclarationReflection;
 
 			expect( extendPrivateCollection ).to.not.equal( undefined );
 
@@ -278,7 +278,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			];
 
 			for ( const field of privateFields ) {
-				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPrivateCollection.children!.find( c => c.name === field );
 
 				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
 			}
@@ -288,12 +288,12 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			const extendPrivateCollection = conversionResult.getChildByName( [
 				'private-package-public-api/extendprivatecollection',
 				'ExtendPrivateCollection'
-			] );
+			] ) as DeclarationReflection;
 
-			expect( extendPrivateCollection.children.find( c => c.name === 'parent' ) ).to.equal( undefined );
-			expect( extendPrivateCollection.children.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
-			expect( extendPrivateCollection.children.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
-			expect( extendPrivateCollection.children.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children!.find( c => c.name === 'parent' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children!.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children!.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children!.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
 		} );
 	} );
 } );
