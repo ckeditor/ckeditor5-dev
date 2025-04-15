@@ -32,9 +32,7 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
-		typescript( {
-			rootDir: './src'
-		} ),
+		typescript(),
 		nodeResolve( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
