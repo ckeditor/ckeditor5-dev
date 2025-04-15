@@ -16,7 +16,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagError } from '../../lib/index.js';
+import { typeDocTagError } from '../../src/index.js';
 
 describe( 'typedoc-plugins/tag-error', () => {
 	let conversionResult: ProjectReflection;

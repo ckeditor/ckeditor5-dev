@@ -17,7 +17,7 @@ import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import {
 	typeDocTagEvent,
 	typeDocEventInheritanceFixer
-} from '../../lib/index.js';
+} from '../../src/index.js';
 
 import typeDocRemoveClassC from './utils/typedoc-plugin-remove-class-c.js';
 

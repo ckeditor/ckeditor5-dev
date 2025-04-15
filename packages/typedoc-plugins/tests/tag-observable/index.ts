@@ -14,7 +14,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagObservable } from '../../lib/index.js';
+import { typeDocTagObservable } from '../../src/index.js';
 
 type AssertObservableExistsType = {
 	reflections: Array<DeclarationReflection>;

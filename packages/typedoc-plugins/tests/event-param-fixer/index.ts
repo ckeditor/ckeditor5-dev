@@ -19,7 +19,7 @@ import {
 	typeDocTagEvent,
 	typeDocTagObservable,
 	typeDocEventParamFixer
-} from '../../lib/index.js';
+} from '../../src/index.js';
 
 function assertEventInfoParameter( eventInfoParameter: ParameterReflection, eventInfoClass: DeclarationReflection ) {
 	expect( eventInfoParameter ).to.have.property( 'name', 'eventInfo' );

@@ -24,7 +24,7 @@ const externals = [
 ];
 
 export default defineConfig( {
-	input: 'lib/index.ts',
+	input: 'src/index.ts',
 	output: {
 		format: 'esm',
 		file: path.join( cwd, 'dist', 'index.js' ),
@@ -36,8 +36,6 @@ export default defineConfig( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
 		} ),
-		typescript( {
-			rootDir: './lib'
-		} )
+		typescript()
 	]
 } );

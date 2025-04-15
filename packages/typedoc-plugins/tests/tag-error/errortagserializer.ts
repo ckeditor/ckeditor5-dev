@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { type DeclarationReflection } from 'typedoc';
 
-import ErrorTagSerializer from '../../lib/tag-error/errortagserializer';
+import ErrorTagSerializer from '../../src/tag-error/errortagserializer';
 
 describe( 'typedoc-plugins/errortagserializer', () => {
 	let serializer: ErrorTagSerializer;

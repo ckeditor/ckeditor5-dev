@@ -17,7 +17,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagEvent } from '../../lib/index.js';
+import { typeDocTagEvent } from '../../src/index.js';
 
 function assertEventExists( events: Array<DeclarationReflection>, eventName: string ) {
 	const event = events.find( event => {
