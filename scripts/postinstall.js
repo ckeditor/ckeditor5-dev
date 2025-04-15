@@ -7,14 +7,11 @@
 
 import path from 'path';
 import fs from 'fs-extra';
+import { styleText } from 'util';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
 import { glob } from 'glob';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
-
-const ROOT_DIRECTORY = path.join( __dirname, '..' );
+const ROOT_DIRECTORY = path.join( import.meta.dirname, '..' );
 
 // When installing a repository as a dependency, the `.git` directory does not exist.
 // In such a case, husky should not attach its hooks as npm treats it as a package, not a git repository.
@@ -28,23 +25,19 @@ if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
 		stdio: 'inherit'
 	} );
 
-	const packageJsonPaths = await glob( 'packages/*/package.json', { cwd: ROOT_DIRECTORY, absolute: true } );
-	const packagesToProcess = packageJsonPaths
-		.map( async packagePath => ( {
-			packagePath: path.join( packagePath, '..' ),
-			packageJson: await fs.readJson( packagePath )
-		} ) );
+	const paths = await glob( 'packages/*/package.json', { cwd: ROOT_DIRECTORY, absolute: true } );
 
-	const packagesToBuild = ( await Promise.allSettled( packagesToProcess ) )
-		.filter( ( { status } ) => status === 'fulfilled' )
-		.map( ( { value } ) => value )
-		.filter( ( { packageJson } ) => packageJson.scripts?.build )
-		.map( ( { packagePath } ) => packagePath );
+	for ( const packagePath of paths ) {
+		const packageJson = await fs.readJson( packagePath );
 
-	for ( const singlePackage of packagesToBuild ) {
-		console.log( `Building: "${ singlePackage }"...` );
+		if ( !packageJson.scripts?.build ) {
+			continue;
+		}
+
+		console.log( styleText( 'bold', `Building: "${ packageJson.name }"...` ) );
+
 		execSync( 'npm run build', {
-			cwd: singlePackage,
+			cwd: path.join( packagePath, '..' ),
 			stdio: 'inherit'
 		} );
 	}
