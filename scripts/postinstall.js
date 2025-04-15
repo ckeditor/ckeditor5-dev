@@ -6,41 +6,39 @@
 /* eslint-env node */
 
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
+import { styleText } from 'util';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { glob } from 'glob';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
+const ROOT_DIRECTORY = path.join( import.meta.dirname, '..' );
 
-const ROOT_DIRECTORY = path.join( __dirname, '..' );
+// When installing a repository as a dependency, the `.git` directory does not exist.
+// In such a case, husky should not attach its hooks as npm treats it as a package, not a git repository.
+if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
+	const husky = ( await import( 'husky' ) ).default;
 
-( async () => {
-	// When installing a repository as a dependency, the `.git` directory does not exist.
-	// In such a case, husky should not attach its hooks as npm treats it as a package, not a git repository.
-	if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
-		const husky = ( await import( 'husky' ) ).default;
+	husky.install();
 
-		husky.install();
+	execSync( 'npm run postinstall', {
+		cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-tests' ),
+		stdio: 'inherit'
+	} );
 
-		execSync( 'npm run postinstall', {
-			cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-tests' ),
-			stdio: 'inherit'
-		} );
+	const paths = await glob( 'packages/*/package.json', { cwd: ROOT_DIRECTORY, absolute: true } );
 
-		execSync( 'npm run build', {
-			cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-build-tools' ),
-			stdio: 'inherit'
-		} );
+	for ( const packagePath of paths ) {
+		const packageJson = await fs.readJson( packagePath );
 
-		execSync( 'npm run build', {
-			cwd: path.join( ROOT_DIRECTORY, 'packages', 'typedoc-plugins' ),
-			stdio: 'inherit'
-		} );
+		if ( !packageJson.scripts?.build ) {
+			continue;
+		}
+
+		console.log( styleText( 'bold', `Building: "${ packageJson.name }"...` ) );
 
 		execSync( 'npm run build', {
-			cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-web-crawler' ),
+			cwd: path.join( packagePath, '..' ),
 			stdio: 'inherit'
 		} );
 	}
-} )();
+}
