@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import shellEscape from 'shell-escape';
+import { simpleGit } from 'simple-git';
 
 /**
  * Push the local changes to a remote server.
@@ -22,7 +21,10 @@ export default async function push( options ) {
 		cwd = process.cwd()
 	} = options;
 
-	const command = `git push origin ${ shellEscape( [ releaseBranch ] ) } ${ shellEscape( [ 'v' + version ] ) }`;
+	const git = simpleGit( { baseDir: cwd } );
+	const remote = 'origin';
+	const tag = `v${ version }`;
 
-	return tools.shExec( command, { cwd, verbosity: 'error', async: true } );
+	await git.push( remote, releaseBranch );
+	await git.raw( 'push', remote, tag );
 }
