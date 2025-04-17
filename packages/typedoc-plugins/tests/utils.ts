@@ -6,7 +6,7 @@
 import upath from 'upath';
 import { expect } from 'vitest';
 import type { TypeScript } from 'typedoc';
-import type { ValidatorErrorCallbackArg } from '../lib/validators';
+import type { ValidatorErrorCallbackArg } from '../src/validators';
 
 export const ROOT_TEST_DIRECTORY = upath.join( __dirname, '..', 'tests' );
 

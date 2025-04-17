@@ -18,11 +18,11 @@ import {
 	typeDocEventInheritanceFixer,
 	typeDocInterfaceAugmentationFixer,
 	typeDocPurgePrivateApiDocs
-} from '../../../lib/index.js';
+} from '../../../src/index.js';
 
 import { ROOT_TEST_DIRECTORY, assertCalls } from '../../utils.js';
-import firesValidator from '../../../lib/validators/fires-validator/index.js';
-import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
+import firesValidator from '../../../src/validators/fires-validator/index.js';
+import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 
 describe( 'typedoc-plugins/validators/fires-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'fires-validator', 'fixtures' );

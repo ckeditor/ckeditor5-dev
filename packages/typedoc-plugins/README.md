@@ -37,7 +37,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/module-fixer' )
     ]
 }
 ```
@@ -55,7 +55,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/symbol-fixer' )
     ]
 }
 ```
@@ -71,7 +71,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/interface-augmentation-fixer' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/interface-augmentation-fixer' )
     ]
 }
 ```
@@ -86,7 +86,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/event-param-fixer' )
     ]
 }
 ```
@@ -101,7 +101,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/event-inheritance-fixer' )
     ]
 }
 ```
@@ -116,7 +116,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/purge-private-api-docs' )
     ]
 }
 ```
@@ -131,7 +131,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/tag-error' )
     ]
 }
 ```
@@ -148,7 +148,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/tag-event' )
     ]
 }
 ```
@@ -161,7 +161,7 @@ To enable the plugin, add the following path to available plugins:
 {
     plugin: [
         // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )
+        require.resolve( '@ckeditor/typedoc-plugins/src/tag-observable' )
     ]
 }
 ```
