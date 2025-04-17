@@ -11,10 +11,12 @@ import {
 	typeDocTagError,
 	typeDocTagEvent,
 	typeDocTagObservable,
-	typeDocEventParamFixer
+	typeDocEventParamFixer,
+	typeDocEventInheritanceFixer,
+	typeDocInterfaceAugmentationFixer,
+	typeDocPurgePrivateApiDocs,
+	validate
 } from '@ckeditor/typedoc-plugins';
-
-// import validators from './validators/index.js';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -23,12 +25,11 @@ import {
  * @returns {Promise}
  */
 export default async function build( config ) {
-	// const { plugins } = typedocPlugins;
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
-	// const strictMode = config.strict || false;
+	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
 	const ignoreFiles = config.ignoreFiles || [];
-	// const validatorOptions = config.validatorOptions || {};
+	const validatorOptions = config.validatorOptions || {};
 
 	const files = await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
@@ -38,9 +39,7 @@ export default async function build( config ) {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
-		// TODO: Revert `logLevel`.
-		// logLevel: 'Warning',
-		logLevel: 'Error',
+		logLevel: 'Warning',
 		basePath: config.cwd,
 
 		blockTags: [
@@ -69,6 +68,9 @@ export default async function build( config ) {
 	typeDocTagEvent( app );
 	typeDocTagObservable( app );
 	typeDocEventParamFixer( app );
+	typeDocEventInheritanceFixer( app );
+	typeDocInterfaceAugmentationFixer( app );
+	typeDocPurgePrivateApiDocs( app );
 
 	console.log( 'Typedoc started...' );
 
@@ -78,11 +80,11 @@ export default async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	// const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
-	//
-	// if ( !validationResult && strictMode ) {
-	// 	throw 'Something went wrong with TypeDoc.';
-	// }
+	const validationResult = validate( app, validatorOptions );
+
+	if ( !validationResult && strictMode ) {
+		throw 'Something went wrong with TypeDoc.';
+	}
 
 	if ( config.outputPath ) {
 		await app.generateJson( conversionResult, config.outputPath );

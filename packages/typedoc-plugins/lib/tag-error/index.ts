@@ -8,6 +8,7 @@ import {
 	Converter,
 	ReflectionKind,
 	ParameterReflection,
+	DeclarationReflection,
 	IntrinsicType,
 	ReferenceType,
 	TypeScript as ts,
@@ -84,14 +85,16 @@ function onEventEnd( context: Context ) {
 			const errorName = parentNode.comment!;
 			const { parent } = parentNode as unknown as { parent: { comment: MaybeCommentDisplayPart } };
 
-			const errorDeclaration = context
-				.withScope( reflection )
-				.createDeclarationReflection(
-					ReflectionKind.Document,
-					undefined,
-					undefined,
-					errorName
-				);
+			const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.Document, reflection );
+
+			// const errorDeclaration = context
+			// 	.withScope( reflection )
+			// 	.createDeclarationReflection(
+			// 		ReflectionKind.Document,
+			// 		symbol,
+			// 		undefined,
+			// 		errorName
+			// 	);
 
 			errorDeclaration.isCKEditor5Error = true;
 			errorDeclaration.comment = createComment( parent.comment );
@@ -127,6 +130,10 @@ function onEventEnd( context: Context ) {
 
 					return parameter;
 				} );
+
+			context
+				.withScope( reflection )
+				.postReflectionCreation( errorDeclaration, getSymbol( errorNode ), undefined );
 		}
 	}
 }
@@ -163,26 +170,6 @@ function convertType( context: Context, childTag: ParamExpressionNode ): SomeTyp
 function isUnknownType( type: SomeType ): type is UnknownType {
 	return type.type === 'unknown';
 }
-
-type ParamExpressionNode = ts.Node & {
-	name: {
-		text: string;
-	};
-	comment: MaybeCommentDisplayPart;
-	typeExpression: ts.TypeNode;
-};
-
-type ErrorTagNode = ts.Node & {
-	text: string;
-	parent: ts.Node & {
-		tagName: ts.JSDocTag & {
-			text: string;
-		};
-		comment?: string;
-	};
-};
-
-type MaybeCommentDisplayPart = null | string | Array<CommentDisplayPart>;
 
 function findDescendant(
 	sourceFileOrNode: ts.SourceFile | ErrorTagNode,
@@ -254,3 +241,30 @@ function createComment( commentChildrenOrValue: MaybeCommentDisplayPart ): Comme
 
 	return new Comment( comments );
 }
+
+function getSymbol( node: ts.Node | ErrorTagNode ): ts.Symbol {
+	const symbol = 'symbol' in node ? node.symbol : null;
+
+	return symbol || getSymbol( node.parent );
+}
+
+type ParamExpressionNode = ts.Node & {
+	name: {
+		text: string;
+	};
+	comment: MaybeCommentDisplayPart;
+	typeExpression: ts.TypeNode;
+};
+
+type ErrorTagNode = ts.Node & {
+	text: string;
+	parent: ts.Node & {
+		tagName: ts.JSDocTag & {
+			text: string;
+		};
+		comment?: string;
+	};
+	symbol?: ts.Symbol;
+};
+
+type MaybeCommentDisplayPart = null | string | Array<CommentDisplayPart>;
