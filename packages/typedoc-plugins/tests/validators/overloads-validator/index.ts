@@ -21,11 +21,11 @@ import {
 } from '../../../lib/index.js';
 
 import { ROOT_TEST_DIRECTORY, assertCalls, normalizeExpectedError } from '../../utils.js';
-import firesValidator from '../../../lib/validators/fires-validator/index.js';
+import overloadsValidator from '../../../lib/validators/overloads-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
 
-describe( 'typedoc-plugins/validators/fires-validator', () => {
-	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'fires-validator', 'fixtures' );
+describe( 'typedoc-plugins/validators/overloads-validator', function() {
+	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'overloads-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 
 	let onError: ValidatorErrorCallback;
@@ -50,48 +50,36 @@ describe( 'typedoc-plugins/validators/fires-validator', () => {
 		typeDocInterfaceAugmentationFixer( app );
 		typeDocPurgePrivateApiDocs( app );
 
-		firesValidator( app, onError );
+		overloadsValidator( app, onError );
 
 		await app.convert();
 	} );
 
-	it( 'should warn if fired event does not exist', async () => {
-		const expectedErrors = [
-			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:15'
-			},
-			{
-				identifier: 'property',
-				source: 'fires.ts:15'
-			},
-			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:27'
-			},
-			{
-				identifier: 'property',
-				source: 'fires.ts:27'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:15'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:15'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:21'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:21'
-			}
-		].map( normalizeExpectedError( fixturesPath, identifier => `Incorrect event name: "${ identifier }" in the @fires tag` ) );
+	it( 'should warn if overloaded signature does not have "@label" tag', () => {
+		const errorMessage = 'Overloaded signature misses the @label tag';
 
-		const errorCalls = vi.mocked( onError ).mock.calls;
+		const expectedErrors = [
+			{ source: 'overloadsinvalid.ts:18' },
+			{ source: 'overloadsinvalid.ts:24' },
+			{ source: 'overloadsinvalid.ts:34' },
+			{ source: 'overloadsinvalid.ts:36' }
+		].map( normalizeExpectedError( fixturesPath, () => errorMessage ) );
+
+		const errorCalls = vi.mocked( onError ).mock.calls.filter( ( [ message ] ) => {
+			return message === errorMessage;
+		} );
+
+		assertCalls( errorCalls, expectedErrors );
+	} );
+
+	it( 'should warn if overloaded signatures use the same identifier', () => {
+		const expectedErrors = [
+			{ source: 'overloadsinvalid.ts:51', identifier: 'NOT_SO_UNIQUE' }
+		].map( normalizeExpectedError( fixturesPath, identifier => `Duplicated name: "${ identifier }" in the @label tag` ) );
+
+		const errorCalls = vi.mocked( onError ).mock.calls.filter( ( [ message ] ) => {
+			return message.startsWith( 'Duplicated name:' );
+		} );
 
 		assertCalls( errorCalls, expectedErrors );
 	} );

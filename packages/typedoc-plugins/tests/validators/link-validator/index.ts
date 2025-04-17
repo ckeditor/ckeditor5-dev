@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, type MockContext } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { glob } from 'glob';
 import * as upath from 'upath';
 import { Application } from 'typedoc';
@@ -20,11 +20,11 @@ import {
 	typeDocPurgePrivateApiDocs
 } from '../../../lib/index.js';
 
-import { ROOT_TEST_DIRECTORY, getSource } from '../../utils.js';
+import { ROOT_TEST_DIRECTORY, assertCalls, normalizeExpectedError } from '../../utils.js';
 import linkValidator from '../../../lib/validators/link-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
 
-describe( 'dev-docs/validators/link-validator', function() {
+describe( 'typedoc-plugins/validators/link-validator', function() {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'link-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '*.ts' );
 	const derivedFilePath = upath.join( fixturesPath, 'inheritance', 'derivedclass.ts' );
@@ -120,29 +120,11 @@ describe( 'dev-docs/validators/link-validator', function() {
 				identifier: 'module:non-existing/module~Foo#bar',
 				source: 'links.ts:102'
 			}
-		];
+		].map( normalizeExpectedError( fixturesPath, identifier => `Incorrect link: "${ identifier }"` ) );
 
-		expect( onError ).toHaveBeenCalledTimes( expectedErrors.length );
+		const errorCalls = vi.mocked( onError ).mock.calls;
 
-		const calls = vi.mocked( onError ).mock.calls;
-
-		for ( const call of calls ) {
-			expect( call ).toSatisfy( call => {
-				const [ message, node ] = call as MockContext<ValidatorErrorCallback>[ 'calls' ][ 0 ];
-
-				return expectedErrors.some( error => {
-					if ( message !== `Incorrect link: "${ error.identifier }"` ) {
-						return false;
-					}
-
-					if ( getSource( node ) !== error.source ) {
-						return false;
-					}
-
-					return true;
-				} );
-			} );
-		}
+		assertCalls( errorCalls, expectedErrors );
 	} );
 
 	it( 'should not call error callback for derived class when there are errors in inherited class', async () => {

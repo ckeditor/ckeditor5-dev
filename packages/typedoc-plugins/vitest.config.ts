@@ -15,8 +15,8 @@ export default defineConfig( {
 		],
 		exclude: [
 			'./tests/utils.ts',
-			'./tests/**/utils/**/*.@(js|ts)',
-			'./tests/**/fixtures/**/*.@(js|ts)'
+			'./tests/**/utils/**/*.ts',
+			'./tests/**/fixtures/**/*.ts'
 		],
 		coverage: {
 			provider: 'v8',

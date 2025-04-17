@@ -21,11 +21,11 @@ import {
 } from '../../../lib/index.js';
 
 import { ROOT_TEST_DIRECTORY, assertCalls, normalizeExpectedError } from '../../utils.js';
-import firesValidator from '../../../lib/validators/fires-validator/index.js';
+import moduleValidator from '../../../lib/validators/module-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
 
-describe( 'typedoc-plugins/validators/fires-validator', () => {
-	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'fires-validator', 'fixtures' );
+describe( 'typedoc-plugins/validators/module-validator', function() {
+	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'module-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 
 	let onError: ValidatorErrorCallback;
@@ -50,46 +50,38 @@ describe( 'typedoc-plugins/validators/fires-validator', () => {
 		typeDocInterfaceAugmentationFixer( app );
 		typeDocPurgePrivateApiDocs( app );
 
-		firesValidator( app, onError );
+		moduleValidator( app, onError );
 
 		await app.convert();
 	} );
 
-	it( 'should warn if fired event does not exist', async () => {
+	it( 'should warn if module name is not valid', async () => {
 		const expectedErrors = [
 			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:15'
+				identifier: 'example/',
+				source: 'ckeditor5-example/src/modulerootinvalid1.ts:10'
 			},
 			{
-				identifier: 'property',
-				source: 'fires.ts:15'
+				identifier: 'example/foo',
+				source: 'ckeditor5-example/src/modulerootinvalid2.ts:10'
 			},
 			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:27'
+				identifier: 'example/feature',
+				source: 'ckeditor5-example/src/feature/modulefeatureinvalid1.ts:10'
 			},
 			{
-				identifier: 'property',
-				source: 'fires.ts:27'
+				identifier: 'example/feature/foo',
+				source: 'ckeditor5-example/src/feature/modulefeatureinvalid2.ts:10'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:15'
+				identifier: 'example/feature/nested-feature',
+				source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid1.ts:10'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:15'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:21'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:21'
+				identifier: 'example/feature/nested-feature/foo',
+				source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid2.ts:10'
 			}
-		].map( normalizeExpectedError( fixturesPath, identifier => `Incorrect event name: "${ identifier }" in the @fires tag` ) );
+		].map( normalizeExpectedError( fixturesPath, identifier => `Invalid module name: "${ identifier }"` ) );
 
 		const errorCalls = vi.mocked( onError ).mock.calls;
 

@@ -48,5 +48,7 @@ export type ValidatorOptions = {
 	enableOverloadValidator?: boolean;
 };
 
-export type ValidatorErrorCallback = ( error: string, node: TypeScript.Declaration | null ) => void;
+export type ValidatorErrorCallbackArg = [ error: string, node: TypeScript.Declaration | null ];
+
+export type ValidatorErrorCallback = ( ...args: ValidatorErrorCallbackArg ) => void;
 

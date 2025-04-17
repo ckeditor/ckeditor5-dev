@@ -21,11 +21,11 @@ import {
 } from '../../../lib/index.js';
 
 import { ROOT_TEST_DIRECTORY, assertCalls, normalizeExpectedError } from '../../utils.js';
-import firesValidator from '../../../lib/validators/fires-validator/index.js';
+import seeValidator from '../../../lib/validators/see-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
 
-describe( 'typedoc-plugins/validators/fires-validator', () => {
-	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'fires-validator', 'fixtures' );
+describe( 'typedoc-plugins/validators/see-validator', function() {
+	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'see-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 
 	let onError: ValidatorErrorCallback;
@@ -50,46 +50,66 @@ describe( 'typedoc-plugins/validators/fires-validator', () => {
 		typeDocInterfaceAugmentationFixer( app );
 		typeDocPurgePrivateApiDocs( app );
 
-		firesValidator( app, onError );
+		seeValidator( app, onError );
 
 		await app.convert();
 	} );
 
-	it( 'should warn if fired event does not exist', async () => {
+	it( 'should warn if link is not valid', async () => {
 		const expectedErrors = [
 			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:15'
+				identifier: '.property',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'property',
-				source: 'fires.ts:15'
+				identifier: '#staticProperty',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'event-non-existing',
-				source: 'fires.ts:27'
+				identifier: '#property-non-existing',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'property',
-				source: 'fires.ts:27'
+				identifier: '#property:LABEL-NON-EXISTING',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:15'
+				identifier: '#method:LABEL-NON-EXISTING',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:15'
+				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:21'
+				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
+				source: 'see.ts:60'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:21'
+				identifier: '#event-example',
+				source: 'see.ts:60'
+			},
+			{
+				identifier: '#event:property',
+				source: 'see.ts:60'
+			},
+			{
+				identifier: '~ClassNonExisting#property',
+				source: 'see.ts:60'
+			},
+			{
+				identifier: 'module:non-existing/module~ClassWithSeeTags#property',
+				source: 'see.ts:60'
+			},
+			{
+				identifier: 'module:non-existing/module~Foo#bar',
+				source: 'see.ts:97'
+			},
+			{
+				identifier: 'module:non-existing/module~Foo#bar',
+				source: 'see.ts:97'
 			}
-		].map( normalizeExpectedError( fixturesPath, identifier => `Incorrect event name: "${ identifier }" in the @fires tag` ) );
+		].map( normalizeExpectedError( fixturesPath, identifier => `Incorrect link: "${ identifier }"` ) );
 
 		const errorCalls = vi.mocked( onError ).mock.calls;
 
