@@ -5,7 +5,7 @@
 
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
-import * as upath from 'upath';
+import upath from 'upath';
 import {
 	Application,
 	ReflectionKind,

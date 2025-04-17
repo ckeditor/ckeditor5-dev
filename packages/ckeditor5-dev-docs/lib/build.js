@@ -4,7 +4,8 @@
  */
 
 import { glob } from 'glob';
-import { Application } from 'typedoc';
+import upath from 'upath';
+import { Application, OptionDefaults } from 'typedoc';
 import {
 	typeDocModuleFixer,
 	typeDocSymbolFixer,
@@ -31,29 +32,33 @@ export default async function build( config ) {
 	const ignoreFiles = config.ignoreFiles || [];
 	const validatorOptions = config.validatorOptions || {};
 
-	const files = await glob( sourceFilePatterns, {
+	const files = ( await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
-	} );
+	} ) ).map( upath.normalize );
 
 	const app = await Application.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
-		logLevel: 'Warning',
+		logLevel: 'Warn',
 		basePath: config.cwd,
 
 		blockTags: [
+			...OptionDefaults.blockTags,
 			'@eventName',
-			'@default'
+			'@export',
+			'@fires',
+			'@label',
+			'@observable'
 		],
 		inlineTags: [
-			'@link',
+			...OptionDefaults.inlineTags,
 			'@glink'
 		],
 		modifierTags: [
+			...OptionDefaults.modifierTags,
 			'@publicApi',
-			'@skipSource',
-			'@internal'
+			'@skipSource'
 		],
 		plugin: [
 			// Fixes `"name": 'default" in the output project.

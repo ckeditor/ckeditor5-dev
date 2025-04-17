@@ -5,7 +5,7 @@
 
 import { describe, it, beforeAll, vi } from 'vitest';
 import { glob } from 'glob';
-import * as upath from 'upath';
+import upath from 'upath';
 import { Application } from 'typedoc';
 
 import {
@@ -20,7 +20,7 @@ import {
 	typeDocPurgePrivateApiDocs
 } from '../../../lib/index.js';
 
-import { ROOT_TEST_DIRECTORY, assertCalls, normalizeExpectedError } from '../../utils.js';
+import { ROOT_TEST_DIRECTORY, assertCalls } from '../../utils.js';
 import moduleValidator from '../../../lib/validators/module-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../lib/validators/index.js';
 
@@ -81,7 +81,10 @@ describe( 'typedoc-plugins/validators/module-validator', function() {
 				identifier: 'example/feature/nested-feature/foo',
 				source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid2.ts:10'
 			}
-		].map( normalizeExpectedError( fixturesPath, identifier => `Invalid module name: "${ identifier }"` ) );
+		].map( error => ( {
+			message: `Invalid module name: "${ error.identifier }"`,
+			source: upath.join( fixturesPath, error.source )
+		} ) );
 
 		const errorCalls = vi.mocked( onError ).mock.calls;
 

@@ -6,6 +6,7 @@
 import { readFileSync } from 'fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
+import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 
@@ -32,6 +33,7 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
+		commonjs(),
 		nodeResolve( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
