@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { cloneDeepWith } from 'lodash-es';
+import { cloneDeepWith } from 'es-toolkit/compat';
 import * as utils from './transformcommitutils.js';
 import getChangedFilesForCommit from './getchangedfilesforcommit.js';
 

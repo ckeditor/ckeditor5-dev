@@ -8,7 +8,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "declaration": true,
-    "outDir": "./types",
     "isolatedModules": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

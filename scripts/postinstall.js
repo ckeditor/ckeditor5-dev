@@ -16,9 +16,9 @@ const ROOT_DIRECTORY = path.join( import.meta.dirname, '..' );
 // When installing a repository as a dependency, the `.git` directory does not exist.
 // In such a case, husky should not attach its hooks as npm treats it as a package, not a git repository.
 if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
-	const husky = ( await import( 'husky' ) ).default;
+	const { default: husky } = await import( 'husky' );
 
-	husky.install();
+	husky();
 
 	execSync( 'npm run postinstall', {
 		cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-tests' ),

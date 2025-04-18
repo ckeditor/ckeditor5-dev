@@ -8,7 +8,7 @@ import { readFileSync } from 'fs';
 
 import path from 'upath';
 import PO from 'pofile';
-import { groupBy, merge } from 'lodash-es';
+import { groupBy, merge } from 'es-toolkit/compat';
 import { glob } from 'glob';
 import type { Plugin } from 'rollup';
 import { removeWhitespace } from '../utils.js';
