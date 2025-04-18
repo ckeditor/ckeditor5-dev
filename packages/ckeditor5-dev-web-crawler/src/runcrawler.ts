@@ -194,7 +194,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			message: ( error as Error ).message || '(empty message)'
 		} ) );
 
-		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => onError( {
+		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
 			message: error.message || '(empty message)'
