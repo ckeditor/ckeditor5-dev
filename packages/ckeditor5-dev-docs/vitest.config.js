@@ -7,10 +7,16 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig( {
 	test: {
+		setupFiles: [
+			'./tests/_utils/testsetup.js'
+		],
 		testTimeout: 10000,
 		restoreMocks: true,
 		include: [
 			'tests/**/*.js'
+		],
+		exclude: [
+			'./tests/_utils/**/*.js'
 		],
 		coverage: {
 			provider: 'v8',
