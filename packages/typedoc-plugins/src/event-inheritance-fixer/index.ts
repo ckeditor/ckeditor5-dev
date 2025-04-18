@@ -17,8 +17,8 @@ import {
 /**
  * The `typedoc-plugin-event-inheritance-fixer` takes care of inheriting events, which are not handled by TypeDoc by default.
  *
- * Event can be inherited from a class or from an interface. If a class or an interface fires an event and it is a base for another class or
- * interface, then all events from the base reflection are copied and inserted into each derived reflection.
+ * Event can be inherited from a class or from an interface. If a class or an interface fires an event, and it is a base for another
+ * class or interface, then all events from the base reflection are copied and inserted into each derived reflection.
  *
  * The plugin takes care of events that are specified in parent classes too.
  */
@@ -27,12 +27,12 @@ export default function( app: Application ): void {
 }
 
 function onEventEnd( context: Context ) {
-	// Event can be assigned as a child to a class or to an interface.
+	// Events can be assigned as a child to a class or to an interface (as `#ckeditor5Events`).
 	const eventKind = ReflectionKind.Class | ReflectionKind.Interface;
 	const reflections = context.project.getReflectionsByKind( eventKind ) as Array<DeclarationReflection>;
 
 	for ( const reflection of reflections ) {
-		// Find all parents of given reflection.
+		// Find all parents of a given reflection.
 		// Filter function is required in case if the purge plugin removed a reflection.
 		const parentReflections = getParentClasses( reflection ).filter( Boolean );
 
@@ -41,13 +41,13 @@ function onEventEnd( context: Context ) {
 		// Hence, we need to look for parent classes manually to determine their events.
 		const eventReflections = parentReflections.flatMap( ref => ref.ckeditor5Events || [] );
 
-		// If class or interface does not fire events, skip it.
+		// If a class or interface does not fire events, skip it.
 		if ( !eventReflections.length ) {
 			continue;
 		}
 
 		// Otherwise, find all derived classes and interfaces in the whole inheritance chain.
-		// Including the current processed reflection allow detecting a class that extends a mixin.
+		// Including the current processed reflection allows detecting a class that extends a mixin.
 		//
 		// ClassA
 		//  ⤷ ClassB extends Mixin( ClassA )
@@ -63,7 +63,7 @@ function onEventEnd( context: Context ) {
 		for ( const derivedReflection of derivedReflections ) {
 			// ...and for each event from the parent reflections...
 			for ( const eventReflection of eventReflections ) {
-				// ...skip processing the event if derived reflection already has it.
+				// ...skip processing the event if a derived reflection already has it.
 				// It may happen when processing the `@observable` annotation.
 				const hasEvent = derivedReflection.ckeditor5Events
 					?.some( existingEventReflection => existingEventReflection.name === eventReflection.name );
@@ -105,7 +105,7 @@ function onEventEnd( context: Context ) {
 
 /**
  * Finds all derived classes and interfaces from the specified base reflection. It traverses the whole inheritance chain.
- * If the base reflection is not extended or implemented by any other reflection, empty array is returned.
+ * If the base reflection is not extended or implemented by any other reflection, an empty array is returned.
  */
 function getDerivedReflections( reflection: DeclarationReflection ): Array<DeclarationReflection> {
 	const extendedBy = reflection.extendedBy || [];

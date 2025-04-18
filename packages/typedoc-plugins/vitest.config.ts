@@ -7,9 +7,6 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig( {
 	test: {
-		setupFiles: [
-			// './tests/_utils/testsetup.js'
-		],
 		testTimeout: 10000,
 		mockReset: false,
 		restoreMocks: false,
@@ -18,13 +15,13 @@ export default defineConfig( {
 		],
 		exclude: [
 			'./tests/utils.ts',
-			'./tests/*/utils/**/*.@(js|ts)',
-			'./tests/*/fixtures/**/*.@(js|ts)'
+			'./tests/**/utils/**/*.ts',
+			'./tests/**/fixtures/**/*.ts'
 		],
 		coverage: {
 			provider: 'v8',
 			include: [
-				'lib/**'
+				'src/**'
 			],
 
 			reporter: [ 'text', 'json', 'html', 'lcov' ]

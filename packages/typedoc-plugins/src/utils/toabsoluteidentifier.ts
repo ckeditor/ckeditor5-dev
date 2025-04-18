@@ -32,9 +32,6 @@ function getLongNameParts( reflection: Reflection ) {
 		ReflectionKind.Variable,
 		ReflectionKind.Method,
 		ReflectionKind.Property
-
-		// TODO: Support for events.
-		// ReflectionKind.Event
 	];
 
 	const parts = [];
