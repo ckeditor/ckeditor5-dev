@@ -4,23 +4,24 @@
  */
 
 import {
+	type Application,
 	Comment,
+	type CommentDisplayPart,
+	type Context,
 	Converter,
-	ReflectionKind,
-	ParameterReflection,
 	DeclarationReflection,
 	IntrinsicType,
+	ParameterReflection,
 	ReferenceType,
-	TypeScript as ts,
-	type Application,
-	type Context,
-	type CommentDisplayPart,
+	ReflectionKind,
 	type SomeType,
+	TypeScript as ts,
 	type UnknownType
 } from 'typedoc';
 
 import ErrorTagSerializer from './errortagserializer.js';
 import './augmentation.js';
+import { getTarget } from '../utils';
 
 const ERROR_TAG_NAME = 'error';
 
@@ -40,7 +41,7 @@ export default function( app: Application ): void {
 }
 
 function onEventEnd( context: Context ) {
-	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module );
+	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module ) as Array<DeclarationReflection>;
 
 	// Errors are children of a module.
 	for ( const reflection of moduleReflections ) {
@@ -87,15 +88,6 @@ function onEventEnd( context: Context ) {
 
 			const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.Document, reflection );
 
-			// const errorDeclaration = context
-			// 	.withScope( reflection )
-			// 	.createDeclarationReflection(
-			// 		ReflectionKind.Document,
-			// 		symbol,
-			// 		undefined,
-			// 		errorName
-			// 	);
-
 			errorDeclaration.isCKEditor5Error = true;
 			errorDeclaration.comment = createComment( parent.comment );
 			errorDeclaration.parameters = parentNode.parent.getChildren()
@@ -123,7 +115,7 @@ function onEventEnd( context: Context ) {
 					parameter.comment = createComment( childTagAsParam.comment );
 
 					try {
-						parameter.type = convertType( context, childTagAsParam );
+						parameter.type = convertType( context, reflection, childTagAsParam );
 					} catch ( err ) {
 						parameter.type = new IntrinsicType( 'any' );
 					}
@@ -138,7 +130,7 @@ function onEventEnd( context: Context ) {
 	}
 }
 
-function convertType( context: Context, childTag: ParamExpressionNode ): SomeType {
+function convertType( context: Context, reflection: DeclarationReflection, childTag: ParamExpressionNode ): SomeType {
 	const convertedType = context.converter.convertType( context, childTag.typeExpression );
 
 	if ( !isUnknownType( convertedType ) ) {
@@ -152,9 +144,7 @@ function convertType( context: Context, childTag: ParamExpressionNode ): SomeTyp
 		throw new Error( 'Conversion a type failed.' );
 	}
 
-	// TODO: Should we support local links, e.g., `~ChildrenClass`?
-	const [ moduleName, childName ] = name.replace( 'module:', '' ).split( '~' );
-	const childReflection = context.project.getChildByName( [ moduleName!, childName! ] );
+	const childReflection = getTarget( context, reflection, name ) as DeclarationReflection | null;
 
 	if ( !childReflection ) {
 		throw new Error( 'A module reflection cannot be found.' );

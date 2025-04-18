@@ -328,6 +328,19 @@ describe( 'typedoc-plugins/tag-error', () => {
 				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Class );
 			} );
 
+			it( 'should convert a `module:` type to a reference if a module exists (including children)', () => {
+				const paramDefinition = errorDefinition.parameters.find( param => {
+					return param.name === 'exampleInterfaceChildren';
+				} )!;
+
+				const referenceType = paramDefinition.type as ReferenceType;
+
+				console.log( referenceType );
+
+				expect( referenceType.reflection ).to.have.property( 'name', 'customPropertyInInterface' );
+				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Property );
+			} );
+
 			it( 'should convert a `module:` type to `any` if a module does not exist', () => {
 				const paramDefinition = errorDefinition.parameters.find( param => {
 					return param.name === 'exampleMissingModule';
