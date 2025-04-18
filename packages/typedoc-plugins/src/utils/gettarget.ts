@@ -58,33 +58,13 @@ export function getTarget(
 		return null;
 	}
 
-	// If couldn't find a reflection, perhaps we should look for properties defined in the `type` doclet.
-	// if ( !targetReflection ) {
-	// 	// Strip the property name...
-	// 	const partsWithoutIdentifier = parts.slice( 0, -1 );
-	// 	// ...and try to find the type declaration.
-	// 	const typeReflection = reflection.project.getChildByName( partsWithoutIdentifier ) as DeclarationReflection | undefined;
-
-	// 	if ( !typeReflection || typeReflection.kind !== ReflectionKind.TypeAlias ) {
-	// 		return null;
-	// 	}
-
-	// 	// If found, verify if the property is available as a children of the type.
-	// 	const [ identifierName ] = parts.slice( -1 );
-
-	// 	// TODO: Support.
-	// 	return typeReflection.type.declaration.children.find( childrenReflection => childrenReflection.name === identifierName );
-	// }
-
 	// Now, when the target reflection is found, do some checks whether it matches the identifier.
 	// (1) Check if the labeled signature targets an existing signature.
 	if ( isIdentifierLabeledSignature ) {
-		// TODO: Support.
 		if ( !targetReflection.signatures ) {
 			return null;
 		}
 
-		// TODO: Support.
 		const targetSignature = targetReflection.signatures.find( signature => {
 			if ( !signature.comment ) {
 				return false;

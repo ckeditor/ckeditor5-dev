@@ -140,15 +140,6 @@ function createNewEventReflection(
 	sourceReflection: DeclarationReflection,
 	eventName: string
 ): DeclarationReflection {
-	// Create a new reflection object for the event from the provided scope.
-	// const eventReflection = context
-	// 	.createDeclarationReflection(
-	// 		ReflectionKind.Document,
-	// 		undefined,
-	// 		undefined,
-	// 		normalizeEventName( eventName )
-	// 	);
-
 	const eventReflection = new DeclarationReflection( normalizeEventName( eventName ), ReflectionKind.Document );
 
 	eventReflection.isCKEditor5Event = true;

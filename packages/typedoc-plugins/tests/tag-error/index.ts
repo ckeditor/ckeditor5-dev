@@ -335,8 +335,6 @@ describe( 'typedoc-plugins/tag-error', () => {
 
 				const referenceType = paramDefinition.type as ReferenceType;
 
-				console.log( referenceType );
-
 				expect( referenceType.reflection ).to.have.property( 'name', 'customPropertyInInterface' );
 				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Property );
 			} );
