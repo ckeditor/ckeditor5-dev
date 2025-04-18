@@ -8,6 +8,8 @@ import upath from 'upath';
 import { globSync } from 'glob';
 import depCheck from 'depcheck';
 import chalk from 'chalk';
+import { parseAsync } from 'oxc-parser';
+import { walk } from 'oxc-walker';
 
 /**
  * Checks dependencies sequentially in all provided packages.
@@ -62,10 +64,10 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
-			'**/*.mjs': depCheck.parser.es6,
-			'**/*.js': depCheck.parser.es6,
-			'**/*.jsx': depCheck.parser.jsx,
-			'**/*.ts': depCheck.parser.typescript,
+			'**/*.mjs': filePath => parseModule( filePath, packageJson ),
+			'**/*.js': filePath => parseModule( filePath, packageJson ),
+			'**/*.jsx': filePath => parseModule( filePath, packageJson ),
+			'**/*.ts': filePath => parseModule( filePath, packageJson ),
 			'**/*.vue': depCheck.parser.vue
 		},
 		ignorePatterns: [ 'docs', 'build', 'dist/browser' ],
@@ -281,6 +283,93 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
 		} );
 
 	return [ ...usedPackages ].sort();
+}
+
+/**
+ * Returns all dependencies found in the file, including those from `import.meta.resolve`.
+ *
+ * @param {string} path
+ * @param {Record<string, unknown>} packageJson
+ * @returns {Array<string>}
+ */
+async function parseModule( path, packageJson ) {
+	const content = await fs.promises.readFile( path, 'utf-8' );
+	const { errors, module, program } = await parseAsync( path, content );
+
+	if ( errors.length || !module.hasModuleSyntax ) {
+		// Use native `depcheck` parser if there was an error or if the file content is not ESM.
+		return depCheck.parser.es6( path );
+	}
+
+	const dependencies = Object.keys( {
+		...packageJson.dependencies,
+		...packageJson.devDependencies
+	} );
+
+	const deps = [
+		// Get all static import paths: `import {} from 'package-name'`.
+		...module.staticImports.map( statement => statement.moduleRequest.value ),
+
+		// Get all static export paths: `export {} from 'package-name'`.
+		...module.staticExports
+			.flatMap( staticExport => staticExport.entries.map( entry => entry.moduleRequest?.value ) )
+			.filter( Boolean )
+	];
+
+	// Add paths passed to `import.meta.resolve` to the list of dependencies.
+	// This only works if the passed path is a string literal, not a variable.
+	walk( program, {
+		enter( node, parent ) {
+			if (
+				node.type === 'MemberExpression' &&
+				node.object.type === 'MetaProperty' &&
+				node.property.name === 'resolve' &&
+				parent.arguments[ 0 ].type === 'Literal'
+			) {
+				deps.push( parent.arguments[ 0 ].value );
+			}
+		}
+	} );
+
+	return deps
+		// Remove relative paths.
+		.filter( path => !path.startsWith( '.' ) )
+
+		/**
+		 * Get only package names:
+		 *  - `packageName/some/path` -> `packageName`.
+		 *  - `@scope/packageName/some/path` -> `@scope/packageName`.
+		 */
+		.map( path => {
+			const parts = path.split( '/' );
+
+			return path.startsWith( '@' ) ? parts.slice( 0, 2 ).join( '/' ) : parts[ 0 ];
+		} )
+
+		/**
+		 * Add `@types` dependencies if they are defined in `package.json`:
+		 *  - `package-name` -> `@types/package-name`.
+		 *  - `@scope/package-name` -> `@types/scope__package-name`.
+		 */
+		.reduce( ( acc, dependency ) => {
+			const types = dependency.startsWith( '@' ) ?
+				`@types/${ dependency.replace( '@', '' ).replace( '/', '__' ) }` :
+				`@types/${ dependency }`;
+
+			if ( dependencies.includes( types ) ) {
+				acc.push( types );
+			}
+
+			acc.push( dependency );
+
+			return acc;
+		}, [] )
+
+		// Remove duplicates.
+		.filter( ( value, index, self ) => self.indexOf( value ) === index )
+
+		// Sort the result.
+		.sort();
 }
 
 /**
