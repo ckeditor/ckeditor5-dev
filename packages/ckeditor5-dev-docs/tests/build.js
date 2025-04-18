@@ -21,6 +21,10 @@ import {
 
 import build from '../lib/build.js';
 
+vi.stubGlobal( 'console', {
+	log: vi.fn()
+} );
+
 vi.mock( 'glob' );
 vi.mock( 'typedoc' );
 vi.mock( '@ckeditor/typedoc-plugins' );
@@ -148,14 +152,22 @@ describe( 'lib/build()', () => {
 		expect( validate ).toHaveBeenCalledAfter( stubs.app.convert );
 	} );
 
-	it( 'should create JSON output file', async () => {
+	it( 'should create JSON output file after converting the documentation', async () => {
+		const conversionResult = {
+			name: 'ckeditor5',
+			variant: 'project',
+			kind: 1
+		};
+
+		stubs.app.convert.mockResolvedValue( conversionResult );
+
 		await build( {
 			sourceFiles,
 			outputPath: 'path/to/output.json'
 		} );
 
 		expect( stubs.app.generateJson ).toHaveBeenCalledTimes( 1 );
-		expect( stubs.app.generateJson ).toHaveBeenCalledWith( expect.anything(), 'path/to/output.json' );
+		expect( stubs.app.generateJson ).toHaveBeenCalledWith( conversionResult, 'path/to/output.json' );
 	} );
 
 	it( 'should not create JSON output file if outputh path is not defined', async () => {
