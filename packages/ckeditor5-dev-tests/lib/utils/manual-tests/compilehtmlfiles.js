@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
-import { uniq, debounce } from 'lodash-es';
+import { uniq, debounce } from 'es-toolkit/compat';
 import chalk from 'chalk';
 import * as commonmark from 'commonmark';
 import combine from 'dom-combiner';
