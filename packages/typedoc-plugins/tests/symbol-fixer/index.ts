@@ -5,7 +5,7 @@
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
-import * as upath from 'upath';
+import upath from 'upath';
 import { Application, type ProjectReflection, ReflectionKind } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';

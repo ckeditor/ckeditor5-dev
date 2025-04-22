@@ -11,8 +11,7 @@ import {
 	ReflectionFlag,
 	ReflectionKind,
 	type Application,
-	type Context,
-	type DeclarationReflection,
+	type Context, DeclarationReflection,
 	type Reflection,
 	type TupleType,
 	type SomeType
@@ -97,7 +96,7 @@ function onEventEnd( context: Context ) {
 		// Then, try to find the owner reflection for each found tag to properly associate the event in the hierarchy.
 		for ( const eventTag of eventTags ) {
 			const [ eventOwner, eventName ] = eventTag.split( '#' ) as [ string, string ];
-			const ownerReflection = getTarget( context, reflection, eventOwner )!;
+			const ownerReflection = getTarget( context, reflection, eventOwner )! as DeclarationReflection;
 
 			// The owner for an event can be either a class or an interface.
 			if ( !isClassOrInterface( ownerReflection ) ) {
@@ -141,14 +140,7 @@ function createNewEventReflection(
 	sourceReflection: DeclarationReflection,
 	eventName: string
 ): DeclarationReflection {
-	// Create a new reflection object for the event from the provided scope.
-	const eventReflection = context
-		.createDeclarationReflection(
-			ReflectionKind.Document,
-			undefined,
-			undefined,
-			normalizeEventName( eventName )
-		);
+	const eventReflection = new DeclarationReflection( normalizeEventName( eventName ), ReflectionKind.Document );
 
 	eventReflection.isCKEditor5Event = true;
 
@@ -198,6 +190,9 @@ function createNewEventReflection(
 
 	// Copy the source location as it is the same as the location of the reflection containing the event.
 	eventReflection.sources = [ ...sourceReflection.sources! ];
+
+	// Finalize the reflection registration with TypeScript symbol.
+	context.postReflectionCreation( eventReflection, context.getSymbolFromReflection( sourceReflection ), undefined );
 
 	return eventReflection;
 }

@@ -12,6 +12,7 @@
     "target": "es2020",
     "sourceMap": true,
     "allowJs": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }

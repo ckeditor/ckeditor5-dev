@@ -4,22 +4,24 @@
  */
 
 import {
-	Comment,
-	Converter,
-	ReflectionKind,
-	ParameterReflection,
-	IntrinsicType,
-	ReferenceType,
-	TypeScript as ts,
 	type Application,
-	type Context,
+	Comment,
 	type CommentDisplayPart,
+	type Context,
+	Converter,
+	DeclarationReflection,
+	IntrinsicType,
+	ParameterReflection,
+	ReferenceType,
+	ReflectionKind,
 	type SomeType,
+	TypeScript as ts,
 	type UnknownType
 } from 'typedoc';
 
 import ErrorTagSerializer from './errortagserializer.js';
 import './augmentation.js';
+import { getTarget } from '../utils';
 
 const ERROR_TAG_NAME = 'error';
 
@@ -39,7 +41,7 @@ export default function( app: Application ): void {
 }
 
 function onEventEnd( context: Context ) {
-	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module );
+	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module ) as Array<DeclarationReflection>;
 
 	// Errors are children of a module.
 	for ( const reflection of moduleReflections ) {
@@ -84,14 +86,7 @@ function onEventEnd( context: Context ) {
 			const errorName = parentNode.comment!;
 			const { parent } = parentNode as unknown as { parent: { comment: MaybeCommentDisplayPart } };
 
-			const errorDeclaration = context
-				.withScope( reflection )
-				.createDeclarationReflection(
-					ReflectionKind.Document,
-					undefined,
-					undefined,
-					errorName
-				);
+			const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.Document, reflection );
 
 			errorDeclaration.isCKEditor5Error = true;
 			errorDeclaration.comment = createComment( parent.comment );
@@ -120,18 +115,22 @@ function onEventEnd( context: Context ) {
 					parameter.comment = createComment( childTagAsParam.comment );
 
 					try {
-						parameter.type = convertType( context, childTagAsParam );
+						parameter.type = convertType( context, reflection, childTagAsParam );
 					} catch ( err ) {
 						parameter.type = new IntrinsicType( 'any' );
 					}
 
 					return parameter;
 				} );
+
+			context
+				.withScope( reflection )
+				.postReflectionCreation( errorDeclaration, getSymbol( errorNode ), undefined );
 		}
 	}
 }
 
-function convertType( context: Context, childTag: ParamExpressionNode ): SomeType {
+function convertType( context: Context, reflection: DeclarationReflection, childTag: ParamExpressionNode ): SomeType {
 	const convertedType = context.converter.convertType( context, childTag.typeExpression );
 
 	if ( !isUnknownType( convertedType ) ) {
@@ -145,9 +144,7 @@ function convertType( context: Context, childTag: ParamExpressionNode ): SomeTyp
 		throw new Error( 'Conversion a type failed.' );
 	}
 
-	// TODO: Should we support local links, e.g., `~ChildrenClass`?
-	const [ moduleName, childName ] = name.replace( 'module:', '' ).split( '~' );
-	const childReflection = context.project.getChildByName( [ moduleName!, childName! ] );
+	const childReflection = getTarget( context, reflection, name ) as DeclarationReflection | null;
 
 	if ( !childReflection ) {
 		throw new Error( 'A module reflection cannot be found.' );
@@ -163,26 +160,6 @@ function convertType( context: Context, childTag: ParamExpressionNode ): SomeTyp
 function isUnknownType( type: SomeType ): type is UnknownType {
 	return type.type === 'unknown';
 }
-
-type ParamExpressionNode = ts.Node & {
-	name: {
-		text: string;
-	};
-	comment: MaybeCommentDisplayPart;
-	typeExpression: ts.TypeNode;
-};
-
-type ErrorTagNode = ts.Node & {
-	text: string;
-	parent: ts.Node & {
-		tagName: ts.JSDocTag & {
-			text: string;
-		};
-		comment?: string;
-	};
-};
-
-type MaybeCommentDisplayPart = null | string | Array<CommentDisplayPart>;
 
 function findDescendant(
 	sourceFileOrNode: ts.SourceFile | ErrorTagNode,
@@ -254,3 +231,30 @@ function createComment( commentChildrenOrValue: MaybeCommentDisplayPart ): Comme
 
 	return new Comment( comments );
 }
+
+function getSymbol( node: ts.Node | ErrorTagNode ): ts.Symbol {
+	const symbol = 'symbol' in node ? node.symbol : null;
+
+	return symbol || getSymbol( node.parent );
+}
+
+type ParamExpressionNode = ts.Node & {
+	name: {
+		text: string;
+	};
+	comment: MaybeCommentDisplayPart;
+	typeExpression: ts.TypeNode;
+};
+
+type ErrorTagNode = ts.Node & {
+	text: string;
+	parent: ts.Node & {
+		tagName: ts.JSDocTag & {
+			text: string;
+		};
+		comment?: string;
+	};
+	symbol?: ts.Symbol;
+};
+
+type MaybeCommentDisplayPart = null | string | Array<CommentDisplayPart>;

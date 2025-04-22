@@ -4,7 +4,8 @@
  */
 
 import { glob } from 'glob';
-import { Application } from 'typedoc';
+import upath from 'upath';
+import { Application, OptionDefaults } from 'typedoc';
 import {
 	typeDocModuleFixer,
 	typeDocSymbolFixer,
@@ -14,10 +15,9 @@ import {
 	typeDocEventParamFixer,
 	typeDocEventInheritanceFixer,
 	typeDocInterfaceAugmentationFixer,
-	typeDocPurgePrivateApiDocs
+	typeDocPurgePrivateApiDocs,
+	validate
 } from '@ckeditor/typedoc-plugins';
-
-// import validators from './validators/index.js';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -26,38 +26,39 @@ import {
  * @returns {Promise}
  */
 export default async function build( config ) {
-	// const { plugins } = typedocPlugins;
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
-	// const strictMode = config.strict || false;
+	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
 	const ignoreFiles = config.ignoreFiles || [];
-	// const validatorOptions = config.validatorOptions || {};
+	const validatorOptions = config.validatorOptions || {};
 
-	const files = await glob( sourceFilePatterns, {
+	const files = ( await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
-	} );
+	} ) ).map( upath.normalize );
 
 	const app = await Application.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
-		// TODO: Revert `logLevel`.
-		// logLevel: 'Warning',
-		logLevel: 'Error',
+		logLevel: 'Warn',
 		basePath: config.cwd,
 
 		blockTags: [
+			...OptionDefaults.blockTags,
 			'@eventName',
-			'@default'
+			'@export',
+			'@fires',
+			'@label',
+			'@observable'
 		],
 		inlineTags: [
-			'@link',
+			...OptionDefaults.inlineTags,
 			'@glink'
 		],
 		modifierTags: [
+			...OptionDefaults.modifierTags,
 			'@publicApi',
-			'@skipSource',
-			'@internal'
+			'@skipSource'
 		],
 		plugin: [
 			// Fixes `"name": 'default" in the output project.
@@ -84,11 +85,11 @@ export default async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	// const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
-	//
-	// if ( !validationResult && strictMode ) {
-	// 	throw 'Something went wrong with TypeDoc.';
-	// }
+	const validationResult = validate( app, validatorOptions );
+
+	if ( !validationResult && strictMode ) {
+		throw 'Something went wrong with TypeDoc.';
+	}
 
 	if ( config.outputPath ) {
 		await app.generateJson( conversionResult, config.outputPath );

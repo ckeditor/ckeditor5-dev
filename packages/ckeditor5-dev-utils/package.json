@@ -46,7 +46,6 @@
   },
   "devDependencies": {
     "jest-extended": "^4.0.2",
-    "vinyl": "^3.0.0",
     "vitest": "^2.0.5"
   },
   "scripts": {

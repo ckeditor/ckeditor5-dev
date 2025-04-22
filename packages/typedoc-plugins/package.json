@@ -22,6 +22,9 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "upath": "^2.0.1"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
@@ -31,7 +34,6 @@
     "typedoc": "^0.28.1",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "5.0.4",
-    "upath": "^2.0.1",
     "vitest": "^2.0.5"
   },
   "peerDependencies": {
@@ -45,8 +47,8 @@
     "test:dev": "vitest dev"
   },
   "depcheckIgnore": [
-    "@vitest/coverage-v8",
     "typedoc",
+    "typedoc-plugin-rename-defaults",
     "typescript"
   ]
 }

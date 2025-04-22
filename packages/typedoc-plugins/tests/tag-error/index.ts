@@ -5,7 +5,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 import { glob } from 'glob';
-import * as upath from 'upath';
+import upath from 'upath';
 import {
 	Application,
 	ReflectionKind,
@@ -326,6 +326,17 @@ describe( 'typedoc-plugins/tag-error', () => {
 
 				expect( referenceType.reflection ).to.have.property( 'name', 'Error' );
 				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Class );
+			} );
+
+			it( 'should convert a `module:` type to a reference if a module exists (including children)', () => {
+				const paramDefinition = errorDefinition.parameters.find( param => {
+					return param.name === 'exampleInterfaceChildren';
+				} )!;
+
+				const referenceType = paramDefinition.type as ReferenceType;
+
+				expect( referenceType.reflection ).to.have.property( 'name', 'customPropertyInInterface' );
+				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Property );
 			} );
 
 			it( 'should convert a `module:` type to `any` if a module does not exist', () => {

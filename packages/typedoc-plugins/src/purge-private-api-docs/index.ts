@@ -12,7 +12,7 @@ import {
 	type DeclarationReflection
 } from 'typedoc';
 import fs from 'fs';
-import * as upath from 'upath';
+import upath from 'upath';
 
 /**
  * The `typedoc-plugin-purge-private-api-docs` removes reflections collected from private packages.
