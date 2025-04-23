@@ -17,7 +17,8 @@ import {
 	typeDocEventParamFixer,
 	typeDocEventInheritanceFixer,
 	typeDocInterfaceAugmentationFixer,
-	typeDocPurgePrivateApiDocs
+	typeDocPurgePrivateApiDocs,
+	typeDocRestoreProgramAfterConversion
 } from '../../../src/index.js';
 
 import { ROOT_TEST_DIRECTORY, assertCalls } from '../../utils.js';
@@ -49,6 +50,7 @@ describe( 'typedoc-plugins/validators/module-validator', function() {
 		typeDocEventInheritanceFixer( app );
 		typeDocInterfaceAugmentationFixer( app );
 		typeDocPurgePrivateApiDocs( app );
+		typeDocRestoreProgramAfterConversion( app );
 
 		moduleValidator( app, onError );
 

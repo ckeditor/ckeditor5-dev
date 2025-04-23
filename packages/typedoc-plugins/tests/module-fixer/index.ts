@@ -9,7 +9,7 @@ import upath from 'upath';
 import { Application, type ProjectReflection } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocModuleFixer } from '../../src/index.js';
+import { typeDocModuleFixer, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
 describe( 'typedoc-plugins/module-fixer', () => {
 	let conversionResult: ProjectReflection;
@@ -29,6 +29,7 @@ describe( 'typedoc-plugins/module-fixer', () => {
 		} );
 
 		typeDocModuleFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( files ).to.not.lengthOf( 0 );
 

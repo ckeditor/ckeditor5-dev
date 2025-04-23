@@ -13,7 +13,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocPurgePrivateApiDocs } from '../../src/index.js';
+import { typeDocPurgePrivateApiDocs, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
 describe( 'typedoc-plugins/purge-private-api-docs', function() {
 	let conversionResult: ProjectReflection;
@@ -40,6 +40,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 		} );
 
 		typeDocPurgePrivateApiDocs( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( entryPoints ).to.not.lengthOf( 0 );
 

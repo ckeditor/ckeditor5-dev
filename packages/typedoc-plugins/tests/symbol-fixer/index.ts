@@ -9,7 +9,7 @@ import upath from 'upath';
 import { Application, type ProjectReflection, ReflectionKind } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocSymbolFixer } from '../../src/index.js';
+import { typeDocRestoreProgramAfterConversion, typeDocSymbolFixer } from '../../src/index.js';
 
 describe( 'typedoc-plugins/symbol-fixer', () => {
 	let typeDoc: Application,
@@ -34,6 +34,7 @@ describe( 'typedoc-plugins/symbol-fixer', () => {
 		warnSpy = vi.spyOn( typeDoc.logger, 'warn' );
 
 		typeDocSymbolFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( files ).to.not.lengthOf( 0 );
 

@@ -16,6 +16,7 @@ import {
 	typeDocEventInheritanceFixer,
 	typeDocInterfaceAugmentationFixer,
 	typeDocPurgePrivateApiDocs,
+	typeDocRestoreProgramAfterConversion,
 	validate
 } from '@ckeditor/typedoc-plugins';
 
@@ -124,7 +125,8 @@ describe( 'lib/build()', () => {
 			typeDocEventParamFixer,
 			typeDocEventInheritanceFixer,
 			typeDocInterfaceAugmentationFixer,
-			typeDocPurgePrivateApiDocs
+			typeDocPurgePrivateApiDocs,
+			typeDocRestoreProgramAfterConversion
 		];
 
 		expect( stubs.app.convert ).toHaveBeenCalledTimes( 1 );

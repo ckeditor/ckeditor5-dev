@@ -14,7 +14,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagObservable } from '../../src/index.js';
+import { typeDocRestoreProgramAfterConversion, typeDocTagObservable } from '../../src/index.js';
 
 type AssertObservableExistsType = {
 	reflections: Array<DeclarationReflection>;
@@ -58,6 +58,7 @@ describe( 'typedoc-plugins/tag-observable', function() {
 		} );
 
 		typeDocTagObservable( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( files ).to.not.lengthOf( 0 );
 

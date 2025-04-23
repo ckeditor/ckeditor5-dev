@@ -7,6 +7,7 @@ import { glob } from 'glob';
 import upath from 'upath';
 import { Application, OptionDefaults } from 'typedoc';
 import {
+	typeDocRestoreProgramAfterConversion,
 	typeDocModuleFixer,
 	typeDocSymbolFixer,
 	typeDocTagError,
@@ -67,6 +68,7 @@ export default async function build( config ) {
 		]
 	} );
 
+	typeDocRestoreProgramAfterConversion( app );
 	typeDocModuleFixer( app );
 	typeDocSymbolFixer( app );
 	typeDocTagError( app );
