@@ -30,11 +30,7 @@ describe( 'parseArguments()', () => {
 			warning: logWarningStub
 		} );
 
-		vi.mocked( fs ).existsSync.mockImplementation( path => {
-			console.log( path );
-
-			return existingFiles.includes( path );
-		} );
+		vi.mocked( fs ).existsSync.mockImplementation( path => existingFiles.includes( path ) );
 	} );
 
 	it( 'replaces kebab-case strings with camelCase values', () => {
