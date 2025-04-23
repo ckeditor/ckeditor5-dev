@@ -16,7 +16,8 @@ import {
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import {
 	typeDocTagEvent,
-	typeDocEventInheritanceFixer
+	typeDocEventInheritanceFixer,
+	typeDocRestoreProgramAfterConversion
 } from '../../src/index.js';
 
 import typeDocRemoveClassC from './utils/typedoc-plugin-remove-class-c.js';
@@ -44,6 +45,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 
 		typeDocTagEvent( typeDoc );
 		typeDocEventInheritanceFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( entryPoints ).to.not.lengthOf( 0 );
 
@@ -367,6 +369,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			typeDocRemoveClassC( typeDoc );
 			typeDocTagEvent( typeDoc );
 			typeDocEventInheritanceFixer( typeDoc );
+			typeDocRestoreProgramAfterConversion( typeDoc );
 
 			conversionResult = ( await typeDoc.convert() )!;
 		} );

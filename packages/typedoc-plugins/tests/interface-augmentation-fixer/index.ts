@@ -15,7 +15,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocInterfaceAugmentationFixer } from '../../src/index.js';
+import { typeDocInterfaceAugmentationFixer, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
 describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 	let conversionResult: ProjectReflection;
@@ -37,6 +37,7 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 		} );
 
 		typeDocInterfaceAugmentationFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( entryPoints ).to.not.lengthOf( 0 );
 

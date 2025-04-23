@@ -18,7 +18,8 @@ import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import {
 	typeDocTagEvent,
 	typeDocTagObservable,
-	typeDocEventParamFixer
+	typeDocEventParamFixer,
+	typeDocRestoreProgramAfterConversion
 } from '../../src/index.js';
 
 function assertEventInfoParameter( eventInfoParameter: ParameterReflection, eventInfoClass: DeclarationReflection ) {
@@ -62,6 +63,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 		typeDocTagEvent( typeDoc );
 		typeDocTagObservable( typeDoc );
 		typeDocEventParamFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( entryPoints ).to.not.lengthOf( 0 );
 
@@ -97,6 +99,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 		typeDocTagEvent( typeDoc );
 		typeDocTagObservable( typeDoc );
 		typeDocEventParamFixer( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		const conversionResult = ( await typeDoc.convert() )!;
 		const eventInfoClass = conversionResult.getChildByName( [ 'utils/eventinfo', 'EventInfo' ] );

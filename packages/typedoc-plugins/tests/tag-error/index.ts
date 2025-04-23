@@ -16,7 +16,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagError } from '../../src/index.js';
+import { typeDocRestoreProgramAfterConversion, typeDocTagError } from '../../src/index.js';
 
 describe( 'typedoc-plugins/tag-error', () => {
 	let conversionResult: ProjectReflection;
@@ -39,6 +39,7 @@ describe( 'typedoc-plugins/tag-error', () => {
 		} );
 
 		typeDocTagError( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( files ).to.not.lengthOf( 0 );
 

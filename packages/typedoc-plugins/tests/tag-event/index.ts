@@ -17,7 +17,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocTagEvent } from '../../src/index.js';
+import { typeDocRestoreProgramAfterConversion, typeDocTagEvent } from '../../src/index.js';
 
 function assertEventExists( events: Array<DeclarationReflection>, eventName: string ) {
 	const event = events.find( event => {
@@ -51,6 +51,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 		warnSpy = vi.spyOn( typeDoc.logger, 'warn' );
 
 		typeDocTagEvent( typeDoc );
+		typeDocRestoreProgramAfterConversion( typeDoc );
 
 		expect( files ).to.not.lengthOf( 0 );
 
