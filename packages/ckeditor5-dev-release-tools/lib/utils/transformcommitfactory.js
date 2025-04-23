@@ -462,9 +462,9 @@ export default function transformCommitFactory( options = {} ) {
 				return [ scope ];
 			}
 
-			// Do not copy breaking changes notes. It's enough to keep them in the first commit.
-			if ( index && key === 'notes' ) {
-				return [];
+			// Copy the the breaking changes notes only in the first commit.
+			if ( key === 'notes' ) {
+				return index ? [] : value;
 			}
 		} ) );
 	}
