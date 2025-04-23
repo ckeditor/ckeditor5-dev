@@ -353,31 +353,39 @@ describe( 'parseArguments()', () => {
 
 	describe( 'identity-file', () => {
 		it( 'should be null by default, if `staging-ff.js` does not exist', () => {
-			const options = parseArguments( [] );
+			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
 
 			expect( options.identityFile ).to.equal( null );
 		} );
 
-		it( 'should point to the default value by default, if `staging-ff.js` does exist', () => {
+		it( 'should be null by default, if allowDefaultIdentityFile was not passed', () => {
 			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
 
-			const options = parseArguments( [] );
+			const options = parseArguments( [], {} );
+
+			expect( options.identityFile ).to.equal( null );
+		} );
+
+		it( 'should point to the default value by default', () => {
+			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+
+			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
 
 			expect( options.identityFile ).to.equal( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
 		} );
 
-		it( 'should point to the passed value, if `staging-ff.js` does exist', () => {
+		it( 'should point to the passed value', () => {
 			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
 
-			const options = parseArguments( [ '--identity-file', 'configs/identity.js' ] );
+			const options = parseArguments( [ '--identity-file', 'configs/identity.js' ], { allowDefaultIdentityFile: true } );
 
 			expect( options.identityFile ).to.equal( 'configs/identity.js' );
 		} );
 
-		it( 'should be false if --no-identity-file was passed, if `staging-ff.js` does exist', () => {
+		it( 'should be false if --no-identity-file was passed', () => {
 			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
 
-			const options = parseArguments( [ '--no-identity-file' ] );
+			const options = parseArguments( [ '--no-identity-file' ], { allowDefaultIdentityFile: true } );
 
 			expect( options.identityFile ).to.equal( false );
 		} );
