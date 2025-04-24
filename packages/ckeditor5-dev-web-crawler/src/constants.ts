@@ -26,15 +26,15 @@ export interface ErrorType {
  * Errors from the following hosts will be ignored.
  */
 export const IGNORED_HOSTS = [
-	'ucarecdn.com',
+	'visualwebsiteoptimizer.com',
 	'fury.io',
 	'shields.io',
 	'coveralls.io',
 	'spotify.com',
 	'vimeo.com',
+	'youtube.com',
 	'facebook.com',
 	'challenges.cloudflare.com',
-	'svc.webspellchecker.net',
 	'binance.com',
 	'jsfiddle.net'
 ];
