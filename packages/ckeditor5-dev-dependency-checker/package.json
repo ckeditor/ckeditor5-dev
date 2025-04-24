@@ -31,7 +31,7 @@
     "fs-extra": "^11.0.0",
     "glob": "^11.0.1",
     "minimist": "^1.2.8",
-    "oxc-parser": "^0.64.0",
+    "oxc-parser": "^0.66.0",
     "oxc-walker": "^0.2.5",
     "upath": "^2.0.1"
   }
