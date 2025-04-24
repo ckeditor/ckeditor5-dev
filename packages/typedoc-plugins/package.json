@@ -33,7 +33,7 @@
     "typedoc": "^0.23.15"
   },
   "scripts": {
-    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "test": "mocha \"./tests/**/*.js\" --timeout 10000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   },
   "depcheckIgnore": [
