@@ -13,4 +13,5 @@ export { default as typeDocEventInheritanceFixer } from './event-inheritance-fix
 export { default as typeDocInterfaceAugmentationFixer } from './interface-augmentation-fixer/index.js';
 export { default as typeDocPurgePrivateApiDocs } from './purge-private-api-docs/index.js';
 export { default as typeDocRestoreProgramAfterConversion } from './restore-program-after-conversion/index.js';
+export { default as typeDocReferenceFixer } from './reference-fixer/index.js';
 export { default as validate } from './validators/index.js';

@@ -17,6 +17,7 @@ import {
 	typeDocEventInheritanceFixer,
 	typeDocInterfaceAugmentationFixer,
 	typeDocPurgePrivateApiDocs,
+	typeDocReferenceFixer,
 	validate
 } from '@ckeditor/typedoc-plugins';
 
@@ -40,6 +41,7 @@ export default async function build( config ) {
 	const app = await Application.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
+		excludePrivate: false,
 		entryPoints: files,
 		logLevel: 'Warn',
 		basePath: config.cwd,
@@ -78,6 +80,7 @@ export default async function build( config ) {
 	typeDocEventInheritanceFixer( app );
 	typeDocInterfaceAugmentationFixer( app );
 	typeDocPurgePrivateApiDocs( app );
+	typeDocReferenceFixer( app );
 
 	console.log( 'Typedoc started...' );
 
