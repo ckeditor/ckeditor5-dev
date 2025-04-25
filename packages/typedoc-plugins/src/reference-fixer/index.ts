@@ -6,10 +6,10 @@
 import {
 	Converter,
 	ReflectionKind,
+	DeclarationReflection,
 	type ReferenceReflection,
 	type Context,
-	type Application,
-	DeclarationReflection
+	type Application
 } from 'typedoc';
 
 /**
@@ -31,6 +31,7 @@ function onEventEnd( context: Context ) {
 			const newReflectionName = new DeclarationReflection( reflection.name, ReflectionKind.Variable, reflection.parent );
 			newReflectionName.sources = [ ...reflection.sources! ];
 			newReflectionName.flags = targetReflection.flags;
+			newReflectionName.type = targetReflection.type;
 
 			// TODO: Looks like it does not work as expected.
 			// context.postReflectionCreation( newReflectionName, context.getSymbolFromReflection( reflection ), undefined );
