@@ -33,10 +33,15 @@ export const IGNORED_HOSTS = [
 	'spotify.com',
 	'vimeo.com',
 	'youtube.com',
+	'twitter.com',
+	'twimg.com',
 	'facebook.com',
+	'facebook.net',
 	'challenges.cloudflare.com',
 	'binance.com',
-	'jsfiddle.net'
+	'iframe.ly',
+	'jsfiddle.net',
+	'fonts.googleapis.com'
 ];
 
 export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
