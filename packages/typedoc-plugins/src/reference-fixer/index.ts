@@ -9,7 +9,7 @@ import {
 	type ReferenceReflection,
 	type Context,
 	type Application,
-	type DeclarationReflection
+	DeclarationReflection
 } from 'typedoc';
 
 /**
@@ -26,21 +26,38 @@ function onEventEnd( context: Context ) {
 	for ( const reflection of reflections ) {
 		const targetReflection = reflection.getTargetReflectionDeep() as DeclarationReflection;
 
-		const shouldFix1 =
-			reflection.parent!.name.split( '/' ).length >
-			targetReflection.parent!.name.split( '/' ).length;
+		// Icons need a separate handler.
+		if ( reflection.parent!.name === 'icons/index' ) {
+			const newReflectionName = new DeclarationReflection( reflection.name, ReflectionKind.Variable, reflection.parent );
+			newReflectionName.sources = [ ...reflection.sources! ];
+			newReflectionName.flags = targetReflection.flags;
 
-		const shouldFix2 = targetReflection.parent!.name.endsWith( '/index' );
+			// TODO: Looks like it does not work as expected.
+			// context.postReflectionCreation( newReflectionName, context.getSymbolFromReflection( reflection ), undefined );
+			// context.finalizeDeclarationReflection( newReflectionName );
 
-		// TODO: Consider better conditions.
-		if ( shouldFix1 || shouldFix2 ) {
-			targetReflection.name = targetReflection.escapedName || targetReflection.name;
+			( targetReflection.parent as DeclarationReflection ).addChild( newReflectionName );
+			( targetReflection.parent as DeclarationReflection ).removeChild( reflection );
+		} else {
+			const shouldFix1 =
+				reflection.parent!.name.split( '/' ).length >
+				targetReflection.parent!.name.split( '/' ).length;
 
-			const reflectionParent = reflection.parent as DeclarationReflection;
-			const targetReflectionParent = targetReflection.parent as DeclarationReflection;
+			const shouldFix2 = targetReflection.parent!.name.endsWith( '/index' );
 
-			reflectionParent.addChild( targetReflection );
-			targetReflectionParent.removeChild( targetReflection );
+			// TODO: Consider better conditions.
+			if ( shouldFix1 || shouldFix2 ) {
+				targetReflection.name = targetReflection.escapedName || targetReflection.name;
+
+				const reflectionParent = reflection.parent as DeclarationReflection;
+				const targetReflectionParent = targetReflection.parent as DeclarationReflection;
+
+				reflectionParent.addChild( targetReflection );
+				targetReflectionParent.removeChild( targetReflection );
+
+				reflectionParent.removeChild( reflection );
+				targetReflectionParent.addChild( reflection );
+			}
 		}
 	}
 }

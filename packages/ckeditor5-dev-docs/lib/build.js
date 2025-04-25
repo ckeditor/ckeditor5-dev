@@ -6,20 +6,7 @@
 import { glob } from 'glob';
 import upath from 'upath';
 import { Application, OptionDefaults } from 'typedoc';
-import {
-	typeDocRestoreProgramAfterConversion,
-	typeDocModuleFixer,
-	typeDocSymbolFixer,
-	typeDocTagError,
-	typeDocTagEvent,
-	typeDocTagObservable,
-	typeDocEventParamFixer,
-	typeDocEventInheritanceFixer,
-	typeDocInterfaceAugmentationFixer,
-	typeDocPurgePrivateApiDocs,
-	typeDocReferenceFixer,
-	validate
-} from '@ckeditor/typedoc-plugins';
+import * as plugins from '@ckeditor/typedoc-plugins';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -70,17 +57,18 @@ export default async function build( config ) {
 		]
 	} );
 
-	typeDocRestoreProgramAfterConversion( app );
-	typeDocModuleFixer( app );
-	typeDocSymbolFixer( app );
-	typeDocTagError( app );
-	typeDocTagEvent( app );
-	typeDocTagObservable( app );
-	typeDocEventParamFixer( app );
-	typeDocEventInheritanceFixer( app );
-	typeDocInterfaceAugmentationFixer( app );
-	typeDocPurgePrivateApiDocs( app );
-	typeDocReferenceFixer( app );
+	plugins.typeDocRestoreProgramAfterConversion( app );
+	plugins.typeDocModuleFixer( app );
+	plugins.typeDocSymbolFixer( app );
+	plugins.typeDocTagError( app );
+	plugins.typeDocTagEvent( app );
+	plugins.typeDocTagObservable( app );
+	plugins.typeDocEventParamFixer( app );
+	plugins.typeDocEventInheritanceFixer( app );
+	plugins.typeDocInterfaceAugmentationFixer( app );
+	plugins.typeDocPurgePrivateApiDocs( app );
+	plugins.typeDocReferenceFixer( app );
+	plugins.typeDocOutputCleanUp( app );
 
 	console.log( 'Typedoc started...' );
 
@@ -90,7 +78,7 @@ export default async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validate( app, validatorOptions );
+	const validationResult = plugins.validate( app, validatorOptions );
 
 	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';

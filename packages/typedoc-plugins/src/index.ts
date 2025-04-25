@@ -14,4 +14,5 @@ export { default as typeDocInterfaceAugmentationFixer } from './interface-augmen
 export { default as typeDocPurgePrivateApiDocs } from './purge-private-api-docs/index.js';
 export { default as typeDocRestoreProgramAfterConversion } from './restore-program-after-conversion/index.js';
 export { default as typeDocReferenceFixer } from './reference-fixer/index.js';
+export { default as typeDocOutputCleanUp } from './output-cleanup/index.js';
 export { default as validate } from './validators/index.js';
