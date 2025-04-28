@@ -7,7 +7,7 @@
 
 /* eslint-env node */
 
-import { cpus, freemem } from 'os';
+import { cpus } from 'os';
 
 export interface ErrorType {
 
@@ -44,22 +44,7 @@ export const IGNORED_HOSTS = [
 	'fonts.googleapis.com'
 ];
 
-/**
- * The default concurrency for the crawler. This is calculated to provide each browser
- * tag with one CPU core and 1.5 GB of memory, but not more than 16 browser tags.
- * This is to prevent the system from running out of memory or timing out.
- */
-export const DEFAULT_CONCURRENCY = Math.min(
-	cpus().length,
-	Math.floor(
-		freemem() /* B */ /
-		1024 /* KB */ /
-		1024 /* MB */ /
-		1024 /* GB */ /
-		1.5
-	),
-	16
-);
+export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
 
 export const DEFAULT_TIMEOUT = 15 * 1000;
 
