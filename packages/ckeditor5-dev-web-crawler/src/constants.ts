@@ -26,17 +26,22 @@ export interface ErrorType {
  * Errors from the following hosts will be ignored.
  */
 export const IGNORED_HOSTS = [
-	'ucarecdn.com',
+	'visualwebsiteoptimizer.com',
 	'fury.io',
 	'shields.io',
 	'coveralls.io',
 	'spotify.com',
 	'vimeo.com',
+	'youtube.com',
+	'twitter.com',
+	'twimg.com',
 	'facebook.com',
+	'facebook.net',
 	'challenges.cloudflare.com',
-	'svc.webspellchecker.net',
 	'binance.com',
-	'jsfiddle.net'
+	'iframe.ly',
+	'jsfiddle.net',
+	'fonts.googleapis.com'
 ];
 
 export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
