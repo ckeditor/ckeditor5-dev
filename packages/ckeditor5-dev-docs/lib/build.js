@@ -32,6 +32,7 @@ export default async function build( config ) {
 		entryPoints: files,
 		logLevel: 'Warn',
 		basePath: config.cwd,
+		readme: 'none',
 
 		blockTags: [
 			...OptionDefaults.blockTags,
