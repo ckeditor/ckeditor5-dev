@@ -3,12 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Reflection } from 'typedoc';
-
-type PartialObject = {
-	[ key: string ]: unknown;
-	groups?: Array<unknown>;
-};
+import type { DeclarationReflection } from 'typedoc';
 
 export default class CleanUpSerializer {
 	public get priority(): number {
@@ -19,7 +14,7 @@ export default class CleanUpSerializer {
 		return true;
 	}
 
-	public toObject( item: Reflection, obj: PartialObject ): object {
+	public toObject( item: DeclarationReflection, obj: Partial<DeclarationReflection> ): object {
 		delete obj.groups;
 
 		return obj;
