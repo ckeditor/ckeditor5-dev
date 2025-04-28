@@ -13,8 +13,15 @@ import {
 } from 'typedoc';
 
 /**
- * TODO: Add description.
- * TODO: Add tests.
+ * The `typedoc-plugin-reference-fixer` tries to fix a case when TypeDoc incorrectly assigns reflections that are re-exported from another
+ * file as a default export. In such case TypeDoc adds reflection declaration to the file containing the re-export and the actual source
+ * file contains only a reference targeting the declaration from the re-exported file.
+ *
+ * This plugin works as follows:
+ * - It searches for reflection declarations defined in "index" modules. Then, all such reflections are moved to the correct place where
+ *   they are defined in the source code. References are moved to "index" modules where they are re-exported.
+ * - The exception is the `ckeditor5-icons` package, which contains only references in "index" module. For this case, reflection
+ *   declarations which represent icons are created manually.
  */
 export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_END, onEventEnd );
@@ -24,41 +31,54 @@ function onEventEnd( context: Context ) {
 	const reflections = context.project.getReflectionsByKind( ReflectionKind.Reference ) as Array<ReferenceReflection>;
 
 	for ( const reflection of reflections ) {
-		const targetReflection = reflection.getTargetReflectionDeep() as DeclarationReflection;
+		// Skip processing references collected from TypeScript typings files ("*.d.ts").
+		if ( isTypingsSource( reflection ) ) {
+			continue;
+		}
 
-		// Icons need a separate handler.
-		if ( reflection.parent!.name === 'icons/index' ) {
-			const newReflectionName = new DeclarationReflection( reflection.name, ReflectionKind.Variable, reflection.parent );
+		const reflectionParent = reflection.parent as DeclarationReflection;
+		const targetReflection = reflection.getTargetReflectionDeep() as DeclarationReflection;
+		const targetReflectionParent = targetReflection.parent as DeclarationReflection;
+
+		// The `ckeditor5-icons` package re-exports SVGs in `icons/index` module, so it needs a dedicated handler.
+		if ( reflectionParent.name === 'icons/index' ) {
+			const newReflectionName = new DeclarationReflection( reflection.name, ReflectionKind.Variable, reflectionParent );
 			newReflectionName.sources = [ ...reflection.sources! ];
 			newReflectionName.flags = targetReflection.flags;
 			newReflectionName.type = targetReflection.type;
 
-			// TODO: Looks like it does not work as expected.
-			// context.postReflectionCreation( newReflectionName, context.getSymbolFromReflection( reflection ), undefined );
-			// context.finalizeDeclarationReflection( newReflectionName );
+			reflectionParent.addChild( newReflectionName );
+			reflectionParent.removeChild( reflection );
 
-			( targetReflection.parent as DeclarationReflection ).addChild( newReflectionName );
-			( targetReflection.parent as DeclarationReflection ).removeChild( reflection );
-		} else {
-			const shouldFix1 =
-				reflection.parent!.name.split( '/' ).length >
-				targetReflection.parent!.name.split( '/' ).length;
+			continue;
+		}
 
-			const shouldFix2 = targetReflection.parent!.name.endsWith( '/index' );
+		// If the reflection is declared as a child of the "index" module, move it to the proper (target) location.
+		if ( isIndexModule( targetReflectionParent ) ) {
+			targetReflection.name = targetReflection.escapedName || targetReflection.name;
 
-			// TODO: Consider better conditions.
-			if ( shouldFix1 || shouldFix2 ) {
-				targetReflection.name = targetReflection.escapedName || targetReflection.name;
+			targetReflection.parent = reflectionParent;
+			reflectionParent.addChild( targetReflection );
+			targetReflectionParent.removeChild( targetReflection );
 
-				const reflectionParent = reflection.parent as DeclarationReflection;
-				const targetReflectionParent = targetReflection.parent as DeclarationReflection;
-
-				reflectionParent.addChild( targetReflection );
-				targetReflectionParent.removeChild( targetReflection );
-
-				reflectionParent.removeChild( reflection );
-				targetReflectionParent.addChild( reflection );
-			}
+			reflection.parent = targetReflectionParent;
+			reflectionParent.removeChild( reflection );
+			targetReflectionParent.addChild( reflection );
 		}
 	}
+}
+
+function isTypingsSource( reflection: DeclarationReflection ) {
+	const [ source ] = reflection.sources!;
+
+	return source!.fullFileName.endsWith( '.d.ts' );
+}
+
+function isIndexModule( reflection: DeclarationReflection ) {
+	const [ source ] = reflection.sources!;
+
+	const isIndexFile = source!.fullFileName.endsWith( '/index.ts' );
+	const isModule = reflection.kind === ReflectionKind.Module;
+
+	return isIndexFile && isModule;
 }
