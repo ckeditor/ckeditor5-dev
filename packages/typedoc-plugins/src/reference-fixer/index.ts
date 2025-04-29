@@ -71,7 +71,7 @@ function onEventEnd( context: Context ) {
 function isTypingsSource( reflection: DeclarationReflection ) {
 	const [ source ] = reflection.sources!;
 
-	return source!.fullFileName.endsWith( '.d.ts' );
+	return source?.fullFileName.endsWith( '.d.ts' );
 }
 
 function isIndexModule( reflection: DeclarationReflection ) {
