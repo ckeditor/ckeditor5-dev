@@ -20,6 +20,7 @@ export default async function build( config ) {
 	const extraPlugins = config.extraPlugins || [];
 	const ignoreFiles = config.ignoreFiles || [];
 	const validatorOptions = config.validatorOptions || {};
+	const verbose = config.verbose || false;
 
 	const files = ( await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
@@ -30,7 +31,7 @@ export default async function build( config ) {
 		excludeExternals: true,
 		excludePrivate: false,
 		entryPoints: files,
-		logLevel: 'Warn',
+		logLevel: verbose ? 'Info' : 'Warn',
 		basePath: config.cwd,
 		readme: 'none',
 
@@ -40,7 +41,8 @@ export default async function build( config ) {
 			'@export',
 			'@fires',
 			'@label',
-			'@observable'
+			'@observable',
+			'@error'
 		],
 		inlineTags: [
 			...OptionDefaults.inlineTags,
@@ -107,6 +109,9 @@ export default async function build( config ) {
  *
  * @property {boolean} [strict=false] If `true`, errors found during the validation will finish the process
  * and exit code will be changed to `1`.
+ *
+ * @property {boolean} [verbose=false] If `true`, the output will be verbose.
+ *
  * @property {string} [outputPath] A path to the place where extracted doclets will be saved. Is an optional value due to tests.
  *
  * @property {string} [extraPlugins=[]] An array of path to extra plugins that will be added to Typedoc.
