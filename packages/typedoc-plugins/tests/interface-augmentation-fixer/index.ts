@@ -109,4 +109,18 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 
 		expect( target ).to.equal( fooConfigInterface );
 	} );
+
+	it( 'should store augmented interfaces which are re-exported in "index.ts"', () => {
+		const augmentedInterfaces = conversionResult.project.ckeditor5AugmentedInterfaces!;
+
+		expect( augmentedInterfaces ).to.have.length( 2 );
+
+		const [ foobarConfigInterface, fooConfigInterface ] = augmentedInterfaces;
+
+		expect( foobarConfigInterface ).not.to.be.undefined;
+		expect( foobarConfigInterface ).to.have.property( 'name', 'FoobarConfig' );
+
+		expect( fooConfigInterface ).not.to.be.undefined;
+		expect( fooConfigInterface ).to.have.property( 'name', 'FooConfig' );
+	} );
 } );

@@ -16,6 +16,7 @@ import upath from 'upath';
 
 /**
  * The `typedoc-plugin-purge-private-api-docs` removes reflections collected from private packages.
+ * It also removes reflections sources from augmented interfaces which are collected from private packages.
  *
  * Private packages are marked with the `private: true` property in their `package.json` files.
  *
@@ -47,9 +48,15 @@ function onEventEnd( context: Context ) {
 		if ( !isPublicApi( node ) ) {
 			context.project.removeReflection( reflection );
 		} else {
-			removeUrlSourcesFromReflection( reflection );
+			removePrivateUrlSourcesFromReflection( reflection );
 			removeNonPublicMembersFromReflection( reflection, context );
 		}
+	}
+
+	const augmentedInterfaces = context.project.ckeditor5AugmentedInterfaces || [];
+
+	for ( const reflection of augmentedInterfaces ) {
+		removePrivateUrlSourcesFromReflection( reflection );
 	}
 }
 
@@ -113,15 +120,17 @@ function isInheritedReflectionFromPrivatePackage( reflection: DeclarationReflect
 	return isPrivatePackageFile( reflection.sources![ 0 ]!.fullFileName );
 }
 
-function removeUrlSourcesFromReflection( reflection: DeclarationReflection ) {
+function removePrivateUrlSourcesFromReflection( reflection: DeclarationReflection ) {
 	if ( reflection.sources ) {
-		reflection.sources.forEach( source => {
-			delete source.url;
-		} );
+		reflection.sources
+			.filter( source => isPrivatePackageFile( source.fullFileName ) )
+			.forEach( source => {
+				delete source.url;
+			} );
 	}
 
 	reflection.traverse( childReflection => {
-		removeUrlSourcesFromReflection( childReflection as DeclarationReflection );
+		removePrivateUrlSourcesFromReflection( childReflection as DeclarationReflection );
 	} );
 }
 

@@ -11,6 +11,7 @@ import {
 	type Application,
 	type DeclarationReflection
 } from 'typedoc';
+import './augmentation.js';
 
 /**
  * The `typedoc-plugin-interface-augmentation-fixer` tries to fix an interface, that has been extended (augmented) from the outside (from
@@ -56,7 +57,6 @@ function onEventEnd( context: Context ) {
 
 		// Copy properties from an extended interface exported via the main package `index.ts` (module augmentation).
 		reflection.children = interfaceToCopy.children.slice();
-		reflection.groups = interfaceToCopy.groups!.slice();
 
 		// We do not want to have the same interface defined twice.
 		// The goal is to have a reference as a child in the main module.
@@ -78,5 +78,10 @@ function onEventEnd( context: Context ) {
 		// ...just to register the new reference reflection with this old symbol.
 		// This trick is needed to make sure that all type references still point to the correct reflection.
 		context.project.registerReflection( newRef, oldSymbol, undefined );
+
+		// Store augmented interfaces, because it might be required to post-process them in another plugin,
+		// i.e. in `typedoc-plugin-purge-private-api-docs` to remove reflection sources targeting private packages.
+		context.project.ckeditor5AugmentedInterfaces ??= [];
+		context.project.ckeditor5AugmentedInterfaces.push( reflection );
 	}
 }
