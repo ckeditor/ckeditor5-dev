@@ -8,12 +8,42 @@ import { glob } from 'glob';
 import upath from 'upath';
 import {
 	Application,
-	type ProjectReflection,
-	type DeclarationReflection
+	Converter,
+	ReflectionKind,
+	SourceReference,
+	DeclarationReflection,
+	type Context,
+	type ProjectReflection
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocPurgePrivateApiDocs, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
+
+function storeAugmentedInterface( app: Application ) {
+	// TODO: To resolve types.
+	// @ts-expect-error TS2339
+	// Property 'on' does not exist on type 'Converter'.
+	app.converter.on( Converter.EVENT_END, ( context: Context ) => {
+		context.project.ckeditor5AugmentedInterfaces = [
+			createInterface( 'AugmentedInterfacePublic' ),
+			createInterface( 'AugmentedInterfacePrivate', true )
+		];
+	} );
+}
+
+function createInterface( name: string, isPrivate?: boolean ) {
+	const privatePath = '/fixtures/private-package/src/augmentedinterface.ts';
+	const publicPath = '/fixtures/public-package/src/augmentedinterface.ts';
+	const fullFileName = upath.join( __dirname + ( isPrivate ? privatePath : publicPath ) );
+
+	const source = new SourceReference( fullFileName, 1, 1 );
+	source.url = 'https://github.com/ckeditor/ckeditor5-dev/blob/hash/file.ts#L1';
+
+	const reflection = new DeclarationReflection( name, ReflectionKind.Interface );
+	reflection.sources = [ source ];
+
+	return reflection;
+}
 
 describe( 'typedoc-plugins/purge-private-api-docs', function() {
 	let conversionResult: ProjectReflection;
@@ -39,6 +69,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			excludePrivate: false
 		} );
 
+		storeAugmentedInterface( typeDoc );
 		typeDocPurgePrivateApiDocs( typeDoc );
 		typeDocRestoreProgramAfterConversion( typeDoc );
 
@@ -295,6 +326,15 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 			expect( extendPrivateCollection.children!.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
 			expect( extendPrivateCollection.children!.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
 			expect( extendPrivateCollection.children!.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
+		} );
+	} );
+
+	describe( 'augmented interfaces', () => {
+		it( 'should remove sources only from private reflections', () => {
+			const [ augmentedInterfacePublic, augmentedInterfacePrivate ] = conversionResult.ckeditor5AugmentedInterfaces!;
+
+			expect( augmentedInterfacePublic.sources![ 0 ].url ).not.to.be.undefined;
+			expect( augmentedInterfacePrivate.sources![ 0 ].url ).to.be.undefined;
 		} );
 	} );
 } );
