@@ -13,7 +13,8 @@ import {
 	type ProjectReflection,
 	type DeclarationReflection,
 	type UnionType,
-	type ReferenceType
+	type ReferenceType,
+	type ArrayType
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
@@ -266,14 +267,12 @@ describe( 'typedoc-plugins/tag-error', () => {
 
 				expect( comment ).to.have.property( 'summary' );
 				expect( comment.summary ).to.be.an( 'array' );
-				expect( comment.summary ).to.lengthOf( 3 );
+				expect( comment.summary ).to.lengthOf( 1 );
 				expect( comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( comment.summary[ 0 ] ).to.have.property( 'text', 'A name ' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'text', 'module:utils/object~Object' );
-				expect( comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
-				expect( comment.summary[ 2 ] ).to.have.property( 'text', ' `description`.' );
+				expect( comment.summary[ 0 ] ).to.have.property(
+					'text',
+					'A name {@link module:utils/object~Object} `description`.'
+				);
 			} );
 
 			it( 'should convert a comment including an inline tag to a summary', () => {
@@ -287,14 +286,12 @@ describe( 'typedoc-plugins/tag-error', () => {
 				const comment = paramDefinition.comment!;
 
 				expect( comment.summary ).to.be.an( 'array' );
-				expect( comment.summary ).to.lengthOf( 3 );
+				expect( comment.summary ).to.lengthOf( 1 );
 				expect( comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( comment.summary[ 0 ] ).to.have.property( 'text', 'Description of the error. Please, see ' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
-				expect( comment.summary[ 1 ] ).to.have.property( 'text', '~CustomError' );
-				expect( comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
-				expect( comment.summary[ 2 ] ).to.have.property( 'text', '.' );
+				expect( comment.summary[ 0 ] ).to.have.property(
+					'text',
+					'Description of the error. Please, see {@link ~CustomError}.'
+				);
 			} );
 
 			it( 'should convert an intrinsic type (boolean) using a TypeDoc notation', () => {
@@ -323,6 +320,19 @@ describe( 'typedoc-plugins/tag-error', () => {
 				expect( firstType ).to.have.property( 'type', 'intrinsic' );
 				expect( secondType ).to.have.property( 'name', 'number' );
 				expect( secondType ).to.have.property( 'type', 'intrinsic' );
+			} );
+
+			it( 'should convert an array of intrinsic type (string) using a TypeDoc notation', () => {
+				const paramDefinition = errorDefinition.parameters.find( param => {
+					return param.name === 'arrayString';
+				} )!;
+
+				const arrayType = paramDefinition.type as ArrayType;
+				expect( arrayType ).to.have.property( 'elementType' );
+
+				const intrinsicType = arrayType.elementType;
+				expect( intrinsicType ).to.have.property( 'name', 'string' );
+				expect( intrinsicType ).to.have.property( 'type', 'intrinsic' );
 			} );
 
 			it( 'should convert a `module:` type to a reference if a module exists', () => {
@@ -358,13 +368,29 @@ describe( 'typedoc-plugins/tag-error', () => {
 				expect( intrinsicType ).to.have.property( 'type', 'intrinsic' );
 			} );
 
-			it( 'should convert a dot notation `@param` type to `any` (unsupported syntax)', () => {
+			it( 'should convert an array of a `module:` type to a reference if a module exists', () => {
 				const paramDefinition = errorDefinition.parameters.find( param => {
-					return param.name === 'nestedObject';
+					return param.name === 'arrayModule';
 				} )!;
 
-				const intrinsicType = paramDefinition.type;
+				const arrayType = paramDefinition.type as ArrayType;
+				expect( arrayType ).to.have.property( 'elementType' );
 
+				const referenceType = arrayType.elementType as unknown as ReferenceType;
+
+				expect( referenceType.reflection ).to.have.property( 'name', 'SystemError' );
+				expect( referenceType.reflection ).to.have.property( 'kind', ReflectionKind.Interface );
+			} );
+
+			it( 'should convert an array of a `module:` type to any if a module does not exist', () => {
+				const paramDefinition = errorDefinition.parameters.find( param => {
+					return param.name === 'arrayMissingModule';
+				} )!;
+
+				const arrayType = paramDefinition.type as ArrayType;
+				expect( arrayType ).to.have.property( 'elementType' );
+
+				const intrinsicType = arrayType.elementType;
 				expect( intrinsicType ).to.have.property( 'name', 'any' );
 				expect( intrinsicType ).to.have.property( 'type', 'intrinsic' );
 			} );

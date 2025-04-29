@@ -81,9 +81,11 @@ export function create( errorName: string ): CustomError {
  * @param {module:fixtures/error~Error} exampleModule Just an existing module.
  * @param {module:fixtures/error~ErrorFooBar} exampleMissingModule Just a non-existing module.
  * @param {module:fixtures/error~SystemError#customPropertyInInterface} exampleInterfaceChildren Just a named property.
+ * @param {Array.<module:fixtures/error~SystemError>} arrayModule An array of modules.
+ * @param {Array.<module:fixtures/error~SystemErrorFooBarHe>} arrayMissingModule An array of non-existing modules.
+ * @param {Array.<string>} arrayString An array of strings.
  * @param {HTMLElement} domInstance An instance of an HTML element.
  * @param {object} nestedObject A nested object.
- * @param {string} nestedObject.property A nested property in an object.
  * @param {any} linkInDescriptionAbsolute A name {@link module:utils/object~Object} `description`.
  * @param {any} linkInDescriptionRelative Description of the error. Please, see {@link ~CustomError}.
  * @param {any} paramMissingDescription

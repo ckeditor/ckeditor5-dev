@@ -13,10 +13,9 @@ import {
 	IntrinsicType,
 	ParameterReflection,
 	ReferenceType,
+	ArrayType,
 	ReflectionKind,
-	type SomeType,
-	TypeScript as ts,
-	type UnknownType
+	TypeScript as ts
 } from 'typedoc';
 
 import ErrorTagSerializer from './errortagserializer.js';
@@ -30,8 +29,8 @@ const ERROR_TAG_NAME = 'error';
  *
  * So far, we do not support collecting types of `@param`.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export default function ( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, -1000 );
 
 	// TODO: To resolve types.
 	// @ts-expect-error TS2345
@@ -114,18 +113,12 @@ function onEventEnd( context: Context ) {
 					return true;
 				} )
 				.map( _childTag => {
-					const childTagAsParam = _childTag as unknown as ParamExpressionNode;
-
-					const parameter = new ParameterReflection( childTagAsParam.name.text, ReflectionKind.Parameter, errorDeclaration );
-					parameter.comment = createComment( childTagAsParam.comment );
-
-					try {
-						parameter.type = convertType( context, reflection, childTagAsParam );
-					} catch ( err ) {
-						parameter.type = new IntrinsicType( 'any' );
-					}
-
-					return parameter;
+					return createParameter(
+						context,
+						errorDeclaration,
+						_childTag as unknown as ParamExpressionNode,
+						errorDeclaration
+					);
 				} );
 
 			context
@@ -135,29 +128,69 @@ function onEventEnd( context: Context ) {
 	}
 }
 
-function convertType( context: Context, reflection: DeclarationReflection, childTag: ParamExpressionNode ): SomeType {
-	const nameWithBrackets = childTag.typeExpression.getText();
+function createParameter(
+	context: Context,
+	reflection: DeclarationReflection,
+	childTag: ParamExpressionNode,
+	parent: DeclarationReflection
+): ParameterReflection {
+	const regexp = /@param\s+\{([^}]+)\}\s+([\w.]+)\s+(.+)/;
+	const arrayModuleRegexp = /<([^>]+)>/;
+	const match = childTag.getText().match( regexp );
 
-	if ( nameWithBrackets.startsWith( '@param' ) ) {
-		throw new Error( 'A nod notation @param is not supported.' );
-	}
+	const parameter = new ParameterReflection( childTag.name.text, ReflectionKind.Parameter, parent );
 
-	const type = nameWithBrackets.slice( 1, -1 );
+	let isArray = false;
 
-	if ( type.startsWith( 'module:' ) ) {
-		const childReflection = getTarget( context, reflection, type ) as DeclarationReflection | null;
-
-		if ( !childReflection ) {
-			throw new Error( 'A module reflection cannot be found.' );
+	try {
+		if ( !match ) {
+			throw new Error( 'Invalid signature to process.' );
 		}
 
-		return ReferenceType.createResolvedReference(
-			childTag.name.text,
-			childReflection,
-			context.project
-		);
+		let typeName = match[ 1 ]!;
+		const name = match[ 2 ]!;
+		const description = match[ 3 ]!;
+
+		if ( name!.includes( '.' ) ) {
+			throw new Error( 'A nod notation @param is not supported.' );
+		}
+
+		parameter.name = name;
+		isArray = typeName.startsWith( 'Array' );
+
+		if ( isArray ) {
+			// Extract the type name from `<` and `>` brackets.
+			typeName = typeName.match( arrayModuleRegexp )!.at( 1 )!;
+		}
+
+		if ( typeName!.startsWith( 'module:' ) ) {
+			const childReflection = getTarget( context, reflection, typeName! );
+
+			if ( !childReflection ) {
+				throw new Error( 'A module reflection cannot be found.' );
+			}
+
+			const returnType = ReferenceType.createResolvedReference(
+				childTag.name.text,
+				childReflection as DeclarationReflection,
+				context.project
+			);
+
+			parameter.type = isArray ? new ArrayType( returnType ) : returnType;
+		} else {
+			// No need to wrap in `ArrayType` as we use the default typedoc mechanism here.
+			parameter.type = context.converter.convertType( context, childTag.typeExpression );
+		}
+
+		parameter.comment = createComment( description );
+	} catch {
+		const anyType = new IntrinsicType( 'any' );
+
+		parameter.type = isArray ? new ArrayType( anyType ) : anyType;
+		parameter.comment = createComment( childTag.comment );
 	}
-	return context.converter.convertType( context, childTag.typeExpression );
+
+	return parameter;
 }
 
 function findDescendant(
