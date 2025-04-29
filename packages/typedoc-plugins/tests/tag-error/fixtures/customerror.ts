@@ -46,6 +46,9 @@ export default class CustomError extends Error {
 		 * It contains a parameter.
 		 *
 		 * @error customerror-inside-method
+		 * @param {string} test An example param.
+		 * @customTag It's a custom tag that should not emit an error.
+		 * @customTag {string} It's a custom tag that should not emit an error.
 		 */
 		return new CustomError( errorName );
 	}

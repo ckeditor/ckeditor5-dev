@@ -9,6 +9,7 @@ import upath from 'upath';
 import {
 	Application,
 	ReflectionKind,
+	OptionDefaults,
 	type ProjectReflection,
 	type DeclarationReflection,
 	type UnionType,
@@ -30,9 +31,15 @@ describe( 'typedoc-plugins/tag-error', () => {
 
 		const files = ( await glob( sourceFilePatterns ) ).map( file => upath.normalize( file ) );
 		const typeDoc = await Application.bootstrapWithPlugins( {
-			logLevel: 'Error',
+			logLevel: 'Warn',
 			entryPoints: files,
 			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			blockTags: [
+				...OptionDefaults.blockTags,
+				'@eventName',
+				'@error',
+				'@customTag'
+			],
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]

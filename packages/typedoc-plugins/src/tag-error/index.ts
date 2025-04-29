@@ -106,6 +106,11 @@ function onEventEnd( context: Context ) {
 						return false;
 					}
 
+					// Keep the `@param` tags only.
+					if ( childTagAsParam.tagName.text !== 'param' ) {
+						return false;
+					}
+
 					return true;
 				} )
 				.map( _childTag => {
@@ -131,34 +136,28 @@ function onEventEnd( context: Context ) {
 }
 
 function convertType( context: Context, reflection: DeclarationReflection, childTag: ParamExpressionNode ): SomeType {
-	const convertedType = context.converter.convertType( context, childTag.typeExpression );
+	const nameWithBrackets = childTag.typeExpression.getText();
 
-	if ( !isUnknownType( convertedType ) ) {
-		return convertedType;
+	if ( nameWithBrackets.startsWith( '@param' ) ) {
+		throw new Error( 'A nod notation @param is not supported.' );
 	}
 
-	const { name } = convertedType;
+	const type = nameWithBrackets.slice( 1, -1 );
 
-	// A dot notation is not supported (`@param {obj.field} ...`).
-	if ( name.startsWith( '@param' ) ) {
-		throw new Error( 'Conversion a type failed.' );
+	if ( type.startsWith( 'module:' ) ) {
+		const childReflection = getTarget( context, reflection, type ) as DeclarationReflection | null;
+
+		if ( !childReflection ) {
+			throw new Error( 'A module reflection cannot be found.' );
+		}
+
+		return ReferenceType.createResolvedReference(
+			childTag.name.text,
+			childReflection,
+			context.project
+		);
 	}
-
-	const childReflection = getTarget( context, reflection, name ) as DeclarationReflection | null;
-
-	if ( !childReflection ) {
-		throw new Error( 'A module reflection cannot be found.' );
-	}
-
-	return ReferenceType.createResolvedReference(
-		childTag.name.text,
-		childReflection,
-		context.project
-	);
-}
-
-function isUnknownType( type: SomeType ): type is UnknownType {
-	return type.type === 'unknown';
+	return context.converter.convertType( context, childTag.typeExpression );
 }
 
 function findDescendant(
@@ -240,6 +239,9 @@ function getSymbol( node: ts.Node | ErrorTagNode ): ts.Symbol {
 
 type ParamExpressionNode = ts.Node & {
 	name: {
+		text: string;
+	};
+	tagName: {
 		text: string;
 	};
 	comment: MaybeCommentDisplayPart;
