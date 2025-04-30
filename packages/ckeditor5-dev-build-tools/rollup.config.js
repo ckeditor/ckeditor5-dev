@@ -28,7 +28,7 @@ export default defineConfig( {
 	input: 'src/index.ts',
 	output: {
 		format: 'esm',
-		file: path.join( cwd, 'dist', 'index.js' ),
+		dir: path.join( cwd, 'dist' ),
 		assetFileNames: '[name][extname]'
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
