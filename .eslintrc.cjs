@@ -36,15 +36,5 @@ module.exports = {
 				' */'
 			]
 		} ]
-	},
-	overrides: [
-		{
-			files: [
-				'./packages/typedoc-plugins/**/*'
-			],
-			rules: {
-				'ckeditor5-rules/require-file-extensions-in-imports': 'off'
-			}
-		}
-	]
+	}
 };

@@ -48,7 +48,7 @@
     "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {
-    "**/*.js": [
+    "**/*.{js,ts,mjs,cjs}": [
       "eslint --quiet"
     ]
   },
