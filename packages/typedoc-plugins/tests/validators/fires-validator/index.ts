@@ -6,7 +6,7 @@
 import { describe, it, beforeAll, vi } from 'vitest';
 import { glob } from 'glob';
 import upath from 'upath';
-import { Application } from 'typedoc';
+import { Application, Converter, type Context } from 'typedoc';
 
 import {
 	typeDocModuleFixer,
@@ -24,6 +24,7 @@ import {
 import { ROOT_TEST_DIRECTORY, assertCalls } from '../../utils.js';
 import firesValidator from '../../../src/validators/fires-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
+import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 
 describe( 'typedoc-plugins/validators/fires-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'fires-validator', 'fixtures' );
@@ -52,7 +53,12 @@ describe( 'typedoc-plugins/validators/fires-validator', () => {
 		typeDocPurgePrivateApiDocs( app );
 		typeDocRestoreProgramAfterConversion( app );
 
-		firesValidator( app, onError );
+		// TODO: To resolve types.
+		// @ts-expect-error TS2339
+		// Property 'on' does not exist on type 'Converter'.
+		app.converter.on( Converter.EVENT_END, ( context: Context ) => {
+			firesValidator( context, onError );
+		}, getPluginPriority( 'validators' ) );
 
 		await app.convert();
 	} );

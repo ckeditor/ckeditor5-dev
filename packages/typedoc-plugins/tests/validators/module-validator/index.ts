@@ -3,25 +3,26 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, beforeAll, vi } from 'vitest';
+import { beforeAll, describe, it, vi } from 'vitest';
 import { glob } from 'glob';
 import upath from 'upath';
-import { Application } from 'typedoc';
+import { Application, Converter, type Context } from 'typedoc';
 
 import {
+	typeDocEventInheritanceFixer,
+	typeDocEventParamFixer,
+	typeDocInterfaceAugmentationFixer,
 	typeDocModuleFixer,
+	typeDocPurgePrivateApiDocs,
+	typeDocRestoreProgramAfterConversion,
 	typeDocSymbolFixer,
 	typeDocTagError,
 	typeDocTagEvent,
-	typeDocTagObservable,
-	typeDocEventParamFixer,
-	typeDocEventInheritanceFixer,
-	typeDocInterfaceAugmentationFixer,
-	typeDocPurgePrivateApiDocs,
-	typeDocRestoreProgramAfterConversion
+	typeDocTagObservable
 } from '../../../src/index.js';
 
-import { ROOT_TEST_DIRECTORY, assertCalls } from '../../utils.js';
+import { assertCalls, ROOT_TEST_DIRECTORY } from '../../utils.js';
+import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 import moduleValidator from '../../../src/validators/module-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 
@@ -52,7 +53,12 @@ describe( 'typedoc-plugins/validators/module-validator', function() {
 		typeDocPurgePrivateApiDocs( app );
 		typeDocRestoreProgramAfterConversion( app );
 
-		moduleValidator( app, onError );
+		// TODO: To resolve types.
+		// @ts-expect-error TS2339
+		// Property 'on' does not exist on type 'Converter'.
+		app.converter.on( Converter.EVENT_END, ( context: Context ) => {
+			moduleValidator( context, onError );
+		}, getPluginPriority( 'validators' ) );
 
 		await app.convert();
 	} );

@@ -16,10 +16,11 @@ import * as plugins from '@ckeditor/typedoc-plugins';
  */
 export default async function build( config ) {
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
-	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
 	const ignoreFiles = config.ignoreFiles || [];
-	const validatorOptions = config.validatorOptions || {};
+	const validatorOptions = config.validatorOptions || {
+		strict: false
+	};
 	const verbose = config.verbose || false;
 
 	const files = ( await glob( sourceFilePatterns, {
@@ -72,18 +73,13 @@ export default async function build( config ) {
 	plugins.typeDocPurgePrivateApiDocs( app );
 	plugins.typeDocReferenceFixer( app );
 	plugins.typeDocOutputCleanUp( app );
+	plugins.validate( app, validatorOptions );
 
 	console.log( 'Typedoc started...' );
 
 	const conversionResult = await app.convert();
 
 	if ( !conversionResult ) {
-		throw 'Something went wrong with TypeDoc.';
-	}
-
-	const validationResult = plugins.validate( app, validatorOptions );
-
-	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 

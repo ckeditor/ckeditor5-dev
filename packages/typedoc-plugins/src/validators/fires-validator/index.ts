@@ -3,50 +3,37 @@
  * For licensing, see LICENSE.md.
  */
 
-import {
-	Converter,
-	ReflectionKind,
-	type Context,
-	type Application,
-	type DeclarationReflection
-} from 'typedoc';
+import { type Context, type DeclarationReflection, ReflectionKind } from 'typedoc';
 import { getNode, isAbsoluteIdentifier, isIdentifierValid, isReflectionValid } from '../../utils/index.js';
 import { type ValidatorErrorCallback } from '../index.js';
-import { getPluginPriority } from '../../utils/getpluginpriority.js';
 
 /**
  * Validates the output produced by TypeDoc.
  *
  * It checks if the event in the "@fires" tag exists.
  */
-export default function( app: Application, onError: ValidatorErrorCallback ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd( onError ), getPluginPriority( 'validators' ) );
-}
+export default function( context: Context, onError: ValidatorErrorCallback ): void {
+	const reflections = context.project
+		.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature )
+		.filter( isReflectionValid ) as Array<DeclarationReflection>;
 
-function onEventEnd( onError: ValidatorErrorCallback ) {
-	return ( context: Context ) => {
-		const reflections = context.project
-			.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature )
-			.filter( isReflectionValid ) as Array<DeclarationReflection>;
+	for ( const reflection of reflections ) {
+		const identifiers = getIdentifiersFromFiresTag( reflection );
 
-		for ( const reflection of reflections ) {
-			const identifiers = getIdentifiersFromFiresTag( reflection );
+		if ( !identifiers.length ) {
+			continue;
+		}
 
-			if ( !identifiers.length ) {
-				continue;
-			}
+		for ( const identifier of identifiers ) {
+			const isValid = isIdentifierValid( context, reflection, identifier );
 
-			for ( const identifier of identifiers ) {
-				const isValid = isIdentifierValid( context, reflection, identifier );
+			if ( !isValid ) {
+				const eventName = identifier.replace( /^#event:/, '' );
 
-				if ( !isValid ) {
-					const eventName = identifier.replace( /^#event:/, '' );
-
-					onError( `Incorrect event name: "${ eventName }" in the @fires tag`, getNode( context, reflection ) );
-				}
+				onError( `Incorrect event name: "${ eventName }" in the @fires tag`, getNode( context, reflection ) );
 			}
 		}
-	};
+	}
 }
 
 function getIdentifiersFromFiresTag( reflection: DeclarationReflection ) {

@@ -113,7 +113,11 @@ describe( 'lib/build()', () => {
 
 	it( 'should execute TypeDoc plugins before converting the documentation', async () => {
 		await build( {
-			sourceFiles
+			sourceFiles,
+			validatorOptions: {
+				enableOverloadValidator: true,
+				strict: false
+			}
 		} );
 
 		const plugins = [
@@ -129,29 +133,21 @@ describe( 'lib/build()', () => {
 			typeDocRestoreProgramAfterConversion
 		];
 
-		expect( stubs.app.convert ).toHaveBeenCalledTimes( 1 );
-
 		plugins.forEach( plugin => {
 			expect( plugin ).toHaveBeenCalledTimes( 1 );
 			expect( plugin ).toHaveBeenCalledWith( stubs.app );
 
 			expect( plugin ).toHaveBeenCalledBefore( stubs.app.convert );
 		} );
-	} );
 
-	it( 'should validate the documentation after converting the documentation', async () => {
-		await build( {
-			sourceFiles,
-			validatorOptions: {
-				enableOverloadValidator: true
-			}
+		expect( validate ).toHaveBeenCalledTimes( 1 );
+		expect( validate ).toHaveBeenCalledWith( stubs.app, {
+			enableOverloadValidator: true,
+			strict: false
 		} );
+		expect( validate ).toHaveBeenCalledBefore( stubs.app.convert );
 
 		expect( stubs.app.convert ).toHaveBeenCalledTimes( 1 );
-		expect( validate ).toHaveBeenCalledTimes( 1 );
-		expect( validate ).toHaveBeenCalledWith( stubs.app, { enableOverloadValidator: true } );
-
-		expect( validate ).toHaveBeenCalledAfter( stubs.app.convert );
 	} );
 
 	it( 'should create JSON output file after converting the documentation', async () => {
@@ -184,20 +180,6 @@ describe( 'lib/build()', () => {
 		stubs.app.convert.mockResolvedValue( null );
 
 		return build( { sourceFiles } )
-			.then(
-				() => {
-					throw new Error( 'Expected to throw.' );
-				},
-				err => {
-					expect( err ).to.equal( 'Something went wrong with TypeDoc.' );
-				}
-			);
-	} );
-
-	it( 'should throw an error if validation failed in strict mode', async () => {
-		vi.mocked( validate ).mockReturnValue( false );
-
-		return build( { sourceFiles, strict: true } )
 			.then(
 				() => {
 					throw new Error( 'Expected to throw.' );
