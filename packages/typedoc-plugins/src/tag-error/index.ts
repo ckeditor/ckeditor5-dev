@@ -26,10 +26,8 @@ const ERROR_TAG_NAME = 'error';
 
 /**
  * The `typedoc-plugin-tag-error` collects error definitions from the `@error` tag.
- *
- * So far, we do not support collecting types of `@param`.
  */
-export default function ( app: Application ): void {
+export default function( app: Application ): void {
 	app.converter.on( Converter.EVENT_END, onEventEnd, -1000 );
 
 	// TODO: To resolve types.
@@ -152,7 +150,7 @@ function createParameter(
 		const description = match[ 3 ]!;
 
 		if ( name!.includes( '.' ) ) {
-			throw new Error( 'A nod notation @param is not supported.' );
+			throw new Error( 'A dot notation @param is not supported.' );
 		}
 
 		parameter.name = name;
