@@ -31,13 +31,13 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "glob": "^10.0.0",
     "rollup": "^4.9.5",
-    "typedoc": "^0.28.1",
+    "typedoc": "0.28.3",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "5.0.4",
     "vitest": "^2.0.5"
   },
   "peerDependencies": {
-    "typedoc": "^0.28.1"
+    "typedoc": "0.28.3"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js",
