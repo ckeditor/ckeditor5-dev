@@ -19,8 +19,9 @@ import {
 } from 'typedoc';
 
 import ErrorTagSerializer from './errortagserializer.js';
+import { getTarget } from '../utils/index.js';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 import './augmentation.js';
-import { getTarget } from '../utils';
 
 const ERROR_PARAM_REGEXP = /@param\s+\{([^}]+)\}\s+([\w.]+)\s+(.+)/;
 const ARRAY_TYPE_REGEXP = /<([^>]+)>/;
@@ -29,8 +30,8 @@ const ERROR_TAG_NAME = 'error';
 /**
  * The `typedoc-plugin-tag-error` collects error definitions from the `@error` tag.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd, -1000 );
+export function typeDocTagError( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocTagError.name ) );
 
 	// TODO: To resolve types.
 	// @ts-expect-error TS2345

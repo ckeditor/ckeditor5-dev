@@ -13,6 +13,7 @@ import {
 } from 'typedoc';
 import fs from 'fs';
 import upath from 'upath';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-purge-private-api-docs` removes reflections collected from private packages.
@@ -23,8 +24,8 @@ import upath from 'upath';
  * We do not want to expose private APIs in the documentation, but the paid features may extend the configuration reflection.
  * Add the `@publicApi` annotation to publish a private reflection within the block comment defining a module name.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocPurgePrivateApiDocs( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocPurgePrivateApiDocs.name ) );
 }
 
 function onEventEnd( context: Context ) {

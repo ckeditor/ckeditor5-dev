@@ -13,6 +13,7 @@ import {
 	type IntersectionType,
 	type DeclarationReflection
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-event-inheritance-fixer` takes care of inheriting events, which are not handled by TypeDoc by default.
@@ -22,8 +23,8 @@ import {
  *
  * The plugin takes care of events that are specified in parent classes too.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocEventInheritanceFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocEventInheritanceFixer.name ) );
 }
 
 function onEventEnd( context: Context ) {

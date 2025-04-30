@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Serializer, DeclarationReflection, ParameterReflection } from 'typedoc';
 
-import EventTagSerializer, { type PartialObject } from '../../src/tag-event/eventtagserializer';
+import EventTagSerializer, { type PartialObject } from '../../src/tag-event/eventtagserializer.js';
 
 describe( 'typedoc-plugins/eventtagserializer', () => {
 	let serializer: EventTagSerializer;

@@ -19,6 +19,7 @@ import {
 import { getTarget } from '../utils/index.js';
 
 import EventTagSerializer from './eventtagserializer.js';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 import './augmentation.js';
 
 /**
@@ -64,8 +65,8 @@ import './augmentation.js';
  *
  * Exported type may contain multiple `@eventName` tags to re-use the same type to create many different events.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocTagEvent( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocTagEvent.name ) );
 
 	// TODO: To resolve types.
 	// @ts-expect-error TS2345

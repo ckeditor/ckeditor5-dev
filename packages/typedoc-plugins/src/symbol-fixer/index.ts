@@ -9,6 +9,7 @@ import {
 	type Context,
 	type Reflection
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-symbol-fixer` plugin renames `Symbol.*` definitions with the JSDoc style.
@@ -16,8 +17,8 @@ import {
  *   * Typedoc: `[iterator]() → Iterator`
  *   * JSDoc: `Symbol.iterator() → Iterator`
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+export function typeDocSymbolFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration(), getPluginPriority( typeDocSymbolFixer.name ) );
 }
 
 function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflection ) => void ) {

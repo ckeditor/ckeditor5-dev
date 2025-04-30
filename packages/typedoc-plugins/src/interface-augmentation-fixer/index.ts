@@ -12,6 +12,7 @@ import {
 	type DeclarationReflection
 } from 'typedoc';
 import './augmentation.js';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-interface-augmentation-fixer` tries to fix an interface, that has been extended (augmented) from the outside (from
@@ -24,8 +25,8 @@ import './augmentation.js';
  * - Copies the externally added properties to the source definition.
  * - Replaces the duplicated interface with a reference to the source definition.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocInterfaceAugmentationFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocInterfaceAugmentationFixer.name ) );
 }
 
 function onEventEnd( context: Context ) {

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type Error from './error';
+import type Error from './error.js';
 
 /**
  * @module fixtures/logger

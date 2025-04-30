@@ -12,6 +12,7 @@ import {
 } from 'typedoc';
 import { getNode, isIdentifierValid, isReflectionValid } from '../../utils/index.js';
 import { type ValidatorErrorCallback } from '../index.js';
+import { getPluginPriority } from '../../utils/getpluginpriority.js';
 
 /**
  * Validates the output produced by TypeDoc.
@@ -19,7 +20,7 @@ import { type ValidatorErrorCallback } from '../index.js';
  * It checks if the identifier in the "@link" tag points to an existing doclet.
  */
 export default function( app: Application, onError: ValidatorErrorCallback ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd( onError ) );
+	app.converter.on( Converter.EVENT_END, onEventEnd( onError ), getPluginPriority( 'validators' ) );
 }
 
 function onEventEnd( onError: ValidatorErrorCallback ) {

@@ -12,6 +12,7 @@ import {
 } from 'typedoc';
 import { getNode } from '../../utils/index.js';
 import { type ValidatorErrorCallback } from '../index.js';
+import { getPluginPriority } from '../../utils/getpluginpriority.js';
 
 const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
 
@@ -21,7 +22,7 @@ const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
  * It checks if the module name matches the path to the file where the module is defined.
  */
 export default function( app: Application, onError: ValidatorErrorCallback ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd( onError ) );
+	app.converter.on( Converter.EVENT_END, onEventEnd( onError ), getPluginPriority( 'validators' ) );
 }
 
 function onEventEnd( onError: ValidatorErrorCallback ) {

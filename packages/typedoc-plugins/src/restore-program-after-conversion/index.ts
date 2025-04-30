@@ -8,6 +8,7 @@ import {
 	type Context,
 	type Application
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-restore-program-after-conversion` restores TypeScript program used for source conversion.
@@ -16,9 +17,8 @@ import {
  * This operation prevents from using custom TypeDoc plugins, which listen to `EVENT_END` event, because some TypeDoc internals
  * require that `context.program` exists.
  */
-export default function( app: Application ): void {
-	// Set non-default priority to ensure execution before other plugins.
-	app.converter.on( Converter.EVENT_END, onEventEnd, 1000 );
+export function typeDocRestoreProgramAfterConversion( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocRestoreProgramAfterConversion.name ) );
 }
 
 function onEventEnd( context: Context ) {

@@ -11,9 +11,10 @@ import {
 	type Reflection,
 	type TypeScript as ts
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+export function typeDocModuleFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration(), getPluginPriority( typeDocModuleFixer.name ) );
 }
 
 function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflection ) => void ) {

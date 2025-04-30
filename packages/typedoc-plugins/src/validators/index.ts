@@ -13,7 +13,7 @@ import overloadsValidator from './overloads-validator/index.js';
 /**
  * Validates the CKEditor 5 documentation.
  */
-export default function( app: Application, options: ValidatorOptions = {} ): boolean {
+export function validate( app: Application, options: ValidatorOptions = {} ): boolean {
 	const validators = [
 		seeValidator,
 		linkValidator,

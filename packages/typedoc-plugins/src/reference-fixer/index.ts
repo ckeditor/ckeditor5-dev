@@ -11,6 +11,7 @@ import {
 	type Context,
 	type Application
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-reference-fixer` tries to fix a case when TypeDoc incorrectly assigns reflections that are re-exported from another
@@ -23,8 +24,8 @@ import {
  * - The exception is the `ckeditor5-icons` package, which contains only references in "index" module. For this case, reflection
  *   declarations which represent icons are created manually.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocReferenceFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocReferenceFixer.name ) );
 }
 
 function onEventEnd( context: Context ) {

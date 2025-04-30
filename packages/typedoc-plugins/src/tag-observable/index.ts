@@ -14,14 +14,15 @@ import {
 	type SomeType,
 	type DeclarationReflection
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-tag-observable` handles the `@observable` tag that is assigned to the class property. If found, two new events are
  * created and inserted as a class children: `change:{property}` and `set:{property}`, where `{property}` is the name of the observable
  * class property.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocTagObservable( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocTagObservable.name ) );
 }
 
 function onEventEnd( context: Context ) {

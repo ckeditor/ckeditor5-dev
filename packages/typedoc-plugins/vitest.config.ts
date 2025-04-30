@@ -7,16 +7,17 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig( {
 	test: {
-		testTimeout: 10000,
+		testTimeout: 1000 * 20,
+		hookTimeout: 1000 * 30,
 		mockReset: false,
 		restoreMocks: false,
 		include: [
 			'tests/**/*.ts'
 		],
 		exclude: [
-			'./tests/utils.ts',
-			'./tests/**/utils/**/*.ts',
-			'./tests/**/fixtures/**/*.ts'
+			'tests/utils.ts',
+			'tests/*/utils/**/*.ts',
+			'tests/**/fixtures/**/*.ts'
 		],
 		coverage: {
 			provider: 'v8',

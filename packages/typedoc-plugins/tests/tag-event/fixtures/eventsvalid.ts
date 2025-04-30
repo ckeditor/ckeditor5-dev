@@ -7,7 +7,7 @@
  * @module fixtures/eventsvalid
  */
 
-import ExampleClass from './exampleclass';
+import ExampleClass from './exampleclass.js';
 
 export default class EventsValidClass extends ExampleClass {}
 export class EventsValidAnotherClass extends ExampleClass {}

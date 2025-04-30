@@ -7,7 +7,7 @@
  * @module interface-augmentation/foobar
  */
 
-import type { FooConfig } from '..';
+import type { FooConfig } from '../index.js';
 
 // Module augmentation that points to the actual interface source file.
 declare module '../foo/fooconfig' {

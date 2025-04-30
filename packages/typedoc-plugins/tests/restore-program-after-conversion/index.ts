@@ -10,6 +10,7 @@ import { Application, Converter, type Context } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocRestoreProgramAfterConversion } from '../../src/index.js';
+import { getPluginPriority } from '../../src/utils/getpluginpriority.js';
 
 function contextProgramChecker( app: Application ) {
 	// TODO: To resolve types.
@@ -17,7 +18,7 @@ function contextProgramChecker( app: Application ) {
 	// Property 'on' does not exist on type 'Converter'.
 	app.converter.on( Converter.EVENT_END, ( context: Context ) => {
 		expect( context.program ).not.toBeUndefined();
-	} );
+	}, getPluginPriority( 'contextProgramChecker' ) );
 }
 
 describe( 'typedoc-plugins/restore-program-after-conversion', () => {

@@ -26,7 +26,7 @@
  * @error customerror-after-module
  */
 
-import Error from './error';
+import Error from './error.js';
 
 /**
  * An error statement occurring before the export keyword.

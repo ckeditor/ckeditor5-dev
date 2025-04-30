@@ -13,13 +13,14 @@ import {
 	type Application,
 	type DeclarationReflection
 } from 'typedoc';
+import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 /**
  * The `typedoc-plugin-event-param-fixer` creates the `eventInfo` parameter that is of type `EventInfo` class, and then inserts it as the
  * first parameter for each found event reflection.
  */
-export default function( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd );
+export function typeDocEventParamFixer( app: Application ): void {
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocEventParamFixer.name ) );
 }
 
 function onEventEnd( context: Context ) {

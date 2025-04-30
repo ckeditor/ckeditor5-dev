@@ -8,7 +8,7 @@
  * @publicApi
  */
 
-import { PublicCollection } from '../../public-package/src/publiccollection';
+import { PublicCollection } from '../../public-package/src/publiccollection.js';
 
 export class ExtendPublicCollection extends PublicCollection {
 	public isPrivate: boolean = true;
