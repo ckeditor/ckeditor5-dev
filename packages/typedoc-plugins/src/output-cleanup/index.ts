@@ -7,7 +7,7 @@ import { type Application } from 'typedoc';
 import CleanUpSerializer from './cleanupserializer.js';
 
 /**
- * TODO: Docs.
+ * The `typedoc-plugin-output-cleanup` removes unnecessary properties from reflections to decrease the size of the generated output.
  */
 export default function( app: Application ): void {
 	// TODO: To resolve types.

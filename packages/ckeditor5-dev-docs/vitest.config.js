@@ -10,7 +10,8 @@ export default defineConfig( {
 		setupFiles: [
 			'./tests/_utils/testsetup.js'
 		],
-		testTimeout: 10000,
+		testTimeout: 20000,
+		hookTimeout: 20000,
 		restoreMocks: true,
 		include: [
 			'tests/**/*.js'

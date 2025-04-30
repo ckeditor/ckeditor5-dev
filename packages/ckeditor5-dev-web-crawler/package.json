@@ -32,9 +32,9 @@
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "rollup": "^4.9.5",
     "typescript": "5.0.4",
     "upath": "^2.0.1"
