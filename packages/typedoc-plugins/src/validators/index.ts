@@ -25,8 +25,7 @@ export function validate( app: Application, options: ValidatorOptions = {} ): vo
 			seeValidator,
 			linkValidator,
 			firesValidator,
-			moduleValidator,
-			overloadsValidator
+			moduleValidator
 		];
 
 		if ( options.enableOverloadValidator ) {
