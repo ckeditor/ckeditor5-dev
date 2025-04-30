@@ -26,7 +26,7 @@ import linkValidator from '../../../src/validators/link-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 
-describe( 'typedoc-plugins/validators/link-validator', function() {
+describe( 'typedoc-plugins/validators/link-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'link-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '*.ts' );
 	const derivedFilePath = upath.join( fixturesPath, 'inheritance', 'derivedclass.ts' );
@@ -70,47 +70,47 @@ describe( 'typedoc-plugins/validators/link-validator', function() {
 		const expectedErrors = [
 			{
 				identifier: '.property',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#staticProperty',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#property-non-existing',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#property:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#method:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
-				identifier: '#event-example',
-				source: 'links.ts:49'
+				identifier: '#example',
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '#event:property',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: '~ClassNonExisting#property',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: 'module:non-existing/module~ClassWithLinks#property',
-				source: 'links.ts:49'
+				source: 'links.ts:51'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
@@ -118,15 +118,15 @@ describe( 'typedoc-plugins/validators/link-validator', function() {
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:62'
+				source: 'links.ts:64'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:102'
+				source: 'links.ts:104'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:102'
+				source: 'links.ts:104'
 			}
 		].map( error => ( {
 			message: `Incorrect link: "${ error.identifier }"`,

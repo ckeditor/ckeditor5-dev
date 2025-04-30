@@ -185,7 +185,7 @@ export type EventFooAbsolute = {
 };
 
 /**
- * @eventName module:fixtures/eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix
+ * @eventName module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute-with-prefix
  */
 export type EventFooAbsoluteWithPrefix = {
 	name: string;

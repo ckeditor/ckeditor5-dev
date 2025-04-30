@@ -66,36 +66,36 @@ describe( 'typedoc-plugins/validators/fires-validator', () => {
 	it( 'should warn if fired event does not exist', async () => {
 		const expectedErrors = [
 			{
-				identifier: 'event-non-existing',
+				identifier: 'class-non-existing',
 				source: 'fires.ts:15'
 			},
 			{
-				identifier: 'property',
+				identifier: 'class-property',
 				source: 'fires.ts:15'
 			},
 			{
-				identifier: 'event-non-existing',
+				identifier: 'method-non-existing',
 				source: 'fires.ts:27'
 			},
 			{
-				identifier: 'property',
+				identifier: 'method-property',
 				source: 'fires.ts:27'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:15'
+				identifier: 'module:fixtures/fires~ClassWithFires#event:non-existing',
+				source: 'firesabsolute.ts:17'
 			},
 			{
 				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:15'
+				source: 'firesabsolute.ts:17'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:21'
+				identifier: 'module:fixtures/fires~ClassWithFires#event:non-existing',
+				source: 'firesabsolute.ts:25'
 			},
 			{
 				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:21'
+				source: 'firesabsolute.ts:25'
 			}
 		].map( error => ( {
 			message: `Incorrect event name: "${ error.identifier }" in the @fires tag`,

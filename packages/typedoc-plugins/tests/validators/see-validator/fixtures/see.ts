@@ -33,7 +33,9 @@ export class ClassWithSeeTags {
 	 * @see #method
 	 * @see #method:LABEL1
 	 * @see #method:LABEL2
-	 * @see #event:event-example
+	 * @see #event:example
+	 * @see #event:set:example
+	 * @see #event:change:example
 	 * @see ~ClassWithSeeTags#property
 	 * @see module:fixtures/see~ClassWithSeeTags#property
 	 * @see http://github.com/ckeditor/ckeditor5
@@ -52,6 +54,7 @@ export class ClassWithSeeTags {
 	 * @see #methodWithoutComment:LABEL-NON-EXISTING
 	 * @see #methodWithoutLabel:LABEL-NON-EXISTING
 	 * @see #event-example
+	 * @see #event:example:invalid
 	 * @see #event:property
 	 * @see ~ClassNonExisting#property
 	 * @see module:non-existing/module~ClassWithSeeTags#property
@@ -90,10 +93,18 @@ export class ClassWithSeeTags {
 /**
  * An example event with valid and invalid "@see" tags.
  *
- * @eventName ~ClassWithSeeTags#event-example
+ * @eventName ~ClassWithSeeTags#example
  * @see module:fixtures/see~ClassWithSeeTags#property
  * @see module:non-existing/module~Foo#bar
  */
 export type EventExample = {
+	name: string;
+};
+
+/**
+ * @eventName ~ClassWithSeeTags#set:example
+ * @eventName ~ClassWithSeeTags#change:example
+ */
+export type EventObservableExample = {
 	name: string;
 };

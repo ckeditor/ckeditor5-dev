@@ -8,7 +8,7 @@
  */
 
 /**
- * @fires event-example
+ * @fires example
  */
 export class ClassWithLinks {
 	/**
@@ -28,7 +28,9 @@ export class ClassWithLinks {
 	 * - {@link #method}.
 	 * - {@link #method:LABEL1}.
 	 * - {@link #method:LABEL2}.
-	 * - {@link #event:event-example}.
+	 * - {@link #event:example}.
+	 * - {@link #event:set:example}.
+	 * - {@link #event:change:example}.
 	 * - {@link ~ClassWithLinks#property}.
 	 * - {@link module:fixtures/links~ClassWithLinks#property}.
 	 * - {@link module:fixtures/links~ClassWithLinks#property custom label}.
@@ -41,7 +43,7 @@ export class ClassWithLinks {
 	 * - {@link #method:LABEL-NON-EXISTING}.
 	 * - {@link #methodWithoutComment:LABEL-NON-EXISTING}.
 	 * - {@link #methodWithoutLabel:LABEL-NON-EXISTING}.
-	 * - {@link #event-example}.
+	 * - {@link #example}.
 	 * - {@link #event:property}.
 	 * - {@link ~ClassNonExisting#property}.
 	 * - {@link module:non-existing/module~ClassWithLinks#property}.
@@ -97,8 +99,16 @@ export class ClassWithLinks {
  * Valid link added at the end fo avoid modifying indexes.
  * - {@link module:fixtures/types~MentionFeedObjectItem#id}
  *
- * @eventName ~ClassWithLinks#event-example
+ * @eventName ~ClassWithLinks#example
  */
 export type EventExample = {
+	name: string;
+};
+
+/**
+ * @eventName ~ClassWithLinks#set:example
+ * @eventName ~ClassWithLinks#change:example
+ */
+export type EventObservableExample = {
 	name: string;
 };

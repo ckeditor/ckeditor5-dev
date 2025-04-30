@@ -41,7 +41,11 @@ export function getTarget(
 	let targetReflection: DeclarationReflection | undefined;
 
 	if ( isIdentifierEvent ) {
-		targetReflection = context.project.getChildByName( parts )?.ckeditor5Events.find( event => event.name === lastPartLabel );
+		// Events cannot be labeled signatures, so we must use the full name.
+		// As events are not prefixed with the `event:` phrase, we need to remove it manually from an at comment expression.
+		targetReflection = context.project.getChildByName( parts )?.ckeditor5Events.find( event => {
+			return event.name === lastPart.replace( 'event:', '' );
+		} );
 	} else {
 		parts.push(
 			isIdentifierLabeledSignature ?

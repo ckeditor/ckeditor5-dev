@@ -26,7 +26,7 @@ import seeValidator from '../../../src/validators/see-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 
-describe( 'typedoc-plugins/validators/see-validator', function() {
+describe( 'typedoc-plugins/validators/see-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'see-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 
@@ -67,55 +67,59 @@ describe( 'typedoc-plugins/validators/see-validator', function() {
 		const expectedErrors = [
 			{
 				identifier: '.property',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#staticProperty',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#property-non-existing',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#property:LABEL-NON-EXISTING',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#method:LABEL-NON-EXISTING',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#event-example',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
+			},
+			{
+				identifier: '#event:example:invalid',
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '#event:property',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: '~ClassNonExisting#property',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: 'module:non-existing/module~ClassWithSeeTags#property',
-				source: 'see.ts:60'
+				source: 'see.ts:63'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'see.ts:97'
+				source: 'see.ts:100'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'see.ts:97'
+				source: 'see.ts:100'
 			}
 		].map( error => ( {
 			message: `Incorrect link: "${ error.identifier }"`,

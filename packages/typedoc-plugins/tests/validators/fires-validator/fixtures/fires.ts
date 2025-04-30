@@ -8,9 +8,9 @@
  */
 
 /**
- * @fires event-example
- * @fires event-non-existing
- * @fires property
+ * @fires example
+ * @fires class-non-existing
+ * @fires class-property
  */
 export class ClassWithFires {
 	public property: number;
@@ -20,16 +20,24 @@ export class ClassWithFires {
 	}
 
 	/**
-	 * @fires event-example
-	 * @fires event-non-existing
-	 * @fires property
+	 * @fires example
+	 * @fires method-non-existing
+	 * @fires method-property
 	 */
 	public method(): void {}
 }
 
 /**
- * @eventName ~ClassWithFires#event-example
+ * @eventName ~ClassWithFires#example
  */
 export type EventExample = {
+	name: string;
+};
+
+/**
+ * @eventName ~ClassWithFires#set:example
+ * @eventName ~ClassWithFires#change:example
+ */
+export type EventObservableExample = {
 	name: string;
 };
