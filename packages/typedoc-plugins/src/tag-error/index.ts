@@ -22,6 +22,8 @@ import ErrorTagSerializer from './errortagserializer.js';
 import './augmentation.js';
 import { getTarget } from '../utils';
 
+const ERROR_PARAM_REGEXP = /@param\s+\{([^}]+)\}\s+([\w.]+)\s+(.+)/;
+const ARRAY_TYPE_REGEXP = /<([^>]+)>/;
 const ERROR_TAG_NAME = 'error';
 
 /**
@@ -110,11 +112,11 @@ function onEventEnd( context: Context ) {
 
 					return true;
 				} )
-				.map( _childTag => {
+				.map( childTag => {
 					return createParameter(
 						context,
 						errorDeclaration,
-						_childTag as unknown as ParamExpressionNode,
+						childTag as unknown as ParamExpressionNode,
 						errorDeclaration
 					);
 				} );
@@ -132,12 +134,8 @@ function createParameter(
 	childTag: ParamExpressionNode,
 	parent: DeclarationReflection
 ): ParameterReflection {
-	const regexp = /@param\s+\{([^}]+)\}\s+([\w.]+)\s+(.+)/;
-	const arrayModuleRegexp = /<([^>]+)>/;
-	const match = childTag.getText().match( regexp );
-
+	const match = childTag.getText().match( ERROR_PARAM_REGEXP );
 	const parameter = new ParameterReflection( childTag.name.text, ReflectionKind.Parameter, parent );
-
 	let isArray = false;
 
 	try {
@@ -158,7 +156,7 @@ function createParameter(
 
 		if ( isArray ) {
 			// Extract the type name from `<` and `>` brackets.
-			typeName = typeName.match( arrayModuleRegexp )!.at( 1 )!;
+			typeName = typeName.match( ARRAY_TYPE_REGEXP )!.at( 1 )!;
 		}
 
 		if ( typeName!.startsWith( 'module:' ) ) {
