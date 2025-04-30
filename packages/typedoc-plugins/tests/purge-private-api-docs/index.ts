@@ -45,7 +45,7 @@ function createInterface( name: string, isPrivate?: boolean ) {
 	return reflection;
 }
 
-describe( 'typedoc-plugins/purge-private-api-docs', function() {
+describe( 'typedoc-plugins/purge-private-api-docs', () => {
 	let conversionResult: ProjectReflection;
 
 	const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'purge-private-api-docs', 'fixtures' );

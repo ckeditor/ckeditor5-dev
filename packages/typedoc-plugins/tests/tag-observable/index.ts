@@ -32,7 +32,7 @@ function assertObservableExists( { reflections, parentName, observableName }: As
 	expect( observable, `"${ observableName }" not found in "${ parentName }"` ).to.not.be.undefined;
 }
 
-describe( 'typedoc-plugins/tag-observable', function() {
+describe( 'typedoc-plugins/tag-observable', () => {
 	let conversionResult: ProjectReflection;
 
 	const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'tag-observable', 'fixtures' );

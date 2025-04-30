@@ -22,7 +22,7 @@ import {
 
 import typeDocRemoveClassC from './utils/typedoc-plugin-remove-class-c.js';
 
-describe( 'typedoc-plugins/event-inheritance-fixer', function() {
+describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 	let conversionResult: ProjectReflection,
 		entryPoints: Array<string>,
 		events: Array<DeclarationReflection>;

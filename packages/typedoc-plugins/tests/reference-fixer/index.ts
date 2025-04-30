@@ -17,7 +17,7 @@ import {
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocReferenceFixer, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
-describe( 'typedoc-plugins/reference-fixer', function() {
+describe( 'typedoc-plugins/reference-fixer', () => {
 	let conversionResult: ProjectReflection;
 
 	const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'reference-fixer', 'fixtures' );

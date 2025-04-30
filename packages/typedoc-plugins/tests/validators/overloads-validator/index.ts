@@ -26,7 +26,7 @@ import overloadsValidator from '../../../src/validators/overloads-validator/inde
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 
-describe( 'typedoc-plugins/validators/overloads-validator', function() {
+describe( 'typedoc-plugins/validators/overloads-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'overloads-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 

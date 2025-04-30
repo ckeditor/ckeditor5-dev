@@ -26,7 +26,7 @@ import { getPluginPriority } from '../../../src/utils/getpluginpriority.js';
 import moduleValidator from '../../../src/validators/module-validator/index.js';
 import { type ValidatorErrorCallback } from '../../../src/validators/index.js';
 
-describe( 'typedoc-plugins/validators/module-validator', function() {
+describe( 'typedoc-plugins/validators/module-validator', () => {
 	const fixturesPath = upath.join( ROOT_TEST_DIRECTORY, 'validators', 'module-validator', 'fixtures' );
 	const sourceFilePattern = upath.join( fixturesPath, '**', '*.ts' );
 

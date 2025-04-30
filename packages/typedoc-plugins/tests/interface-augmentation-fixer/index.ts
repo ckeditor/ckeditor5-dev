@@ -17,7 +17,7 @@ import {
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocInterfaceAugmentationFixer, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
-describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
+describe( 'typedoc-plugins/interface-augmentation-fixer', () => {
 	let conversionResult: ProjectReflection;
 
 	const FIXTURES_PATH = upath.join( ROOT_TEST_DIRECTORY, 'interface-augmentation-fixer', 'fixtures' );
