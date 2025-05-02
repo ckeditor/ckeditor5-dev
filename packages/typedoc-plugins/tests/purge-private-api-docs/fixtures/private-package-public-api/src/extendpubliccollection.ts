@@ -33,3 +33,10 @@ export class ExtendPublicCollection extends PublicCollection {
 		return 0;
 	}
 }
+
+/**
+ * @eventName ~ExtendPublicCollection#extendPublicCollectionEvent
+ */
+export type ExtendPublicCollectionEvent = {
+	name: 'extendPublicCollectionEvent';
+};

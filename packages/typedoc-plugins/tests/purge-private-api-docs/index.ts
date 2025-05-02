@@ -17,7 +17,7 @@ import {
 } from 'typedoc';
 
 import { ROOT_TEST_DIRECTORY } from '../utils.js';
-import { typeDocPurgePrivateApiDocs, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
+import { typeDocPurgePrivateApiDocs, typeDocTagEvent, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
 function storeAugmentedInterface( app: Application ) {
 	// TODO: To resolve types.
@@ -70,6 +70,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 		} );
 
 		storeAugmentedInterface( typeDoc );
+		typeDocTagEvent( typeDoc );
 		typeDocPurgePrivateApiDocs( typeDoc );
 		typeDocRestoreProgramAfterConversion( typeDoc );
 
@@ -85,7 +86,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 			const publicCollection = conversionResult.getChildByName( 'public-package/publiccollection' ) as DeclarationReflection;
 
 			expect( publicCollection ).to.not.equal( undefined );
-			expect( publicCollection.children?.length ).to.equal( 1 );
+			expect( publicCollection.children?.length ).to.equal( 2 );
 		} );
 	} );
 
@@ -330,11 +331,47 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 	} );
 
 	describe( 'augmented interfaces', () => {
-		it( 'should remove sources only from private reflections', () => {
+		it( 'should remove source URLs only from private reflections', () => {
 			const [ augmentedInterfacePublic, augmentedInterfacePrivate ] = conversionResult.ckeditor5AugmentedInterfaces!;
 
 			expect( augmentedInterfacePublic.sources![ 0 ].url ).not.to.be.undefined;
 			expect( augmentedInterfacePrivate.sources![ 0 ].url ).to.be.undefined;
+		} );
+	} );
+
+	describe( 'events', () => {
+		it( 'should remove events from private package without the `@publicApi` annotation', () => {
+			const privateCollectionEvent = conversionResult.project.getReflectionsByKind( ReflectionKind.Document )
+				.find( reflection => reflection.name === 'privateCollectionEvent' );
+
+			expect( privateCollectionEvent ).to.be.undefined;
+		} );
+
+		it( 'should keep events from public package', () => {
+			const publicEvent = conversionResult.project.getReflectionsByKind( ReflectionKind.Document )
+				.find( reflection => reflection.name === 'publicCollectionEvent' );
+
+			expect( publicEvent ).not.to.be.undefined;
+		} );
+
+		it( 'should keep events from private package with the `@publicApi` annotation but without source URL', () => {
+			const extendPrivateCollectionEvent = conversionResult.project.getReflectionsByKind( ReflectionKind.Document )
+				.find( reflection => reflection.name === 'extendPrivateCollectionEvent' ) as DeclarationReflection;
+
+			const extendPublicCollectionEvent = conversionResult.project.getReflectionsByKind( ReflectionKind.Document )
+				.find( reflection => reflection.name === 'extendPublicCollectionEvent' ) as DeclarationReflection;
+
+			expect( extendPrivateCollectionEvent ).not.to.be.undefined;
+			expect( extendPublicCollectionEvent ).not.to.be.undefined;
+
+			const [ extendPrivateCollectionEventSource ] = extendPrivateCollectionEvent!.sources!;
+			const [ eextendPublicCollectionEventSource ] = extendPublicCollectionEvent!.sources!;
+
+			expect( extendPrivateCollectionEventSource ).to.be.an( 'object' );
+			expect( extendPrivateCollectionEventSource ).not.to.have.property( 'url' );
+
+			expect( eextendPublicCollectionEventSource ).to.be.an( 'object' );
+			expect( eextendPublicCollectionEventSource ).not.to.have.property( 'url' );
 		} );
 	} );
 } );

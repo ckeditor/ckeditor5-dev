@@ -47,6 +47,15 @@ function onEventEnd( context: Context ) {
 		const node = symbol.declarations!.at( 0 )! as TypeScript.SourceFile;
 
 		if ( !isPublicApi( node ) ) {
+			// Events are stored in a custom property that must be handled manually during the removal procedure.
+			const reflectionEvents = reflection.getChildrenByKind( ReflectionKind.Class | ReflectionKind.Interface )
+				.flatMap( child => child.ckeditor5Events )
+				.filter( Boolean );
+
+			reflectionEvents.forEach( reflectionEvent => {
+				context.project.removeReflection( reflectionEvent );
+			} );
+
 			context.project.removeReflection( reflection );
 		} else {
 			removePrivateUrlSourcesFromReflection( reflection );

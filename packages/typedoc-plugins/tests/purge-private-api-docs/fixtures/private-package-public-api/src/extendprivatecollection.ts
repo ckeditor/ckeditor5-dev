@@ -33,3 +33,10 @@ export class ExtendPrivateCollection extends PrivateCollection {
 		return 0;
 	}
 }
+
+/**
+ * @eventName ~ExtendPrivateCollection#extendPrivateCollectionEvent
+ */
+export type ExtendPrivateCollectionEvent = {
+	name: 'extendPrivateCollectionEvent';
+};
