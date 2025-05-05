@@ -78,7 +78,7 @@ function onEventEnd( context: Context ) {
 
 		// ...just to register the new reference reflection with this old symbol.
 		// This trick is needed to make sure that all type references still point to the correct reflection.
-		context.project.registerReflection( newRef, oldSymbol, undefined );
+		context.project.registerReflection( newRef.getTargetReflectionDeep(), oldSymbol, undefined );
 
 		// Store augmented interfaces, because it might be required to post-process them in another plugin,
 		// i.e. in `typedoc-plugin-purge-private-api-docs` to remove reflection sources targeting private packages.
