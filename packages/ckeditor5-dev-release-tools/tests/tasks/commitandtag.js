@@ -18,6 +18,7 @@ describe( 'commitAndTag()', () => {
 		stubs = {
 			git: {
 				tags: vi.fn(),
+				add: vi.fn(),
 				commit: vi.fn(),
 				reset: vi.fn(),
 				log: vi.fn(),
@@ -93,13 +94,11 @@ describe( 'commitAndTag()', () => {
 			nodir: true
 		} ) );
 
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith(
-			'Release: v1.0.0. [skip ci]',
-			[
-				'package.json',
-				'packages/ckeditor5-foo/package.json'
-			]
-		);
+		expect( stubs.git.add ).toHaveBeenCalledExactlyOnceWith( [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]' );
 	} );
 
 	it( 'should not add skip ci to the commit when skipCi is set as false', async () => {
@@ -112,10 +111,11 @@ describe( 'commitAndTag()', () => {
 			nodir: true
 		} ) );
 
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith(
-			'Release: v1.0.0.',
-			expect.anything()
-		);
+		expect( stubs.git.add ).toHaveBeenCalledExactlyOnceWith( [
+			'package.json',
+			'packages/ckeditor5-foo/package.json'
+		] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0.' );
 	} );
 
 	it( 'should add a tag to the created commit', async () => {
@@ -146,10 +146,11 @@ describe( 'commitAndTag()', () => {
 		} );
 
 		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]', [
+		expect( stubs.git.add ).toHaveBeenCalledExactlyOnceWith( [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]' );
 		expect( stubs.git.reset ).toHaveBeenCalledExactlyOnceWith( [ 'previousmockhash' ] );
 
 		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
@@ -169,12 +170,47 @@ describe( 'commitAndTag()', () => {
 		} ) ).rejects.toThrow( 'Error executing git commit in dry run mode.' );
 
 		expect( stubs.git.log ).toHaveBeenCalledExactlyOnceWith( [ '-1' ] );
-		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]', [
+		expect( stubs.git.add ).toHaveBeenCalledExactlyOnceWith( [
 			'package.json',
 			'packages/ckeditor5-foo/package.json'
 		] );
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]' );
 
 		expect( stubs.git.reset ).not.toHaveBeenCalled();
 		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should split adding files to commit into chunks if they exceed the character limit', async () => {
+		const numberOfFiles = 500;
+
+		vi.mocked( glob ).mockResolvedValue(
+			new Array( numberOfFiles ).fill().map( ( _, i ) => `very/long/path/foo/bar/file_${ i }.js` )
+		);
+
+		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ] } );
+
+		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.anything(), expect.objectContaining( {
+			absolute: true,
+			nodir: true
+		} ) );
+
+		expect( stubs.git.add ).toHaveBeenCalledTimes( 5 );
+
+		/**
+		 * First chunk is larger because `file_1` is shorter filename than `file_100`,
+		 * and more files can fit within the given character limit.
+		 *
+		 * Sum should equal given number of files resolved by glob.
+		 */
+		const expectedChunkSizes = [ 117, 114, 114, 114, 41 ];
+		const expectedChunkSizesSum = expectedChunkSizes.reduce( ( a, b ) => a + b );
+
+		expect( expectedChunkSizesSum, 'Sum of expected chunks does not equal total number of files' ).toEqual( numberOfFiles );
+
+		expectedChunkSizes.forEach( ( expectedChunkSize, i ) => {
+			expect( stubs.git.add.mock.calls[ i ][ 0 ], `Chunk indexed "${ i }" has unexpected size` ).toHaveLength( expectedChunkSize );
+		} );
+
+		expect( stubs.git.commit ).toHaveBeenCalledExactlyOnceWith( 'Release: v1.0.0. [skip ci]' );
 	} );
 } );
