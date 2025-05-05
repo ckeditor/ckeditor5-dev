@@ -1,6 +1,70 @@
 Changelog
 =========
 
+## [49.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v48.0.0...v49.0.0) (2025-05-05)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: The API docs builder requires `typedoc` in version 0.28 or higher.
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The manual tests script will now load a default predefined identity file, if it exists.
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: The TypeDoc plugins require the `typedoc` dependency in a version `0.28` or higher.
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: CKEditor 5 events are stored in the `#ckeditor5Events` property on a class or interface declaration.
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: CKEditor 5 errors can be recognized by the `#isCKEditor5Error` flag on a declaration.
+
+### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: The `strict` option passed as a modifier to the `build()` function should be wrapped into the `validatorOptions` object.
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Parameters of CKEditor 5 events and errors are now stored in the `#parameters` property (instead of `#typeParameters`).
+
+### Features
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Migrate from `lodash-es` to `es-toolkit`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/49482f89b56806742614e6e00b18a6396785603f))
+* **[dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)**: Treat paths used in `import.meta.resolve` as potential dependencies. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b679fdf91e61905ff4d4362e28e666c9f73d1812))
+* **[dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)**: Improve performance. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b679fdf91e61905ff4d4362e28e666c9f73d1812))
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Support for `typedoc@0.28`. The package uses the latest (`0.28.4`) TypeDoc release when introducing this change. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f2a4737c18c9f665b5a232b01fb07832ee624632))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Migrate from `lodash-es` to `es-toolkit`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/49482f89b56806742614e6e00b18a6396785603f))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The manual tests script will now load a default predefined identity file, if it exists. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6cc2895e4a9fdbbbaf8ccc7027ba714ea897d62a))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Migrate from `lodash-es` to `es-toolkit`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/49482f89b56806742614e6e00b18a6396785603f))
+* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Block requests from `IGNORED_HOSTS`. ([#1117](https://github.com/ckeditor/ckeditor5-dev/issues/1117)). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2a2a3b4d5b65c8e17cb8f3375ac2a4f26f123587))
+* Update most outdated dependencies. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/49482f89b56806742614e6e00b18a6396785603f))
+
+### Other changes
+
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Introduced the `validate()` function that checks if the converted documentation is error-free. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f2a4737c18c9f665b5a232b01fb07832ee624632))
+
+  The following cases are verified:
+
+  * An event in the `@fires` tag exists.
+  * An identifier in the `@link` tag points to an existing doclet.
+  * A module name matches the path to the file where the module is defined.
+  * Overloaded methods and functions are described with the mandatory and unique `@label` tag.
+  * An identifier in the `@see` tag points to an existing doclet.
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Improved processing parameters of the CKEditor 5 error definitions. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f2a4737c18c9f665b5a232b01fb07832ee624632))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/49.0.0): v48.0.0 => v49.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/49.0.0): v48.0.0 => v49.0.0
+</details>
+
+
 ## [48.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v47.1.1...v48.0.0) (2025-04-22)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
@@ -151,43 +215,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/47.0.0): v46.1.0 => v47.0.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/47.0.0): v46.1.0 => v47.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/47.0.0): v46.1.0 => v47.0.0
-</details>
-
-
-## [46.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v46.0.7...v46.1.0) (2025-03-06)
-
-### Features
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added the options.dryRun parameter to the commitAndTag() function to verify if a release commit passes validation, so releasing a project will not fail due to issues while committing. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0e4779d403fbf22dd6f8a3f2a1de5d1b2183db81))
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `commitAndTag()` function now uses annotated tags instead of lightweight ones to allow signing tags while preparing a release. Closes [ckeditor/ckeditor5#18080](https://github.com/ckeditor/ckeditor5/issues/18080). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ecbcfd3a6767b1251400e67659ae326fa44b868a))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/46.1.0): v46.0.7 => v46.1.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/46.1.0): v46.0.7 => v46.1.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/46.1.0): v46.0.7 => v46.1.0
 </details>
 
 ---
