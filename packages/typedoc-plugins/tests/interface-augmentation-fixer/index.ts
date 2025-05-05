@@ -105,9 +105,8 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', () => {
 		expect( foobarVariable.type ).to.have.property( 'type', 'reference' );
 
 		const reflection = ( foobarVariable.type as ReferenceType ).reflection as ReferenceReflection;
-		const target = reflection.tryGetTargetReflectionDeep();
 
-		expect( target ).to.equal( fooConfigInterface );
+		expect( reflection ).to.equal( fooConfigInterface );
 	} );
 
 	it( 'should store augmented interfaces which are re-exported in "index.ts"', () => {
