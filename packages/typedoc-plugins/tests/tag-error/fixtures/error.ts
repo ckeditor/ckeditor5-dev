@@ -26,3 +26,7 @@ export default class Error {
 		return this.errorName;
 	}
 }
+
+export interface SystemError {
+	customPropertyInInterface: string;
+}

@@ -7,7 +7,7 @@
  * @module fixtures/eventsvalid
  */
 
-import ExampleClass from './exampleclass';
+import ExampleClass from './exampleclass.js';
 
 export default class EventsValidClass extends ExampleClass {}
 export class EventsValidAnotherClass extends ExampleClass {}
@@ -178,21 +178,21 @@ export type EventFooComplex<Param extends 'a' | 'b' | 'c' = 'a'> = {
 };
 
 /**
- * @eventName module:eventsvalid~EventsValidClass#event-foo-absolute
+ * @eventName module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute
  */
 export type EventFooAbsolute = {
 	name: string;
 };
 
 /**
- * @eventName module:eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix
+ * @eventName module:fixtures/eventsvalid~EventsValidClass#event-foo-absolute-with-prefix
  */
 export type EventFooAbsoluteWithPrefix = {
 	name: string;
 };
 
 /**
- * @eventName module:exampleinterface~ExampleInterface#event-change:{property}
+ * @eventName module:fixtures/exampleinterface~ExampleInterface#event-change:{property}
  */
 export type InterfaceChangeEvent = {
 	name: 'change' | `change:${ string }`;
@@ -204,7 +204,7 @@ export type InterfaceChangeEvent = {
 };
 
 /**
- * @eventName module:exampleinterface~ExampleInterface#event-set:{property}
+ * @eventName module:fixtures/exampleinterface~ExampleInterface#event-set:{property}
  */
 export type InterfaceSetEvent = {
 	name: 'set' | `set:${ string }`;

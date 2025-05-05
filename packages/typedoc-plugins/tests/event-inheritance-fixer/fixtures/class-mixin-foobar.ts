@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { ClassMixinFoo } from './class-mixin-foo';
+import { ClassMixinFoo } from './class-mixin-foo.js';
 
 /**
  * @module fixtures/class-mixin-foobar

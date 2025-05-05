@@ -16,6 +16,7 @@
   "type": "module",
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-ci": "^48.0.0",
+    "@ckeditor/ckeditor5-dev-dependency-checker": "^48.0.0",
     "@ckeditor/ckeditor5-dev-release-tools": "^48.0.0",
     "@ckeditor/ckeditor5-dev-bump-year": "^48.0.0",
     "@inquirer/prompts": "^7.4.1",
@@ -43,10 +44,11 @@
     "lint": "eslint --quiet \"**/*.{js,ts}\"",
     "precommit": "lint-staged",
     "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
-    "reinstall": "yarn run clean && yarn install"
+    "reinstall": "yarn run clean && yarn install",
+    "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {
-    "**/*.js": [
+    "**/*.{js,ts,mjs,cjs}": [
       "eslint --quiet"
     ]
   },
