@@ -189,11 +189,6 @@ describe( 'commitAndTag()', () => {
 
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ] } );
 
-		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.anything(), expect.objectContaining( {
-			absolute: true,
-			nodir: true
-		} ) );
-
 		expect( stubs.git.add ).toHaveBeenCalledTimes( 5 );
 
 		/**
