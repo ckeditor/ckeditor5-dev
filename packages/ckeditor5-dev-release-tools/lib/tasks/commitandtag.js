@@ -9,6 +9,8 @@ import { simpleGit } from 'simple-git';
 
 const { toUnix } = upath;
 
+const CHUNK_LENGTH_LIMIT = 4000;
+
 /**
  * Creates a commit and a tag for specified version.
  *
@@ -42,8 +44,12 @@ export default async function commitAndTag( {
 	const { all: availableTags } = await git.tags();
 	const tagForVersion = availableTags.find( tag => tag.endsWith( version ) );
 
-	const makeCommit = () => {
-		return git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`, filePathsToAdd );
+	const makeCommit = async () => {
+		for ( const chunk of splitPathsIntoChunks( filePathsToAdd ) ) {
+			await git.add( chunk );
+		}
+
+		return git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }` );
 	};
 
 	if ( dryRun ) {
@@ -56,4 +62,19 @@ export default async function commitAndTag( {
 		await makeCommit();
 		await git.addAnnotatedTag( `v${ version }`, `Release: v${ version }.` );
 	}
+}
+
+function splitPathsIntoChunks( filePathsToAdd ) {
+	return filePathsToAdd.reduce( ( chunks, path ) => {
+		const lastChunk = chunks.at( -1 );
+		const newLength = [ ...lastChunk, path ].join( ' ' ).length;
+
+		if ( newLength < CHUNK_LENGTH_LIMIT ) {
+			lastChunk.push( path );
+		} else {
+			chunks.push( [ path ] );
+		}
+
+		return chunks;
+	}, [ [] ] );
 }
