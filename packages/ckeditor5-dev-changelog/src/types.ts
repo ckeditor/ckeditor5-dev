@@ -45,6 +45,11 @@ export type GenerateChangelog = {
 	 * The organisation namespace to use for the changelog. Defaults to '@ckeditor'.
 	 */
 	organisationNamespace?: string;
+
+	/**
+	 * Whether changelog is for a single package rather than a monorepo.
+	 */
+	singlePackage?: boolean;
 };
 
 /**
@@ -80,7 +85,7 @@ export type Entry = {
 };
 
 type FileMetadata = {
-	'breaking-change'?: SectionName;
+	'breaking-change'?: 'major' | 'minor' | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;

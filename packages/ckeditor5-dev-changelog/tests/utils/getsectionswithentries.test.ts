@@ -60,6 +60,18 @@ describe( 'getSectionsWithEntries()', () => {
 		expect( result.other.entries ).toHaveLength( 1 );
 	} );
 
+	it( 'should correctly classify generic breaking changes', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': true } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 1 );
+	} );
+
 	it( 'should classify an entry with an unknown type as invalid', () => {
 		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType' as any } } ) ];
 

@@ -32,7 +32,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
 		const isValid = isEntryValid( entry, packagesNames, organisationNamespace );
-		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
+		const section = getSection( isValid, type, breakingChange );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
 		const messageFirstLine = [
@@ -91,6 +91,22 @@ function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisa
 	}
 
 	return true;
+}
+
+function getSection( isValid: boolean, type: SectionName, breakingChange: ParsedFile['data']['breaking-change'] ): SectionName {
+	if ( !isValid ) {
+		return 'invalid';
+	}
+
+	if ( typeof breakingChange === 'string' ) {
+		return breakingChange;
+	}
+
+	if ( breakingChange === true ) {
+		return 'breaking';
+	}
+
+	return type;
 }
 
 function typeToSection( type: string | undefined ): SectionName {

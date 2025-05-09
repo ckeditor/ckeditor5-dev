@@ -22,6 +22,7 @@ import { getNewChangelog } from '../src/utils/getnewchangelog.js';
 import { getDateFormatted } from '../src/utils/getdateformatted.js';
 import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
+import { removeScope } from '../src/utils/removescope.js';
 import { SECTIONS } from '../src/constants.js';
 
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
@@ -41,6 +42,7 @@ vi.mock( '../src/utils/getnewchangelog.js' );
 vi.mock( '../src/utils/getdateformatted.js' );
 vi.mock( '../src/utils/defaulttransformscope.js' );
 vi.mock( '../src/utils/getexternalrepositorieswithdefaults.js' );
+vi.mock( '../src/utils/removescope.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
@@ -102,6 +104,10 @@ describe( 'generateChangelog()', () => {
 				title: SECTIONS.minor.title,
 				entries: []
 			},
+			breaking: {
+				title: SECTIONS.breaking.title,
+				entries: []
+			},
 			feature: {
 				title: SECTIONS.feature.title,
 				entries: [
@@ -160,6 +166,9 @@ describe( 'generateChangelog()', () => {
 			}
 		] );
 		vi.mocked( getNewChangelog ).mockReturnValue( 'Mocked changelog content' );
+		vi.mocked( removeScope ).mockImplementation( parsedChangesetFiles => {
+			parsedChangesetFiles.forEach( changeset => delete changeset.data.scope );
+		} );
 	} );
 
 	it( 'generates changelog with all required sections', async () => {
@@ -202,9 +211,95 @@ describe( 'generateChangelog()', () => {
 				}
 			],
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: [
 				{ name: 'test-package', version: '1.0.0' }
 			]
+		} );
+
+		expect( modifyChangelog ).toHaveBeenCalledWith(
+			'Mocked changelog content',
+			'/home/ckeditor'
+		);
+		expect( removeChangesetFiles ).toHaveBeenCalledWith(
+			[
+				{
+					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+					skipLinks: false
+				}
+			],
+			'/home/ckeditor',
+			'.changelog',
+			[]
+		);
+		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
+	} );
+
+	it( 'generates changelog without scope when generating for a single package', async () => {
+		await generateChangelog( { ...defaultOptions, singlePackage: true } );
+
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
+		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
+
+		// Check that getNewChangelog is called with correct arguments
+		expect( getNewChangelog ).toHaveBeenCalledWith( {
+			oldVersion: '1.0.0',
+			newVersion: '1.0.1',
+			dateFormatted: 'March 26, 2024',
+			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+			sectionsToDisplay: [
+				{
+					title: SECTIONS.feature.title,
+					entries: [
+						{
+							message: 'Test feature',
+							data: {
+								type: 'Feature',
+								scope: [ 'test-package' ],
+								closes: [],
+								see: [],
+								mainContent: 'Test feature',
+								restContent: []
+							},
+							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
+						}
+					]
+				}
+			],
+			releasedPackagesInfo: [
+				{
+					title: 'Released packages',
+					version: '1.0.1',
+					packages: [ 'test-package' ]
+				}
+			],
+			isInternal: false,
+			singlePackage: true,
+			packageJsons: [
+				{ name: 'test-package', version: '1.0.0' }
+			]
+		} );
+
+		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
+			organisationNamespace: '@ckeditor',
+			packageJsons: [ {
+				name: 'test-package',
+				version: '1.0.0'
+			} ],
+			parsedFiles: [ {
+				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+				content: 'Test changeset',
+				data: {
+					closes: [],
+					see: [],
+					type: 'Feature'
+				},
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
+			} ],
+			transformScope: expect.any( Function )
 		} );
 
 		expect( modifyChangelog ).toHaveBeenCalledWith(
@@ -312,6 +407,10 @@ describe( 'generateChangelog()', () => {
 			},
 			minor: {
 				title: SECTIONS.minor.title,
+				entries: []
+			},
+			breaking: {
+				title: SECTIONS.breaking.title,
 				entries: []
 			},
 			feature: {
