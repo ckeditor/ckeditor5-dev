@@ -124,10 +124,10 @@ describe( 'getSectionsWithEntries()', () => {
 		const message = result.feature.entries[ 0 ]!.message;
 
 		expect( message ).toContain(
-			'Closes [#ckeditor/ckeditor5#123](https://github.com/ckeditor/issues/ckeditor/ckeditor5#123).'
+			'Closes [ckeditor/ckeditor5#123](https://github.com/ckeditor/ckeditor5/issues/123).'
 		);
 		expect( message ).toContain(
-			'See [#mr-developer/cool-project.com#456](https://github.com/ckeditor/issues/mr-developer/cool-project.com#456).'
+			'See [mr-developer/cool-project.com#456](https://github.com/mr-developer/cool-project.com/issues/456).'
 		);
 	} );
 

@@ -87,7 +87,7 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 		if ( differentRepoMatch ) {
 			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
 
-			return `[#${ number }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
+			return `[${ issue }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
 		}
 
 		return null;
