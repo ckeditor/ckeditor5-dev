@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import path from 'path';
 import * as tests from '../lib/index.js';
 
-const options = tests.parseArguments( process.argv.slice( 2 ) );
+const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIdentityFile: true } );
 
 // By default, the watch mechanism should be enabled in manual tests.
 // However, it makes sense to disable it when a developer wants to compile these files once,

@@ -7,7 +7,7 @@
  * @module fixtures/customexampleclass
  */
 
-import { ExampleClass } from './exampleclass';
+import { ExampleClass } from './exampleclass.js';
 
 export class CustomExampleClass extends ExampleClass {
 	// In the generated TypeDoc output this class will also contain all inherited observable properties from ExampleClass.

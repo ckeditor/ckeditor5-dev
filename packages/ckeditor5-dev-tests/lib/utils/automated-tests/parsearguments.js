@@ -4,15 +4,17 @@
  */
 
 import fs from 'fs-extra';
-import path from 'path';
+import path from 'upath';
 import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * @param {Array.<string>} args
+ * @param {Object} settings
+ * @param {string} [settings.allowDefaultIdentityFile]
  * @returns {object}
  */
-export default function parseArguments( args ) {
+export default function parseArguments( args, settings = {} ) {
 	const log = logger();
 
 	const minimistConfig = {
@@ -108,6 +110,7 @@ export default function parseArguments( args ) {
 	parseDebugOption( options );
 	parseRepositoriesOption( options );
 	parseTsconfigPath( options );
+	useDefaultIdentityFile( options );
 
 	return options;
 
@@ -263,5 +266,30 @@ export default function parseArguments( args ) {
 		} catch ( e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * @param {object} options
+	 */
+	function useDefaultIdentityFile( options ) {
+		if ( !settings.allowDefaultIdentityFile ) {
+			return;
+		}
+
+		// This option has three possible states:
+		// null - meaning that `--identity-file` was not passed, and default value should be injected.
+		// false - meaning that `--no-identity-file` was passed, and default value should not be injected.
+		// string - meaning that `--identity-file` was passed, and default value should not be injected.
+		if ( options.identityFile !== null ) {
+			return;
+		}
+
+		const defaultFilePath = path.join( options.cwd, 'external', 'ckeditor5-commercial', 'scripts', 'presets', 'staging-ff.js' );
+
+		if ( !fs.existsSync( defaultFilePath ) ) {
+			return;
+		}
+
+		options.identityFile = defaultFilePath;
 	}
 }

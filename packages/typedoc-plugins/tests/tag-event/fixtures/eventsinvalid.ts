@@ -7,7 +7,7 @@
  * @module fixtures/eventsinvalid
  */
 
-import ExampleClass from './exampleclass';
+import ExampleClass from './exampleclass.js';
 
 export default class EventsInvalidClass extends ExampleClass {
 	public static create( value: string ): ExampleClass {

@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import parseArguments from '../../../lib/utils/automated-tests/parsearguments.js';
 
-vi.mock( 'path', () => ( {
+vi.mock( 'upath', () => ( {
 	default: {
 		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
 		dirname: vi.fn()
@@ -18,15 +18,19 @@ vi.mock( 'fs-extra' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'parseArguments()', () => {
-	let logWarningStub;
+	let logWarningStub, existingFiles;
 
 	beforeEach( () => {
 		logWarningStub = vi.fn();
+
+		existingFiles = [];
 
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/project' );
 		vi.mocked( logger ).mockReturnValue( {
 			warning: logWarningStub
 		} );
+
+		vi.mocked( fs ).existsSync.mockImplementation( path => existingFiles.includes( path ) );
 	} );
 
 	it( 'replaces kebab-case strings with camelCase values', () => {
@@ -319,15 +323,13 @@ describe( 'parseArguments()', () => {
 
 	describe( 'tsconfig', () => {
 		it( 'should be null by default, if `tsconfig.test.json` does not exist', () => {
-			vi.mocked( fs ).existsSync.mockReturnValue( false );
-
 			const options = parseArguments( [] );
 
 			expect( options.tsconfig ).to.equal( null );
 		} );
 
 		it( 'should use `tsconfig.test.json` from `cwd` if it is available by default', () => {
-			vi.mocked( fs ).existsSync.mockReturnValue( true );
+			existingFiles.push( '/home/project/tsconfig.test.json' );
 
 			const options = parseArguments( [] );
 
@@ -335,7 +337,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should parse `--tsconfig` to absolute path if it is set and it exists', () => {
-			vi.mocked( fs ).existsSync.mockReturnValue( true );
+			existingFiles.push( '/home/project/configs/tsconfig.json' );
 
 			const options = parseArguments( [ '--tsconfig', 'configs/tsconfig.json' ] );
 
@@ -343,11 +345,49 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should be null if `--tsconfig` points to non-existing file', () => {
-			vi.mocked( fs ).existsSync.mockReturnValue( false );
-
 			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
 
 			expect( options.tsconfig ).to.equal( null );
+		} );
+	} );
+
+	describe( 'identity-file', () => {
+		it( 'should be null by default, if `staging-ff.js` does not exist', () => {
+			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
+
+			expect( options.identityFile ).to.equal( null );
+		} );
+
+		it( 'should be null by default, if allowDefaultIdentityFile was not passed', () => {
+			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+
+			const options = parseArguments( [], {} );
+
+			expect( options.identityFile ).to.equal( null );
+		} );
+
+		it( 'should point to the default value by default', () => {
+			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+
+			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
+
+			expect( options.identityFile ).to.equal( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+		} );
+
+		it( 'should point to the passed value', () => {
+			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+
+			const options = parseArguments( [ '--identity-file', 'configs/identity.js' ], { allowDefaultIdentityFile: true } );
+
+			expect( options.identityFile ).to.equal( 'configs/identity.js' );
+		} );
+
+		it( 'should be false if --no-identity-file was passed', () => {
+			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+
+			const options = parseArguments( [ '--no-identity-file' ], { allowDefaultIdentityFile: true } );
+
+			expect( options.identityFile ).to.equal( false );
 		} );
 	} );
 } );

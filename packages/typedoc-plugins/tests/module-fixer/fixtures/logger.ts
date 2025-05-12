@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type Error from './error';
+import type Error from './error.js';
 
 /**
  * @module fixtures/logger
@@ -13,4 +13,9 @@ export default class Logger {
 	public static error( error: Error ): void {
 		console.log( error.name );
 	}
+}
+export interface DeleteChange {
+	type: 'delete';
+	index: number;
+	howMany: number;
 }

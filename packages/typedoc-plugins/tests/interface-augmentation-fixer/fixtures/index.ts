@@ -7,5 +7,5 @@
  * @module interface-augmentation
  */
 
-export type { FooConfig } from './foo/fooconfig';
-export type { foobarVariable } from './foobar/foobarconfig';
+export type { FooConfig } from './foo/fooconfig.js';
+export type { foobarVariable } from './foobar/foobarconfig.js';

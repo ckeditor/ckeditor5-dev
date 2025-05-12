@@ -7,7 +7,7 @@
  * @module fixtures/customerror
  */
 
-import Error from './error';
+import Error from './error.js';
 
 export default class CustomError extends Error {
 }
