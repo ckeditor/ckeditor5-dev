@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { InterfaceC } from './interface-c';
+import type { InterfaceC } from './interface-c.js';
 
 /**
  * @module fixtures/mixed-class

@@ -53,3 +53,10 @@ export class PublicCollection {
 	public _getInternalFunction(): void {
 	}
 }
+
+/**
+ * @eventName ~PublicCollection#publicCollectionEvent
+ */
+export type PublicCollectionEvent = {
+	name: 'publicCollectionEvent';
+};

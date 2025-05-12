@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "lib": [
-      "DOM"
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ],
     "noImplicitAny": true,
     "noImplicitOverride": true,
@@ -10,6 +12,7 @@
     "target": "es2020",
     "sourceMap": true,
     "allowJs": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }

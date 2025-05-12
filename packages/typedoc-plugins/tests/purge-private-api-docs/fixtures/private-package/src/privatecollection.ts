@@ -53,3 +53,10 @@ export class PrivateCollection {
 	public _getInternalFunction(): void {
 	}
 }
+
+/**
+ * @eventName ~PrivateCollection#privateCollectionEvent
+ */
+export type PrivateCollectionEvent = {
+	name: 'privateCollectionEvent';
+};

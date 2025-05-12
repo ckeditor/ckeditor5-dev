@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/typedoc-plugins",
-  "version": "47.1.1",
+  "version": "49.0.0",
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -16,27 +16,39 @@
     "node": ">=20.0.0",
     "npm": ">=5.7.1"
   },
-  "main": "lib/index.js",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
+  "dependencies": {
+    "upath": "^2.0.1"
+  },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "glob": "^10.0.0",
-    "mocha": "^10.0.0",
-    "nyc": "^17.1.0",
-    "sinon": "^9.2.4",
-    "typedoc": "^0.23.15",
-    "typescript": "5.0.4"
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "glob": "^11.0.1",
+    "rollup": "^4.9.5",
+    "typedoc": "0.28.4",
+    "typedoc-plugin-rename-defaults": "^0.7.3",
+    "typescript": "5.0.4",
+    "vitest": "^3.1.1"
   },
   "peerDependencies": {
-    "typedoc": "^0.23.15"
+    "typedoc": "0.28.4"
   },
   "scripts": {
-    "test": "mocha './tests/**/*.js' --timeout 10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch",
+    "test": "vitest run --config vitest.config.ts",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:dev": "vitest dev"
   },
   "depcheckIgnore": [
-    "typedoc"
+    "typedoc",
+    "typedoc-plugin-rename-defaults",
+    "typescript"
   ]
 }

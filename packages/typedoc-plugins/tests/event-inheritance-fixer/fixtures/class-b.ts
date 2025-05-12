@@ -7,7 +7,7 @@
  * @module fixtures/class-b
  */
 
-import { ClassA } from './class-a';
+import { ClassA } from './class-a.js';
 
 export class ClassB extends ClassA {}
 

@@ -165,21 +165,25 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		const pageErrors: Array<CrawlerError> = [];
 
 		page.on( 'request', request => {
-			const url = request.url();
-			const resourceType = request.resourceType();
+			const { hostname, pathname } = new URL( request.url() );
 
-			if ( resourceType === 'media' ) {
+			if ( !hostname ) {
+				// Don't block requests without a hostname (e.g. data URLs).
+				return request.continue();
+			}
+
+			if ( request.resourceType() === 'media' ) {
 				// Block all 'media' requests, as they are likely to fail anyway due to limitations in Puppeteer.
 				return request.abort( 'blockedbyclient' );
 			}
 
-			if ( url.includes( 'visualwebsiteoptimizer' ) ) {
-				// We don't need this when doing testing.
+			if ( IGNORED_HOSTS.some( host => hostname.endsWith( host ) ) ) {
+				// Block all requests to ignored hosts.
 				return request.abort( 'blockedbyclient' );
 			}
 
-			if ( url.endsWith( 'api.json' ) ) {
-				// This file is huge and loaded on every page, but doesn't need to be tested.
+			if ( pathname.endsWith( 'api.json' ) ) {
+				// This file is huge and loaded on every page, but isn't required during testing.
 				return request.abort( 'blockedbyclient' );
 			}
 
@@ -194,7 +198,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			message: ( error as Error ).message || '(empty message)'
 		} ) );
 
-		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => onError( {
+		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
 			message: error.message || '(empty message)'
@@ -209,38 +213,31 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 				return;
 			}
 
-			const url = request.url();
-
-			if ( IGNORED_HOSTS.some( ignoredHost => url.includes( ignoredHost ) ) ) {
+			if ( errorText?.includes( 'net::ERR_BLOCKED_BY_CLIENT' ) ) {
+				// Do not log errors explicitly aborted by the crawler.
 				return;
 			}
 
-			// Do not log errors explicitly aborted by the crawler.
-			if ( errorText !== 'net::ERR_BLOCKED_BY_CLIENT.Inspector' ) {
-				const host = new URL( url ).host;
-				const isNavigation = isNavigationRequest( request );
-				const message = isNavigation ?
-					`Failed to open link ${ chalk.bold( url ) }` :
-					`Failed to load resource from ${ chalk.bold( host ) }`;
+			const url = request.url();
+			const host = new URL( url ).host;
+			const isNavigation = isNavigationRequest( request );
+			const message = isNavigation ?
+				`Failed to open link ${ chalk.bold( url ) }` :
+				`Failed to load resource from ${ chalk.bold( host ) }`;
 
-				pageErrors.push( {
-					pageUrl: isNavigation ? data.parentUrl : data.url,
-					type: ERROR_TYPES.REQUEST_FAILURE,
-					message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
-					failedResourceUrl: url
-				} );
-			}
+			pageErrors.push( {
+				pageUrl: isNavigation ? data.parentUrl : data.url,
+				type: ERROR_TYPES.REQUEST_FAILURE,
+				message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
+				failedResourceUrl: url
+			} );
 		} );
 
 		page.on( ERROR_TYPES.RESPONSE_FAILURE.event, response => {
 			const responseStatus = response.status();
-			const url = response.url();
-
-			if ( IGNORED_HOSTS.some( ignoredHost => url.includes( ignoredHost ) ) ) {
-				return;
-			}
 
 			if ( responseStatus > 399 ) {
+				const url = response.url();
 				const host = new URL( url ).host;
 				const isNavigation = isNavigationRequest( response.request() );
 				const message = isNavigation ?
@@ -378,7 +375,6 @@ function getErrorHandler( errors: Map<ErrorType, Map<string, ErrorCollection>> )
 		const messageLines = error.message.split( '\n' );
 		const firstMessageLine = messageLines.shift()!;
 		const nextMessageLines = messageLines.join( '\n' );
-
 		const errorCollection = errors.get( error.type )!;
 
 		if ( !errorCollection.has( firstMessageLine ) ) {

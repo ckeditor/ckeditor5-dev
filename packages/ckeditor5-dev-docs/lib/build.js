@@ -4,10 +4,9 @@
  */
 
 import { glob } from 'glob';
-import TypeDoc from 'typedoc';
-import typedocPlugins from '@ckeditor/typedoc-plugins';
-
-import validators from './validators/index.js';
+import upath from 'upath';
+import { Application, OptionDefaults } from 'typedoc';
+import * as plugins from '@ckeditor/typedoc-plugins';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -16,78 +15,76 @@ import validators from './validators/index.js';
  * @returns {Promise}
  */
 export default async function build( config ) {
-	const { plugins } = typedocPlugins;
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
-	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
 	const ignoreFiles = config.ignoreFiles || [];
-	const validatorOptions = config.validatorOptions || {};
+	const validatorOptions = config.validatorOptions || {
+		strict: false
+	};
+	const verbose = config.verbose || false;
 
-	const files = await glob( sourceFilePatterns, {
+	const files = ( await glob( sourceFilePatterns, {
 		ignore: ignoreFiles
-	} );
-	const typeDoc = new TypeDoc.Application();
+	} ) ).map( upath.normalize );
 
-	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-
-	typeDoc.bootstrap( {
+	const app = await Application.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
+		excludePrivate: false,
 		entryPoints: files,
-		logLevel: 'Warn',
+		logLevel: verbose ? 'Info' : 'Warn',
 		basePath: config.cwd,
+		readme: 'none',
+
 		blockTags: [
+			...OptionDefaults.blockTags,
 			'@eventName',
-			'@default'
+			'@export',
+			'@fires',
+			'@label',
+			'@observable',
+			'@error'
 		],
 		inlineTags: [
-			'@link',
+			...OptionDefaults.inlineTags,
 			'@glink'
 		],
 		modifierTags: [
+			...OptionDefaults.modifierTags,
 			'@publicApi',
-			'@skipSource',
-			'@internal'
+			'@skipSource'
 		],
 		plugin: [
 			// Fixes `"name": 'default" in the output project.
 			'typedoc-plugin-rename-defaults',
-
-			plugins[ 'typedoc-plugin-module-fixer' ],
-			plugins[ 'typedoc-plugin-symbol-fixer' ],
-			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
-			plugins[ 'typedoc-plugin-tag-error' ],
-			plugins[ 'typedoc-plugin-tag-event' ],
-			plugins[ 'typedoc-plugin-tag-observable' ],
-			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
-
-			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
-			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
-
-			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
-			plugins[ 'typedoc-plugin-event-param-fixer' ],
-
 			...extraPlugins
 		]
 	} );
 
+	plugins.typeDocRestoreProgramAfterConversion( app );
+	plugins.typeDocModuleFixer( app );
+	plugins.typeDocSymbolFixer( app );
+	plugins.typeDocTagError( app );
+	plugins.typeDocTagEvent( app );
+	plugins.typeDocTagObservable( app );
+	plugins.typeDocEventParamFixer( app );
+	plugins.typeDocEventInheritanceFixer( app );
+	plugins.typeDocInterfaceAugmentationFixer( app );
+	plugins.typeDocPurgePrivateApiDocs( app );
+	plugins.typeDocReferenceFixer( app );
+	plugins.typeDocOutputCleanUp( app );
+	plugins.validate( app, validatorOptions );
+
 	console.log( 'Typedoc started...' );
 
-	const conversionResult = typeDoc.convert();
+	const conversionResult = await app.convert();
 
 	if ( !conversionResult ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
-
-	if ( !validationResult && strictMode ) {
-		throw 'Something went wrong with TypeDoc.';
-	}
-
 	if ( config.outputPath ) {
-		await typeDoc.generateJson( conversionResult, config.outputPath );
+		await app.generateJson( conversionResult, config.outputPath );
 	}
 
 	console.log( `Documented ${ files.length } files!` );
@@ -108,6 +105,9 @@ export default async function build( config ) {
  *
  * @property {boolean} [strict=false] If `true`, errors found during the validation will finish the process
  * and exit code will be changed to `1`.
+ *
+ * @property {boolean} [verbose=false] If `true`, the output will be verbose.
+ *
  * @property {string} [outputPath] A path to the place where extracted doclets will be saved. Is an optional value due to tests.
  *
  * @property {string} [extraPlugins=[]] An array of path to extra plugins that will be added to Typedoc.

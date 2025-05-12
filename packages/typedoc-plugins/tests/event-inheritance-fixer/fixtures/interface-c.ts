@@ -7,7 +7,7 @@
  * @module fixtures/interface-c
  */
 
-import type { InterfaceB } from './interface-b';
+import type { InterfaceB } from './interface-b.js';
 
 export interface InterfaceC extends InterfaceB {}
 

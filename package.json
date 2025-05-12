@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "47.1.1",
+  "version": "49.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -15,20 +15,21 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^47.1.1",
-    "@ckeditor/ckeditor5-dev-release-tools": "^47.1.1",
-    "@ckeditor/ckeditor5-dev-bump-year": "^47.1.1",
-    "@inquirer/prompts": "^6.0.0",
-    "@listr2/prompt-adapter-inquirer": "^2.0.16",
+    "@ckeditor/ckeditor5-dev-ci": "^49.0.0",
+    "@ckeditor/ckeditor5-dev-dependency-checker": "^49.0.0",
+    "@ckeditor/ckeditor5-dev-release-tools": "^49.0.0",
+    "@ckeditor/ckeditor5-dev-bump-year": "^49.0.0",
+    "@inquirer/prompts": "^7.4.1",
+    "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^21.0.0",
     "eslint": "^8.21.0",
     "eslint-config-ckeditor5": "^9.0.0",
     "fs-extra": "^11.0.0",
-    "glob": "^10.0.0",
-    "husky": "^8.0.2",
+    "glob": "^11.0.1",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
-    "lint-staged": "^15.0.0",
-    "listr2": "^8.0.0",
+    "lint-staged": "^15.5.1",
+    "listr2": "^8.3.2",
     "minimist": "^1.2.8",
     "semver": "^7.6.3",
     "upath": "^2.0.1"
@@ -43,10 +44,11 @@
     "lint": "eslint --quiet \"**/*.{js,ts}\"",
     "precommit": "lint-staged",
     "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
-    "reinstall": "yarn run clean && yarn install"
+    "reinstall": "yarn run clean && yarn install",
+    "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {
-    "**/*.js": [
+    "**/*.{js,ts,mjs,cjs}": [
       "eslint --quiet"
     ]
   },

@@ -5,7 +5,10 @@
 
 ## Overview
 
-This repository consists of few plugins which extend the capabilities of [TypeDoc](https://typedoc.org/).
+This repository consists of a few plugins which extend the capabilities of [TypeDoc](https://typedoc.org/).
+
+> [!WARNING]
+> The [`@ckeditor/typedoc-plugins`](https://www.npmjs.com/package/@ckeditor/typedoc-plugins) requires [`typedoc@0.28`](https://npmjs.com/package/typedoc).
 
 Before enabling plugins from the package, you need to install it first.
 
@@ -15,156 +18,76 @@ npm install @ckeditor/typedoc-plugins
 
 Below you can find the detailed overview of available plugins.
 
-### Module fixer
+## Usage
 
-The plugin reads the module name specified in the `@module` annotation.
-
-```ts
-import type { TypeDefinition } from '...';
-
-/**
- * @module package/file
- */
-```
-
-For the example specified above, a name of the parsed module should be equal to `package/file`.
-
-The `import` statements may be specified above the "@module" block code. In such a case, the default module parser from `typedoc` returns the module name based on a path relative to the project root.
-
-To enable the plugin, add the following path to available plugins:
+To use the `typedoc-plugins`, you need to create an instance of the Typedoc application.
 
 ```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
-    ]
-}
+import { Application } from 'typedoc';
+import { typeDocSymbolFixer } from '@ckeditor/typedoc-plugins';
+
+const app = await Application.bootstrapWithPlugins( { /* Typedoc options. */ } );
+
+// It is essential to execute a plugin before converting the project.
+typeDocSymbolFixer( app );
+
+const conversionResult = await typeDoc.convert();
 ```
 
-### Symbol fixer
+## Available plugins
 
-The plugin renames `Symbol.*` definitions with the JSDoc style.
+- **Module fixer** &mdash; `typeDocModuleFixer()`
 
-* Typedoc: `[iterator]() → Iterator`
-* JSDoc: `Symbol.iterator() → Iterator`
+  The plugin reads the module name specified in the `@module` annotation.
 
-To enable the plugin, add the following path to available plugins:
+  ```ts
+  import type { TypeDefinition } from '...';
+  
+  /**
+   * @module package/file
+   */
+  ```
 
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
-    ]
-}
-```
+  For the example specified above, the name of the parsed module should be equal to `package/file`.
 
-### Interface augmentation fixer
+  The `import` statements may be specified above the "@module" block code. In such a case, the default module parser from `typedoc` returns the module name based on a path relative to the project root.
 
-The plugin tries to fix an interface, that has been extended (augmented) from the outside (from
-another module) in the re-exported `index.ts` file. When the extending "declare module ..." declaration contains the full package name, it points to the `index.ts` file instead of the actual source file. The goal is to add missing properties from interfaces to their source locations.
+- **Symbol fixer** &mdash; `typeDocSymbolFixer()`
 
-To enable the plugin, add the following path to available plugins:
+  The plugin renames `Symbol.*` definitions with the JSDoc style.
 
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/interface-augmentation-fixer' )
-    ]
-}
-```
+  - Typedoc: `[iterator]() → Iterator`
+  - JSDoc: `Symbol.iterator() → Iterator`
 
-### Event parameter fixer
+- **Interface augmentation fixer** &mdash; `typeDocInterfaceAugmentationFixer()`
 
-The plugin injects the `eventInfo` parameter (an instance of the `EventInfo` class) as the first parameter for each event reflection.
+  The plugin tries to fix an interface, that has been extended (augmented) from the outside (from another module) in the re-exported `index.ts` file. When the extending "declare module ..." declaration contains the full package name, it points to the `index.ts` file instead of the actual source file. The goal is to add missing properties from interfaces to their source locations.
 
-To enable the plugin, add the following path to available plugins:
+- **Event parameter fixer** &mdash; `typeDocEventParamFixer()`
 
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
-    ]
-}
-```
+  The plugin injects the `eventInfo` parameter (an instance of the `EventInfo` class) as the first parameter for each event reflection.
 
-### Events inheritance fixer
+- **Events inheritance fixer** &mdash; `typeDocEventInheritanceFixer()`
 
-The plugin takes care of inheriting events, which are created manually via the [`@eventName`](#tag-eventname) annotation.
+  The plugin takes care of inheriting events, which are created manually via the [`@eventName`](#tag-eventname) annotation.
 
-To enable the plugin, add the following path to available plugins:
+- **Purge private API** &mdash; `typeDocPurgePrivateApiDocs()`
 
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' )
-    ]
-}
-```
+  The plugin removes reflections collected from private packages (marked as `"private": true` in their `package.json`). To disable the mechanism, add the `@publicApi` annotation at the beginning of a file.
+    
+- **Tag `@error`** &mdash; `typeDocTagError()`
 
-### Purge private API
+  The plugin collects error definitions from the `@error` annotation.
+    
+- **Tag `@eventName`** &mdash; `typeDocTagEvent()`
 
-The plugin removes reflections collected from private packages (marked as `"private": true` in their `package.json`). To disable the mechanism, add the `@publicApi` annotation at the beginning of a file.
+  The plugin collects event definitions from the `@eventName` annotation and assigns them as the children of the class or the `Observable` interface.
 
-To enable the plugin, add the following path to available plugins:
+  We are not using the [`@event`](https://typedoc.org/tags/event/) annotation, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be difficult to get it to work as we expect.
 
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
-    ]
-}
-```
+- **Tag `@observable`** &mdash; `typeDocTagObservable()`
 
-### Tag `@error`
-
-The plugin collects error definitions from the `@error` annotation.
-
-To enable the plugin, add the following path to available plugins:
-
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' )
-    ]
-}
-```
-
-### Tag `@eventName`
-
-The plugin collects event definitions from the `@eventName` annotation and assigns them as the children of the class or the `Observable` interface.
-
-We are not using the [`@event`](https://typedoc.org/tags/event/) annotation, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be difficult to get it to work as we expect.
-
-To enable the plugin, add the following path to available plugins:
-
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
-    ]
-}
-```
-
-### Tag `@observable`
-
-To enable the plugin, add the following path to available plugins:
-
-```js
-{
-    plugin: [
-        // ...
-        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )
-    ]
-}
-```
+  Adds support for creating CKEditor 5 events from properties marked as `@observable`.
 
 ------------------------------------------------------------------------------------
 
