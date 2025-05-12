@@ -167,7 +167,11 @@ describe( 'generateChangelog()', () => {
 		] );
 		vi.mocked( getNewChangelog ).mockReturnValue( 'Mocked changelog content' );
 		vi.mocked( removeScope ).mockImplementation( parsedChangesetFiles => {
-			parsedChangesetFiles.forEach( changeset => delete changeset.data.scope );
+			return parsedChangesetFiles.map( changeset => {
+				delete changeset.data.scope;
+
+				return changeset;
+			} );
 		} );
 	} );
 

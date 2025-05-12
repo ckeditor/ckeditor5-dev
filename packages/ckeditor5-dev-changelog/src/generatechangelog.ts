@@ -48,10 +48,10 @@ export async function generateChangelog( {
 	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
-	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
+	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 
 	if ( singlePackage ) {
-		removeScope( parsedChangesetFiles );
+		parsedChangesetFiles = removeScope( parsedChangesetFiles );
 	}
 
 	const sectionsWithEntries = getSectionsWithEntries( {

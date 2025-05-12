@@ -5,6 +5,10 @@
 
 import type { ParsedFile } from '../types';
 
-export function removeScope( parsedChangesetFiles: Array<ParsedFile> ): void {
-	return parsedChangesetFiles.forEach( changeset => delete changeset.data.scope );
+export function removeScope( parsedChangesetFiles: Array<ParsedFile> ): Array<ParsedFile> {
+	return parsedChangesetFiles.map( changeset => {
+		delete changeset.data.scope;
+
+		return changeset;
+	} );
 }

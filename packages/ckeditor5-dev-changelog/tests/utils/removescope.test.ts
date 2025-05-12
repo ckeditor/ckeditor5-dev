@@ -8,7 +8,7 @@ import { removeScope } from '../../src/utils/removescope.js';
 import { describe, it, expect } from 'vitest';
 
 describe( 'removeScope()', () => {
-	it( 'should mutate the passed data by stripping the scope', () => {
+	it( 'should strip the scope from the data', () => {
 		const parsedChangesetFiles: Array<ParsedFile> = [ {
 			skipLinks: true,
 			changesetPath: 'changesetPath1',
@@ -30,9 +30,9 @@ describe( 'removeScope()', () => {
 			}
 		} ];
 
-		removeScope( parsedChangesetFiles );
+		const result = removeScope( parsedChangesetFiles );
 
-		expect( parsedChangesetFiles ).toEqual( [ {
+		expect( result ).toEqual( [ {
 			skipLinks: true,
 			changesetPath: 'changesetPath1',
 			gitHubUrl: 'gitHubUrl1',
