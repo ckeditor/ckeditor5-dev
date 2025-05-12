@@ -6,9 +6,9 @@
 import type { ParsedFile } from '../types';
 
 export function removeScope( parsedChangesetFiles: Array<ParsedFile> ): Array<ParsedFile> {
-	return parsedChangesetFiles.map( changeset => {
-		delete changeset.data.scope;
+	const clone: Array<ParsedFile> = JSON.parse( JSON.stringify( parsedChangesetFiles ) );
 
-		return changeset;
-	} );
+	clone.forEach( changeset => delete changeset.data.scope );
+
+	return clone;
 }
