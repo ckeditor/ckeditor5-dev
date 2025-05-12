@@ -101,7 +101,7 @@ describe( 'getSectionsWithEntries()', () => {
 		Object.values( result ).forEach( section => expect( section.entries ).toBeUndefined );
 	} );
 
-	it( 'should generate correct markdown links for scope and issues', () => {
+	it( 'should generate correct markdown links for scope and issues from the current repository', () => {
 		const parsedFiles = [ createParsedFile() ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
@@ -111,6 +111,35 @@ describe( 'getSectionsWithEntries()', () => {
 		expect( message ).toContain( '[DisplayName-package-1](https://npmjs.com/package/package-1)' );
 		expect( message ).toContain( 'Closes [#123](https://github.com/ckeditor/issues/123).' );
 		expect( message ).toContain( 'See [#456](https://github.com/ckeditor/issues/456).' );
+	} );
+
+	it( 'should generate correct markdown links for issues from other repositories', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			closes: [ 'ckeditor/ckeditor5#123' ],
+			see: [ 'mr-developer/cool-project.com#456' ]
+		} } ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).toContain(
+			'Closes [#ckeditor/ckeditor5#123](https://github.com/ckeditor/issues/ckeditor/ckeditor5#123).'
+		);
+		expect( message ).toContain(
+			'See [#mr-developer/cool-project.com#456](https://github.com/ckeditor/issues/mr-developer/cool-project.com#456).'
+		);
+	} );
+
+	it( 'should generate invalid entry when links for issues are invalid', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			closes: [ 'foo/bar' ]
+		} } ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+
+		expect( result.feature.entries.length ).toEqual( 0 );
+		expect( result.invalid.entries.length ).toEqual( 1 );
 	} );
 
 	it( 'should format the content properly', () => {

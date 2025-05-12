@@ -14,6 +14,10 @@ import type {
 import { SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
 
+type DifferentRepoIssue = { owner: string; repository: string; number: string };
+const differentRepoIssuePattern = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+const sameRepoIssuePattern = /^\d+$/;
+
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
@@ -31,7 +35,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const scope = getScopesLinks( entry.data.scope, transformScope );
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
-		const isValid = isEntryValid( entry, packagesNames, organisationNamespace );
+		const isValid = isEntryValid( { entry, packagesNames, organisationNamespace, closes, see } );
 		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
@@ -73,14 +77,46 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 		return null;
 	}
 
-	return prefix + ' ' + issues
-		.map( id => `[#${ id }](${ gitHubUrl }/issues/${ id })` )
-		.join( ', ' ) + '.';
+	const links = issues.map( String ).map( issue => {
+		if ( issue.match( sameRepoIssuePattern ) ) {
+			return `[#${ issues }](${ gitHubUrl }/issues/${ issues })`;
+		}
+
+		const differentRepoMatch = issue.match( differentRepoIssuePattern );
+
+		if ( differentRepoMatch ) {
+			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
+
+			return `[#${ number }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
+		}
+
+		return null;
+	} );
+
+	if ( links.includes( null ) ) {
+		return 'invalid';
+	}
+
+	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function isEntryValid( entry: ParsedFile, packagesNames: Array<string>, organisationNamespace: string ): boolean {
+function isEntryValid( { entry, packagesNames, organisationNamespace, closes, see }: {
+	entry: ParsedFile;
+	packagesNames: Array<string>;
+	organisationNamespace: string;
+	closes: string | null;
+	see: string | null;
+} ): boolean {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
 	const expectedTypes: Array<unknown> = [ 'Feature', 'Fix', 'Other' ];
+
+	if ( closes === 'invalid' ) {
+		return false;
+	}
+
+	if ( see === 'invalid' ) {
+		return false;
+	}
 
 	if ( !expectedTypes.includes( entry.data.type ) ) {
 		return false;
