@@ -14,6 +14,7 @@ type NewChangelogOptions = {
 	sectionsToDisplay: Array<Section>;
 	releasedPackagesInfo: Array<ReleaseInfo>;
 	isInternal: boolean;
+	singlePackage: boolean;
 	packageJsons: Array<PackageJson>;
 };
 
@@ -25,6 +26,7 @@ export function getNewChangelog( {
 	sectionsToDisplay,
 	releasedPackagesInfo,
 	isInternal,
+	singlePackage,
 	packageJsons
 }: NewChangelogOptions ): string {
 	const packagesNamesSorted = packageJsons.map( packageJson => packageJson.name ).sort();
@@ -54,18 +56,25 @@ export function getNewChangelog( {
 		packagesNamesSorted.map( name => `* [${ name }](${ NPM_URL }/${ name }/v/${ newVersion }): v${ oldVersion } => v${ newVersion }` )
 	].flat().join( '\n' );
 
-	return [
+	const changelog = [
 		header,
 		'',
-		isInternal ? 'Internal changes only (updated dependencies, documentation, etc.).\n' : sections,
-		'### Released packages',
-		'',
-		`Check out the [Versioning policy](${ VERSIONING_POLICY_URL }) guide for more information.`,
-		'',
-		'<details>',
-		'<summary>Released packages (summary)</summary>',
-		isInternal ? internalVersionsBumps : packagesVersionBumps,
-		'</details>',
-		''
-	].join( '\n' );
+		isInternal ? 'Internal changes only (updated dependencies, documentation, etc.).\n' : sections
+	];
+
+	if ( !singlePackage ) {
+		changelog.push(
+			'### Released packages',
+			'',
+			`Check out the [Versioning policy](${ VERSIONING_POLICY_URL }) guide for more information.`,
+			'',
+			'<details>',
+			'<summary>Released packages (summary)</summary>',
+			isInternal ? internalVersionsBumps : packagesVersionBumps,
+			'</details>',
+			''
+		);
+	}
+
+	return changelog.join( '\n' );
 }

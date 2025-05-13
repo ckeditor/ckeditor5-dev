@@ -21,22 +21,20 @@ const sameRepoIssuePattern = /^\d+$/;
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace }: {
+export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage }: {
 	parsedFiles: Array<ParsedFile>;
 	packageJsons: Array<PackageJson>;
 	transformScope: TransformScope;
 	organisationNamespace: string;
+	singlePackage: boolean;
 } ): SectionsWithEntries {
 	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const breakingChange = entry.data[ 'breaking-change' ];
-		const type = typeToSection( entry.data.type );
 		const scope = getScopesLinks( entry.data.scope, transformScope );
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
-		const isValid = isEntryValid( { entry, packagesNames, organisationNamespace, closes, see } );
-		const section = !isValid ? 'invalid' : ( breakingChange ?? type );
+		const section = getSection( { entry, packagesNames, organisationNamespace, singlePackage, closes, see } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
 		const messageFirstLine = [
@@ -100,45 +98,63 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function isEntryValid( { entry, packagesNames, organisationNamespace, closes, see }: {
+function getSection( {
+	entry,
+	packagesNames,
+	organisationNamespace,
+	singlePackage,
+	closes,
+	see
+}: {
 	entry: ParsedFile;
 	packagesNames: Array<string>;
 	organisationNamespace: string;
+	singlePackage: boolean;
 	closes: string | null;
 	see: string | null;
-} ): boolean {
+} ): SectionName {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
-	const expectedTypes: Array<unknown> = [ 'Feature', 'Fix', 'Other' ];
+	const breakingChange = entry.data[ 'breaking-change' ];
 
 	if ( closes === 'invalid' ) {
-		return false;
+		return 'invalid';
 	}
 
 	if ( see === 'invalid' ) {
-		return false;
-	}
-
-	if ( !expectedTypes.includes( entry.data.type ) ) {
-		return false;
+		return 'invalid';
 	}
 
 	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
-		return false;
+		return 'invalid';
 	}
 
-	return true;
-}
+	// If someone tries to use generic breaking change instead of minor/major in monorepo, the entry is invalid.
+	if ( !singlePackage && entry.data[ 'breaking-change' ] === true ) {
+		return 'invalid';
+	}
 
-function typeToSection( type: string | undefined ): SectionName {
-	if ( type === 'Feature' ) {
+	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
+	if ( singlePackage && typeof breakingChange === 'string' ) {
+		return 'breaking';
+	}
+
+	if ( typeof breakingChange === 'string' ) {
+		return breakingChange;
+	}
+
+	if ( breakingChange === true ) {
+		return 'breaking';
+	}
+
+	if ( entry.data.type === 'Feature' ) {
 		return 'feature';
 	}
 
-	if ( type === 'Fix' ) {
+	if ( entry.data.type === 'Fix' ) {
 		return 'fix';
 	}
 
-	if ( type === 'Other' ) {
+	if ( entry.data.type === 'Other' ) {
 		return 'other';
 	}
 

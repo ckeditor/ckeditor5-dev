@@ -24,6 +24,7 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
+import { removeScope } from './utils/removescope.js';
 
 /**
  * This function handles the entire changelog generation process including version management,
@@ -38,7 +39,8 @@ export async function generateChangelog( {
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = CHANGESET_DIRECTORY,
-	skipLinks = false
+	skipLinks = false,
+	singlePackage = false
 }: RepositoryConfig & GenerateChangelog ): Promise<void> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
@@ -46,12 +48,18 @@ export async function generateChangelog( {
 	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
-	const parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
+	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
+
+	if ( singlePackage ) {
+		parsedChangesetFiles = removeScope( parsedChangesetFiles );
+	}
+
 	const sectionsWithEntries = getSectionsWithEntries( {
 		parsedFiles: parsedChangesetFiles,
 		packageJsons,
 		transformScope,
-		organisationNamespace
+		organisationNamespace,
+		singlePackage
 	} );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
@@ -78,7 +86,8 @@ export async function generateChangelog( {
 		sectionsToDisplay,
 		releasedPackagesInfo,
 		isInternal,
-		packageJsons
+		packageJsons,
+		singlePackage
 	} );
 
 	await modifyChangelog( newChangelog, cwd );
