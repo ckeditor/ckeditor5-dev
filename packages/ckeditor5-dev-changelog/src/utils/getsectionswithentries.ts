@@ -90,12 +90,12 @@ function getSection( {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
 	const breakingChange = entry.data[ 'breaking-change' ];
 
-	// If someone tries to use generic breaking change instead of minor/major in monorepo, the entry is invalid.
-	if ( !singlePackage && entry.data[ 'breaking-change' ] === true ) {
+	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
 		return 'invalid';
 	}
 
-	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
+	// If someone tries to use generic breaking change instead of minor/major in monorepo, the entry is invalid.
+	if ( !singlePackage && entry.data[ 'breaking-change' ] === true ) {
 		return 'invalid';
 	}
 
