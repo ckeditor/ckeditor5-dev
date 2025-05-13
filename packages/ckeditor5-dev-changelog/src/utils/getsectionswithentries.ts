@@ -14,6 +14,10 @@ import type {
 import { SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
 
+type DifferentRepoIssue = { owner: string; repository: string; number: string };
+const differentRepoIssuePattern = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+const sameRepoIssuePattern = /^\d+$/;
+
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
@@ -30,7 +34,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const scope = getScopesLinks( entry.data.scope, transformScope );
 		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
 		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
-		const section = getSection( { entry, packagesNames, organisationNamespace, singlePackage } );
+		const section = getSection( { entry, packagesNames, organisationNamespace, singlePackage, closes, see } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
 
 		const messageFirstLine = [
@@ -71,24 +75,54 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 		return null;
 	}
 
-	return prefix + ' ' + issues
-		.map( id => `[#${ id }](${ gitHubUrl }/issues/${ id })` )
-		.join( ', ' ) + '.';
+	const links = issues.map( String ).map( issue => {
+		if ( issue.match( sameRepoIssuePattern ) ) {
+			return `[#${ issues }](${ gitHubUrl }/issues/${ issues })`;
+		}
+
+		const differentRepoMatch = issue.match( differentRepoIssuePattern );
+
+		if ( differentRepoMatch ) {
+			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
+
+			return `[${ issue }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
+		}
+
+		return null;
+	} );
+
+	if ( links.includes( null ) ) {
+		return 'invalid';
+	}
+
+	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
 function getSection( {
 	entry,
 	packagesNames,
 	organisationNamespace,
-	singlePackage
+	singlePackage,
+	closes,
+	see
 }: {
 	entry: ParsedFile;
 	packagesNames: Array<string>;
 	organisationNamespace: string;
 	singlePackage: boolean;
+	closes: string | null;
+	see: string | null;
 } ): SectionName {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
 	const breakingChange = entry.data[ 'breaking-change' ];
+
+	if ( closes === 'invalid' ) {
+		return 'invalid';
+	}
+
+	if ( see === 'invalid' ) {
+		return 'invalid';
+	}
 
 	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
 		return 'invalid';
