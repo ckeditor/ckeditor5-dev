@@ -31,8 +31,9 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 
 describe( 'getSectionsWithEntries()', () => {
 	const organisationNamespace = '@ckeditor';
+	const singlePackage = false;
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
-	let packages: Array<PackageJson>;
+	let packageJsons: Array<PackageJson>;
 
 	beforeEach( () => {
 		transformScope = vi.fn( name => ( {
@@ -40,7 +41,7 @@ describe( 'getSectionsWithEntries()', () => {
 			npmUrl: `https://npmjs.com/package/${ name }`
 		} ) );
 
-		packages = [
+		packageJsons = [
 			{ name: `${ organisationNamespace }/package-1`, version: '1.0.0' },
 			{ name: `${ organisationNamespace }/package-2`, version: '1.0.0' }
 		];
@@ -53,17 +54,70 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Other' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.fix.entries ).toHaveLength( 1 );
 		expect( result.other.entries ).toHaveLength( 1 );
 	} );
 
+	it( 'should correctly classify generic breaking changes', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': true } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage: true } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 1 );
+		expect( result.invalid.entries ).toHaveLength( 0 );
+	} );
+
+	it( 'should classify generic breaking changes in monorepo as invalid', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': true } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 0 );
+		expect( result.invalid.entries ).toHaveLength( 1 );
+	} );
+
+	it( 'should cast minor and major breaking changes to a generic ones in single packages', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': 'minor' } } ),
+			createParsedFile( { data: { 'breaking-change': 'major' } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage: true } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 2 );
+		expect( result.invalid.entries ).toHaveLength( 0 );
+	} );
+
+	it( 'should correctly classify invalid data types', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { type: 'foobar' } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 0 );
+		expect( result.invalid.entries ).toHaveLength( 1 );
+	} );
+
 	it( 'should classify an entry with an unknown type as invalid', () => {
 		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType' as any } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		expect( result.invalid.entries ).toHaveLength( 1 );
 	} );
@@ -71,7 +125,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should not include see and closes when they are undefined', () => {
 		const parsedFiles = [ createParsedFile( { data: { see: undefined, closes: undefined } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -82,7 +136,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should classify an entry as invalid if the scope is not recognized', () => {
 		const parsedFiles = [ createParsedFile( { data: { scope: [ 'unknown-package' ] } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		expect( result.invalid.entries ).toHaveLength( 1 );
 	} );
@@ -90,13 +144,13 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should classify an entry as valid if the scope is not undefined', () => {
 		const parsedFiles = [ createParsedFile( { data: { scope: undefined } } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		expect( result.invalid.entries ).toHaveLength( 0 );
 	} );
 
 	it( 'should handle an empty parsedFiles array', () => {
-		const result = getSectionsWithEntries( { parsedFiles: [], packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles: [], packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		Object.values( result ).forEach( section => expect( section.entries ).toBeUndefined );
 	} );
@@ -104,7 +158,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should generate correct markdown links for scope and issues', () => {
 		const parsedFiles = [ createParsedFile() ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -116,7 +170,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should format the content properly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -133,7 +187,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should call linkToGitHubUser correctly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content' } ) ];
 
-		getSectionsWithEntries( { parsedFiles, packageJsons: packages, transformScope, organisationNamespace } );
+		getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
 
 		expect( linkToGitHubUser ).toHaveBeenCalledWith( 'Some content' );
 	} );

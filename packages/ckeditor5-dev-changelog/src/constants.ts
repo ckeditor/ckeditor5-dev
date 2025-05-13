@@ -20,6 +20,7 @@ export const CHANGESET_DIRECTORY = '.changelog';
 export const SECTIONS = {
 	major: { title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
 	minor: { title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
+	breaking: { title: 'BREAKING CHANGES' },
 	feature: { title: 'Features' },
 	fix: { title: 'Bug fixes' },
 	other: { title: 'Other changes' },

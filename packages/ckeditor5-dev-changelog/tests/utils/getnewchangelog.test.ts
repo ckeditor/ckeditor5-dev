@@ -45,6 +45,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: []
 		} );
 
@@ -61,6 +62,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: []
 		} );
 
@@ -76,6 +78,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
+			singlePackage: false,
 			packageJsons: [
 				createPackageJson( '@ckeditor/ckeditor5-package-a' ),
 				createPackageJson( '@ckeditor/ckeditor5-package-b' )
@@ -104,6 +107,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay,
 			releasedPackagesInfo: [],
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: []
 		} );
 
@@ -133,6 +137,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo,
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: []
 		} );
 
@@ -143,6 +148,32 @@ describe( 'getNewChangelog()', () => {
 		expect( result ).toContain( 'Minor releases (contain minor breaking changes)' );
 		expect( result ).toContain( `* [@ckeditor/ckeditor5-package-b](${ NPM_URL }/@ckeditor/ckeditor5-package-b/v/2.0.0): v1.1.0` );
 		expect( result ).toContain( `* [@ckeditor/ckeditor5-package-c](${ NPM_URL }/@ckeditor/ckeditor5-package-c/v/2.0.0): v1.1.0` );
+	} );
+
+	it( 'should not include the `Released packages` section for single package changelogs', () => {
+		const releasedPackagesInfo = [
+			createReleaseInfo( 'Major releases (contain major breaking changes)', 'v2.0.0', [
+				'@ckeditor/ckeditor5-package-a'
+			] ),
+			createReleaseInfo( 'Minor releases (contain minor breaking changes)', 'v1.1.0', [
+				'@ckeditor/ckeditor5-package-b',
+				'@ckeditor/ckeditor5-package-c'
+			] )
+		];
+
+		const result = getNewChangelog( {
+			oldVersion: '1.0.0',
+			newVersion: '2.0.0',
+			dateFormatted: '2023-04-15',
+			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+			sectionsToDisplay: [],
+			releasedPackagesInfo,
+			isInternal: false,
+			singlePackage: true,
+			packageJsons: []
+		} );
+
+		expect( result ).not.toContain( '### Released packages' );
 	} );
 
 	it( 'should include internal version bumps information for internal releases', () => {
@@ -159,6 +190,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
+			singlePackage: false,
 			packageJsons
 		} );
 
@@ -186,6 +218,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
+			singlePackage: false,
 			packageJsons
 		} );
 
@@ -206,6 +239,7 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
+			singlePackage: false,
 			packageJsons: []
 		} );
 
