@@ -303,6 +303,7 @@ describe( 'generateChangelog()', () => {
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
 				skipLinks: false
 			} ],
+			singlePackage: true,
 			transformScope: expect.any( Function )
 		} );
 

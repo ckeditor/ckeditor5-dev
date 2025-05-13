@@ -58,7 +58,8 @@ export async function generateChangelog( {
 		parsedFiles: parsedChangesetFiles,
 		packageJsons,
 		transformScope,
-		organisationNamespace
+		organisationNamespace,
+		singlePackage
 	} );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
