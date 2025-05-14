@@ -40,6 +40,7 @@ export const IGNORED_HOSTS = [
 	'challenges.cloudflare.com',
 	'binance.com',
 	'iframe.ly',
+	'if-cdn.com',
 	'jsfiddle.net',
 	'fonts.googleapis.com'
 ];
