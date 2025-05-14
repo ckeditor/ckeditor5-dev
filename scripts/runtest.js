@@ -40,7 +40,7 @@ function main() {
 				stdio: 'inherit',
 				cwd: path.join( cwd, relativePath )
 			} );
-		} catch ( error ) {
+		} catch {
 			hasError = true;
 		}
 	}

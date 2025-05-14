@@ -10,7 +10,7 @@ export default function getLicenseBanner() {
 	// make webpack preserve that banner while cleaning code from others comments during the build task.
 	// It's because UglifyJsWebpackPlugin minification takes place after adding a banner.
 
-	/* eslint-disable indent */
+	/* eslint-disable @stylistic/indent */
 	return (
 `/*!
  * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
