@@ -40,12 +40,13 @@ export async function generateChangelog( {
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = CHANGESET_DIRECTORY,
 	skipLinks = false,
-	singlePackage = false
-}: RepositoryConfig & GenerateChangelog ): Promise<void> {
+	singlePackage = false,
+	returnChangelog = false
+}: RepositoryConfig & GenerateChangelog ): Promise<string | undefined> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await getRepositoryUrl( cwd );
-	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
+	const { version: oldVersion, name: packageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
@@ -68,7 +69,13 @@ export async function generateChangelog( {
 	logChangelogFiles( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
-	const { isInternal, newVersion } = await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName, nextVersion );
+	const { isInternal, newVersion } = await getNewVersion( {
+		sectionsWithEntries,
+		oldVersion,
+		packageName,
+		nextVersion,
+		returnChangelog
+	} );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
 		sections: sectionsWithEntries,
@@ -90,10 +97,16 @@ export async function generateChangelog( {
 		singlePackage
 	} );
 
-	await modifyChangelog( newChangelog, cwd );
-	await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
+	if ( !returnChangelog ) {
+		await modifyChangelog( newChangelog, cwd );
+		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
+	}
 
 	// TODO consider commiting the changes here or in a separate command.
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
+
+	if ( returnChangelog ) {
+		return newChangelog;
+	}
 }

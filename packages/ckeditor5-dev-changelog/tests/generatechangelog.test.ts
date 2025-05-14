@@ -326,6 +326,59 @@ describe( 'generateChangelog()', () => {
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
+	it( 'generates changelog and returns it instead of writing to a file in `returnChangelog` mode', async () => {
+		const result = await generateChangelog( { ...defaultOptions, returnChangelog: true } );
+
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
+		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
+
+		// Check that getNewChangelog is called with correct arguments
+		expect( getNewChangelog ).toHaveBeenCalledWith( {
+			oldVersion: '1.0.0',
+			newVersion: '1.0.1',
+			dateFormatted: 'March 26, 2024',
+			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+			sectionsToDisplay: [
+				{
+					title: SECTIONS.feature.title,
+					entries: [
+						{
+							message: 'Test feature',
+							data: {
+								type: 'Feature',
+								scope: [ 'test-package' ],
+								closes: [],
+								see: [],
+								mainContent: 'Test feature',
+								restContent: []
+							},
+							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
+						}
+					]
+				}
+			],
+			releasedPackagesInfo: [
+				{
+					title: 'Released packages',
+					version: '1.0.1',
+					packages: [ 'test-package' ]
+				}
+			],
+			isInternal: false,
+			singlePackage: false,
+			packageJsons: [
+				{ name: 'test-package', version: '1.0.0' }
+			]
+		} );
+
+		expect( modifyChangelog ).toHaveBeenCalledTimes( 0 );
+		expect( removeChangesetFiles ).toHaveBeenCalledTimes( 0 );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
+
+		expect( result ).toEqual( 'Mocked changelog content' );
+	} );
+
 	it( 'handles first release (version 0.0.1)', async () => {
 		vi.mocked( getPackageJson ).mockResolvedValue( { version: '0.0.1', name: 'test-package' } );
 
@@ -478,12 +531,13 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		// In the actual implementation, getNewVersion is called with nextVersion 'internal'
-		expect( getNewVersion ).toHaveBeenCalledWith(
-			expect.any( Object ),
-			'1.0.0',
-			'test-package',
-			'internal'
-		);
+		expect( getNewVersion ).toHaveBeenCalledWith( {
+			sectionsWithEntries: expect.any( Object ),
+			oldVersion: '1.0.0',
+			packageName: 'test-package',
+			nextVersion: 'internal',
+			returnChangelog: false
+		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
 			newVersion: '1.0.1'
@@ -520,12 +574,13 @@ describe( 'generateChangelog()', () => {
 			nextVersion: 'internal'
 		} );
 
-		expect( getNewVersion ).toHaveBeenCalledWith(
-			expect.any( Object ),
-			'1.0.0',
-			'test-package',
-			'internal'
-		);
+		expect( getNewVersion ).toHaveBeenCalledWith( {
+			sectionsWithEntries: expect.any( Object ),
+			oldVersion: '1.0.0',
+			packageName: 'test-package',
+			nextVersion: 'internal',
+			returnChangelog: false
+		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
 			newVersion: '1.0.1',

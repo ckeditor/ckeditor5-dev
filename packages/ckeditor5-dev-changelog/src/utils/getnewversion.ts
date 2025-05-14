@@ -14,15 +14,24 @@ type NewVersionObj = {
 	newVersion: string;
 };
 
+export type GetNewVersionArgs = {
+	sectionsWithEntries: SectionsWithEntries;
+	oldVersion: string;
+	packageName: string;
+	nextVersion: string | undefined;
+	returnChangelog: boolean;
+};
+
 /**
  * This function analyzes the changes and suggests the appropriate version bump.
  */
-export async function getNewVersion(
-	sectionsWithEntries: SectionsWithEntries,
-	oldVersion: string,
-	packageName: string,
-	nextVersion: string | undefined ): Promise<NewVersionObj>
-{
+export async function getNewVersion( {
+	sectionsWithEntries,
+	oldVersion,
+	packageName,
+	nextVersion,
+	returnChangelog
+}: GetNewVersionArgs ): Promise<NewVersionObj> {
 	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
 	if ( nextVersion === 'internal' ) {
@@ -41,6 +50,13 @@ export async function getNewVersion(
 
 	if ( sectionsWithEntries.major.entries.length ) {
 		bumpType = 'major';
+	}
+
+	if ( returnChangelog ) {
+		return {
+			newVersion: semver.inc( oldVersion, bumpType ) || oldVersion,
+			isInternal: false
+		};
 	}
 
 	const userProvidedVersion = await provideNewVersionForMonorepository( { version: oldVersion, packageName, bumpType } );

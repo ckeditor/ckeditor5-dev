@@ -115,6 +115,7 @@ function getSection( {
 } ): SectionName {
 	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
 	const breakingChange = entry.data[ 'breaking-change' ];
+	const type = entry.data.type;
 
 	if ( closes === 'invalid' ) {
 		return 'invalid';
@@ -129,7 +130,7 @@ function getSection( {
 	}
 
 	// If someone tries to use generic breaking change instead of minor/major in monorepo, the entry is invalid.
-	if ( !singlePackage && entry.data[ 'breaking-change' ] === true ) {
+	if ( !singlePackage && breakingChange === true ) {
 		return 'invalid';
 	}
 
@@ -146,15 +147,15 @@ function getSection( {
 		return 'breaking';
 	}
 
-	if ( entry.data.type === 'Feature' ) {
+	if ( type === 'Feature' ) {
 		return 'feature';
 	}
 
-	if ( entry.data.type === 'Fix' ) {
+	if ( type === 'Fix' ) {
 		return 'fix';
 	}
 
-	if ( entry.data.type === 'Other' ) {
+	if ( type === 'Other' ) {
 		return 'other';
 	}
 
