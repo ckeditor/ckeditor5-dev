@@ -30,7 +30,7 @@ import { removeScope } from './utils/removescope.js';
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */
-export async function generateChangelog( {
+export async function generateChangelog<T extends boolean | undefined>( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
@@ -41,8 +41,9 @@ export async function generateChangelog( {
 	changesetsDirectory = CHANGESET_DIRECTORY,
 	skipLinks = false,
 	singlePackage = false,
-	returnChangelog = false
-}: RepositoryConfig & GenerateChangelog ): Promise<string | undefined> {
+	noWrite = false,
+	removeInputFiles = true
+}: RepositoryConfig & GenerateChangelog<T> ): Promise<string | undefined> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await getRepositoryUrl( cwd );
@@ -74,7 +75,7 @@ export async function generateChangelog( {
 		oldVersion,
 		packageName,
 		nextVersion,
-		returnChangelog
+		noWrite
 	} );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
@@ -97,8 +98,11 @@ export async function generateChangelog( {
 		singlePackage
 	} );
 
-	if ( !returnChangelog ) {
+	if ( !noWrite ) {
 		await modifyChangelog( newChangelog, cwd );
+	}
+
+	if ( removeInputFiles ) {
 		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
 	}
 
@@ -106,7 +110,7 @@ export async function generateChangelog( {
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
 
-	if ( returnChangelog ) {
+	if ( noWrite ) {
 		return newChangelog;
 	}
 }

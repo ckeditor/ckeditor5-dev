@@ -65,7 +65,7 @@ describe( 'getNewVersion()', () => {
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: undefined,
-			returnChangelog: false
+			noWrite: false
 		};
 	} );
 
@@ -175,8 +175,8 @@ describe( 'getNewVersion()', () => {
 		} );
 	} );
 
-	it( 'should return a version without asking user when returnChangelog is true', async () => {
-		options.returnChangelog = true;
+	it( 'should return a version without asking user when noWrite is true', async () => {
+		options.noWrite = true;
 
 		const result = await getNewVersion( options );
 
@@ -185,8 +185,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledTimes( 0 );
 	} );
 
-	it( 'should return the old version without asking user when returnChangelog is true and semver cannot resolve one', async () => {
-		options.returnChangelog = true;
+	it( 'should return the old version without asking user when noWrite is true and semver cannot resolve one', async () => {
+		options.noWrite = true;
 		options.oldVersion = '1.2.3';
 
 		const result = await getNewVersion( options );

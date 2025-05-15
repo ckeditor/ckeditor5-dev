@@ -182,7 +182,6 @@ describe( 'generateChangelog()', () => {
 		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
 		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
 
-		// Check that getNewChangelog is called with correct arguments
 		expect( getNewChangelog ).toHaveBeenCalledWith( {
 			oldVersion: '1.0.0',
 			newVersion: '1.0.1',
@@ -247,7 +246,6 @@ describe( 'generateChangelog()', () => {
 		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
 		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
 
-		// Check that getNewChangelog is called with correct arguments
 		expect( getNewChangelog ).toHaveBeenCalledWith( {
 			oldVersion: '1.0.0',
 			newVersion: '1.0.1',
@@ -326,14 +324,13 @@ describe( 'generateChangelog()', () => {
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
-	it( 'generates changelog and returns it instead of writing to a file in `returnChangelog` mode', async () => {
-		const result = await generateChangelog( { ...defaultOptions, returnChangelog: true } );
+	it( 'generates changelog and returns it instead of writing to a file in `noWrite` mode', async () => {
+		const result = await generateChangelog( { ...defaultOptions, noWrite: true } );
 
 		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
 		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
 		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
 
-		// Check that getNewChangelog is called with correct arguments
 		expect( getNewChangelog ).toHaveBeenCalledWith( {
 			oldVersion: '1.0.0',
 			newVersion: '1.0.1',
@@ -373,10 +370,96 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		expect( modifyChangelog ).toHaveBeenCalledTimes( 0 );
-		expect( removeChangesetFiles ).toHaveBeenCalledTimes( 0 );
+		expect( removeChangesetFiles ).toHaveBeenCalledWith(
+			[
+				{
+					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+					skipLinks: false
+				}
+			],
+			'/home/ckeditor',
+			'.changelog',
+			[]
+		);
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 
 		expect( result ).toEqual( 'Mocked changelog content' );
+	} );
+
+	it( 'does not delete input files when `removeInputFiles` is false', async () => {
+		await generateChangelog( { ...defaultOptions, removeInputFiles: false } );
+
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
+		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
+
+		expect( getNewChangelog ).toHaveBeenCalledWith( {
+			oldVersion: '1.0.0',
+			newVersion: '1.0.1',
+			dateFormatted: 'March 26, 2024',
+			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+			sectionsToDisplay: [
+				{
+					title: SECTIONS.feature.title,
+					entries: [
+						{
+							message: 'Test feature',
+							data: {
+								type: 'Feature',
+								scope: [ 'test-package' ],
+								closes: [],
+								see: [],
+								mainContent: 'Test feature',
+								restContent: []
+							},
+							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
+						}
+					]
+				}
+			],
+			releasedPackagesInfo: [
+				{
+					title: 'Released packages',
+					version: '1.0.1',
+					packages: [ 'test-package' ]
+				}
+			],
+			isInternal: false,
+			singlePackage: false,
+			packageJsons: [
+				{ name: 'test-package', version: '1.0.0' }
+			]
+		} );
+
+		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
+			organisationNamespace: '@ckeditor',
+			packageJsons: [ {
+				name: 'test-package',
+				version: '1.0.0'
+			} ],
+			parsedFiles: [ {
+				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+				content: 'Test changeset',
+				data: {
+					closes: [],
+					see: [],
+					scope: [ 'test-package' ],
+					type: 'Feature'
+				},
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
+			} ],
+			singlePackage: false,
+			transformScope: expect.any( Function )
+		} );
+
+		expect( modifyChangelog ).toHaveBeenCalledWith(
+			'Mocked changelog content',
+			'/home/ckeditor'
+		);
+		expect( removeChangesetFiles ).toHaveBeenCalledTimes( 0 );
+		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
 	it( 'handles first release (version 0.0.1)', async () => {
@@ -536,7 +619,7 @@ describe( 'generateChangelog()', () => {
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: 'internal',
-			returnChangelog: false
+			noWrite: false
 		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
@@ -579,7 +662,7 @@ describe( 'generateChangelog()', () => {
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: 'internal',
-			returnChangelog: false
+			noWrite: false
 		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,

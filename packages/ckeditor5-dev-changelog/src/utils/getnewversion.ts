@@ -19,7 +19,7 @@ export type GetNewVersionArgs = {
 	oldVersion: string;
 	packageName: string;
 	nextVersion: string | undefined;
-	returnChangelog: boolean;
+	noWrite: boolean;
 };
 
 /**
@@ -30,7 +30,7 @@ export async function getNewVersion( {
 	oldVersion,
 	packageName,
 	nextVersion,
-	returnChangelog
+	noWrite
 }: GetNewVersionArgs ): Promise<NewVersionObj> {
 	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
@@ -52,7 +52,7 @@ export async function getNewVersion( {
 		bumpType = 'major';
 	}
 
-	if ( returnChangelog ) {
+	if ( noWrite ) {
 		return {
 			newVersion: semver.inc( oldVersion, bumpType ) || oldVersion,
 			isInternal: false
