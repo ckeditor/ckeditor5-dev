@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';

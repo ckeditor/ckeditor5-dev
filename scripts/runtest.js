@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import path from 'path';
 import { execSync } from 'child_process';
 import fs from 'fs-extra';

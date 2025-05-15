@@ -19,7 +19,6 @@ const POLISH_TRANSLATIONS_FROM_ROOT = 'export default {"pl":{"dictionary":{"Hell
 // eslint-disable-next-line @stylistic/max-len
 const GERMAN_TRANSLATIONS_FROM_ROOT = 'export default {"de":{"dictionary":{"Hello world":"Hallo Welt"},getPluralForm(n){return (n != 1);}}}';
 
-// eslint-disable-next-line @stylistic/max-len
 const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hello world":"Hello world"},"getPluralForm":null}}';
 
 /**

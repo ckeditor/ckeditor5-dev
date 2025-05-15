@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 export { default as runCrawler } from './runcrawler.js';
 export { getBaseUrl, isUrlValid, toArray } from './utils.js';
 export { DEFAULT_CONCURRENCY } from './constants.js';

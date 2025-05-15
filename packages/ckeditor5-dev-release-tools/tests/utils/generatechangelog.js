@@ -728,11 +728,9 @@ describe( 'generateChangelog()', () => {
 						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
-						/* eslint-disable @stylistic/max-len */
 						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations.'
 						);
-						/* eslint-enable @stylistic/max-len */
 					} );
 			} );
 

@@ -17,5 +17,5 @@ export default function getLicenseBanner() {
  * For licensing, see LICENSE.md.
  */`
 	);
-	/* eslint-enable indent */
+	/* eslint-enable @stylistic/indent */
 }

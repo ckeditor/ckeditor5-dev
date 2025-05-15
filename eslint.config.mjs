@@ -5,7 +5,6 @@
 
 import globals from 'globals';
 import { defineConfig } from 'eslint/config';
-import mocha from 'eslint-plugin-mocha';
 import ckeditor5Rules from 'eslint-plugin-ckeditor5-rules';
 import ckeditor5Config from 'eslint-config-ckeditor5';
 
@@ -56,13 +55,13 @@ export default defineConfig( [
 	{
 		files: [ 'packages/ckeditor5-dev-tests/lib/**/*.@(js|ts)' ],
 
-		plugins: {
-			mocha
-		},
-
 		languageOptions: {
 			globals: {
-				...globals.mocha
+				...globals.mocha,
+				...globals.browser,
+				'__karma__': true,
+				CKEditorInspector: true,
+				io: true
 			}
 		}
 	}
