@@ -8,7 +8,7 @@ import type { SECTIONS } from './constants.js';
 /**
  * Configuration options for generating a changelog.
  */
-export type GenerateChangelog<T extends boolean | undefined> = {
+export type GenerateChangelog = {
 
 	/**
 	 * The current working directory of the repository.
@@ -55,7 +55,7 @@ export type GenerateChangelog<T extends boolean | undefined> = {
 	 * Whether changelog should be returned by the script instead of saving it to a file.
 	 * Using this option will also pick version automatically, instead of asking user.
 	 */
-	noWrite?: T;
+	noWrite?: boolean;
 
 	/**
 	 * Controls whether changeset files will be deleted after generating changelog.

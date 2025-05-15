@@ -26,11 +26,19 @@ import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 
+export async function generateChangelog(
+  config: RepositoryConfig & GenerateChangelog & { noWrite?: false | undefined }
+): Promise<void>;
+
+export async function generateChangelog(
+  config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+): Promise<string>;
+
 /**
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */
-export async function generateChangelog<T extends boolean | undefined>( {
+export async function generateChangelog( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
@@ -43,7 +51,7 @@ export async function generateChangelog<T extends boolean | undefined>( {
 	singlePackage = false,
 	noWrite = false,
 	removeInputFiles = true
-}: RepositoryConfig & GenerateChangelog<T> ): Promise<string | undefined> {
+}: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await getRepositoryUrl( cwd );
