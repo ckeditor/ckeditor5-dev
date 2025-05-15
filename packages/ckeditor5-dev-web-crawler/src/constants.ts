@@ -41,7 +41,10 @@ export const IGNORED_HOSTS = [
 	'binance.com',
 	'iframe.ly',
 	'jsfiddle.net',
-	'fonts.googleapis.com'
+	'fonts.googleapis.com',
+
+	// See: https://github.com/ckeditor/ckeditor5/issues/18519.
+	'if-cdn.com'
 ];
 
 export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
