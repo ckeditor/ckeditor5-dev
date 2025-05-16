@@ -11,21 +11,23 @@
   },
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "type": "module",
   "devDependencies": {
+    "@ckeditor/ckeditor5-dev-bump-year": "^49.0.1",
     "@ckeditor/ckeditor5-dev-ci": "^49.0.1",
     "@ckeditor/ckeditor5-dev-dependency-checker": "^49.0.1",
     "@ckeditor/ckeditor5-dev-release-tools": "^49.0.1",
-    "@ckeditor/ckeditor5-dev-bump-year": "^49.0.1",
     "@inquirer/prompts": "^7.4.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^21.0.0",
-    "eslint": "^8.21.0",
-    "eslint-config-ckeditor5": "^9.0.0",
+    "eslint": "^9.26.0",
+    "eslint-config-ckeditor5": "^10.0.0-alpha.0",
+    "eslint-plugin-ckeditor5-rules": "^10.0.0-alpha.0",
     "fs-extra": "^11.0.0",
     "glob": "^11.0.1",
+    "globals": "^16.1.0",
     "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
     "lint-staged": "^15.5.1",
@@ -41,14 +43,14 @@
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
-    "lint": "eslint --quiet \"**/*.{js,ts}\"",
+    "lint": "eslint",
     "precommit": "lint-staged",
     "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
     "reinstall": "yarn run clean && yarn install",
     "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {
-    "**/*.{js,ts,mjs,cjs}": [
+    "**/*": [
       "eslint --quiet"
     ]
   },

@@ -14,4 +14,5 @@ declare module '../foobaz/foobazconfig' {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface FoobazingaConfig {}

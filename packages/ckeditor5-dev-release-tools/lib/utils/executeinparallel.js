@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import crypto from 'crypto';
 import upath from 'upath';
 import os from 'os';
