@@ -7,6 +7,7 @@
 import settings from './settings.json' with { type: 'json' };
 
 // Test importing SVG.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import plus from '../theme/plus.svg';
 

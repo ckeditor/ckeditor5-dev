@@ -263,7 +263,7 @@ export default function parseArguments( args, settings = {} ) {
 	function isDirectory( path ) {
 		try {
 			return fs.statSync( path ).isDirectory();
-		} catch {
+		} catch ( e ) {
 			return false;
 		}
 	}

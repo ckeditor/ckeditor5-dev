@@ -430,11 +430,11 @@ describe( 'generateChangelog()', () => {
 					expect( changesAsArray[ 1 ] ).toEqual(
 						'### Other changes'
 					);
-					/* eslint-disable @stylistic/max-len */
+					/* eslint-disable max-len */
 					expect( changesAsArray[ 2 ] ).toEqual(
 						'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 					);
-					/* eslint-enable @stylistic/max-len */
+					/* eslint-enable max-len */
 				} );
 		} );
 
@@ -574,11 +574,11 @@ describe( 'generateChangelog()', () => {
 						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
-						/* eslint-disable @stylistic/max-len */
+						/* eslint-disable max-len */
 						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 						);
-						/* eslint-enable @stylistic/max-len */
+						/* eslint-enable max-len */
 					} );
 			} );
 
@@ -657,11 +657,11 @@ describe( 'generateChangelog()', () => {
 						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
-						/* eslint-disable @stylistic/max-len */
+						/* eslint-disable max-len */
 						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 						);
-						/* eslint-enable @stylistic/max-len */
+						/* eslint-enable max-len */
 					} );
 			} );
 
@@ -728,9 +728,11 @@ describe( 'generateChangelog()', () => {
 						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
+						/* eslint-disable max-len */
 						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations.'
 						);
+						/* eslint-enable max-len */
 					} );
 			} );
 

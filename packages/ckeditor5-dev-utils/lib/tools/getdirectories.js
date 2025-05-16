@@ -16,7 +16,7 @@ export default function getDirectories( directoryPath ) {
 	const isDirectory = path => {
 		try {
 			return fs.statSync( path ).isDirectory();
-		} catch {
+		} catch ( e ) {
 			return false;
 		}
 	};

@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 /**
  * This script checks if the provided workflow has been restarted. If so, it exits with a zero error code.
  *

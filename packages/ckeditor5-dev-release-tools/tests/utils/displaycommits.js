@@ -262,12 +262,12 @@ describe( 'displayCommits()', () => {
 		const [ firstArgument ] = firstCall;
 		const message = firstArgument.split( '\n' );
 
-		/* eslint-disable @stylistic/max-len */
+		/* eslint-disable max-len */
 		expect( message[ 0 ] ).toContain( 'Feature: Simple foo.' );
 		expect( message[ 1 ] ).toContain( 'MAJOR BREAKING CHANGES: 1 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
 		expect( message[ 2 ] ).toContain( 'MAJOR BREAKING CHANGES: 2 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
 		expect( message[ 3 ] ).toContain( 'MINOR BREAKING CHANGES: 3 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
-		/* eslint-enable @stylistic/max-len */
+		/* eslint-enable max-len */
 	} );
 
 	describe( 'options.attachLinkToCommit', () => {

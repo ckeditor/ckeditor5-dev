@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 import { bots, members } from './data/index.js';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;

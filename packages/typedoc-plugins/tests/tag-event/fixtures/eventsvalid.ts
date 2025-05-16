@@ -59,7 +59,7 @@ export type EventFooWithParams = {
 /**
  * @eventName ~EventsValidClass#event-foo-no-content
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type EventFooNoContent = {};
 
 /**

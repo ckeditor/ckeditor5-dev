@@ -134,7 +134,7 @@ export function getLastTagFromGit() {
 		const lastTag = tools.shExec( 'git describe --abbrev=0 --tags 2> /dev/null', { verbosity: 'error' } );
 
 		return lastTag.trim().replace( /^v/, '' ) || null;
-	} catch {
+	} catch ( err ) {
 		/* istanbul ignore next */
 		return null;
 	}

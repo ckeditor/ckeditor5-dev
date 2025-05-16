@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 
 const changelogVersion = releaseTools.getLastFromChangelog();

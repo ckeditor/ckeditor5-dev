@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 /**
  * Extracts base URL from the provided page URL. Base URL consists of a protocol, a host, a port, and a path.
  * A hash and search parts are omitted, because they would have navigated to the same page if they were set.

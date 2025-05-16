@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 import { describe, expect, it } from 'vitest';
 import processJobStatuses from '../lib/process-job-statuses.js';
 
