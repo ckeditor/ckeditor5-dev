@@ -185,9 +185,20 @@ describe( 'getSectionsWithEntries()', () => {
 		);
 	} );
 
-	it( 'should generate invalid entry when links for issues are invalid', () => {
+	it( 'should generate invalid entry when links for issues to close are invalid', () => {
 		const parsedFiles = [ createParsedFile( { data: {
 			closes: [ 'foo/bar' ]
+		} } ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );
+
+		expect( result.feature.entries.length ).toEqual( 0 );
+		expect( result.invalid.entries.length ).toEqual( 1 );
+	} );
+
+	it( 'should generate invalid entry when links for related issues are invalid', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			see: [ 'foo/bar' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage } );

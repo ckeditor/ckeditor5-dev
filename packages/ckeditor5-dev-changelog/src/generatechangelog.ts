@@ -26,6 +26,14 @@ import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 
+export async function generateChangelog(
+  config: RepositoryConfig & GenerateChangelog & { noWrite?: false | undefined }
+): Promise<void>;
+
+export async function generateChangelog(
+  config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+): Promise<string>;
+
 /**
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
@@ -40,12 +48,14 @@ export async function generateChangelog( {
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = CHANGESET_DIRECTORY,
 	skipLinks = false,
-	singlePackage = false
-}: RepositoryConfig & GenerateChangelog ): Promise<void> {
+	singlePackage = false,
+	noWrite = false,
+	removeInputFiles = true
+}: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await getRepositoryUrl( cwd );
-	const { version: oldVersion, name: rootPackageName } = await getPackageJson( cwd );
+	const { version: oldVersion, name: packageName } = await getPackageJson( cwd );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
@@ -68,7 +78,12 @@ export async function generateChangelog( {
 	logChangelogFiles( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
-	const { isInternal, newVersion } = await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName, nextVersion );
+	const { isInternal, newVersion } = await getNewVersion( {
+		sectionsWithEntries,
+		oldVersion,
+		packageName,
+		nextVersion
+	} );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
 		sections: sectionsWithEntries,
@@ -90,10 +105,19 @@ export async function generateChangelog( {
 		singlePackage
 	} );
 
-	await modifyChangelog( newChangelog, cwd );
-	await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
+	if ( !noWrite ) {
+		await modifyChangelog( newChangelog, cwd );
+	}
+
+	if ( removeInputFiles ) {
+		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
+	}
 
 	// TODO consider commiting the changes here or in a separate command.
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
+
+	if ( noWrite ) {
+		return newChangelog;
+	}
 }

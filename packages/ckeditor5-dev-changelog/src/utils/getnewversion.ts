@@ -14,15 +14,22 @@ type NewVersionObj = {
 	newVersion: string;
 };
 
+export type GetNewVersionArgs = {
+	sectionsWithEntries: SectionsWithEntries;
+	oldVersion: string;
+	packageName: string;
+	nextVersion: string | undefined;
+};
+
 /**
  * This function analyzes the changes and suggests the appropriate version bump.
  */
-export async function getNewVersion(
-	sectionsWithEntries: SectionsWithEntries,
-	oldVersion: string,
-	packageName: string,
-	nextVersion: string | undefined ): Promise<NewVersionObj>
-{
+export async function getNewVersion( {
+	sectionsWithEntries,
+	oldVersion,
+	packageName,
+	nextVersion
+}: GetNewVersionArgs ): Promise<NewVersionObj> {
 	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
 	if ( nextVersion === 'internal' ) {
