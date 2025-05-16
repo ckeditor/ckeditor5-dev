@@ -53,7 +53,6 @@ export type GenerateChangelog = {
 
 	/**
 	 * Whether changelog should be returned by the script instead of saving it to a file.
-	 * Using this option will also pick version automatically, instead of asking user.
 	 */
 	noWrite?: boolean;
 
