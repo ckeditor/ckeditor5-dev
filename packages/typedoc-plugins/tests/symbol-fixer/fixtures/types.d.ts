@@ -4,5 +4,5 @@
  */
 
 declare interface SymbolConstructor {
-	readonly fake: symbol;
+    readonly fake: symbol;
 }

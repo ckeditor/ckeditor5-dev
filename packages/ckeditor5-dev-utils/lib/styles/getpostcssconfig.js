@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 import postCssImport from 'postcss-import';
 import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';

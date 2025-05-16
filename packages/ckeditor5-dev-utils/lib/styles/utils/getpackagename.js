@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 /**
  * Returns a (CKEditor 5) package name the file belongs to.
  *

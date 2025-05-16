@@ -13,7 +13,7 @@
     "directory": "packages/ckeditor5-dev-docs"
   },
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=20.0.0",
     "npm": ">=5.7.1"
   },
   "type": "module",

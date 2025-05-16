@@ -13,7 +13,7 @@ export default class Error {
 	constructor( errorName: string ) {
 		try {
 			this.errorName = errorName;
-		} catch {
+		} catch ( error ) {
 			this.errorName = errorName;
 		}
 	}

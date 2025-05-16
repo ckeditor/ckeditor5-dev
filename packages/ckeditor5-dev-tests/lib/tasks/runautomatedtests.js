@@ -155,6 +155,7 @@ function assertConsoleUsageToThrowErrors() {
 		.replace( /^\t/gm, '' );
 }
 
+/* eslint-disable no-undef,mocha/no-top-level-hooks */
 function makeConsoleUsageToThrowErrors() {
 	const originalWarn = console.warn;
 
@@ -189,6 +190,7 @@ function makeConsoleUsageToThrowErrors() {
 			} );
 	} );
 }
+/* eslint-enable no-undef,mocha/no-top-level-hooks */
 
 function runKarma( options ) {
 	return new Promise( ( resolve, reject ) => {

@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 import util from 'util';
 import chalk from 'chalk';
 import { Cluster } from 'puppeteer-cluster';
@@ -423,7 +425,7 @@ async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorTy
 	try {
 		// Try to parse value from meta tag...
 		content = JSON.parse( contentString as any );
-	} catch {
+	} catch ( error ) {
 		// ...but if it is not a valid JSON, return an empty map.
 		return patterns;
 	}
