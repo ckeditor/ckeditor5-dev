@@ -71,7 +71,6 @@ async function mockCommercialDependencies() {
 	);
 }
 
-// eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach( () => {
 	setProcessCwdMock();
 } );

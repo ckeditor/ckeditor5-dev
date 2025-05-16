@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 const FINISHED_STATUSES = [
 	'success',
 	'failed',
