@@ -82,8 +82,7 @@ export async function generateChangelog( {
 		sectionsWithEntries,
 		oldVersion,
 		packageName,
-		nextVersion,
-		noWrite
+		nextVersion
 	} );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {

@@ -618,8 +618,7 @@ describe( 'generateChangelog()', () => {
 			sectionsWithEntries: expect.any( Object ),
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: 'internal',
-			noWrite: false
+			nextVersion: 'internal'
 		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
@@ -661,8 +660,7 @@ describe( 'generateChangelog()', () => {
 			sectionsWithEntries: expect.any( Object ),
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: 'internal',
-			noWrite: false
+			nextVersion: 'internal'
 		} );
 		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,

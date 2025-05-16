@@ -19,7 +19,6 @@ export type GetNewVersionArgs = {
 	oldVersion: string;
 	packageName: string;
 	nextVersion: string | undefined;
-	noWrite: boolean;
 };
 
 /**
@@ -29,8 +28,7 @@ export async function getNewVersion( {
 	sectionsWithEntries,
 	oldVersion,
 	packageName,
-	nextVersion,
-	noWrite
+	nextVersion
 }: GetNewVersionArgs ): Promise<NewVersionObj> {
 	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
@@ -50,13 +48,6 @@ export async function getNewVersion( {
 
 	if ( sectionsWithEntries.major.entries.length ) {
 		bumpType = 'major';
-	}
-
-	if ( noWrite ) {
-		return {
-			newVersion: semver.inc( oldVersion, bumpType ) || oldVersion,
-			isInternal: false
-		};
 	}
 
 	const userProvidedVersion = await provideNewVersionForMonorepository( { version: oldVersion, packageName, bumpType } );

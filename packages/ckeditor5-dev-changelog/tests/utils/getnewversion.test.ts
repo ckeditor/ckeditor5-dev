@@ -64,8 +64,7 @@ describe( 'getNewVersion()', () => {
 			sectionsWithEntries: createSectionsWithEntries(),
 			oldVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: undefined,
-			noWrite: false
+			nextVersion: undefined
 		};
 	} );
 
@@ -173,27 +172,6 @@ describe( 'getNewVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'major'
 		} );
-	} );
-
-	it( 'should return a version without asking user when noWrite is true', async () => {
-		options.noWrite = true;
-
-		const result = await getNewVersion( options );
-
-		expect( result.newVersion ).toBe( '1.0.1' );
-		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledTimes( 0 );
-	} );
-
-	it( 'should return the old version without asking user when noWrite is true and semver cannot resolve one', async () => {
-		options.noWrite = true;
-		options.oldVersion = '1.2.3';
-
-		const result = await getNewVersion( options );
-
-		expect( result.newVersion ).toBe( '1.2.3' );
-		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should handle internal version when nextVersion is set to "internal"', async () => {
