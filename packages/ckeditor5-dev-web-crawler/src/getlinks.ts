@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env browser */
-// eslint-disable-next-line spaced-comment
 /// <reference lib="dom" />
 
 /**

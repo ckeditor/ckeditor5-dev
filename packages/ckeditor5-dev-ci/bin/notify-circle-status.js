@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import slackNotify from 'slack-notify';
 import formatMessage from '../lib/format-message.js';
 

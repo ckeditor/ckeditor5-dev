@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import upath from 'upath';
 import fs from 'fs-extra';
 import { Listr } from 'listr2';
