@@ -36,6 +36,12 @@ export default async function build( config ) {
 		basePath: config.cwd,
 		readme: 'none',
 
+		jsDocCompatibility: {
+			// Disable TypeDoc attempt to infer the tag content whether it should be parsed as code.
+			// See: https://github.com/ckeditor/ckeditor5/issues/18526.
+			defaultTag: false
+		},
+
 		blockTags: [
 			...OptionDefaults.blockTags,
 			'@eventName',
