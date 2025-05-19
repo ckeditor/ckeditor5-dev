@@ -23,11 +23,11 @@
     "dist"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-release-tools": "^49.0.1",
+    "@ckeditor/ckeditor5-dev-release-tools": "^49.0.2",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
     "fs-extra": "^11.0.0",
-    "glob": "^10.0.0",
+    "glob": "^11.0.1",
     "gray-matter": "^4.0.3",
     "inquirer": "^11.0.0",
     "pacote": "^19.0.0",

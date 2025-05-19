@@ -45,12 +45,22 @@
     "through2": "^4.0.0"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/pacote": "^11.1.8",
+    "@types/fs-extra": "^11.0.4",
+    "@vitest/coverage-v8": "^2.0.0",
+    "rollup": "^4.9.5",
+    "typescript": "^5.6.0",
     "jest-extended": "^4.0.2",
     "vitest": "^3.1.1"
   },
   "scripts": {
-    "test": "vitest run --config vitest.config.js",
-    "coverage": "vitest run --config vitest.config.js --coverage"
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch",
+    "test": "vitest run --config vitest.config.ts",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:dev": "vitest dev"
   },
   "depcheckIgnore": [
     "css-loader",
