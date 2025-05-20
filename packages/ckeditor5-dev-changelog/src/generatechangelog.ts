@@ -25,12 +25,13 @@ import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
+import { InternalError } from './errors.js';
 
 /**
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */
-export async function generateChangelog( {
+async function main( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
@@ -95,4 +96,21 @@ export async function generateChangelog( {
 	// TODO consider commiting the changes here or in a separate command.
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
+}
+
+/**
+ * Wrapper function that provides error handling for the changelog generation process.
+ */
+export async function generateChangelog( options: RepositoryConfig & GenerateChangelog ): Promise<void> {
+	try {
+		await main( options );
+	} catch ( error ) {
+		if ( error instanceof InternalError ) {
+			console.error( chalk.red( 'Error: ' + error.message ) );
+
+			process.exit( 1 );
+		} else {
+			throw error;
+		}
+	}
 }
