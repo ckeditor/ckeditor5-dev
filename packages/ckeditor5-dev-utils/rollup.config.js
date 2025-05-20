@@ -6,8 +6,6 @@
 import { readFileSync } from 'fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
-// import commonjs from '@rollup/plugin-commonjs';
-// import json from '@rollup/plugin-json';
 import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
@@ -34,18 +32,6 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
-		// /**
-		//  * Converts CommonJS modules to ES6.
-		//  */
-		// commonjs( {
-		// 	defaultIsModuleExports: true
-		// } ),
-		//
-		// /**
-		//  * Allows importing JSON files.
-		//  */
-		// json(),
-
 		typescript(),
 		nodeResolve( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
