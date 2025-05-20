@@ -42,7 +42,7 @@ export async function generateChangelog(
 	options: RepositoryConfig & GenerateChangelog
 ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
 	try {
-		return main( options );
+		return await main( options );
 	} catch ( error ) {
 		if ( error instanceof InternalError ) {
 			console.error( chalk.red( 'Error: ' + error.message ) );

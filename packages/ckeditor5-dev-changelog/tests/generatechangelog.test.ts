@@ -670,11 +670,37 @@ describe( 'generateChangelog()', () => {
 		expect( modifyChangelog ).toHaveBeenCalled();
 	} );
 
-	it( 'handles error properly when getSectionsToDisplay throws', async () => {
-		vi.mocked( getSectionsToDisplay ).mockImplementation( () => {
+	it( 'handles InternalError properly', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
 			throw new InternalError();
 		} );
 
-		await expect( generateChangelog( defaultOptions ) ).rejects.toThrow( InternalError );
+		await generateChangelog( defaultOptions );
+
+		expect( processMock ).toHaveBeenCalledOnce();
+		expect( consoleMock ).toHaveBeenCalledOnce();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
+	} );
+
+	it( 'rethrows other errors', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+			throw new Error();
+		} );
+
+		await expect( generateChangelog( defaultOptions ) ).rejects.toThrow();
+
+		expect( processMock ).not.toBeCalled();
+		expect( consoleMock ).not.toBeCalled();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
 	} );
 } );

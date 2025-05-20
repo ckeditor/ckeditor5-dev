@@ -5,7 +5,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGitHubUser } from '../../src/utils/external/linktogithubuser.js';
 import type { ParsedFile, PackageJson } from '../../src/types.js';
 import { validateEntry } from '../../src/utils/validateentry.js';
 
@@ -126,6 +125,32 @@ describe( 'getSectionsWithEntries()', () => {
 		expect( result.invalid.entries ).toHaveLength( 0 );
 	} );
 
+	it( 'should classify minor breaking change in a monorepo', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': 'minor', breakingChangeNormalized: 'minor' } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
+
+		expect( result.major.entries ).toHaveLength( 0 );
+		expect( result.minor.entries ).toHaveLength( 1 );
+		expect( result.breaking.entries ).toHaveLength( 0 );
+		expect( result.invalid.entries ).toHaveLength( 0 );
+	} );
+
+	it( 'should classify major breaking change in a monorepo', () => {
+		const parsedFiles = [
+			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } )
+		];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
+
+		expect( result.major.entries ).toHaveLength( 1 );
+		expect( result.minor.entries ).toHaveLength( 0 );
+		expect( result.breaking.entries ).toHaveLength( 0 );
+		expect( result.invalid.entries ).toHaveLength( 0 );
+	} );
+
 	it( 'should classify an entry with an unknown type as invalid', () => {
 		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType', typeNormalized: 'UnknownType' } } ) ];
 
@@ -222,6 +247,23 @@ describe( 'getSectionsWithEntries()', () => {
 		expect( message ).not.toContain( 'See [#456]' );
 	} );
 
+	it( 'should not add invalid links to the generated message', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			closesNormalized: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
+		} } ) ];
+
+		vi.mocked( validateEntry ).mockReturnValueOnce( {
+			validatedEntry: parsedFiles[ 0 ] as ParsedFile,
+			isValid: false
+		} );
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+
+		const message = result.invalid.entries[ 0 ]!.message;
+
+		expect( message ).not.toContain( '@https://github.com/ckeditor/ckeditor5/issues/123' );
+	} );
+
 	it( 'should format the content properly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
 
@@ -237,13 +279,5 @@ describe( 'getSectionsWithEntries()', () => {
 			'',
 			'  Third line.'
 		].join( '\n' ) );
-	} );
-
-	it( 'should call linkToGitHubUser correctly', () => {
-		const parsedFiles = [ createParsedFile( { content: 'Some content' } ) ];
-
-		getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
-
-		expect( linkToGitHubUser ).toHaveBeenCalledWith( 'Some content' );
 	} );
 } );
