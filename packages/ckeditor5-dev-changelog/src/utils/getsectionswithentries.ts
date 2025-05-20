@@ -4,7 +4,7 @@
  */
 
 import type { Entry, PackageJson, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, SECTIONS } from '../constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
@@ -82,6 +82,14 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
 
 			return `[${ issue }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
+		}
+
+		const repoUrlMatch = issue.match( ISSUE_URL_PATTERN );
+
+		if ( repoUrlMatch ) {
+			const { owner, repository, number } = repoUrlMatch.groups as DifferentRepoIssue;
+
+			return `[${ owner }/${ repository }#${ number }](${ issue })`;
 		}
 
 		return null;

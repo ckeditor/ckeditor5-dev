@@ -4,7 +4,7 @@
  */
 
 import type { ParsedFile } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN } from '../constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN } from '../constants.js';
 
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
@@ -39,16 +39,26 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 	if ( data.seeNormalized ) {
 		for ( const see of data.seeNormalized ) {
-			if ( !( String( see ).match( ISSUE_PATTERN ) || String( see ).match( ISSUE_SLUG_PATTERN ) ) ) {
-				validations.push( `See "${ see }" is not a valid issue reference. Provide either: a number, slug#id.` );
+			const seeStr = String( see );
+
+			if ( !( seeStr.match( ISSUE_PATTERN ) || seeStr.match( ISSUE_SLUG_PATTERN ) || seeStr.match( ISSUE_URL_PATTERN ) ) ) {
+				validations.push( [
+					`See "${ see }" is not a valid issue reference. Provide either:`,
+					'issue number, repository-slug#id or full issue link URL.'
+				].join( ' ' ) );
 			}
 		}
 	}
 
 	if ( data.closesNormalized ) {
 		for ( const closes of data.closesNormalized ) {
-			if ( !( String( closes ).match( ISSUE_PATTERN ) || String( closes ).match( ISSUE_SLUG_PATTERN ) ) ) {
-				validations.push( `Closes "${ closes }" is not a valid issue reference. Provide either: a number, slug#id.` );
+			const closesStr = String( closes );
+
+			if ( !( closesStr.match( ISSUE_PATTERN ) || closesStr.match( ISSUE_SLUG_PATTERN ) || closesStr.match( ISSUE_URL_PATTERN ) ) ) {
+				validations.push( [
+					`Closes "${ closes }" is not a valid issue reference. Provide either:`,
+					'issue number, repository-slug#id or full issue link URL.'
+				].join( ' ' ) );
 			}
 		}
 	}

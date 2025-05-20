@@ -29,3 +29,5 @@ export const SECTIONS = {
 
 export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
 export const ISSUE_PATTERN = /^\d+$/;
+export const ISSUE_URL_PATTERN =
+	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
