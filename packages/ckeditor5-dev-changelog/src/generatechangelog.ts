@@ -58,14 +58,13 @@ export async function generateChangelog( {
 		parsedFiles: parsedChangesetFiles,
 		packageJsons,
 		transformScope,
-		organisationNamespace,
 		singlePackage
 	} );
 
-	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
-
 	// Logging changes in the console.
 	logChangelogFiles( sectionsWithEntries );
+
+	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
 	const { isInternal, newVersion } = await getNewVersion( sectionsWithEntries, oldVersion, rootPackageName, nextVersion );

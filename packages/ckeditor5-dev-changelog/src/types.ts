@@ -77,24 +77,33 @@ export type SectionName = keyof typeof SECTIONS;
 
 export type Entry = {
 	message: string;
-	data: FileMetadata & {
+	data: FileMetadata & FileMetadataNormalized & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
+		invalidDetails?: Array<string>;
 	};
 	changesetPath: string;
 };
 
 type FileMetadata = {
-	'breaking-change'?: 'major' | 'minor' | boolean;
+	'breaking-change'?: string | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;
 	see?: Array<string>;
 };
 
+type FileMetadataNormalized = {
+	breakingChangeNormalized?: 'major' | 'minor' | boolean;
+	typeNormalized?: string;
+	scopeNormalized?: Array<string>;
+	closesNormalized?: Array<string>;
+	seeNormalized?: Array<string>;
+};
+
 export type ParsedFile = {
 	content: string;
-	data: FileMetadata;
+	data: FileMetadata & FileMetadataNormalized;
 	changesetPath: string;
 	gitHubUrl: string;
 	skipLinks: boolean;

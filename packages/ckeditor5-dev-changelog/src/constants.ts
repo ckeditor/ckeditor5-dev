@@ -26,3 +26,6 @@ export const SECTIONS = {
 	other: { title: 'Other changes' },
 	invalid: { title: 'Invalid changes' }
 } as const;
+
+export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+export const ISSUE_PATTERN = /^\d+$/;

@@ -3,39 +3,35 @@
  * For licensing, see LICENSE.md.
  */
 
-import type {
-	Entry,
-	PackageJson,
-	ParsedFile,
-	SectionName,
-	SectionsWithEntries,
-	TransformScope
-} from '../types.js';
-import { SECTIONS } from '../constants.js';
+import type { Entry, PackageJson, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
+import { normalizeEntry } from './normalizeentry.js';
+import { validateEntry } from './validateentry.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
-const differentRepoIssuePattern = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
-const sameRepoIssuePattern = /^\d+$/;
 
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage }: {
+export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage }: {
 	parsedFiles: Array<ParsedFile>;
 	packageJsons: Array<PackageJson>;
 	transformScope: TransformScope;
-	organisationNamespace: string;
 	singlePackage: boolean;
 } ): SectionsWithEntries {
 	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const scope = getScopesLinks( entry.data.scope, transformScope );
-		const closes = getIssuesLinks( entry.data.closes, 'Closes', entry.gitHubUrl );
-		const see = getIssuesLinks( entry.data.see, 'See', entry.gitHubUrl );
-		const section = getSection( { entry, packagesNames, organisationNamespace, singlePackage, closes, see } );
-		const [ mainContent, ...restContent ] = linkToGitHubUser( entry.content ).trim().split( '\n\n' );
+		const normalizedEntry = normalizeEntry( entry, singlePackage );
+		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
+		const validatedData = validatedEntry.data;
+
+		const scope = getScopesLinks( validatedData.scopeNormalized, transformScope );
+		const closes = getIssuesLinks( validatedData.closesNormalized, 'Closes', validatedEntry.gitHubUrl );
+		const see = getIssuesLinks( validatedData.seeNormalized, 'See', validatedEntry.gitHubUrl );
+		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
+		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
 
 		const messageFirstLine = [
 			'*',
@@ -49,8 +45,8 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 
 		const newEntry: Entry = {
 			message: changeMessage,
-			data: { ...entry.data, mainContent, restContent },
-			changesetPath: entry.changesetPath
+			data: { ...validatedData, mainContent, restContent },
+			changesetPath: validatedEntry.changesetPath
 		};
 
 		sections[ section ].entries = [ ...sections[ section ].entries, newEntry ];
@@ -76,11 +72,11 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	}
 
 	const links = issues.map( String ).map( issue => {
-		if ( issue.match( sameRepoIssuePattern ) ) {
+		if ( issue.match( ISSUE_PATTERN ) ) {
 			return `[#${ issues }](${ gitHubUrl }/issues/${ issues })`;
 		}
 
-		const differentRepoMatch = issue.match( differentRepoIssuePattern );
+		const differentRepoMatch = issue.match( ISSUE_SLUG_PATTERN );
 
 		if ( differentRepoMatch ) {
 			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
@@ -91,70 +87,36 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 		return null;
 	} );
 
-	if ( links.includes( null ) ) {
-		return 'invalid';
-	}
-
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( {
-	entry,
-	packagesNames,
-	organisationNamespace,
-	singlePackage,
-	closes,
-	see
-}: {
-	entry: ParsedFile;
-	packagesNames: Array<string>;
-	organisationNamespace: string;
-	singlePackage: boolean;
-	closes: string | null;
-	see: string | null;
-} ): SectionName {
-	const packagesNamesNoNamespace = packagesNames.map( packageName => packageName.replace( `${ organisationNamespace }/`, '' ) );
-	const breakingChange = entry.data[ 'breaking-change' ];
-
-	if ( closes === 'invalid' ) {
+function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
+	if ( !isValid ) {
 		return 'invalid';
 	}
 
-	if ( see === 'invalid' ) {
-		return 'invalid';
-	}
-
-	if ( entry.data.scope && !entry.data.scope.every( scope => packagesNamesNoNamespace.includes( scope ) ) ) {
-		return 'invalid';
-	}
-
-	// If someone tries to use generic breaking change instead of minor/major in monorepo, the entry is invalid.
-	if ( !singlePackage && entry.data[ 'breaking-change' ] === true ) {
-		return 'invalid';
-	}
+	const breakingChangeNormalized = entry.data.breakingChangeNormalized;
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
-	if ( singlePackage && typeof breakingChange === 'string' ) {
-		return 'breaking';
+	if ( singlePackage ) {
+		if ( breakingChangeNormalized === 'minor' || breakingChangeNormalized === 'major' || breakingChangeNormalized === true ) {
+			return 'breaking';
+		}
+	} else {
+		if ( breakingChangeNormalized === 'minor' || breakingChangeNormalized === 'major' ) {
+			return 'breaking';
+		}
 	}
 
-	if ( typeof breakingChange === 'string' ) {
-		return breakingChange;
-	}
-
-	if ( breakingChange === true ) {
-		return 'breaking';
-	}
-
-	if ( entry.data.type === 'Feature' ) {
+	if ( entry.data.typeNormalized === 'Feature' ) {
 		return 'feature';
 	}
 
-	if ( entry.data.type === 'Fix' ) {
+	if ( entry.data.typeNormalized === 'Fix' ) {
 		return 'fix';
 	}
 
-	if ( entry.data.type === 'Other' ) {
+	if ( entry.data.typeNormalized === 'Other' ) {
 		return 'other';
 	}
 
