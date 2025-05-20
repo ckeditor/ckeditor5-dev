@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
-import { manifest } from '../../lib/utils/pacotecacheless.js';
+import { describe, expect, it, vi, type Mock } from 'vitest';
+import checkVersionAvailability from '../../src/npm/checkversionavailability.js';
+import { manifest } from '../../src/npm/pacotecacheless.js';
 
-vi.mock( '../../lib/utils/pacotecacheless.js' );
+vi.mock( '../../src/npm/pacotecacheless.js' );
 
 describe( 'checkVersionAvailability()', () => {
 	it( 'should resolve to true if version does not exist', async () => {
@@ -17,8 +17,9 @@ describe( 'checkVersionAvailability()', () => {
 
 		expect( manifest ).toHaveBeenCalledExactlyOnceWith( 'stub-package@1.0.1' );
 	} );
+
 	it( 'should resolve to false if version exists', async () => {
-		manifest.mockResolvedValue( '1.0.1' );
+		( manifest as Mock ).mockResolvedValue( '1.0.1' );
 
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) ).resolves.toBe( false );
 	} );

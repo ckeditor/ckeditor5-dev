@@ -15,7 +15,11 @@ type Options = {
 /**
  * This function locates package.json files for all packages located in `packagesDirectory` in the repository structure.
  */
-export async function findPathsToPackages( cwd: string, packagesDirectory: string | null, options: Options = {} ): Promise<Array<string>> {
+export default async function findPathsToPackages(
+	cwd: string,
+	packagesDirectory: string | null,
+	options: Options = {}
+): Promise<Array<string>> {
 	const {
 		includePackageJson = false,
 		includeCwd = false,

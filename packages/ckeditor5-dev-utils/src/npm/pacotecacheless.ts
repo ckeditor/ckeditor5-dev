@@ -12,8 +12,13 @@ import pacote from 'pacote';
 export const manifest = cacheLessPacoteFactory( pacote.manifest );
 export const packument = cacheLessPacoteFactory( pacote.packument );
 
-function cacheLessPacoteFactory( callback ) {
-	return async ( description, options = {} ) => {
+/**
+ * Creates a version of a `pacote` function that doesn't use caching.
+ */
+function cacheLessPacoteFactory<T extends ( ...args: Array<any> ) => any>( callback: T ) {
+	return async ( ...args: Parameters<T> ): Promise<Awaited<ReturnType<T>>> => {
+		const [ description, options = {} ] = args as unknown as [ string, any ];
+
 		const uuid = randomUUID();
 		const cacheDir = upath.join( os.tmpdir(), `pacote--${ uuid }` );
 

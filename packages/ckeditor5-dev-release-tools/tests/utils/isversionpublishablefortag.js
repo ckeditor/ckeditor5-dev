@@ -3,19 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
+import { npm } from '@ckeditor/ckeditor5-dev-utils';
 import { describe, expect, it, vi } from 'vitest';
 import semver from 'semver';
-
 import isVersionPublishableForTag from '../../lib/utils/isversionpublishablefortag.js';
-import { manifest } from '../../lib/utils/pacotecacheless.js';
 
-vi.mock( '../../lib/utils/pacotecacheless.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'semver' );
 
 describe( 'isVersionPublishableForTag()', () => {
 	it( 'should return false if given version is not available', async () => {
 		vi.mocked( semver.lte ).mockReturnValue( true );
-		vi.mocked( manifest ).mockResolvedValue( ( {
+		vi.mocked( npm.manifest ).mockResolvedValue( ( {
 			version: '1.0.0'
 		} ) );
 
@@ -23,13 +22,13 @@ describe( 'isVersionPublishableForTag()', () => {
 
 		expect( result ).to.equal( false );
 		expect( semver.lte ).toHaveBeenCalledExactlyOnceWith( '1.0.0', '1.0.0' );
-		expect( manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
+		expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
 	} );
 
 	it( 'should return false if given version is not higher than the latest published', async () => {
 		vi.mocked( semver.lte ).mockReturnValue( true );
 
-		vi.mocked( manifest ).mockResolvedValue( ( {
+		vi.mocked( npm.manifest ).mockResolvedValue( ( {
 			version: '1.0.1'
 		} ) );
 
@@ -40,12 +39,12 @@ describe( 'isVersionPublishableForTag()', () => {
 	} );
 
 	it( 'should return true if given npm tag is not published yet', async () => {
-		vi.mocked( manifest ).mockRejectedValue( 'E404' );
+		vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
 
 		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
 
 		expect( result ).to.equal( true );
 		expect( semver.lte ).not.toHaveBeenCalled();
-		expect( manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@alpha' );
+		expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@alpha' );
 	} );
 } );

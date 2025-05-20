@@ -4,10 +4,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { npm, tools } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from '../../lib/utils/getchangelog.js';
 import getPackageJson from '../../lib/utils/getpackagejson.js';
-import { packument } from '../../lib/utils/pacotecacheless.js';
 
 import {
 	getLastFromChangelog,
@@ -22,7 +21,6 @@ import {
 } from '../../lib/utils/versions.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../lib/utils/pacotecacheless.js' );
 vi.mock( '../../lib/utils/getchangelog.js' );
 vi.mock( '../../lib/utils/getpackagejson.js' );
 
@@ -107,20 +105,20 @@ describe( 'versions', () => {
 		} );
 
 		it( 'asks npm for all versions of a package', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {}
 			} );
 
 			return getLastPreRelease( '42.0.0-alpha' )
 				.then( () => {
-					expect( vi.mocked( packument ) ).toHaveBeenCalledTimes( 1 );
-					expect( vi.mocked( packument ) ).toHaveBeenCalledWith( 'ckeditor5' );
+					expect( vi.mocked( npm.packument ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( npm.packument ) ).toHaveBeenCalledWith( 'ckeditor5' );
 				} );
 		} );
 
 		it( 'returns null if there is no version for a package', () => {
-			vi.mocked( packument ).mockRejectedValue();
+			vi.mocked( npm.packument ).mockRejectedValue();
 
 			return getLastPreRelease( '42.0.0-alpha' )
 				.then( result => {
@@ -129,7 +127,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns null if there is no pre-release version matching the release identifier', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -147,7 +145,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns null if pre-release version matches the release identifier only partially', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -164,7 +162,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last pre-release version matching the release identifier', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -182,7 +180,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last pre-release version matching the release identifier (non-chronological versions order)', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -201,7 +199,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last pre-release version matching the release identifier (sequence numbers greater than 10)', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -221,7 +219,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last nightly version', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230614.0': {},
@@ -243,7 +241,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last nightly version from a specified day', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230614.0': {},
@@ -265,7 +263,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last version from exactly the "nightly" tag when multiple nightly tags exist', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -282,7 +280,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last version from exactly the "nightly-next" tag when multiple nightly tags exist', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-next-20230615.0': {},
@@ -299,7 +297,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last version from exactly the "nightly" tag when multiple nightly tags exist from a specific day', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -316,7 +314,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last version from exactly the "nightly-next" tag when multiple nightly tags exist from a specific day', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-next-20230615.0': {},
@@ -333,7 +331,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last pre-release version matching the release identifier exactly', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -352,7 +350,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last nightly version matching the release identifier exactly', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -376,7 +374,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns last pre-release version from exactly the "nightly" tag', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230613.0': {},
@@ -403,7 +401,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns pre-release version with id = 0 if pre-release version was never published for the package yet', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -419,7 +417,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns pre-release version with incremented id if older pre-release version was already published', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -435,7 +433,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns version with incremented id from exactly the "nightly" tag if older version was already published', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.5': {},
@@ -452,7 +450,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns version with incremented id from exactly the "nightly-next" tag if older version was already published', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-next-20230615.5': {},
@@ -482,7 +480,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns next pre-release version from exactly the "nightly" tag', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-nightly-20230615.0': {},
@@ -512,7 +510,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'returns next internal pre-release version', () => {
-			vi.mocked( packument ).mockResolvedValue( {
+			vi.mocked( npm.packument ).mockResolvedValue( {
 				name: 'ckeditor5',
 				versions: {
 					'0.0.0-internal-20230615.0': {},

@@ -6,11 +6,7 @@
 import semver, { type ReleaseType } from 'semver';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { randomUUID } from 'crypto';
-import upath from 'upath';
-import os from 'os';
-import fs from 'fs-extra';
-import pacote from 'pacote';
+import { npm } from '@ckeditor/ckeditor5-dev-utils';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -33,7 +29,9 @@ type Question = {
 	prefix: string;
 };
 
-const manifest = cacheLessPacoteFactory( pacote.manifest );
+//
+// TODO: Each export means a new file.
+//
 
 /**
  * This function displays a prompt to provide a new version for all packages in the repository.
@@ -66,7 +64,7 @@ function validateVersionFormat( version: string ): VersionValidationResult {
  * Validates if the provided version is higher than the current one.
  */
 export function validateVersionHigherThanCurrent( version: string, currentVersion: string ): VersionValidationResult {
-	// Skip this validation for 'internal' version
+	// Skip this validation for an 'internal' version
 	if ( version === 'internal' ) {
 		return true;
 	}
@@ -82,12 +80,12 @@ export function validateVersionHigherThanCurrent( version: string, currentVersio
  * Validates if the provided version is available in the npm registry.
  */
 export async function validateVersionAvailability( version: string, packageName: string ): Promise<VersionValidationResult> {
-	// Skip this validation for 'internal' version
+	// Skip this validation for an 'internal' version.
 	if ( version === 'internal' ) {
 		return true;
 	}
 
-	const isAvailable = await checkVersionAvailability( version, packageName );
+	const isAvailable = await npm.checkVersionAvailability( version, packageName );
 
 	if ( !isAvailable ) {
 		return 'Given version is already taken.';
@@ -134,42 +132,3 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	} ];
 }
-
-/**
- * Checks if a specific version of a package is available in the npm registry.
- */
-async function checkVersionAvailability( version: string, packageName: string ): Promise<boolean> {
-	return manifest( `${ packageName }@${ version }` )
-		.then( () => {
-			// If `manifest` resolves, a package with the given version exists.
-			return false;
-		} )
-		.catch( () => {
-			// When throws, the package does not exist.
-			return true;
-		} );
-}
-
-/**
- * Creates a version of a pacote function that doesn't use caching.
- */
-function cacheLessPacoteFactory( callback: typeof pacote.manifest ) {
-	return async ( description: string, options = {} ) => {
-		const uuid = randomUUID();
-		const cacheDir = upath.join( os.tmpdir(), `pacote--${ uuid }` );
-
-		await fs.ensureDir( cacheDir );
-
-		try {
-			return await callback( description, {
-				...options,
-				cache: cacheDir,
-				memoize: false,
-				preferOnline: true
-			} );
-		} finally {
-			await fs.remove( cacheDir );
-		}
-	};
-}
-

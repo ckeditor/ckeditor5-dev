@@ -6,15 +6,9 @@
 import { manifest } from './pacotecacheless.js';
 
 /**
- * Checks if the provided version for the package exists in the npm registry.
- *
- * Returns a promise that resolves to `true` if the provided version does not exist or resolves the promise to `false` otherwise.
- *
- * @param {string} version
- * @param {string} packageName
- * @returns {Promise}
+ * Checks if a specific version of a package is available in the npm registry.
  */
-export default async function checkVersionAvailability( version, packageName ) {
+export default async function checkVersionAvailability( version: string, packageName: string ): Promise<boolean> {
 	return manifest( `${ packageName }@${ version }` )
 		.then( () => {
 			// If `manifest` resolves, a package with the given version exists.

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getPackageJson } from '../../utils/getpackagejson.js';
+import { getPackageJson } from '../getpackagejson.js';
 
 /**
  * This function extracts the repository URL for generating links in the changelog.
