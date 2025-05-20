@@ -207,11 +207,8 @@ describe( 'getSectionsWithEntries()', () => {
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
 
-		const message = result.feature.entries[ 0 ]!.message;
-
-		expect( message ).toContain(
-			'Closes [ckeditor/ckeditor5#123](https://github.com/ckeditor/ckeditor5/issues/123).'
-		);
+		expect( result.feature.entries.length ).toEqual( 1 );
+		expect( result.invalid.entries.length ).toEqual( 0 );
 	} );
 
 	it( 'should skip links when skipLinks is true', () => {

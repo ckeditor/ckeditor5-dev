@@ -50,6 +50,16 @@ export type GenerateChangelog = {
 	 * Whether changelog is for a single package rather than a monorepo.
 	 */
 	singlePackage?: boolean;
+
+	/**
+	 * Whether changelog should be returned by the script instead of saving it to a file.
+	 */
+	noWrite?: boolean;
+
+	/**
+	 * Controls whether changeset files will be deleted after generating changelog.
+	 */
+	removeInputFiles?: boolean;
 };
 
 /**
