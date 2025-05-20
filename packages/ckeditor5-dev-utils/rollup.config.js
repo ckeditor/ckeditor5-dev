@@ -24,10 +24,25 @@ const externals = [
 ];
 
 export default defineConfig( {
-	input: 'src/index.ts',
+	input: {
+		main: 'src/index.ts',
+		debug: 'src/loaders/ck-debug-loader.ts'
+	},
 	output: {
+		dir: path.join( cwd, 'dist' ),
 		format: 'esm',
-		file: path.join( cwd, 'dist', 'index.js' ),
+		entryFileNames: chunk => {
+			if ( chunk.name === 'main' ) {
+				return 'index.js';
+			}
+
+			// Webpack debug loader.
+			if ( chunk.name === 'debug' ) {
+				return 'ck-debug-loader.js';
+			}
+
+			return '[name].js';
+		},
 		assetFileNames: '[name][extname]'
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
