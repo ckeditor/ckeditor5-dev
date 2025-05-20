@@ -11,9 +11,13 @@ const createEntry = ( scope: Array<string> ): Entry => ( {
 	message: '',
 	data: {
 		scope,
+		scopeNormalized: scope,
 		type: '',
+		typeNormalized: '',
 		closes: [],
+		closesNormalized: [],
 		see: [],
+		seeNormalized: [],
 		mainContent: '',
 		restContent: []
 	},
@@ -23,6 +27,7 @@ const createEntry = ( scope: Array<string> ): Entry => ( {
 const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
 	major: { entries: [], title: 'Major Breaking Changes' },
 	minor: { entries: [], title: 'Minor Breaking Changes' },
+	breaking: { entries: [], title: 'Breaking Changes' },
 	feature: { entries: [], title: 'Features' },
 	fix: { entries: [], title: 'Bug fixes' },
 	other: { entries: [], title: 'Other changes' },

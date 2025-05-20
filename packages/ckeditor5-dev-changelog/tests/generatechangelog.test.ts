@@ -24,6 +24,7 @@ import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
 import { removeScope } from '../src/utils/removescope.js';
 import { SECTIONS } from '../src/constants.js';
+import { InternalError } from '../src/errors.js';
 
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
 vi.mock( '../src/utils/getpackagejson.js' );
@@ -47,7 +48,8 @@ vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
 		green: ( text: string ) => text,
-		cyan: ( text: string ) => text
+		cyan: ( text: string ) => text,
+		red: ( text: string ) => text
 	}
 } ) );
 
@@ -287,7 +289,6 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
-			organisationNamespace: '@ckeditor',
 			packageJsons: [ {
 				name: 'test-package',
 				version: '1.0.0'
@@ -532,5 +533,22 @@ describe( 'generateChangelog()', () => {
 			sectionsToDisplay: expect.any( Array )
 		} ) );
 		expect( modifyChangelog ).toHaveBeenCalled();
+	} );
+
+	it( 'handles InternalError and exits gracefully', async () => {
+		const consoleErrorSpy = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		const processExitSpy = vi.spyOn( process, 'exit' ).mockImplementation( () => undefined as never );
+
+		vi.mocked( getSectionsToDisplay ).mockImplementation( () => {
+			throw new InternalError();
+		} );
+
+		await generateChangelog( defaultOptions );
+
+		expect( consoleErrorSpy ).toHaveBeenCalledWith( expect.stringContaining( 'Error: No valid changesets found' ) );
+		expect( processExitSpy ).toHaveBeenCalledWith( 1 );
+
+		consoleErrorSpy.mockRestore();
+		processExitSpy.mockRestore();
 	} );
 } );

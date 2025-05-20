@@ -19,7 +19,7 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Added new feature',
-						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature' },
+						data: { mainContent: 'Added new feature', restContent: [], typeNormalized: 'Feature' },
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
@@ -40,7 +40,10 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Invalid entry',
-						data: { mainContent: 'Invalid entry', restContent: [] },
+						data: {
+							restContent: [],
+							invalidDetails: [ 'Missing type', 'Incorrect format' ]
+						},
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
@@ -50,7 +53,10 @@ describe( 'logChangelogFiles()', () => {
 		logChangelogFiles( sections );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Invalid entry" (file:///repo/changelog/changeset-1.md)', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/changeset-1.md', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Missing type', { indent: 8 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Incorrect format', { indent: 8 } );
 	} );
 
 	it( 'handles empty sections gracefully', () => {
@@ -72,8 +78,8 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added new button',
 						data: {
-							type: 'Feature',
-							scope: [ 'ckeditor5-ui', 'ckeditor5-core' ],
+							typeNormalized: 'Feature',
+							scopeNormalized: [ 'ckeditor5-ui', 'ckeditor5-core' ],
 							mainContent: 'Added new button component',
 							restContent: []
 						},
@@ -100,7 +106,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed button issue',
 						data: {
-							type: 'Fix',
+							typeNormalized: 'Fix',
 							mainContent: 'Fixed button click behavior',
 							restContent: [
 								'Closes #123',
@@ -128,7 +134,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'Added feature',
 							restContent: []
 						},
@@ -142,7 +148,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed bug',
 						data: {
-							type: 'Fix',
+							typeNormalized: 'Fix',
 							mainContent: 'Fixed bug',
 							restContent: []
 						},
@@ -167,7 +173,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'First feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'First feature',
 							restContent: []
 						},
@@ -176,7 +182,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Second feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'Second feature',
 							restContent: []
 						},
@@ -200,8 +206,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Valid feature',
 						data: {
-							type: 'Feature',
-							mainContent: 'Valid feature',
+							typeNormalized: 'Feature',
 							restContent: []
 						},
 						changesetPath: '/repo/changelog/valid.md'
@@ -213,7 +218,10 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Invalid entry',
-						data: { mainContent: 'Invalid entry', restContent: [] },
+						data: {
+							restContent: [],
+							invalidDetails: [ 'Invalid type' ]
+						},
 						changesetPath: '/repo/changelog/invalid.md'
 					}
 				]
@@ -224,6 +232,32 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- "Invalid entry" (file:///repo/changelog/invalid.md)', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- File: file:///repo/changelog/invalid.md', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 7, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 8, '- Invalid type', { indent: 8 } );
+	} );
+
+	it( 'handles invalid sections with no validation details correctly', () => {
+		const sections: SectionsWithEntries = {
+			invalid: {
+				title: 'Invalid changes',
+				entries: [
+					{
+						message: 'Invalid entry with no details',
+						data: {
+							mainContent: 'Invalid entry',
+							restContent: []
+						},
+						changesetPath: '/repo/changelog/invalid-no-details.md'
+					}
+				]
+			}
+		} as any;
+
+		logChangelogFiles( sections );
+
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/invalid-no-details.md', { indent: 4 } );
+		expect( logInfo ).not.toHaveBeenNthCalledWith( 4, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
 	} );
 } );

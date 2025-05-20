@@ -73,7 +73,7 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 
 	const links = issues.map( String ).map( issue => {
 		if ( issue.match( ISSUE_PATTERN ) ) {
-			return `[#${ issues }](${ gitHubUrl }/issues/${ issues })`;
+			return `[#${ issue }](${ gitHubUrl }/issues/${ issue })`;
 		}
 
 		const differentRepoMatch = issue.match( ISSUE_SLUG_PATTERN );
@@ -111,8 +111,12 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 			return 'breaking';
 		}
 	} else {
-		if ( breakingChangeNormalized === 'minor' || breakingChangeNormalized === 'major' ) {
-			return 'breaking';
+		if ( breakingChangeNormalized === 'minor' ) {
+			return 'minor';
+		}
+
+		if ( breakingChangeNormalized === 'major' ) {
+			return 'major';
 		}
 	}
 
