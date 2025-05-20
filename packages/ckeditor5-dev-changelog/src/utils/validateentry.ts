@@ -18,15 +18,21 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		validations.push( `Type "${ data.type }" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).` );
 	}
 
-	if ( !singlePackage && ![ 'minor', 'major' ].includes( data.breakingChangeNormalized as string ) ) {
-		validations.push(
-			`Breaking change "${ data[ 'breaking-change' ] }" should be one of: "minor", "major", for a monorepo (case insensitive).`
-		);
-	} else if ( singlePackage && !( typeof data[ 'breaking-change' ] === 'undefined' || data.breakingChangeNormalized === true ) ) {
-		validations.push( [
-			`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
-			'"true", or not specified, for a single repo (case insensitive).'
-		].join( ' ' ) );
+	const breakingChangeProvided = typeof data[ 'breaking-change' ] !== 'undefined';
+
+	if ( singlePackage ) {
+		if ( breakingChangeProvided && data.breakingChangeNormalized !== true ) {
+			validations.push( [
+				`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
+				'"true", or not specified, for a single repo (case insensitive).'
+			].join( ' ' ) );
+		}
+	} else {
+		if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data.breakingChangeNormalized as string ) ) {
+			validations.push(
+				`Breaking change "${ data[ 'breaking-change' ] }" should be one of: "minor", "major", for a monorepo (case insensitive).`
+			);
+		}
 	}
 
 	if ( data.scopeNormalized ) {
