@@ -14,7 +14,9 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const data = entry.data;
 	const validations: Array<string> = [];
 
-	if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.typeNormalized! ) ) {
+	if ( typeof data.type === 'undefined' ) {
+		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
+	} else if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.typeNormalized! ) ) {
 		validations.push( `Type "${ data.type }" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).` );
 	}
 
