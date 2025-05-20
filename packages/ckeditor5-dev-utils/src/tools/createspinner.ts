@@ -11,23 +11,56 @@ import cliCursor from 'cli-cursor';
 // A size of default indent for a log.
 const INDENT_SIZE = 3;
 
+type CreateSpinnerOptions = {
+
+	/**
+	 * Whether the spinner should be disabled.
+	 */
+	isDisabled?: boolean;
+
+	/**
+	 * An emoji that will replace the spinner when it finishes.
+	 *
+	 * @default '📍'
+	 */
+	emoji?: string;
+
+	/**
+	 * The indent level.
+	 */
+	indentLevel?: number;
+
+	/**
+	 * If specified, the spinner contains a counter. It starts from `0`.
+	 * To increase its value, call the `#increase()` method on the returned instance of the spinner.
+	 */
+	total?: number;
+
+	/**
+	 * If a spinner is a counter, this option allows customizing the displayed line.
+	 *
+	 * @default '[title] Status: [current]/[total].'
+	 */
+	status?: string | CKEditor5SpinnerStatus;
+};
+
+type CKEditor5Spinner = {
+	start: () => void;
+	increase: () => void;
+	finish: ( options: { emoji?: string } ) => void;
+};
+
+type CKEditor5SpinnerStatus = ( title: string, current: number, total: number ) => string;
+
 /**
  * A factory function that creates an instance of a CLI spinner. It supports both a spinner CLI and a spinner with a counter.
  *
  * The spinner improves UX when processing a time-consuming task. A developer does not have to consider whether the process hanged on.
  *
- * @param {string} title Description of the current processed task.
- * @param {object} [options={}]
- * @param {boolean} [options.isDisabled] Whether the spinner should be disabled.
- * @param {string} [options.emoji='📍'] An emoji that will replace the spinner when it finishes.
- * @param {number} [options.indentLevel=1] The indent level.
- * @param {number} [options.total] If specified, the spinner contains a counter. It starts from `0`. To increase its value,
- * call the `#increase()` method on the returned instance of the spinner.
- * @param {string|CKEditor5SpinnerStatus} [options.status='[title] Status: [current]/[total].'] If a spinner is a counter,
- * this option allows customizing the displayed line.
- * @returns {CKEditor5Spinner}
+ * @param title Description of the current processed task.
+ * @param [options={}]
  */
-export default function createSpinner( title, options = {} ) {
+export default function createSpinner( title: string, options: CreateSpinnerOptions = {} ): CKEditor5Spinner {
 	const isEnabled = !options.isDisabled && isInteractive();
 	const indentLevel = options.indentLevel || 0;
 	const indent = ' '.repeat( indentLevel * INDENT_SIZE );
@@ -35,7 +68,7 @@ export default function createSpinner( title, options = {} ) {
 	const status = options.status || '[title] Status: [current]/[total].';
 	const spinnerType = typeof options.total === 'number' ? 'counter' : 'spinner';
 
-	let timerId;
+	let timerId: ReturnType<typeof setTimeout>;
 	let counter = 0;
 
 	return {
@@ -52,13 +85,13 @@ export default function createSpinner( title, options = {} ) {
 				}
 
 				if ( typeof options.status === 'function' ) {
-					return options.status( title, counter, options.total );
+					return options.status( title, counter, options.total! );
 				}
 
 				return `${ status }`
 					.replace( '[title]', title )
-					.replace( '[current]', counter )
-					.replace( '[total]', options.total.toString() );
+					.replace( '[current]', String( counter ) )
+					.replace( '[total]', options.total!.toString() );
 			};
 
 			let index = 0;
@@ -113,38 +146,3 @@ export default function createSpinner( title, options = {} ) {
 	}
 }
 
-/**
- * @typedef {object} CKEditor5Spinner
- *
- * @property {CKEditor5SpinnerStart} start
- *
- * @property {CKEditor5SpinnerIncrease} increase
- *
- * @property {CKEditor5SpinnerFinish} finish
- */
-
-/**
- * @callback CKEditor5SpinnerStart
- */
-
-/**
- * @callback CKEditor5SpinnerIncrease
- */
-
-/**
- * @callback CKEditor5SpinnerFinish
- *
- * @param {object} [options={}]
- *
- * @param {string} [options.emoji]
- */
-
-/**
- * @callback CKEditor5SpinnerStatus
- *
- * @param {string} title
- *
- * @param {number} current
- *
- * @param {number} total
- */

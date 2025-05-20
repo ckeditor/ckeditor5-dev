@@ -3,10 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-/**
- * @returns {object}
- */
-export default function getFormattedTextLoader() {
+export default function getFormattedTextLoader(): { test: RegExp; use: Array<string> } {
 	return {
 		test: /\.(txt|html|rtf)$/,
 		use: [ 'raw-loader' ]

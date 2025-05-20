@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-export default function getLicenseBanner() {
+export default function getLicenseBanner(): string {
 	const date = new Date();
 
 	// License banner starts with `!`. That combines with uglifyjs' `comments` /^!/ option

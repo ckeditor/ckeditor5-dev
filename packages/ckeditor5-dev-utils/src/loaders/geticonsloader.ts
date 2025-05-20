@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-/**
- * @param {object} [options]
- * @param {boolean} [options.matchExtensionOnly]
- * @returns {object}
- */
-export default function getIconsLoader( { matchExtensionOnly = false } = {} ) {
+export default function getIconsLoader( { matchExtensionOnly = false }: { matchExtensionOnly?: boolean } = {} ): {
+	test: RegExp;
+	use: Array<string>;
+} {
 	return {
 		test: matchExtensionOnly ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
 		use: [ 'raw-loader' ]

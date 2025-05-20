@@ -5,7 +5,39 @@
 
 import chalk from 'chalk';
 
-const levels = new Map();
+export type Verbosity = 'info' | 'warning' | 'error' | 'silent';
+
+type Logger = {
+
+	/**
+	 * Displays a message when the verbosity level is equal to 'info'.
+	 *
+	 * @param {string} message Message to log.
+	 */
+	info: ( message: string ) => void;
+
+	/**
+	 * Displays a warning message when the verbosity level is equal to 'info' or 'warning'.
+	 *
+	 * @param {string} message Message to log.
+	 */
+	warning: ( message: string ) => void;
+
+	/**
+	 * Displays an error message.
+	 *
+	 * @param {string} message Message to log.
+	 * @param {Error} [error] An error instance to log in the console.
+	 */
+	error: ( message: string, error?: Error ) => void;
+
+	/**
+	 * @internal
+	 */
+	_log: ( messageVerbosity: Verbosity, message: string, error?: Error ) => void;
+};
+
+const levels = new Map<Verbosity, Set<Verbosity>>();
 
 levels.set( 'silent', new Set( [] ) );
 levels.set( 'info', new Set( [ 'info' ] ) );
@@ -40,51 +72,22 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *      errorLog.error( 'Message.' ); // This message will be always displayed.
  *
  * Additionally, the `logger#error()` method prints the error instance if provided as the second argument.
- *
- * @param {'info'|'warning'|'error'|'silent'} [moduleVerbosity='info'] Level of the verbosity for all log methods.
- * @returns {object} logger
- * @returns {Function} logger.info
- * @returns {Function} logger.warning
- * @returns {Function} logger.error
  */
-export default function logger( moduleVerbosity = 'info' ) {
+export default function logger( moduleVerbosity: Verbosity = 'info' ): Logger {
 	return {
-		/**
-		 * Displays a message when verbosity level is equal to 'info'.
-		 *
-		 * @param {string} message Message to log.
-		 */
 		info( message ) {
 			this._log( 'info', message );
 		},
-
-		/**
-		 * Displays a warning message when verbosity level is equal to 'info' or 'warning'.
-		 *
-		 * @param {string} message Message to log.
-		 */
 		warning( message ) {
 			this._log( 'warning', chalk.yellow( message ) );
 		},
 
-		/**
-		 * Displays an error message.
-		 *
-		 * @param {string} message Message to log.
-		 * @param {Error} [error] An error instance to log in the console.
-		 */
 		error( message, error ) {
 			this._log( 'error', chalk.red( message ), error );
 		},
 
-		/**
-		 * @private
-		 * @param {string} messageVerbosity Verbosity of particular message.
-		 * @param {string} message Message to log.
-		 * @param {Error} [error] An error instance to log in the console.
-		 */
 		_log( messageVerbosity, message, error ) {
-			if ( !levels.get( messageVerbosity ).has( moduleVerbosity ) ) {
+			if ( !levels.get( messageVerbosity )!.has( moduleVerbosity ) ) {
 				return;
 			}
 

@@ -5,20 +5,28 @@
 
 import chalk from 'chalk';
 import sh from 'shelljs';
-import logger from '../logger/index.js';
+import logger, { type Verbosity } from '../logger/index.js';
 
-/**
- * Executes a shell command.
- *
- * @param {string} command The command to be executed.
- * @param {object} options
- * @param {'info'|'warning'|'error'|'silent'} [options.verbosity='info'] Level of the verbosity. If set as 'info'
- * both outputs (stdout and stderr) will be logged. If set as 'error', only stderr output will be logged.
- * @param {string} [options.cwd=process.cwd()]
- * @param {boolean} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
- * @returns {string|Promise.<string>} The command output.
- */
-export default function shExec( command, options = {} ) {
+type ShExecOptions = {
+
+	/**
+	 * Level of the verbosity. If set as 'info' both outputs (stdout and stderr) will be logged.
+	 * If set as 'error', only stderr output will be logged.
+	 */
+	verbosity?: Verbosity;
+
+	cwd?: string;
+
+	/**
+	 * If set, the command execution is asynchronous. The execution is synchronous by default.
+	 */
+	async?: boolean;
+};
+
+export default function shExec( command: string, options: { async: true } & ShExecOptions ): Promise<string>;
+export default function shExec( command: string, options?: ( { async?: false } & ShExecOptions ) ): string;
+
+export default function shExec( command: string, options: ShExecOptions = {} ): string | Promise<string> {
 	const {
 		verbosity = 'info',
 		cwd = process.cwd(),
@@ -48,16 +56,9 @@ export default function shExec( command, options = {} ) {
 	return execHandler( { code, stdout, stderr, verbosity, command } );
 }
 
-/**
- * @param {object} options
- * @param {number} options.code
- * @param {string} options.stdout
- * @param {string} options.stderr
- * @param {'info'|'warning'|'error'|'silent'} options.verbosity
- * @param {string} options.command
- * @returns {string}
- */
-function execHandler( { code, stdout, stderr, verbosity, command } ) {
+function execHandler(
+	{ code, stdout, stderr, verbosity, command }: { code: number; stdout: string; stderr: string; verbosity: Verbosity; command: string }
+): string {
 	const log = logger( verbosity );
 	const grey = chalk.grey;
 

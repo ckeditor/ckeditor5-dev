@@ -27,15 +27,12 @@
  * it outputs
  *
  *        "ckeditor5-bar"
- *
- * @param {string} inputFilePath A path to the file.
- * @returns {string} The name of the package.
  */
-export default function getPackageName( inputFilePath ) {
+export default function getPackageName( inputFilePath: string ): string | null {
 	const match = inputFilePath.match( /^.+[/\\](ckeditor5-[^/\\]+)/ );
 
 	if ( match ) {
-		return match.pop();
+		return match.pop()!;
 	} else {
 		return null;
 	}

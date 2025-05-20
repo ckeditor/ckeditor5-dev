@@ -5,12 +5,11 @@
 
 import getDebugLoader from './getdebugloader.js';
 
-/**
- * @param {object} options
- * @param {Array.<string>} options.debugFlags
- * @returns {object}
- */
-export default function getJavaScriptLoader( { debugFlags } ) {
+type JavaScriptLoaderOptions = ReturnType<typeof getDebugLoader> & {
+	test: RegExp;
+};
+
+export default function getJavaScriptLoader( { debugFlags }: { debugFlags: Array<string> } ): JavaScriptLoaderOptions {
 	return {
 		test: /\.js$/,
 		...getDebugLoader( debugFlags )

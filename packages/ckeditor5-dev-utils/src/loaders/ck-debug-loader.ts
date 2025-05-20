@@ -3,6 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+interface MinimalLoaderContext {
+	query: {
+		debugFlags: Array<string>;
+	};
+
+	callback( err: Error | null, content?: string | Buffer, sourceMap?: unknown ): void;
+}
+
 /**
  * The loader matches sentences like: `// @if CK_DEBUG // someDebugCode();` and uncomment them.
  * It also uncomments code after specific flags if they are provided to the webpack configuration.
@@ -12,7 +20,11 @@
  * @param {string} source
  * @param {any} map
  */
-export default function ckDebugLoader( source, map ) {
+export default function ckDebugLoader(
+	this: MinimalLoaderContext,
+	source: string,
+	map: unknown
+): void {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
 		// `this.query` comes from the webpack loader configuration specified as the loader options.
 		// {

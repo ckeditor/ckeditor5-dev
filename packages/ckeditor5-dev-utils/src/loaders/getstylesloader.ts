@@ -6,16 +6,31 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getPostCssConfig } from '../styles/index.js';
 
-/**
- * @param {object} options
- * @param {string} options.themePath
- * @param {boolean} [options.minify]
- * @param {boolean} [options.sourceMap]
- * @param {boolean} [options.extractToSeparateFile]
- * @param {boolean} [options.skipPostCssLoader]
- * @returns {object}
- */
-export default function getStylesLoader( options ) {
+type GetStylesLoaderOptions = {
+	themePath: string;
+	minify?: boolean;
+	sourceMap?: boolean;
+	extractToSeparateFile?: boolean;
+	skipPostCssLoader?: boolean;
+};
+
+type StylesLoader = {
+	test: RegExp;
+	use: Array<LoaderToUse>;
+};
+
+type LoaderToUse = string | {
+	loader: string;
+	options?: {
+		injectType?: string;
+		attributes?: {
+			'data-cke': boolean;
+		};
+		postcssOptions?: object;
+	};
+};
+
+export default function getStylesLoader( options: GetStylesLoaderOptions ): StylesLoader {
 	const {
 		themePath,
 		minify = false,
@@ -53,6 +68,6 @@ export default function getStylesLoader( options ) {
 					} )
 				}
 			}
-		].filter( Boolean )
+		].filter( Boolean ) as Array<LoaderToUse>
 	};
 }

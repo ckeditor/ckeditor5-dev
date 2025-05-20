@@ -3,17 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { Plugin } from 'postcss';
+
 /**
  * A plugin that prepends a path to the file in the comment for each file
  * processed by PostCSS.
- *
- * @returns {Function} A PostCSS plugin.
  */
-function themeLogger() {
+function themeLogger(): Plugin {
 	return {
 		postcssPlugin: 'postcss-ckeditor5-theme-logger',
 		Once( root ) {
-			root.prepend( `/* ${ root.source.input.file } */ \n` );
+			root.prepend( `/* ${ root.source!.input.file } */ \n` );
 		}
 	};
 }

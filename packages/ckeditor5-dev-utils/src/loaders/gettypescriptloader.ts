@@ -5,14 +5,26 @@
 
 import getDebugLoader from './getdebugloader.js';
 
-/**
- * @param {object} [options]
- * @param {string} [options.configFile]
- * @param {Array.<string>} [options.debugFlags]
- * @param {boolean} [options.includeDebugLoader]
- * @returns {object}
- */
-export default function getTypeScriptLoader( options = {} ) {
+type TypeScriptLoaderOptions = {
+	configFile?: string;
+	debugFlags?: Array<string>;
+	includeDebugLoader?: boolean;
+};
+
+type TypeScriptLoader = {
+	test: RegExp;
+	use: Array<LoaderToUse>;
+};
+
+type LoaderToUse = {
+	loader: string;
+	options: {
+		target: string;
+		tsconfig: string;
+	};
+};
+
+export default function getTypeScriptLoader( options: TypeScriptLoaderOptions = {} ): TypeScriptLoader {
 	const {
 		configFile = 'tsconfig.json',
 		debugFlags = [],
@@ -30,6 +42,6 @@ export default function getTypeScriptLoader( options = {} ) {
 				}
 			},
 			includeDebugLoader ? getDebugLoader( debugFlags ) : null
-		].filter( Boolean )
+		].filter( Boolean ) as Array<LoaderToUse>
 	};
 }

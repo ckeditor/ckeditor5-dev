@@ -5,6 +5,18 @@
 
 import path from 'path';
 
+type CoverageLoaderConfig = {
+	test: RegExp;
+	use: Array<{
+		loader: string;
+		options: {
+			plugins: Array<string>;
+		};
+	}>;
+	include: Array<RegExp>;
+	exclude: Array<RegExp>;
+};
+
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 /**
@@ -12,7 +24,7 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
  * @param {Array.<string>} options.files
  * @returns {object}
  */
-export default function getCoverageLoader( { files } ) {
+export default function getCoverageLoader( { files }: { files: Array<string> } ): CoverageLoaderConfig {
 	return {
 		test: /\.[jt]s$/,
 		use: [
@@ -42,18 +54,18 @@ export default function getCoverageLoader( { files } ) {
  * @param {Array.<string>} globs
  * @returns {Array.<string>}
  */
-function getPathsToIncludeForCoverage( globs ) {
+function getPathsToIncludeForCoverage( globs: Array<string> ): Array<RegExp> {
 	const values = globs
 		.reduce( ( returnedPatterns, globPatterns ) => {
 			returnedPatterns.push( ...globPatterns );
 
 			return returnedPatterns;
-		}, [] )
+		}, [] as Array<string> )
 		.map( glob => {
 			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\/(?!.*ckeditor5-)/ );
 
 			if ( matchCKEditor5 ) {
-				const packageName = matchCKEditor5[ 1 ]
+				const packageName = matchCKEditor5[ 1 ]!
 					// A special case when --files='!engine' or --files='!engine|ui' was passed.
 					// Convert it to /ckeditor5-(?!engine)[^/]\/src\//.
 					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' )
@@ -65,5 +77,5 @@ function getPathsToIncludeForCoverage( globs ) {
 		// Filter undefined ones.
 		.filter( path => path );
 
-	return [ ...new Set( values ) ];
+	return [ ...new Set( values as Array<RegExp> ) ];
 }
