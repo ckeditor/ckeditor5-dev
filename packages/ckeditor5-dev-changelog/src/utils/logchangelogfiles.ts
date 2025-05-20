@@ -34,10 +34,10 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 			}
 		} else {
 			for ( const entry of section.entries ) {
-				logInfo( `- "${ entry.data.mainContent }" (file://${ entry.changesetPath })`, { indent: 4 } );
-				logInfo( color( 'VALIDATION DETAILS:' ), { indent: 6 } );
+				logInfo( `- File: file://${ entry.changesetPath }`, { indent: 4 } );
+				logInfo( chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
 				for ( const validationMessage of entry.data.invalidDetails ?? [] ) {
-					logInfo( color( `* ${ validationMessage }` ), { indent: 8 } );
+					logInfo( `- ${ validationMessage }`, { indent: 8 } );
 				}
 			}
 		}
