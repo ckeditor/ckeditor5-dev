@@ -3,16 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import sh from 'shelljs';
-import shExec from '../../lib/tools/shexec.js';
-import logger from '../../lib/logger/index.js';
+import shExec from '../../src/tools/shexec.js';
+import logger from '../../src/logger/index.js';
 
 vi.mock( 'shelljs' );
-vi.mock( '../../lib/logger/index.js' );
+vi.mock( '../../src/logger/index.js' );
+
+type CallbackType = ( exitCode: number, stdout?: string, stderr?: string ) => void;
 
 describe( 'shExec()', () => {
-	let stubs;
+	let stubs: Record<string, Mock>;
 
 	beforeEach( () => {
 		stubs = {
@@ -25,12 +27,12 @@ describe( 'shExec()', () => {
 		vi.mocked( logger ).mockReturnValue( {
 			info: stubs.infoSpy,
 			error: stubs.errorSpy
-		} );
+		} as any );
 	} );
 
 	describe( 'sync', () => {
 		it( 'should execute a specified command using the default cwd', () => {
-			vi.mocked( sh ).exec.mockReturnValue( { code: 0 } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 0 } as any );
 
 			shExec( 'command' );
 
@@ -46,7 +48,7 @@ describe( 'shExec()', () => {
 		it( 'should execute command with specified cwd', () => {
 			const cwd = '/home/user';
 
-			vi.mocked( sh ).exec.mockReturnValue( { code: 0 } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 0 } as any );
 
 			shExec( 'command', { cwd } );
 
@@ -59,7 +61,7 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should throw error on unsuccessful call', () => {
-			vi.mocked( sh ).exec.mockReturnValue( { code: 1 } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 1 } as any );
 
 			expect( () => {
 				shExec( 'command' );
@@ -69,7 +71,7 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should output using log functions when exit code is equal to 0', () => {
-			vi.mocked( sh ).exec.mockReturnValue( { code: 0, stdout: 'out', stderr: 'err' } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 0, stdout: 'out', stderr: 'err' } as any );
 
 			shExec( 'command' );
 
@@ -82,7 +84,7 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should output using log functions when exit code is not equal to 0', () => {
-			vi.mocked( sh ).exec.mockReturnValue( { code: 1, stdout: 'out', stderr: 'err' } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 1, stdout: 'out', stderr: 'err' } as any );
 
 			expect( () => {
 				shExec( 'command' );
@@ -97,7 +99,7 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should not log if no output from executed command', () => {
-			vi.mocked( sh ).exec.mockReturnValue( { code: 0, stdout: '', stderr: '' } );
+			vi.mocked( sh ).exec.mockReturnValue( { code: 0, stdout: '', stderr: '' } as any );
 
 			shExec( 'command', { verbosity: 'error' } );
 
@@ -109,27 +111,27 @@ describe( 'shExec()', () => {
 
 	describe( 'async', () => {
 		it( 'should return a promise when executing a command in asynchronous mode', async () => {
-			vi.mocked( sh ).exec.mockImplementation( ( command, options, callback ) => {
+			vi.mocked( sh ).exec.mockImplementation( ( ( command: string, options: object, callback: CallbackType ) => {
 				callback( 0 );
-			} );
+			} ) as any );
 
 			await shExec( 'command', { async: true } );
 			expect( vi.mocked( sh ).exec ).toHaveBeenCalledOnce();
 		} );
 
 		it( 'should throw error on unsuccessful call in asynchronous mode', async () => {
-			vi.mocked( sh ).exec.mockImplementation( ( command, options, callback ) => {
+			vi.mocked( sh ).exec.mockImplementation( ( ( command: string, options: object, callback: CallbackType ) => {
 				callback( 1 );
-			} );
+			} ) as any );
 
 			await expect( shExec( 'command', { async: true } ) ).rejects.toThrow();
 			expect( vi.mocked( sh ).exec ).toHaveBeenCalledOnce();
 		} );
 
 		it( 'should output using log functions when exit code is equal to 0 in asynchronous mode', async () => {
-			vi.mocked( sh ).exec.mockImplementation( ( command, options, callback ) => {
+			vi.mocked( sh ).exec.mockImplementation( ( ( command: string, options: object, callback: CallbackType ) => {
 				callback( 0, 'out', 'err' );
-			} );
+			} ) as any );
 
 			await shExec( 'command', { async: true } );
 
@@ -142,9 +144,9 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should output using log functions when exit code is not equal to 0 in asynchronous mode', async () => {
-			vi.mocked( sh ).exec.mockImplementation( ( command, options, callback ) => {
+			vi.mocked( sh ).exec.mockImplementation( ( ( command: string, options: object, callback: CallbackType ) => {
 				callback( 1, 'out', 'err' );
-			} );
+			} ) as any );
 
 			await expect( shExec( 'command', { async: true } ) ).rejects.toThrow();
 
@@ -157,9 +159,9 @@ describe( 'shExec()', () => {
 		} );
 
 		it( 'should not log if no output from executed command in asynchronous mode', async () => {
-			vi.mocked( sh ).exec.mockImplementation( ( command, options, callback ) => {
+			vi.mocked( sh ).exec.mockImplementation( ( ( command: string, options: object, callback: CallbackType ) => {
 				callback( 0, '', '' );
-			} );
+			} ) as any );
 
 			await shExec( 'command', { verbosity: 'error', async: true } );
 

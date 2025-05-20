@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import logger from '../../lib/logger/index.js';
+import logger, { type Logger } from '../../src/logger/index.js';
 
 vi.stubGlobal( 'console', {
 	log: vi.fn(),
@@ -15,7 +15,7 @@ vi.stubGlobal( 'console', {
 
 describe( 'logger()', () => {
 	const logMessage = 'An example.';
-	let log;
+	let log: Logger;
 
 	it( 'provides an API for set verbosity level', () => {
 		expect( logger ).to.be.a( 'function' );

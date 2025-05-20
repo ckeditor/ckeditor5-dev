@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import getLicenseBanner from '../../lib/bundler/getlicensebanner.js';
+import getLicenseBanner from '../../src/bundler/getlicensebanner.js';
 
 describe( 'getLicenseBanner()', () => {
 	it( 'should return a banner', () => {

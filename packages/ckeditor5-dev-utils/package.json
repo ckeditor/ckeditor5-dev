@@ -24,8 +24,8 @@
   ],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-translations": "^49.0.2",
-    "@types/shelljs": "^0.8.16",
     "@types/postcss-import": "^14.0.3",
+    "@types/shelljs": "^0.8.16",
     "@types/through2": "^2.0.41",
     "chalk": "^5.0.0",
     "cli-cursor": "^5.0.0",
@@ -49,14 +49,14 @@
     "through2": "^4.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^12.1.2",
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@types/pacote": "^11.1.8",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/fs-extra": "^11.0.4",
+    "@types/pacote": "^11.1.8",
     "@vitest/coverage-v8": "^2.0.0",
+    "jest-extended": "^4.0.2",
     "rollup": "^4.9.5",
     "typescript": "^5.6.0",
-    "jest-extended": "^4.0.2",
     "vitest": "^3.1.1"
   },
   "scripts": {

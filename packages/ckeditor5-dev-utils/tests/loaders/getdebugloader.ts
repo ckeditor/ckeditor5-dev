@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import getDebugLoader from '../../lib/loaders/getdebugloader.js';
+import getDebugLoader from '../../src/loaders/getdebugloader.js';
 
 describe( 'getDebugLoader()', () => {
 	it( 'should be a function', () => {

@@ -5,8 +5,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
-import getDllPluginWebpackConfig from '../../lib/builds/getdllpluginwebpackconfig.js';
-import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../../lib/loaders/index.js';
+import getDllPluginWebpackConfig from '../../src/builds/getdllpluginwebpackconfig.js';
+import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../../src/loaders/index.js';
 
 const stubs = vi.hoisted( () => ( {
 	CKEditorTranslationsPlugin: {
@@ -34,8 +34,8 @@ const stubs = vi.hoisted( () => ( {
 	}
 } ) );
 
-vi.mock( '../../lib/loaders/index.js' );
-vi.mock( '../../lib/bundler/index.js' );
+vi.mock( '../../src/loaders/index.js' );
+vi.mock( '../../src/bundler/index.js' );
 vi.mock( 'fs-extra' );
 vi.mock( 'path', () => ( {
 	default: {
@@ -45,7 +45,9 @@ vi.mock( 'path', () => ( {
 } ) );
 vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
 	CKEditorTranslationsPlugin: class CKEditorTranslationsPlugin {
-		constructor( ...args ) {
+		protected readonly name: string;
+
+		constructor( ...args: Array<unknown> ) {
 			this.name = 'CKEditorTranslationsPlugin';
 
 			stubs.CKEditorTranslationsPlugin.constructor( ...args );
@@ -54,7 +56,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
 } ) );
 vi.mock( 'terser-webpack-plugin', () => ( {
 	default: class TerserPlugin {
-		constructor( ...args ) {
+		constructor( ...args: Array<unknown> ) {
 			stubs.TerserPlugin.constructor( ...args );
 		}
 	}
@@ -98,10 +100,10 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 		expect( webpackConfig.optimization.minimize ).to.equal( true );
 		expect( webpackConfig.optimization.minimizer ).to.be.an( 'array' );
-		expect( webpackConfig.optimization.minimizer.length ).to.equal( 1 );
+		expect( webpackConfig.optimization.minimizer!.length ).to.equal( 1 );
 
 		// Due to versions mismatch, the `instanceof` check does not pass.
-		expect( webpackConfig.optimization.minimizer[ 0 ].constructor.name ).to.equal( 'TerserPlugin' );
+		expect( webpackConfig.optimization.minimizer!.at( 0 )!.constructor.name ).to.equal( 'TerserPlugin' );
 	} );
 
 	it( 'transforms package with many dashes in its name', async () => {
@@ -136,7 +138,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			manifestPath: '/manifest/path'
 		} );
 
-		expect( webpackConfig.output.libraryExport ).to.be.undefined;
+		expect( 'libraryExport' in webpackConfig.output ).to.be.false;
 	} );
 
 	it( 'uses index.ts entry file by default', async () => {
@@ -215,7 +217,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			} ) );
 
 			const [ firstCall ] = stubs.CKEditorTranslationsPlugin.constructor.mock.calls;
-			const { sourceFilesPattern } = firstCall[ 0 ];
+			const { sourceFilesPattern } = firstCall!.at( 0 )!;
 
 			expect( 'src/bold.js' ).to.match( sourceFilesPattern );
 			expect( 'src/bold.ts' ).to.match( sourceFilesPattern );

@@ -6,7 +6,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import cliCursor from 'cli-cursor';
 import isInteractive from 'is-interactive';
-import createSpinner from '../../lib/tools/createspinner.js';
+import createSpinner from '../../src/tools/createspinner.js';
 import readline from 'readline';
 
 vi.mock( 'is-interactive' );
@@ -85,7 +85,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );
@@ -136,7 +137,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );
@@ -303,7 +305,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );
@@ -338,7 +341,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );
@@ -371,7 +375,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );
@@ -412,7 +417,8 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				const writeStub = vi.spyOn( process.stdout, 'write' ).mockImplementation( () => {} );
+				const writeStub = vi.spyOn( process.stdout, 'write' )
+					.mockImplementation( ( () => {} ) as any );
 
 				vi.advanceTimersByTime( 5 );
 				expect( writeStub ).toHaveBeenCalledTimes( 1 );

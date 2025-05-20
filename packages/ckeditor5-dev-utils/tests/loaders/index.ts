@@ -4,22 +4,22 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as loaders from '../../lib/loaders/index.js';
-import getCoverageLoader from '../../lib/loaders/getcoverageloader.js';
-import getTypeScriptLoader from '../../lib/loaders/gettypescriptloader.js';
-import getDebugLoader from '../../lib/loaders/getdebugloader.js';
-import getIconsLoader from '../../lib/loaders/geticonsloader.js';
-import getFormattedTextLoader from '../../lib/loaders/getformattedtextloader.js';
-import getJavaScriptLoader from '../../lib/loaders/getjavascriptloader.js';
-import getStylesLoader from '../../lib/loaders/getstylesloader.js';
+import * as loaders from '../../src/loaders/index.js';
+import getCoverageLoader from '../../src/loaders/getcoverageloader.js';
+import getTypeScriptLoader from '../../src/loaders/gettypescriptloader.js';
+import getDebugLoader from '../../src/loaders/getdebugloader.js';
+import getIconsLoader from '../../src/loaders/geticonsloader.js';
+import getFormattedTextLoader from '../../src/loaders/getformattedtextloader.js';
+import getJavaScriptLoader from '../../src/loaders/getjavascriptloader.js';
+import getStylesLoader from '../../src/loaders/getstylesloader.js';
 
-vi.mock( '../../lib/loaders/getcoverageloader.js' );
-vi.mock( '../../lib/loaders/gettypescriptloader.js' );
-vi.mock( '../../lib/loaders/getdebugloader.js' );
-vi.mock( '../../lib/loaders/geticonsloader.js' );
-vi.mock( '../../lib/loaders/getformattedtextloader.js' );
-vi.mock( '../../lib/loaders/getjavascriptloader.js' );
-vi.mock( '../../lib/loaders/getstylesloader.js' );
+vi.mock( '../../src/loaders/getcoverageloader.js' );
+vi.mock( '../../src/loaders/gettypescriptloader.js' );
+vi.mock( '../../src/loaders/getdebugloader.js' );
+vi.mock( '../../src/loaders/geticonsloader.js' );
+vi.mock( '../../src/loaders/getformattedtextloader.js' );
+vi.mock( '../../src/loaders/getjavascriptloader.js' );
+vi.mock( '../../src/loaders/getstylesloader.js' );
 
 describe( 'loaders/index.js', () => {
 	describe( 'getCoverageLoader()', () => {

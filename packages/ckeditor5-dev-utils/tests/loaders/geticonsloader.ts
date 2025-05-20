@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import getIconsLoader from '../../lib/loaders/geticonsloader.js';
+import getIconsLoader from '../../src/loaders/geticonsloader.js';
 
 describe( 'getIconsLoader()', () => {
 	it( 'should be a function', () => {

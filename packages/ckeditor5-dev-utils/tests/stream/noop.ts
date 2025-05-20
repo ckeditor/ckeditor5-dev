@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import stream from 'stream';
-import noop from '../../lib/stream/noop.js';
+import noop from '../../src/stream/noop.js';
 
 describe( 'noop()', () => {
 	it( 'should return PassTrough stream', () => {

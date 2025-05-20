@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import getPackageName from '../../../lib/styles/utils/getpackagename.js';
+import getPackageName from '../../../src/styles/utils/getpackagename.js';
 
 describe( 'getPackageName()', () => {
 	describe( 'Unix paths', () => {
@@ -68,6 +68,6 @@ describe( 'getPackageName()', () => {
 	} );
 } );
 
-function checkPackage( filePath, expectedPath ) {
+function checkPackage( filePath: string, expectedPath: string ) {
 	expect( getPackageName( filePath ) ).to.equal( expectedPath );
 }

@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as bundler from '../../lib/bundler/index.js';
-import getLicenseBanner from '../../lib/bundler/getlicensebanner.js';
+import * as bundler from '../../src/bundler/index.js';
+import getLicenseBanner from '../../src/bundler/getlicensebanner.js';
 
-vi.mock( '../../lib/bundler/getlicensebanner.js' );
+vi.mock( '../../src/bundler/getlicensebanner.js' );
 
 describe( 'bundler/index.js', () => {
 	describe( 'getLicenseBanner()', () => {

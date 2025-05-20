@@ -8,25 +8,25 @@ import postCssImport from 'postcss-import';
 import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
-import themeLogger from '../../lib/styles/themelogger.js';
-import themeImporter from '../../lib/styles/themeimporter.js';
-import getPostCssConfig from '../../lib/styles/getpostcssconfig.js';
+import themeLogger from '../../src/styles/themelogger.js';
+import themeImporter from '../../src/styles/themeimporter.js';
+import getPostCssConfig from '../../src/styles/getpostcssconfig.js';
 
 vi.mock( 'postcss-import' );
 vi.mock( 'postcss-mixins' );
 vi.mock( 'postcss-nesting' );
 vi.mock( 'cssnano' );
-vi.mock( '../../lib/styles/themelogger.js' );
-vi.mock( '../../lib/styles/themeimporter.js' );
+vi.mock( '../../src/styles/themelogger.js' );
+vi.mock( '../../src/styles/themeimporter.js' );
 
 describe( 'getPostCssConfig()', () => {
 	beforeEach( () => {
-		vi.mocked( themeImporter ).mockReturnValue( 'postcss-ckeditor5-theme-importer' );
-		vi.mocked( themeLogger ).mockReturnValue( 'postcss-ckeditor5-theme-logger' );
-		vi.mocked( postCssImport ).mockReturnValue( 'postcss-import' );
-		vi.mocked( postCssMixins ).mockReturnValue( 'postcss-mixins' );
-		vi.mocked( postCssNesting ).mockReturnValue( 'postcss-nesting' );
-		vi.mocked( cssnano ).mockReturnValue( 'cssnano' );
+		vi.mocked( themeImporter ).mockReturnValue( 'postcss-ckeditor5-theme-importer' as any );
+		vi.mocked( themeLogger ).mockReturnValue( 'postcss-ckeditor5-theme-logger' as any );
+		vi.mocked( postCssImport ).mockReturnValue( 'postcss-import' as any );
+		vi.mocked( postCssMixins ).mockReturnValue( 'postcss-mixins' as any );
+		vi.mocked( postCssNesting ).mockReturnValue( 'postcss-nesting' as any );
+		vi.mocked( cssnano ).mockReturnValue( 'cssnano' as any );
 	} );
 
 	it( 'returns PostCSS plugins', () => {

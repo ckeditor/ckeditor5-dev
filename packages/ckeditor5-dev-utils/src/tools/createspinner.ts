@@ -47,7 +47,7 @@ type CreateSpinnerOptions = {
 type CKEditor5Spinner = {
 	start: () => void;
 	increase: () => void;
-	finish: ( options: { emoji?: string } ) => void;
+	finish: ( options?: { emoji?: string } ) => void;
 };
 
 type CKEditor5SpinnerStatus = ( title: string, current: number, total: number ) => string;

@@ -4,12 +4,12 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as styles from '../../lib/styles/index.js';
-import getPostCssConfig from '../../lib/styles/getpostcssconfig.js';
-import themeImporter from '../../lib/styles/themeimporter.js';
+import * as styles from '../../src/styles/index.js';
+import getPostCssConfig from '../../src/styles/getpostcssconfig.js';
+import themeImporter from '../../src/styles/themeimporter.js';
 
-vi.mock( '../../lib/styles/getpostcssconfig.js' );
-vi.mock( '../../lib/styles/themeimporter.js' );
+vi.mock( '../../src/styles/getpostcssconfig.js' );
+vi.mock( '../../src/styles/themeimporter.js' );
 
 describe( 'styles/index.js', () => {
 	describe( 'getPostCssConfig()', () => {

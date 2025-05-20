@@ -4,22 +4,22 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import logger from '../lib/logger/index.js';
-import * as packageUtils from '../lib/index.js';
-import * as bundler from '../lib/bundler/index.js';
-import * as loaders from '../lib/loaders/index.js';
-import * as builds from '../lib/builds/index.js';
-import * as stream from '../lib/stream/index.js';
-import * as styles from '../lib/styles/index.js';
-import * as tools from '../lib/tools/index.js';
+import logger from '../src/logger/index.js';
+import * as packageUtils from '../src/index.js';
+import * as bundler from '../src/bundler/index.js';
+import * as loaders from '../src/loaders/index.js';
+import * as builds from '../src/builds/index.js';
+import * as stream from '../src/stream/index.js';
+import * as styles from '../src/styles/index.js';
+import * as tools from '../src/tools/index.js';
 
-vi.mock( '../lib/builds/index.js' );
-vi.mock( '../lib/bundler/index.js' );
-vi.mock( '../lib/loaders/index.js' );
-vi.mock( '../lib/logger/index.js' );
-vi.mock( '../lib/stream/index.js' );
-vi.mock( '../lib/styles/index.js' );
-vi.mock( '../lib/tools/index.js' );
+vi.mock( '../src/builds/index.js' );
+vi.mock( '../src/bundler/index.js' );
+vi.mock( '../src/loaders/index.js' );
+vi.mock( '../src/logger/index.js' );
+vi.mock( '../src/stream/index.js' );
+vi.mock( '../src/styles/index.js' );
+vi.mock( '../src/tools/index.js' );
 
 describe( 'index.js', () => {
 	describe( '#builds', () => {

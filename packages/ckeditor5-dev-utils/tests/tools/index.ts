@@ -9,16 +9,16 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as tools from '../../lib/tools/index.js';
-import shExec from '../../lib/tools/shexec.js';
-import createSpinner from '../../lib/tools/createspinner.js';
-import getDirectories from '../../lib/tools/getdirectories.js';
-import updateJSONFile from '../../lib/tools/updatejsonfile.js';
+import * as tools from '../../src/tools/index.js';
+import shExec from '../../src/tools/shexec.js';
+import createSpinner from '../../src/tools/createspinner.js';
+import getDirectories from '../../src/tools/getdirectories.js';
+import updateJSONFile from '../../src/tools/updatejsonfile.js';
 
-vi.mock( '../../lib/tools/shexec.js' );
-vi.mock( '../../lib/tools/createspinner.js' );
-vi.mock( '../../lib/tools/getdirectories.js' );
-vi.mock( '../../lib/tools/updatejsonfile.js' );
+vi.mock( '../../src/tools/shexec.js' );
+vi.mock( '../../src/tools/createspinner.js' );
+vi.mock( '../../src/tools/getdirectories.js' );
+vi.mock( '../../src/tools/updatejsonfile.js' );
 
 describe( 'tools/index.js', () => {
 	describe( 'createSpinner()', () => {

@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as stream from '../../lib/stream/index.js';
-import noop from '../../lib/stream/noop.js';
+import * as stream from '../../src/stream/index.js';
+import noop from '../../src/stream/noop.js';
 
-vi.mock( '../../lib/stream/noop.js' );
+vi.mock( '../../src/stream/noop.js' );
 
 describe( 'stream/index.js', () => {
 	describe( 'noop()', () => {

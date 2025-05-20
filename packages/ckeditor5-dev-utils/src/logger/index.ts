@@ -7,7 +7,7 @@ import chalk from 'chalk';
 
 export type Verbosity = 'info' | 'warning' | 'error' | 'silent';
 
-type Logger = {
+export type Logger = {
 
 	/**
 	 * Displays a message when the verbosity level is equal to 'info'.

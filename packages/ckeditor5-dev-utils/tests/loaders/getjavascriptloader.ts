@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import getJavaScriptLoader from '../../lib/loaders/getjavascriptloader.js';
-import getDebugLoader from '../../lib/loaders/getdebugloader.js';
+import getJavaScriptLoader from '../../src/loaders/getjavascriptloader.js';
+import getDebugLoader from '../../src/loaders/getdebugloader.js';
 
-vi.mock( '../../lib/loaders/getdebugloader.js' );
+vi.mock( '../../src/loaders/getdebugloader.js' );
 
 describe( 'getJavaScriptLoader()', () => {
 	it( 'should be a function', () => {
@@ -19,7 +19,7 @@ describe( 'getJavaScriptLoader()', () => {
 			loader: 'ck-debug-loader',
 			options: {
 				debug: true
-			}
+			} as any
 		} );
 
 		const debugLoader = getJavaScriptLoader( {

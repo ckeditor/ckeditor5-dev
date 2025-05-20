@@ -5,7 +5,7 @@
 
 import path from 'path';
 import { describe, expect, it } from 'vitest';
-import getCoverageLoader from '../../lib/loaders/getcoverageloader.js';
+import getCoverageLoader from '../../src/loaders/getcoverageloader.js';
 
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
@@ -31,7 +31,7 @@ describe( 'getCoverageLoader()', () => {
 		expect( coverageLoader.use ).to.be.an( 'array' );
 		expect( coverageLoader.use ).to.lengthOf( 1 );
 
-		const babelLoader = coverageLoader.use[ 0 ];
+		const babelLoader = coverageLoader.use.at( 0 )!;
 
 		expect( babelLoader.loader ).to.equal( 'babel-loader' );
 	} );

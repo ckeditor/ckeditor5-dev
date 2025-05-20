@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import getTypeScriptLoader from '../../lib/loaders/gettypescriptloader.js';
-import getDebugLoader from '../../lib/loaders/getdebugloader.js';
+import getTypeScriptLoader from '../../src/loaders/gettypescriptloader.js';
+import getDebugLoader from '../../src/loaders/getdebugloader.js';
 
-vi.mock( '../../lib/loaders/getdebugloader.js' );
+vi.mock( '../../src/loaders/getdebugloader.js' );
 
 describe( 'getTypeScriptLoader()', () => {
 	it( 'should be a function', () => {
@@ -29,7 +29,10 @@ describe( 'getTypeScriptLoader()', () => {
 
 		expect( esbuildLoader ).to.be.an( 'object' );
 		expect( esbuildLoader ).to.have.property( 'options' );
-		expect( esbuildLoader.options ).to.have.property( 'tsconfig', '/home/project/configs/tsconfig.json' );
+
+		const options = typeof esbuildLoader === 'object' && esbuildLoader.options;
+
+		expect( options ).to.have.property( 'tsconfig', '/home/project/configs/tsconfig.json' );
 	} );
 
 	it( 'should return a definition that allows processing `*.ts` files using esbuild-loader (skipping `options.configFile`)', () => {
@@ -45,13 +48,16 @@ describe( 'getTypeScriptLoader()', () => {
 
 		expect( esbuildLoader ).to.be.an( 'object' );
 		expect( esbuildLoader ).to.have.property( 'options' );
-		expect( esbuildLoader.options ).to.have.property( 'tsconfig', 'tsconfig.json' );
+
+		const options = typeof esbuildLoader === 'object' && esbuildLoader.options;
+
+		expect( options ).to.have.property( 'tsconfig', 'tsconfig.json' );
 	} );
 
 	it( 'should return a definition that enables the debug loader before the typescript files', () => {
 		vi.mocked( getDebugLoader ).mockReturnValue( {
 			loader: 'ck-debug-loader'
-		} );
+		} as any );
 
 		const tsLoader = getTypeScriptLoader( {
 			configFile: '/home/project/configs/tsconfig.json',
@@ -73,7 +79,7 @@ describe( 'getTypeScriptLoader()', () => {
 			options: {
 				debug: true
 			}
-		} );
+		} as any );
 
 		const tsLoader = getTypeScriptLoader( {
 			configFile: '/home/project/configs/tsconfig.json',
@@ -88,9 +94,12 @@ describe( 'getTypeScriptLoader()', () => {
 		expect( debugLoader ).to.be.an( 'object' );
 
 		expect( debugLoader ).to.have.property( 'loader' );
-		expect( debugLoader.loader ).to.equal( 'ck-debug-loader' );
+		expect( debugLoader!.loader ).to.equal( 'ck-debug-loader' );
 		expect( debugLoader ).to.have.property( 'options' );
-		expect( debugLoader.options ).to.be.an( 'object' );
-		expect( debugLoader.options ).to.have.property( 'debug', true );
+
+		const options = typeof debugLoader === 'object' && debugLoader.options;
+
+		expect( options ).to.be.an( 'object' );
+		expect( options ).to.have.property( 'debug', true );
 	} );
 } );

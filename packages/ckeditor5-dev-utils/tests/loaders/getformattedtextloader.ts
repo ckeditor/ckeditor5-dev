@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import getFormattedTextLoader from '../../lib/loaders/getformattedtextloader.js';
+import getFormattedTextLoader from '../../src/loaders/getformattedtextloader.js';
 
 describe( 'getFormattedTextLoader()', () => {
 	it( 'should be a function', () => {

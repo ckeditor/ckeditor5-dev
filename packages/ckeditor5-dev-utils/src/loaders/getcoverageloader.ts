@@ -19,12 +19,7 @@ type CoverageLoaderConfig = {
 
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
-/**
- * @param {object} options]
- * @param {Array.<string>} options.files
- * @returns {object}
- */
-export default function getCoverageLoader( { files }: { files: Array<string> } ): CoverageLoaderConfig {
+export default function getCoverageLoader( { files }: { files: Array<Array<string>> } ): CoverageLoaderConfig {
 	return {
 		test: /\.[jt]s$/,
 		use: [
@@ -50,11 +45,8 @@ export default function getCoverageLoader( { files }: { files: Array<string> } )
  *
  * This loose way of matching packages for CC works with packages under various paths.
  * E.g., `workspace/ckeditor5-utils` and `ckeditor5/node_modules/ckeditor5-utils` and every other path.
- *
- * @param {Array.<string>} globs
- * @returns {Array.<string>}
  */
-function getPathsToIncludeForCoverage( globs: Array<string> ): Array<RegExp> {
+function getPathsToIncludeForCoverage( globs: Array<Array<string>> ): Array<RegExp> {
 	const values = globs
 		.reduce( ( returnedPatterns, globPatterns ) => {
 			returnedPatterns.push( ...globPatterns );

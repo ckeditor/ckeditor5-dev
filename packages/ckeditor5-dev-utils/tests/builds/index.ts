@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import * as tasks from '../../lib/builds/index.js';
-import getDllPluginWebpackConfig from '../../lib/builds/getdllpluginwebpackconfig.js';
+import * as tasks from '../../src/builds/index.js';
+import getDllPluginWebpackConfig from '../../src/builds/getdllpluginwebpackconfig.js';
 
-vi.mock( '../../lib/builds/getdllpluginwebpackconfig.js' );
+vi.mock( '../../src/builds/getdllpluginwebpackconfig.js' );
 
 describe( 'builds/index.js', () => {
 	describe( 'getDllPluginWebpackConfig()', () => {
