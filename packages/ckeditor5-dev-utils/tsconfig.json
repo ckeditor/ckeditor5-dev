@@ -4,7 +4,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "types": [
-      "./types/ckeditor5-dev-translations.d.ts"
+      "./types/ckeditor5-dev-translations.d.ts",
+      "./types/shelljs.d.ts",
     ]
   },
   "include": [

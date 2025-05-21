@@ -51,7 +51,7 @@ export default function shExec( command: string, options: ShExecOptions = {} ): 
 		} );
 	}
 
-	const { code, stdout, stderr } = sh.exec( command, execOptions );
+	const { code, stdout, stderr } = sh.exec( command, execOptions )!;
 
 	return execHandler( { code, stdout, stderr, verbosity, command } );
 }

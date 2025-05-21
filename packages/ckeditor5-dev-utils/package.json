@@ -25,7 +25,6 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-translations": "^49.0.2",
     "@types/postcss-import": "^14.0.3",
-    "@types/shelljs": "^0.8.16",
     "@types/through2": "^2.0.41",
     "chalk": "^5.0.0",
     "cli-cursor": "^5.0.0",
