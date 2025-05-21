@@ -4,5 +4,5 @@
  */
 
 declare module '@ckeditor/ckeditor5-dev-translations' {
-	export const CKEditorTranslationsPlugin: new (...args: unknown[]) => object;
+	export const CKEditorTranslationsPlugin: new ( ...args: Array<unknown> ) => object;
 }
