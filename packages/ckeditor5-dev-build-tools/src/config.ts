@@ -7,7 +7,7 @@ import path from 'upath';
 import { existsSync } from 'fs';
 import { getOptionalPlugin, getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
-import type { Plugin, RollupOptions } from 'rollup';
+import { defineConfig, type Plugin, type RollupOptions } from 'rollup';
 import type { BuildOptions } from './build.js';
 
 /**
@@ -37,8 +37,7 @@ import postcssNesting from 'postcss-nesting';
 /**
  * Generates Rollup configurations.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getRollupConfig( options: BuildOptions ) {
+export async function getRollupConfig( options: BuildOptions ): Promise<RollupOptions> {
 	const {
 		input,
 		output,
@@ -88,7 +87,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 */
 	const extensions = [ '.ts', '.mts', '.mjs', '.js', '.json', '.node' ];
 
-	return {
+	return defineConfig( {
 		input,
 		logLevel,
 
@@ -278,7 +277,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 				addBanner( { banner } )
 			)
 		]
-	} as const satisfies RollupOptions;
+	} );
 }
 
 /**
