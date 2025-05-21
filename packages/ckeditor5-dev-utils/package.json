@@ -45,7 +45,7 @@
     "postcss-mixins": "^11.0.0",
     "postcss-nesting": "^13.0.0",
     "raw-loader": "^4.0.1",
-    "shelljs": "^0.9.2",g
+    "shelljs": "^0.9.2",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.0.0",
     "through2": "^4.0.0",
