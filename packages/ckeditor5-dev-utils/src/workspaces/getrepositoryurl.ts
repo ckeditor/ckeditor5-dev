@@ -3,15 +3,29 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getPackageJson } from '../getpackagejson.js';
+import getPackageJson, { type PackageJson } from './getpackagejson.js';
+
+export default function getRepositoryUrl( cwd: string, options: { async: true } ): Promise<string>;
+export default function getRepositoryUrl( cwd: string, options?: { async?: false } ): string;
 
 /**
  * This function extracts the repository URL for generating links in the changelog.
  */
-export async function getRepositoryUrl( cwd: string ): Promise<string> {
-	const packageJson = await getPackageJson( cwd );
+export default function getRepositoryUrl( cwd: string, { async = false }: { async?: boolean } = {} ): Promise<string> | string {
+	if ( !async ) {
+		const packageJson = getPackageJson( cwd );
 
-	// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
+		return findRepositoryUrl( packageJson );
+	}
+
+	return getPackageJson( cwd, { async: true } )
+		.then( packageJson => {
+			return findRepositoryUrl( packageJson );
+		} );
+}
+
+function findRepositoryUrl( packageJson: PackageJson ): string {
+// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
 	// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
 	// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
 	let repositoryUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;

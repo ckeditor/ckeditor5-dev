@@ -4,9 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { npm, tools } from '@ckeditor/ckeditor5-dev-utils';
+import { npm, tools, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from '../../lib/utils/getchangelog.js';
-import getPackageJson from '../../lib/utils/getpackagejson.js';
 
 import {
 	getLastFromChangelog,
@@ -22,7 +21,6 @@ import {
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/getchangelog.js' );
-vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'versions', () => {
 	describe( 'getLastFromChangelog()', () => {
@@ -101,7 +99,7 @@ describe( 'versions', () => {
 
 	describe( 'getLastPreRelease()', () => {
 		beforeEach( () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 		} );
 
 		it( 'asks npm for all versions of a package', () => {
@@ -370,7 +368,7 @@ describe( 'versions', () => {
 
 	describe( 'getLastNightly()', () => {
 		beforeEach( async () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 		} );
 
 		it( 'returns last pre-release version from exactly the "nightly" tag', () => {
@@ -397,7 +395,7 @@ describe( 'versions', () => {
 
 	describe( 'getNextPreRelease()', () => {
 		beforeEach( async () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 		} );
 
 		it( 'returns pre-release version with id = 0 if pre-release version was never published for the package yet', () => {
@@ -469,7 +467,7 @@ describe( 'versions', () => {
 
 	describe( 'getNextNightly()', () => {
 		beforeEach( () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 
 			vi.useFakeTimers();
 			vi.setSystemTime( new Date( '2023-06-15 12:00:00' ) );
@@ -499,7 +497,7 @@ describe( 'versions', () => {
 
 	describe( 'getNextInternal()', () => {
 		beforeEach( () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 
 			vi.useFakeTimers();
 			vi.setSystemTime( new Date( '2023-06-15 12:00:00' ) );
@@ -557,7 +555,7 @@ describe( 'versions', () => {
 
 	describe( 'getCurrent()', () => {
 		it( 'returns current version from "package.json"', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( { version: '0.1.2' } );
+			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { version: '0.1.2' } );
 
 			expect( getCurrent() ).to.equal( '0.1.2' );
 		} );

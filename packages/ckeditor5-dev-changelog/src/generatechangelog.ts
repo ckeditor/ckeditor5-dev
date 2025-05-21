@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { format } from 'date-fns';
 import chalk from 'chalk';
 import { CHANGESET_DIRECTORY, ORGANISATION_NAMESPACE, PACKAGES_DIRECTORY_NAME } from './constants.js';
@@ -15,19 +16,17 @@ import { getPackageJsons } from './utils/getreleasepackagespkgjsons.js';
 import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
 import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
-import { getPackageJson } from './utils/getpackagejson.js';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
 import { defaultTransformScope } from './utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from './utils/getexternalrepositorieswithdefaults.js';
-import { getRepositoryUrl } from './utils/external/getrepositoryurl.js';
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite?: false | undefined }
+  config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
 ): Promise<void>;
 
 export async function generateChangelog(
@@ -54,8 +53,8 @@ export async function generateChangelog( {
 }: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
-	const gitHubUrl = await getRepositoryUrl( cwd );
-	const { version: oldVersion, name: packageName } = await getPackageJson( cwd );
+	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
+	const { version: oldVersion, name: packageName } = await workspaces.getPackageJson( cwd, { async: true } );
 	const dateFormatted = getDateFormatted( date );
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );

@@ -4,7 +4,7 @@
  */
 
 import fs from 'fs-extra';
-import type { PackageJson, RepositoryConfig } from '../types.js';
+import type { RepositoryConfig } from '../types.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
@@ -14,7 +14,7 @@ export async function getPackageJsons(
 	cwd: string,
 	packagesDirectory: string,
 	externalRepositories: Array<Required<RepositoryConfig>>
-): Promise<Array<PackageJson>> {
+): Promise<Array<workspaces.PackageJson>> {
 	const externalPackagesPromises = externalRepositories.map( externalRepository => {
 		return workspaces.findPathsToPackages(
 			externalRepository.cwd,

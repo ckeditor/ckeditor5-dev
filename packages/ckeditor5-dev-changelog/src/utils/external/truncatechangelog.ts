@@ -5,13 +5,13 @@
 
 import fs from 'fs';
 import upath from 'upath';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../../constants.js';
-import { getRepositoryUrl } from './getrepositoryurl.js';
 
 /**
  * This function limits the size of the changelog by removing older entries.
  */
-export async function truncateChangelog( length: number, cwd: string ): Promise<void> {
+export function truncateChangelog( length: number, cwd: string ): void {
 	const changelog = getChangelog( cwd );
 
 	if ( !changelog ) {
@@ -30,7 +30,7 @@ export async function truncateChangelog( length: number, cwd: string ): Promise<
 	}
 
 	const truncatedEntries = entries.slice( 0, length );
-	const repositoryUrl = await getRepositoryUrl( cwd );
+	const repositoryUrl = workspaces.getRepositoryUrl( cwd );
 	const changelogFooter = entries.length > truncatedEntries.length ?
 		`\n\n---\n\nTo see all releases, visit the [release page](${ repositoryUrl }/releases).\n` :
 		'\n';

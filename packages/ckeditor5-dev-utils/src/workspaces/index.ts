@@ -4,3 +4,5 @@
  */
 
 export { default as findPathsToPackages } from './findpathstopackages.js';
+export { default as getPackageJson, type PackageJson } from './getpackagejson.js';
+export { default as getRepositoryUrl } from './getrepositoryurl.js';

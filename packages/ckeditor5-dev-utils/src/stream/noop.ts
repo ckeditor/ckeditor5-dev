@@ -6,7 +6,7 @@
 import { PassThrough, type Transform } from 'stream';
 import through from 'through2';
 
-export default function noop( callback: null | ( ( chunk: unknown ) => unknown | Promise<unknown> ) ): Transform {
+export default function noop( callback?: ( ( chunk: unknown ) => unknown | Promise<unknown> ) ): Transform {
 	if ( !callback ) {
 		return new PassThrough( { objectMode: true } );
 	}

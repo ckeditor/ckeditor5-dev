@@ -3,14 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { truncateChangelog } from '../../../src/utils/external/truncatechangelog.js';
-import { getRepositoryUrl } from '../../../src/utils/external/getrepositoryurl.js';
 import { CHANGELOG_HEADER } from '../../../src/constants.js';
 import fs from 'fs';
 
 vi.mock( 'fs' );
-vi.mock( '../../../src/utils/external/getrepositoryurl.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',
 	CHANGELOG_FILE: 'CHANGELOG.md'
@@ -19,19 +19,19 @@ vi.mock( '../../../src/constants.js', () => ( {
 describe( 'truncateChangelog()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/ckeditor' );
-		vi.mocked( getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5-dev' );
+		vi.mocked( workspaces.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 		vi.mocked( fs.existsSync ).mockReturnValue( true );
 	} );
 
-	it( 'does nothing if there is no changelog', async () => {
+	it( 'does nothing if there is no changelog', () => {
 		vi.mocked( fs.existsSync ).mockReturnValue( false );
 
-		await truncateChangelog( 5, 'cwd' );
+		truncateChangelog( 5, 'cwd' );
 
 		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );
 
-	it( 'truncates the changelog and adds the link to the release page', async () => {
+	it( 'truncates the changelog and adds the link to the release page', () => {
 		const expectedChangelogEntries = [
 			'## [0.3.0](https://github.com) (2017-01-13)',
 			'',
@@ -63,7 +63,7 @@ describe( 'truncateChangelog()', () => {
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + changelogEntries );
 
-		await truncateChangelog( 2, '/custom/cwd' );
+		truncateChangelog( 2, '/custom/cwd' );
 
 		expect( fs.readFileSync ).toHaveBeenNthCalledWith( 1, '/custom/cwd/CHANGELOG.md', 'utf-8' );
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
@@ -74,7 +74,7 @@ describe( 'truncateChangelog()', () => {
 		);
 	} );
 
-	it( 'does not add the link to the release page if changelog is not truncated', async () => {
+	it( 'does not add the link to the release page if changelog is not truncated', () => {
 		const expectedChangelogEntries = [
 			'## [0.3.0](https://github.com) (2017-01-13)',
 			'',
@@ -88,11 +88,10 @@ describe( 'truncateChangelog()', () => {
 		].join( '\n' );
 
 		const expectedChangelogFooter = '\n';
-		const changelogEntries = expectedChangelogEntries;
 
-		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + changelogEntries );
+		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + expectedChangelogEntries );
 
-		await truncateChangelog( 2, 'cwd' );
+		truncateChangelog( 2, 'cwd' );
 
 		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
 			1,
@@ -102,10 +101,10 @@ describe( 'truncateChangelog()', () => {
 		);
 	} );
 
-	it( 'handles empty entries array', async () => {
+	it( 'handles empty entries array', () => {
 		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER );
 
-		await truncateChangelog( 5, '/home/ckeditor' );
+		truncateChangelog( 5, '/home/ckeditor' );
 
 		expect( fs.writeFileSync ).not.toHaveBeenCalled();
 	} );

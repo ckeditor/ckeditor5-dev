@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import type {
 	Entry,
-	PackageJson,
 	ParsedFile,
 	SectionName,
 	SectionsWithEntries,
@@ -23,7 +23,7 @@ const sameRepoIssuePattern = /^\d+$/;
  */
 export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage }: {
 	parsedFiles: Array<ParsedFile>;
-	packageJsons: Array<PackageJson>;
+	packageJsons: Array<workspaces.PackageJson>;
 	transformScope: TransformScope;
 	organisationNamespace: string;
 	singlePackage: boolean;
