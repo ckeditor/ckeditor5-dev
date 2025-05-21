@@ -27,7 +27,7 @@ describe( 'noop()', () => {
 
 	it( 'should wait until a promise returned by the callback is resolved', () => {
 		let resolved = false;
-		let resolve;
+		let resolve: ( value: unknown ) => void;
 
 		const stream = noop( () => {
 			return new Promise( r => {
@@ -45,29 +45,29 @@ describe( 'noop()', () => {
 		stream.write( 'foo' );
 
 		resolved = true;
-		resolve();
+		resolve!( null );
 	} );
 
 	it( 'should fail when a returned promise is rejected', () => {
 		return new Promise( done => {
-			const chunks = [];
+			const chunks: Array<string> = [];
 			const stream = noop( chunk => {
 				return new Promise( ( resolve, reject ) => {
 					if ( chunk === 'foo' ) {
 						reject();
 					} else {
-						resolve();
+						resolve( null );
 					}
 				} );
 			} );
 
-			stream.pipe( noop( chunk => {
-				chunks.push( chunk );
+			stream.pipe( noop( ( chunk: unknown ) => {
+				chunks.push( chunk as string );
 			} ) );
 
 			stream.on( 'end', () => {
 				expect( chunks.join() ).to.equal( 'bar' );
-				done();
+				done( null );
 			} );
 
 			stream.write( 'foo' );
