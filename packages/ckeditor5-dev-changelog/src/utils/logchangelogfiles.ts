@@ -35,9 +35,9 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 		} else {
 			for ( const entry of section.entries ) {
 				logInfo( `- File: file://${ entry.changesetPath }`, { indent: 4 } );
-				if ( entry.data.invalidDetails?.length ) {
+				if ( entry.data.validations?.length ) {
 					logInfo( chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
-					for ( const validationMessage of entry.data.invalidDetails ) {
+					for ( const validationMessage of entry.data.validations ) {
 						logInfo( `- ${ validationMessage }`, { indent: 8 } );
 					}
 				}

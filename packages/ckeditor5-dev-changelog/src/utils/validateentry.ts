@@ -71,7 +71,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		}
 	}
 
-	const validatedEntry = { ...entry, data: { ...data, invalidDetails: validations } };
+	const validatedEntry = { ...entry, data: { ...data, validations } };
 
 	return { isValid: validations.length === 0, validatedEntry };
 }

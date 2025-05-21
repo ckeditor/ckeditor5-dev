@@ -29,7 +29,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
 			);
 		} );
@@ -40,7 +40,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Type "Unknown" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
 			);
 		} );
@@ -91,7 +91,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Breaking change "major" should be one of: "true", or not specified, for a single repo (case insensitive).'
 			);
 		} );
@@ -122,7 +122,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Breaking change "true" should be one of: "minor", "major", for a monorepo (case insensitive).'
 			);
 		} );
@@ -165,7 +165,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Scope "unknown-package" is not recognised as a valid package in the repository.'
 			);
 		} );
@@ -192,7 +192,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Scope "unknown-package" is not recognised as a valid package in the repository.'
 			);
 		} );
@@ -209,7 +209,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'See "invalid-issue-reference" is not a valid issue reference. ' +
 				'Provide either: issue number, repository-slug#id or full issue link URL.'
 			);
@@ -263,7 +263,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails ).toContain(
+			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Closes "invalid-issue-reference" is not a valid issue reference. ' +
 				'Provide either: issue number, repository-slug#id or full issue link URL.'
 			);
@@ -320,7 +320,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).invalidDetails.length ).toBe( 5 );
+			expect( ( validatedEntry.data as any ).validations.length ).toBe( 5 );
 		} );
 
 		it( 'should return valid for a completely valid entry', () => {

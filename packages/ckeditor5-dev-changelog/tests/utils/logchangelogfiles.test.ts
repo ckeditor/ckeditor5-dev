@@ -42,7 +42,7 @@ describe( 'logChangelogFiles()', () => {
 						message: 'Invalid entry',
 						data: {
 							restContent: [],
-							invalidDetails: [ 'Missing type', 'Incorrect format' ]
+							validations: [ 'Missing type', 'Incorrect format' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
@@ -220,7 +220,7 @@ describe( 'logChangelogFiles()', () => {
 						message: 'Invalid entry',
 						data: {
 							restContent: [],
-							invalidDetails: [ 'Invalid type' ]
+							validations: [ 'Invalid type' ]
 						},
 						changesetPath: '/repo/changelog/invalid.md'
 					}

@@ -90,7 +90,7 @@ export type Entry = {
 	data: FileMetadata & FileMetadataNormalized & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
-		invalidDetails?: Array<string>;
+		validations?: Array<string>;
 	};
 	changesetPath: string;
 };
