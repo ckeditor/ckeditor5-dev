@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGitHubUser } from '../../src/utils/external/linktogithubuser.js';
+import { linkToGitHubUser } from '../../src/utils/linktogithubuser.js';
 import type { ParsedFile } from '../../src/types.js';
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
@@ -13,7 +13,7 @@ type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock( '../../src/utils/external/linktogithubuser', () => ( {
+vi.mock( '../../src/utils/linktogithubuser', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
 

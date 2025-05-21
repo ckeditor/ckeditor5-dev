@@ -12,7 +12,7 @@ import type {
 	TransformScope
 } from '../types.js';
 import { SECTIONS } from '../constants.js';
-import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
+import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 const differentRepoIssuePattern = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
