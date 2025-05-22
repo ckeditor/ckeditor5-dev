@@ -5,14 +5,13 @@
 
 import fs from 'fs';
 import path from 'path';
-import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import { tools, logger, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import compareFunc from 'compare-func';
 import chalk from 'chalk';
 import semver from 'semver';
 import displayCommits from '../utils/displaycommits.js';
 import displaySkippedPackages from '../utils/displayskippedpackages.js';
 import generateChangelog from '../utils/generatechangelog.js';
-import getPackageJson from '../utils/getpackagejson.js';
 import getPackagesPaths from '../utils/getpackagespaths.js';
 import getCommits from '../utils/getcommits.js';
 import getNewVersionType from '../utils/getnewversiontype.js';
@@ -22,7 +21,6 @@ import getChangelog from '../utils/getchangelog.js';
 import saveChangelog from '../utils/savechangelog.js';
 import truncateChangelog from '../utils/truncatechangelog.js';
 import transformCommitFactory from '../utils/transformcommitfactory.js';
-import { getRepositoryUrl } from '../utils/transformcommitutils.js';
 import provideNewVersionForMonoRepository from '../utils/providenewversionformonorepository.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER, CLI_INDENT_SIZE } from '../utils/constants.js';
 
@@ -70,7 +68,7 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
 export default async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
-	const rootPkgJson = getPackageJson( options.cwd );
+	const rootPkgJson = workspaces.getPackageJson( options.cwd );
 	const skipFileSave = options.skipFileSave || false;
 
 	logProcess( 'Collecting paths to packages...' );
@@ -119,7 +117,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		packagesVersion.set( rootPkgJson.name, nextVersion );
 
 		for ( const packagePath of pathsCollection.matched ) {
-			const packageJson = getPackageJson( packagePath );
+			const packageJson = workspaces.getPackageJson( packagePath );
 
 			currentPackagesVersion.set( packageJson.name, packageJson.version );
 			packagesPaths.set( packageJson.name, packagePath );
@@ -283,7 +281,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		// Find the highest version in all packages.
 		const [ packageHighestVersion, highestVersion ] = [ ...pathsCollection.matched ]
 			.reduce( ( currentHighest, repositoryPath ) => {
-				const packageJson = getPackageJson( repositoryPath );
+				const packageJson = workspaces.getPackageJson( repositoryPath );
 
 				currentPackagesVersion.set( packageJson.name, packageJson.version );
 
@@ -317,7 +315,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 				// Update the version for all packages.
 				for ( const packagePath of pathsCollection.matched ) {
 					promise = promise.then( () => {
-						const pkgJson = getPackageJson( packagePath );
+						const pkgJson = workspaces.getPackageJson( packagePath );
 
 						packagesPaths.set( pkgJson.name, packagePath );
 						packagesVersion.set( pkgJson.name, nextVersion );
@@ -417,7 +415,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		const writerContext = {
 			version,
 			commit: 'commit',
-			repoUrl: getRepositoryUrl( options.cwd ),
+			repoUrl: workspaces.getRepositoryUrl( options.cwd ),
 			currentTag: 'v' + version,
 			previousTag: options.from ? options.from : 'v' + rootPkgJson.version,
 			isPatch: semver.diff( version, rootPkgJson.version ) === 'patch',

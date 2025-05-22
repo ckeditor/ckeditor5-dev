@@ -4,10 +4,10 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { npm } from '@ckeditor/ckeditor5-dev-utils';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import provideNewVersionForMonoRepository from '../../lib/utils/providenewversionformonorepository.js';
-import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
 
 vi.mock( 'inquirer' );
 vi.mock( 'chalk', () => ( {
@@ -19,7 +19,7 @@ vi.mock( 'chalk', () => ( {
 vi.mock( '../../lib/utils/constants.js', () => ( {
 	CLI_INDENT_SIZE: 1
 } ) );
-vi.mock( '../../lib/utils/checkversionavailability.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'provideNewVersionForMonoRepository()', () => {
 	beforeEach( () => {
@@ -168,7 +168,7 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		const [ firstQuestion ] = firstArgument;
 		const { validate } = firstQuestion;
 
-		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 
 		await expect( validate( '2.0.0' ) ).resolves.toBe( true );
 		await expect( validate( '1.1.0' ) ).resolves.toBe( true );
@@ -177,15 +177,15 @@ describe( 'provideNewVersionForMonoRepository()', () => {
 		await expect( validate( 'internal' ) ).resolves.toBe( 'Please provide a valid version.' );
 		await expect( validate( '0.1' ) ).resolves.toBe( 'Please provide a valid version.' );
 
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '2.0.0', '@ckeditor/ckeditor5-foo' );
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.1.0', '@ckeditor/ckeditor5-foo' );
+		expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '2.0.0', '@ckeditor/ckeditor5-foo' );
+		expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '1.1.0', '@ckeditor/ckeditor5-foo' );
 
-		vi.mocked( checkVersionAvailability ).mockResolvedValue( false );
+		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( false );
 
 		await expect( validate( '3.0.0' ) ).resolves.toBe( 'Given version is already taken.' );
 
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '3.0.0', '@ckeditor/ckeditor5-foo' );
+		expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '3.0.0', '@ckeditor/ckeditor5-foo' );
 	} );
 } );

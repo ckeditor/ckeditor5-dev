@@ -4,15 +4,15 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { getPackageJsons } from '../../src/utils/getreleasepackagespkgjsons.js';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { findPathsToPackages } from '../../src/utils/external/findpathstopackages.js';
 import type { RepositoryConfig } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'upath' );
-vi.mock( '../../src/utils/external/findpathstopackages' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'getReleasePackagesPkgJsons()', () => {
 	const cwd = '/local/directory';
@@ -23,7 +23,7 @@ describe( 'getReleasePackagesPkgJsons()', () => {
 	];
 
 	it( 'should correctly retrieve package.json files from local and external repositories', async () => {
-		vi.mocked( findPathsToPackages )
+		vi.mocked( workspaces.findPathsToPackages )
 			.mockResolvedValueOnce( [ '/local/package1', '/local/package2' ] )
 			.mockResolvedValueOnce( [ '/external/package3' ] )
 			.mockResolvedValueOnce( [ '/external/package4' ] );
@@ -47,7 +47,7 @@ describe( 'getReleasePackagesPkgJsons()', () => {
 	} );
 
 	it( 'should handle no packages found in local or external repositories', async () => {
-		vi.mocked( findPathsToPackages )
+		vi.mocked( workspaces.findPathsToPackages )
 			.mockResolvedValueOnce( [] )
 			.mockResolvedValueOnce( [] )
 			.mockResolvedValueOnce( [] );
@@ -58,7 +58,7 @@ describe( 'getReleasePackagesPkgJsons()', () => {
 	} );
 
 	it( 'should handle errors while reading package.json', async () => {
-		vi.mocked( findPathsToPackages )
+		vi.mocked( workspaces.findPathsToPackages )
 			.mockResolvedValueOnce( [ '/local/package1' ] )
 			.mockResolvedValueOnce( [] );
 
@@ -72,7 +72,7 @@ describe( 'getReleasePackagesPkgJsons()', () => {
 	} );
 
 	it( 'should handle no external repositories', async () => {
-		vi.mocked( findPathsToPackages ).mockResolvedValueOnce( [ '/local/package1' ] );
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValueOnce( [ '/local/package1' ] );
 
 		vi.mocked( fs.readJson )
 			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } );

@@ -3,10 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
+import { describe, it, expect } from 'vitest';
 import { getNewChangelog } from '../../src/utils/getnewchangelog.js';
 import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/constants.js';
-import type { PackageJson, ReleaseInfo, Section } from '../../src/types.js';
-import { describe, it, expect } from 'vitest';
+import type { ReleaseInfo, Section } from '../../src/types.js';
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 describe( 'getNewChangelog()', () => {
 	const createSection = ( title: string, entries: Array<{ message: string }> = [] ): Section => ( {
@@ -25,7 +26,7 @@ describe( 'getNewChangelog()', () => {
 		} ) )
 	} );
 
-	const createPackageJson = ( name: string, version: string = '1.0.0' ): PackageJson => ( {
+	const createPackageJson = ( name: string, version: string = '1.0.0' ): workspaces.PackageJson => ( {
 		name,
 		version
 	} );

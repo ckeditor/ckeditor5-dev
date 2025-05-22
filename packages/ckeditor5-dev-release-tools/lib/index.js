@@ -30,8 +30,6 @@ export { default as getChangelog } from './utils/getchangelog.js';
 export { default as saveChangelog } from './utils/savechangelog.js';
 export { default as executeInParallel } from './utils/executeinparallel.js';
 export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
-export { default as checkVersionAvailability } from './utils/checkversionavailability.js';
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
 export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
 export { default as provideToken } from './utils/providetoken.js';
-export { default as findPathsToPackages } from './utils/findpathstopackages.js';

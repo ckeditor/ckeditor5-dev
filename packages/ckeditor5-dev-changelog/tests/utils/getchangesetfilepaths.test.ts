@@ -3,19 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import upath from 'upath';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { RepositoryConfig } from '../../src/types.js';
 import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
-import { getRepositoryUrl } from '../../src/utils/external/getrepositoryurl.js';
 
 vi.mock( 'glob' );
-vi.mock( '../../src/utils/external/getrepositoryurl.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'getChangesetFilePaths()', () => {
 	beforeEach( () => {
-		vi.mocked( getRepositoryUrl ).mockImplementation( cwd => {
+		vi.mocked( workspaces.getRepositoryUrl ).mockImplementation( ( ( cwd: string, options: object ) => {
+			expect( options ).to.haveOwnProperty( 'async', true );
+
 			if ( cwd === '/mock/current' ) {
 				return Promise.resolve( 'https://github.com/ckeditor/current' );
 			}
@@ -29,7 +31,7 @@ describe( 'getChangesetFilePaths()', () => {
 			}
 
 			return Promise.resolve( 'https://github.com/ckeditor/unknown' );
-		} );
+		} ) as any );
 	} );
 
 	it( 'should return file paths from both local and external repositories', async () => {

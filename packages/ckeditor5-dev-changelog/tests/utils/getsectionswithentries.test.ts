@@ -5,14 +5,15 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
-import { linkToGitHubUser } from '../../src/utils/external/linktogithubuser.js';
-import type { ParsedFile, PackageJson } from '../../src/types.js';
+import { linkToGitHubUser } from '../../src/utils/linktogithubuser.js';
+import type { ParsedFile } from '../../src/types.js';
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock( '../../src/utils/external/linktogithubuser', () => ( {
+vi.mock( '../../src/utils/linktogithubuser', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
 
@@ -33,7 +34,7 @@ describe( 'getSectionsWithEntries()', () => {
 	const organisationNamespace = '@ckeditor';
 	const singlePackage = false;
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
-	let packageJsons: Array<PackageJson>;
+	let packageJsons: Array<workspaces.PackageJson>;
 
 	beforeEach( () => {
 		transformScope = vi.fn( name => ( {
@@ -214,14 +215,15 @@ describe( 'getSectionsWithEntries()', () => {
 
 		const message = result.feature.entries[ 0 ]!.message;
 
+		/* eslint-disable max-len */
 		expect( message ).toEqual( [
-			// eslint-disable-next-line max-len
 			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
 			'',
 			'  Second line.',
 			'',
 			'  Third line.'
 		].join( '\n' ) );
+		/* eslint-enable max-len */
 	} );
 
 	it( 'should call linkToGitHubUser correctly', () => {

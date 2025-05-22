@@ -25,7 +25,21 @@ if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
 		stdio: 'inherit'
 	} );
 
-	const paths = await glob( 'packages/*/package.json', { cwd: ROOT_DIRECTORY, absolute: true } );
+	const paths = ( await glob( 'packages/*/package.json', { cwd: ROOT_DIRECTORY, absolute: true } ) )
+		// Force @ckeditor/ckeditor5-dev-utils to be built first because it is used by other packages.
+		.sort( ( a, b ) => {
+			const isADevUtils = a.includes( 'ckeditor5-dev-utils' );
+			const isBDevUtils = b.includes( 'ckeditor5-dev-utils' );
+
+			if ( isADevUtils && !isBDevUtils ) {
+				return -1;
+			}
+			if ( !isADevUtils && isBDevUtils ) {
+				return 1;
+			}
+
+			return 0;
+		} );
 
 	for ( const packagePath of paths ) {
 		const packageJson = await fs.readJson( packagePath );

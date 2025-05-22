@@ -3,9 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { logger, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import chalk from 'chalk';
-import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import getPackageJson from './getpackagejson.js';
 import { CLI_INDENT_SIZE } from './constants.js';
 
 /**
@@ -19,9 +18,12 @@ export default function displaySkippedPackages( skippedPackagesPaths ) {
 	}
 
 	const indent = ' '.repeat( CLI_INDENT_SIZE );
-
 	const packageNames = Array.from( skippedPackagesPaths )
-		.map( packagePath => getPackageJson( packagePath ).name );
+		.map( packagePath => {
+			const { name } = workspaces.getPackageJson( packagePath );
+
+			return name;
+		} );
 
 	let message = indent + chalk.bold.underline( 'Packages listed below have been skipped:' ) + '\n';
 	message += packageNames.map( line => indent + `  * ${ line }` ).join( '\n' );

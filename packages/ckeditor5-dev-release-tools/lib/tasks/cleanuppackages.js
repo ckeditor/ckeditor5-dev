@@ -6,7 +6,7 @@
 import fs from 'fs-extra';
 import upath from 'upath';
 import { glob } from 'glob';
-import findPathsToPackages from '../utils/findpathstopackages.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
@@ -30,7 +30,7 @@ import findPathsToPackages from '../utils/findpathstopackages.js';
  */
 export default async function cleanUpPackages( options ) {
 	const { packagesDirectory, packageJsonFieldsToRemove, preservePostInstallHook, cwd } = parseOptions( options );
-	const packageJsonPaths = await findPathsToPackages( cwd, packagesDirectory, { includePackageJson: true } );
+	const packageJsonPaths = await workspaces.findPathsToPackages( cwd, packagesDirectory, { includePackageJson: true } );
 
 	for ( const packageJsonPath of packageJsonPaths ) {
 		const packagePath = upath.dirname( packageJsonPath );

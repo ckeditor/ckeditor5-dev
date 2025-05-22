@@ -3,14 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getRepositoryUrl } from '../../lib/utils/transformcommitutils.js';
 import saveChangelog from '../../lib/utils/savechangelog.js';
 import getChangelog from '../../lib/utils/getchangelog.js';
 import truncateChangelog from '../../lib/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../lib/utils/constants.js';
 
-vi.mock( '../../lib/utils/transformcommitutils.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/savechangelog.js' );
 vi.mock( '../../lib/utils/getchangelog.js' );
 vi.mock( '../../lib/utils/constants.js', () => ( {
@@ -20,7 +20,7 @@ vi.mock( '../../lib/utils/constants.js', () => ( {
 describe( 'truncateChangelog()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/ckeditor' );
-		vi.mocked( getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
+		vi.mocked( workspaces.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 	} );
 
 	it( 'does nothing if there is no changelog', () => {

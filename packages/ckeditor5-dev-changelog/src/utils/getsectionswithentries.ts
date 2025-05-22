@@ -3,16 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import type {
 	Entry,
-	PackageJson,
 	ParsedFile,
 	SectionName,
 	SectionsWithEntries,
 	TransformScope
 } from '../types.js';
 import { SECTIONS } from '../constants.js';
-import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
+import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 const differentRepoIssuePattern = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
@@ -23,7 +23,7 @@ const sameRepoIssuePattern = /^\d+$/;
  */
 export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, organisationNamespace, singlePackage }: {
 	parsedFiles: Array<ParsedFile>;
-	packageJsons: Array<PackageJson>;
+	packageJsons: Array<workspaces.PackageJson>;
 	transformScope: TransformScope;
 	organisationNamespace: string;
 	singlePackage: boolean;

@@ -31,11 +31,9 @@ import {
 } from '../lib/utils/versions.js';
 import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
-import checkVersionAvailability from '../lib/utils/checkversionavailability.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 import provideToken from '../lib/utils/providetoken.js';
-import findPathsToPackages from '../lib/utils/findpathstopackages.js';
 
 import * as index from '../lib/index.js';
 
@@ -57,7 +55,6 @@ vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
 vi.mock( '../lib/utils/isversionpublishablefortag' );
 vi.mock( '../lib/utils/providetoken' );
-vi.mock( '../lib/utils/findpathstopackages' );
 
 describe( 'dev-release-tools/index', () => {
 	describe( 'generateChangelogForSinglePackage()', () => {
@@ -242,13 +239,6 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'checkVersionAvailability()', () => {
-		it( 'should be a function', () => {
-			expect( checkVersionAvailability ).to.be.a( 'function' );
-			expect( index.checkVersionAvailability ).to.equal( checkVersionAvailability );
-		} );
-	} );
-
 	describe( 'isVersionPublishableForTag()', () => {
 		it( 'should be a function', () => {
 			expect( isVersionPublishableForTag ).to.be.a( 'function' );
@@ -260,13 +250,6 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( provideToken ).to.be.a( 'function' );
 			expect( index.provideToken ).to.equal( provideToken );
-		} );
-	} );
-
-	describe( 'findPathsToPackages()', () => {
-		it( 'should be a function', () => {
-			expect( findPathsToPackages ).to.be.a( 'function' );
-			expect( index.findPathsToPackages ).to.equal( findPathsToPackages );
 		} );
 	} );
 } );

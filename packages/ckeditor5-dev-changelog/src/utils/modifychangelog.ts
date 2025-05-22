@@ -7,7 +7,7 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
-import { truncateChangelog } from '../utils/external/truncatechangelog.js';
+import { truncateChangelog } from '../utils/truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
 
 /**
