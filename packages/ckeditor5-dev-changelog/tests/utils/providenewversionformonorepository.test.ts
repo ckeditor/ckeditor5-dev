@@ -40,15 +40,15 @@ describe( 'provideNewVersionForMonorepository()', () => {
 
 	describe( 'Version suggestion and prompt configuration', () => {
 		it.each( [
-			{ bumpType: 'patch', expectedVersion: '1.0.1' },
-			{ bumpType: 'minor', expectedVersion: '1.1.0' },
-			{ bumpType: 'major', expectedVersion: '2.0.0' },
+			[ '1.0.1', 'patch' ],
+			[ '1.1.0', 'minor' ],
+			[ '2.0.0', 'major' ]
 		] )(
-			'should suggest version for bumpType="$bumpType"',
-			async ( { bumpType, expectedVersion } ) => {
+			'should suggest version "%s" for bumpType "%s"',
+			async ( expectedVersion, bumpType ) => {
 				const options = {
 					...defaultOptions,
-					bumpType: bumpType as ReleaseType,
+					bumpType: bumpType as ReleaseType
 				};
 
 				vi.mocked( semver.inc ).mockReturnValueOnce( expectedVersion );
