@@ -37,22 +37,21 @@ describe( 'validateVersionHigherThanCurrent', () => {
 		expect( semver.gt ).toHaveBeenCalledWith( '1.1.0', '1.0.0' );
 	} );
 
-	it( 'should compare versions correctly for different scenarios', () => {
-		const testCases = [
-			{ version: '1.0.1', current: '1.0.0', gtResult: true, expected: true },
-			{ version: '1.1.0', current: '1.0.0', gtResult: true, expected: true },
-			{ version: '2.0.0', current: '1.0.0', gtResult: true, expected: true },
-			{ version: '1.0.0', current: '1.0.0', gtResult: false, expected: 'Provided version must be higher than "1.0.0".' },
-			{ version: '0.9.9', current: '1.0.0', gtResult: false, expected: 'Provided version must be higher than "1.0.0".' }
-		];
+	it.each( [
+		{ proposal: '1.0.1', current: '1.0.0', output: true, expected: true },
+		{ proposal: '1.1.0', current: '1.0.0', output: true, expected: true },
+		{ proposal: '2.0.0', current: '1.0.0', output: true, expected: true },
+		{ proposal: '1.0.0', current: '1.0.0', output: false, expected: 'Provided version must be higher than "1.0.0".' },
+		{ proposal: '0.9.9', current: '1.0.0', output: false, expected: 'Provided version must be higher than "1.0.0".' }
+	] )(
+		'should compare versions: proposal=$proposal, current=$current, output=$output',
+		( { proposal, current, output, expected } ) => {
+			vi.mocked( semver.gt ).mockReturnValue( output );
 
-		for ( const { version, current, gtResult, expected } of testCases ) {
-			vi.mocked( semver.gt ).mockReturnValue( gtResult );
-
-			const result = validateVersionHigherThanCurrent( version, current );
+			const result = validateVersionHigherThanCurrent( proposal, current );
 
 			expect( result ).toBe( expected );
-			expect( semver.gt ).toHaveBeenCalledWith( version, current );
+			expect( semver.gt ).toHaveBeenCalledWith( proposal, current );
 		}
-	} );
+	);
 } );
