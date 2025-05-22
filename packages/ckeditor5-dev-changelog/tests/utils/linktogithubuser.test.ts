@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { linkToGitHubUser } from '../../../src/utils/external/linktogithubuser.js';
+import { linkToGitHubUser } from '../../src/utils/linktogithubuser.js';
 
 describe( 'linkToGitHubUser()', () => {
 	it( 'makes a link to GitHub profile if a user was mentioned in a comment', () => {

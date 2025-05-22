@@ -5,13 +5,13 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
-import { truncateChangelog } from '../../src/utils/external/truncatechangelog.js';
+import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/constants.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
 
 vi.mock( 'fs-extra' );
-vi.mock( '../../src/utils/external/truncatechangelog.js' );
+vi.mock( '../../src/utils/truncatechangelog.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( 'chalk', () => ( {
 	default: {

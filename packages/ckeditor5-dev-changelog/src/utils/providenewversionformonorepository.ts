@@ -6,7 +6,8 @@
 import semver, { type ReleaseType } from 'semver';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { npm } from '@ckeditor/ckeditor5-dev-utils';
+import { validateVersionAvailability } from './validateversionavailability.js';
+import { validateVersionHigherThanCurrent } from './validateversionhigherthancurrent.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -28,10 +29,6 @@ type Question = {
 	validate: ( input: string ) => Promise<VersionValidationResult>;
 	prefix: string;
 };
-
-//
-// TODO: Each export means a new file.
-//
 
 /**
  * This function displays a prompt to provide a new version for all packages in the repository.
@@ -55,40 +52,6 @@ function validateVersionFormat( version: string ): VersionValidationResult {
 
 	if ( !semver.valid( version ) ) {
 		return 'Please provide a valid version or "internal" for internal changes.';
-	}
-
-	return true;
-}
-
-/**
- * Validates if the provided version is higher than the current one.
- */
-export function validateVersionHigherThanCurrent( version: string, currentVersion: string ): VersionValidationResult {
-	// Skip this validation for an 'internal' version
-	if ( version === 'internal' ) {
-		return true;
-	}
-
-	if ( !semver.gt( version, currentVersion ) ) {
-		return `Provided version must be higher than "${ currentVersion }".`;
-	}
-
-	return true;
-}
-
-/**
- * Validates if the provided version is available in the npm registry.
- */
-export async function validateVersionAvailability( version: string, packageName: string ): Promise<VersionValidationResult> {
-	// Skip this validation for an 'internal' version.
-	if ( version === 'internal' ) {
-		return true;
-	}
-
-	const isAvailable = await npm.checkVersionAvailability( version, packageName );
-
-	if ( !isAvailable ) {
-		return 'Given version is already taken.';
 	}
 
 	return true;

@@ -5,13 +5,13 @@
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { truncateChangelog } from '../../../src/utils/external/truncatechangelog.js';
-import { CHANGELOG_HEADER } from '../../../src/constants.js';
+import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
+import { CHANGELOG_HEADER } from '../../src/constants.js';
 import fs from 'fs';
 
 vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../../src/constants.js', () => ( {
+vi.mock( '../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',
 	CHANGELOG_FILE: 'CHANGELOG.md'
 } ) );
