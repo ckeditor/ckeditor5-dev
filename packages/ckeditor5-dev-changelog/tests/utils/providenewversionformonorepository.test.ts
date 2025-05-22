@@ -86,10 +86,9 @@ describe( 'provideNewVersionForMonorepository()', () => {
 			expect( question.message ).toContain( `suggested: "${ currentVersion }"` );
 		} );
 
-		it( 'should apply indentation based on indentLevel option', async () => {
-			const indentLevels = [ 0, 1, 2, 3 ];
-
-			for ( const indentLevel of indentLevels ) {
+		it.each( [ 0, 1, 2, 3 ] )(
+			'should apply indentation for indentLevel=%i',
+			async indentLevel => {
 				const options = {
 					...defaultOptions,
 					indentLevel
@@ -102,11 +101,11 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 				const question = mockCalls[ mockCalls.length - 1 ][ 0 ][ 0 ];
 
-				// CLI_INDENT_SIZE is 3 as defined in the implementation
+				// CLI_INDENT_SIZE is 3
 				const expectedIndent = ' '.repeat( indentLevel * 3 );
 				expect( question.prefix ).toBe( `${ expectedIndent }?` );
 			}
-		} );
+		);
 
 		it( 'should trim input values', async () => {
 			let filterFunction: any;
