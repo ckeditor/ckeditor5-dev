@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS } from './constants.js';
+import type { SECTIONS, TYPES } from './constants.js';
 
 /**
  * Configuration options for generating a changelog.
@@ -85,6 +85,8 @@ export type RepositoryConfig = {
 
 export type SectionName = keyof typeof SECTIONS;
 
+export type NormalizedType = typeof TYPES[ number ][ 'name' ];
+
 export type Entry = {
 	message: string;
 	data: FileMetadata & FileMetadataNormalized & {
@@ -96,7 +98,6 @@ export type Entry = {
 };
 
 type FileMetadata = {
-	'breaking-change'?: string | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;
@@ -104,8 +105,7 @@ type FileMetadata = {
 };
 
 type FileMetadataNormalized = {
-	breakingChangeNormalized?: 'major' | 'minor' | boolean;
-	typeNormalized?: string;
+	typeNormalized?: NormalizedType;
 	scopeNormalized?: Array<string>;
 	closesNormalized?: Array<string>;
 	seeNormalized?: Array<string>;

@@ -29,9 +29,11 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Provide a type with one of the values: "Feature", "Other", "Fix" ("Fixes" is also allowed),' +
+				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
+				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
+			] );
 		} );
 
 		it( 'should return invalid when type is not recognized', () => {
@@ -40,9 +42,11 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Type "Unknown" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Type "Unknown" should be one of: "Feature", "Other", "Fix" ("Fixes" is also allowed),' +
+				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
+				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
+			] );
 		} );
 
 		it( 'should return valid when type is "Feature"', () => {
@@ -80,28 +84,24 @@ describe( 'validateEntry()', () => {
 	} );
 
 	describe( 'breaking change validation for single package', () => {
-		it( 'should return invalid when breaking change is not "true" for a single package', () => {
+		it( 'should return invalid when breaking change is not "Breaking" for a single package', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Feature',
-				typeNormalized: 'Feature',
-				'breaking-change': 'major',
-				breakingChangeNormalized: 'major'
+				type: 'major',
+				typeNormalized: 'Major'
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Breaking change "major" should be one of: "true", or not specified, for a single repo (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Breaking change "major" should be generic: "breaking", for a single package mode (case insensitive).'
+			] );
 		} );
 
 		it( 'should return valid when breaking change is "true" for a single package', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
-				typeNormalized: 'Feature',
-				'breaking-change': true,
-				breakingChangeNormalized: true
+				typeNormalized: 'Feature'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, true );
@@ -113,26 +113,22 @@ describe( 'validateEntry()', () => {
 	describe( 'breaking change validation for monorepo', () => {
 		it( 'should return invalid when breaking change is not "minor" or "major" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Feature',
-				typeNormalized: 'Feature',
-				'breaking-change': true,
-				breakingChangeNormalized: true
+				type: 'breaking',
+				typeNormalized: 'Breaking'
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Breaking change "true" should be one of: "minor", "major", for a monorepo (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Breaking change "breaking" should be one of: "minor", "major", for a monorepo (case insensitive).'
+			] );
 		} );
 
 		it( 'should return valid when breaking change is "minor" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
-				typeNormalized: 'Feature',
-				'breaking-change': 'minor',
-				breakingChangeNormalized: 'minor'
+				typeNormalized: 'Feature'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );
@@ -143,9 +139,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return valid when breaking change is "major" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
-				typeNormalized: 'Feature',
-				'breaking-change': 'major',
-				breakingChangeNormalized: 'major'
+				typeNormalized: 'Feature'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );
@@ -166,7 +160,7 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Scope "unknown-package" is not recognised as a valid package in the repository.'
+				'Scope "unknown-package" is not recognized as a valid package in the repository.'
 			);
 		} );
 
@@ -193,7 +187,7 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Scope "unknown-package" is not recognised as a valid package in the repository.'
+				'Scope "unknown-package" is not recognized as a valid package in the repository.'
 			);
 		} );
 	} );
@@ -310,8 +304,6 @@ describe( 'validateEntry()', () => {
 		it( 'should collect multiple validation errors', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Unknown',
-				'breaking-change': 'not-valid',
-				breakingChangeNormalized: 'not-valid',
 				scopeNormalized: [ 'unknown-package' ],
 				seeNormalized: [ 'invalid-reference' ],
 				closesNormalized: [ 'invalid-reference' ]
@@ -320,15 +312,13 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations.length ).toBe( 5 );
+			expect( ( validatedEntry.data as any ).validations.length ).toBe( 4 );
 		} );
 
 		it( 'should return valid for a completely valid entry', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
-				'breaking-change': 'major',
-				breakingChangeNormalized: 'major',
 				scopeNormalized: [ 'ckeditor5-engine' ],
 				seeNormalized: [ '1234' ],
 				closesNormalized: [ 'ckeditor/ckeditor5#5678' ]

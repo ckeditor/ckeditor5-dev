@@ -4,7 +4,7 @@
  */
 
 import type { ParsedFile } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN } from '../constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from '../constants.js';
 
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
@@ -14,25 +14,39 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const data = entry.data;
 	const validations: Array<string> = [];
 
+	const allowedTypesArray = TYPES.map( ( { name } ) => name );
+	const allowedTypesList = new Intl.ListFormat(
+		'en-US', { style: 'long', type: 'disjunction' }
+	).format(
+		TYPES.map( type => {
+			let entry = `"${ type.name }"`;
+
+			if ( 'aliases' in type ) {
+				const list = type.aliases.map( alias => `"${ alias }"` ).join( ', ' );
+
+				entry += ` (${ list } ${ type.aliases.length > 1 ? 'are' : 'is' } also allowed)`;
+			}
+
+			return entry;
+		} )
+	);
+
 	if ( typeof data.type === 'undefined' ) {
-		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
-	} else if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.typeNormalized! ) ) {
-		validations.push( `Type "${ data.type }" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).` );
+		validations.push( `Provide a type with one of the values: ${ allowedTypesList } (case insensitive).` );
+	} else if ( !allowedTypesArray.includes( data.typeNormalized! ) ) {
+		validations.push( `Type "${ data.type }" should be one of: ${ allowedTypesList } (case insensitive).` );
 	}
 
-	const breakingChangeProvided = typeof data[ 'breaking-change' ] !== 'undefined';
-
 	if ( singlePackage ) {
-		if ( breakingChangeProvided && data.breakingChangeNormalized !== true ) {
-			validations.push( [
-				`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
-				'"true", or not specified, for a single repo (case insensitive).'
-			].join( ' ' ) );
+		if ( data.typeNormalized === 'Major' || data.typeNormalized === 'Minor' ) {
+			validations.push(
+				`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
+			);
 		}
 	} else {
-		if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data.breakingChangeNormalized as string ) ) {
+		if ( !singlePackage && data.typeNormalized === 'Breaking' ) {
 			validations.push(
-				`Breaking change "${ data[ 'breaking-change' ] }" should be one of: "minor", "major", for a monorepo (case insensitive).`
+				`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
 			);
 		}
 	}
@@ -40,7 +54,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	if ( data.scopeNormalized ) {
 		for ( const scopeName of data.scopeNormalized ) {
 			if ( !noScopePackagesNames.includes( scopeName ) ) {
-				validations.push( `Scope "${ scopeName }" is not recognised as a valid package in the repository.` );
+				validations.push( `Scope "${ scopeName }" is not recognized as a valid package in the repository.` );
 			}
 		}
 	}

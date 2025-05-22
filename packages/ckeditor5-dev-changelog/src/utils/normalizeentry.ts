@@ -3,33 +3,24 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ParsedFile } from '../types.js';
+import { TYPES } from '../constants.js';
+import type { NormalizedType, ParsedFile } from '../types.js';
 
-export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): ParsedFile {
-	// Normalize type.
-	const typeCapitalized = capitalize( entry.data.type );
-	const typeNormalized = typeCapitalized === 'Fixes' ? 'Fix' : typeCapitalized;
-
-	// Normalize breaking-change.
-	const breakingChange = entry.data[ 'breaking-change' ];
-	const breakingChangeLowerCase = String( breakingChange ).toLowerCase();
-	let breakingChangeNormalized: 'minor' | 'major' | boolean | undefined;
-
-	if ( singlePackage ) {
-		if ( breakingChangeLowerCase === 'true' ) {
-			breakingChangeNormalized = true;
-		} else if ( breakingChangeLowerCase === 'minor' ) {
-			breakingChangeNormalized = 'minor';
-		} else if ( breakingChangeLowerCase === 'major' ) {
-			breakingChangeNormalized = 'major';
+export function normalizeEntry( entry: ParsedFile ): ParsedFile {
+	// Normalize Type.
+	const typeCapitalized = capitalize( entry.data.type ) as NormalizedType;
+	const matchingType = TYPES.find( type => {
+		if ( type.name === typeCapitalized ) {
+			return true;
 		}
-	} else {
-		if ( breakingChangeLowerCase === 'minor' ) {
-			breakingChangeNormalized = 'minor';
-		} else if ( breakingChangeLowerCase === 'major' ) {
-			breakingChangeNormalized = 'major';
+
+		if ( !( 'aliases' in type ) ) {
+			return false;
 		}
-	}
+
+		return ( type.aliases as ReadonlyArray<string> ).includes( typeCapitalized );
+	} );
+	const typeNormalized = matchingType ? matchingType.name : undefined;
 
 	// Normalize scope.
 	const scope = entry.data.scope;
@@ -46,7 +37,6 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 		data: {
 			...entry.data,
 			typeNormalized,
-			breakingChangeNormalized,
 			scopeNormalized,
 			closesNormalized,
 			seeNormalized

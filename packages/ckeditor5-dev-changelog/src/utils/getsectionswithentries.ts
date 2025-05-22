@@ -25,7 +25,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const normalizedEntry = normalizeEntry( entry, singlePackage );
+		const normalizedEntry = normalizeEntry( entry );
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 
@@ -105,19 +105,17 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 		return 'invalid';
 	}
 
-	const breakingChangeNormalized = entry.data.breakingChangeNormalized;
-
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( breakingChangeNormalized === 'minor' || breakingChangeNormalized === 'major' || breakingChangeNormalized === true ) {
+		if ( entry.data.typeNormalized === 'Minor' || entry.data.typeNormalized === 'Major' || entry.data.typeNormalized === 'Breaking' ) {
 			return 'breaking';
 		}
 	} else {
-		if ( breakingChangeNormalized === 'minor' ) {
+		if ( entry.data.typeNormalized === 'Minor' ) {
 			return 'minor';
 		}
 
-		if ( breakingChangeNormalized === 'major' ) {
+		if ( entry.data.typeNormalized === 'Major' ) {
 			return 'major';
 		}
 	}

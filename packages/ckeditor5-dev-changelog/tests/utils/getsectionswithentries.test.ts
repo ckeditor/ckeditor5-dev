@@ -62,7 +62,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify parsedFiles into sections', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } ),
+			createParsedFile( { data: { type: 'major', typeNormalized: 'Major' } } ),
 			createParsedFile( { data: { type: 'Fix', typeNormalized: 'Fix' } } ),
 			createParsedFile( { data: { type: 'Other', typeNormalized: 'Other' } } )
 		];
@@ -76,7 +76,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify generic breaking changes', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': true, breakingChangeNormalized: true } } )
+			createParsedFile( { data: { type: 'breaking', typeNormalized: 'Breaking' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -89,13 +89,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify generic breaking changes in monorepo as invalid', () => {
 		const parsedFiles = [
-			createParsedFile( {
-				data: {
-					'breaking-change': true,
-					breakingChangeNormalized: true,
-					typeNormalized: 'Feature'
-				}
-			} )
+			createParsedFile( { data: { type: 'breaking', typeNormalized: 'Breaking' } } )
 		];
 
 		// For this test, we need to override the validation mock to mark the entry as invalid.
@@ -114,8 +108,8 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should cast minor and major breaking changes to a generic ones in single packages', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor', breakingChangeNormalized: 'minor' } } ),
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } )
+			createParsedFile( { data: { type: 'minor', typeNormalized: 'Minor' } } ),
+			createParsedFile( { data: { type: 'major', typeNormalized: 'Major' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -128,7 +122,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify minor breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor', breakingChangeNormalized: 'minor' } } )
+			createParsedFile( { data: { type: 'minor', typeNormalized: 'Minor' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -141,7 +135,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify major breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } )
+			createParsedFile( { data: { type: 'major', typeNormalized: 'Major' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -153,7 +147,7 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify an entry with an unknown type as invalid', () => {
-		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType', typeNormalized: 'UnknownType' } } ) ];
+		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType' } } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
 
