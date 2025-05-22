@@ -51,7 +51,7 @@ describe( 'validateVersionAvailability', () => {
 		'package-a',
 		'package-b',
 		'@scope/package-c'
-	] )( 'should check availability for package "%s"', async ( packageName ) => {
+	] )( 'should check availability for package "%s"', async packageName => {
 		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 		vi.mocked( npm.checkVersionAvailability ).mockClear();
 
