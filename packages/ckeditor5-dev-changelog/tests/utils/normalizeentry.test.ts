@@ -5,7 +5,19 @@
 
 import type { ParsedFile } from '../../src/types.js';
 import { normalizeEntry } from '../../src/utils/normalizeentry.js';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock( '../../src/constants.js', () => {
+	return {
+		TYPES: [
+			{ name: 'Feature' },
+			{ name: 'Other' },
+			{ name: 'Fix', aliases: [ 'Fixes' ] },
+			{ name: 'Major', aliases: [ 'Major breaking change' ] },
+			{ name: 'Minor', aliases: [ 'Minor breaking change' ] }
+		]
+	};
+} );
 
 function createEntry( data: Record<string, any> ): ParsedFile {
 	return {
@@ -29,7 +41,7 @@ describe( 'normalizeEntry()', () => {
 			expect( normalizedEntry.data.typeNormalized ).toBe( 'Feature' );
 		} );
 
-		it( 'should convert "Fixes" to "Fix"', () => {
+		it( 'should convert aliases to the base name', () => {
 			const entry = createEntry( { type: 'fixes' } );
 
 			const normalizedEntry = normalizeEntry( entry );

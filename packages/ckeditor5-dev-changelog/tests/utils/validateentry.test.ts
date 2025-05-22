@@ -5,7 +5,22 @@
 
 import type { ParsedFile } from '../../src/types.js';
 import { validateEntry } from '../../src/utils/validateentry.js';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock( '../../src/constants.js', () => {
+	return {
+		ISSUE_PATTERN: /^\d+$/,
+		ISSUE_SLUG_PATTERN: /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/,
+		ISSUE_URL_PATTERN: /^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/,
+		TYPES: [
+			{ name: 'Feature' },
+			{ name: 'Fix', aliases: [ 'Fixes', 'Fixed' ] }, // Additional value to test the "is"/"are" grammar options.
+			{ name: 'Major', aliases: [ 'Major breaking change' ] },
+			{ name: 'Minor', aliases: [ 'Minor breaking change' ] },
+			{ name: 'Breaking', aliases: [ 'Breaking change' ] }
+		]
+	};
+} );
 
 function createEntry( data: Record<string, any> ): ParsedFile {
 	return {
@@ -30,26 +45,26 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toEqual( [
-				'Provide a type with one of the values: "Feature", "Other", "Fix" ("Fixes" is also allowed),' +
+				'Provide a type with one of the values: "Feature", "Fix" ("Fixes", "Fixed" are also allowed),' +
 				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
 				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
 			] );
 		} );
 
 		it( 'should return invalid when type is not recognized', () => {
-			const entry: ParsedFile = createEntry( { type: 'Unknown', typeNormalized: 'Unknown' } );
+			const entry: ParsedFile = createEntry( { type: 'Unknown' } );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toEqual( [
-				'Type "Unknown" should be one of: "Feature", "Other", "Fix" ("Fixes" is also allowed),' +
+				'Type "Unknown" should be one of: "Feature", "Fix" ("Fixes", "Fixed" are also allowed),' +
 				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
 				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
 			] );
 		} );
 
-		it( 'should return valid when type is "Feature"', () => {
+		it( 'should return valid when type is provided', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature'
@@ -60,20 +75,9 @@ describe( 'validateEntry()', () => {
 			expect( isValid ).toBeTruthy();
 		} );
 
-		it( 'should return valid when type is "Other"', () => {
+		it( 'should return valid when type uses an alias', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Other',
-				typeNormalized: 'Other'
-			} );
-
-			const { isValid } = validateEntry( entry, packageNames, false );
-
-			expect( isValid ).toBeTruthy();
-		} );
-
-		it( 'should return valid when type is "Fix"', () => {
-			const entry: ParsedFile = createEntry( {
-				type: 'Fix',
+				type: 'Fixes',
 				typeNormalized: 'Fix'
 			} );
 
@@ -98,10 +102,10 @@ describe( 'validateEntry()', () => {
 			] );
 		} );
 
-		it( 'should return valid when breaking change is "true" for a single package', () => {
+		it( 'should return valid when breaking change is "Breaking" for a single package', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Feature',
-				typeNormalized: 'Feature'
+				type: 'breaking',
+				typeNormalized: 'Breaking'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, true );
@@ -127,8 +131,8 @@ describe( 'validateEntry()', () => {
 
 		it( 'should return valid when breaking change is "minor" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Feature',
-				typeNormalized: 'Feature'
+				type: 'minor',
+				typeNormalized: 'Minor'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );
@@ -138,8 +142,8 @@ describe( 'validateEntry()', () => {
 
 		it( 'should return valid when breaking change is "major" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
-				type: 'Feature',
-				typeNormalized: 'Feature'
+				type: 'major',
+				typeNormalized: 'Major'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );

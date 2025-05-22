@@ -15,21 +15,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const validations: Array<string> = [];
 
 	const allowedTypesArray = TYPES.map( ( { name } ) => name );
-	const allowedTypesList = new Intl.ListFormat(
-		'en-US', { style: 'long', type: 'disjunction' }
-	).format(
-		TYPES.map( type => {
-			let entry = `"${ type.name }"`;
-
-			if ( 'aliases' in type ) {
-				const list = type.aliases.map( alias => `"${ alias }"` ).join( ', ' );
-
-				entry += ` (${ list } ${ type.aliases.length > 1 ? 'are' : 'is' } also allowed)`;
-			}
-
-			return entry;
-		} )
-	);
+	const allowedTypesList = getAllowedTypesList();
 
 	if ( typeof data.type === 'undefined' ) {
 		validations.push( `Provide a type with one of the values: ${ allowedTypesList } (case insensitive).` );
@@ -88,4 +74,22 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const validatedEntry = { ...entry, data: { ...data, validations } };
 
 	return { isValid: validations.length === 0, validatedEntry };
+}
+
+function getAllowedTypesList(): string {
+	const formatter = new Intl.ListFormat( 'en-US', { style: 'long', type: 'disjunction' } );
+
+	const items = TYPES.map( type => {
+		let entry = `"${ type.name }"`;
+
+		if ( 'aliases' in type ) {
+			const list = type.aliases.map( alias => `"${ alias }"` ).join( ', ' );
+
+			entry += ` (${ list } ${ type.aliases.length > 1 ? 'are' : 'is' } also allowed)`;
+		}
+
+		return entry;
+	} );
+
+	return formatter.format( items );
 }

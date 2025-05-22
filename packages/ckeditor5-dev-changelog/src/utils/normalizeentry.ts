@@ -4,11 +4,11 @@
  */
 
 import { TYPES } from '../constants.js';
-import type { NormalizedType, ParsedFile } from '../types.js';
+import type { ParsedFile } from '../types.js';
 
 export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 	// Normalize Type.
-	const typeCapitalized = capitalize( entry.data.type ) as NormalizedType;
+	const typeCapitalized = capitalize( entry.data.type );
 	const matchingType = TYPES.find( type => {
 		if ( type.name === typeCapitalized ) {
 			return true;
