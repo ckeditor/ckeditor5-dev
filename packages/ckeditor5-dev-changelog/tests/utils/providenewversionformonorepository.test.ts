@@ -39,19 +39,19 @@ describe( 'provideNewVersionForMonorepository()', () => {
 	} );
 
 	describe( 'Version suggestion and prompt configuration', () => {
-		it( 'should suggest version based on bump type', async () => {
-			const bumpTypes: Array<ReleaseType> = [ 'patch', 'minor', 'major' ];
-			const expectedVersions = [ '1.0.1', '1.1.0', '2.0.0' ];
-
-			for ( let i = 0; i < bumpTypes.length; i++ ) {
-				const bumpType = bumpTypes[ i ];
-				const expectedVersion = expectedVersions[ i ];
+		it.each( [
+			{ bumpType: 'patch', expectedVersion: '1.0.1' },
+			{ bumpType: 'minor', expectedVersion: '1.1.0' },
+			{ bumpType: 'major', expectedVersion: '2.0.0' },
+		] )(
+			'should suggest version for bumpType="$bumpType"',
+			async ( { bumpType, expectedVersion } ) => {
 				const options = {
 					...defaultOptions,
-					bumpType: bumpType as ReleaseType
+					bumpType: bumpType as ReleaseType,
 				};
 
-				vi.mocked( semver.inc ).mockReturnValueOnce( expectedVersion as string );
+				vi.mocked( semver.inc ).mockReturnValueOnce( expectedVersion );
 				vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: expectedVersion } );
 
 				const result = await provideNewVersionForMonorepository( options as any );
@@ -65,7 +65,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				expect( question.default ).toBe( expectedVersion );
 				expect( question.message ).toContain( `suggested: "${ expectedVersion }"` );
 			}
-		} );
+		);
 
 		it( 'should use current version as default when semver.inc returns null', async () => {
 			const currentVersion = '1.0.0';
