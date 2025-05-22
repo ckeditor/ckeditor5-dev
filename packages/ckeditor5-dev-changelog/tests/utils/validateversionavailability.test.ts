@@ -47,18 +47,17 @@ describe( 'validateVersionAvailability', () => {
 		expect( npm.checkVersionAvailability ).toHaveBeenCalledWith( '1.0.0', 'test-package' );
 	} );
 
-	it( 'should check availability for different package names', async () => {
+	it.each( [
+		'package-a',
+		'package-b',
+		'@scope/package-c'
+	] )( 'should check availability for package "%s"', async ( packageName ) => {
 		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+		vi.mocked( npm.checkVersionAvailability ).mockClear();
 
-		const packages = [ 'package-a', 'package-b', '@scope/package-c' ];
+		const result = await validateVersionAvailability( '1.0.0', packageName );
 
-		for ( const packageName of packages ) {
-			vi.mocked( npm.checkVersionAvailability ).mockClear();
-
-			const result = await validateVersionAvailability( '1.0.0', packageName );
-
-			expect( result ).toBe( true );
-			expect( npm.checkVersionAvailability ).toHaveBeenCalledWith( '1.0.0', packageName );
-		}
+		expect( result ).toBe( true );
+		expect( npm.checkVersionAvailability ).toHaveBeenCalledWith( '1.0.0', packageName );
 	} );
 } );
