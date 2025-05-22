@@ -275,8 +275,8 @@ describe( 'provideNewVersionForMonorepository()', () => {
 			'1.0.1',
 			'1.1.0',
 			'2.0.0',
-			'internal',
-		] )( 'should return the version selected by the user: "%s"', async ( userVersion ) => {
+			'internal'
+		] )( 'should return the version selected by the user: "%s"', async userVersion => {
 			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: userVersion } );
 
 			const result = await provideNewVersionForMonorepository( defaultOptions as any );
