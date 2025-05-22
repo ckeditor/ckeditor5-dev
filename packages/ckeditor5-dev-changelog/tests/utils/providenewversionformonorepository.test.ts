@@ -271,16 +271,17 @@ describe( 'provideNewVersionForMonorepository()', () => {
 	} );
 
 	describe( 'Function return value', () => {
-		it( 'should return the version selected by the user', async () => {
-			const userInputVersions = [ '1.0.1', '1.1.0', '2.0.0', 'internal' ];
+		it.each( [
+			'1.0.1',
+			'1.1.0',
+			'2.0.0',
+			'internal',
+		] )( 'should return the version selected by the user: "%s"', async ( userVersion ) => {
+			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: userVersion } );
 
-			for ( const userVersion of userInputVersions ) {
-				vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: userVersion } );
+			const result = await provideNewVersionForMonorepository( defaultOptions as any );
 
-				const result = await provideNewVersionForMonorepository( defaultOptions as any );
-
-				expect( result ).toBe( userVersion );
-			}
+			expect( result ).toBe( userVersion );
 		} );
 	} );
 
