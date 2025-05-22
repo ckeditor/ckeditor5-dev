@@ -11,8 +11,7 @@ import assertNpmTag from '../utils/assertnpmtag.js';
 import assertFilesToPublish from '../utils/assertfilestopublish.js';
 import executeInParallel from '../utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback.js';
-import checkVersionAvailability from '../utils/checkversionavailability.js';
-import findPathsToPackages from '../utils/findpathstopackages.js';
+import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * The purpose of the script is to publish the prepared packages. However, before, it executes a few checks that
@@ -72,7 +71,7 @@ export default async function publishPackages( options ) {
 	await assertNpmAuthorization( npmOwner );
 
 	// Find packages that would be published...
-	const packagePaths = await findPathsToPackages( cwd, packagesDirectory );
+	const packagePaths = await workspaces.findPathsToPackages( cwd, packagesDirectory );
 
 	// ...and filter out those that have already been processed.
 	// In other words, check whether a version per package (it's read from a `package.json` file)
@@ -80,7 +79,7 @@ export default async function publishPackages( options ) {
 	await removeAlreadyPublishedPackages( packagePaths );
 
 	// Once again, find packages to publish after the filtering operation.
-	const packagesToProcess = await findPathsToPackages( cwd, packagesDirectory );
+	const packagesToProcess = await workspaces.findPathsToPackages( cwd, packagesDirectory );
 
 	if ( !packagesToProcess.length ) {
 		listrTask.output = 'All packages have been published.';
@@ -132,7 +131,7 @@ export default async function publishPackages( options ) {
 async function removeAlreadyPublishedPackages( packagePaths ) {
 	for ( const absolutePackagePath of packagePaths ) {
 		const pkgJson = await fs.readJson( upath.join( absolutePackagePath, 'package.json' ) );
-		const isAvailable = await checkVersionAvailability( pkgJson.version, pkgJson.name );
+		const isAvailable = await npm.checkVersionAvailability( pkgJson.version, pkgJson.name );
 
 		if ( !isAvailable ) {
 			await fs.remove( absolutePackagePath );

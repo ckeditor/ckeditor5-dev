@@ -5,6 +5,7 @@
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
+import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
 import { differenceInMilliseconds } from 'date-fns';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
 import assertPackages from '../../lib/utils/assertpackages.js';
@@ -13,24 +14,21 @@ import assertFilesToPublish from '../../lib/utils/assertfilestopublish.js';
 import executeInParallel from '../../lib/utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 import publishPackages from '../../lib/tasks/publishpackages.js';
-import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
-import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
 
 vi.mock( 'fs-extra' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/assertpackages.js' );
 vi.mock( '../../lib/utils/assertnpmtag.js' );
 vi.mock( '../../lib/utils/assertfilestopublish.js' );
 vi.mock( '../../lib/utils/executeinparallel.js' );
 vi.mock( '../../lib/utils/publishpackageonnpmcallback.js' );
-vi.mock( '../../lib/utils/checkversionavailability.js' );
-vi.mock( '../../lib/utils/findpathstopackages.js' );
 
 describe( 'publishPackages()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/project' );
 
-		vi.mocked( findPathsToPackages )
+		vi.mocked( workspaces.findPathsToPackages )
 			.mockResolvedValueOnce( [
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -49,7 +47,7 @@ describe( 'publishPackages()', () => {
 		vi.mocked( publishPackageOnNpmCallback ).mockResolvedValue();
 
 		vi.mocked( fs ).readJson.mockResolvedValue( { name: '', version: '' } );
-		vi.mocked( checkVersionAvailability ).mockResolvedValue( true );
+		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 
 		vi.useFakeTimers();
 	} );
@@ -71,7 +69,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should read the package directory (default `cwd`)', async () => {
-			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
+			vi.mocked( workspaces.findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
 			await publishPackages( {
 				packagesDirectory: 'packages',
@@ -79,11 +77,11 @@ describe( 'publishPackages()', () => {
 				listrTask: {}
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/project', 'packages' );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith( '/work/project', 'packages' );
 		} );
 
 		it( 'should read the package directory (custom `cwd`)', async () => {
-			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
+			vi.mocked( workspaces.findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
 			await publishPackages( {
 				packagesDirectory: 'packages',
@@ -92,11 +90,11 @@ describe( 'publishPackages()', () => {
 				cwd: '/work/custom-dir'
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledWith( '/work/custom-dir', 'packages' );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith( '/work/custom-dir', 'packages' );
 		} );
 
 		it( 'should assert npm authorization', async () => {
-			vi.mocked( findPathsToPackages ).mockReset().mockResolvedValue( [] );
+			vi.mocked( workspaces.findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
 			await publishPackages( {
 				packagesDirectory: 'packages',
@@ -172,7 +170,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should throw if package assertion failed', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				.mockResolvedValue( [
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
@@ -427,7 +425,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should verify if given package can be published', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				.mockReset()
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-foo',
@@ -452,13 +450,13 @@ describe( 'publishPackages()', () => {
 			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json' );
 			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json' );
 
-			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-foo' );
-			expect( vi.mocked( checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-bar' );
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-foo' );
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-bar' );
 		} );
 
 		it( 'should remove a package if is already published', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				.mockReset()
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-foo',
@@ -470,7 +468,7 @@ describe( 'publishPackages()', () => {
 				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
 				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
 
-			vi.mocked( checkVersionAvailability )
+			vi.mocked( npm.checkVersionAvailability )
 				.mockResolvedValueOnce( false )
 				.mockResolvedValueOnce( true );
 
@@ -487,11 +485,11 @@ describe( 'publishPackages()', () => {
 
 	describe( 're-publish packages that could not be published', () => {
 		beforeEach( () => {
-			vi.mocked( findPathsToPackages ).mockReset();
+			vi.mocked( workspaces.findPathsToPackages ).mockReset();
 		} );
 
 		it( 'should not execute the specified `confirmationCallback` when re-publishing packages', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				// First execution.
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-bar'
@@ -524,7 +522,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should execute itself once again after a timeout passes if some packages could not be published', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				// First execution.
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-bar'
@@ -559,7 +557,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should inform a user about a timeout that hangs the process', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				// First execution.
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-bar'
@@ -602,14 +600,14 @@ describe( 'publishPackages()', () => {
 		it( 'should try to publish packages five times before rejecting a promise', async () => {
 			// We want to simulate that the last call published the package. The previous attempts had failed.
 			for ( let i = 0; i < 5; ++i ) {
-				vi.mocked( findPathsToPackages )
+				vi.mocked( workspaces.findPathsToPackages )
 					.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
 					.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] );
 			}
 
 			// The last call before throwing an error. After comparing results with the registry,
 			// there is nothing to publish.
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
 				.mockResolvedValue( [] );
 
@@ -637,7 +635,7 @@ describe( 'publishPackages()', () => {
 		} );
 
 		it( 'should execute itself and publish the non-published packages again (integration)', async () => {
-			vi.mocked( findPathsToPackages )
+			vi.mocked( workspaces.findPathsToPackages )
 				// First execution.
 				.mockResolvedValueOnce( [
 					'/work/project/packages/ckeditor5-foo',
@@ -667,7 +665,7 @@ describe( 'publishPackages()', () => {
 				} );
 			} );
 
-			vi.mocked( checkVersionAvailability )
+			vi.mocked( npm.checkVersionAvailability )
 				// @ckeditor/ckeditor5-foo
 				.mockResolvedValueOnce( true )
 				// @ckeditor/ckeditor5-bar
@@ -692,11 +690,11 @@ describe( 'publishPackages()', () => {
 			expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
 
 			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 6 );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 6 );
 		} );
 
 		it( 'should reject a promise if cannot publish packages and there are no more attempts', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				name: '@ckeditor/ckeditor5-bar',
@@ -714,11 +712,11 @@ describe( 'publishPackages()', () => {
 
 			await expect( promise ).rejects.toThrow( 'Some packages could not be published.' );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 4 );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 4 );
 		} );
 
 		it( 'should reject a promise if cannot publish packages and there is no more attempting (a negative attempts value)', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				name: '@ckeditor/ckeditor5-bar',
@@ -731,7 +729,7 @@ describe( 'publishPackages()', () => {
 				attempts: -5
 			} ) ).rejects.toThrow( 'Some packages could not be published.' );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
 } );

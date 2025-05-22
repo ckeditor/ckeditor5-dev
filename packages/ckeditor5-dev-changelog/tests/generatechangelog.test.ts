@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateChangelog } from '../src/generatechangelog.js';
 import { getPackageJsons } from '../src/utils/getreleasepackagespkgjsons.js';
-import { getPackageJson } from '../src/utils/getpackagejson.js';
 import { getChangesetFilePaths } from '../src/utils/getchangesetfilepaths.js';
 import { getChangesetsParsed } from '../src/utils/getchangesetsparsed.js';
 import { getSectionsWithEntries } from '../src/utils/getsectionswithentries.js';
@@ -17,7 +17,6 @@ import { modifyChangelog } from '../src/utils/modifychangelog.js';
 import { removeChangesetFiles } from '../src/utils/removechangesetfiles.js';
 import { logInfo } from '../src/utils/loginfo.js';
 import { logChangelogFiles } from '../src/utils/logchangelogfiles.js';
-import { getRepositoryUrl } from '../src/utils/external/getrepositoryurl.js';
 import { getNewChangelog } from '../src/utils/getnewchangelog.js';
 import { getDateFormatted } from '../src/utils/getdateformatted.js';
 import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
@@ -26,8 +25,8 @@ import { removeScope } from '../src/utils/removescope.js';
 import { SECTIONS } from '../src/constants.js';
 import { InternalError } from '../src/errors.js';
 
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
-vi.mock( '../src/utils/getpackagejson.js' );
 vi.mock( '../src/utils/getchangesetfilepaths.js' );
 vi.mock( '../src/utils/getchangesetsparsed.js' );
 vi.mock( '../src/utils/getsectionswithentries.js' );
@@ -38,7 +37,6 @@ vi.mock( '../src/utils/modifychangelog.js' );
 vi.mock( '../src/utils/removechangesetfiles.js' );
 vi.mock( '../src/utils/loginfo.js' );
 vi.mock( '../src/utils/logchangelogfiles.js' );
-vi.mock( '../src/utils/external/getrepositoryurl.js' );
 vi.mock( '../src/utils/getnewchangelog.js' );
 vi.mock( '../src/utils/getdateformatted.js' );
 vi.mock( '../src/utils/defaulttransformscope.js' );
@@ -68,8 +66,8 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( getPackageJsons ).mockResolvedValue( [
 			{ name: 'test-package', version: '1.0.0' }
 		] );
-		vi.mocked( getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
-		vi.mocked( getPackageJson ).mockResolvedValue( { version: '1.0.0', name: 'test-package' } );
+		vi.mocked( workspaces.getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
+		vi.mocked( workspaces.getPackageJson ).mockResolvedValue( { version: '1.0.0', name: 'test-package' } );
 		vi.mocked( getDateFormatted ).mockReturnValue( 'March 26, 2024' );
 		vi.mocked( defaultTransformScope ).mockImplementation( name => ( {
 			displayName: name,
@@ -239,6 +237,20 @@ describe( 'generateChangelog()', () => {
 			[]
 		);
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
+	} );
+
+	it( 'uses async operations on `workspaces`', async () => {
+		await generateChangelog( defaultOptions );
+
+		expect( workspaces.getRepositoryUrl ).toHaveBeenCalledWith(
+			'/home/ckeditor',
+			{ async: true }
+		);
+
+		expect( workspaces.getPackageJson ).toHaveBeenCalledWith(
+			'/home/ckeditor',
+			{ async: true }
+		);
 	} );
 
 	it( 'generates changelog without scope when generating for a single package', async () => {
@@ -463,7 +475,7 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'handles first release (version 0.0.1)', async () => {
-		vi.mocked( getPackageJson ).mockResolvedValue( { version: '0.0.1', name: 'test-package' } );
+		vi.mocked( workspaces.getPackageJson ).mockResolvedValue( { version: '0.0.1', name: 'test-package' } );
 
 		await generateChangelog( defaultOptions );
 

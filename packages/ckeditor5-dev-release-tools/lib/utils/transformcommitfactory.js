@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { cloneDeepWith } from 'es-toolkit/compat';
 import * as utils from './transformcommitutils.js';
 import getChangedFilesForCommit from './getchangedfilesforcommit.js';
@@ -117,7 +118,7 @@ export default function transformCommitFactory( options = {} ) {
 		}
 
 		commit.files = getChangedFilesForCommit( commit.hash ) || [];
-		commit.repositoryUrl = utils.getRepositoryUrl();
+		commit.repositoryUrl = workspaces.getRepositoryUrl();
 
 		if ( commit.isPublicCommit ) {
 			// Remove [skip ci] from the commit subject.

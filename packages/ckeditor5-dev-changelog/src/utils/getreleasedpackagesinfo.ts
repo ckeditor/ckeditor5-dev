@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, PackageJson, ReleaseInfo, SectionsWithEntries } from '../types.js';
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
+import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
 
 /**
  * Generates information about packages being released in the new version.
@@ -13,7 +14,7 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
-	packageJsons: Array<PackageJson>;
+	packageJsons: Array<workspaces.PackageJson>;
 	organisationNamespace: string;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
@@ -44,7 +45,7 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	].filter( release => release.packages?.length > 0 );
 }
 
-function getNewVersionReleases( packages: Array<PackageJson> ) {
+function getNewVersionReleases( packages: Array<workspaces.PackageJson> ) {
 	return packages
 		.filter( packageJson => packageJson.version === '0.0.1' )
 		.map( packageJson => packageJson.name )

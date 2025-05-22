@@ -38,7 +38,6 @@
     "glob": "^11.0.1",
     "inquirer": "^12.5.2",
     "minimatch": "^10.0.1",
-    "pacote": "^20.0.0",
     "semver": "^7.6.3",
     "shell-escape": "^0.2.0",
     "simple-git": "^3.27.0",

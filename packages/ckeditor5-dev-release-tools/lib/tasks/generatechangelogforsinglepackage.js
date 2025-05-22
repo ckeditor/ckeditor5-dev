@@ -4,16 +4,14 @@
  */
 
 import fs from 'fs';
-import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import { tools, logger, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import chalk from 'chalk';
 import semver from 'semver';
 import displayCommits from '../utils/displaycommits.js';
 import generateChangelog from '../utils/generatechangelog.js';
-import getPackageJson from '../utils/getpackagejson.js';
 import getNewVersionType from '../utils/getnewversiontype.js';
 import getCommits from '../utils/getcommits.js';
 import getWriterOptions from '../utils/getwriteroptions.js';
-import { getRepositoryUrl } from '../utils/transformcommitutils.js';
 import transformCommitFactory from '../utils/transformcommitfactory.js';
 import getFormattedDate from '../utils/getformatteddate.js';
 import saveChangelog from '../utils/savechangelog.js';
@@ -45,7 +43,7 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  */
 export default async function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
-	const pkgJson = getPackageJson();
+	const pkgJson = workspaces.getPackageJson();
 
 	logProcess( chalk.bold( `Generating changelog for "${ chalk.underline( pkgJson.name ) }"...` ) );
 
@@ -106,7 +104,7 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 			const writerContext = {
 				version,
 				commit: 'commit',
-				repoUrl: getRepositoryUrl(),
+				repoUrl: workspaces.getRepositoryUrl(),
 				currentTag: 'v' + version,
 				previousTag: options.from ? options.from : 'v' + pkgJson.version,
 				isPatch: semver.diff( version, pkgJson.version ) === 'patch',

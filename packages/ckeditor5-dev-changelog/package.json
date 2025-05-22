@@ -23,26 +23,24 @@
     "dist"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-release-tools": "^49.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^49.0.2",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
     "fs-extra": "^11.0.0",
-    "glob": "^10.0.0",
+    "glob": "^11.0.1",
     "gray-matter": "^4.0.3",
     "inquirer": "^11.0.0",
-    "pacote": "^19.0.0",
     "semver": "^7.6.3",
     "upath": "^2.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@types/pacote": "^11.1.8",
     "@types/fs-extra": "^11.0.4",
-    "@vitest/coverage-v8": "^2.0.0",
+    "@vitest/coverage-v8": "^3.1.1",
     "rollup": "^4.9.5",
-    "typescript": "^5.6.0",
-    "vitest": "^2.0.0"
+    "typescript": "5.0.4",
+    "vitest": "^3.1.1"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js",

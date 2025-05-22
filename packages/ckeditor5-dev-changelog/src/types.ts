@@ -132,14 +132,6 @@ export type ReleaseInfo = {
 	packages: Array<string>;
 };
 
-export type PackageJson = {
-	name: string;
-	version: string;
-	repository?: string | {
-		url: string;
-	};
-};
-
 export type TransformScope = ( name: string ) => {
 	displayName: string;
 	npmUrl: string;

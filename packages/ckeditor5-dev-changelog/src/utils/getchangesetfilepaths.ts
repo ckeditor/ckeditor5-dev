@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import upath from 'upath';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
-import { getRepositoryUrl } from '../utils/external/getrepositoryurl.js';
 
 /**
  * This function collects markdown files that contain changelog entries for processing.
@@ -22,7 +22,7 @@ export async function getChangesetFilePaths(
 
 		return {
 			changesetPaths: changesetGlob.map( path => upath.normalize( path ) ),
-			gitHubUrl: await getRepositoryUrl( repo.cwd ),
+			gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
 			skipLinks: repo.skipLinks
 		};
 	} ) );
@@ -32,7 +32,7 @@ export async function getChangesetFilePaths(
 	const resolvedChangesetPaths = await Promise.all( [
 		{
 			changesetPaths: mainChangesetGlob.map( path => upath.normalize( path ) ),
-			gitHubUrl: await getRepositoryUrl( cwd ),
+			gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
 			skipLinks
 		},
 		...externalChangesetPaths

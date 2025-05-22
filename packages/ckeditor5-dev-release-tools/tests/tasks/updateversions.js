@@ -6,20 +6,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import updateVersions from '../../lib/tasks/updateversions.js';
-import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'fs-extra' );
-vi.mock( '../../lib/utils/findpathstopackages.js' );
 
 describe( 'updateVersions()', () => {
 	beforeEach( () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( { version: '1.0.0' } );
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/ckeditor5-dev' ] );
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/ckeditor5-dev' ] );
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/ckeditor5-dev' );
 	} );
 
 	it( 'should update the version field in all found packages including the root package', async () => {
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [
 			'/ckeditor5-dev/packages/package1/package.json',
 			'/ckeditor5-dev/packages/package2/package.json',
 			'/ckeditor5-dev/packages/package3/package.json',
@@ -28,7 +28,7 @@ describe( 'updateVersions()', () => {
 
 		await updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			'/ckeditor5-dev',
 			'packages',
 			{
@@ -70,7 +70,7 @@ describe( 'updateVersions()', () => {
 	} );
 
 	it( 'should allow filtering out packages that do not pass the `packagesDirectoryFilter` callback', async () => {
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [
 			'/ckeditor5-dev/packages/package1/package.json',
 			'/ckeditor5-dev/packages/package-bar/package.json',
 			'/ckeditor5-dev/packages/package-foo/package.json',
@@ -85,7 +85,7 @@ describe( 'updateVersions()', () => {
 			packagesDirectoryFilter
 		} );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			expect.anything(),
 			expect.anything(),
 			expect.objectContaining( {
@@ -95,11 +95,11 @@ describe( 'updateVersions()', () => {
 	} );
 
 	it( 'should update the version field in the root package when `packagesDirectory` is not provided', async () => {
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/ckeditor5-dev/package.json' ] );
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/ckeditor5-dev/package.json' ] );
 
 		await updateVersions( { version: '1.0.1' } );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			'/ckeditor5-dev',
 			null,
 			expect.any( Object )
@@ -128,7 +128,7 @@ describe( 'updateVersions()', () => {
 	it( 'should be able to provide custom cwd', async () => {
 		await updateVersions( { version: '1.0.1', cwd: 'C:/Users/username/ckeditor5-dev/custom-dir' } );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			'C:/Users/username/ckeditor5-dev/custom-dir',
 			null,
 			expect.any( Object )

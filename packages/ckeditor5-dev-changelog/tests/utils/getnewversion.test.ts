@@ -4,14 +4,14 @@
  */
 
 import { getNewVersion, type GetNewVersionArgs } from '../../src/utils/getnewversion.js';
-import { provideNewVersionForMonorepository } from '../../src/utils/external/providenewversionformonorepository.js';
+import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import semver from 'semver';
 
-vi.mock( '../../src/utils/external/providenewversionformonorepository' );
+vi.mock( '../../src/utils/providenewversionformonorepository' );
 vi.mock( '../../src/utils/loginfo' );
 vi.mock( 'semver', () => {
 	return {

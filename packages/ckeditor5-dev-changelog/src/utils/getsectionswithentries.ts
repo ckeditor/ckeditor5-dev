@@ -3,9 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { Entry, PackageJson, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
+import type {
+	Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
-import { linkToGitHubUser } from '../utils/external/linktogithubuser.js';
+import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
 
@@ -16,7 +18,7 @@ type DifferentRepoIssue = { owner: string; repository: string; number: string };
  */
 export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage }: {
 	parsedFiles: Array<ParsedFile>;
-	packageJsons: Array<PackageJson>;
+	packageJsons: Array<workspaces.PackageJson>;
 	transformScope: TransformScope;
 	singlePackage: boolean;
 } ): SectionsWithEntries {

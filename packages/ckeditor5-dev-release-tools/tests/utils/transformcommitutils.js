@@ -3,12 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { describe, it, expect, vi } from 'vitest';
-import getPackageJson from '../../lib/utils/getpackagejson.js';
 
 import * as transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 
-vi.mock( '../../lib/utils/getpackagejson.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'transformCommitUtils', () => {
 	describe( 'availableTypes', () => {
@@ -107,10 +107,7 @@ describe( 'transformCommitUtils', () => {
 
 	describe( 'linkToGithubIssue()', () => {
 		it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as a string)', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: 'https://github.com/ckeditor/ckeditor5-dev'
-			} );
+			vi.mocked( workspaces.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 
 			expect( transformCommitUtils.linkToGithubIssue( 'Some issue #1.' ) )
 				.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
@@ -171,82 +168,6 @@ describe( 'transformCommitUtils', () => {
 			const sentence = 'This is a short sentence.';
 
 			expect( transformCommitUtils.truncate( sentence, 13 ) ).to.equal( 'This is a...' );
-		} );
-	} );
-
-	describe( 'getRepositoryUrl()', () => {
-		it( 'throws an error if package.json does not contain the "repository" property', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package'
-			} );
-
-			expect( () => transformCommitUtils.getRepositoryUrl() )
-				.to.throw( Error, 'The package.json for "test-package" must contain the "repository" property.' );
-		} );
-
-		it( 'passes specified `cwd` to `getPackageJson()` util', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
-			} );
-
-			transformCommitUtils.getRepositoryUrl( 'foo' );
-
-			expect( getPackageJson ).toHaveBeenCalledTimes( 1 );
-			expect( getPackageJson ).toHaveBeenCalledWith( 'foo' );
-		} );
-
-		it( 'returns the repository URL (packageJson.repository as a string, contains "/issues")', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
-			} );
-
-			expect( transformCommitUtils.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
-		} );
-
-		it( 'returns the repository URL (packageJson.repository as a string, ends with ".git")', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: 'https://github.com/ckeditor/ckeditor5-dev.git'
-			} );
-
-			expect( transformCommitUtils.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
-		} );
-
-		it( 'returns the repository URL (packageJson.repository as an object)', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: {
-					url: 'https://github.com/ckeditor/ckeditor5-dev'
-				}
-			} );
-
-			expect( transformCommitUtils.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
-		} );
-
-		it( 'returns the repository URL (packageJson.repository as an object, contains "/issues")', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: {
-					url: 'https://github.com/ckeditor/ckeditor5-dev/issues',
-					type: 'git'
-				}
-			} );
-
-			expect( transformCommitUtils.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
-		} );
-
-		it( 'returns the repository URL (packageJson.repository as an object, ends with ".git")', () => {
-			vi.mocked( getPackageJson ).mockReturnValue( {
-				name: 'test-package',
-				repository: {
-					url: 'https://github.com/ckeditor/ckeditor5-dev.git',
-					type: 'git'
-				}
-			} );
-
-			expect( transformCommitUtils.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
 		} );
 	} );
 } );

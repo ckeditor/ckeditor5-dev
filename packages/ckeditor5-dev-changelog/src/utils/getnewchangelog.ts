@@ -3,8 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../constants.js';
-import type { PackageJson, ReleaseInfo, Section } from '../types.js';
+import type { ReleaseInfo, Section } from '../types.js';
 
 type NewChangelogOptions = {
 	oldVersion: string;
@@ -15,7 +16,7 @@ type NewChangelogOptions = {
 	releasedPackagesInfo: Array<ReleaseInfo>;
 	isInternal: boolean;
 	singlePackage: boolean;
-	packageJsons: Array<PackageJson>;
+	packageJsons: Array<workspaces.PackageJson>;
 };
 
 export function getNewChangelog( {

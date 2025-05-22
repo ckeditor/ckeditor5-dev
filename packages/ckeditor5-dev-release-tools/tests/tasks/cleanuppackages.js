@@ -8,13 +8,13 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { glob } from 'glob';
 import mockFs from 'mock-fs';
-import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 describe( 'cleanUpPackages()', () => {
 	let cleanUpPackages, stubs;
 
 	beforeEach( async () => {
-		// Calls to `fs` and `glob` are stubbed, but they are passed through to the real implementation, because we want to test the
+		// Calls to `fs` and `glob` are stubbed, but they are passed through to the real implementation because we want to test the
 		// real behavior of the script. The whole filesystem is mocked by the `mock-fs` util for testing purposes. A virtual project is
 		// prepared in tests on this mocked filesystem.
 		vi.doMock( 'glob', () => ( {
@@ -28,14 +28,16 @@ describe( 'cleanUpPackages()', () => {
 				readdir: vi.fn().mockImplementation( fs.readdir )
 			}
 		} ) );
-		vi.doMock( '../../lib/utils/findpathstopackages.js', () => ( {
-			default: vi.fn().mockImplementation( findPathsToPackages )
+		vi.doMock( '@ckeditor/ckeditor5-dev-utils', () => ( {
+			workspaces: {
+				findPathsToPackages: vi.fn().mockImplementation( workspaces.findPathsToPackages )
+			}
 		} ) );
 
 		stubs = {
 			...await import( 'glob' ),
 			...( await import( 'fs-extra' ) ).default,
-			findPathsToPackages: ( await import( '../../lib/utils/findpathstopackages.js' ) ).default
+			findPathsToPackages: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).workspaces.findPathsToPackages
 		};
 
 		cleanUpPackages = ( await import( '../../lib/tasks/cleanuppackages.js' ) ).default;
