@@ -31,3 +31,12 @@ export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9
 export const ISSUE_PATTERN = /^\d+$/;
 export const ISSUE_URL_PATTERN =
 	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
+
+export const TYPES = [
+	{ name: 'Feature' },
+	{ name: 'Other' },
+	{ name: 'Fix', aliases: [ 'Fixes' ] },
+	{ name: 'Major breaking change', aliases: [ 'Major' ] },
+	{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
+	{ name: 'Breaking change', aliases: [ 'Breaking' ] }
+] as const satisfies ReadonlyArray<{ name: string; aliases?: ReadonlyArray<string> }>;
