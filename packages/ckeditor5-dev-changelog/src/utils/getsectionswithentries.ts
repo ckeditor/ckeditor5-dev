@@ -107,15 +107,15 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( entry.data.typeNormalized === 'Minor' || entry.data.typeNormalized === 'Major' || entry.data.typeNormalized === 'Breaking' ) {
+		if ( [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ].includes( entry.data.typeNormalized! ) ) {
 			return 'breaking';
 		}
 	} else {
-		if ( entry.data.typeNormalized === 'Minor' ) {
+		if ( entry.data.typeNormalized === 'Minor breaking change' ) {
 			return 'minor';
 		}
 
-		if ( entry.data.typeNormalized === 'Major' ) {
+		if ( entry.data.typeNormalized === 'Major breaking change' ) {
 			return 'major';
 		}
 	}

@@ -15,9 +15,9 @@ vi.mock( '../../src/constants.js', () => {
 		TYPES: [
 			{ name: 'Feature' },
 			{ name: 'Fix', aliases: [ 'Fixes', 'Fixed' ] }, // Additional value to test the "is"/"are" grammar options.
-			{ name: 'Major', aliases: [ 'Major breaking change' ] },
-			{ name: 'Minor', aliases: [ 'Minor breaking change' ] },
-			{ name: 'Breaking', aliases: [ 'Breaking change' ] }
+			{ name: 'Major breaking change', aliases: [ 'Major' ] },
+			{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
+			{ name: 'Breaking change', aliases: [ 'Breaking' ] }
 		]
 	};
 } );
@@ -46,8 +46,8 @@ describe( 'validateEntry()', () => {
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toEqual( [
 				'Provide a type with one of the values: "Feature", "Fix" ("Fixes", "Fixed" are also allowed),' +
-				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
-				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
+				' "Major breaking change" ("Major" is also allowed), "Minor breaking change" ("Minor" is also allowed),' +
+				' or "Breaking change" ("Breaking" is also allowed) (case insensitive).'
 			] );
 		} );
 
@@ -59,8 +59,8 @@ describe( 'validateEntry()', () => {
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toEqual( [
 				'Type "Unknown" should be one of: "Feature", "Fix" ("Fixes", "Fixed" are also allowed),' +
-				' "Major" ("Major breaking change" is also allowed), "Minor" ("Minor breaking change" is also allowed),' +
-				' or "Breaking" ("Breaking change" is also allowed) (case insensitive).'
+				' "Major breaking change" ("Major" is also allowed), "Minor breaking change" ("Minor" is also allowed),' +
+				' or "Breaking change" ("Breaking" is also allowed) (case insensitive).'
 			] );
 		} );
 
@@ -91,7 +91,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return invalid when breaking change is not "Breaking" for a single package', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'major',
-				typeNormalized: 'Major'
+				typeNormalized: 'Major breaking change'
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
@@ -105,7 +105,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return valid when breaking change is "Breaking" for a single package', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'breaking',
-				typeNormalized: 'Breaking'
+				typeNormalized: 'Breaking change'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, true );
@@ -118,7 +118,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return invalid when breaking change is not "minor" or "major" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'breaking',
-				typeNormalized: 'Breaking'
+				typeNormalized: 'Breaking change'
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
@@ -132,7 +132,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return valid when breaking change is "minor" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'minor',
-				typeNormalized: 'Minor'
+				typeNormalized: 'Minor breaking change'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );
@@ -143,7 +143,7 @@ describe( 'validateEntry()', () => {
 		it( 'should return valid when breaking change is "major" for a monorepo', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'major',
-				typeNormalized: 'Major'
+				typeNormalized: 'Major breaking change'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, false );

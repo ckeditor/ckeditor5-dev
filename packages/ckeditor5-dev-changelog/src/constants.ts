@@ -36,7 +36,7 @@ export const TYPES = [
 	{ name: 'Feature' },
 	{ name: 'Other' },
 	{ name: 'Fix', aliases: [ 'Fixes' ] },
-	{ name: 'Major', aliases: [ 'Major breaking change' ] },
-	{ name: 'Minor', aliases: [ 'Minor breaking change' ] },
-	{ name: 'Breaking', aliases: [ 'Breaking change' ] }
+	{ name: 'Major breaking change', aliases: [ 'Major' ] },
+	{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
+	{ name: 'Breaking change', aliases: [ 'Breaking' ] }
 ] as const satisfies ReadonlyArray<{ name: string; aliases?: ReadonlyArray<string> }>;

@@ -24,13 +24,13 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	}
 
 	if ( singlePackage ) {
-		if ( data.typeNormalized === 'Major' || data.typeNormalized === 'Minor' ) {
+		if ( data.typeNormalized === 'Major breaking change' || data.typeNormalized === 'Minor breaking change' ) {
 			validations.push(
 				`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
 			);
 		}
 	} else {
-		if ( !singlePackage && data.typeNormalized === 'Breaking' ) {
+		if ( !singlePackage && data.typeNormalized === 'Breaking change' ) {
 			validations.push(
 				`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
 			);
