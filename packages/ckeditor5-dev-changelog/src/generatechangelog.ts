@@ -119,7 +119,10 @@ export async function generateChangelog( {
 	}
 
 	await modifyChangelog( newChangelog, cwd );
-	await commitChanges( newVersion, changesetFilePaths );
+	await commitChanges(
+		newVersion,
+		changesetFilePaths.map( ( { cwd, isRoot, changesetPaths } ) => ( { cwd, isRoot, changesetPaths } ) )
+	);
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
 }

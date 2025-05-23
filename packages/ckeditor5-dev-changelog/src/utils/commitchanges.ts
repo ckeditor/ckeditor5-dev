@@ -10,7 +10,9 @@ import { logInfo } from './loginfo.js';
 import { CHANGELOG_FILE } from '../constants.js';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
 
-export async function commitChanges( version: string, repositories: Array<ChangesetPathsWithGithubUrl> ): Promise<void> {
+type RepositoryData = Pick<ChangesetPathsWithGithubUrl, 'cwd' | 'isRoot' | 'changesetPaths'>;
+
+export async function commitChanges( version: string, repositories: Array<RepositoryData> ): Promise<void> {
 	const message = `Changelog for v${ version }. [skip ci]`;
 
 	logInfo( `○ ${ chalk.cyan( 'Committing changes...' ) }` );
