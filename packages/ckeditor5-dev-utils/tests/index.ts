@@ -12,6 +12,7 @@ import * as builds from '../src/builds/index.js';
 import * as stream from '../src/stream/index.js';
 import * as styles from '../src/styles/index.js';
 import * as tools from '../src/tools/index.js';
+import * as git from '../src/git/index.js';
 
 vi.mock( '../src/builds/index.js' );
 vi.mock( '../src/bundler/index.js' );
@@ -20,6 +21,7 @@ vi.mock( '../src/logger/index.js' );
 vi.mock( '../src/stream/index.js' );
 vi.mock( '../src/styles/index.js' );
 vi.mock( '../src/tools/index.js' );
+vi.mock( '../src/git/index.js' );
 
 describe( 'index.js', () => {
 	describe( '#builds', () => {
@@ -61,6 +63,12 @@ describe( 'index.js', () => {
 	describe( '#tools', () => {
 		it( 'should be a function', () => {
 			expect( packageUtils.tools ).to.equal( tools );
+		} );
+	} );
+
+	describe( '#git', () => {
+		it( 'should be a function', () => {
+			expect( packageUtils.git ).to.equal( git );
 		} );
 	} );
 } );
