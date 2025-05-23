@@ -5,7 +5,6 @@
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
-import upath from 'upath';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { RepositoryConfig } from '../../src/types.js';
 import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
@@ -63,19 +62,25 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ].map( upath.normalize ),
+				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: true
+				skipLinks: true,
+				isRoot: true,
+				cwd: '/mock/current'
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ].map( upath.normalize ),
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: true
+				skipLinks: true,
+				isRoot: false,
+				cwd: '/mock/repo1'
 			},
 			{
-				changesetPaths: [ '/mock/repo2/changesets/file4.md' ].map( upath.normalize ),
+				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo2',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: false,
+				cwd: '/mock/repo2'
 			}
 		] );
 
@@ -97,9 +102,11 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md' ].map( upath.normalize ),
+				changesetPaths: [ '/mock/current/changesets/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: true,
+				cwd: '/mock/current'
 			}
 		] );
 
@@ -133,12 +140,16 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false
+				skipLinks: false,
+				cwd: '/mock/current',
+				isRoot: true
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ].map( upath.normalize ),
+				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: false
+				skipLinks: false,
+				cwd: '/mock/repo1',
+				isRoot: false
 			}
 		] );
 
@@ -163,12 +174,16 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: true,
+				cwd: '/mock/current'
 			},
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: false,
+				cwd: '/mock/repo1'
 			}
 		] );
 
@@ -212,7 +227,9 @@ describe( 'getChangesetFilePaths()', () => {
 					'C:/mock/current/changesets/subfolder/file2.md'
 				],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: true,
+				cwd: '/mock/current'
 			}
 		] );
 

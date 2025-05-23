@@ -23,7 +23,9 @@ export async function getChangesetFilePaths(
 		return {
 			changesetPaths: changesetGlob.map( path => upath.normalize( path ) ),
 			gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
-			skipLinks: repo.skipLinks
+			skipLinks: repo.skipLinks,
+			cwd: repo.cwd,
+			isRoot: false
 		};
 	} ) );
 
@@ -33,7 +35,9 @@ export async function getChangesetFilePaths(
 		{
 			changesetPaths: mainChangesetGlob.map( path => upath.normalize( path ) ),
 			gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
-			skipLinks
+			skipLinks,
+			cwd,
+			isRoot: true
 		},
 		...externalChangesetPaths
 	] );

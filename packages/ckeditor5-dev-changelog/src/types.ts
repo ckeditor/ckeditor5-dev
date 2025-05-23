@@ -132,6 +132,8 @@ export type ChangesetPathsWithGithubUrl = {
 	changesetPaths: Array<string>;
 	gitHubUrl: string;
 	skipLinks: boolean;
+	cwd: string;
+	isRoot: boolean;
 };
 
 type oneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
