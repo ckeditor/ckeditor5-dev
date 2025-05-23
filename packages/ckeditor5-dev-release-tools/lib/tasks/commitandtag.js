@@ -34,10 +34,12 @@ export default async function commitAndTag( {
 		return;
 	}
 
+	const message = `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`;
+
 	if ( dryRun ) {
 		return git.commit( {
 			cwd: normalizedCwd,
-			message: `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`,
+			message,
 			dryRun: true,
 			files: filePathsToAdd
 		} );
@@ -54,7 +56,7 @@ export default async function commitAndTag( {
 	if ( !tagForVersion ) {
 		await git.commit( {
 			cwd: normalizedCwd,
-			message: `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`,
+			message,
 			files: filePathsToAdd
 		} );
 		await gitInstance.addAnnotatedTag( `v${ version }`, `Release: v${ version }.` );
