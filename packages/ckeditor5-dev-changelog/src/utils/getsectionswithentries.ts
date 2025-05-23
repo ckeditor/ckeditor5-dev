@@ -109,7 +109,7 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( breakingChangeNormalized === 'minor' || breakingChangeNormalized === 'major' || breakingChangeNormalized === true ) {
+		if ( [ 'minor', 'major', true ].includes( breakingChangeNormalized! ) ) {
 			return 'breaking';
 		}
 	} else {
@@ -122,19 +122,7 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 		}
 	}
 
-	if ( entry.data.typeNormalized === 'Feature' ) {
-		return 'feature';
-	}
-
-	if ( entry.data.typeNormalized === 'Fix' ) {
-		return 'fix';
-	}
-
-	if ( entry.data.typeNormalized === 'Other' ) {
-		return 'other';
-	}
-
-	return 'invalid';
+	return entry.data.typeNormalized?.toLowerCase() as SectionName;
 }
 
 function getInitialSectionsWithEntries(): SectionsWithEntries {

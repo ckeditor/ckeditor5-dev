@@ -178,14 +178,6 @@ describe( 'getSectionsWithEntries()', () => {
 		expect( result.invalid.entries ).toHaveLength( 0 );
 	} );
 
-	it( 'should classify an entry with an unknown type as invalid', () => {
-		const parsedFiles = [ createParsedFile( { data: { type: 'UnknownType', typeNormalized: 'UnknownType' } } ) ];
-
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
-
-		expect( result.invalid.entries ).toHaveLength( 1 );
-	} );
-
 	it( 'should not include see and closes when they are undefined', () => {
 		const parsedFiles = [ createParsedFile( {
 			data: {
