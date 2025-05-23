@@ -24,6 +24,7 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
+import { commitChanges } from './utils/commitchanges.js';
 
 export async function generateChangelog(
   config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
@@ -104,19 +105,21 @@ export async function generateChangelog( {
 		singlePackage
 	} );
 
-	if ( !noWrite ) {
-		await modifyChangelog( newChangelog, cwd );
-	}
-
+	// TODO: Merge `removeInputFiles` and `noWrite` options. Then, rename:
+	// * `disableFilesystemOperations`
+	// * `noFilesystemChanges`
+	// * `readonlyMode` (the question is why it changes the return type; perhaps it's bad option)
+	// * `dryRun ` (as above)
 	if ( removeInputFiles ) {
 		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
 	}
 
-	// TODO consider commiting the changes here or in a separate command.
-
-	logInfo( '○ ' + chalk.green( 'Done!' ) );
-
 	if ( noWrite ) {
 		return newChangelog;
 	}
+
+	await modifyChangelog( newChangelog, cwd );
+	await commitChanges( newVersion, changesetFilePaths );
+
+	logInfo( '○ ' + chalk.green( 'Done!' ) );
 }
