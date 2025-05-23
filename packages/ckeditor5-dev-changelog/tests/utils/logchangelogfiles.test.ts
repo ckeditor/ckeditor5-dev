@@ -19,7 +19,7 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Added new feature',
-						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature' },
+						data: { mainContent: 'Added new feature', restContent: [], typeNormalized: 'Feature' },
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
@@ -30,7 +30,9 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Feature: Added new feature"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.green( '+' ) } "Feature: Added new feature"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, '' );
+		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'WARNING:' ) );
 	} );
 
 	it( 'logs invalid section in red', () => {
@@ -40,7 +42,10 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Invalid entry',
-						data: { mainContent: 'Invalid entry', restContent: [] },
+						data: {
+							restContent: [],
+							validations: [ 'Missing type', 'Incorrect format' ]
+						},
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
@@ -50,7 +55,10 @@ describe( 'logChangelogFiles()', () => {
 		logChangelogFiles( sections );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Invalid entry" (file:///repo/changelog/changeset-1.md)', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/changeset-1.md', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Missing type', { indent: 8 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Incorrect format', { indent: 8 } );
 	} );
 
 	it( 'handles empty sections gracefully', () => {
@@ -60,8 +68,8 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenCalledTimes( 1 );
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
+		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'WARNING:' ) );
 	} );
 
 	it( 'logs entries with type and scope correctly', () => {
@@ -72,8 +80,8 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added new button',
 						data: {
-							type: 'Feature',
-							scope: [ 'ckeditor5-ui', 'ckeditor5-core' ],
+							typeNormalized: 'Feature',
+							scopeValidated: [ 'ckeditor5-ui', 'ckeditor5-core' ],
 							mainContent: 'Added new button component',
 							restContent: []
 						},
@@ -87,7 +95,7 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith(
 			3,
-			'- "Feature (ckeditor5-ui, ckeditor5-core): Added new button component"',
+			`- ${ chalk.green( '+' ) } "Feature (ckeditor5-ui, ckeditor5-core): Added new button component"`,
 			{ indent: 4 }
 		);
 	} );
@@ -100,7 +108,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed button issue',
 						data: {
-							type: 'Fix',
+							typeNormalized: 'Fix',
 							mainContent: 'Fixed button click behavior',
 							restContent: [
 								'Closes #123',
@@ -115,7 +123,7 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Fix: Fixed button click behavior"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.green( '+' ) } "Fix: Fixed button click behavior"`, { indent: 4 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.italic( '"Closes #123"' ), { indent: 6 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, chalk.italic( '"See also: #456"' ), { indent: 6 } );
 	} );
@@ -128,7 +136,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'Added feature',
 							restContent: []
 						},
@@ -142,7 +150,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed bug',
 						data: {
-							type: 'Fix',
+							typeNormalized: 'Fix',
 							mainContent: 'Fixed bug',
 							restContent: []
 						},
@@ -154,7 +162,7 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenCalledTimes( 7 ); // Initial + 2 sections with 2 entries + 2 empty lines
+		// Updated call count to account for warning message
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.blue( 'Found Bug fixes:' ), { indent: 2 } );
 	} );
@@ -167,7 +175,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'First feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'First feature',
 							restContent: []
 						},
@@ -176,7 +184,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Second feature',
 						data: {
-							type: 'Feature',
+							typeNormalized: 'Feature',
 							mainContent: 'Second feature',
 							restContent: []
 						},
@@ -188,8 +196,8 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- "Feature: First feature"', { indent: 4 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- "Feature: Second feature"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.green( '+' ) } "Feature: First feature"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, `- ${ chalk.green( '+' ) } "Feature: Second feature"`, { indent: 4 } );
 	} );
 
 	it( 'handles mixed valid and invalid sections correctly', () => {
@@ -200,8 +208,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Valid feature',
 						data: {
-							type: 'Feature',
-							mainContent: 'Valid feature',
+							typeNormalized: 'Feature',
 							restContent: []
 						},
 						changesetPath: '/repo/changelog/valid.md'
@@ -213,7 +220,10 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Invalid entry',
-						data: { mainContent: 'Invalid entry', restContent: [] },
+						data: {
+							restContent: [],
+							validations: [ 'Invalid type' ]
+						},
 						changesetPath: '/repo/changelog/invalid.md'
 					}
 				]
@@ -224,6 +234,85 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- "Invalid entry" (file:///repo/changelog/invalid.md)', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- File: file:///repo/changelog/invalid.md', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 7, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 8, '- Invalid type', { indent: 8 } );
+	} );
+
+	it( 'handles invalid sections with no validation details correctly', () => {
+		const sections: SectionsWithEntries = {
+			invalid: {
+				title: 'Invalid changes',
+				entries: [
+					{
+						message: 'Invalid entry with no details',
+						data: {
+							mainContent: 'Invalid entry',
+							restContent: []
+						},
+						changesetPath: '/repo/changelog/invalid-no-details.md'
+					}
+				]
+			}
+		} as any;
+
+		logChangelogFiles( sections );
+
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/invalid-no-details.md', { indent: 4 } );
+		expect( logInfo ).not.toHaveBeenCalledWith( chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+	} );
+
+	it( 'logs entries with validation warnings using yellow exclamation mark', () => {
+		const sections: SectionsWithEntries = {
+			Feature: {
+				title: 'Features',
+				entries: [
+					{
+						message: 'Feature with warnings',
+						data: {
+							typeNormalized: 'Feature',
+							mainContent: 'Feature with warnings',
+							restContent: [],
+							validations: [ 'Invalid scope reference' ]
+						},
+						changesetPath: '/repo/changelog/warning-feature.md'
+					}
+				]
+			}
+		} as any;
+
+		logChangelogFiles( sections );
+
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( '!' ) } "Feature: Feature with warnings"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- File: file:///repo/changelog/warning-feature.md', { indent: 8 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Invalid scope reference', { indent: 10 } );
+	} );
+
+	it( 'handles entries with rest content and validations correctly', () => {
+		const sections: SectionsWithEntries = {
+			Feature: {
+				title: 'Features',
+				entries: [
+					{
+						message: 'Feature with rest content and warnings',
+						data: {
+							typeNormalized: 'Feature',
+							mainContent: 'Feature with rest content',
+							restContent: [ 'Closes #123' ],
+							validations: [ 'Invalid scope' ]
+						},
+						changesetPath: '/repo/changelog/complex-feature.md'
+					}
+				]
+			}
+		} as any;
+
+		logChangelogFiles( sections );
+
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( '!' ) } "Feature: Feature with rest content"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.italic( '"Closes #123"' ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- File: file:///repo/changelog/complex-feature.md', { indent: 8 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Invalid scope', { indent: 10 } );
 	} );
 } );

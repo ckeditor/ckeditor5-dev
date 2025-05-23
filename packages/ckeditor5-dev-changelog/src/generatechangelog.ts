@@ -24,20 +24,39 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
+import { InternalError } from './errors.js';
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
+	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
 ): Promise<void>;
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+	config: RepositoryConfig & GenerateChangelog & { noWrite: true }
 ): Promise<string>;
+
+/**
+ * Wrapper function that provides error handling for the changelog generation process.
+ */
+export async function generateChangelog(
+	options: RepositoryConfig & GenerateChangelog
+): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+	try {
+		return await main( options );
+	} catch ( error ) {
+		if ( !( error instanceof InternalError ) ) {
+			throw error;
+		}
+
+		console.error( chalk.red( 'Error: ' + error.message ) );
+		process.exit( 1 );
+	}
+}
 
 /**
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */
-export async function generateChangelog( {
+async function main( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
@@ -67,14 +86,13 @@ export async function generateChangelog( {
 		parsedFiles: parsedChangesetFiles,
 		packageJsons,
 		transformScope,
-		organisationNamespace,
 		singlePackage
 	} );
 
-	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
-
 	// Logging changes in the console.
 	logChangelogFiles( sectionsWithEntries );
+
+	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
 	const { isInternal, newVersion } = await getNewVersion( {

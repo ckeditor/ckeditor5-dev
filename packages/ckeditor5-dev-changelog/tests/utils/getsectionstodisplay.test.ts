@@ -5,6 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay.js';
+import { InternalError } from '../../src/errors.js';
 import type { SectionsWithEntries, Section, Entry } from '../../src/types.js';
 
 const createSection = ( title: string, entries: Array<Entry> ): Section => ( {
@@ -22,7 +23,8 @@ describe( 'getSectionsToDisplay()', () => {
 			feature: createSection( 'Features', [] ),
 			fix: createSection( 'Fix', [] ),
 			other: createSection( 'Other', [] ),
-			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] ),
+			breaking: createSection( 'Breaking Changes', [] )
 		};
 
 		const result = getSectionsToDisplay( sectionsWithEntries );
@@ -40,11 +42,12 @@ describe( 'getSectionsToDisplay()', () => {
 			feature: createSection( 'Features', [] ),
 			fix: createSection( 'Fix', [] ),
 			other: createSection( 'Other', [] ),
-			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] ),
+			breaking: createSection( 'Breaking Changes', [] )
 		};
 
 		expect( () => {
 			getSectionsToDisplay( sectionsWithEntries );
-		} ).toThrow( 'No valid changesets found. Aborting.' );
+		} ).toThrow( InternalError );
 	} );
 } );

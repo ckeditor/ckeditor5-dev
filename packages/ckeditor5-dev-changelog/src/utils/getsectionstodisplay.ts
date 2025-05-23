@@ -4,6 +4,7 @@
  */
 
 import type { Section, SectionsWithEntries } from '../types.js';
+import { InternalError } from '../errors.js';
 
 /**
  * This function determines which sections contain valid entries to be shown.
@@ -14,7 +15,7 @@ export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries )
 		.map( ( [ , section ] ) => section );
 
 	if ( !sectionsToDisplay.length ) {
-		throw new Error( 'No valid changesets found. Aborting.' );
+		throw new InternalError();
 	}
 
 	return sectionsToDisplay;

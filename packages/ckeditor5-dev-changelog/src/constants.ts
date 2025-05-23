@@ -24,5 +24,10 @@ export const SECTIONS = {
 	feature: { title: 'Features' },
 	fix: { title: 'Bug fixes' },
 	other: { title: 'Other changes' },
-	invalid: { title: 'Invalid changes' }
+	invalid: { title: 'incorrectly defined input files' }
 } as const;
+
+export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+export const ISSUE_PATTERN = /^\d+$/;
+export const ISSUE_URL_PATTERN =
+	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;

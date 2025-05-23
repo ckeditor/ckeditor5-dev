@@ -23,6 +23,7 @@ import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
 import { removeScope } from '../src/utils/removescope.js';
 import { SECTIONS } from '../src/constants.js';
+import { InternalError } from '../src/errors.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
@@ -45,7 +46,8 @@ vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
 		green: ( text: string ) => text,
-		cyan: ( text: string ) => text
+		cyan: ( text: string ) => text,
+		red: ( text: string ) => text
 	}
 } ) );
 
@@ -297,7 +299,6 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
-			organisationNamespace: '@ckeditor',
 			packageJsons: [ {
 				name: 'test-package',
 				version: '1.0.0'
@@ -445,7 +446,6 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
-			organisationNamespace: '@ckeditor',
 			packageJsons: [ {
 				name: 'test-package',
 				version: '1.0.0'
@@ -680,5 +680,39 @@ describe( 'generateChangelog()', () => {
 			sectionsToDisplay: expect.any( Array )
 		} ) );
 		expect( modifyChangelog ).toHaveBeenCalled();
+	} );
+
+	it( 'handles InternalError properly', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+			throw new InternalError();
+		} );
+
+		await generateChangelog( defaultOptions );
+
+		expect( processMock ).toHaveBeenCalledOnce();
+		expect( consoleMock ).toHaveBeenCalledOnce();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
+	} );
+
+	it( 'rethrows other errors', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+			throw new Error();
+		} );
+
+		await expect( generateChangelog( defaultOptions ) ).rejects.toThrow();
+
+		expect( processMock ).not.toBeCalled();
+		expect( consoleMock ).not.toBeCalled();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
 	} );
 } );
