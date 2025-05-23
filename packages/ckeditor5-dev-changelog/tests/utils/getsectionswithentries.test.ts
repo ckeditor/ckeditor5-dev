@@ -17,9 +17,7 @@ vi.mock( '../../src/utils/linktogithubuser', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
 
-vi.mock( '../../src/utils/validateentry', () => ( {
-	validateEntry: vi.fn( entry => ( { validatedEntry: entry, isValid: true } ) )
-} ) );
+vi.mock( '../../src/utils/validateentry' );
 
 const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
 	content: 'Some content',
@@ -30,12 +28,15 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 	data: {
 		type: 'FEATURE',
 		typeNormalized: 'Feature',
-		scope: [ 'package-1' ],
-		scopeNormalized: [ 'PACKAGE-1' ],
+		scope: [ 'PACKAGE-1' ],
+		scopeNormalized: [ 'package-1' ],
+		scopeValidated: [ 'package-1' ],
 		closes: [ '123' ],
 		closesNormalized: [ '123' ],
+		closesValidated: [ '123' ],
 		see: [ '456' ],
 		seeNormalized: [ '456' ],
+		seeValidated: [ '456' ],
 		...overrides.data
 	}
 } as any );
@@ -56,6 +57,22 @@ describe( 'getSectionsWithEntries()', () => {
 			{ name: `${ organisationNamespace }/package-1`, version: '1.0.0' },
 			{ name: `${ organisationNamespace }/package-2`, version: '1.0.0' }
 		];
+
+		vi.mocked( validateEntry ).mockImplementation( entry => {
+			const data = entry.data! || {};
+			return {
+				validatedEntry: {
+					...entry,
+					data: {
+						...data,
+						scopeValidated: data.scopeNormalized,
+						closesValidated: data.closesNormalized,
+						seeValidated: data.seeNormalized
+					}
+				},
+				isValid: true
+			};
+		} );
 
 		vi.clearAllMocks();
 	} );
@@ -98,9 +115,18 @@ describe( 'getSectionsWithEntries()', () => {
 			} )
 		];
 
-		// For this test, we need to override the validation mock to mark the entry as invalid.
+		const testFile = parsedFiles[ 0 ]!;
+		const testData = testFile.data!;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
-			validatedEntry: parsedFiles[ 0 ] as ParsedFile,
+			validatedEntry: {
+				...testFile,
+				data: {
+					...testData,
+					scopeValidated: testData.scopeNormalized,
+					closesValidated: testData.closesNormalized,
+					seeValidated: testData.seeNormalized
+				}
+			},
 			isValid: false
 		} );
 
@@ -165,8 +191,10 @@ describe( 'getSectionsWithEntries()', () => {
 			data: {
 				see: undefined,
 				seeNormalized: undefined,
+				seeValidated: undefined,
 				closes: undefined,
-				closesNormalized: undefined
+				closesNormalized: undefined,
+				closesValidated: undefined
 			}
 		} ) ];
 
@@ -179,7 +207,13 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify an entry as valid if the scope is undefined', () => {
-		const parsedFiles = [ createParsedFile( { data: { scope: undefined, scopeNormalized: undefined } } ) ];
+		const parsedFiles = [ createParsedFile( {
+			data: {
+				scope: undefined,
+				scopeNormalized: undefined,
+				scopeValidated: undefined
+			}
+		} ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
 
@@ -190,7 +224,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should handle an empty parsedFiles array', () => {
 		const result = getSectionsWithEntries( { parsedFiles: [], packageJsons, transformScope, singlePackage } );
 
-		Object.values( result ).forEach( section => expect( section.entries ).toBeUndefined );
+		Object.values( result ).forEach( section => expect( section.entries ).toHaveLength( 0 ) );
 	} );
 
 	it( 'should generate correct markdown links for scope and issues from the current repository', () => {
@@ -209,8 +243,10 @@ describe( 'getSectionsWithEntries()', () => {
 		const parsedFiles = [ createParsedFile( { data: {
 			closes: [ 'ckeditor/ckeditor5#123' ],
 			closesNormalized: [ 'ckeditor/ckeditor5#123' ],
+			closesValidated: [ 'ckeditor/ckeditor5#123' ],
 			see: [ 'mr-developer/cool-project.com#456' ],
-			seeNormalized: [ 'mr-developer/cool-project.com#456' ]
+			seeNormalized: [ 'mr-developer/cool-project.com#456' ],
+			seeValidated: [ 'mr-developer/cool-project.com#456' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
@@ -228,7 +264,8 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should generate correct markdown links for GitHub issues with URL format', () => {
 		const parsedFiles = [ createParsedFile( { data: {
 			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ],
-			closesNormalized: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
+			closesNormalized: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ],
+			closesValidated: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
@@ -250,11 +287,22 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should not add invalid links to the generated message', () => {
 		const parsedFiles = [ createParsedFile( { data: {
-			closesNormalized: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
+			closesNormalized: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ],
+			closesValidated: []
 		} } ) ];
 
+		const testFile = parsedFiles[ 0 ]!;
+		const testData = testFile.data!;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
-			validatedEntry: parsedFiles[ 0 ] as ParsedFile,
+			validatedEntry: {
+				...testFile,
+				data: {
+					...testData,
+					scopeValidated: testData.scopeNormalized,
+					closesValidated: [],
+					seeValidated: testData.seeNormalized
+				}
+			},
 			isValid: false
 		} );
 
@@ -281,5 +329,19 @@ describe( 'getSectionsWithEntries()', () => {
 			'  Third line.'
 		].join( '\n' ) );
 		/* eslint-enable max-len */
+	} );
+
+	it( 'should handle invalid issue references that do not match any pattern', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			closes: [ 'invalid-reference' ],
+			closesNormalized: [ 'invalid-reference' ],
+			closesValidated: [ 'invalid-reference' ]
+		} } ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).toContain( 'Closes .' );
 	} );
 } );

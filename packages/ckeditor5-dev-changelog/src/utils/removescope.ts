@@ -10,6 +10,7 @@ export function removeScope( parsedChangesetFiles: Array<ParsedFile> ): Array<Pa
 
 	clone.forEach( changeset => delete changeset.data.scope );
 	clone.forEach( changeset => delete changeset.data.scopeNormalized );
+	clone.forEach( changeset => delete changeset.data.scopeValidated );
 
 	return clone;
 }

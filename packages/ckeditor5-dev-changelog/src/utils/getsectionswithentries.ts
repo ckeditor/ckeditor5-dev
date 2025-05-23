@@ -29,9 +29,9 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 
-		const scope = getScopesLinks( validatedData.scopeNormalized, transformScope );
-		const closes = getIssuesLinks( validatedData.closesNormalized, 'Closes', validatedEntry.gitHubUrl );
-		const see = getIssuesLinks( validatedData.seeNormalized, 'See', validatedEntry.gitHubUrl );
+		const scope = getScopesLinks( validatedData.scopeValidated, transformScope );
+		const closes = getIssuesLinks( validatedData.closesValidated, 'Closes', validatedEntry.gitHubUrl );
+		const see = getIssuesLinks( validatedData.seeValidated, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
 
@@ -69,7 +69,7 @@ function getScopesLinks( scope: Array<string> | undefined, transformScope: Trans
 }
 
 function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitHubUrl: string ): string | null {
-	if ( !issues ) {
+	if ( !issues?.length ) {
 		return null;
 	}
 

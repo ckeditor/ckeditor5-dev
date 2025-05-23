@@ -150,12 +150,12 @@ describe( 'normalizeEntry()', () => {
 
 	describe( 'other fields normalization', () => {
 		it( 'should maintain closes field', () => {
-			const closesValue = [ '123', '456' ];
+			const closesValue = [ 123, '456' ];
 			const entry = createEntry( { closes: closesValue } );
 
 			const normalizedEntry = normalizeEntry( entry, false );
 
-			expect( normalizedEntry.data.closesNormalized ).toBe( closesValue );
+			expect( normalizedEntry.data.closesNormalized ).toEqual( [ '123', '456' ] );
 		} );
 
 		it( 'should maintain see field', () => {
@@ -164,7 +164,7 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry, false );
 
-			expect( normalizedEntry.data.seeNormalized ).toBe( seeValue );
+			expect( normalizedEntry.data.seeNormalized ).toEqual( seeValue );
 		} );
 	} );
 
@@ -197,8 +197,8 @@ describe( 'normalizeEntry()', () => {
 			expect( normalizedEntry.data.typeNormalized ).toBe( 'Feature' );
 			expect( normalizedEntry.data.breakingChangeNormalized ).toBe( 'minor' );
 			expect( normalizedEntry.data.scopeNormalized ).toEqual( [ 'engine' ] );
-			expect( normalizedEntry.data.closesNormalized ).toBe( originalEntry.data.closes );
-			expect( normalizedEntry.data.seeNormalized ).toBe( originalEntry.data.see );
+			expect( normalizedEntry.data.closesNormalized ).toEqual( originalEntry.data.closes );
+			expect( normalizedEntry.data.seeNormalized ).toEqual( originalEntry.data.see );
 		} );
 	} );
 } );

@@ -155,7 +155,7 @@ describe( 'validateEntry()', () => {
 	} );
 
 	describe( 'scope validation', () => {
-		it( 'should return invalid when scope is not a valid package', () => {
+		it( 'should add validation message but remain valid when scope is not a valid package', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
@@ -164,10 +164,11 @@ describe( 'validateEntry()', () => {
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
-			expect( isValid ).toBeFalsy();
+			expect( isValid ).toBeTruthy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Scope "unknown-package" is not recognised as a valid package in the repository.'
 			);
+			expect( ( validatedEntry.data as any ).scopeValidated ).toEqual( [] );
 		} );
 
 		it( 'should return valid when scope is a valid package', () => {
@@ -177,12 +178,13 @@ describe( 'validateEntry()', () => {
 				scopeNormalized: [ 'ckeditor5-engine' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).scopeValidated ).toEqual( [ 'ckeditor5-engine' ] );
 		} );
 
-		it( 'should validate multiple scopes correctly', () => {
+		it( 'should validate multiple scopes but remain valid even if some are invalid', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
@@ -191,15 +193,16 @@ describe( 'validateEntry()', () => {
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
-			expect( isValid ).toBeFalsy();
+			expect( isValid ).toBeTruthy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Scope "unknown-package" is not recognised as a valid package in the repository.'
 			);
+			expect( ( validatedEntry.data as any ).scopeValidated ).toEqual( [ 'ckeditor5-engine' ] );
 		} );
 	} );
 
 	describe( 'see validation', () => {
-		it( 'should return invalid when see is not a valid issue reference', () => {
+		it( 'should add validation message but remain valid when see is not a valid issue reference', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
@@ -208,11 +211,12 @@ describe( 'validateEntry()', () => {
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
-			expect( isValid ).toBeFalsy();
+			expect( isValid ).toBeTruthy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'See "invalid-issue-reference" is not a valid issue reference. ' +
 				'Provide either: issue number, repository-slug#id or full issue link URL.'
 			);
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [] );
 		} );
 
 		it( 'should return valid when see is an issue number', () => {
@@ -222,9 +226,10 @@ describe( 'validateEntry()', () => {
 				seeNormalized: [ '1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [ '1234' ] );
 		} );
 
 		it( 'should return valid when see is a repository-slug#id', () => {
@@ -234,9 +239,10 @@ describe( 'validateEntry()', () => {
 				seeNormalized: [ 'ckeditor/ckeditor5#1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [ 'ckeditor/ckeditor5#1234' ] );
 		} );
 
 		it( 'should return valid when see is a full issue URL', () => {
@@ -246,14 +252,32 @@ describe( 'validateEntry()', () => {
 				seeNormalized: [ 'https://github.com/ckeditor/ckeditor5/issues/1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [ 'https://github.com/ckeditor/ckeditor5/issues/1234' ] );
+		} );
+
+		it( 'should filter out invalid see references while keeping valid ones', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				typeNormalized: 'Feature',
+				seeNormalized: [ 'invalid-reference', '1234', 'ckeditor/ckeditor5#5678' ]
+			} );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
+
+			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).validations ).toContain(
+				'See "invalid-reference" is not a valid issue reference. ' +
+				'Provide either: issue number, repository-slug#id or full issue link URL.'
+			);
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [ '1234', 'ckeditor/ckeditor5#5678' ] );
 		} );
 	} );
 
 	describe( 'closes validation', () => {
-		it( 'should return invalid when closes is not a valid issue reference', () => {
+		it( 'should add validation message but remain valid when closes is not a valid issue reference', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
@@ -262,11 +286,12 @@ describe( 'validateEntry()', () => {
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
-			expect( isValid ).toBeFalsy();
+			expect( isValid ).toBeTruthy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
 				'Closes "invalid-issue-reference" is not a valid issue reference. ' +
 				'Provide either: issue number, repository-slug#id or full issue link URL.'
 			);
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [] );
 		} );
 
 		it( 'should return valid when closes is an issue number', () => {
@@ -276,9 +301,10 @@ describe( 'validateEntry()', () => {
 				closesNormalized: [ '1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [ '1234' ] );
 		} );
 
 		it( 'should return valid when closes is a repository-slug#id', () => {
@@ -288,9 +314,10 @@ describe( 'validateEntry()', () => {
 				closesNormalized: [ 'ckeditor/ckeditor5#1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [ 'ckeditor/ckeditor5#1234' ] );
 		} );
 
 		it( 'should return valid when closes is a full issue URL', () => {
@@ -300,14 +327,32 @@ describe( 'validateEntry()', () => {
 				closesNormalized: [ 'https://github.com/ckeditor/ckeditor5/issues/1234' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [ 'https://github.com/ckeditor/ckeditor5/issues/1234' ] );
+		} );
+
+		it( 'should filter out invalid closes references while keeping valid ones', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				typeNormalized: 'Feature',
+				closesNormalized: [ 'invalid-reference', '1234', 'ckeditor/ckeditor5#5678' ]
+			} );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
+
+			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).validations ).toContain(
+				'Closes "invalid-reference" is not a valid issue reference. ' +
+				'Provide either: issue number, repository-slug#id or full issue link URL.'
+			);
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [ '1234', 'ckeditor/ckeditor5#5678' ] );
 		} );
 	} );
 
 	describe( 'multiple validations', () => {
-		it( 'should collect multiple validation errors', () => {
+		it( 'should collect multiple validation errors but only mark as invalid for critical errors', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Unknown',
 				'breaking-change': 'not-valid',
@@ -321,6 +366,9 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations.length ).toBe( 5 );
+			expect( ( validatedEntry.data as any ).scopeValidated ).toEqual( [] );
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [] );
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [] );
 		} );
 
 		it( 'should return valid for a completely valid entry', () => {
@@ -334,9 +382,12 @@ describe( 'validateEntry()', () => {
 				closesNormalized: [ 'ckeditor/ckeditor5#5678' ]
 			} );
 
-			const { isValid } = validateEntry( entry, packageNames, false );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
+			expect( ( validatedEntry.data as any ).scopeValidated ).toEqual( [ 'ckeditor5-engine' ] );
+			expect( ( validatedEntry.data as any ).seeValidated ).toEqual( [ '1234' ] );
+			expect( ( validatedEntry.data as any ).closesValidated ).toEqual( [ 'ckeditor/ckeditor5#5678' ] );
 		} );
 	} );
 } );

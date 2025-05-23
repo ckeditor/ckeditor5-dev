@@ -87,7 +87,7 @@ export type SectionName = keyof typeof SECTIONS;
 
 export type Entry = {
 	message: string;
-	data: FileMetadata & FileMetadataNormalized & {
+	data: FileMetadata & FileMetadataNormalized & FileMetadataValidated & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
 		validations?: Array<string>;
@@ -103,6 +103,12 @@ type FileMetadata = {
 	see?: Array<string>;
 };
 
+type FileMetadataValidated = {
+	scopeValidated?: Array<string>;
+	closesValidated?: Array<string>;
+	seeValidated?: Array<string>;
+};
+
 type FileMetadataNormalized = {
 	breakingChangeNormalized?: 'major' | 'minor' | boolean;
 	typeNormalized?: string;
@@ -113,7 +119,7 @@ type FileMetadataNormalized = {
 
 export type ParsedFile = {
 	content: string;
-	data: FileMetadata & FileMetadataNormalized;
+	data: FileMetadata & FileMetadataNormalized & FileMetadataValidated;
 	changesetPath: string;
 	gitHubUrl: string;
 	skipLinks: boolean;
