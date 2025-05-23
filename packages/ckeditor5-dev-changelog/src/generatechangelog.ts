@@ -44,20 +44,36 @@ export async function generateChangelog( {
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
 	organisationNamespace = ORGANISATION_NAMESPACE,
 	externalRepositories = [],
+	// TODO: An integrator should define it. No defaults here.
+	// TODO: Required when `singlePackage=false`.
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = CHANGESET_DIRECTORY,
 	skipLinks = false,
 	singlePackage = false,
+
+	// TODO: Merge `removeInputFiles` and `noWrite` options.
 	noWrite = false,
 	removeInputFiles = true
 }: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+	// TODO: getExternalRepositoriesWithDefaults => `normalizeRepositories`.
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
+
+	// TODO: If I understood correct purposes of this util, it should be renamed to: `findAvailablePackages`.
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
+
+	// TODO: This should be built-in `getExternalRepositoriesWithDefaults`.
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
+
 	const { version: oldVersion, name: packageName } = await workspaces.getPackageJson( cwd, { async: true } );
+
+	// TODO: It's an internal of `getNewChangelog()`.
 	const dateFormatted = getDateFormatted( date );
+
+	// TODO It should accept a single parameter: the normalized repositories array.
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
+
+	// TODO: Extract to an internal helper to replace `let` with `const`.
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 
 	if ( singlePackage ) {
