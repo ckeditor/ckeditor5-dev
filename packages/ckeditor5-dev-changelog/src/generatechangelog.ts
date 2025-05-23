@@ -43,13 +43,12 @@ export async function generateChangelog(
 	try {
 		return await main( options );
 	} catch ( error ) {
-		if ( error instanceof InternalError ) {
-			console.error( chalk.red( 'Error: ' + error.message ) );
-
-			process.exit( 1 );
-		} else {
+		if ( !( error instanceof InternalError ) ) {
 			throw error;
 		}
+
+		console.error( chalk.red( 'Error: ' + error.message ) );
+		process.exit( 1 );
 	}
 }
 
