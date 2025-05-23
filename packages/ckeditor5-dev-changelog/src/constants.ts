@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { join } from 'path';
+
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
 export const CHANGELOG_HEADER = 'Changelog\n=========';
@@ -16,6 +18,8 @@ export const PACKAGES_DIRECTORY_NAME = 'packages';
 export const ORGANISATION_NAMESPACE = '@ckeditor';
 
 export const CHANGESET_DIRECTORY = '.changelog';
+
+export const TEMPLATE_FILE = join( import.meta.dirname, '../bin/template.md' );
 
 export const SECTIONS = {
 	major: { title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },

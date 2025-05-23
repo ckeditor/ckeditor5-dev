@@ -17,11 +17,24 @@
     "npm": ">=5.7.1"
   },
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./template": {
+      "types": "./dist/types/template.d.ts",
+      "default": "./dist/template.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
+    "bin",
     "dist"
   ],
+  "bin": {
+    "ckeditor5-dev-generate-changelog": "bin/generate-template.js"
+  },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^49.0.2",
     "chalk": "^5.0.0",
@@ -34,8 +47,8 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.6",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/fs-extra": "^11.0.4",
     "@vitest/coverage-v8": "^3.1.1",
     "rollup": "^4.9.5",
