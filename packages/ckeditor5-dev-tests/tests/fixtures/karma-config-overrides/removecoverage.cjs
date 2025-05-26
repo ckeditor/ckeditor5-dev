@@ -5,4 +5,4 @@
 
 module.exports = config => {
 	config.reporters.splice( config.reporters.indexOf( 'coverage' ), 1 );
-}
+};

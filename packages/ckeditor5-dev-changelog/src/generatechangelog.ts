@@ -27,11 +27,11 @@ import { removeScope } from './utils/removescope.js';
 import { commitChanges } from './utils/commitchanges.js';
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
+	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
 ): Promise<void>;
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+	config: RepositoryConfig & GenerateChangelog & { noWrite: true }
 ): Promise<string>;
 
 /**
@@ -55,7 +55,7 @@ export async function generateChangelog( {
 	// TODO: Merge `removeInputFiles` and `noWrite` options.
 	noWrite = false,
 	removeInputFiles = true
-}: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+}: RepositoryConfig & GenerateChangelog ): Promise<string | void> {
 	// TODO: getExternalRepositoriesWithDefaults => `normalizeRepositories`.
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 

@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import formatMessage from '../lib/format-message.js';
