@@ -5,14 +5,15 @@
 
 import chalk from 'chalk';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { commitChanges } from '../../src/utils/commitchanges.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'chalk', () => ( {
 	default: {
-		cyan: vi.fn( ( text: string ) => text )
+		cyan: vi.fn( ( text: string ) => text ),
+		red: vi.fn( ( text: string ) => text )
 	}
 } ) );
 vi.mock( '../../src/utils/loginfo.js' );
@@ -21,6 +22,10 @@ vi.mock( '../../src/constants.js', () => ( {
 } ) );
 
 describe( 'commitChanges()', () => {
+	beforeEach( () => {
+		vi.mocked( tools.commit ).mockResolvedValue( undefined );
+	} );
+
 	it( 'should print a message when committing changes (single repository)', async () => {
 		await commitChanges( '1.0.0', [
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
@@ -168,5 +173,17 @@ describe( 'commitChanges()', () => {
 				'/home/ckeditor/ckeditor5/external/ckeditor5-internal/.changelog/changeset-1.md'
 			]
 		} );
+	} );
+
+	it( 'should not crash when an error occurs during commit', async () => {
+		vi.mocked( tools.commit ).mockRejectedValueOnce( new Error( 'Commit failed' ) );
+
+		await commitChanges( '1.0.0', [
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
+		] );
+
+		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
+		expect( logInfo ).toHaveBeenCalledWith( 'An error occurred while committing changes.', { indent: 2 } );
+		expect( logInfo ).toHaveBeenCalledWith( 'Commit failed', { indent: 2 } );
 	} );
 } );

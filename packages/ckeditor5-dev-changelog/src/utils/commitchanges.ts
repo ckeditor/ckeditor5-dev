@@ -27,6 +27,10 @@ export async function commitChanges( version: string, repositories: Array<Reposi
 
 		logInfo( `◌ Processing "${ cwd }".`, { indent: 1 } );
 
-		await tools.commit( { cwd, message, files } );
+		await tools.commit( { cwd, message, files } )
+			.catch( error => {
+				logInfo( 'An error occurred while committing changes.', { indent: 2 } );
+				logInfo( chalk.red( error.message ), { indent: 2 } );
+			} );
 	}
 }
