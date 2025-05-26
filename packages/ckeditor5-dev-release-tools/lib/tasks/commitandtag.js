@@ -6,13 +6,10 @@
 import upath from 'upath';
 import { glob } from 'glob';
 import { simpleGit } from 'simple-git';
-
-const { toUnix } = upath;
-
-const CHUNK_LENGTH_LIMIT = 4000;
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * Creates a commit and a tag for specified version.
+ * Creates a commit and a tag for the specified version.
  *
  * @param {object} options
  * @param {string} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
@@ -30,51 +27,38 @@ export default async function commitAndTag( {
 	skipCi = true,
 	dryRun = false
 } ) {
-	const normalizedCwd = toUnix( cwd );
+	const normalizedCwd = upath.toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
 	if ( !filePathsToAdd.length ) {
 		return;
 	}
 
-	const git = simpleGit( {
+	const message = `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`;
+
+	if ( dryRun ) {
+		return tools.commit( {
+			cwd: normalizedCwd,
+			message,
+			dryRun: true,
+			files: filePathsToAdd
+		} );
+	}
+
+	const gitInstance = simpleGit( {
 		baseDir: normalizedCwd
 	} );
 
-	const { all: availableTags } = await git.tags();
+	const { all: availableTags } = await gitInstance.tags();
 	const tagForVersion = availableTags.find( tag => tag.endsWith( version ) );
 
-	const makeCommit = async () => {
-		for ( const chunk of splitPathsIntoChunks( filePathsToAdd ) ) {
-			await git.add( chunk );
-		}
-
-		return git.commit( `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }` );
-	};
-
-	if ( dryRun ) {
-		const lastCommit = await git.log( [ '-1' ] );
-
-		await makeCommit();
-		await git.reset( [ lastCommit.latest.hash ] );
-	} else if ( !tagForVersion ) {
-		// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
-		await makeCommit();
-		await git.addAnnotatedTag( `v${ version }`, `Release: v${ version }.` );
+	// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
+	if ( !tagForVersion ) {
+		await tools.commit( {
+			cwd: normalizedCwd,
+			message,
+			files: filePathsToAdd
+		} );
+		await gitInstance.addAnnotatedTag( `v${ version }`, `Release: v${ version }.` );
 	}
-}
-
-function splitPathsIntoChunks( filePathsToAdd ) {
-	return filePathsToAdd.reduce( ( chunks, path ) => {
-		const lastChunk = chunks.at( -1 );
-		const newLength = [ ...lastChunk, path ].join( ' ' ).length;
-
-		if ( newLength < CHUNK_LENGTH_LIMIT ) {
-			lastChunk.push( path );
-		} else {
-			chunks.push( [ path ] );
-		}
-
-		return chunks;
-	}, [ [] ] );
 }

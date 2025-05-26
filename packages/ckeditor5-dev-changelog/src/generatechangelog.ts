@@ -24,6 +24,7 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
+import { commitChanges } from './utils/commitchanges.js';
 
 export async function generateChangelog(
 	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
@@ -43,20 +44,36 @@ export async function generateChangelog( {
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
 	organisationNamespace = ORGANISATION_NAMESPACE,
 	externalRepositories = [],
+	// TODO: An integrator should define it. No defaults here.
+	// TODO: Required when `singlePackage=false`.
 	transformScope = defaultTransformScope,
 	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
 	changesetsDirectory = CHANGESET_DIRECTORY,
 	skipLinks = false,
 	singlePackage = false,
+
+	// TODO: Merge `removeInputFiles` and `noWrite` options.
 	noWrite = false,
 	removeInputFiles = true
 }: RepositoryConfig & GenerateChangelog ): Promise<string | void> {
+	// TODO: getExternalRepositoriesWithDefaults => `normalizeRepositories`.
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
+
+	// TODO: If I understood correct purposes of this util, it should be renamed to: `findAvailablePackages`.
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
+
+	// TODO: This should be built-in `getExternalRepositoriesWithDefaults`.
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
+
 	const { version: oldVersion, name: packageName } = await workspaces.getPackageJson( cwd, { async: true } );
+
+	// TODO: It's an internal of `getNewChangelog()`.
 	const dateFormatted = getDateFormatted( date );
+
+	// TODO It should accept a single parameter: the normalized repositories array.
 	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
+
+	// TODO: Extract to an internal helper to replace `let` with `const`.
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
 
 	if ( singlePackage ) {
@@ -104,19 +121,24 @@ export async function generateChangelog( {
 		singlePackage
 	} );
 
-	if ( !noWrite ) {
-		await modifyChangelog( newChangelog, cwd );
-	}
-
+	// TODO: Merge `removeInputFiles` and `noWrite` options. Then, rename:
+	// * `disableFilesystemOperations`
+	// * `noFilesystemChanges`
+	// * `readonlyMode` (the question is why it changes the return type; perhaps it's bad option)
+	// * `dryRun ` (as above)
 	if ( removeInputFiles ) {
 		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
 	}
 
-	// TODO consider commiting the changes here or in a separate command.
-
-	logInfo( '○ ' + chalk.green( 'Done!' ) );
-
 	if ( noWrite ) {
 		return newChangelog;
 	}
+
+	await modifyChangelog( newChangelog, cwd );
+	await commitChanges(
+		newVersion,
+		changesetFilePaths.map( ( { cwd, isRoot, changesetPaths } ) => ( { cwd, isRoot, changesetPaths } ) )
+	);
+
+	logInfo( '○ ' + chalk.green( 'Done!' ) );
 }
