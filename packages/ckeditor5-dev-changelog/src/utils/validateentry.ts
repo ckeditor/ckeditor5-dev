@@ -28,7 +28,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const breakingChangeProvided = typeof data[ 'breaking-change' ] !== 'undefined';
 
 	if ( singlePackage ) {
-		if ( breakingChangeProvided && data.breakingChangeNormalized !== true ) {
+		if ( breakingChangeProvided && ![ 'minor', 'major', true ].includes( data.breakingChangeNormalized as string ) ) {
 			validations.push( [
 				`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
 				'"true", or not specified, for a single repo (case insensitive).'

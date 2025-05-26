@@ -84,15 +84,15 @@ describe( 'validateEntry()', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Feature',
 				typeNormalized: 'Feature',
-				'breaking-change': 'major',
-				breakingChangeNormalized: 'major'
+				'breaking-change': false,
+				breakingChangeNormalized: false
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Breaking change "major" should be one of: "true", or not specified, for a single repo (case insensitive).'
+				'Breaking change "false" should be one of: "true", or not specified, for a single repo (case insensitive).'
 			);
 		} );
 
@@ -102,6 +102,32 @@ describe( 'validateEntry()', () => {
 				typeNormalized: 'Feature',
 				'breaking-change': true,
 				breakingChangeNormalized: true
+			} );
+
+			const { isValid } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeTruthy();
+		} );
+
+		it( 'should return valid when breaking change is "major" for a single package', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				typeNormalized: 'Feature',
+				'breaking-change': 'major',
+				breakingChangeNormalized: 'major'
+			} );
+
+			const { isValid } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeTruthy();
+		} );
+
+		it( 'should return valid when breaking change is "minor" for a single package', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				typeNormalized: 'Feature',
+				'breaking-change': 'minor',
+				breakingChangeNormalized: 'minor'
 			} );
 
 			const { isValid } = validateEntry( entry, packageNames, true );

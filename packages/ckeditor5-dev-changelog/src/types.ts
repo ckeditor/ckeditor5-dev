@@ -110,7 +110,7 @@ type FileMetadataValidated = {
 };
 
 type FileMetadataNormalized = {
-	breakingChangeNormalized?: 'major' | 'minor' | boolean;
+	breakingChangeNormalized?: string | boolean;
 	typeNormalized?: string;
 	scopeNormalized?: Array<string>;
 	closesNormalized?: Array<string>;

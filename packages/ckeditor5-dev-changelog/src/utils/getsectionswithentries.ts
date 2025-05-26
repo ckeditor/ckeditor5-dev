@@ -25,7 +25,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const normalizedEntry = normalizeEntry( entry, singlePackage );
+		const normalizedEntry = normalizeEntry( entry );
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 

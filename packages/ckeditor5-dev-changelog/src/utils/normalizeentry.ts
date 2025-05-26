@@ -5,7 +5,7 @@
 
 import type { ParsedFile } from '../types.js';
 
-export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): ParsedFile {
+export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 	// Normalize type.
 	const typeCapitalized = capitalize( entry.data.type );
 	const typeNormalized = typeCapitalized === 'Fixes' ? 'Fix' : typeCapitalized;
@@ -13,22 +13,12 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 	// Normalize breaking-change.
 	const breakingChange = entry.data[ 'breaking-change' ];
 	const breakingChangeLowerCase = String( breakingChange ).toLowerCase();
-	let breakingChangeNormalized: 'minor' | 'major' | boolean | undefined;
+	let breakingChangeNormalized: string | boolean | undefined;
 
-	if ( singlePackage ) {
-		if ( breakingChangeLowerCase === 'true' ) {
-			breakingChangeNormalized = true;
-		} else if ( breakingChangeLowerCase === 'minor' ) {
-			breakingChangeNormalized = 'minor';
-		} else if ( breakingChangeLowerCase === 'major' ) {
-			breakingChangeNormalized = 'major';
-		}
+	if ( typeof breakingChange === 'boolean' ) {
+		breakingChangeNormalized = breakingChange;
 	} else {
-		if ( breakingChangeLowerCase === 'minor' ) {
-			breakingChangeNormalized = 'minor';
-		} else if ( breakingChangeLowerCase === 'major' ) {
-			breakingChangeNormalized = 'major';
-		}
+		breakingChangeNormalized = breakingChangeLowerCase;
 	}
 
 	// Normalize scope.
