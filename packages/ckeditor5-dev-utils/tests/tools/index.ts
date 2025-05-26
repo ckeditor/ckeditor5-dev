@@ -14,11 +14,13 @@ import shExec from '../../src/tools/shexec.js';
 import createSpinner from '../../src/tools/createspinner.js';
 import getDirectories from '../../src/tools/getdirectories.js';
 import updateJSONFile from '../../src/tools/updatejsonfile.js';
+import commit from '../../src/tools/commit.js';
 
 vi.mock( '../../src/tools/shexec.js' );
 vi.mock( '../../src/tools/createspinner.js' );
 vi.mock( '../../src/tools/getdirectories.js' );
 vi.mock( '../../src/tools/updatejsonfile.js' );
+vi.mock( '../../src/tools/commit.js' );
 
 describe( 'tools/index.js', () => {
 	describe( 'createSpinner()', () => {
@@ -46,6 +48,13 @@ describe( 'tools/index.js', () => {
 		it( 'should be a function', () => {
 			expect( tools.updateJSONFile ).to.be.a( 'function' );
 			expect( tools.updateJSONFile ).toEqual( updateJSONFile );
+		} );
+	} );
+
+	describe( 'commit()', () => {
+		it( 'should be a function', () => {
+			expect( tools.commit ).to.be.a( 'function' );
+			expect( tools.commit ).toEqual( commit );
 		} );
 	} );
 } );

@@ -6,7 +6,7 @@
 import upath from 'upath';
 import { glob } from 'glob';
 import { simpleGit } from 'simple-git';
-import { git } from '@ckeditor/ckeditor5-dev-utils';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Creates a commit and a tag for the specified version.
@@ -37,7 +37,7 @@ export default async function commitAndTag( {
 	const message = `Release: v${ version }.${ skipCi ? ' [skip ci]' : '' }`;
 
 	if ( dryRun ) {
-		return git.commit( {
+		return tools.commit( {
 			cwd: normalizedCwd,
 			message,
 			dryRun: true,
@@ -54,7 +54,7 @@ export default async function commitAndTag( {
 
 	// Commit and create a tag if it does not exist yet. It might happen when a release job is restarted.
 	if ( !tagForVersion ) {
-		await git.commit( {
+		await tools.commit( {
 			cwd: normalizedCwd,
 			message,
 			files: filePathsToAdd

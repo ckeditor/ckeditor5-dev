@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { glob } from 'glob';
-import commit from '../../src/git/commit.js';
+import commit from '../../src/tools/commit.js';
 import { simpleGit } from 'simple-git';
 
 vi.mock( 'simple-git' );

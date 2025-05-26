@@ -5,7 +5,7 @@
 
 import upath from 'upath';
 import chalk from 'chalk';
-import { git } from '@ckeditor/ckeditor5-dev-utils';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { logInfo } from './loginfo.js';
 import { CHANGELOG_FILE } from '../constants.js';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
@@ -27,6 +27,6 @@ export async function commitChanges( version: string, repositories: Array<Reposi
 
 		logInfo( `◌ Processing "${ cwd }".`, { indent: 1 } );
 
-		await git.commit( { cwd, message, files } );
+		await tools.commit( { cwd, message, files } );
 	}
 }

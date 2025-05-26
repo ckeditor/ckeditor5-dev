@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import { simpleGit } from 'simple-git';
-import { git } from '@ckeditor/ckeditor5-dev-utils';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import commitAndTag from '../../lib/tasks/commitandtag.js';
 
 vi.mock( 'simple-git' );
@@ -41,7 +41,7 @@ describe( 'commitAndTag()', () => {
 	it( 'should not create a commit and tag if there are no files modified', async () => {
 		await commitAndTag( { files: [] } );
 
-		expect( git.commit ).not.toHaveBeenCalled();
+		expect( tools.commit ).not.toHaveBeenCalled();
 		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 
@@ -53,7 +53,7 @@ describe( 'commitAndTag()', () => {
 		} );
 		await commitAndTag( { files: [ 'package.json' ], version: '1.0.0' } );
 
-		expect( git.commit ).not.toHaveBeenCalled();
+		expect( tools.commit ).not.toHaveBeenCalled();
 		expect( stubs.git.addAnnotatedTag ).not.toHaveBeenCalled();
 	} );
 
@@ -95,7 +95,7 @@ describe( 'commitAndTag()', () => {
 			nodir: true
 		} ) );
 
-		expect( git.commit ).toHaveBeenCalledExactlyOnceWith( {
+		expect( tools.commit ).toHaveBeenCalledExactlyOnceWith( {
 			cwd: '/home/ckeditor',
 			files: [
 				'package.json',
@@ -115,7 +115,7 @@ describe( 'commitAndTag()', () => {
 			nodir: true
 		} ) );
 
-		expect( git.commit ).toHaveBeenCalledExactlyOnceWith( {
+		expect( tools.commit ).toHaveBeenCalledExactlyOnceWith( {
 			cwd: '/home/ckeditor',
 			files: [
 				'package.json',
@@ -152,7 +152,7 @@ describe( 'commitAndTag()', () => {
 			dryRun: true
 		} );
 
-		expect( git.commit ).toHaveBeenCalledExactlyOnceWith( {
+		expect( tools.commit ).toHaveBeenCalledExactlyOnceWith( {
 			cwd: '/home/ckeditor',
 			files: [
 				'package.json',

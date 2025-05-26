@@ -4,7 +4,7 @@
  */
 
 import chalk from 'chalk';
-import { git } from '@ckeditor/ckeditor5-dev-utils';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { describe, it, expect, vi } from 'vitest';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { commitChanges } from '../../src/utils/commitchanges.js';
@@ -48,7 +48,7 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
 		] );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				files: expect.arrayContaining( [
 					'/home/ckeditor/ckeditor5/CHANGES.md'
@@ -79,7 +79,7 @@ describe( 'commitChanges()', () => {
 			}
 		] );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				files: [
 					'/home/ckeditor/ckeditor5/changeset-1.md',
@@ -94,7 +94,7 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, changesetPaths: [] }
 		] );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				message: 'Changelog for v1.0.0. [skip ci]'
 			} )
@@ -106,7 +106,7 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, changesetPaths: [] }
 		] );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				cwd: '/home/ckeditor/ckeditor5'
 			} )
@@ -141,9 +141,9 @@ describe( 'commitChanges()', () => {
 			}
 		] );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledTimes( 3 );
 
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith( {
 			cwd: '/home/ckeditor/ckeditor5',
 			message: 'Changelog for v1.0.0. [skip ci]',
 			files: [
@@ -152,7 +152,7 @@ describe( 'commitChanges()', () => {
 				'/home/ckeditor/ckeditor5/.changelog/changeset-2.md'
 			]
 		} );
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith( {
 			cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-dev',
 			message: 'Changelog for v1.0.0. [skip ci]',
 			files: [
@@ -161,7 +161,7 @@ describe( 'commitChanges()', () => {
 				'/home/ckeditor/ckeditor5/external/ckeditor5-dev/.changelog/changeset-3.md'
 			]
 		} );
-		expect( vi.mocked( git.commit ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith( {
 			cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-internal',
 			message: 'Changelog for v1.0.0. [skip ci]',
 			files: [
