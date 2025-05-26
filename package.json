@@ -23,8 +23,8 @@
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^21.0.0",
     "eslint": "^9.26.0",
-    "eslint-config-ckeditor5": "^10.0.0-alpha.0",
-    "eslint-plugin-ckeditor5-rules": "^10.0.0-alpha.0",
+    "eslint-config-ckeditor5": "^10.0.0",
+    "eslint-plugin-ckeditor5-rules": "^10.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^11.0.1",
     "globals": "^16.1.0",
@@ -51,7 +51,7 @@
   },
   "lint-staged": {
     "**/*": [
-      "eslint --quiet"
+      "eslint"
     ]
   },
   "workspaces": {
