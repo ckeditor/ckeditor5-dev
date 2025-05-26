@@ -19,8 +19,8 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
 
 		isValid = false;
-	} else if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.typeNormalized! ) ) {
-		validations.push( `Type "${ data.type }" should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).` );
+	} else if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.type! ) ) {
+		validations.push( 'Type should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
 
 		isValid = false;
 	}
@@ -28,7 +28,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const breakingChangeProvided = typeof data[ 'breaking-change' ] !== 'undefined';
 
 	if ( singlePackage ) {
-		if ( breakingChangeProvided && !data.breakingChangeNormalized ) {
+		if ( breakingChangeProvided && !data[ 'breaking-change' ] ) {
 			validations.push( [
 				`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
 				'"true", or not specified, for a single repo (case insensitive).'
@@ -37,7 +37,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 			isValid = false;
 		}
 	} else {
-		if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data.breakingChangeNormalized as string ) ) {
+		if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data[ 'breaking-change' ] as string ) ) {
 			validations.push(
 				`Breaking change "${ data[ 'breaking-change' ] }" should be one of: "minor", "major", for a monorepo (case insensitive).`
 			);
@@ -46,10 +46,10 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		}
 	}
 
-	if ( data.scopeNormalized ) {
+	if ( data.scope ) {
 		const scopeValidated = [];
 
-		for ( const scopeName of data.scopeNormalized ) {
+		for ( const scopeName of data.scope ) {
 			if ( !noScopePackagesNames.includes( scopeName ) ) {
 				validations.push( `Scope "${ scopeName }" is not recognised as a valid package in the repository.` );
 			} else {
@@ -57,13 +57,13 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 			}
 		}
 
-		data.scopeValidated = scopeValidated;
+		data.scope = scopeValidated;
 	}
 
-	if ( data.seeNormalized ) {
+	if ( data.see ) {
 		const seeValidated = [];
 
-		for ( const see of data.seeNormalized ) {
+		for ( const see of data.see ) {
 			if ( !( see.match( ISSUE_PATTERN ) || see.match( ISSUE_SLUG_PATTERN ) || see.match( ISSUE_URL_PATTERN ) ) ) {
 				validations.push( [
 					`See "${ see }" is not a valid issue reference. Provide either:`,
@@ -74,13 +74,13 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 			}
 		}
 
-		data.seeValidated = seeValidated;
+		data.see = seeValidated;
 	}
 
-	if ( data.closesNormalized ) {
+	if ( data.closes ) {
 		const closesValidated = [];
 
-		for ( const closes of data.closesNormalized ) {
+		for ( const closes of data.closes ) {
 			if ( !( closes.match( ISSUE_PATTERN ) || closes.match( ISSUE_SLUG_PATTERN ) || closes.match( ISSUE_URL_PATTERN ) ) ) {
 				validations.push( [
 					`Closes "${ closes }" is not a valid issue reference. Provide either:`,
@@ -91,7 +91,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 			}
 		}
 
-		data.closesValidated = closesValidated;
+		data.closes = closesValidated;
 	}
 
 	const validatedEntry = { ...entry, data: { ...data, validations } };

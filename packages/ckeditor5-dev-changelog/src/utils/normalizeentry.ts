@@ -35,11 +35,11 @@ export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 		...entry,
 		data: {
 			...entry.data,
-			typeNormalized,
-			breakingChangeNormalized,
-			scopeNormalized,
-			closesNormalized,
-			seeNormalized
+			type: typeNormalized,
+			'breaking-change': breakingChangeNormalized,
+			scope: scopeNormalized,
+			closes: closesNormalized,
+			see: seeNormalized
 		}
 	};
 }

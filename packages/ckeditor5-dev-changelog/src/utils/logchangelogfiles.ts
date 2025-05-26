@@ -25,11 +25,11 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 		if ( !( sectionName === 'invalid' ) ) {
 			for ( const entry of section.entries ) {
 				const isEntryFullyValid = !entry.data.validations?.length;
-				const scope = entry.data.scopeValidated ? ` (${ entry.data.scopeValidated?.join( ', ' ) })` : '';
+				const scope = entry.data.scope ? ` (${ entry.data.scope?.join( ', ' ) })` : '';
 				const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( '!' );
 
 				logInfo(
-					`- ${ validationIndicator } "${ entry.data.typeNormalized }${ scope }: ${ entry.data.mainContent }"`,
+					`- ${ validationIndicator } "${ entry.data.type }${ scope }: ${ entry.data.mainContent }"`,
 					{ indent: 4 }
 				);
 

@@ -19,7 +19,7 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Added new feature',
-						data: { mainContent: 'Added new feature', restContent: [], typeNormalized: 'Feature' },
+						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature' },
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
@@ -80,8 +80,8 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added new button',
 						data: {
-							typeNormalized: 'Feature',
-							scopeValidated: [ 'ckeditor5-ui', 'ckeditor5-core' ],
+							type: 'Feature',
+							scope: [ 'ckeditor5-ui', 'ckeditor5-core' ],
 							mainContent: 'Added new button component',
 							restContent: []
 						},
@@ -108,7 +108,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed button issue',
 						data: {
-							typeNormalized: 'Fix',
+							type: 'Fix',
 							mainContent: 'Fixed button click behavior',
 							restContent: [
 								'Closes #123',
@@ -136,7 +136,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Added feature',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							mainContent: 'Added feature',
 							restContent: []
 						},
@@ -150,7 +150,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Fixed bug',
 						data: {
-							typeNormalized: 'Fix',
+							type: 'Fix',
 							mainContent: 'Fixed bug',
 							restContent: []
 						},
@@ -175,7 +175,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'First feature',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							mainContent: 'First feature',
 							restContent: []
 						},
@@ -184,7 +184,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Second feature',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							mainContent: 'Second feature',
 							restContent: []
 						},
@@ -208,7 +208,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Valid feature',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							restContent: []
 						},
 						changesetPath: '/repo/changelog/valid.md'
@@ -271,7 +271,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Feature with warnings',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							mainContent: 'Feature with warnings',
 							restContent: [],
 							validations: [ 'Invalid scope reference' ]
@@ -297,7 +297,7 @@ describe( 'logChangelogFiles()', () => {
 					{
 						message: 'Feature with rest content and warnings',
 						data: {
-							typeNormalized: 'Feature',
+							type: 'Feature',
 							mainContent: 'Feature with rest content',
 							restContent: [ 'Closes #123' ],
 							validations: [ 'Invalid scope' ]

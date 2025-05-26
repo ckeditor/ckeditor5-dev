@@ -9,8 +9,6 @@ export function removeScope( parsedChangesetFiles: Array<ParsedFile> ): Array<Pa
 	const clone: Array<ParsedFile> = JSON.parse( JSON.stringify( parsedChangesetFiles ) );
 
 	clone.forEach( changeset => delete changeset.data.scope );
-	clone.forEach( changeset => delete changeset.data.scopeNormalized );
-	clone.forEach( changeset => delete changeset.data.scopeValidated );
 
 	return clone;
 }

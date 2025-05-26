@@ -29,9 +29,9 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 
-		const scope = getScopesLinks( validatedData.scopeValidated, transformScope );
-		const closes = getIssuesLinks( validatedData.closesValidated, 'Closes', validatedEntry.gitHubUrl );
-		const see = getIssuesLinks( validatedData.seeValidated, 'See', validatedEntry.gitHubUrl );
+		const scope = getScopesLinks( validatedData.scope, transformScope );
+		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
+		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
 
@@ -105,7 +105,7 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 		return 'invalid';
 	}
 
-	const breakingChangeNormalized = entry.data.breakingChangeNormalized;
+	const breakingChangeNormalized = entry.data[ 'breaking-change' ];
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
@@ -122,7 +122,7 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 		}
 	}
 
-	return entry.data.typeNormalized?.toLowerCase() as SectionName;
+	return entry.data.type?.toLowerCase() as SectionName;
 }
 
 function getInitialSectionsWithEntries(): SectionsWithEntries {
