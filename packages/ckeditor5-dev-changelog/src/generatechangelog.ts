@@ -26,11 +26,11 @@ import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
+	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
 ): Promise<void>;
 
 export async function generateChangelog(
-  config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+	config: RepositoryConfig & GenerateChangelog & { noWrite: true }
 ): Promise<string>;
 
 /**
@@ -50,7 +50,7 @@ export async function generateChangelog( {
 	singlePackage = false,
 	noWrite = false,
 	removeInputFiles = true
-}: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+}: RepositoryConfig & GenerateChangelog ): Promise<string | void> {
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
