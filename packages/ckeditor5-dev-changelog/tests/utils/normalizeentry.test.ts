@@ -62,6 +62,14 @@ describe( 'normalizeEntry()', () => {
 
 			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( 'test123' );
 		} );
+
+		it( 'should normalize undefined to be undefined', () => {
+			const entry = createEntry( { 'breaking-change': undefined } );
+
+			const normalizedEntry = normalizeEntry( entry );
+
+			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( undefined );
+		} );
 	} );
 
 	describe( 'scope normalization', () => {

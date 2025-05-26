@@ -17,6 +17,8 @@ export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 
 	if ( typeof breakingChange === 'boolean' ) {
 		breakingChangeNormalized = breakingChange;
+	} else if ( typeof breakingChange === 'undefined' ) {
+		breakingChangeNormalized = undefined;
 	} else {
 		breakingChangeNormalized = breakingChangeLowerCase;
 	}
