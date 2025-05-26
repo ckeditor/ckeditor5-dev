@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay.js';
-import { InternalError } from '../../src/errors/InternalError.js';
+import { InternalError } from '../../src/errors/internalerror.js';
 import type { SectionsWithEntries, Section, Entry } from '../../src/types.js';
 
 const createSection = ( title: string, entries: Array<Entry> ): Section => ( {

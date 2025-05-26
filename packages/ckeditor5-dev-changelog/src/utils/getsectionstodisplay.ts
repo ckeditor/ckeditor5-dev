@@ -5,7 +5,7 @@
 
 import type { Section, SectionsWithEntries } from '../types.js';
 
-import { InternalError } from '../errors/InternalError.js';
+import { InternalError } from '../errors/internalerror.js';
 
 /**
  * This function determines which sections contain valid entries to be shown.

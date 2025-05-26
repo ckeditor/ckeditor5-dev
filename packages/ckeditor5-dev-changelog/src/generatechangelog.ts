@@ -25,7 +25,7 @@ import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 
-import { InternalError } from './errors/InternalError.js';
+import { InternalError } from './errors/internalerror.js';
 
 export async function generateChangelog(
 	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
