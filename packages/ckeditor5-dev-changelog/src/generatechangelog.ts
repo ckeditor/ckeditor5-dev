@@ -24,7 +24,8 @@ import { getExternalRepositoriesWithDefaults } from './utils/getexternalreposito
 import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
-import { InternalError } from './errors.js';
+
+import { InternalError } from './errors/InternalError.js';
 
 export async function generateChangelog(
 	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }

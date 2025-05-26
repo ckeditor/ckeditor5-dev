@@ -23,7 +23,7 @@ import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
 import { removeScope } from '../src/utils/removescope.js';
 import { SECTIONS } from '../src/constants.js';
-import { InternalError } from '../src/errors.js';
+import { InternalError } from '../src/errors/InternalError.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
