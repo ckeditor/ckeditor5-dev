@@ -17,7 +17,7 @@ export default function confirmNpmTag( versionTag, npmTag ) {
 	const areVersionsEqual = versionTag === npmTag;
 	const color = areVersionsEqual ? chalk.magenta : chalk.red;
 
-	// eslint-disable-next-line max-len
+	// eslint-disable-next-line @stylistic/max-len
 	const message = `The next release bumps the "${ color( versionTag ) }" version. Should it be published to npm as "${ color( npmTag ) }"?`;
 
 	const confirmQuestion = {

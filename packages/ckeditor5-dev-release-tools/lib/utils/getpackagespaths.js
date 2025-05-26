@@ -56,7 +56,7 @@ export default function getPackagesPaths( options ) {
 			} else {
 				pathsCollection.skipped.add( dependencyPath );
 			}
-		} catch ( err ) {
+		} catch {
 			/* istanbul ignore next */
 			console.warn( `Missing "package.json file in "${ dependencyPath }". Skipping.` );
 		}

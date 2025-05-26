@@ -3,6 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global window */
-
 window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';
