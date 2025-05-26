@@ -6,7 +6,7 @@
 import { mkdir, copyFile, constants } from 'fs/promises';
 import { promisify, styleText, parseArgs } from 'util';
 import { exec } from 'child_process';
-import { isAbsolute, resolve, relative } from 'upath';
+import { isAbsolute, resolve, relative } from 'path';
 import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './constants.js';
 
 /**
