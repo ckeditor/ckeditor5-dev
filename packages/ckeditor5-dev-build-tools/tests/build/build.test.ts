@@ -13,16 +13,21 @@ import { mockGetUserDependency } from '../_utils/utils.js';
 /**
  * Mock `rollup` to replace `rollup.write` with `rollup.generate`.
  */
-vi.mock( 'rollup', () => ( {
-	async rollup( rollupOptions: Rollup.RollupOptions ) {
-		const { rollup } = await vi.importActual<typeof Rollup>( 'rollup' );
-		const build = await rollup( rollupOptions );
+vi.mock( 'rollup', async () => {
+	const { rollup, defineConfig } = await vi.importActual<typeof Rollup>( 'rollup' );
 
-		return {
-			write: build.generate
-		};
-	}
-} ) );
+	return {
+		async rollup( rollupOptions: Rollup.RollupOptions ) {
+			const build = await rollup( rollupOptions );
+
+			return {
+				write: build.generate
+			};
+		},
+
+		defineConfig
+	};
+} );
 
 /**
  * Mocks Rollup.
