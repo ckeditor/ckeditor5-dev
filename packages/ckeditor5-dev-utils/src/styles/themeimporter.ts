@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import fs from 'fs';
 import path from 'path';
 import { default as postcss, type Plugin, type Processor, type Root, type Helpers } from 'postcss';

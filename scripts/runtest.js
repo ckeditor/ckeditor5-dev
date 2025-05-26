@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import path from 'path';
 import { execSync } from 'child_process';
 import fs from 'fs-extra';
@@ -40,7 +38,7 @@ function main() {
 				stdio: 'inherit',
 				cwd: path.join( cwd, relativePath )
 			} );
-		} catch ( error ) {
+		} catch {
 			hasError = true;
 		}
 	}

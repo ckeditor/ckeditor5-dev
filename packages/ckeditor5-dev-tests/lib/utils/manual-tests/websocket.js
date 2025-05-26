@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global document, io, window */
-
 ( () => {
 	const socket = io();
 	let currentToastElement;
