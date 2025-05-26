@@ -134,6 +134,19 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeTruthy();
 		} );
+
+		it( 'should return valid when breaking change is any text for a single package', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				typeNormalized: 'Feature',
+				'breaking-change': 'test123',
+				breakingChangeNormalized: 'test123'
+			} );
+
+			const { isValid } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeTruthy();
+		} );
 	} );
 
 	describe( 'breaking change validation for monorepo', () => {
