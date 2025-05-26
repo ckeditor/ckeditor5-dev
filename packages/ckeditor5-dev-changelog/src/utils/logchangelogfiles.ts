@@ -20,13 +20,13 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 
 		const color = sectionName === 'invalid' ? chalk.red : chalk.blue;
 
-		logInfo( '◌ ' + color( `Found ${ section.title }:` ), { indent: 2 } );
+		logInfo( '◌ ' + color( chalk.underline( `Found ${ section.title }:` ) ), { indent: 2 } );
 
 		if ( !( sectionName === 'invalid' ) ) {
 			for ( const entry of section.entries ) {
 				const isEntryFullyValid = !entry.data.validations?.length;
 				const scope = entry.data.scope ? ` (${ entry.data.scope?.join( ', ' ) })` : '';
-				const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( '!' );
+				const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : '⚠️';
 
 				logInfo(
 					`- ${ validationIndicator } "${ entry.data.type }${ scope }: ${ entry.data.mainContent }"`,
@@ -50,7 +50,7 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 				logInfo( `- File: file://${ entry.changesetPath }`, { indent: 4 } );
 
 				if ( entry.data.validations?.length ) {
-					logInfo( chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+					logInfo( chalk.yellow( 'Validation details:' ), { indent: 6 } );
 
 					for ( const validationMessage of entry.data.validations ) {
 						logInfo( `- ${ validationMessage }`, { indent: 8 } );
@@ -62,20 +62,18 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 		logInfo( '' );
 	}
 
-	logInfo( [
-		'...',
-		'',
-		chalk.yellow( 'WARNING:' ),
-		'',
-		'Entries marked with ' + chalk.yellow( '!' ) + ' symbol includes invalid references ' +
-		'(see or/and closes) or/and scope definitions. Please ensure that:',
-		'',
-		chalk.grey( '- Reference entries match one of the following formats:' ),
-		chalk.grey( '\t1. an issue number (e.g., 1000)' ),
-		chalk.grey( '\t2. repository-slug#id (e.g., org/repo#1000)' ),
-		chalk.grey( '\t3. a full issue link URL' ),
-		chalk.grey( '- A scope field consists of existing packages.' ),
-		'',
-		'...'
-	].join( '\n' ) );
+	logInfo( chalk.underline( 'Legend:' ), { indent: 2 } );
+	logInfo( '' );
+	logInfo( `◌ Entries marked with ${ chalk.green( '+' ) } symbol are included in the changelog.`, { indent: 2 } );
+	logInfo(
+		'◌ Entries marked with ' + chalk.yellow( '⚠️' ) + ' symbol includes invalid references (see or/and closes) ' +
+		'or/and scope definitions. Please ensure that:',
+		{ indent: 2 }
+	);
+	logInfo( '- Reference entries match one of the following formats:', { indent: 4 } );
+	logInfo( '1. an issue number (e.g., 1000)', { indent: 6 } );
+	logInfo( '2. repository-slug#id (e.g., org/repo#1000)', { indent: 6 } );
+	logInfo( '3. a full issue link URL', { indent: 6 } );
+	logInfo( '- A scope field consists of existing packages.', { indent: 4 } );
+	logInfo( '' );
 }

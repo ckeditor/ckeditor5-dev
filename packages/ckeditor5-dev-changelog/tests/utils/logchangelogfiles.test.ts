@@ -29,10 +29,10 @@ describe( 'logChangelogFiles()', () => {
 		logChangelogFiles( sections );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( chalk.underline( 'Found Features:' ) ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.green( '+' ) } "Feature: Added new feature"`, { indent: 4 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '' );
-		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'WARNING:' ) );
+		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'Legend:' ), expect.anything() );
 	} );
 
 	it( 'logs invalid section in red', () => {
@@ -54,9 +54,9 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( chalk.underline( 'Found Invalid changes:' ) ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/changeset-1.md', { indent: 4 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.yellow( 'Validation details:' ), { indent: 6 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Missing type', { indent: 8 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Incorrect format', { indent: 8 } );
 	} );
@@ -69,7 +69,7 @@ describe( 'logChangelogFiles()', () => {
 		logChangelogFiles( sections );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
-		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'WARNING:' ) );
+		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'Legend:' ), expect.anything() );
 	} );
 
 	it( 'logs entries with type and scope correctly', () => {
@@ -163,8 +163,8 @@ describe( 'logChangelogFiles()', () => {
 		logChangelogFiles( sections );
 
 		// Updated call count to account for warning message
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.blue( 'Found Bug fixes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( chalk.underline( 'Found Features:' ) ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.blue( chalk.underline( 'Found Bug fixes:' ) ), { indent: 2 } );
 	} );
 
 	it( 'logs multiple entries in the same section correctly', () => {
@@ -232,10 +232,10 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( 'Found Features:' ), { indent: 2 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.blue( chalk.underline( 'Found Features:' ) ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ ' + chalk.red( chalk.underline( 'Found Invalid changes:' ) ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- File: file:///repo/changelog/invalid.md', { indent: 4 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 7, chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 7, chalk.yellow( 'Validation details:' ), { indent: 6 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 8, '- Invalid type', { indent: 8 } );
 	} );
 
@@ -258,9 +258,9 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( 'Found Invalid changes:' ), { indent: 2 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ ' + chalk.red( chalk.underline( 'Found Invalid changes:' ) ), { indent: 2 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- File: file:///repo/changelog/invalid-no-details.md', { indent: 4 } );
-		expect( logInfo ).not.toHaveBeenCalledWith( chalk.yellow( chalk.underline( 'Validation details:' ) ), { indent: 6 } );
+		expect( logInfo ).not.toHaveBeenCalledWith( chalk.yellow( 'Validation details:' ), { indent: 6 } );
 	} );
 
 	it( 'logs entries with validation warnings using yellow exclamation mark', () => {
@@ -284,7 +284,7 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( '!' ) } "Feature: Feature with warnings"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- ⚠️ "Feature: Feature with warnings"', { indent: 4 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- File: file:///repo/changelog/warning-feature.md', { indent: 8 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Invalid scope reference', { indent: 10 } );
 	} );
@@ -310,7 +310,7 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( '!' ) } "Feature: Feature with rest content"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- ⚠️ "Feature: Feature with rest content"', { indent: 4 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.italic( '"Closes #123"' ), { indent: 6 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- File: file:///repo/changelog/complex-feature.md', { indent: 8 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Invalid scope', { indent: 10 } );

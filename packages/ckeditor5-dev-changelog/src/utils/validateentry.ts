@@ -16,11 +16,11 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	let isValid = true;
 
 	if ( typeof data.type === 'undefined' ) {
-		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
+		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" (case insensitive).' );
 
 		isValid = false;
 	} else if ( ![ 'Fix', 'Feature', 'Other' ].includes( data.type! ) ) {
-		validations.push( 'Type should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).' );
+		validations.push( 'Type should be one of: "Feature", "Other" or "Fix" (case insensitive).' );
 
 		isValid = false;
 	}

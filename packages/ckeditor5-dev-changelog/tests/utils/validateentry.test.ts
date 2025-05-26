@@ -30,7 +30,7 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Provide a type with one of the values: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
+				'Provide a type with one of the values: "Feature", "Other" or "Fix" (case insensitive).'
 			);
 		} );
 
@@ -41,7 +41,7 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Type should be one of: "Feature", "Other" or "Fix" ("Fixes" is allowed) (case insensitive).'
+				'Type should be one of: "Feature", "Other" or "Fix" (case insensitive).'
 			);
 		} );
 
