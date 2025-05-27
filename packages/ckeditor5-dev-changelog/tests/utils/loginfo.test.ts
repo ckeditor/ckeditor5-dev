@@ -19,9 +19,9 @@ describe( 'logInfo()', () => {
 	it( 'logs text with the specified indentation', () => {
 		const consoleSpy = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 
-		logInfo( 'Indented text', { indent: 4 } );
+		logInfo( 'Indented text', { indent: 2 } );
 
-		expect( consoleSpy ).toHaveBeenCalledWith( '    Indented text' );
+		expect( consoleSpy ).toHaveBeenCalledWith( '      Indented text' );
 		consoleSpy.mockRestore();
 	} );
 

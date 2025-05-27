@@ -90,12 +90,13 @@ export type Entry = {
 	data: FileMetadata & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
+		validations?: Array<string>;
 	};
 	changesetPath: string;
 };
 
 type FileMetadata = {
-	'breaking-change'?: 'major' | 'minor' | boolean;
+	'breaking-change'?: string | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;
@@ -113,6 +114,8 @@ export type ParsedFile = {
 export type Section = {
 	entries: Array<Entry>;
 	title: string;
+	titleInLogs?: string;
+	excludeInChangelog?: boolean;
 };
 
 export type SectionsWithEntries = Record<SectionName, Section>;
