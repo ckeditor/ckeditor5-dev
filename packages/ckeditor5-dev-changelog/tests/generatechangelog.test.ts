@@ -141,6 +141,10 @@ describe( 'generateChangelog()', () => {
 			invalid: {
 				title: SECTIONS.invalid.title,
 				entries: []
+			},
+			warning: {
+				title: SECTIONS.warning.title,
+				entries: []
 			}
 		} );
 		vi.mocked( getNewVersion ).mockResolvedValue( { newVersion: '1.0.1', isInternal: false } );
@@ -171,13 +175,6 @@ describe( 'generateChangelog()', () => {
 			}
 		] );
 		vi.mocked( getNewChangelog ).mockReturnValue( 'Mocked changelog content' );
-		vi.mocked( removeScope ).mockImplementation( parsedChangesetFiles => {
-			return parsedChangesetFiles.map( changeset => {
-				delete changeset.data.scope;
-
-				return changeset;
-			} );
-		} );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -300,22 +297,21 @@ describe( 'generateChangelog()', () => {
 			}
 		] );
 
-		expect( vi.mocked( getSectionsWithEntries ) ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				parsedFiles: expect.arrayContaining( [
-					{
-						changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
-						content: 'Test changeset'
-					}
-				] )
-			} )
-		);
+		expect( vi.mocked( getSectionsWithEntries ) ).toHaveBeenCalledWith( expect.objectContaining( {
+			parsedFiles: expect.arrayContaining( [
+				{
+					changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+					content: 'Test changeset'
+				}
+			] )
+		} ) );
 
-		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				singlePackage: true
-			} )
-		);
+		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalledWith( expect.objectContaining( {
+			singlePackage: true
+		} ) );
+
+		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalled();
+		expect( vi.mocked( modifyChangelog ) ).toHaveBeenCalled();
 	} );
 
 	it( 'does not delete input files when `removeInputFiles` is false', async () => {
@@ -446,6 +442,10 @@ describe( 'generateChangelog()', () => {
 			},
 			invalid: {
 				title: SECTIONS.invalid.title,
+				entries: []
+			},
+			warning: {
+				title: SECTIONS.warning.title,
 				entries: []
 			}
 		};
