@@ -5,7 +5,9 @@
 
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import type {
-	Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
+	Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope,
+	ValidatedFile,
+	ValidatedType } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
@@ -100,14 +102,16 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
+function getSection( { entry, singlePackage, isValid }: { entry: ValidatedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
 	if ( !isValid ) {
 		return 'invalid';
 	}
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ].includes( entry.data.type! ) ) {
+		const breakingChangeTypes: Array<ValidatedType> = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
+
+		if ( breakingChangeTypes.includes( entry.data.type ) ) {
 			return 'breaking';
 		}
 	} else {
