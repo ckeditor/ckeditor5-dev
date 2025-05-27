@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { DeepReadonly, EntryType } from './types';
+
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
 export const CHANGELOG_HEADER = 'Changelog\n=========';
@@ -39,4 +41,4 @@ export const TYPES = [
 	{ name: 'Major breaking change', aliases: [ 'Major' ] },
 	{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
 	{ name: 'Breaking change', aliases: [ 'Breaking' ] }
-] as const satisfies ReadonlyArray<{ name: string; aliases?: ReadonlyArray<string> }>;
+] as const satisfies DeepReadonly<Array<EntryType>>;

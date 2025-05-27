@@ -5,6 +5,10 @@
 
 import type { SECTIONS, TYPES } from './constants.js';
 
+export type DeepReadonly<T> = {
+	readonly [P in keyof T]: DeepReadonly<T[P]>
+};
+
 /**
  * Configuration options for generating a changelog.
  */
@@ -84,6 +88,11 @@ export type RepositoryConfig = {
 };
 
 export type SectionName = keyof typeof SECTIONS;
+
+export type EntryType = {
+	name: string;
+	aliases?: Array<string>;
+};
 
 export type NormalizedType = typeof TYPES[ number ][ 'name' ];
 
