@@ -50,7 +50,11 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 			changesetPath: validatedEntry.changesetPath
 		};
 
-		sections[ section ].entries = [ ...sections[ section ].entries, newEntry ];
+		sections[ section ].entries.push( newEntry );
+
+		if ( isValid && newEntry.data.validations?.length ) {
+			sections.warning.entries.push( newEntry );
+		}
 
 		return sections;
 	}, getInitialSectionsWithEntries() );

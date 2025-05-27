@@ -12,7 +12,9 @@ import { InternalError } from '../errors/internalerror.js';
  */
 export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
 	const sectionsToDisplay = Object.entries( sectionsWithEntries )
-		.filter( ( [ sectionName, { entries } ] ) => entries?.length && sectionName !== 'invalid' )
+		.filter( ( [ , { entries, excludeInChangelog } ] ) => {
+			return entries?.length && !excludeInChangelog;
+		} )
 		.map( ( [ , section ] ) => section );
 
 	if ( !sectionsToDisplay.length ) {

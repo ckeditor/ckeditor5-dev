@@ -132,6 +132,8 @@ export type ValidatedFile = ParsedFile & {
 export type Section = {
 	entries: Array<Entry>;
 	title: string;
+	titleInLogs?: string;
+	excludeInChangelog?: boolean;
 };
 
 export type SectionsWithEntries = Record<SectionName, Section>;

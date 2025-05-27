@@ -40,7 +40,7 @@ export async function generateChangelog(
  */
 export async function generateChangelog(
 	options: RepositoryConfig & GenerateChangelog
-): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+): Promise<string | void> {
 	try {
 		return await main( options );
 	} catch ( error ) {
