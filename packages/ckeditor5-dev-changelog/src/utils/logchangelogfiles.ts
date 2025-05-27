@@ -26,7 +26,7 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 			for ( const entry of section.entries ) {
 				const isEntryFullyValid = !entry.data.validations?.length;
 				const scope = entry.data.scope ? ` (${ entry.data.scope?.join( ', ' ) })` : '';
-				const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : '⚠️';
+				const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
 
 				logInfo(
 					`- ${ validationIndicator } "${ entry.data.type }${ scope }: ${ entry.data.mainContent }"`,
@@ -38,10 +38,10 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 				}
 
 				if ( !isEntryFullyValid ) {
-					logInfo( `- File: file://${ entry.changesetPath }`, { indent: 8 } );
+					logInfo( `- File: file://${ entry.changesetPath }`, { indent: 6 } );
 
 					for ( const validationMessage of entry.data.validations! ) {
-						logInfo( `- ${ validationMessage }`, { indent: 10 } );
+						logInfo( `- ${ validationMessage }`, { indent: 8 } );
 					}
 				}
 			}
@@ -66,7 +66,7 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	logInfo( '' );
 	logInfo( `◌ Entries marked with ${ chalk.green( '+' ) } symbol are included in the changelog.`, { indent: 2 } );
 	logInfo(
-		'◌ Entries marked with ' + chalk.yellow( '⚠️' ) + ' symbol includes invalid references (see or/and closes) ' +
+		'◌ Entries marked with ' + chalk.yellow( 'x' ) + ' symbol includes invalid references (see or/and closes) ' +
 		'or/and scope definitions. Please ensure that:',
 		{ indent: 2 }
 	);

@@ -284,9 +284,9 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- ⚠️ "Feature: Feature with warnings"', { indent: 4 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- File: file:///repo/changelog/warning-feature.md', { indent: 8 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Invalid scope reference', { indent: 10 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( 'x' ) } "Feature: Feature with warnings"`, { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- File: file:///repo/changelog/warning-feature.md', { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Invalid scope reference', { indent: 8 } );
 	} );
 
 	it( 'handles entries with rest content and validations correctly', () => {
@@ -310,9 +310,9 @@ describe( 'logChangelogFiles()', () => {
 
 		logChangelogFiles( sections );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- ⚠️ "Feature: Feature with rest content"', { indent: 4 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, `- ${ chalk.yellow( 'x' ) } "Feature: Feature with rest content"`, { indent: 4 } );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, chalk.italic( '"Closes #123"' ), { indent: 6 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- File: file:///repo/changelog/complex-feature.md', { indent: 8 } );
-		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Invalid scope', { indent: 10 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- File: file:///repo/changelog/complex-feature.md', { indent: 6 } );
+		expect( logInfo ).toHaveBeenNthCalledWith( 6, '- Invalid scope', { indent: 8 } );
 	} );
 } );

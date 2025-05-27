@@ -25,7 +25,6 @@ import { getNewChangelog } from './utils/getnewchangelog.js';
 import { removeChangesetFiles } from './utils/removechangesetfiles.js';
 import { removeScope } from './utils/removescope.js';
 import { commitChanges } from './utils/commitchanges.js';
-
 import { InternalError } from './errors/internalerror.js';
 
 export async function generateChangelog(
