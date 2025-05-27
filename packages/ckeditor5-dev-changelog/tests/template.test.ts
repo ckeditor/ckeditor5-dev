@@ -3,7 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import { stripVTControlCharacters } from 'util';
 import { join } from 'upath';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as template from '../src/template.js';
@@ -177,7 +176,7 @@ describe( 'generateTemplate', () => {
 		await template.generateTemplate();
 
 		expect( mocks.log ).toHaveBeenCalledWith(
-			stripVTControlCharacters( `Changelog file created: ${ join( CHANGESET_DIRECTORY, EXPECTED_FILE_NAME ) }` )
+			expect.stringContaining( `Changelog file created: ${ join( CHANGESET_DIRECTORY, EXPECTED_FILE_NAME ) }` )
 		);
 	} );
 
@@ -195,7 +194,7 @@ describe( 'generateTemplate', () => {
 
 		await expect( () => template.generateTemplate( { retries: 1 } ) ).rejects.toThrow( 'File already exists' );
 		expect( mocks.error ).toHaveBeenCalledExactlyOnceWith(
-			stripVTControlCharacters( 'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.' )
+			expect.stringContaining( 'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.' )
 		);
 	} );
 
@@ -207,7 +206,7 @@ describe( 'generateTemplate', () => {
 		await template.generateTemplate();
 
 		expect( mocks.error ).toHaveBeenCalledWith(
-			stripVTControlCharacters( 'Error: Git is not installed or the current folder is not in git repository.' )
+			expect.stringContaining( 'Error: Git is not installed or the current folder is not in git repository.' )
 		);
 		expect( processExitSpy ).toHaveBeenCalledWith( 1 );
 	} );
