@@ -56,9 +56,15 @@ function mockCliArgs( ...args: Array<string> ) {
 	} );
 }
 
+/**
+ * Mocks `setTimeout` to immediately execute the callback function.
+ */
+function mockSetTimeout() {
+	vi.spyOn( globalThis, 'setTimeout' ).mockImplementation( ( fn: () => any ) => fn() );
+}
+
 describe( 'generateTemplate', () => {
 	beforeEach( () => {
-		vi.useFakeTimers();
 		vi.setSystemTime( mocks.time );
 		vi.stubGlobal( 'console', {
 			warn: console.warn,
@@ -68,7 +74,6 @@ describe( 'generateTemplate', () => {
 	} );
 
 	afterEach( () => {
-		vi.useRealTimers();
 		vi.resetAllMocks();
 		vi.unstubAllGlobals();
 	} );
@@ -168,14 +173,6 @@ describe( 'generateTemplate', () => {
 		);
 	} );
 
-	it( 'retries creating the file if it already exists', async () => {
-		vi.useRealTimers(); // Let `setTimeout` work properly.
-		mocks.copyFile.mockRejectedValueOnce( 'File already exists' );
-
-		await template.generateTemplate( { retries: 1 } );
-		expect( mocks.copyFile ).toHaveBeenCalledTimes( 2 ); // First intentionally failed attempt, then a successful one.
-	} );
-
 	it( 'logs a message when file is created', async () => {
 		await template.generateTemplate();
 
@@ -184,8 +181,16 @@ describe( 'generateTemplate', () => {
 		);
 	} );
 
+	it( 'retries creating the file if it already exists', async () => {
+		mockSetTimeout();
+		mocks.copyFile.mockRejectedValueOnce( 'File already exists' );
+
+		await template.generateTemplate( { retries: 1 } );
+		expect( mocks.copyFile ).toHaveBeenCalledTimes( 2 ); // First intentionally failed attempt, then a successful one.
+	} );
+
 	it( 'logs an error when file with given name already exists and `retries` reached limit', async () => {
-		vi.useRealTimers(); // Let `setTimeout` work properly.
+		mockSetTimeout();
 		mocks.copyFile.mockRejectedValue( 'File already exists' );
 
 		await expect( () => template.generateTemplate( { retries: 1 } ) ).rejects.toThrow( 'File already exists' );
