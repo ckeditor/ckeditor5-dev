@@ -13,9 +13,9 @@ vi.mock( '../../src/constants.js', () => {
 			{ name: 'Feature' },
 			{ name: 'Other' },
 			{ name: 'Fix', aliases: [ 'Fixes' ] },
-			{ name: 'Major', aliases: [ 'Major breaking change' ] },
-			{ name: 'Minor', aliases: [ 'Minor breaking change' ] },
-			{ name: 'Breaking', aliases: [ 'Breaking change' ] }
+			{ name: 'Major breaking change', aliases: [ 'Major' ] },
+			{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
+			{ name: 'Breaking change', aliases: [ 'Breaking' ] }
 		]
 	};
 } );
@@ -37,7 +37,7 @@ describe( 'normalizeEntry()', () => {
 		it( 'should capitalize the type', () => {
 			const entry = createEntry( { type: 'feature' } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.type ).toBe( 'Feature' );
 		} );
@@ -45,7 +45,7 @@ describe( 'normalizeEntry()', () => {
 		it( 'should convert aliases to the base name', () => {
 			const entry = createEntry( { type: 'fixes' } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.type ).toBe( 'Fix' );
 		} );
@@ -53,23 +53,34 @@ describe( 'normalizeEntry()', () => {
 		it( 'should maintain other capitalized types', () => {
 			const entry = createEntry( { type: 'other' } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.type ).toBe( 'Other' );
 		} );
 
 		it( 'should normalize breaking change aliases', () => {
+			const entry1 = createEntry( { type: 'Major' } );
+			const entry2 = createEntry( { type: 'Minor' } );
+			const entry3 = createEntry( { type: 'Breaking' } );
+
+			const normalizedEntry1 = normalizeEntry( entry1, false );
+			const normalizedEntry2 = normalizeEntry( entry2, false );
+			const normalizedEntry3 = normalizeEntry( entry3, false );
+
+			expect( normalizedEntry1.data.type ).toBe( 'Major breaking change' );
+			expect( normalizedEntry2.data.type ).toBe( 'Minor breaking change' );
+			expect( normalizedEntry3.data.type ).toBe( 'Breaking change' );
+		} );
+
+		it( 'should cast minor and major breaking changes in a single package to generic one', () => {
 			const entry1 = createEntry( { type: 'Major breaking change' } );
 			const entry2 = createEntry( { type: 'Minor breaking change' } );
-			const entry3 = createEntry( { type: 'Breaking change' } );
 
-			const normalizedEntry1 = normalizeEntry( entry1 );
-			const normalizedEntry2 = normalizeEntry( entry2 );
-			const normalizedEntry3 = normalizeEntry( entry3 );
+			const normalizedEntry1 = normalizeEntry( entry1, true );
+			const normalizedEntry2 = normalizeEntry( entry2, true );
 
-			expect( normalizedEntry1.data.type ).toBe( 'Major' );
-			expect( normalizedEntry2.data.type ).toBe( 'Minor' );
-			expect( normalizedEntry3.data.type ).toBe( 'Breaking' );
+			expect( normalizedEntry1.data.type ).toBe( 'Breaking change' );
+			expect( normalizedEntry2.data.type ).toBe( 'Breaking change' );
 		} );
 	} );
 
@@ -77,7 +88,7 @@ describe( 'normalizeEntry()', () => {
 		it( 'should normalize scope to lowercase', () => {
 			const entry = createEntry( { scope: [ 'EngIne', 'UI' ] } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.scope ).toEqual( [ 'engine', 'ui' ] );
 		} );
@@ -85,7 +96,7 @@ describe( 'normalizeEntry()', () => {
 		it( 'should return undefined when scope is not provided', () => {
 			const entry = createEntry( {} );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.scope ).toBeUndefined();
 		} );
@@ -96,7 +107,7 @@ describe( 'normalizeEntry()', () => {
 			const closesValue = [ 123, '456' ];
 			const entry = createEntry( { closes: closesValue } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.closes ).toEqual( [ '123', '456' ] );
 		} );
@@ -105,7 +116,7 @@ describe( 'normalizeEntry()', () => {
 			const seeValue = [ 'https://example.com', 'https://github.com/ckeditor/ckeditor5/issues/123' ];
 			const entry = createEntry( { see: seeValue } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.see ).toEqual( seeValue );
 		} );

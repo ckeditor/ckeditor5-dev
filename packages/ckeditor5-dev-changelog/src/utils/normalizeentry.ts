@@ -4,9 +4,14 @@
  */
 
 import { TYPES } from '../constants.js';
-import type { ParsedFile } from '../types.js';
+import type { ParsedFile, ValidatedType } from '../types.js';
 
-export function normalizeEntry( entry: ParsedFile ): ParsedFile {
+const typesToCast: Array<ValidatedType> = [
+	'Major breaking change',
+	'Minor breaking change'
+];
+
+export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): ParsedFile {
 	// Normalize type.
 	const typeCapitalized = capitalize( entry.data.type );
 	const matchingType = TYPES.find( type => {
@@ -20,7 +25,11 @@ export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 
 		return ( type.aliases as ReadonlyArray<string> ).includes( typeCapitalized );
 	} );
-	const typeNormalized = matchingType ? matchingType.name : undefined;
+	let typeNormalized = matchingType ? matchingType.name : undefined;
+
+	if ( singlePackage && typesToCast.includes( typeNormalized! ) ) {
+		typeNormalized = 'Breaking change';
+	}
 
 	// Normalize scope.
 	const scope = entry.data.scope;
