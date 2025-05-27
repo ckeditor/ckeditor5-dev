@@ -312,15 +312,14 @@ describe( 'getSectionsWithEntries()', () => {
 
 		const message = result.feature.entries[ 0 ]!.message;
 
-		/* eslint-disable max-len */
 		expect( message ).toEqual( [
+			// eslint-disable-next-line @stylistic/max-len
 			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Some content. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
 			'',
 			'  Second line.',
 			'',
 			'  Third line.'
 		].join( '\n' ) );
-		/* eslint-enable max-len */
 	} );
 
 	it( 'should handle invalid issue references that do not match any pattern', () => {

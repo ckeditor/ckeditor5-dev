@@ -3,9 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global window, document */
-
-// eslint-disable-next-line mocha/no-top-level-hooks
 afterEach( function() {
 	const leakedElementMarkups = Array.from( document.body.children ).filter( el => !this._lastDomElements.has( el ) ).map( el => {
 		const html = el.outerHTML.length > 80 ?

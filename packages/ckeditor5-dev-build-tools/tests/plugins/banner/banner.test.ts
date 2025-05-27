@@ -20,8 +20,6 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 		plugins: [
 			swcPlugin,
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			styles( {
 				mode: [
 					'extract',

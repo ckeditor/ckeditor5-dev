@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import { cpus } from 'os';
 
 export interface ErrorType {

@@ -13,7 +13,7 @@ export default function getDirectories( directoryPath: string ): Array<string> {
 	const isDirectory = ( directoryPath: string ) => {
 		try {
 			return fs.statSync( directoryPath ).isDirectory();
-		} catch ( e ) {
+		} catch {
 			return false;
 		}
 	};

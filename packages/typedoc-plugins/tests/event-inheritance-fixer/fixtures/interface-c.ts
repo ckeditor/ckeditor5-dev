@@ -9,6 +9,7 @@
 
 import type { InterfaceB } from './interface-b.js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface InterfaceC extends InterfaceB {}
 
 /**
