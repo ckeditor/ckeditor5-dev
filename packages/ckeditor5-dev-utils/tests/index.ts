@@ -20,6 +20,7 @@ vi.mock( '../src/logger/index.js' );
 vi.mock( '../src/stream/index.js' );
 vi.mock( '../src/styles/index.js' );
 vi.mock( '../src/tools/index.js' );
+vi.mock( '../src/git/index.js' );
 
 describe( 'index.js', () => {
 	describe( '#builds', () => {

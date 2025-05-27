@@ -27,19 +27,19 @@ export function normalizeEntry( entry: ParsedFile ): ParsedFile {
 	const scopeNormalized = scope?.map( scopeEntry => String( scopeEntry ).toLowerCase() );
 
 	// Normalize closes.
-	const closesNormalized = entry.data.closes;
+	const closesNormalized = entry.data.closes?.map( closes => String( closes ) );
 
 	// Normalize see.
-	const seeNormalized = entry.data.see;
+	const seeNormalized = entry.data.see?.map( see => String( see ) );
 
 	return {
 		...entry,
 		data: {
 			...entry.data,
-			typeNormalized,
-			scopeNormalized,
-			closesNormalized,
-			seeNormalized
+			type: typeNormalized,
+			scope: scopeNormalized,
+			closes: closesNormalized,
+			see: seeNormalized
 		}
 	};
 }

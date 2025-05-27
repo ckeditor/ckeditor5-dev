@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import path from 'path';
 import fs from 'fs-extra';
 import { styleText } from 'util';

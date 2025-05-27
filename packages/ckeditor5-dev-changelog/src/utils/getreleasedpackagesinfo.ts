@@ -56,7 +56,7 @@ function getPackageNamesByScope( entries: Array<Entry> = [], { packagesToRemove,
 	packagesToRemove: Array<string>;
 	organisationNamespace: string;
 } ) {
-	const packageNames = entries.flatMap( entry => entry.data.scopeNormalized ).filter( Boolean );
+	const packageNames = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
 	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
 	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ organisationNamespace }/` + scope );
 	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );

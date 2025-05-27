@@ -13,67 +13,98 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const noScopePackagesNames = packagesNames.map( packageName => packageName.replace( /@.*\//, '' ) );
 	const data = entry.data;
 	const validations: Array<string> = [];
+	let isValid = true;
 
-	const allowedTypesArray = TYPES.map( ( { name } ) => name );
+	const allowedTypesArray: Array<string> = TYPES.map( ( { name } ) => name );
 	const allowedTypesList = getAllowedTypesList();
 
 	if ( typeof data.type === 'undefined' ) {
-		validations.push( `Provide a type with one of the values: ${ allowedTypesList } (case insensitive).` );
-	} else if ( !allowedTypesArray.includes( data.typeNormalized! ) ) {
+		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" (case insensitive).' );
+
+		isValid = false;
+	} else if ( !allowedTypesArray.includes( data.type ) ) {
 		validations.push( `Type "${ data.type }" should be one of: ${ allowedTypesList } (case insensitive).` );
+
+		isValid = false;
 	}
 
 	if ( singlePackage ) {
-		if ( data.typeNormalized === 'Major breaking change' || data.typeNormalized === 'Minor breaking change' ) {
+		if ( data.type === 'Major breaking change' || data.type === 'Minor breaking change' ) {
 			validations.push(
 				`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
 			);
 		}
+
+		// if ( breakingChangeProvided && !data[ 'breaking-change' ] ) {
+		// 	validations.push( [
+		// 		`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
+		// 		'"true", or not specified, for a single repo (case insensitive).'
+		// 	].join( ' ' ) );
+
+		// 	isValid = false;
+		// }
 	} else {
-		if ( !singlePackage && data.typeNormalized === 'Breaking change' ) {
+		if ( !singlePackage && data.type === 'Breaking change' ) {
+		// if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data[ 'breaking-change' ] as string ) ) {
 			validations.push(
 				`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
 			);
+
+			isValid = false;
 		}
 	}
 
-	if ( data.scopeNormalized ) {
-		for ( const scopeName of data.scopeNormalized ) {
+	if ( data.scope ) {
+		const scopeValidated = [];
+
+		for ( const scopeName of data.scope ) {
 			if ( !noScopePackagesNames.includes( scopeName ) ) {
 				validations.push( `Scope "${ scopeName }" is not recognized as a valid package in the repository.` );
+			} else {
+				scopeValidated.push( scopeName );
 			}
 		}
+
+		data.scope = scopeValidated;
 	}
 
-	if ( data.seeNormalized ) {
-		for ( const see of data.seeNormalized ) {
-			const seeStr = String( see );
+	if ( data.see ) {
+		const seeValidated = [];
 
-			if ( !( seeStr.match( ISSUE_PATTERN ) || seeStr.match( ISSUE_SLUG_PATTERN ) || seeStr.match( ISSUE_URL_PATTERN ) ) ) {
+		for ( const see of data.see ) {
+			if ( !( see.match( ISSUE_PATTERN ) || see.match( ISSUE_SLUG_PATTERN ) || see.match( ISSUE_URL_PATTERN ) ) ) {
 				validations.push( [
 					`See "${ see }" is not a valid issue reference. Provide either:`,
 					'issue number, repository-slug#id or full issue link URL.'
 				].join( ' ' ) );
+			} else {
+				seeValidated.push( see );
 			}
 		}
+
+		data.see = seeValidated;
 	}
 
-	if ( data.closesNormalized ) {
-		for ( const closes of data.closesNormalized ) {
-			const closesStr = String( closes );
+	if ( data.closes ) {
+		const closesValidated = [];
 
-			if ( !( closesStr.match( ISSUE_PATTERN ) || closesStr.match( ISSUE_SLUG_PATTERN ) || closesStr.match( ISSUE_URL_PATTERN ) ) ) {
+		for ( const closes of data.closes ) {
+			if ( !( closes.match( ISSUE_PATTERN ) || closes.match( ISSUE_SLUG_PATTERN ) || closes.match( ISSUE_URL_PATTERN ) ) ) {
 				validations.push( [
 					`Closes "${ closes }" is not a valid issue reference. Provide either:`,
 					'issue number, repository-slug#id or full issue link URL.'
 				].join( ' ' ) );
+			} else {
+				closesValidated.push( closes );
 			}
 		}
+
+		data.closes = closesValidated;
 	}
 
 	const validatedEntry = { ...entry, data: { ...data, validations } };
 
-	return { isValid: validations.length === 0, validatedEntry };
+	return { isValid, validatedEntry };
 }
 
 function getAllowedTypesList(): string {

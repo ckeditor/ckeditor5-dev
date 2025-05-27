@@ -98,7 +98,7 @@ export type NormalizedType = typeof TYPES[ number ][ 'name' ];
 
 export type Entry = {
 	message: string;
-	data: FileMetadata & FileMetadataNormalized & {
+	data: FileMetadata & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
 		validations?: Array<string>;
@@ -113,16 +113,9 @@ type FileMetadata = {
 	see?: Array<string>;
 };
 
-type FileMetadataNormalized = {
-	typeNormalized?: NormalizedType;
-	scopeNormalized?: Array<string>;
-	closesNormalized?: Array<string>;
-	seeNormalized?: Array<string>;
-};
-
 export type ParsedFile = {
 	content: string;
-	data: FileMetadata & FileMetadataNormalized;
+	data: FileMetadata;
 	changesetPath: string;
 	gitHubUrl: string;
 	skipLinks: boolean;
@@ -150,6 +143,8 @@ export type ChangesetPathsWithGithubUrl = {
 	changesetPaths: Array<string>;
 	gitHubUrl: string;
 	skipLinks: boolean;
+	cwd: string;
+	isRoot: boolean;
 };
 
 type oneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;

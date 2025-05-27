@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global document, window */
-
 const toggleButton = document.querySelector( '.manual-test-sidebar__toggle' );
 const container = document.body;
 const pinnedCSSClass = 'manual-test-container_pinned-sidebar';

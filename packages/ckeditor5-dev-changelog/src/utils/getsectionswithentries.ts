@@ -29,9 +29,9 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 
-		const scope = getScopesLinks( validatedData.scopeNormalized, transformScope );
-		const closes = getIssuesLinks( validatedData.closesNormalized, 'Closes', validatedEntry.gitHubUrl );
-		const see = getIssuesLinks( validatedData.seeNormalized, 'See', validatedEntry.gitHubUrl );
+		const scope = getScopesLinks( validatedData.scope, transformScope );
+		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
+		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
 
@@ -69,7 +69,7 @@ function getScopesLinks( scope: Array<string> | undefined, transformScope: Trans
 }
 
 function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitHubUrl: string ): string | null {
-	if ( !issues ) {
+	if ( !issues?.length ) {
 		return null;
 	}
 
@@ -107,32 +107,20 @@ function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; sin
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ].includes( entry.data.typeNormalized! ) ) {
+		if ( [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ].includes( entry.data.type! ) ) {
 			return 'breaking';
 		}
 	} else {
-		if ( entry.data.typeNormalized === 'Minor breaking change' ) {
+		if ( entry.data.type === 'Minor breaking change' ) {
 			return 'minor';
 		}
 
-		if ( entry.data.typeNormalized === 'Major breaking change' ) {
+		if ( entry.data.type === 'Major breaking change' ) {
 			return 'major';
 		}
 	}
 
-	if ( entry.data.typeNormalized === 'Feature' ) {
-		return 'feature';
-	}
-
-	if ( entry.data.typeNormalized === 'Fix' ) {
-		return 'fix';
-	}
-
-	if ( entry.data.typeNormalized === 'Other' ) {
-		return 'other';
-	}
-
-	return 'invalid';
+	return entry.data.type?.toLowerCase() as SectionName;
 }
 
 function getInitialSectionsWithEntries(): SectionsWithEntries {

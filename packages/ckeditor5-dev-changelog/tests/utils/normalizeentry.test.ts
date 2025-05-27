@@ -38,7 +38,7 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Feature' );
+			expect( normalizedEntry.data.type ).toBe( 'Feature' );
 		} );
 
 		it( 'should convert aliases to the base name', () => {
@@ -46,7 +46,7 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Fix' );
+			expect( normalizedEntry.data.type ).toBe( 'Fix' );
 		} );
 
 		it( 'should maintain other capitalized types', () => {
@@ -54,31 +54,33 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Other' );
+			expect( normalizedEntry.data.type ).toBe( 'Other' );
 		} );
+	} );
 
-		it( 'should normalize "MINOR" to "minor"', () => {
-			const entry = createEntry( { type: 'MINOR' } );
+	describe( 'breaking change normalization', () => {
+		it( 'should normalize boolean value to boolean', () => {
+			const entry = createEntry( { 'breaking-change': true } );
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Minor' );
+			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( true );
 		} );
 
-		it( 'should normalize "MAJOR" to "major"', () => {
-			const entry = createEntry( { type: 'MAJOR' } );
+		it( 'should normalize text to be lowercase', () => {
+			const entry = createEntry( { 'breaking-change': 'TEST123' } );
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Major' );
+			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( 'test123' );
 		} );
 
-		it( 'should return undefined for other values', () => {
-			const entry = createEntry( { type: 'invalid' } );
+		it( 'should normalize undefined to be undefined', () => {
+			const entry = createEntry( { 'breaking-change': undefined } );
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.typeNormalized ).toBe( undefined );
+			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( undefined );
 		} );
 	} );
 
@@ -88,7 +90,7 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.scopeNormalized ).toEqual( [ 'engine', 'ui' ] );
+			expect( normalizedEntry.data.scope ).toEqual( [ 'engine', 'ui' ] );
 		} );
 
 		it( 'should return undefined when scope is not provided', () => {
@@ -96,18 +98,18 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.scopeNormalized ).toBeUndefined();
+			expect( normalizedEntry.data.scope ).toBeUndefined();
 		} );
 	} );
 
 	describe( 'other fields normalization', () => {
 		it( 'should maintain closes field', () => {
-			const closesValue = [ '123', '456' ];
+			const closesValue = [ 123, '456' ];
 			const entry = createEntry( { closes: closesValue } );
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.closesNormalized ).toBe( closesValue );
+			expect( normalizedEntry.data.closes ).toEqual( [ '123', '456' ] );
 		} );
 
 		it( 'should maintain see field', () => {
@@ -116,38 +118,7 @@ describe( 'normalizeEntry()', () => {
 
 			const normalizedEntry = normalizeEntry( entry );
 
-			expect( normalizedEntry.data.seeNormalized ).toBe( seeValue );
-		} );
-	} );
-
-	describe( 'entry structure preservation', () => {
-		it( 'should preserve original data while adding normalized fields', () => {
-			const originalEntry = createEntry( {
-				type: 'feature',
-				scope: [ 'ENGINE' ],
-				closes: [ '#123' ],
-				see: [ 'https://example.com' ]
-			} );
-
-			const normalizedEntry = normalizeEntry( originalEntry );
-
-			// Check that original data is preserved
-			expect( normalizedEntry.content ).toBe( originalEntry.content );
-			expect( normalizedEntry.changesetPath ).toBe( originalEntry.changesetPath );
-			expect( normalizedEntry.gitHubUrl ).toBe( originalEntry.gitHubUrl );
-			expect( normalizedEntry.skipLinks ).toBe( originalEntry.skipLinks );
-
-			// Check that original data fields are preserved
-			expect( normalizedEntry.data.type ).toBe( originalEntry.data.type );
-			expect( normalizedEntry.data.scope ).toBe( originalEntry.data.scope );
-			expect( normalizedEntry.data.closes ).toBe( originalEntry.data.closes );
-			expect( normalizedEntry.data.see ).toBe( originalEntry.data.see );
-
-			// Check that normalized fields are added
-			expect( normalizedEntry.data.typeNormalized ).toBe( 'Feature' );
-			expect( normalizedEntry.data.scopeNormalized ).toEqual( [ 'engine' ] );
-			expect( normalizedEntry.data.closesNormalized ).toBe( originalEntry.data.closes );
-			expect( normalizedEntry.data.seeNormalized ).toBe( originalEntry.data.see );
+			expect( normalizedEntry.data.see ).toEqual( seeValue );
 		} );
 	} );
 } );

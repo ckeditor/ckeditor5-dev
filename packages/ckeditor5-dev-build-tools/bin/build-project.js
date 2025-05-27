@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 'use strict';
 
 import { build } from '../dist/index.js';
