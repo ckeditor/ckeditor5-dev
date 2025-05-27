@@ -55,7 +55,7 @@ function getTitleColor( sectionName: SectionName ) {
 
 	let defaultColor: ( value: string ) => string = chalk.blue;
 
-	if ( sectionName === 'major' || sectionName === 'minor' ) {
+	if ( sectionName === 'major' || sectionName === 'minor' || sectionName === 'breaking' ) {
 		// To avoid tricks in tests, let's simplify the implementation.
 		defaultColor = ( value: string ) => {
 			return chalk.bold( chalk.blue( value ) );

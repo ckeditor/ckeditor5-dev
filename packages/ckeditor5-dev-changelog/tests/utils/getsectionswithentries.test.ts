@@ -75,7 +75,7 @@ describe( 'getSectionsWithEntries()', () => {
 					}
 				},
 				isValid: true
-			};
+			} as any;
 		} );
 
 		vi.clearAllMocks();
@@ -83,7 +83,8 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify parsedFiles into sections', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major' } } ),
+
+			createParsedFile( { data: { type: 'Major breaking change' } } ),
 			createParsedFile( { data: { type: 'Fix' } } ),
 			createParsedFile( { data: { type: 'Other' } } )
 		];
@@ -97,7 +98,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify generic breaking changes', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': true } } )
+			createParsedFile( { data: { type: 'Breaking change' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -110,16 +111,11 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify generic breaking changes in monorepo as invalid', () => {
 		const parsedFiles = [
-			createParsedFile( {
-				data: {
-					'breaking-change': true,
-					type: 'Feature'
-				}
-			} )
+			createParsedFile( { data: { type: 'Breaking change' } } )
 		];
 
 		const testFile = parsedFiles[ 0 ]!;
-		const testData = testFile.data!;
+		const testData = testFile.data as any;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
 			validatedEntry: {
 				...testFile,
@@ -140,8 +136,8 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should cast minor and major breaking changes to a generic ones in single packages', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor' } } ),
-			createParsedFile( { data: { 'breaking-change': 'major' } } )
+			createParsedFile( { data: { type: 'Minor breaking change' } } ),
+			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -154,7 +150,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify minor breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor' } } )
+			createParsedFile( { data: { type: 'Minor breaking change' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -167,7 +163,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify major breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major' } } )
+			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -271,7 +267,7 @@ describe( 'getSectionsWithEntries()', () => {
 		} } ) ];
 
 		const testFile = parsedFiles[ 0 ]!;
-		const testData = testFile.data!;
+		const testData = testFile.data as any;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
 			validatedEntry: {
 				...testFile,

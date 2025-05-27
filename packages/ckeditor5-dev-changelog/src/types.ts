@@ -3,7 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS } from './constants.js';
+import type { SECTIONS, TYPES } from './constants.js';
+
+export type DeepReadonly<T> = {
+	readonly [P in keyof T]: DeepReadonly<T[P]>
+};
 
 /**
  * Configuration options for generating a changelog.
@@ -85,6 +89,13 @@ export type RepositoryConfig = {
 
 export type SectionName = keyof typeof SECTIONS;
 
+export type EntryType = {
+	name: string;
+	aliases?: Array<string>;
+};
+
+export type ValidatedType = typeof TYPES[ number ][ 'name' ];
+
 export type Entry = {
 	message: string;
 	data: FileMetadata & {
@@ -96,11 +107,14 @@ export type Entry = {
 };
 
 type FileMetadata = {
-	'breaking-change'?: string | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;
 	see?: Array<string>;
+};
+
+type ValidatedFileMetadata = FileMetadata & {
+	type: ValidatedType;
 };
 
 export type ParsedFile = {
@@ -109,6 +123,10 @@ export type ParsedFile = {
 	changesetPath: string;
 	gitHubUrl: string;
 	skipLinks: boolean;
+};
+
+export type ValidatedFile = ParsedFile & {
+	data: ValidatedFileMetadata;
 };
 
 export type Section = {

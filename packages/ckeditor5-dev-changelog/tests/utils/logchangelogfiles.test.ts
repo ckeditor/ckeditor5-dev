@@ -100,10 +100,14 @@ describe( 'logChangelogFiles()', () => {
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Incorrect format', expect.any( Object ) );
 	} );
 
-	it( 'should use different style for heading when displaying major breaking change', () => {
-		const sections: SectionsWithEntries = {
-			major: {
-				title: 'Major breaking change',
+	it.each( [
+		[ 'major', 'Major breaking changes' ],
+		[ 'minor', 'Minor breaking changes' ],
+		[ 'breaking', 'Breaking changes' ]
+	] )( 'should use different style for heading when displaying the "%s breaking changes" section', ( sectionKey, title ) => {
+		const sections = {
+			[ sectionKey ]: {
+				title,
 				entries: [
 					{
 						message: 'Added feature',
@@ -116,44 +120,15 @@ describe( 'logChangelogFiles()', () => {
 					}
 				]
 			}
-		} as any;
+		};
 
-		logChangelogFiles( sections );
-
-		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.bold ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Major breaking change:' );
-
-		// Updated call count to account for warning message
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Major breaking change:', expect.any( Object ) );
-	} );
-
-	it( 'should use different style for heading when displaying minor breaking change', () => {
-		const sections: SectionsWithEntries = {
-			minor: {
-				title: 'Minor breaking change',
-				entries: [
-					{
-						message: 'Added feature',
-						data: {
-							type: 'Feature',
-							mainContent: 'Added feature',
-							restContent: []
-						},
-						changesetPath: '/repo/changelog/feature.md'
-					}
-				]
-			}
-		} as any;
-
-		logChangelogFiles( sections );
+		logChangelogFiles( sections as any );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.bold ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Minor breaking change:' );
+		expect( chalk.blue ).toHaveBeenCalledWith( `${ title }:` );
 
-		// Updated call count to account for warning message
-		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Minor breaking change:', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 2, `◌ ${ title }:`, expect.any( Object ) );
 	} );
 
 	it( 'should use the `titleInLogs` property instead of `title` if a section defines it', () => {

@@ -4,8 +4,7 @@
  */
 
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import type {
-	Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
+import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope, ValidatedFile, ValidatedType } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
@@ -25,7 +24,7 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 	const packagesNames = packageJsons.map( packageJson => packageJson.name );
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const normalizedEntry = normalizeEntry( entry );
+		const normalizedEntry = normalizeEntry( entry, singlePackage );
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
 		const validatedData = validatedEntry.data;
 
@@ -104,24 +103,24 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( { entry, singlePackage, isValid }: { entry: ParsedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
+function getSection( { entry, singlePackage, isValid }: { entry: ValidatedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
 	if ( !isValid ) {
 		return 'invalid';
 	}
 
-	const breakingChangeNormalized = entry.data[ 'breaking-change' ];
-
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( singlePackage ) {
-		if ( [ 'minor', 'major', true ].includes( breakingChangeNormalized! ) ) {
+		const breakingChangeTypes: Array<ValidatedType> = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
+
+		if ( breakingChangeTypes.includes( entry.data.type ) ) {
 			return 'breaking';
 		}
 	} else {
-		if ( breakingChangeNormalized === 'minor' ) {
+		if ( entry.data.type === 'Minor breaking change' ) {
 			return 'minor';
 		}
 
-		if ( breakingChangeNormalized === 'major' ) {
+		if ( entry.data.type === 'Major breaking change' ) {
 			return 'major';
 		}
 	}
