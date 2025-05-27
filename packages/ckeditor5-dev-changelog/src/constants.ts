@@ -18,13 +18,26 @@ export const ORGANISATION_NAMESPACE = '@ckeditor';
 export const CHANGESET_DIRECTORY = '.changelog';
 
 export const SECTIONS = {
-	major: { title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
-	minor: { title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
+	major: {
+		title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		titleInLogs: 'MAJOR BREAKING CHANGES'
+	},
+	minor: {
+		title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		titleInLogs: 'MINOR BREAKING CHANGES'
+	},
 	breaking: { title: 'BREAKING CHANGES' },
 	feature: { title: 'Features' },
 	fix: { title: 'Bug fixes' },
 	other: { title: 'Other changes' },
-	invalid: { title: 'incorrectly defined input files' }
+	warning: {
+		title: 'Incorrect values',
+		excludeInChangelog: true
+	},
+	invalid: {
+		title: 'Invalid files',
+		excludeInChangelog: true
+	}
 } as const;
 
 export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;

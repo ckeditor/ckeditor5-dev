@@ -26,17 +26,10 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 	changesetPath: 'path/to/changeset',
 	...overrides,
 	data: {
-		type: 'FEATURE',
-		typeNormalized: 'Feature',
-		scope: [ 'PACKAGE-1' ],
-		scopeNormalized: [ 'package-1' ],
-		scopeValidated: [ 'package-1' ],
+		type: 'Feature',
+		scope: [ 'package-1' ],
 		closes: [ '123' ],
-		closesNormalized: [ '123' ],
-		closesValidated: [ '123' ],
 		see: [ '456' ],
-		seeNormalized: [ '456' ],
-		seeValidated: [ '456' ],
 		...overrides.data
 	}
 } as any );
@@ -60,14 +53,25 @@ describe( 'getSectionsWithEntries()', () => {
 
 		vi.mocked( validateEntry ).mockImplementation( entry => {
 			const data = entry.data! || {};
+
+			const see = ( data.see || [] ).filter( entry => !entry.startsWith( 'invalid' ) );
+			const closes = ( data.closes || [] ).filter( entry => !entry.startsWith( 'invalid' ) );
+			let validations = undefined;
+
+			if ( see.length || closes.length ) {
+				validations = [
+					'Invalid references.'
+				];
+			}
+
 			return {
 				validatedEntry: {
 					...entry,
 					data: {
 						...data,
-						scopeValidated: data.scopeNormalized,
-						closesValidated: data.closesNormalized,
-						seeValidated: data.seeNormalized
+						see,
+						closes,
+						validations
 					}
 				},
 				isValid: true
@@ -79,9 +83,9 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify parsedFiles into sections', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } ),
-			createParsedFile( { data: { type: 'Fix', typeNormalized: 'Fix' } } ),
-			createParsedFile( { data: { type: 'Other', typeNormalized: 'Other' } } )
+			createParsedFile( { data: { 'breaking-change': 'major' } } ),
+			createParsedFile( { data: { type: 'Fix' } } ),
+			createParsedFile( { data: { type: 'Other' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
@@ -93,7 +97,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should correctly classify generic breaking changes', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': true, breakingChangeNormalized: true } } )
+			createParsedFile( { data: { 'breaking-change': true } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -109,8 +113,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( {
 				data: {
 					'breaking-change': true,
-					breakingChangeNormalized: true,
-					typeNormalized: 'Feature'
+					type: 'Feature'
 				}
 			} )
 		];
@@ -121,10 +124,7 @@ describe( 'getSectionsWithEntries()', () => {
 			validatedEntry: {
 				...testFile,
 				data: {
-					...testData,
-					scopeValidated: testData.scopeNormalized,
-					closesValidated: testData.closesNormalized,
-					seeValidated: testData.seeNormalized
+					...testData
 				}
 			},
 			isValid: false
@@ -140,8 +140,8 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should cast minor and major breaking changes to a generic ones in single packages', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor', breakingChangeNormalized: 'minor' } } ),
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } )
+			createParsedFile( { data: { 'breaking-change': 'minor' } } ),
+			createParsedFile( { data: { 'breaking-change': 'major' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
@@ -154,7 +154,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify minor breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'minor', breakingChangeNormalized: 'minor' } } )
+			createParsedFile( { data: { 'breaking-change': 'minor' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -167,7 +167,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should classify major breaking change in a monorepo', () => {
 		const parsedFiles = [
-			createParsedFile( { data: { 'breaking-change': 'major', breakingChangeNormalized: 'major' } } )
+			createParsedFile( { data: { 'breaking-change': 'major' } } )
 		];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
@@ -182,11 +182,7 @@ describe( 'getSectionsWithEntries()', () => {
 		const parsedFiles = [ createParsedFile( {
 			data: {
 				see: undefined,
-				seeNormalized: undefined,
-				seeValidated: undefined,
-				closes: undefined,
-				closesNormalized: undefined,
-				closesValidated: undefined
+				closes: undefined
 			}
 		} ) ];
 
@@ -201,9 +197,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should classify an entry as valid if the scope is undefined', () => {
 		const parsedFiles = [ createParsedFile( {
 			data: {
-				scope: undefined,
-				scopeNormalized: undefined,
-				scopeValidated: undefined
+				scope: undefined
 			}
 		} ) ];
 
@@ -234,11 +228,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should generate correct markdown links for issues from other repositories', () => {
 		const parsedFiles = [ createParsedFile( { data: {
 			closes: [ 'ckeditor/ckeditor5#123' ],
-			closesNormalized: [ 'ckeditor/ckeditor5#123' ],
-			closesValidated: [ 'ckeditor/ckeditor5#123' ],
-			see: [ 'mr-developer/cool-project.com#456' ],
-			seeNormalized: [ 'mr-developer/cool-project.com#456' ],
-			seeValidated: [ 'mr-developer/cool-project.com#456' ]
+			see: [ 'mr-developer/cool-project.com#456' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
@@ -255,9 +245,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should generate correct markdown links for GitHub issues with URL format', () => {
 		const parsedFiles = [ createParsedFile( { data: {
-			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ],
-			closesNormalized: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ],
-			closesValidated: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
+			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
@@ -279,8 +267,7 @@ describe( 'getSectionsWithEntries()', () => {
 
 	it( 'should not add invalid links to the generated message', () => {
 		const parsedFiles = [ createParsedFile( { data: {
-			closesNormalized: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ],
-			closesValidated: []
+			closes: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
 		const testFile = parsedFiles[ 0 ]!;
@@ -290,9 +277,7 @@ describe( 'getSectionsWithEntries()', () => {
 				...testFile,
 				data: {
 					...testData,
-					scopeValidated: testData.scopeNormalized,
-					closesValidated: [],
-					seeValidated: testData.seeNormalized
+					see: testData.see
 				}
 			},
 			isValid: false
@@ -322,17 +307,54 @@ describe( 'getSectionsWithEntries()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should handle invalid issue references that do not match any pattern', () => {
+	it( 'should handle invalid issue references that do not match any pattern (closes)', () => {
 		const parsedFiles = [ createParsedFile( { data: {
-			closes: [ 'invalid-reference' ],
-			closesNormalized: [ 'invalid-reference' ],
-			closesValidated: [ 'invalid-reference' ]
+			closes: [ 'invalid-reference' ]
 		} } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
-		expect( message ).toContain( 'Closes .' );
+		expect( message ).not.toContain( 'Closes' );
+	} );
+
+	it( 'should handle invalid issue references that do not match any pattern (see)', () => {
+		const parsedFiles = [ createParsedFile( { data: {
+			see: [ 'invalid-reference' ]
+		} } ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).not.toContain( 'See' );
+	} );
+
+	it( 'should include the partial valid entry in the "warning" section (checking `closes`)', () => {
+		const parsedFiles = [ createParsedFile( {
+			data: {
+				type: 'Other',
+				closes: [ 'invalid-reference' ]
+			}
+		} ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+
+		expect( result.other.entries ).toHaveLength( 1 );
+		expect( result.warning.entries ).toHaveLength( 1 );
+	} );
+
+	it( 'should include the partial valid entry in the "warning" section (checking `see`)', () => {
+		const parsedFiles = [ createParsedFile( {
+			data: {
+				see: [ 'invalid-reference' ]
+			}
+		} ) ];
+
+		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+
+		expect( result.feature.entries ).toHaveLength( 1 );
+		expect( result.warning.entries ).toHaveLength( 1 );
 	} );
 } );
