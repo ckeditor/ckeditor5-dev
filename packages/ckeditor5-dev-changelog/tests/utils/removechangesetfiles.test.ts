@@ -31,12 +31,16 @@ describe( 'removeChangesetFiles()', () => {
 		{
 			changesetPaths: [ '/repo/changelog/changeset-1.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-1',
-			skipLinks: false
+			skipLinks: false,
+			cwd: '/changeset-path-1',
+			isRoot: false
 		},
 		{
 			changesetPaths: [ '/repo/changelog/changeset-2.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-2',
-			skipLinks: false
+			skipLinks: false,
+			cwd: '/changeset-path-2',
+			isRoot: false
 		}
 	];
 

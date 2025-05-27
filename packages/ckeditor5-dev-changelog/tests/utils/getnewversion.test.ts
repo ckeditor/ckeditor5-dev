@@ -47,6 +47,7 @@ describe( 'getNewVersion()', () => {
 		feature: { entries: [], title: 'Features' },
 		fix: { entries: [], title: 'Bug fixes' },
 		other: { entries: [], title: 'Other changes' },
+		warning: { entries: [], title: 'Warning' },
 		invalid: { entries: [], title: 'Invalid changes' },
 		...overrides
 	} );

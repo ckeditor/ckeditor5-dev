@@ -138,6 +138,10 @@ describe( 'generateChangelog()', () => {
 				title: SECTIONS.other.title,
 				entries: []
 			},
+			warning: {
+				title: SECTIONS.warning.title,
+				entries: []
+			},
 			invalid: {
 				title: SECTIONS.invalid.title,
 				entries: []
@@ -438,6 +442,10 @@ describe( 'generateChangelog()', () => {
 			},
 			other: {
 				title: SECTIONS.other.title,
+				entries: []
+			},
+			warning: {
+				title: SECTIONS.warning.title,
 				entries: []
 			},
 			invalid: {
