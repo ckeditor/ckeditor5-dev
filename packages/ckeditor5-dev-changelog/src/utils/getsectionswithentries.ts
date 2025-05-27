@@ -4,10 +4,7 @@
  */
 
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import type {
-	Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope,
-	ValidatedFile,
-	ValidatedType } from '../types.js';
+import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope, ValidatedFile, ValidatedType } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
 import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
