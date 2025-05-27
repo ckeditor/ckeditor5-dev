@@ -94,7 +94,7 @@ export type EntryType = {
 	aliases?: Array<string>;
 };
 
-export type NormalizedType = typeof TYPES[ number ][ 'name' ];
+export type ValidatedType = typeof TYPES[ number ][ 'name' ];
 
 export type Entry = {
 	message: string;
@@ -113,12 +113,20 @@ type FileMetadata = {
 	see?: Array<string>;
 };
 
+type ValidatedFileMetadata = FileMetadata & {
+	type: ValidatedType;
+};
+
 export type ParsedFile = {
 	content: string;
 	data: FileMetadata;
 	changesetPath: string;
 	gitHubUrl: string;
 	skipLinks: boolean;
+};
+
+export type ValidatedFile = ParsedFile & {
+	data: ValidatedFileMetadata;
 };
 
 export type Section = {

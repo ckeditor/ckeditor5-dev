@@ -14,7 +14,8 @@ vi.mock( '../../src/constants.js', () => {
 			{ name: 'Other' },
 			{ name: 'Fix', aliases: [ 'Fixes' ] },
 			{ name: 'Major', aliases: [ 'Major breaking change' ] },
-			{ name: 'Minor', aliases: [ 'Minor breaking change' ] }
+			{ name: 'Minor', aliases: [ 'Minor breaking change' ] },
+			{ name: 'Breaking', aliases: [ 'Breaking change' ] }
 		]
 	};
 } );
@@ -56,31 +57,19 @@ describe( 'normalizeEntry()', () => {
 
 			expect( normalizedEntry.data.type ).toBe( 'Other' );
 		} );
-	} );
 
-	describe( 'breaking change normalization', () => {
-		it( 'should normalize boolean value to boolean', () => {
-			const entry = createEntry( { 'breaking-change': true } );
+		it( 'should normalize breaking change aliases', () => {
+			const entry1 = createEntry( { type: 'Major breaking change' } );
+			const entry2 = createEntry( { type: 'Minor breaking change' } );
+			const entry3 = createEntry( { type: 'Breaking change' } );
 
-			const normalizedEntry = normalizeEntry( entry );
+			const normalizedEntry1 = normalizeEntry( entry1 );
+			const normalizedEntry2 = normalizeEntry( entry2 );
+			const normalizedEntry3 = normalizeEntry( entry3 );
 
-			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( true );
-		} );
-
-		it( 'should normalize text to be lowercase', () => {
-			const entry = createEntry( { 'breaking-change': 'TEST123' } );
-
-			const normalizedEntry = normalizeEntry( entry );
-
-			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( 'test123' );
-		} );
-
-		it( 'should normalize undefined to be undefined', () => {
-			const entry = createEntry( { 'breaking-change': undefined } );
-
-			const normalizedEntry = normalizeEntry( entry );
-
-			expect( normalizedEntry.data[ 'breaking-change' ] ).toBe( undefined );
+			expect( normalizedEntry1.data.type ).toBe( 'Major' );
+			expect( normalizedEntry2.data.type ).toBe( 'Minor' );
+			expect( normalizedEntry3.data.type ).toBe( 'Breaking' );
 		} );
 	} );
 

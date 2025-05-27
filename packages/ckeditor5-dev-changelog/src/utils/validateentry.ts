@@ -3,12 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ParsedFile } from '../types.js';
+import type { ValidatedType, ParsedFile, ValidatedFile } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from '../constants.js';
 
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
-	validatedEntry: ParsedFile;
+	validatedEntry: ValidatedFile;
 } {
 	const noScopePackagesNames = packagesNames.map( packageName => packageName.replace( /@.*\//, '' ) );
 	const data = entry.data;
@@ -28,30 +28,20 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		isValid = false;
 	}
 
-	if ( singlePackage ) {
-		if ( data.type === 'Major breaking change' || data.type === 'Minor breaking change' ) {
-			validations.push(
-				`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
-			);
-		}
+	if ( singlePackage && [ 'Major breaking change', 'Minor breaking change' ].includes( data.type! ) ) {
+		validations.push(
+			`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
+		);
 
-		// if ( breakingChangeProvided && !data[ 'breaking-change' ] ) {
-		// 	validations.push( [
-		// 		`Breaking change "${ data[ 'breaking-change' ] }" should be one of:`,
-		// 		'"true", or not specified, for a single repo (case insensitive).'
-		// 	].join( ' ' ) );
+		isValid = false;
+	}
 
-		// 	isValid = false;
-		// }
-	} else {
-		if ( !singlePackage && data.type === 'Breaking change' ) {
-		// if ( breakingChangeProvided && ![ 'minor', 'major' ].includes( data[ 'breaking-change' ] as string ) ) {
-			validations.push(
-				`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
-			);
+	if ( !singlePackage && data.type === 'Breaking change' ) {
+		validations.push(
+			`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
+		);
 
-			isValid = false;
-		}
+		isValid = false;
 	}
 
 	if ( data.scope ) {
@@ -102,7 +92,14 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 		data.closes = closesValidated;
 	}
 
-	const validatedEntry = { ...entry, data: { ...data, validations } };
+	const validatedEntry = {
+		...entry,
+		data: {
+			...data,
+			validations,
+			type: data.type as ValidatedType
+		}
+	};
 
 	return { isValid, validatedEntry };
 }

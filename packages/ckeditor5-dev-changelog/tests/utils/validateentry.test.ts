@@ -15,6 +15,7 @@ vi.mock( '../../src/constants.js', () => {
 		TYPES: [
 			{ name: 'Feature' },
 			{ name: 'Fix', aliases: [ 'Fixes', 'Fixed' ] }, // Additional value to test the "is"/"are" grammar options.
+			{ name: 'Other' },
 			{ name: 'Major breaking change', aliases: [ 'Major' ] },
 			{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
 			{ name: 'Breaking change', aliases: [ 'Breaking' ] }
@@ -55,9 +56,11 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Type should be one of: "Feature", "Other" or "Fix" (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Type "Unknown" should be one of: "Feature", "Fix" ("Fixes", "Fixed" are also allowed),' +
+				' "Other", "Major breaking change" ("Major" is also allowed), "Minor breaking change"' +
+				' ("Minor" is also allowed), or "Breaking change" ("Breaking" is also allowed) (case insensitive).'
+			] );
 		} );
 
 		it( 'should return valid when type is "Feature"', () => {
@@ -83,79 +86,62 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeTruthy();
 		} );
-	} );
 
-	describe( 'breaking change validation for single package', () => {
-		it( 'should return invalid when breaking change is not "true" for a single package', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': false } );
+		it( 'should return valid when type is "Breaking change" for a single package', () => {
+			const entry: ParsedFile = createEntry( { type: 'Breaking change' } );
+
+			const { isValid } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeTruthy();
+		} );
+
+		it( 'should return invalid when type is "Major breaking change" for a single package', () => {
+			const entry: ParsedFile = createEntry( { type: 'Major breaking change' } );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations ).toContain(
-				'Breaking change "false" should be one of: "true", or not specified, for a single repo (case insensitive).'
-			);
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Breaking change "Major breaking change" should be generic: "breaking", for a single package mode (case insensitive).'
+			] );
 		} );
 
-		it( 'should return valid when breaking change is "true" for a single package', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': true } );
+		it( 'should return invalid when type is "Minor breaking change" for a single package', () => {
+			const entry: ParsedFile = createEntry( { type: 'Minor breaking change' } );
 
-			const { isValid } = validateEntry( entry, packageNames, true );
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeFalsy();
+			expect( ( validatedEntry.data as any ).validations ).toEqual( [
+				'Breaking change "Minor breaking change" should be generic: "breaking", for a single package mode (case insensitive).'
+			] );
+		} );
+
+		it( 'should return valid when type is "Major breaking change" for a monorepo', () => {
+			const entry: ParsedFile = createEntry( { type: 'Major breaking change' } );
+
+			const { isValid } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
 		} );
 
-		it( 'should return valid when breaking change is "major" for a single package', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': 'major' } );
+		it( 'should return valid when type is "Minor breaking change" for a monorepo', () => {
+			const entry: ParsedFile = createEntry( { type: 'Minor breaking change' } );
 
-			const { isValid } = validateEntry( entry, packageNames, true );
-
-			expect( isValid ).toBeTruthy();
-		} );
-
-		it( 'should return valid when breaking change is "minor" for a single package', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': 'minor' } );
-
-			const { isValid } = validateEntry( entry, packageNames, true );
+			const { isValid } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeTruthy();
 		} );
 
-		it( 'should return valid when breaking change is any text for a single package', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': 'test123' } );
-
-			const { isValid } = validateEntry( entry, packageNames, true );
-
-			expect( isValid ).toBeTruthy();
-		} );
-	} );
-
-	describe( 'breaking change validation for monorepo', () => {
-		it( 'should return invalid when breaking change is not "minor" or "major" for a monorepo', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': true } );
+		it( 'should return invalid when type is "Breaking change" for a monorepo', () => {
+			const entry: ParsedFile = createEntry( { type: 'Breaking change' } );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
 			expect( ( validatedEntry.data as any ).validations ).toEqual( [
-				'Breaking change "breaking" should be one of: "minor", "major", for a monorepo (case insensitive).'
+				'Breaking change "Breaking change" should be one of: "minor", "major", for a monorepo (case insensitive).'
 			] );
-		} );
-
-		it( 'should return valid when breaking change is "minor" for a monorepo', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': 'minor' } );
-
-			const { isValid } = validateEntry( entry, packageNames, false );
-
-			expect( isValid ).toBeTruthy();
-		} );
-
-		it( 'should return valid when breaking change is "major" for a monorepo', () => {
-			const entry: ParsedFile = createEntry( { type: 'Feature', 'breaking-change': 'major' } );
-
-			const { isValid } = validateEntry( entry, packageNames, false );
-
-			expect( isValid ).toBeTruthy();
 		} );
 	} );
 
@@ -314,7 +300,6 @@ describe( 'validateEntry()', () => {
 		it( 'should collect multiple validation errors but only mark as invalid for critical errors', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Unknown',
-				'breaking-change': 'not-valid',
 				scope: [ 'unknown-package' ],
 				see: [ 'invalid-reference' ],
 				closes: [ 'invalid-reference' ]
@@ -323,7 +308,7 @@ describe( 'validateEntry()', () => {
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( ( validatedEntry.data as any ).validations.length ).toBe( 5 );
+			expect( ( validatedEntry.data as any ).validations.length ).toBe( 4 );
 			expect( ( validatedEntry.data as any ).scope ).toEqual( [] );
 			expect( ( validatedEntry.data as any ).see ).toEqual( [] );
 			expect( ( validatedEntry.data as any ).closes ).toEqual( [] );
