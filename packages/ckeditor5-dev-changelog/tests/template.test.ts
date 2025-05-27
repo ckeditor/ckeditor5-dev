@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { stripVTControlCharacters } from 'util';
 import { join } from 'upath';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as template from '../src/template.js';
@@ -178,7 +179,9 @@ describe( 'generateTemplate', () => {
 	it( 'logs a message when file is created', async () => {
 		await template.generateTemplate();
 
-		expect( mocks.log ).toHaveBeenCalledWith( `Changelog file created: ${ join( CHANGESET_DIRECTORY, EXPECTED_FILE_NAME ) }` );
+		expect( mocks.log ).toHaveBeenCalledWith(
+			stripVTControlCharacters( `Changelog file created: ${ join( CHANGESET_DIRECTORY, EXPECTED_FILE_NAME ) }` )
+		);
 	} );
 
 	it( 'logs an error when file with given name already exists and `retries` reached limit', async () => {
@@ -187,7 +190,7 @@ describe( 'generateTemplate', () => {
 
 		await expect( () => template.generateTemplate( { retries: 1 } ) ).rejects.toThrow( 'File already exists' );
 		expect( mocks.error ).toHaveBeenCalledExactlyOnceWith(
-			'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.'
+			stripVTControlCharacters( 'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.' )
 		);
 	} );
 
@@ -198,7 +201,9 @@ describe( 'generateTemplate', () => {
 
 		await template.generateTemplate();
 
-		expect( mocks.error ).toHaveBeenCalledWith( 'Error: Git is not installed or the current folder is not in git repository.' );
+		expect( mocks.error ).toHaveBeenCalledWith(
+			stripVTControlCharacters( 'Error: Git is not installed or the current folder is not in git repository.' )
+		);
 		expect( processExitSpy ).toHaveBeenCalledWith( 1 );
 	} );
 } );
