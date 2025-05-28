@@ -31,7 +31,6 @@ describe( 'getNewVersion()', () => {
 		data: {
 			mainContent: undefined,
 			restContent: [],
-			'breaking-change': 'major',
 			type: 'feature',
 			scope: [],
 			closes: [],

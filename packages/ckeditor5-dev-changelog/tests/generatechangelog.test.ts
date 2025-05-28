@@ -145,10 +145,6 @@ describe( 'generateChangelog()', () => {
 			invalid: {
 				title: SECTIONS.invalid.title,
 				entries: []
-			},
-			warning: {
-				title: SECTIONS.warning.title,
-				entries: []
 			}
 		} );
 		vi.mocked( getNewVersion ).mockResolvedValue( { newVersion: '1.0.1', isInternal: false } );
@@ -450,10 +446,6 @@ describe( 'generateChangelog()', () => {
 			},
 			invalid: {
 				title: SECTIONS.invalid.title,
-				entries: []
-			},
-			warning: {
-				title: SECTIONS.warning.title,
 				entries: []
 			}
 		};

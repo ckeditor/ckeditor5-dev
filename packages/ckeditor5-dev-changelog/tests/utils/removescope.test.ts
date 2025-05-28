@@ -15,7 +15,6 @@ describe( 'removeScope()', () => {
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
 			data: {
-				'breaking-change': true,
 				type: 'type1',
 				scope: [ 'scope1' ]
 			}
@@ -38,7 +37,6 @@ describe( 'removeScope()', () => {
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
 			data: {
-				'breaking-change': true,
 				type: 'type1'
 			}
 		}, {
@@ -59,7 +57,6 @@ describe( 'removeScope()', () => {
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
 			data: {
-				'breaking-change': true,
 				type: 'type1',
 				scope: [ 'scope1' ]
 			}
