@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 /**
  * @param options
  * @param {string} options.circleToken

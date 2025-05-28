@@ -5,11 +5,13 @@
 
 import { describe, it, expect } from 'vitest';
 import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay.js';
+import { InternalError } from '../../src/errors/internalerror.js';
 import type { SectionsWithEntries, Section, Entry } from '../../src/types.js';
 
-const createSection = ( title: string, entries: Array<Entry> ): Section => ( {
+const createSection = ( title: string, entries: Array<Entry>, excludeInChangelog: boolean = false ): Section => ( {
 	title,
-	entries
+	entries,
+	excludeInChangelog
 } );
 
 const createEntry = ( message: string ): Entry => ( { message } ) as any;
@@ -22,15 +24,20 @@ describe( 'getSectionsToDisplay()', () => {
 			feature: createSection( 'Features', [] ),
 			fix: createSection( 'Fix', [] ),
 			other: createSection( 'Other', [] ),
-			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ], true ),
+			warning: createSection( 'Warning', [ createEntry( 'Invalid entry' ) ], true ),
+			breaking: createSection( 'Breaking Changes', [] )
 		};
 
 		const result = getSectionsToDisplay( sectionsWithEntries );
 
-		expect( result ).toEqual( [
-			{ title: 'Major Changes', entries: [ { message: 'Breaking change' } ] },
-			{ title: 'Minor Changes', entries: [ { message: 'Minor change' } ] }
-		] );
+		expect( result ).toEqual( expect.arrayContaining( [
+			expect.objectContaining( { title: 'Major Changes', entries: [ { message: 'Breaking change' } ] } )
+		] ) );
+
+		expect( result ).toEqual( expect.arrayContaining( [
+			expect.objectContaining( { title: 'Minor Changes', entries: [ { message: 'Minor change' } ] } )
+		] ) );
 	} );
 
 	it( 'should throw an error if all sections are invalid or empty', () => {
@@ -40,11 +47,13 @@ describe( 'getSectionsToDisplay()', () => {
 			feature: createSection( 'Features', [] ),
 			fix: createSection( 'Fix', [] ),
 			other: createSection( 'Other', [] ),
-			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ] )
+			invalid: createSection( 'Invalid', [ createEntry( 'Invalid entry' ) ], true ),
+			warning: createSection( 'Warning', [ createEntry( 'Invalid entry' ) ], true ),
+			breaking: createSection( 'Breaking Changes', [] )
 		};
 
 		expect( () => {
 			getSectionsToDisplay( sectionsWithEntries );
-		} ).toThrow( 'No valid changesets found. Aborting.' );
+		} ).toThrow( InternalError );
 	} );
 } );

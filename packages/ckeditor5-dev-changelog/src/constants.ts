@@ -4,6 +4,7 @@
  */
 
 import { join } from 'path';
+import type { DeepReadonly, EntryType } from './types';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
@@ -22,11 +23,38 @@ export const CHANGESET_DIRECTORY = '.changelog';
 export const TEMPLATE_FILE = join( import.meta.dirname, '../bin/template.md' );
 
 export const SECTIONS = {
-	major: { title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
-	minor: { title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` },
+	major: {
+		title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		titleInLogs: 'MAJOR BREAKING CHANGES'
+	},
+	minor: {
+		title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		titleInLogs: 'MINOR BREAKING CHANGES'
+	},
 	breaking: { title: 'BREAKING CHANGES' },
 	feature: { title: 'Features' },
 	fix: { title: 'Bug fixes' },
 	other: { title: 'Other changes' },
-	invalid: { title: 'Invalid changes' }
+	warning: {
+		title: 'Incorrect values',
+		excludeInChangelog: true
+	},
+	invalid: {
+		title: 'Invalid files',
+		excludeInChangelog: true
+	}
 } as const;
+
+export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+export const ISSUE_PATTERN = /^\d+$/;
+export const ISSUE_URL_PATTERN =
+	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
+
+export const TYPES = [
+	{ name: 'Feature' },
+	{ name: 'Other' },
+	{ name: 'Fix', aliases: [ 'Fixes' ] },
+	{ name: 'Major breaking change', aliases: [ 'Major' ] },
+	{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
+	{ name: 'Breaking change', aliases: [ 'Breaking' ] }
+] as const satisfies DeepReadonly<Array<EntryType>>;

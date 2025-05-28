@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 import { execSync } from 'child_process';
 import minimist from 'minimist';
 import processJobStatuses from '../lib/process-job-statuses.js';

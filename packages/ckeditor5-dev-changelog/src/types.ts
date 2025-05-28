@@ -3,7 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS } from './constants.js';
+import type { SECTIONS, TYPES } from './constants.js';
+
+export type DeepReadonly<T> = {
+	readonly [P in keyof T]: DeepReadonly<T[P]>
+};
 
 /**
  * Configuration options for generating a changelog.
@@ -85,21 +89,32 @@ export type RepositoryConfig = {
 
 export type SectionName = keyof typeof SECTIONS;
 
+export type EntryType = {
+	name: string;
+	aliases?: Array<string>;
+};
+
+export type ValidatedType = typeof TYPES[ number ][ 'name' ];
+
 export type Entry = {
 	message: string;
 	data: FileMetadata & {
 		mainContent: string | undefined;
 		restContent: Array<string>;
+		validations?: Array<string>;
 	};
 	changesetPath: string;
 };
 
 type FileMetadata = {
-	'breaking-change'?: 'major' | 'minor' | boolean;
 	type?: string;
 	scope?: Array<string>;
 	closes?: Array<string>;
 	see?: Array<string>;
+};
+
+type ValidatedFileMetadata = FileMetadata & {
+	type: ValidatedType;
 };
 
 export type ParsedFile = {
@@ -110,9 +125,15 @@ export type ParsedFile = {
 	skipLinks: boolean;
 };
 
+export type ValidatedFile = ParsedFile & {
+	data: ValidatedFileMetadata;
+};
+
 export type Section = {
 	entries: Array<Entry>;
 	title: string;
+	titleInLogs?: string;
+	excludeInChangelog?: boolean;
 };
 
 export type SectionsWithEntries = Record<SectionName, Section>;
@@ -132,6 +153,8 @@ export type ChangesetPathsWithGithubUrl = {
 	changesetPaths: Array<string>;
 	gitHubUrl: string;
 	skipLinks: boolean;
+	cwd: string;
+	isRoot: boolean;
 };
 
 type oneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;

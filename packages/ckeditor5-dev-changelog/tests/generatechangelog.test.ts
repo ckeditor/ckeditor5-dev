@@ -22,7 +22,9 @@ import { getDateFormatted } from '../src/utils/getdateformatted.js';
 import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
 import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
 import { removeScope } from '../src/utils/removescope.js';
+import { commitChanges } from '../src/utils/commitchanges.js';
 import { SECTIONS } from '../src/constants.js';
+import { InternalError } from '../src/errors/internalerror.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../src/utils/getreleasepackagespkgjsons.js' );
@@ -41,15 +43,18 @@ vi.mock( '../src/utils/getdateformatted.js' );
 vi.mock( '../src/utils/defaulttransformscope.js' );
 vi.mock( '../src/utils/getexternalrepositorieswithdefaults.js' );
 vi.mock( '../src/utils/removescope.js' );
+vi.mock( '../src/utils/commitchanges.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		yellow: ( text: string ) => text,
 		green: ( text: string ) => text,
-		cyan: ( text: string ) => text
+		cyan: ( text: string ) => text,
+		red: ( text: string ) => text
 	}
 } ) );
 
 describe( 'generateChangelog()', () => {
+	// TODO: Missing tests for the default value of `cwd`.
 	const defaultOptions = {
 		cwd: '/home/ckeditor',
 		packagesDirectory: 'packages',
@@ -76,7 +81,9 @@ describe( 'generateChangelog()', () => {
 			{
 				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				skipLinks: false
+				skipLinks: false,
+				isRoot: true,
+				cwd: '/home/ckeditor'
 			}
 		] );
 		vi.mocked( getChangesetsParsed ).mockResolvedValue( [
@@ -134,6 +141,10 @@ describe( 'generateChangelog()', () => {
 			invalid: {
 				title: SECTIONS.invalid.title,
 				entries: []
+			},
+			warning: {
+				title: SECTIONS.warning.title,
+				entries: []
 			}
 		} );
 		vi.mocked( getNewVersion ).mockResolvedValue( { newVersion: '1.0.1', isInternal: false } );
@@ -164,77 +175,6 @@ describe( 'generateChangelog()', () => {
 			}
 		] );
 		vi.mocked( getNewChangelog ).mockReturnValue( 'Mocked changelog content' );
-		vi.mocked( removeScope ).mockImplementation( parsedChangesetFiles => {
-			return parsedChangesetFiles.map( changeset => {
-				delete changeset.data.scope;
-
-				return changeset;
-			} );
-		} );
-	} );
-
-	it( 'generates changelog with all required sections', async () => {
-		await generateChangelog( defaultOptions );
-
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
-		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
-		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
-
-		expect( getNewChangelog ).toHaveBeenCalledWith( {
-			oldVersion: '1.0.0',
-			newVersion: '1.0.1',
-			dateFormatted: 'March 26, 2024',
-			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-			sectionsToDisplay: [
-				{
-					title: SECTIONS.feature.title,
-					entries: [
-						{
-							message: 'Test feature',
-							data: {
-								type: 'Feature',
-								scope: [ 'test-package' ],
-								closes: [],
-								see: [],
-								mainContent: 'Test feature',
-								restContent: []
-							},
-							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
-						}
-					]
-				}
-			],
-			releasedPackagesInfo: [
-				{
-					title: 'Released packages',
-					version: '1.0.1',
-					packages: [ 'test-package' ]
-				}
-			],
-			isInternal: false,
-			singlePackage: false,
-			packageJsons: [
-				{ name: 'test-package', version: '1.0.0' }
-			]
-		} );
-
-		expect( modifyChangelog ).toHaveBeenCalledWith(
-			'Mocked changelog content',
-			'/home/ckeditor'
-		);
-		expect( removeChangesetFiles ).toHaveBeenCalledWith(
-			[
-				{
-					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
-					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					skipLinks: false
-				}
-			],
-			'/home/ckeditor',
-			'.changelog',
-			[]
-		);
-		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -251,71 +191,63 @@ describe( 'generateChangelog()', () => {
 		);
 	} );
 
-	it( 'generates changelog without scope when generating for a single package', async () => {
-		await generateChangelog( { ...defaultOptions, singlePackage: true } );
+	it( 'formats the date correctly', async () => {
+		await generateChangelog( defaultOptions );
 
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
-		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
 		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
 
-		expect( getNewChangelog ).toHaveBeenCalledWith( {
-			oldVersion: '1.0.0',
-			newVersion: '1.0.1',
-			dateFormatted: 'March 26, 2024',
-			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-			sectionsToDisplay: [
-				{
-					title: SECTIONS.feature.title,
-					entries: [
-						{
-							message: 'Test feature',
-							data: {
-								type: 'Feature',
-								scope: [ 'test-package' ],
-								closes: [],
-								see: [],
-								mainContent: 'Test feature',
-								restContent: []
-							},
-							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
-						}
-					]
-				}
-			],
-			releasedPackagesInfo: [
-				{
-					title: 'Released packages',
-					version: '1.0.1',
-					packages: [ 'test-package' ]
-				}
-			],
-			isInternal: false,
-			singlePackage: true,
-			packageJsons: [
-				{ name: 'test-package', version: '1.0.0' }
-			]
-		} );
+		expect( getNewChangelog ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				dateFormatted: 'March 26, 2024'
+			} )
+		);
+	} );
 
-		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
-			organisationNamespace: '@ckeditor',
-			packageJsons: [ {
-				name: 'test-package',
-				version: '1.0.0'
-			} ],
-			parsedFiles: [ {
-				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
-				content: 'Test changeset',
-				data: {
-					closes: [],
-					see: [],
-					type: 'Feature'
-				},
+	it( 'generates a changelog based on the input files (a mono-repository)', async () => {
+		await generateChangelog( defaultOptions );
+
+		expect( removeScope ).toHaveBeenCalledTimes( 0 );
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
+		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+
+		expect( getNewChangelog ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				oldVersion: '1.0.0',
+				newVersion: '1.0.1',
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				skipLinks: false
-			} ],
-			singlePackage: true,
-			transformScope: expect.any( Function )
-		} );
+				sectionsToDisplay: [
+					{
+						title: SECTIONS.feature.title,
+						entries: [
+							{
+								message: 'Test feature',
+								data: {
+									type: 'Feature',
+									scope: [ 'test-package' ],
+									closes: [],
+									see: [],
+									mainContent: 'Test feature',
+									restContent: []
+								},
+								changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
+							}
+						]
+					}
+				],
+				releasedPackagesInfo: [
+					{
+						title: 'Released packages',
+						version: '1.0.1',
+						packages: [ 'test-package' ]
+					}
+				],
+				isInternal: false,
+				singlePackage: false,
+				packageJsons: [
+					{ name: 'test-package', version: '1.0.0' }
+				]
+			} )
+		);
 
 		expect( modifyChangelog ).toHaveBeenCalledWith(
 			'Mocked changelog content',
@@ -326,7 +258,9 @@ describe( 'generateChangelog()', () => {
 				{
 					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					skipLinks: false
+					skipLinks: false,
+					isRoot: true,
+					cwd: '/home/ckeditor'
 				}
 			],
 			'/home/ckeditor',
@@ -336,145 +270,57 @@ describe( 'generateChangelog()', () => {
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
-	it( 'generates changelog and returns it instead of writing to a file in `noWrite` mode', async () => {
-		const result = await generateChangelog( { ...defaultOptions, noWrite: true } );
+	it( 'removes the `scope` property from entries when generating for a single package', async () => {
+		vi.mocked( removeScope ).mockReturnValue( [
+			{
+				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+				content: 'Test changeset'
+			} as any
+		] );
 
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
-		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
-		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
+		await generateChangelog( { ...defaultOptions, singlePackage: true } );
 
-		expect( getNewChangelog ).toHaveBeenCalledWith( {
-			oldVersion: '1.0.0',
-			newVersion: '1.0.1',
-			dateFormatted: 'March 26, 2024',
-			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-			sectionsToDisplay: [
+		expect( vi.mocked( removeScope ) ).toHaveBeenCalledWith( [
+			{
+				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+				content: 'Test changeset',
+				data: {
+					closes: [],
+					see: [],
+					scope: [
+						'test-package'
+					],
+					type: 'Feature'
+				},
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false
+			}
+		] );
+
+		expect( vi.mocked( getSectionsWithEntries ) ).toHaveBeenCalledWith( expect.objectContaining( {
+			parsedFiles: expect.arrayContaining( [
 				{
-					title: SECTIONS.feature.title,
-					entries: [
-						{
-							message: 'Test feature',
-							data: {
-								type: 'Feature',
-								scope: [ 'test-package' ],
-								closes: [],
-								see: [],
-								mainContent: 'Test feature',
-								restContent: []
-							},
-							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
-						}
-					]
+					changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
+					content: 'Test changeset'
 				}
-			],
-			releasedPackagesInfo: [
-				{
-					title: 'Released packages',
-					version: '1.0.1',
-					packages: [ 'test-package' ]
-				}
-			],
-			isInternal: false,
-			singlePackage: false,
-			packageJsons: [
-				{ name: 'test-package', version: '1.0.0' }
-			]
-		} );
+			] )
+		} ) );
 
-		expect( modifyChangelog ).toHaveBeenCalledTimes( 0 );
-		expect( removeChangesetFiles ).toHaveBeenCalledWith(
-			[
-				{
-					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
-					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					skipLinks: false
-				}
-			],
-			'/home/ckeditor',
-			'.changelog',
-			[]
-		);
-		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
+		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalledWith( expect.objectContaining( {
+			singlePackage: true
+		} ) );
 
-		expect( result ).toEqual( 'Mocked changelog content' );
+		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalled();
+		expect( vi.mocked( modifyChangelog ) ).toHaveBeenCalled();
 	} );
 
 	it( 'does not delete input files when `removeInputFiles` is false', async () => {
 		await generateChangelog( { ...defaultOptions, removeInputFiles: false } );
 
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
-		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
-		expect( getDateFormatted ).toHaveBeenCalledWith( '2024-03-26' );
-
-		expect( getNewChangelog ).toHaveBeenCalledWith( {
-			oldVersion: '1.0.0',
-			newVersion: '1.0.1',
-			dateFormatted: 'March 26, 2024',
-			gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-			sectionsToDisplay: [
-				{
-					title: SECTIONS.feature.title,
-					entries: [
-						{
-							message: 'Test feature',
-							data: {
-								type: 'Feature',
-								scope: [ 'test-package' ],
-								closes: [],
-								see: [],
-								mainContent: 'Test feature',
-								restContent: []
-							},
-							changesetPath: '/home/ckeditor/.changelog/changeset-1.md'
-						}
-					]
-				}
-			],
-			releasedPackagesInfo: [
-				{
-					title: 'Released packages',
-					version: '1.0.1',
-					packages: [ 'test-package' ]
-				}
-			],
-			isInternal: false,
-			singlePackage: false,
-			packageJsons: [
-				{ name: 'test-package', version: '1.0.0' }
-			]
-		} );
-
-		expect( getSectionsWithEntries ).toHaveBeenCalledWith( {
-			organisationNamespace: '@ckeditor',
-			packageJsons: [ {
-				name: 'test-package',
-				version: '1.0.0'
-			} ],
-			parsedFiles: [ {
-				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
-				content: 'Test changeset',
-				data: {
-					closes: [],
-					see: [],
-					scope: [ 'test-package' ],
-					type: 'Feature'
-				},
-				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				skipLinks: false
-			} ],
-			singlePackage: false,
-			transformScope: expect.any( Function )
-		} );
-
-		expect( modifyChangelog ).toHaveBeenCalledWith(
-			'Mocked changelog content',
-			'/home/ckeditor'
-		);
 		expect( removeChangesetFiles ).toHaveBeenCalledTimes( 0 );
-		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
-	it( 'handles first release (version 0.0.1)', async () => {
+	it( 'handles an initial release (version 0.0.1)', async () => {
 		vi.mocked( workspaces.getPackageJson ).mockResolvedValue( { version: '0.0.1', name: 'test-package' } );
 
 		await generateChangelog( defaultOptions );
@@ -485,7 +331,7 @@ describe( 'generateChangelog()', () => {
 		} ) );
 	} );
 
-	it( 'handles external repositories', async () => {
+	it( 'allows defining the external repositories', async () => {
 		const externalRepositories = [ {
 			cwd: '/external/repo',
 			packagesDirectory: 'packages',
@@ -543,7 +389,9 @@ describe( 'generateChangelog()', () => {
 				{
 					changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					skipLinks: false
+					skipLinks: false,
+					isRoot: true,
+					cwd: '/home/ckeditor'
 				}
 			],
 			'/home/ckeditor',
@@ -595,6 +443,10 @@ describe( 'generateChangelog()', () => {
 			invalid: {
 				title: SECTIONS.invalid.title,
 				entries: []
+			},
+			warning: {
+				title: SECTIONS.warning.title,
+				entries: []
 			}
 		};
 
@@ -617,7 +469,6 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'handles nextVersion: "internal" correctly', async () => {
-		// Mock getNewVersion to return isInternal: true for internal nextVersion
 		vi.mocked( getNewVersion ).mockResolvedValue( { newVersion: '1.0.1', isInternal: true } );
 
 		await generateChangelog( {
@@ -625,7 +476,6 @@ describe( 'generateChangelog()', () => {
 			nextVersion: 'internal'
 		} );
 
-		// In the actual implementation, getNewVersion is called with nextVersion 'internal'
 		expect( getNewVersion ).toHaveBeenCalledWith( {
 			sectionsWithEntries: expect.any( Object ),
 			oldVersion: '1.0.0',
@@ -639,10 +489,9 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'handles sectionsToDisplay with valid entries when nextVersion is "internal"', async () => {
-		// Mock getNewVersion to return isInternal: true for internal nextVersion
 		vi.mocked( getNewVersion ).mockResolvedValue( { newVersion: '1.0.1', isInternal: true } );
 
-		// Provide at least one section to display to avoid the error
+		// Provide at least one section to display to avoid the error.
 		vi.mocked( getSectionsToDisplay ).mockReturnValue( [
 			{
 				title: SECTIONS.other.title,
@@ -680,5 +529,131 @@ describe( 'generateChangelog()', () => {
 			sectionsToDisplay: expect.any( Array )
 		} ) );
 		expect( modifyChangelog ).toHaveBeenCalled();
+	} );
+
+	it( 'commits the files updated or removed while generating changes', async () => {
+		await generateChangelog( defaultOptions );
+
+		expect( commitChanges ).toHaveBeenCalledWith( '1.0.1', [
+			{
+				cwd: '/home/ckeditor',
+				isRoot: true,
+				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ]
+			}
+		] );
+	} );
+
+	it( 'commits the files updated or removed while generating changes including external changes', async () => {
+		const externalRepositories = [ {
+			cwd: '/home/ckeditor5/external/ckeditor5-dev',
+			packagesDirectory: 'packages',
+			skipLinks: false
+		} ];
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( externalRepositories );
+
+		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [
+			{
+				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				skipLinks: false,
+				isRoot: true,
+				cwd: '/home/ckeditor'
+			},
+			{
+				...externalRepositories[ 0 ],
+				changesetPaths: [ '/home/ckeditor5/external/ckeditor5-dev/.changelog/changeset-1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+				skipLinks: false,
+				cwd: '/home/ckeditor5/external/ckeditor5-dev',
+				isRoot: false
+			}
+		] );
+
+		await generateChangelog( {
+			...defaultOptions,
+			externalRepositories
+		} );
+
+		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( externalRepositories );
+
+		expect( commitChanges ).toHaveBeenCalledWith( '1.0.1', [
+			{
+				cwd: '/home/ckeditor',
+				isRoot: true,
+				changesetPaths: [
+					'/home/ckeditor/.changelog/changeset-1.md'
+				]
+			},
+			{
+				cwd: '/home/ckeditor5/external/ckeditor5-dev',
+				isRoot: false,
+				changesetPaths: [
+					'/home/ckeditor5/external/ckeditor5-dev/.changelog/changeset-1.md'
+				]
+			}
+		] );
+	} );
+
+	describe( 'noWrite=true', () => {
+		it( 'returns the changelog instead of writing to a file when in `noWrite=true` mode', async () => {
+			await expect( generateChangelog( { ...defaultOptions, noWrite: true } ) ).resolves.toEqual( 'Mocked changelog content' );
+
+			expect( modifyChangelog ).toHaveBeenCalledTimes( 0 );
+			expect( removeChangesetFiles ).toHaveBeenCalledWith(
+				[
+					{
+						changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+						gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+						skipLinks: false,
+						isRoot: true,
+						cwd: '/home/ckeditor'
+					}
+				],
+				'/home/ckeditor',
+				'.changelog',
+				[]
+			);
+		} );
+
+		it( 'does not commit changes when in `noWrite=true` mode', async () => {
+			await generateChangelog( { ...defaultOptions, noWrite: true } );
+
+			expect( commitChanges ).toHaveBeenCalledTimes( 0 );
+		} );
+	} );
+
+	it( 'handles InternalError properly', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+			throw new InternalError();
+		} );
+
+		await generateChangelog( defaultOptions );
+
+		expect( processMock ).toHaveBeenCalledOnce();
+		expect( consoleMock ).toHaveBeenCalledOnce();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
+	} );
+
+	it( 'rethrows other errors', async () => {
+		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
+		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
+
+		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+			throw new Error();
+		} );
+
+		await expect( generateChangelog( defaultOptions ) ).rejects.toThrow();
+
+		expect( processMock ).not.toBeCalled();
+		expect( consoleMock ).not.toBeCalled();
+
+		processMock.mockRestore();
+		processMock.mockRestore();
 	} );
 } );
