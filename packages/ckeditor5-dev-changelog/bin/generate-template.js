@@ -5,8 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
 'use strict';
 
 import { generateTemplate } from '@ckeditor/ckeditor5-dev-changelog/template';

@@ -6,27 +6,22 @@
 import { mkdir, copyFile, constants } from 'fs/promises';
 import { promisify, styleText, parseArgs } from 'util';
 import { exec } from 'child_process';
-import { isAbsolute, resolve, relative } from 'path';
+import path from 'upath';
+import { format } from 'date-fns';
 import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './constants.js';
 
 /**
  * Options for the `generateTemplate` function.
  */
 interface GenerateTemplateOptions {
-	cwd: string;
 	directory: string;
-	template: string;
-	retries: number;
 }
 
 /**
  * Default options for the `generateTemplate` function.
  */
 const DEFAULT_OPTIONS: GenerateTemplateOptions = {
-	cwd: process.cwd(),
-	directory: CHANGESET_DIRECTORY,
-	template: TEMPLATE_FILE,
-	retries: 1
+	directory: CHANGESET_DIRECTORY
 };
 
 /**
@@ -35,10 +30,7 @@ const DEFAULT_OPTIONS: GenerateTemplateOptions = {
 function getCliArguments(): Partial<GenerateTemplateOptions> {
 	const { values } = parseArgs( {
 		options: {
-			cwd: { type: 'string' },
-			directory: { type: 'string' },
-			template: { type: 'string' },
-			retries: { type: 'string' }
+			directory: { type: 'string' }
 		},
 
 		// Skip `node ckeditor5-dev-changelog`.
@@ -48,10 +40,7 @@ function getCliArguments(): Partial<GenerateTemplateOptions> {
 		strict: true
 	} );
 
-	return {
-		...values,
-		retries: Number( values.retries || DEFAULT_OPTIONS.retries )
-	};
+	return values;
 }
 
 /**
@@ -60,39 +49,19 @@ function getCliArguments(): Partial<GenerateTemplateOptions> {
 function normalizeOptions( options: Partial<GenerateTemplateOptions> ): GenerateTemplateOptions {
 	const normalized: GenerateTemplateOptions = Object.assign( {}, DEFAULT_OPTIONS, options );
 
-	// Normalize all paths to be absolute.
-	normalized.cwd = isAbsolute( normalized.cwd ) ? normalized.cwd : resolve( process.cwd(), normalized.cwd );
-	normalized.directory = isAbsolute( normalized.directory ) ? normalized.directory : resolve( normalized.cwd, normalized.directory );
-	normalized.template = isAbsolute( normalized.template ) ? normalized.template : resolve( normalized.cwd, normalized.template );
+	// Ensure that paths are absolute and resolve to the current working directory.
+	normalized.directory = path.resolve( process.cwd(), normalized.directory );
 
 	return normalized;
 }
 
 /**
- * Returns the current date formatted to be used in a filename.
- */
-function getFormattedDate(): string {
-	const now = new Date();
-	const year: string = String( now.getFullYear() );
-	const month: string = String( now.getMonth() + 1 ).padStart( 2, '0' ); // Months are 0-indexed.
-	const day: string = String( now.getDate() ).padStart( 2, '0' );
-	const hours: string = String( now.getHours() ).padStart( 2, '0' );
-	const minutes: string = String( now.getMinutes() ).padStart( 2, '0' );
-	const seconds: string = String( now.getSeconds() ).padStart( 2, '0' );
-
-	return year + month + day + hours + minutes + seconds;
-}
-
-/**
  * Returns the current git branch name formatted to be used in a filename.
  */
-async function getFormattedGitBranchName( cwd: string ): Promise<string> {
+async function getFormattedGitBranchName(): Promise<string> {
 	try {
 		const asyncExec = promisify( exec );
-		const { stdout } = await asyncExec( 'git rev-parse --abbrev-ref HEAD', {
-			cwd,
-			encoding: 'utf8'
-		} );
+		const { stdout } = await asyncExec( 'git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' } );
 
 		return stdout
 			.trim()
@@ -107,9 +76,9 @@ async function getFormattedGitBranchName( cwd: string ): Promise<string> {
  * Returns a filename for the template file based on the current date and git branch name.
  * The filename is formatted as `YYYYMMDDHHMMSS_{GIT_BRANCH_NAME}.md`.
  */
-export async function getFileName( cwd: string ): Promise<string> {
-	const date = getFormattedDate();
-	const gitBranchName = await getFormattedGitBranchName( cwd );
+export async function getFileName(): Promise<string> {
+	const date = format( new Date(), 'yyyyMMddHHmmss' );
+	const gitBranchName = await getFormattedGitBranchName();
 
 	return `${ date }_${ gitBranchName }.md`;
 }
@@ -118,20 +87,21 @@ export async function getFileName( cwd: string ): Promise<string> {
  * Generates a template file for the changelog in the specified directory.
  */
 export async function generateTemplate(
-	options: Partial<GenerateTemplateOptions> = getCliArguments()
+	args: Partial<GenerateTemplateOptions> = getCliArguments(),
+	retries = 5
 ): Promise<void> {
-	const args: GenerateTemplateOptions = normalizeOptions( options );
-	const filename = await getFileName( args.cwd );
-	const path = resolve( args.directory, filename );
+	const options: GenerateTemplateOptions = normalizeOptions( args );
+	const filename = await getFileName();
+	const outputPath = path.resolve( options.directory, filename );
 
-	await mkdir( args.directory, { recursive: true } );
+	await mkdir( options.directory, { recursive: true } );
 
 	try {
-		await copyFile( args.template, path, constants.COPYFILE_EXCL );
+		await copyFile( TEMPLATE_FILE, outputPath, constants.COPYFILE_EXCL );
 
-		console.log( styleText( [ 'green', 'bold' ], `Changelog file created: ${ relative( args.cwd, path ) }` ) );
+		console.log( styleText( [ 'green', 'bold' ], `Changelog file created: ${ path.relative( process.cwd(), outputPath ) }` ) );
 	} catch ( error: any ) {
-		if ( args.retries <= 0 ) {
+		if ( retries <= 0 ) {
 			throw error;
 		}
 
@@ -139,7 +109,7 @@ export async function generateTemplate(
 
 		return new Promise( resolve => {
 			setTimeout( () => {
-				resolve( generateTemplate( { ...args, retries: args.retries - 1 } ) );
+				resolve( generateTemplate( options, retries - 1 ) );
 			}, 1000 );
 		} );
 	}

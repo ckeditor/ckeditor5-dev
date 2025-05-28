@@ -7,7 +7,7 @@
 # - Major breaking change
 # - Minor breaking change
 # - Breaking change
-# 
+#
 # For guidance on breaking changes, see:
 # https://ckeditor.com/docs/ckeditor5/latest/updating/versioning-policy.html#major-and-minor-breaking-changes
 type:

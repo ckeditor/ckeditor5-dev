@@ -83,14 +83,6 @@ describe( 'generateTemplate', () => {
 		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), CHANGESET_DIRECTORY ), { recursive: true } );
 	} );
 
-	it( 'creates a directory if necessary respecting custom `directory` option', async () => {
-		await template.generateTemplate( {
-			directory: 'custom_directory'
-		} );
-
-		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), 'custom_directory' ), { recursive: true } );
-	} );
-
 	it( 'creates a template file', async () => {
 		const expectedFilePath = join( process.cwd(), CHANGESET_DIRECTORY, EXPECTED_FILE_NAME );
 
@@ -103,34 +95,18 @@ describe( 'generateTemplate', () => {
 		);
 	} );
 
-	it( 'creates a template file respecting custom `template` option', async () => {
-		const expectedTemplatePath = join( process.cwd(), 'custom_template.md' );
-
-		await template.generateTemplate( {
-			template: 'custom_template.md'
-		} );
-
-		expect( mocks.copyFile ).toHaveBeenCalledWith(
-			expectedTemplatePath,
-			expect.any( String ),
-			expect.any( Number )
-		);
-	} );
-
 	it( 'respects options containing absolute paths', async () => {
 		const cwd = join( process.cwd(), 'custom_cwd' );
 
 		const options = {
-			cwd,
-			directory: join( cwd, 'custom_directory' ),
-			template: join( cwd, 'custom_template.md' )
+			directory: join( cwd, 'custom_directory' )
 		};
 
 		await template.generateTemplate( options );
 
 		expect( mocks.mkdir ).toHaveBeenCalledWith( options.directory, { recursive: true } );
 		expect( mocks.copyFile ).toHaveBeenCalledWith(
-			options.template,
+			TEMPLATE_FILE,
 			join( options.directory, EXPECTED_FILE_NAME ),
 			expect.any( Number )
 		);
@@ -138,36 +114,32 @@ describe( 'generateTemplate', () => {
 
 	it( 'respects options containing relative paths', async () => {
 		const options = {
-			cwd: 'custom_cwd',
-			directory: 'custom_directory',
-			template: 'custom_template.md'
+			directory: 'custom_directory'
 		};
 
 		await template.generateTemplate( options );
 
-		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), 'custom_cwd', options.directory ), { recursive: true } );
+		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), options.directory ), { recursive: true } );
 		expect( mocks.copyFile ).toHaveBeenCalledWith(
-			join( process.cwd(), 'custom_cwd', options.template ),
-			join( process.cwd(), 'custom_cwd', options.directory, EXPECTED_FILE_NAME ),
+			TEMPLATE_FILE,
+			join( process.cwd(), options.directory, EXPECTED_FILE_NAME ),
 			expect.any( Number )
 		);
 	} );
 
 	it( 'respects options passed via CLI arguments', async () => {
 		const flags = [
-			'--cwd=custom_cwd',
-			'--directory=custom_directory',
-			'--template=custom_template.md'
+			'--directory=custom_directory'
 		];
 
 		mockCliArgs( ...flags );
 
 		await template.generateTemplate();
 
-		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), 'custom_cwd', 'custom_directory' ), { recursive: true } );
+		expect( mocks.mkdir ).toHaveBeenCalledWith( join( process.cwd(), 'custom_directory' ), { recursive: true } );
 		expect( mocks.copyFile ).toHaveBeenCalledWith(
-			join( process.cwd(), 'custom_cwd', 'custom_template.md' ),
-			join( process.cwd(), 'custom_cwd', 'custom_directory', EXPECTED_FILE_NAME ),
+			TEMPLATE_FILE,
+			join( process.cwd(), 'custom_directory', EXPECTED_FILE_NAME ),
 			expect.any( Number )
 		);
 	} );
@@ -184,7 +156,7 @@ describe( 'generateTemplate', () => {
 		mockSetTimeout();
 		mocks.copyFile.mockRejectedValueOnce( 'File already exists' );
 
-		await template.generateTemplate( { retries: 1 } );
+		await template.generateTemplate();
 		expect( mocks.copyFile ).toHaveBeenCalledTimes( 2 ); // First intentionally failed attempt, then a successful one.
 	} );
 
@@ -192,8 +164,9 @@ describe( 'generateTemplate', () => {
 		mockSetTimeout();
 		mocks.copyFile.mockRejectedValue( 'File already exists' );
 
-		await expect( () => template.generateTemplate( { retries: 1 } ) ).rejects.toThrow( 'File already exists' );
-		expect( mocks.error ).toHaveBeenCalledExactlyOnceWith(
+		await expect( () => template.generateTemplate() ).rejects.toThrow( 'File already exists' );
+		expect( mocks.error ).toHaveBeenCalledTimes( 5 );
+		expect( mocks.error ).toHaveBeenCalledWith(
 			expect.stringContaining( 'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.' )
 		);
 	} );
