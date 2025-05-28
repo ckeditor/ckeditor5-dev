@@ -53,9 +53,9 @@ test( '--tsconfig', async () => {
 		declarations: false
 	} );
 
-	expect( fileExists.plugins.some( ( plugin: any ) => plugin.name === 'typescript' ) ).toBe( true );
-	expect( fileDoesntExist.plugins.some( ( plugin: any ) => plugin.name === 'typescript' ) ).toBe( false );
-	expect( declarationsFalse.plugins.some( ( plugin: any ) => plugin.name === 'typescript' ) ).toBe( false );
+	expect( fileExists.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( fileDoesntExist.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( false );
+	expect( declarationsFalse.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( false );
 } );
 
 test( '--external', async () => {
