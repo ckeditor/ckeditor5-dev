@@ -91,4 +91,8 @@ function displayValidEntry( entry: Entry ): void {
 	if ( entry.data.closesLinks?.length ) {
 		logInfo( `- Closes: ${ entry.data.closesLinks.map( closesObj => closesObj.link ).join( ', ' ) }`, { indent: 3 } );
 	}
+
+	if ( entry.data.communityCredits?.length ) {
+		logInfo( `- Thanks to: ${ entry.data.communityCredits.join( ', ' ) }`, { indent: 3 } );
+	}
 }

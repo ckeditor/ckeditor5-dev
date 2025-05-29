@@ -32,6 +32,12 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
 		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
+
+		// TODO it works, but refactor the code
+		if ( validatedData.communityCredits?.length ) {
+			validatedEntry.content = validatedEntry.content.concat( `\nThanks to ${ validatedData.communityCredits?.join( ', ' ) }.` );
+		}
+
 		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
 		const mainContentFormatted = mainContent?.split( '\n' ).map( line => line.trim() ).join( '\n  ' );
 		const restContentFormatted = restContent.map( restContentLine =>

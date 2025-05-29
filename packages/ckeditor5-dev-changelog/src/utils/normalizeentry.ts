@@ -33,14 +33,19 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 
 	// Normalize scope.
 	const scope = entry.data.scope;
-	const scopeLowercase = scope?.map( scopeEntry => String( scopeEntry ).toLowerCase() );
+	const scopeLowercase = scope?.filter( scope => scope ).map( scopeEntry => String( scopeEntry ).toLowerCase() );
 	const scopeNormalized = [ ...new Set( scopeLowercase ) ].sort();
 
 	// Normalize closes.
-	const closesNormalized = entry.data.closes?.map( closes => String( closes ) );
+	const closesNormalized = entry.data.closes?.filter( closes => closes ).map( closes => String( closes ) );
 
 	// Normalize see.
-	const seeNormalized = entry.data.see?.map( see => String( see ) );
+	const seeNormalized = entry.data.see?.filter( see => see ).map( see => String( see ) );
+
+	// Normalize community credits.
+	const communityCreditsNormalized = entry.data.communityCredits
+		?.filter( see => see )
+		.map( credits => ensureAt( String( credits ) ) );
 
 	return {
 		...entry,
@@ -49,7 +54,8 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 			type: typeNormalized,
 			scope: scopeNormalized,
 			closes: closesNormalized,
-			see: seeNormalized
+			see: seeNormalized,
+			communityCredits: communityCreditsNormalized
 		}
 	};
 }
@@ -58,4 +64,8 @@ function capitalize( value: unknown ) {
 	const valueStr = String( value );
 
 	return valueStr.charAt( 0 ).toUpperCase() + valueStr.slice( 1 ).toLowerCase();
+}
+
+function ensureAt( str: string ) {
+	return str.startsWith( '@' ) ? str : '@' + str;
 }

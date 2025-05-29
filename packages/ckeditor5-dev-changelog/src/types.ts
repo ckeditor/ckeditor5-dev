@@ -114,6 +114,7 @@ type FileMetadata = {
 	scope?: Array<string>;
 	closes?: Array<string>;
 	see?: Array<string>;
+	communityCredits?: Array<string>;
 };
 
 type ValidatedFileMetadata = FileMetadata & {
