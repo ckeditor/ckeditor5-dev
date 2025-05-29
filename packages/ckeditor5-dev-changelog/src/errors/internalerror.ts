@@ -10,7 +10,7 @@ export class InternalError extends Error {
 	constructor() {
 		const message =
 			'No valid changesets found. Please verify that:\n' +
-			'1) Changesets are properly created in the "changesetsDirectory"\n' +
+			'1) Changesets are properly created in the "./changelog"\n' +
 			'2) The "cwd" parameter is set to the root of your project\n' +
 			'3) The "packagesDirectory" parameter correctly specifies the directory containing packages.\n' +
 			'If no errors are visible in the console, but changesets exist in your project, ' +

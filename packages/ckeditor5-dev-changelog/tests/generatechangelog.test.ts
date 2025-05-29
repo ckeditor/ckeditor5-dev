@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateChangelog } from '../src/generatechangelog.js';
 import { getPackageJsons } from '../src/utils/getreleasepackagespkgjsons.js';
 import { getChangesetFilePaths } from '../src/utils/getchangesetfilepaths.js';
-import { getChangesetsParsed } from '../src/utils/getchangesetsparsed.js';
+import { getInputParsed } from '../src/utils/getinputparsed.js';
 import { getSectionsWithEntries } from '../src/utils/getsectionswithentries.js';
 import { getNewVersion } from '../src/utils/getnewversion.js';
 import { getSectionsToDisplay } from '../src/utils/getsectionstodisplay.js';
@@ -86,7 +86,7 @@ describe( 'generateChangelog()', () => {
 				cwd: '/home/ckeditor'
 			}
 		] );
-		vi.mocked( getChangesetsParsed ).mockResolvedValue( [
+		vi.mocked( getInputParsed ).mockResolvedValue( [
 			{
 				content: 'Test changeset',
 				data: {

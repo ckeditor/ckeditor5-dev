@@ -15,7 +15,7 @@ import { getNewVersion } from './utils/getnewversion.js';
 import { getPackageJsons } from './utils/getreleasepackagespkgjsons.js';
 import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
 import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
-import { getChangesetsParsed } from './utils/getchangesetsparsed.js';
+import { getInputParsed } from './utils/getinputparsed.js';
 import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
 import { logInfo } from './utils/loginfo.js';
 import { getDateFormatted } from './utils/getdateformatted.js';
@@ -94,7 +94,7 @@ async function main( {
 	const changesetFilePaths = await getChangesetFilePaths( cwd, externalRepositoriesWithDefaults, shouldSkipLinks );
 
 	// TODO: Extract to an internal helper to replace `let` with `const`.
-	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
+	let parsedChangesetFiles = await getInputParsed( changesetFilePaths );
 
 	if ( singlePackage ) {
 		parsedChangesetFiles = removeScope( parsedChangesetFiles );

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getChangesetsParsed } from '../../src/utils/getchangesetsparsed.js';
+import { getInputParsed } from '../../src/utils/getinputparsed.js';
 import fs from 'fs-extra';
 import matter, { type GrayMatterFile } from 'gray-matter';
 import { describe, it, expect, vi } from 'vitest';
@@ -12,7 +12,7 @@ import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
 
-describe( 'getChangesetsParsed()', () => {
+describe( 'getInputParsed()', () => {
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/changeset1.md';
@@ -94,7 +94,7 @@ describe( 'getChangesetsParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+		const result = await getInputParsed( changesetPathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( expectedResults );
@@ -195,7 +195,7 @@ describe( 'getChangesetsParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+		const result = await getInputParsed( changesetPathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( expectedResults );
@@ -220,7 +220,7 @@ describe( 'getChangesetsParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+		const result = await getInputParsed( changesetPathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( [] );
@@ -233,7 +233,7 @@ describe( 'getChangesetsParsed()', () => {
 		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [];
 
 		// Execute the function
-		const result = await getChangesetsParsed( changesetPathsWithGithubUrl );
+		const result = await getInputParsed( changesetPathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( [] );
