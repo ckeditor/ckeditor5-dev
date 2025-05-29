@@ -25,15 +25,26 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 
 ( async () => {
 	const packages = await glob( '*/', { cwd: upath.join( ROOT_DIRECTORY, 'packages' ) } );
-	const packagesWithTests = await asyncFilter( packages, async packageName => {
-		const pkgJson = await fs.readJson(
-			upath.join( ROOT_DIRECTORY, 'packages', packageName, 'package.json' )
-		);
+	const packagesScriptsMap = await Promise.all(
+		packages.map( async packageName => {
+			const pkgJsonPath = upath.join( ROOT_DIRECTORY, 'packages', packageName, 'package.json' );
+			const pkgJson = await fs.readJson( pkgJsonPath );
 
-		return pkgJson?.scripts?.coverage;
-	} );
+			return {
+				packageName,
+				scripts: pkgJson.scripts ? Object.keys( pkgJson.scripts ) : []
+			};
+		} )
+	);
 
-	packagesWithTests.sort();
+	const packagesWithTypes = packagesScriptsMap
+		.filter( ( { scripts } ) => scripts.includes( 'types' ) )
+		.map( ( { packageName } ) => packageName )
+		.sort();
+	const packagesWithTests = packagesScriptsMap
+		.filter( ( { scripts } ) => scripts.includes( 'coverage' ) )
+		.map( ( { packageName } ) => packageName )
+		.sort();
 
 	/**
 	 * @type CircleCIConfiguration
@@ -42,13 +53,18 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 		await fs.readFile( upath.join( CIRCLECI_CONFIGURATION_DIRECTORY, 'template.yml' ) )
 	);
 
-	config.jobs.validate_and_tests.steps.splice( 3, 0, ...generateTestSteps( packagesWithTests ) );
-	config.jobs.validate_and_tests.steps.splice( -1, 0, {
-		run: {
-			name: 'Combine coverage reports into a single file',
-			command: 'node scripts/ci/combine-coverage-lcov.js'
+	const stepsToAdd = [
+		...generateSteps( packagesWithTypes, 'yarn run types', 'Check types for "$1"' ),
+		...generateSteps( packagesWithTests, 'yarn run coverage', 'Execute tests for "$1"' ),
+		{
+			run: {
+				name: 'Combine coverage reports into a single file',
+				command: 'node scripts/ci/combine-coverage-lcov.js'
+			}
 		}
-	} );
+	];
+
+	config.jobs.validate_and_tests.steps.splice( 3, 0, ...stepsToAdd );
 
 	await fs.writeFile(
 		upath.join( CIRCLECI_CONFIGURATION_DIRECTORY, 'config-tests.yml' ),
@@ -56,16 +72,7 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 	);
 } )();
 
-async function asyncFilter( items, predicate ) {
-	return items.reduce( async ( results, item ) => {
-		return [
-			...await results,
-			...await predicate( item ) ? [ item ] : []
-		];
-	}, [] );
-}
-
-function generateTestSteps( packages ) {
+function generateSteps( packages, command, name ) {
 	return packages.map( packageName => {
 		return {
 			run: {
@@ -74,9 +81,9 @@ function generateTestSteps( packages ) {
 				},
 				// When a previous package failed, we still want to check the entire repository.
 				when: 'always',
-				name: `Execute tests for "${ packageName }"`,
+				name: name.replace( '$1', packageName ),
 				working_directory: upath.join( 'packages', packageName ),
-				command: 'yarn run coverage'
+				command
 			}
 		};
 	} );
