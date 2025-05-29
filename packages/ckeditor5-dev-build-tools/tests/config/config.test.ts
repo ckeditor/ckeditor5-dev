@@ -40,26 +40,26 @@ test( '--input', async () => {
 } );
 
 test( '--tsconfig', async () => {
-	const fileExists: any = await getConfig( {
+	const fileExists = await getConfig( {
 		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
 		declarations: true
 	} );
-	const fileDoesntExist: any = await getConfig( {
+	const fileDoesntExist = await getConfig( {
 		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.non-existing.json',
 		declarations: true
 	} );
-	const declarationsFalse: any = await getConfig( {
+	const declarationsFalse = await getConfig( {
 		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
 		declarations: false
 	} );
 
-	expect( fileExists.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( true );
-	expect( fileDoesntExist.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( false );
-	expect( declarationsFalse.plugins.some( ( plugin: any ) => plugin?.name === 'typescript' ) ).toBe( false );
+	expect( fileExists.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( fileDoesntExist.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
+	expect( declarationsFalse.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
 } );
 
 test( '--external', async () => {
-	const config: any = await getConfig( {
+	const config = await getConfig( {
 		external: [
 			'foo',
 			'socket.io-client'
@@ -97,7 +97,7 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 		} )
 	);
 
-	const config: any = await getConfig( {
+	const config = await getConfig( {
 		external: [ 'ckeditor5' ]
 	} );
 
@@ -120,7 +120,7 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 		} )
 	);
 
-	const config: any = await getConfig( {
+	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]
 	} );
 
@@ -138,7 +138,7 @@ test( '--external doesn\'t fail when "ckeditor5-premium-features" is not install
 		}
 	);
 
-	const config: any = await getConfig( {
+	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]
 	} );
 
@@ -146,21 +146,21 @@ test( '--external doesn\'t fail when "ckeditor5-premium-features" is not install
 } );
 
 test( '--translations', async () => {
-	const withoutTranslations: any = await getConfig();
-	const withTranslations: any = await getConfig( {
+	const withoutTranslations = await getConfig();
+	const withTranslations = await getConfig( {
 		translations: '**/*.po'
 	} );
 
-	expect( withoutTranslations.plugins.some( ( plugin: any ) => plugin?.name === 'cke5-translations' ) ).toBe( false );
-	expect( withTranslations.plugins.some( ( plugin: any ) => plugin?.name === 'cke5-translations' ) ).toBe( true );
+	expect( withoutTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );
+	expect( withTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( true );
 } );
 
 test( '--minify', async () => {
-	const withoutMinification: any = await getConfig();
-	const withMinification: any = await getConfig( {
+	const withoutMinification = await getConfig();
+	const withMinification = await getConfig( {
 		minify: true
 	} );
 
-	expect( withoutMinification.plugins.some( ( plugin: any ) => plugin?.name === 'terser' ) ).toBe( false );
-	expect( withMinification.plugins.some( ( plugin: any ) => plugin?.name === 'terser' ) ).toBe( true );
+	expect( withoutMinification.plugins.some( plugin => plugin?.name === 'terser' ) ).toBe( false );
+	expect( withMinification.plugins.some( plugin => plugin?.name === 'terser' ) ).toBe( true );
 } );

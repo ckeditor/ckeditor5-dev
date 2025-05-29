@@ -40,7 +40,6 @@
     "typedoc": "0.28.4"
   },
   "scripts": {
-    "types": "tsc -p tsconfig.types.json",
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
