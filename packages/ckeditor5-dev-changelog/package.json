@@ -46,7 +46,7 @@
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
-    "coverage": "yarn types && vitest run --config vitest.config.ts --coverage",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev",
     "types": "tsc --noEmit --rootDir ./"
   },

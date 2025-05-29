@@ -9,6 +9,7 @@ import upath from 'upath';
 import { removeEmptyDirs } from './removeemptydirs.js';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 import { logInfo } from './loginfo.js';
+import { CHANGESET_DIRECTORY } from '../constants';
 
 /**
  * This function cleans up the changeset files that have been incorporated into the changelog.
@@ -16,16 +17,15 @@ import { logInfo } from './loginfo.js';
 export async function removeChangesetFiles(
 	changesetFilePaths: Array<ChangesetPathsWithGithubUrl>,
 	cwd: string,
-	changelogDirectory: string,
 	externalRepositories: Array<RepositoryConfig>
 ): Promise<void> {
 	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
 
 	await Promise.all( changesetFilePaths.flatMap( repo => repo.changesetPaths ).map( file => fs.unlink( file ) ) );
 
-	await removeEmptyDirs( upath.join( cwd, changelogDirectory ) );
+	await removeEmptyDirs( upath.join( cwd, CHANGESET_DIRECTORY ) );
 
 	for ( const externalRepo of externalRepositories ) {
-		await removeEmptyDirs( upath.join( externalRepo.cwd, changelogDirectory ) );
+		await removeEmptyDirs( upath.join( externalRepo.cwd, CHANGESET_DIRECTORY ) );
 	}
 }

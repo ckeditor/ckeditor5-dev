@@ -33,20 +33,31 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
 		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
+		const mainContentFormatted = mainContent?.split( '\n' ).map( line => line.trim() ).join( '\n  ' );
+		const restContentFormatted = restContent.map( restContentLine =>
+			restContentLine?.split( '\n' ).map( line => line.trim() ).join( '\n  ' )
+		);
 
 		const messageFirstLine = [
 			'*',
+			// TODO fix undefined scope in changelog
 			scope ? `**${ scope }**:` : null,
-			mainContent,
+			mainContentFormatted,
 			!entry.skipLinks && see ? see : null,
 			!entry.skipLinks && closes ? closes : null
 		].filter( Boolean ).join( ' ' );
 
-		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
+		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContentFormatted.join( '\n\n  ' ) : messageFirstLine;
 
 		const newEntry: Entry = {
 			message: changeMessage,
-			data: { ...validatedData, mainContent, restContent },
+			data: {
+				...validatedData,
+				mainContent: mainContentFormatted,
+				restContent: restContentFormatted,
+				seeLinks: validatedData.see?.map( see => getIssueLinkObject( see, validatedEntry.gitHubUrl ) ),
+				closesLinks: validatedData.closes?.map( closes => getIssueLinkObject( closes, validatedEntry.gitHubUrl ) )
+			},
 			changesetPath: validatedEntry.changesetPath
 		};
 
@@ -71,33 +82,39 @@ function getScopesLinks( scope: Array<string> | undefined, transformScope: Trans
 		.join( ', ' );
 }
 
+function getIssueLinkObject( issue: string, gitHubUrl: string ) {
+	if ( issue.match( ISSUE_PATTERN ) ) {
+		return { displayName: `#${ issue }`, link: `${ gitHubUrl }/issues/${ issue }` };
+	}
+
+	const differentRepoMatch = issue.match( ISSUE_SLUG_PATTERN );
+
+	if ( differentRepoMatch ) {
+		const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
+
+		return { displayName: issue, link: `https://github.com/${ owner }/${ repository }/issues/${ number }` };
+	}
+
+	const repoUrlMatch = issue.match( ISSUE_URL_PATTERN );
+
+	if ( repoUrlMatch ) {
+		const { owner, repository, number } = repoUrlMatch.groups as DifferentRepoIssue;
+
+		return { displayName: `${ owner }/${ repository }#${ number }`, link: issue };
+	}
+
+	return { displayName: '', link: '' };
+}
+
 function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitHubUrl: string ): string | null {
 	if ( !issues?.length ) {
 		return null;
 	}
 
 	const links = issues.map( String ).map( issue => {
-		if ( issue.match( ISSUE_PATTERN ) ) {
-			return `[#${ issue }](${ gitHubUrl }/issues/${ issue })`;
-		}
+		const { displayName, link } = getIssueLinkObject( issue, gitHubUrl );
 
-		const differentRepoMatch = issue.match( ISSUE_SLUG_PATTERN );
-
-		if ( differentRepoMatch ) {
-			const { owner, repository, number } = differentRepoMatch.groups as DifferentRepoIssue;
-
-			return `[${ issue }](https://github.com/${ owner }/${ repository }/issues/${ number })`;
-		}
-
-		const repoUrlMatch = issue.match( ISSUE_URL_PATTERN );
-
-		if ( repoUrlMatch ) {
-			const { owner, repository, number } = repoUrlMatch.groups as DifferentRepoIssue;
-
-			return `[${ owner }/${ repository }#${ number }](${ issue })`;
-		}
-
-		return null;
+		return `[${ displayName }](${ link })`;
 	} );
 
 	return `${ prefix } ${ links.join( ', ' ) }.`;

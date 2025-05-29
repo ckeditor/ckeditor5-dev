@@ -10,29 +10,28 @@ import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
  * Generates information about packages being released in the new version.
  * This function creates a summary of package versions and their changes.
  */
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packageJsons, organisationNamespace }: {
+export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packageJsons }: {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
 	packageJsons: Array<workspaces.PackageJson>;
-	organisationNamespace: string;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
 	const packageNames = packageJsons.map( packageName => packageName.name );
+	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
 
 	const newVersionReleases = getNewVersionReleases( packageJsons );
-	const majorReleases = getPackageNamesByScope( sections.major.entries, { packagesToRemove: newVersionReleases, organisationNamespace } );
+	const majorReleases = getPackageNamesByScope( sections.major.entries, { packagesToRemove: newVersionReleases } );
 	const minorReleases = getPackageNamesByScope( sections.minor.entries, {
-		packagesToRemove: [ ...majorReleases, ...newVersionReleases ], organisationNamespace }
+		packagesToRemove: [ ...majorReleases, ...newVersionReleases ] }
 	);
 	const newFeaturesReleases = getPackageNamesByScope( sections.feature.entries, {
-		packagesToRemove: [ ...minorReleases, ...majorReleases, ...newVersionReleases ],
-		organisationNamespace
+		packagesToRemove: [ ...minorReleases, ...majorReleases, ...newVersionReleases ]
 	} );
 
 	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
 
-	const otherReleases = packageNames
+	const otherReleases = packageNamesDeduplicated
 		.filter( packageName => !packagesToRemoveFromOtherReleases.includes( packageName ) )
 		.sort();
 
@@ -52,13 +51,11 @@ function getNewVersionReleases( packages: Array<workspaces.PackageJson> ) {
 		.sort();
 }
 
-function getPackageNamesByScope( entries: Array<Entry> = [], { packagesToRemove, organisationNamespace }: {
-	packagesToRemove: Array<string>;
-	organisationNamespace: string;
-} ) {
+function getPackageNamesByScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove: Array<string> } ) {
 	const packageNames = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
 	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
-	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ organisationNamespace }/` + scope );
+	// TODO get the organisation name from the root of each repository
+	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ '@ckeditor' }/` + scope );
 	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
 
 	return packagesNamesFiltered.sort();

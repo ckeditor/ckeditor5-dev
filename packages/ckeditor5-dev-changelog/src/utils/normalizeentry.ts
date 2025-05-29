@@ -33,7 +33,8 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 
 	// Normalize scope.
 	const scope = entry.data.scope;
-	const scopeNormalized = scope?.map( scopeEntry => String( scopeEntry ).toLowerCase() );
+	const scopeLowercase = scope?.map( scopeEntry => String( scopeEntry ).toLowerCase() );
+	const scopeNormalized = [ ...new Set( scopeLowercase ) ].sort();
 
 	// Normalize closes.
 	const closesNormalized = entry.data.closes?.map( closes => String( closes ) );

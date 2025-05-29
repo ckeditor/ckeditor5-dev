@@ -39,9 +39,9 @@ describe( 'getExternalRepositoriesWithDefaults()', () => {
 
 	it( 'should handle multiple repositories', () => {
 		const repositories: Array<RepositoryConfig> = [
-			{ cwd: '/path/to/repo1', skipLinks: false },
-			{ cwd: '/path/to/repo2', packagesDirectory: 'custom', skipLinks: false },
-			{ cwd: '/path/to/repo3', skipLinks: false }
+			{ cwd: '/path/to/repo1', shouldSkipLinks: false },
+			{ cwd: '/path/to/repo2', packagesDirectory: 'custom', shouldSkipLinks: false },
+			{ cwd: '/path/to/repo3', shouldSkipLinks: false }
 		];
 
 		const result = getExternalRepositoriesWithDefaults( repositories );

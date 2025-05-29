@@ -30,15 +30,21 @@ export async function getNewVersion( {
 	packageName,
 	nextVersion
 }: GetNewVersionArgs ): Promise<NewVersionObj> {
-	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
-
 	if ( nextVersion === 'internal' ) {
-		return getInternalVersionBump( oldVersion );
+		const internalVersionBump = getInternalVersionBump( oldVersion );
+
+		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ internalVersionBump.newVersion }.` ) }` );
+
+		return internalVersionBump;
 	}
 
 	if ( nextVersion ) {
+		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ nextVersion }.` ) }` );
+
 		return { newVersion: nextVersion, isInternal: false };
 	}
+
+	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 
 	let bumpType: ReleaseType = 'patch';
 

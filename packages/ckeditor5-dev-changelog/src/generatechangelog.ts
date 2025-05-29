@@ -6,8 +6,8 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { format } from 'date-fns';
 import chalk from 'chalk';
-import { CHANGESET_DIRECTORY, ORGANISATION_NAMESPACE, PACKAGES_DIRECTORY_NAME } from './constants.js';
-import type { GenerateChangelog, RawDateString, RepositoryConfig } from './types.js';
+import { PACKAGES_DIRECTORY_NAME } from './constants.js';
+import type { GenerateChangelog } from './types.js';
 import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
 import { logChangelogFiles } from './utils/logchangelogfiles.js';
 import { modifyChangelog } from './utils/modifychangelog.js';
@@ -28,18 +28,18 @@ import { commitChanges } from './utils/commitchanges.js';
 import { InternalError } from './errors/internalerror.js';
 
 export async function generateChangelog(
-	config: RepositoryConfig & GenerateChangelog & { noWrite?: false }
+	config: GenerateChangelog & { noWrite?: false }
 ): Promise<void>;
 
 export async function generateChangelog(
-	config: RepositoryConfig & GenerateChangelog & { noWrite: true }
+	config: GenerateChangelog & { noWrite: true }
 ): Promise<string>;
 
 /**
  * Wrapper function that provides error handling for the changelog generation process.
  */
 export async function generateChangelog(
-	options: RepositoryConfig & GenerateChangelog
+	options: GenerateChangelog
 ): Promise<string | void> {
 	try {
 		return await main( options );
@@ -61,36 +61,37 @@ async function main( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
-	organisationNamespace = ORGANISATION_NAMESPACE,
+	// organisationNamespace = ORGANISATION_NAMESPACE,
 	externalRepositories = [],
 	// TODO: An integrator should define it. No defaults here.
 	// TODO: Required when `singlePackage=false`.
 	transformScope = defaultTransformScope,
-	date = format( new Date(), 'yyyy-MM-dd' ) as RawDateString,
-	changesetsDirectory = CHANGESET_DIRECTORY,
-	skipLinks = false,
+	date = format( new Date(), 'yyyy-MM-dd' ),
+	shouldSkipLinks = false,
 	singlePackage = false,
-
+	skipRootPackage = false,
+	npmPackageToCheck,
 	// TODO: Merge `removeInputFiles` and `noWrite` options.
 	noWrite = false,
 	removeInputFiles = true
-}: RepositoryConfig & GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+}: GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+	validateArguments( skipRootPackage, npmPackageToCheck );
 	// TODO: getExternalRepositoriesWithDefaults => `normalizeRepositories`.
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
 
 	// TODO: If I understood correct purposes of this util, it should be renamed to: `findAvailablePackages`.
-	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults );
+	const packageJsons = await getPackageJsons( cwd, packagesDirectory, externalRepositoriesWithDefaults, skipRootPackage );
 
 	// TODO: This should be built-in `getExternalRepositoriesWithDefaults`.
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
 
-	const { version: oldVersion, name: packageName } = await workspaces.getPackageJson( cwd, { async: true } );
+	const { version: oldVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
 
 	// TODO: It's an internal of `getNewChangelog()`.
 	const dateFormatted = getDateFormatted( date );
 
 	// TODO It should accept a single parameter: the normalized repositories array.
-	const changesetFilePaths = await getChangesetFilePaths( cwd, changesetsDirectory, externalRepositoriesWithDefaults, skipLinks );
+	const changesetFilePaths = await getChangesetFilePaths( cwd, externalRepositoriesWithDefaults, shouldSkipLinks );
 
 	// TODO: Extract to an internal helper to replace `let` with `const`.
 	let parsedChangesetFiles = await getChangesetsParsed( changesetFilePaths );
@@ -115,7 +116,8 @@ async function main( {
 	const { isInternal, newVersion } = await getNewVersion( {
 		sectionsWithEntries,
 		oldVersion,
-		packageName,
+		// TODO fix !
+		packageName: skipRootPackage ? npmPackageToCheck! : rootPackageName,
 		nextVersion
 	} );
 
@@ -123,8 +125,7 @@ async function main( {
 		sections: sectionsWithEntries,
 		oldVersion,
 		newVersion,
-		packageJsons,
-		organisationNamespace
+		packageJsons
 	} );
 
 	const newChangelog = getNewChangelog( {
@@ -145,7 +146,7 @@ async function main( {
 	// * `readonlyMode` (the question is why it changes the return type; perhaps it's bad option)
 	// * `dryRun ` (as above)
 	if ( removeInputFiles ) {
-		await removeChangesetFiles( changesetFilePaths, cwd, changesetsDirectory, externalRepositories );
+		await removeChangesetFiles( changesetFilePaths, cwd, externalRepositories );
 	}
 
 	if ( noWrite ) {
@@ -159,4 +160,11 @@ async function main( {
 	);
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
+}
+
+// TODO think if it's needed
+function validateArguments( skipRootPackage: undefined | boolean, npmPackageToCheck: string | undefined ) {
+	if ( skipRootPackage && npmPackageToCheck === undefined ) {
+		throw new Error( 'Provide npmPackageToCheck.' );
+	}
 }

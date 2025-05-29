@@ -11,8 +11,8 @@ import { PACKAGES_DIRECTORY_NAME } from '../constants.js';
  */
 export function getExternalRepositoriesWithDefaults( externalRepositories: Array<RepositoryConfig> ): Array<Required<RepositoryConfig>> {
 	return externalRepositories.map( externalRepository => ( {
-		...externalRepository,
+		cwd: externalRepository.cwd!,
 		packagesDirectory: externalRepository.packagesDirectory || PACKAGES_DIRECTORY_NAME,
-		skipLinks: externalRepository.skipLinks || false
+		shouldSkipLinks: externalRepository.shouldSkipLinks || false
 	} ) );
 }

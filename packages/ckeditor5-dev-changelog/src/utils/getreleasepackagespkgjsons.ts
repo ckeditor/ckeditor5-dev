@@ -13,7 +13,8 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 export async function getPackageJsons(
 	cwd: string,
 	packagesDirectory: string,
-	externalRepositories: Array<Required<RepositoryConfig>>
+	externalRepositories: Array<Required<RepositoryConfig>>,
+	skipRootPackage: boolean
 ): Promise<Array<workspaces.PackageJson>> {
 	const externalPackagesPromises = externalRepositories.map( externalRepository => {
 		return workspaces.findPathsToPackages(
@@ -24,7 +25,7 @@ export async function getPackageJsons(
 	} );
 
 	const promises = Promise.all( [
-		workspaces.findPathsToPackages( cwd, packagesDirectory, { includeCwd: true, includePackageJson: true } ),
+		workspaces.findPathsToPackages( cwd, packagesDirectory, { includeCwd: !skipRootPackage, includePackageJson: true } ),
 		...externalPackagesPromises
 	] );
 

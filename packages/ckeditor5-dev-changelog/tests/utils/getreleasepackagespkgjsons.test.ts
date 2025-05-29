@@ -18,8 +18,8 @@ describe( 'getReleasePackagesPkgJsons()', () => {
 	const cwd = '/local/directory';
 	const packagesDirectory = '/local/packages';
 	const externalRepositories: Array<Required<RepositoryConfig>> = [
-		{ cwd: '/external/repo1', packagesDirectory: '/external/packages1', skipLinks: false },
-		{ cwd: '/external/repo2', packagesDirectory: '/external/packages2', skipLinks: false }
+		{ cwd: '/external/repo1', packagesDirectory: '/external/packages1', shouldSkipLinks: false },
+		{ cwd: '/external/repo2', packagesDirectory: '/external/packages2', shouldSkipLinks: false }
 	];
 
 	it( 'should correctly retrieve package.json files from local and external repositories', async () => {

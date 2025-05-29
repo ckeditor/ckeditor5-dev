@@ -43,6 +43,8 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	logInfo( '3. A full issue link URL', { indent: 4 } );
 	logInfo( '* A scope field consists of existing packages.', { indent: 3 } );
 	logInfo( '' );
+	logInfo( `Found ${ nonEmptySections.length } entries to parse.`, { indent: 1 } );
+	logInfo( '' );
 }
 
 function getTitleColor( sectionName: SectionName ) {
@@ -75,11 +77,18 @@ function displayWarningEntry( entry: Entry ): void {
 
 function displayValidEntry( entry: Entry ): void {
 	const isEntryFullyValid = !entry.data.validations?.length;
-	const scope = entry.data.scope ? ` (${ entry.data.scope?.join( ', ' ) })` : '';
+	const scope = entry.data.scope?.length ? `(${ entry.data.scope?.join( ', ' ) })` : `(${ chalk.grey( 'no scope' ) })`;
 	const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
+	const shouldTrimMessage = String( entry.data.mainContent ).length > 100;
+	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;
 
-	logInfo(
-		`${ validationIndicator } "${ entry.data.type }${ scope }: ${ entry.data.mainContent }"`,
-		{ indent: 2 }
-	);
+	logInfo( `${ validationIndicator } ${ scope }: ${ trimmedMessageContent }`, { indent: 2 } );
+
+	if ( entry.data.seeLinks?.length ) {
+		logInfo( `- See: ${ entry.data.seeLinks.map( seeObj => seeObj.link ).join( ', ' ) }`, { indent: 3 } );
+	}
+
+	if ( entry.data.closesLinks?.length ) {
+		logInfo( `- Closes: ${ entry.data.closesLinks.map( closesObj => closesObj.link ).join( ', ' ) }`, { indent: 3 } );
+	}
 }

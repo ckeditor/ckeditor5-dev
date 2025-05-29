@@ -346,7 +346,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( {
 			...defaultOptions,
-			skipLinks: true,
+			shouldSkipLinks: true,
 			externalRepositories
 		} );
 

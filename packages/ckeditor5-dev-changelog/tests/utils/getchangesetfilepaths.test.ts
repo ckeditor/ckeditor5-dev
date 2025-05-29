@@ -38,8 +38,8 @@ describe( 'getChangesetFilePaths()', () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: true },
-			{ cwd: '/mock/repo2', packagesDirectory: 'packages', skipLinks: false }
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: true },
+			{ cwd: '/mock/repo2', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
@@ -119,7 +119,7 @@ describe( 'getChangesetFilePaths()', () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
@@ -163,7 +163,7 @@ describe( 'getChangesetFilePaths()', () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
 		vi.mocked( glob ).mockImplementation( () => Promise.resolve( [] ) );
@@ -195,7 +195,7 @@ describe( 'getChangesetFilePaths()', () => {
 		const cwd = '/mock/current';
 		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
-			{ cwd: '/mock/repo1', packagesDirectory: 'packages', skipLinks: false }
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
 		vi.mocked( glob ).mockRejectedValueOnce( new Error( 'Glob failed' ) );
