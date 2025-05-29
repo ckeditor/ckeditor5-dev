@@ -55,15 +55,9 @@ function mockCliArgs( ...args: Array<string> ) {
 	} );
 }
 
-/**
- * Mocks `setTimeout` to immediately execute the callback function.
- */
-function mockSetTimeout() {
-	vi.spyOn( globalThis, 'setTimeout' ).mockImplementation( ( fn: () => any ) => fn() );
-}
-
 describe( 'generateTemplate', () => {
 	beforeEach( () => {
+		vi.useFakeTimers();
 		vi.setSystemTime( mocks.time );
 		vi.stubGlobal( 'console', {
 			warn: console.warn,
@@ -73,6 +67,7 @@ describe( 'generateTemplate', () => {
 	} );
 
 	afterEach( () => {
+		vi.useRealTimers();
 		vi.resetAllMocks();
 		vi.unstubAllGlobals();
 	} );
@@ -153,21 +148,34 @@ describe( 'generateTemplate', () => {
 	} );
 
 	it( 'retries creating the file if it already exists', async () => {
-		mockSetTimeout();
-		mocks.copyFile.mockRejectedValueOnce( 'File already exists' );
+		mocks.copyFile.mockImplementation( ( _, dest ) => {
+			return dest.endsWith( EXPECTED_FILE_NAME ) ? Promise.reject( 'File already exists' ) : Promise.resolve( 'File created' );
+		} );
 
-		await template.generateTemplate();
+		const generatePromise = template.generateTemplate();
+
+		await vi.runAllTimersAsync();
+		await generatePromise;
+
+		expect( mocks.error ).toHaveBeenCalledTimes( 1 );
 		expect( mocks.copyFile ).toHaveBeenCalledTimes( 2 ); // First intentionally failed attempt, then a successful one.
+		expect( mocks.copyFile ).toHaveLastResolvedWith( 'File created' );
 	} );
 
 	it( 'logs an error when file with given name already exists and `retries` reached limit', async () => {
-		mockSetTimeout();
-		mocks.copyFile.mockRejectedValue( 'File already exists' );
+		mocks.copyFile.mockImplementation( () => Promise.reject( 'File already exists' ) );
 
-		await expect( () => template.generateTemplate() ).rejects.toThrow( 'File already exists' );
-		expect( mocks.error ).toHaveBeenCalledTimes( 5 );
+		const shouldReject = expect( () => template.generateTemplate() ).rejects.toThrow( 'File already exists' );
+
+		await vi.runAllTimersAsync();
+		await shouldReject;
+
+		expect( mocks.error ).toHaveBeenCalledTimes( 6 );
 		expect( mocks.error ).toHaveBeenCalledWith(
 			expect.stringContaining( 'You are going to fast 🥵 Waiting 1 second to ensure unique changelog name.' )
+		);
+		expect( mocks.error ).toHaveBeenCalledWith(
+			expect.stringContaining( 'Error: Generating changelog file failed with the following error:' )
 		);
 	} );
 

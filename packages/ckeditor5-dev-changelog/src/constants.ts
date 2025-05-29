@@ -20,7 +20,7 @@ export const ORGANISATION_NAMESPACE = '@ckeditor';
 
 export const CHANGESET_DIRECTORY = '.changelog';
 
-export const TEMPLATE_FILE = join( import.meta.dirname, '../bin/template.md' );
+export const TEMPLATE_FILE = join( import.meta.dirname, '../template/template.md' );
 
 export const SECTIONS = {
 	major: {

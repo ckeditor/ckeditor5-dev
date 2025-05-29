@@ -102,6 +102,7 @@ export async function generateTemplate(
 		console.log( styleText( [ 'green', 'bold' ], `Changelog file created: ${ path.relative( process.cwd(), outputPath ) }` ) );
 	} catch ( error: any ) {
 		if ( retries <= 0 ) {
+			console.error( styleText( [ 'red', 'bold' ], 'Error: Generating changelog file failed with the following error:' ) );
 			throw error;
 		}
 
