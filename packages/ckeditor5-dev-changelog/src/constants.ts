@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import path from 'upath';
 import type { DeepReadonly, EntryType } from './types';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
@@ -20,7 +20,7 @@ export const ORGANISATION_NAMESPACE = '@ckeditor';
 
 export const CHANGESET_DIRECTORY = '.changelog';
 
-export const TEMPLATE_FILE = join( import.meta.dirname, '../template/template.md' );
+export const TEMPLATE_FILE = path.join( import.meta.dirname, '../template/template.md' );
 
 export const SECTIONS = {
 	major: {
