@@ -23,13 +23,7 @@ const externals = [
 	...Object.keys( pkg.peerDependencies || {} )
 ];
 
-export default defineConfig( {
-	input: 'src/index.ts',
-	output: {
-		format: 'esm',
-		file: path.join( cwd, 'dist', 'index.js' ),
-		assetFileNames: '[name][extname]'
-	},
+const sharedConfig = defineConfig( {
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
 		typescript(),
@@ -39,3 +33,24 @@ export default defineConfig( {
 		} )
 	]
 } );
+
+export default defineConfig( [
+	{
+		input: 'src/index.ts',
+		output: {
+			format: 'esm',
+			file: path.join( cwd, 'dist', 'index.js' ),
+			assetFileNames: '[name][extname]'
+		},
+		...sharedConfig
+	},
+	{
+		input: 'src/template.ts',
+		output: {
+			format: 'esm',
+			file: path.join( cwd, 'dist', 'template.js' ),
+			assetFileNames: '[name][extname]'
+		},
+		...sharedConfig
+	}
+] );
