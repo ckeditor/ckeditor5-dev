@@ -23,7 +23,7 @@
     "dist"
   ],
   "dependencies": {
-    "upath": "^2.0.1"
+    "upath": "2.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
