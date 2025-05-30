@@ -58,20 +58,24 @@ function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMapp
 	packageJsons
 		.filter( packageJson => packageJson.dependencies )
 		.forEach( packageJson => {
-			for ( const [ dependency, version ] of Object.entries( packageJson.dependencies ) ) {
-				if ( version === expectedDependencies[ dependency ] ) {
-					continue;
-				}
+			if ( packageJson.dependencies ) {
+				for ( const [ dependency, version ] of Object.entries( packageJson.dependencies ) ) {
+					if ( version === expectedDependencies[ dependency ] ) {
+						continue;
+					}
 
-				packageJson.dependencies[ dependency ] = expectedDependencies[ dependency ];
+					packageJson.dependencies[ dependency ] = expectedDependencies[ dependency ];
+				}
 			}
 
-			for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies ) ) {
-				if ( !isCkeditor5Package( dependency ) || version === expectedDependencies[ dependency ] ) {
-					continue;
-				}
+			if ( packageJson.devDependencies ) {
+				for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies ) ) {
+					if ( !isCkeditor5Package( dependency ) || version === expectedDependencies[ dependency ] ) {
+						continue;
+					}
 
-				packageJson.devDependencies[ dependency ] = expectedDependencies[ dependency ];
+					packageJson.devDependencies[ dependency ] = expectedDependencies[ dependency ];
+				}
 			}
 
 			fs.writeJsonSync( pathMappings[ packageJson.name ], packageJson, { spaces: 2 } );
