@@ -13,218 +13,40 @@ describe( 'getRepositoryUrl()', () => {
 	const mockCwd = '/test/cwd';
 	const mockPackageName = 'test-package';
 
-	describe( 'async=false', () => {
-		it( 'should extract repository URL from string format (missing `async`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5.git'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
+	const testCases: Array<[ description: string, inputValue: string, expected: string ]> = [
+		[ 'string with .git', 'https://github.com/ckeditor/ckeditor5.git', 'https://github.com/ckeditor/ckeditor5' ],
+		[ 'string without .git', 'https://github.com/ckeditor/ckeditor5', 'https://github.com/ckeditor/ckeditor5' ],
+		[ 'string with /issues', 'https://github.com/ckeditor/ckeditor5/issues', 'https://github.com/ckeditor/ckeditor5' ],
+		[ 'string with git+ prefix', 'git+https://github.com/ckeditor/ckeditor5', 'https://github.com/ckeditor/ckeditor5' ],
+		[ 'ssh format', 'git@github.com:ckeditor/ckeditor5.git', 'https://github.com/ckeditor/ckeditor5' ],
+		[ 'short notation', 'ckeditor/ckeditor5', 'https://github.com/ckeditor/ckeditor5' ]
+	];
 
-			const result = getRepositoryUrl( mockCwd );
+	describe.each( [ 'object', 'string' ] )( '`repository` value as `%s`', typeofRepository => {
+		describe.each( [ true, false ] )( 'async=%s', isAsync => {
+			it.each( testCases )( 'should return GitHub URL from %s', async ( _, inputValue, expected ) => {
+				const mockPackageJson = {
+					name: mockPackageName,
+					version: '1.0.0',
+					repository: typeofRepository === 'object' ? { type: 'git', url: inputValue } : inputValue
+				};
 
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
+				if ( isAsync ) {
+					vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
 
-		it( 'should extract repository URL from string format (`async=false`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5.git'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
+					await expect( getRepositoryUrl( mockCwd, { async: true } ) ).resolves.toBe( expected );
 
-			const result = getRepositoryUrl( mockCwd );
+					expect( vi.mocked( getPackageJson ) ).toHaveBeenCalledWith(
+						mockCwd,
+						expect.objectContaining( { async: true } )
+					);
+				} else {
+					vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
 
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should extract repository URL from object format (missing `async`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: {
-					type: 'git',
-					url: 'https://github.com/ckeditor/ckeditor5.git'
+					expect( getRepositoryUrl( mockCwd ) ).toBe( expected );
+					expect( vi.mocked( getPackageJson ) ).toHaveBeenCalledWith( mockCwd );
 				}
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should extract repository URL from object format (`async=false`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: {
-					type: 'git',
-					url: 'https://github.com/ckeditor/ckeditor5.git'
-				}
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove /issues suffix from repository URL (missing `async`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5/issues'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove /issues suffix from repository URL (`async=false`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5/issues'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove git+ prefix from repository URL (missing `async`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'git+https://github.com/ckeditor/ckeditor5'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove git+ prefix from repository URL (`async=false`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'git+https://github.com/ckeditor/ckeditor5'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			const result = getRepositoryUrl( mockCwd );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should throw error when repository is missing (missing `async`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			expect( () => {
-				getRepositoryUrl( mockCwd );
-			} ).toThrow(
-				`The package.json for "${ mockPackageName }" must contain the "repository" property.`
-			);
-		} );
-
-		it( 'should throw error when repository is missing (`async=false`)', () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0'
-			};
-			vi.mocked( getPackageJson ).mockReturnValue( mockPackageJson );
-
-			expect( () => {
-				getRepositoryUrl( mockCwd );
-			} ).toThrow(
-				`The package.json for "${ mockPackageName }" must contain the "repository" property.`
-			);
-		} );
-	} );
-
-	describe( 'async=true', () => {
-		it( 'should extract repository URL from string format', async () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5.git'
-			};
-			vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-			const result = await getRepositoryUrl( mockCwd, { async: true } );
-
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd, { async: true } );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should extract repository URL from object format', async () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: {
-					type: 'git',
-					url: 'https://github.com/ckeditor/ckeditor5.git'
-				}
-			};
-			vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-			const result = await getRepositoryUrl( mockCwd, { async: true } );
-
-			expect( getPackageJson ).toHaveBeenCalledWith( mockCwd, { async: true } );
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove /issues suffix from repository URL', async () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'https://github.com/ckeditor/ckeditor5/issues'
-			};
-			vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-			const result = await getRepositoryUrl( mockCwd, { async: true } );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should remove git+ prefix from repository URL', async () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0',
-				repository: 'git+https://github.com/ckeditor/ckeditor5'
-			};
-			vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-			const result = await getRepositoryUrl( mockCwd, { async: true } );
-
-			expect( result ).toBe( 'https://github.com/ckeditor/ckeditor5' );
-		} );
-
-		it( 'should throw error when repository is missing', async () => {
-			const mockPackageJson = {
-				name: mockPackageName,
-				version: '1.0.0'
-			};
-			vi.mocked( getPackageJson ).mockResolvedValue( mockPackageJson );
-
-			await expect( getRepositoryUrl( mockCwd, { async: true } ) ).rejects.toThrow(
-				`The package.json for "${ mockPackageName }" must contain the "repository" property.`
-			);
+			} );
 		} );
 	} );
 } );
