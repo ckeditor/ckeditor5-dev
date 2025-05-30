@@ -32,35 +32,26 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
 		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
-
-		// TODO it works, but refactor the code
-		if ( validatedData.communityCredits?.length ) {
-			validatedEntry.content = validatedEntry.content.concat( `\nThanks to ${ validatedData.communityCredits?.join( ', ' ) }.` );
-		}
-
-		const [ mainContent, ...restContent ] = linkToGitHubUser( validatedEntry.content ).trim().split( '\n\n' );
-		const mainContentFormatted = mainContent?.split( '\n' ).map( line => line.trim() ).join( '\n  ' );
-		const restContentFormatted = restContent.map( restContentLine =>
-			restContentLine?.split( '\n' ).map( line => line.trim() ).join( '\n  ' )
-		);
+		const contentWithCommunityCredits = getContentWithCommunityCredits( validatedEntry.content, validatedData.communityCredits );
+		const content = linkToGitHubUser( contentWithCommunityCredits );
+		const [ mainContent, ...restContent ] = formatContent( content );
 
 		const messageFirstLine = [
 			'*',
-			// TODO fix undefined scope in changelog
 			scope ? `**${ scope }**:` : null,
-			mainContentFormatted,
+			mainContent,
 			!entry.skipLinks && see ? see : null,
 			!entry.skipLinks && closes ? closes : null
 		].filter( Boolean ).join( ' ' );
 
-		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContentFormatted.join( '\n\n  ' ) : messageFirstLine;
+		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
 
 		const newEntry: Entry = {
 			message: changeMessage,
 			data: {
 				...validatedData,
-				mainContent: mainContentFormatted,
-				restContent: restContentFormatted,
+				mainContent,
+				restContent,
 				seeLinks: validatedData.see?.map( see => getIssueLinkObject( see, validatedEntry.gitHubUrl ) ),
 				closesLinks: validatedData.closes?.map( closes => getIssueLinkObject( closes, validatedEntry.gitHubUrl ) )
 			},
@@ -75,6 +66,20 @@ export function getSectionsWithEntries( { parsedFiles, packageJsons, transformSc
 
 		return sections;
 	}, getInitialSectionsWithEntries() );
+}
+
+function formatContent( content: string ) {
+	const contentByLines = content.trim().split( '\n\n' );
+
+	return contentByLines?.filter( line => line.length ).map( line => trimLineBreaks( line ).trim() );
+}
+
+function getContentWithCommunityCredits( content: string, communityCredits: Array<string> | undefined ) {
+	if ( !communityCredits?.length ) {
+		return content;
+	}
+
+	return content.concat( `\nThanks to ${ communityCredits?.join( ', ' ) }.` );
 }
 
 function getScopesLinks( scope: Array<string> | undefined, transformScope: TransformScope ): string | null {
@@ -159,4 +164,8 @@ function getInitialSectionsWithEntries(): SectionsWithEntries {
 	}
 
 	return sections;
+}
+
+function trimLineBreaks( str: string ) {
+	return str.replace( /^[\r\n]+|[\r\n]+$/g, '' );
 }
