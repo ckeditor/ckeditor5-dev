@@ -52,10 +52,5 @@ if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
 			cwd: path.join( packagePath, '..' ),
 			stdio: 'inherit'
 		} );
-
-		execSync( 'npm run build', {
-			cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-changelog' ),
-			stdio: 'inherit'
-		} );
 	}
 }
