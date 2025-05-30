@@ -10,7 +10,7 @@ import { logInfo } from './loginfo.js';
 /**
  * This function provides a summary of changes that will be included in the changelog.
  */
-export function logChangelogFiles( sections: SectionsWithEntries ): void {
+export function logChangelogFiles( sections: SectionsWithEntries, changesToParse: number ): void {
 	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	const nonEmptySections = ( Object.entries( sections ) as Array<[ SectionName, Section ]> )
@@ -43,7 +43,7 @@ export function logChangelogFiles( sections: SectionsWithEntries ): void {
 	logInfo( '3. A full issue link URL', { indent: 4 } );
 	logInfo( '* A scope field consists of existing packages.', { indent: 3 } );
 	logInfo( '' );
-	logInfo( `Found ${ nonEmptySections.length } entries to parse.`, { indent: 1 } );
+	logInfo( `Found ${ changesToParse } entries to parse.`, { indent: 1 } );
 	logInfo( '' );
 }
 
@@ -68,7 +68,7 @@ function getTitleColor( sectionName: SectionName ) {
 }
 
 function displayWarningEntry( entry: Entry ): void {
-	logInfo( `- file://${ entry.changesetPath }`, { indent: 2 } );
+	logInfo( `→ file://${ entry.changesetPath }`, { indent: 2 } );
 
 	for ( const validationMessage of ( entry.data.validations || [] ) ) {
 		logInfo( `- ${ validationMessage }`, { indent: 3 } );
