@@ -16,6 +16,7 @@
     "node": ">=22.0.0",
     "npm": ">=5.7.1"
   },
+  "main": "lib/index.js",
   "type": "module",
   "files": [
     "bin",
