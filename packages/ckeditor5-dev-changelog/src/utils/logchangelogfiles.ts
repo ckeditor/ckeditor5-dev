@@ -78,7 +78,7 @@ function getTitleColor( sectionName: SectionName ) {
 }
 
 function displayWarningEntry( entry: Entry ): void {
-	logInfo( `→ file://${ entry.changesetPath }`, { indent: 2 } );
+	logInfo( `» file://${ entry.changesetPath }`, { indent: 2 } );
 
 	for ( const validationMessage of ( entry.data.validations || [] ) ) {
 		logInfo( `- ${ validationMessage }`, { indent: 3 } );
