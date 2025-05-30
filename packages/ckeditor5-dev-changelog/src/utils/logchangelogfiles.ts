@@ -4,13 +4,13 @@
  */
 
 import chalk from 'chalk';
-import { type Entry, type Section, type SectionName, type SectionsWithEntries } from '../types.js';
+import { type Entry, type Section, type SectionName, type SectionsWithEntries, type TransformScope } from '../types.js';
 import { logInfo } from './loginfo.js';
 
 /**
  * This function provides a summary of changes that will be included in the changelog.
  */
-export function logChangelogFiles( sections: SectionsWithEntries, changesToParse: number ): void {
+export function logChangelogFiles( sections: SectionsWithEntries, changesToParse: number, transformScope: TransformScope ): void {
 	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	const nonEmptySections = ( Object.entries( sections ) as Array<[ SectionName, Section ]> )
@@ -25,7 +25,7 @@ export function logChangelogFiles( sections: SectionsWithEntries, changesToParse
 			displayWarningEntry :
 			displayValidEntry;
 
-		section.entries.forEach( entries => displayCallback( entries, sectionName ) );
+		section.entries.forEach( entries => displayCallback( entries, sectionName, transformScope ) );
 
 		logInfo( '' );
 	}
@@ -75,13 +75,12 @@ function displayWarningEntry( entry: Entry ): void {
 	}
 }
 
-function displayValidEntry( entry: Entry, sectionName: SectionName ): void {
+function displayValidEntry( entry: Entry, sectionName: SectionName, transformScope: TransformScope ): void {
 	const isEntryFullyValid = !entry.data.validations?.length;
-	const greyBright = chalk.hex( '#9b9b9b' );
-	const scopesWithoutCKEditor5Namespace = entry.data.scope?.map( scope => scope.replace( 'ckeditor5-', '' ) );
+	const scopesWithoutCKEditor5Namespace = entry.data.scope?.map( scope => transformScope( scope ).displayName );
 	const scope = entry.data.scope?.length ?
-		greyBright( `(${ scopesWithoutCKEditor5Namespace?.join( ', ' ) })` ) :
-		`${ chalk.italic( greyBright( '(no scope)' ) ) }`;
+		chalk.grey( scopesWithoutCKEditor5Namespace?.join( ', ' ) ) :
+		`${ chalk.italic( chalk.grey( '(no scope)' ) ) }`;
 	const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
 	const shouldTrimMessage = String( entry.data.mainContent ).length > 100;
 	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;
