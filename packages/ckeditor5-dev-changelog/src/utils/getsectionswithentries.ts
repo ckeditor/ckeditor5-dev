@@ -79,7 +79,7 @@ function getContentWithCommunityCredits( content: string, communityCredits: Arra
 		return content;
 	}
 
-	return content.concat( `\nThanks to ${ communityCredits?.join( ', ' ) }.` );
+	return content.concat( `\n\nThanks to ${ communityCredits?.join( ', ' ) }.` );
 }
 
 function getScopesLinks( scope: Array<string> | undefined, transformScope: TransformScope ): string | null {

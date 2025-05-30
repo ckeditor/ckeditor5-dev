@@ -5,6 +5,7 @@
 
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
+import { deduplicate } from './deduplicate';
 
 /**
  * Generates information about packages being released in the new version.
@@ -17,21 +18,22 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	packageJsons: Array<workspaces.PackageJson>;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
-	const packageNames = packageJsons.map( packageName => packageName.name );
-	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
+	const packageNames = deduplicate( packageJsons.map( packageName => packageName.name ) );
 
 	const newVersionReleases = getNewVersionReleases( packageJsons );
-	const majorReleases = getPackageNamesByScope( sections.major.entries, { packagesToRemove: newVersionReleases } );
-	const minorReleases = getPackageNamesByScope( sections.minor.entries, {
-		packagesToRemove: [ ...majorReleases, ...newVersionReleases ] }
-	);
-	const newFeaturesReleases = getPackageNamesByScope( sections.feature.entries, {
-		packagesToRemove: [ ...minorReleases, ...majorReleases, ...newVersionReleases ]
+	const majorReleases = getScopeWithOrgNamespace( sections.major.entries, { packagesToRemove: newVersionReleases, packageNames } );
+	const minorReleases = getScopeWithOrgNamespace( sections.minor.entries, {
+		packagesToRemove: [ ...majorReleases, ...newVersionReleases ],
+		packageNames
+	} );
+	const newFeaturesReleases = getScopeWithOrgNamespace( sections.feature.entries, {
+		packagesToRemove: [ ...minorReleases, ...majorReleases, ...newVersionReleases ],
+		packageNames
 	} );
 
 	const packagesToRemoveFromOtherReleases = [ majorReleases, minorReleases, newFeaturesReleases, newVersionReleases ].flat();
 
-	const otherReleases = packageNamesDeduplicated
+	const otherReleases = packageNames
 		.filter( packageName => !packagesToRemoveFromOtherReleases.includes( packageName ) )
 		.sort();
 
@@ -51,12 +53,14 @@ function getNewVersionReleases( packages: Array<workspaces.PackageJson> ) {
 		.sort();
 }
 
-function getPackageNamesByScope( entries: Array<Entry> = [], { packagesToRemove }: { packagesToRemove: Array<string> } ) {
-	const packageNames = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
-	const packageNamesDeduplicated = [ ...new Set( packageNames ) ];
-	// TODO get the organisation name from the root of each repository
-	const packagesFullNames = packageNamesDeduplicated.map( scope => `${ '@ckeditor' }/` + scope );
+function getScopeWithOrgNamespace( entries: Array<Entry> = [], { packagesToRemove, packageNames }: {
+	packagesToRemove: Array<string>;
+	packageNames: Array<string>;
+} ) {
+	const scope = deduplicate( entries.flatMap( entry => entry.data.scope ?? [] ).filter( Boolean ) );
+	const packagesFullNames = scope.map( scope => packageNames.find( packageName => packageName.includes( scope ) )! );
 	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
 
 	return packagesNamesFiltered.sort();
 }
+

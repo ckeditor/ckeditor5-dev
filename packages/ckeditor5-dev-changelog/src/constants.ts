@@ -15,8 +15,6 @@ export const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest
 
 export const PACKAGES_DIRECTORY_NAME = 'packages';
 
-export const ORGANISATION_NAMESPACE = '@ckeditor';
-
 export const CHANGESET_DIRECTORY = '.changelog';
 
 export const SECTIONS = {
