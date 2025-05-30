@@ -10,7 +10,12 @@ import { logInfo } from './loginfo.js';
 /**
  * This function provides a summary of changes that will be included in the changelog.
  */
-export function logChangelogFiles( sections: SectionsWithEntries, changesToParse: number, transformScope: TransformScope ): void {
+export function logChangelogFiles(
+	sections: SectionsWithEntries,
+	changesToParse: number,
+	transformScope: TransformScope,
+	isSinglePackage: boolean
+): void {
 	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	const nonEmptySections = ( Object.entries( sections ) as Array<[ SectionName, Section ]> )
@@ -25,7 +30,7 @@ export function logChangelogFiles( sections: SectionsWithEntries, changesToParse
 			displayWarningEntry :
 			displayValidEntry;
 
-		section.entries.forEach( entries => displayCallback( entries, sectionName, transformScope ) );
+		section.entries.forEach( entries => displayCallback( entries, sectionName, transformScope, isSinglePackage ) );
 
 		logInfo( '' );
 	}
@@ -75,7 +80,7 @@ function displayWarningEntry( entry: Entry ): void {
 	}
 }
 
-function displayValidEntry( entry: Entry, sectionName: SectionName, transformScope: TransformScope ): void {
+function displayValidEntry( entry: Entry, sectionName: SectionName, transformScope: TransformScope, isSinglePackage: boolean ): void {
 	const isEntryFullyValid = !entry.data.validations?.length;
 	const scopesWithoutCKEditor5Namespace = entry.data.scope?.map( scope => transformScope( scope ).displayName );
 	const scope = entry.data.scope?.length ?
@@ -86,7 +91,11 @@ function displayValidEntry( entry: Entry, sectionName: SectionName, transformSco
 	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;
 	const isBreakingChange = sectionName === 'breaking' || sectionName === 'major' || sectionName === 'minor';
 
-	logInfo( `${ validationIndicator } ${ scope }: ${ trimmedMessageContent }`, { indent: 2 } );
+	if ( isSinglePackage ) {
+		logInfo( `${ validationIndicator } ${ trimmedMessageContent }`, { indent: 2 } );
+	} else {
+		logInfo( `${ validationIndicator } ${ scope }: ${ trimmedMessageContent }`, { indent: 2 } );
+	}
 
 	if ( !isBreakingChange ) {
 		return;
