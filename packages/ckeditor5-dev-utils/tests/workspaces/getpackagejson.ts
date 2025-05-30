@@ -22,6 +22,7 @@ describe( 'getPackageJson()', () => {
 			expect( result ).toEqual( fakePackageJson );
 			expect( fs.readJsonSync ).toHaveBeenCalledWith( '/my/package/dir/package.json' );
 		} );
+
 		it( 'should read the package.json when cwd is a directory path (`async=false`)', () => {
 			const cwd = '/my/package/dir';
 			const fakePackageJson: PackageJson = { name: 'my-package', version: '1.0.0' };
