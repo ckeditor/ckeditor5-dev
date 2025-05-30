@@ -108,7 +108,7 @@ async function main( {
 	} );
 
 	// Logging changes in the console.
-	logChangelogFiles( sectionsWithEntries, parsedChangesetFiles.length, transformScope, singlePackage );
+	logChangelogFiles( sectionsWithEntries, parsedChangesetFiles.length, transformScope, singlePackage, !!nextVersion );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 

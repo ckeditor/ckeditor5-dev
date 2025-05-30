@@ -14,8 +14,13 @@ export function logChangelogFiles(
 	sections: SectionsWithEntries,
 	changesToParse: number,
 	transformScope: TransformScope,
-	isSinglePackage: boolean
+	isSinglePackage: boolean,
+	isNextVersionProvidedAsProp: boolean
 ): void {
+	if ( isNextVersionProvidedAsProp ) {
+		return;
+	}
+
 	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
 	const nonEmptySections = ( Object.entries( sections ) as Array<[ SectionName, Section ]> )
