@@ -23,6 +23,7 @@
     "dist"
   ],
   "scripts": {
+    "types": "tsc --noEmit",
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch"
   },
