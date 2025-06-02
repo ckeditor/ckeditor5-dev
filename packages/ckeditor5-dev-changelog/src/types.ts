@@ -9,20 +9,7 @@ export type DeepReadonly<T> = {
 	readonly [P in keyof T]: DeepReadonly<T[P]>
 };
 
-/**
- * Configuration options for generating a changelog.
- */
-export type GenerateChangelog = {
-
-	/**
-	 * The current working directory of the repository.
-	 */
-	cwd?: string;
-
-	/**
-	 * The directory containing the packages. Defaults to 'packages'.
-	 */
-	packagesDirectory?: string;
+export type ConfigBase = RepositoryConfig & {
 
 	/**
 	 * The next version number to use. If not provided, will be calculated based on changes.
@@ -36,24 +23,22 @@ export type GenerateChangelog = {
 	externalRepositories?: Array<RepositoryConfig>;
 
 	/**
-	 * Function to transform package scopes in the changelog entries.
-	 */
-	transformScope?: TransformScope;
-
-	/**
 	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
 	 */
 	date?: string;
 
 	/**
-	 * Whether changelog is for a single package rather than a monorepo.
+	 * Controls whether changeset files will be deleted after generating changelog.
 	 */
-	singlePackage?: boolean;
+	removeInputFiles?: boolean;
+};
+
+export type MonoRepoConfigBase = {
 
 	/**
-	 * Whether changelog should be returned by the script instead of saving it to a file.
+	 * Function to transform package scopes in the changelog entries.
 	 */
-	noWrite?: boolean;
+	transformScope?: TransformScope;
 
 	/**
 	 * Whether to include the root package name in the bumped packages versions section in the changelog.
@@ -63,27 +48,33 @@ export type GenerateChangelog = {
 	/**
 	 * The package that will be used when determining if the next version is available on npm.
 	 */
-	npmPackageToCheck?: string;
-
-	/**
-	 * Whether to skip links in the changelog entries. Defaults to false.
-	 */
-	shouldSkipLinks?: boolean;
-
-	/**
-	 * Controls whether changeset files will be deleted after generating changelog.
-	 */
-	removeInputFiles?: boolean;
+	npmPackageToCheck?: string | never;
 } & NpmPackageRequiredWhenSkipRootPackage;
-
-export type RepositoryConfig = Pick<GenerateChangelog, 'cwd' | 'packagesDirectory' | 'shouldSkipLinks'>;
 
 type NpmPackageRequiredWhenSkipRootPackage = {
 	skipRootPackage?: true;
 	npmPackageToCheck: string;
 } | {
 	skipRootPackage?: false;
-	npmPackageToCheck?: string;
+	npmPackageToCheck?: never;
+};
+
+export type RepositoryConfig = {
+
+	/**
+	 * The current working directory of the repository.
+	 */
+	cwd?: string;
+
+	/**
+	 * The directory containing the packages. Defaults to 'packages'.
+	 */
+	packagesDirectory?: string;
+
+	/**
+	 * Whether to skip links in the changelog entries. Defaults to false.
+	 */
+	shouldSkipLinks?: boolean;
 };
 
 export type SectionName = keyof typeof SECTIONS;

@@ -6,62 +6,39 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { format } from 'date-fns';
 import chalk from 'chalk';
-import { PACKAGES_DIRECTORY_NAME } from './constants.js';
-import type { GenerateChangelog } from './types.js';
-import { getSectionsWithEntries } from './utils/getsectionswithentries.js';
-import { logChangelogFiles } from './utils/logchangelogfiles.js';
-import { modifyChangelog } from './utils/modifychangelog.js';
-import { getNewVersion } from './utils/getnewversion.js';
-import { getPackageJsons } from './utils/getreleasepackagespkgjsons.js';
-import { getReleasedPackagesInfo } from './utils/getreleasedpackagesinfo.js';
-import { getChangesetFilePaths } from './utils/getchangesetfilepaths.js';
-import { getInputParsed } from './utils/getinputparsed.js';
-import { getSectionsToDisplay } from './utils/getsectionstodisplay.js';
-import { logInfo } from './utils/loginfo.js';
-import { getDateFormatted } from './utils/getdateformatted.js';
-import { defaultTransformScope } from './utils/defaulttransformscope.js';
-import { getExternalRepositoriesWithDefaults } from './utils/getexternalrepositorieswithdefaults.js';
-import { getNewChangelog } from './utils/getnewchangelog.js';
-import { removeChangesetFiles } from './utils/removechangesetfiles.js';
-import { removeScope } from './utils/removescope.js';
-import { commitChanges } from './utils/commitchanges.js';
-import { InternalError } from './errors/internalerror.js';
+import { PACKAGES_DIRECTORY_NAME } from '../constants.js';
+import type { ConfigBase, MonoRepoConfigBase } from '../types.js';
+import { getSectionsWithEntries } from '../utils/getsectionswithentries.js';
+import { logChangelogFiles } from '../utils/logchangelogfiles.js';
+import { modifyChangelog } from '../utils/modifychangelog.js';
+import { getNewVersion } from '../utils/getnewversion.js';
+import { getPackageJsons } from '../utils/getreleasepackagespkgjsons.js';
+import { getReleasedPackagesInfo } from '../utils/getreleasedpackagesinfo.js';
+import { getChangesetFilePaths } from '../utils/getchangesetfilepaths.js';
+import { getInputParsed } from '../utils/getinputparsed.js';
+import { getSectionsToDisplay } from '../utils/getsectionstodisplay.js';
+import { logInfo } from '../utils/loginfo.js';
+import { getDateFormatted } from '../utils/getdateformatted.js';
+import { defaultTransformScope } from '../utils/defaulttransformscope.js';
+import { getExternalRepositoriesWithDefaults } from '../utils/getexternalrepositorieswithdefaults.js';
+import { getNewChangelog } from '../utils/getnewchangelog.js';
+import { removeChangesetFiles } from '../utils/removechangesetfiles.js';
+import { removeScope } from '../utils/removescope.js';
+import { commitChanges } from '../utils/commitchanges.js';
+import { InternalError } from '../errors/internalerror.js';
 
-export async function generateChangelog(
-	config: GenerateChangelog & { noWrite?: false }
-): Promise<void>;
-
-export async function generateChangelog(
-	config: GenerateChangelog & { noWrite: true }
-): Promise<string>;
-
-/**
- * Wrapper function that provides error handling for the changelog generation process.
- */
-export async function generateChangelog(
-	options: GenerateChangelog
-): Promise<string | void> {
-	try {
-		return await main( options );
-	} catch ( error ) {
-		if ( !( error instanceof InternalError ) ) {
-			throw error;
-		}
-
-		console.error( chalk.red( 'Error: ' + error.message ) );
-		process.exit( 1 );
-	}
-}
+type GenerateChangelog = <T extends boolean | undefined = undefined>(
+	config: ConfigBase & MonoRepoConfigBase & { noWrite?: T; singlePackage: boolean }
+) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
 /**
  * This function handles the entire changelog generation process including version management,
  * package information gathering, and changelog file updates.
  */
-async function main( {
+const main: GenerateChangelog = async ( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
-	// organisationNamespace = ORGANISATION_NAMESPACE,
 	externalRepositories = [],
 	// TODO: An integrator should define it. No defaults here.
 	// TODO: Required when `singlePackage=false`.
@@ -74,7 +51,7 @@ async function main( {
 	// TODO: Merge `removeInputFiles` and `noWrite` options.
 	noWrite = false,
 	removeInputFiles = true
-}: GenerateChangelog ): Promise<string | void> { // eslint-disable-line @typescript-eslint/no-invalid-void-type
+} ) => {
 	validateArguments( skipRootPackage, npmPackageToCheck );
 	// TODO: getExternalRepositoriesWithDefaults => `normalizeRepositories`.
 	const externalRepositoriesWithDefaults = getExternalRepositoriesWithDefaults( externalRepositories );
@@ -150,7 +127,7 @@ async function main( {
 	}
 
 	if ( noWrite ) {
-		return newChangelog;
+		return newChangelog as any;
 	}
 
 	await modifyChangelog( newChangelog, cwd );
@@ -160,7 +137,7 @@ async function main( {
 	);
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
-}
+};
 
 // TODO think if it's needed
 function validateArguments( skipRootPackage: undefined | boolean, npmPackageToCheck: string | undefined ) {
@@ -168,3 +145,19 @@ function validateArguments( skipRootPackage: undefined | boolean, npmPackageToCh
 		throw new Error( 'Provide npmPackageToCheck.' );
 	}
 }
+
+/**
+ * Wrapper function that provides error handling for the changelog generation process.
+ */
+export const generateChangelog: GenerateChangelog = async options => {
+	try {
+		return main( options );
+	} catch ( error ) {
+		if ( !( error instanceof InternalError ) ) {
+			throw error;
+		}
+
+		console.error( chalk.red( 'Error: ' + error.message ) );
+		process.exit( 1 );
+	}
+};
