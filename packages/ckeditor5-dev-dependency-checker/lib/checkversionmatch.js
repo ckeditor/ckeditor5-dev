@@ -11,6 +11,11 @@ import semver from 'semver';
 import { globSync } from 'glob';
 import { execSync } from 'child_process';
 
+const DEFAULT_PKG_JSON_PATTERNS = [
+	'package.json',
+	'packages/*/package.json'
+];
+
 /**
  * This script ensures that all "dependencies" in package JSONs use the same versions of dependencies.
  * It also checks that all versions are pinned, and they don't use the caret operator "^".
@@ -19,24 +24,21 @@ import { execSync } from 'child_process';
  * @param {string} options.cwd
  * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors.
  * @param {Function} [options.isCkeditor5Package]
+ * @param {Array<String>} [options.pkgJsonPatterns]
  * @param {Object} [options.versionExceptions]
  */
 export default async function checkVersionMatch( {
 	cwd,
 	fix = false,
 	isCkeditor5Package = () => false,
+	pkgJsonPatterns = DEFAULT_PKG_JSON_PATTERNS,
 	versionExceptions = {}
 } ) {
 	console.log( chalk.blue( '🔍 Starting checking dependencies versions...' ) );
 
 	const versionsCache = {};
 
-	const [ packageJsons, pathMappings ] = getPackageJsons( { cwd, directories: [
-		'package.json',
-		'packages/*/package.json',
-		'external/ckeditor5-commercial/packages/*/package.json',
-		'external/ckeditor5-commercial/package.json'
-	] } );
+	const [ packageJsons, pathMappings ] = getPackageJsons( { cwd, pkgJsonPatterns } );
 
 	const expectedDependencies = getExpectedDepsVersions( { packageJsons, isCkeditor5Package, versionExceptions, versionsCache } );
 
@@ -56,7 +58,7 @@ export default async function checkVersionMatch( {
  */
 function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, isCkeditor5Package } ) {
 	packageJsons
-		.filter( packageJson => packageJson.dependencies )
+		.filter( packageJson => packageJson.dependencies || packageJson.devDependencies )
 		.forEach( packageJson => {
 			if ( packageJson.dependencies ) {
 				for ( const [ dependency, version ] of Object.entries( packageJson.dependencies ) ) {
@@ -120,9 +122,9 @@ function checkDependenciesMatch( { expectedDependencies, packageJsons, isCkedito
 		console.error( chalk.red( '❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:' ) );
 		console.error( chalk.red( errors.join( '\n' ) ) );
 		process.exit( 1 );
+	} else {
+		console.log( chalk.green( '✅  All dependencies are correct!' ) );
 	}
-
-	console.log( chalk.green( '✅  All dependencies are correct!' ) );
 }
 
 /**
@@ -221,11 +223,11 @@ function getVersionsList( { packageName, versionsCache } ) {
 /**
  * @param {Object} options
  * @param {String} options.cwd
- * @param {Array.<String>} options.directories
+ * @param {Array.<String>} options.pkgJsonPatterns
  * @return {[Array.<Object>, Object.<String, String>]}
  */
-function getPackageJsons( { cwd, directories } ) {
-	const packageJsonPaths = globSync( directories, { absolute: true, cwd } );
+function getPackageJsons( { cwd, pkgJsonPatterns } ) {
+	const packageJsonPaths = globSync( pkgJsonPatterns, { absolute: true, cwd } );
 	const packageJsons = packageJsonPaths.map( packageJsonPath => fs.readJsonSync( packageJsonPath ) );
 	const nameToPathMappings = packageJsonPaths
 		.reduce( ( accum, packageJsonPath ) => ( { ...accum, [ fs.readJsonSync( packageJsonPath ).name ]: packageJsonPath } ), {} );
