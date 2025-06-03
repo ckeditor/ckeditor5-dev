@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { validateVersionAvailability } from './validateversionavailability.js';
 import { validateVersionHigherThanCurrent } from './validateversionhigherthancurrent.js';
+import { logInfo } from './loginfo.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -16,6 +17,7 @@ type Options = {
 	version: string;
 	bumpType: ReleaseType;
 	indentLevel?: number;
+	areChangesetsInvalid: boolean;
 };
 
 type VersionValidationResult = string | true;
@@ -30,15 +32,63 @@ type Question = {
 	prefix: string;
 };
 
+type ConfirmationQuestion = {
+	type: 'input';
+	name: 'continue';
+	message: string;
+	default: string;
+	prefix: string;
+};
+
 /**
  * This function displays a prompt to provide a new version for all packages in the repository.
  * The version is being validated e.g. invalid version format or already used version are not accepted.
  */
 export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
+	if ( options.areChangesetsInvalid ) {
+		// Display warning about invalid changes
+		displayInvalidChangesWarning();
+
+		// Ask for confirmation to continue
+		const shouldContinue = await askContinueConfirmation( options.indentLevel );
+
+		if ( !shouldContinue ) {
+			process.exit( 0 );
+		}
+	}
+
 	const question = createVersionQuestion( options );
 	const answers = await inquirer.prompt<{ version: string }>( question as any );
 
 	return answers.version;
+}
+
+/**
+ * Displays a warning message about invalid changes in a visible color.
+ */
+function displayInvalidChangesWarning(): void {
+	logInfo( '' );
+	logInfo( chalk.yellow.bold( '⚠️  WARNING: Invalid changes detected!' ) );
+	logInfo( chalk.yellow( 'You can cancel this process, fix the sources, and rerun the tool.' ) );
+	logInfo( '' );
+}
+
+/**
+ * Asks the user if they want to continue with the version bump process.
+ */
+async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boolean> {
+	const question: ConfirmationQuestion = {
+		type: 'input',
+		name: 'continue',
+		message: 'Do you want to fix them? (Press Enter to cancel, or type anything to continue):',
+		default: '',
+		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
+	};
+
+	const answers = await inquirer.prompt<{ continue: string }>( question as any );
+
+	// If user just pressed enter (empty response), they want to cancel
+	return answers.continue.trim() !== '';
 }
 
 /**

@@ -56,7 +56,12 @@ export async function getNewVersion( {
 		bumpType = 'major';
 	}
 
-	const userProvidedVersion = await provideNewVersionForMonorepository( { version: oldVersion, packageName, bumpType } );
+	const userProvidedVersion = await provideNewVersionForMonorepository( {
+		packageName,
+		bumpType,
+		version: oldVersion,
+		areChangesetsInvalid: !!sectionsWithEntries.invalid.entries.length
+	} );
 
 	if ( userProvidedVersion === 'internal' ) {
 		return getInternalVersionBump( oldVersion );
