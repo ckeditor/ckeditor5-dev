@@ -3,14 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ConfigBase, MonoRepoConfigBase } from '../types.js';
 import { generateChangelog } from './generatechangelog.js';
+import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 
-type GenerateChangelog = <T extends boolean | undefined = undefined>(
-	config: ConfigBase & MonoRepoConfigBase & { noWrite?: T }
-) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+type MonoRepositoryConfig = ConfigBase & MonoRepoConfigBase & {
+	packagesDirectory: ConfigBase[ 'packagesDirectory' ];
+	transformScope: MonoRepoConfigBase[ 'transformScope' ];
+};
 
-export const generateChangelogForMonoRepository: GenerateChangelog = async ( {
+export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<MonoRepositoryConfig> = async ( {
 	nextVersion,
 	cwd,
 	packagesDirectory,

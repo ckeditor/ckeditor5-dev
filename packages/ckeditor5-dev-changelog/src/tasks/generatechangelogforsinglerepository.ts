@@ -3,14 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ConfigBase } from '../types.js';
+import type { ConfigBase, GenerateChangelogEntryPoint } from '../types.js';
 import { generateChangelog } from './generatechangelog.js';
 
-type GenerateChangelog = <T extends boolean | undefined = undefined>(
-	config: ConfigBase & { noWrite?: T }
-) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+type SingleRepositoryConfig = Omit<ConfigBase, 'packagesDirectory'>;
 
-export const generateChangelogForSingleRepository: GenerateChangelog = async ( {
+export const generateChangelogForSingleRepository: GenerateChangelogEntryPoint<SingleRepositoryConfig> = async ( {
 	nextVersion,
 	cwd,
 	externalRepositories,

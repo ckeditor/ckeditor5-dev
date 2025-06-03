@@ -43,28 +43,20 @@ export type MonoRepoConfigBase = {
 	/**
 	 * Whether to include the root package name in the bumped packages versions section in the changelog.
 	 */
-	skipRootPackage?: boolean;
+	skipRootPackage?: unknown;
 
 	/**
 	 * The package that will be used when determining if the next version is available on npm.
 	 */
-	npmPackageToCheck?: string | never;
+	npmPackageToCheck?: unknown;
 } & NpmPackageRequiredWhenSkipRootPackage;
-
-type NpmPackageRequiredWhenSkipRootPackage = {
-	skipRootPackage?: true;
-	npmPackageToCheck: string;
-} | {
-	skipRootPackage?: false;
-	npmPackageToCheck?: never;
-};
 
 export type RepositoryConfig = {
 
 	/**
 	 * The current working directory of the repository.
 	 */
-	cwd?: string;
+	cwd: string;
 
 	/**
 	 * The directory containing the packages. Defaults to 'packages'.
@@ -77,6 +69,10 @@ export type RepositoryConfig = {
 	shouldSkipLinks?: boolean;
 };
 
+export type GenerateChangelogEntryPoint<K extends object> = <T extends boolean | undefined = undefined>(
+	config: K & { noWrite?: T }
+) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+
 export type SectionName = keyof typeof SECTIONS;
 
 export type EntryType = {
@@ -85,8 +81,6 @@ export type EntryType = {
 };
 
 export type ValidatedType = typeof TYPES[ number ][ 'name' ];
-
-type LinkObject = { displayName: string; link: string };
 
 export type Entry = {
 	message: string;
@@ -98,18 +92,6 @@ export type Entry = {
 		closesLinks?: Array<LinkObject>;
 	};
 	changesetPath: string;
-};
-
-type FileMetadata = {
-	type?: string;
-	scope?: Array<string>;
-	closes?: Array<string>;
-	see?: Array<string>;
-	communityCredits?: Array<string>;
-};
-
-type ValidatedFileMetadata = FileMetadata & {
-	type: ValidatedType;
 };
 
 export type ParsedFile = {
@@ -150,4 +132,26 @@ export type ChangesetPathsWithGithubUrl = {
 	skipLinks: boolean;
 	cwd: string;
 	isRoot: boolean;
+};
+
+type NpmPackageRequiredWhenSkipRootPackage = {
+	skipRootPackage?: true;
+	npmPackageToCheck: string;
+} | {
+	skipRootPackage?: false;
+	npmPackageToCheck?: never;
+};
+
+type LinkObject = { displayName: string; link: string };
+
+type FileMetadata = {
+	type?: string;
+	scope?: Array<string>;
+	closes?: Array<string>;
+	see?: Array<string>;
+	communityCredits?: Array<string>;
+};
+
+type ValidatedFileMetadata = FileMetadata & {
+	type: ValidatedType;
 };

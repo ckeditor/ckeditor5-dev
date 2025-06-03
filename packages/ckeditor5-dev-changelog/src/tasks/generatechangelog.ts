@@ -7,7 +7,7 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { format } from 'date-fns';
 import chalk from 'chalk';
 import { PACKAGES_DIRECTORY_NAME } from '../constants.js';
-import type { ConfigBase, MonoRepoConfigBase } from '../types.js';
+import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { getSectionsWithEntries } from '../utils/getsectionswithentries.js';
 import { logChangelogFiles } from '../utils/logchangelogfiles.js';
 import { modifyChangelog } from '../utils/modifychangelog.js';
@@ -27,15 +27,13 @@ import { removeScope } from '../utils/removescope.js';
 import { commitChanges } from '../utils/commitchanges.js';
 import { InternalError } from '../errors/internalerror.js';
 
-type GenerateChangelog = <T extends boolean | undefined = undefined>(
-	config: ConfigBase & MonoRepoConfigBase & { noWrite?: T; singlePackage: boolean }
-) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { singlePackage: boolean };
 
 /**
- * This function handles the entire changelog generation process including version management,
+ * This function handles the entire changelog generation process, including version management,
  * package information gathering, and changelog file updates.
  */
-const main: GenerateChangelog = async ( {
+const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async ( {
 	nextVersion,
 	cwd = process.cwd(),
 	packagesDirectory = PACKAGES_DIRECTORY_NAME,
@@ -148,7 +146,7 @@ function validateArguments( skipRootPackage: undefined | boolean, npmPackageToCh
 /**
  * Wrapper function that provides error handling for the changelog generation process.
  */
-export const generateChangelog: GenerateChangelog = async options => {
+export const generateChangelog: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options => {
 	try {
 		return main( options );
 	} catch ( error ) {
