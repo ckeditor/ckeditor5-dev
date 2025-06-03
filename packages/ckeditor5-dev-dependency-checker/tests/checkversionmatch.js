@@ -171,7 +171,8 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should not log about non-ckeditor5 dev dependencies using different versions', () => {
+	it( 'should not log about filtered out dev dependencies using different versions', () => {
+		options.devDependenciesFilter = () => false;
 		files[ './package.json' ].devDependencies.dep2 = '2.0.1';
 
 		checkVersionMatch( options );
@@ -184,8 +185,7 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies are correct!' );
 	} );
 
-	it( 'should log about ckeditor5 dev dependencies using different versions', () => {
-		options.isCkeditor5Package = () => true;
+	it( 'should log about dev dependencies using different versions', () => {
 		files[ './package.json' ].devDependencies.dep2 = '2.0.1';
 
 		checkVersionMatch( options );
@@ -205,8 +205,7 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should log about ckeditor5 dev dependencies using different version ranges', () => {
-		options.isCkeditor5Package = () => true;
+	it( 'should log about dev dependencies using different version ranges', () => {
 		files[ './package.json' ].devDependencies.dep2 = '^2.0.0';
 
 		checkVersionMatch( options );
@@ -228,8 +227,7 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should log about ckeditor5 dev dependencies using different version ranges when a package has no devDependencies', () => {
-		options.isCkeditor5Package = () => true;
+	it( 'should log about dev dependencies using different version ranges when a package has no devDependencies', () => {
 		files[ './package.json' ].devDependencies.dep2 = '^2.0.0';
 		delete files[ './packages/foo/package.json' ].devDependencies;
 
@@ -309,7 +307,6 @@ describe( 'checkVersionMatch()', () => {
 	} );
 
 	it( 'should fix devDependencies using different versions', () => {
-		options.isCkeditor5Package = () => true;
 		options.fix = true;
 
 		files[ './package.json' ].devDependencies.dep2 = '2.0.1';

@@ -22,14 +22,14 @@
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/typedoc-plugins": "49.0.2",
-    "glob": "11.0.2",
-    "typedoc": "0.28.4",
-    "typedoc-plugin-rename-defaults": "0.7.3",
-    "upath": "2.0.1"
+    "@ckeditor/typedoc-plugins": "^49.0.2",
+    "glob": "^11.0.2",
+    "typedoc": "0.28.5",
+    "typedoc-plugin-rename-defaults": "^0.7.3",
+    "upath": "^2.0.1"
   },
   "devDependencies": {
-    "jest-extended": "^4.0.2",
+    "jest-extended": "^5.0.3",
     "vitest": "^3.1.1"
   },
   "scripts": {

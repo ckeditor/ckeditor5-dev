@@ -23,14 +23,14 @@ const DEFAULT_PKG_JSON_PATTERNS = [
  * @param {Object} options
  * @param {string} options.cwd
  * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors.
- * @param {Function} [options.isCkeditor5Package]
+ * @param {Function} [options.devDependenciesFilter]
  * @param {Array<String>} [options.pkgJsonPatterns]
  * @param {Object} [options.versionExceptions]
  */
 export default async function checkVersionMatch( {
 	cwd,
 	fix = false,
-	isCkeditor5Package = () => false,
+	devDependenciesFilter = () => true,
 	pkgJsonPatterns = DEFAULT_PKG_JSON_PATTERNS,
 	versionExceptions = {}
 } ) {
@@ -40,12 +40,12 @@ export default async function checkVersionMatch( {
 
 	const [ packageJsons, pathMappings ] = getPackageJsons( { cwd, pkgJsonPatterns } );
 
-	const expectedDependencies = getExpectedDepsVersions( { packageJsons, isCkeditor5Package, versionExceptions, versionsCache } );
+	const expectedDependencies = getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache } );
 
 	if ( fix ) {
-		fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, isCkeditor5Package } );
+		fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, devDependenciesFilter } );
 	} else {
-		checkDependenciesMatch( { expectedDependencies, packageJsons, isCkeditor5Package } );
+		checkDependenciesMatch( { expectedDependencies, packageJsons, devDependenciesFilter } );
 	}
 }
 
@@ -54,9 +54,9 @@ export default async function checkVersionMatch( {
  * @param {Object.<String, String>} options.expectedDependencies
  * @param {Array.<Object>} options.packageJsons
  * @param {Object.<String, String>} options.pathMappings
- * @param {Function} options.isCkeditor5Package
+ * @param {Function} options.devDependenciesFilter
  */
-function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, isCkeditor5Package } ) {
+function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, devDependenciesFilter } ) {
 	packageJsons
 		.filter( packageJson => packageJson.dependencies || packageJson.devDependencies )
 		.forEach( packageJson => {
@@ -72,7 +72,7 @@ function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMapp
 
 			if ( packageJson.devDependencies ) {
 				for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies ) ) {
-					if ( !isCkeditor5Package( dependency ) || version === expectedDependencies[ dependency ] ) {
+					if ( !devDependenciesFilter( dependency ) || version === expectedDependencies[ dependency ] ) {
 						continue;
 					}
 
@@ -89,10 +89,10 @@ function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMapp
 /**
  * @param {Object} options
  * @param {Object.<String, String>} options.expectedDependencies
- * @param {Function} options.isCkeditor5Package
+ * @param {Function} options.devDependenciesFilter
  * @param {Array.<Object>} options.packageJsons
  */
-function checkDependenciesMatch( { expectedDependencies, packageJsons, isCkeditor5Package } ) {
+function checkDependenciesMatch( { expectedDependencies, packageJsons, devDependenciesFilter } ) {
 	const errors = packageJsons
 		.flatMap( packageJson => {
 			const depsErrors = Object.entries( packageJson.dependencies || {} )
@@ -107,7 +107,7 @@ function checkDependenciesMatch( { expectedDependencies, packageJsons, isCkedito
 
 			const devDepsErrors = Object.entries( packageJson.devDependencies || {} )
 				.map( ( [ dependency, version ] ) => {
-					if ( !isCkeditor5Package( dependency ) || version === expectedDependencies[ dependency ] ) {
+					if ( !devDependenciesFilter( dependency ) || version === expectedDependencies[ dependency ] ) {
 						return '';
 					}
 
@@ -141,12 +141,12 @@ function getWrongVersionErrorMsg( { dependency, name, version, expectedDependenc
 /**
  * @param {Object} options
  * @param {Array.<Object>} options.packageJsons
- * @param {Function} options.isCkeditor5Package
+ * @param {Function} options.devDependenciesFilter
  * @param {Object} options.versionExceptions
  * @param {Object} options.versionsCache
  * @return {Object.<String, String>} expectedDependencies
  */
-function getExpectedDepsVersions( { packageJsons, isCkeditor5Package, versionExceptions, versionsCache } ) {
+function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache } ) {
 	return packageJsons
 		.reduce( ( expectedDependencies, packageJson ) => {
 			for ( const [ dependency, version ] of Object.entries( packageJson.dependencies || {} ) ) {
@@ -160,7 +160,7 @@ function getExpectedDepsVersions( { packageJsons, isCkeditor5Package, versionExc
 			}
 
 			for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies || {} ) ) {
-				if ( !isCkeditor5Package( dependency ) ) {
+				if ( !devDependenciesFilter( dependency ) ) {
 					continue;
 				}
 
