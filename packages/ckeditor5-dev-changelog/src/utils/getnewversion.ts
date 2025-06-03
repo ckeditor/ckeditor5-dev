@@ -56,11 +56,16 @@ export async function getNewVersion( {
 		bumpType = 'major';
 	}
 
+	const areErrorsPresent = !!sectionsWithEntries.invalid.entries.length;
+	const areWarningsPresent = Object.values( sectionsWithEntries ).some( section =>
+		section.entries.some( entry => entry.data.validations && entry.data.validations.length > 0 )
+	);
+
 	const userProvidedVersion = await provideNewVersionForMonorepository( {
 		packageName,
 		bumpType,
 		version: oldVersion,
-		areChangesetsInvalid: !!sectionsWithEntries.invalid.entries.length
+		displayValidationWarning: areErrorsPresent || areWarningsPresent
 	} );
 
 	if ( userProvidedVersion === 'internal' ) {

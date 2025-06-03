@@ -17,7 +17,7 @@ type Options = {
 	version: string;
 	bumpType: ReleaseType;
 	indentLevel?: number;
-	areChangesetsInvalid: boolean;
+	displayValidationWarning: boolean;
 };
 
 type VersionValidationResult = string | true;
@@ -45,7 +45,7 @@ type ConfirmationQuestion = {
  * The version is being validated e.g. invalid version format or already used version are not accepted.
  */
 export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
-	if ( options.areChangesetsInvalid ) {
+	if ( options.displayValidationWarning ) {
 		// Display warning about invalid changes
 		displayInvalidChangesWarning();
 
