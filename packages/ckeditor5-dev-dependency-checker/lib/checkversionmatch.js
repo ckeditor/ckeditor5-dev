@@ -11,6 +11,11 @@ import semver from 'semver';
 import { globSync } from 'glob';
 import { execSync } from 'child_process';
 
+const DEPENDENCY_TYPES = [
+	'dependencies',
+	'devDependencies'
+];
+
 const DEFAULT_PKG_JSON_PATTERNS = [
 	'package.json',
 	'packages/*/package.json'
@@ -20,13 +25,13 @@ const DEFAULT_PKG_JSON_PATTERNS = [
  * This script ensures that all "dependencies" in package JSONs use the same versions of dependencies.
  * It also checks that all versions are pinned, and they don't use the caret operator "^".
  *
- * @param {Object} options
+ * @param {object} options
  * @param {string} options.cwd
  * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors.
  * @param {boolean} [options.allowRanges=true] Whether the caret operator "^" is allowed.
- * @param {Function} [options.devDependenciesFilter]
- * @param {Array<String>} [options.pkgJsonPatterns]
- * @param {Object} [options.versionExceptions]
+ * @param {function} [options.devDependenciesFilter]
+ * @param {Array.<string>} [options.pkgJsonPatterns]
+ * @param {object} [options.versionExceptions]
  */
 export default async function checkVersionMatch( {
 	cwd,
@@ -58,73 +63,70 @@ export default async function checkVersionMatch( {
 }
 
 /**
- * @param {Object} options
- * @param {Object.<String, String>} options.expectedDependencies
- * @param {Array.<Object>} options.packageJsons
- * @param {Object.<String, String>} options.pathMappings
- * @param {Function} options.devDependenciesFilter
+ * @param {object} options
+ * @param {object.<string, string>} options.expectedDependencies
+ * @param {Array.<object>} options.packageJsons
+ * @param {object.<string, string>} options.pathMappings
+ * @param {function} options.devDependenciesFilter
  */
 function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, devDependenciesFilter } ) {
-	packageJsons
-		.filter( packageJson => packageJson.dependencies || packageJson.devDependencies )
-		.forEach( packageJson => {
-			if ( packageJson.dependencies ) {
-				for ( const [ dependency, version ] of Object.entries( packageJson.dependencies ) ) {
-					if ( version === expectedDependencies[ dependency ] ) {
-						continue;
-					}
-
-					packageJson.dependencies[ dependency ] = expectedDependencies[ dependency ];
-				}
+	packageJsons.forEach( packageJson => {
+		DEPENDENCY_TYPES.forEach( dependencyType => {
+			if ( !packageJson[ dependencyType ] ) {
+				return;
 			}
 
-			if ( packageJson.devDependencies ) {
-				for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies ) ) {
-					if ( !devDependenciesFilter( dependency ) || version === expectedDependencies[ dependency ] ) {
-						continue;
-					}
-
-					packageJson.devDependencies[ dependency ] = expectedDependencies[ dependency ];
+			Object.keys( packageJson[ dependencyType ] ).forEach( dependencyName => {
+				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
+					return;
 				}
-			}
 
-			fs.writeJsonSync( pathMappings[ packageJson.name ], packageJson, { spaces: 2 } );
+				packageJson[ dependencyType ][ dependencyName ] = expectedDependencies[ dependencyName ];
+			} );
 		} );
+
+		fs.writeJsonSync( pathMappings[ packageJson.name ], packageJson, { spaces: 2 } );
+	} );
 
 	console.log( chalk.green( '✅  All dependencies fixed!' ) );
 }
 
 /**
- * @param {Object} options
- * @param {Object.<String, String>} options.expectedDependencies
- * @param {Function} options.devDependenciesFilter
- * @param {Array.<Object>} options.packageJsons
+ * @param {object} options
+ * @param {Array.<object>} options.packageJsons
+ * @param {function} options.devDependenciesFilter
+ * @param {object.<string, string>} options.expectedDependencies
  */
-function checkDependenciesMatch( { expectedDependencies, packageJsons, devDependenciesFilter } ) {
-	const errors = packageJsons
-		.flatMap( packageJson => {
-			const depsErrors = Object.entries( packageJson.dependencies || {} )
-				.map( ( [ dependency, version ] ) => {
-					if ( version === expectedDependencies[ dependency ] ) {
-						return '';
-					}
+function checkDependenciesMatch( { packageJsons, devDependenciesFilter, expectedDependencies } ) {
+	const errors = packageJsons.flatMap( packageJson => {
+		return DEPENDENCY_TYPES.flatMap( dependencyType => {
+			if ( !packageJson[ dependencyType ] ) {
+				return;
+			}
 
-					return getWrongVersionErrorMsg( { dependency, name: packageJson.name, version, expectedDependencies } );
-				} )
-				.filter( Boolean );
+			return Object.entries( packageJson[ dependencyType ] ).flatMap( ( [ dependencyName, version ] ) => {
+				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
+					return;
+				}
 
-			const devDepsErrors = Object.entries( packageJson.devDependencies || {} )
-				.map( ( [ dependency, version ] ) => {
-					if ( !devDependenciesFilter( dependency ) || version === expectedDependencies[ dependency ] ) {
-						return '';
-					}
+				const expectedVersion = expectedDependencies[ dependencyName ];
 
-					return getWrongVersionErrorMsg( { dependency, name: packageJson.name, version, expectedDependencies } );
-				} )
-				.filter( Boolean );
+				if ( version === expectedVersion ) {
+					return;
+				}
 
-			return [ ...depsErrors, devDepsErrors ].flat();
+				return `"${
+					dependencyName
+				}" in "${
+					packageJson.name
+				}" in version "${
+					version
+				}" should be set to "${
+					expectedVersion
+				}".`;
+			} );
 		} );
+	} ).filter( Boolean );
 
 	if ( errors.length ) {
 		console.error( chalk.red( '❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:' ) );
@@ -136,76 +138,60 @@ function checkDependenciesMatch( { expectedDependencies, packageJsons, devDepend
 }
 
 /**
- * @param {Object} options
- * @param {String} options.dependency
- * @param {String} options.name
- * @param {String} options.version
- * @param {Object.<String, String>} options.expectedDependencies
- */
-function getWrongVersionErrorMsg( { dependency, name, version, expectedDependencies } ) {
-	return `"${ dependency }" in "${ name }" in version "${ version }" should be set to "${ expectedDependencies[ dependency ] }".`;
-}
-
-/**
- * @param {Object} options
- * @param {Array.<Object>} options.packageJsons
- * @param {Function} options.devDependenciesFilter
- * @param {Object} options.versionExceptions
- * @param {Object} options.versionsCache
+ * @param {object} options
+ * @param {Array.<object>} options.packageJsons
+ * @param {function} options.devDependenciesFilter
+ * @param {object} options.versionExceptions
+ * @param {object} options.versionsCache
  * @param {boolean} options.allowRanges
- * @return {Object.<String, String>} expectedDependencies
+ * @return {object.<string, string>} expectedDependencies
  */
 function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges } ) {
-	return packageJsons
-		.reduce( ( expectedDependencies, packageJson ) => {
-			for ( const [ dependency, version ] of Object.entries( packageJson.dependencies || {} ) ) {
-				expectedDependencies[ dependency ] = getNewestVersion( {
-					packageName: dependency,
-					newVersion: version,
-					versionsCache,
-					versionExceptions,
-					allowRanges,
-					currentMaxVersion: expectedDependencies[ dependency ]
-				} );
+	return packageJsons.reduce( ( expectedDependencies, packageJson ) => {
+		DEPENDENCY_TYPES.forEach( dependencyType => {
+			if ( !packageJson[ dependencyType ] ) {
+				return;
 			}
 
-			for ( const [ dependency, version ] of Object.entries( packageJson.devDependencies || {} ) ) {
-				if ( !devDependenciesFilter( dependency ) ) {
-					continue;
+			Object.entries( packageJson[ dependencyType ] ).forEach( ( [ dependencyName, version ] ) => {
+				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
+					return;
 				}
 
-				expectedDependencies[ dependency ] = getNewestVersion( {
-					packageName: dependency,
+				expectedDependencies[ dependencyName ] = getNewestVersion( {
+					dependencyName,
 					newVersion: version,
 					versionsCache,
 					versionExceptions,
 					allowRanges,
-					currentMaxVersion: expectedDependencies[ dependency ]
+					currentMaxVersion: expectedDependencies[ dependencyName ]
 				} );
-			}
+			} );
+		} );
 
-			return expectedDependencies;
-		}, {} );
+		return expectedDependencies;
+	}, {} );
 }
 
 /**
- * @param {Object} options
- * @param {String} options.packageName
- * @param {Object} options.versionsCache
- * @param {Object} options.versionExceptions
- * @param {String} [options.newVersion='0.0.0']
- * @param {String} [options.currentMaxVersion='0.0.0']
- * @return {String}
+ * @param {object} options
+ * @param {string} options.dependencyName
+ * @param {object} options.versionsCache
+ * @param {object} options.versionExceptions
+ * @param {boolean} options.allowRanges
+ * @param {string} [options.newVersion='0.0.0']
+ * @param {string} [options.currentMaxVersion='0.0.0']
+ * @return {string}
  */
 function getNewestVersion( {
-	packageName,
+	dependencyName,
 	versionsCache,
 	versionExceptions,
 	allowRanges,
 	newVersion = '0.0.0',
 	currentMaxVersion = '0.0.0'
 } ) {
-	if ( versionExceptions[ packageName ] ) {
+	if ( versionExceptions[ dependencyName ] ) {
 		return newVersion;
 	}
 
@@ -215,32 +201,32 @@ function getNewestVersion( {
 
 	const newMaxVersion = semver.valid( newVersion ) ?
 		newVersion :
-		semver.maxSatisfying( getVersionsList( { packageName, versionsCache } ), newVersion );
+		semver.maxSatisfying( getVersionsList( { dependencyName, versionsCache } ), newVersion );
 
 	return semver.gt( newMaxVersion, currentMaxVersion ) ? newMaxVersion : currentMaxVersion;
 }
 
 /**
- * @param {Object} options
- * @param {String} options.packageName
- * @param {Object} options.versionsCache
- * @return {Object.<String, String>}
+ * @param {object} options
+ * @param {string} options.dependencyName
+ * @param {object} options.versionsCache
+ * @return {object.<string, string>}
  */
-function getVersionsList( { packageName, versionsCache } ) {
-	if ( !versionsCache[ packageName ] ) {
-		console.log( chalk.blue( `⬇️ Downloading "${ packageName }" versions from npm...` ) );
-		const versionsJson = execSync( `npm view ${ packageName } versions --json`, { encoding: 'utf8' } );
-		versionsCache[ packageName ] = JSON.parse( versionsJson );
+function getVersionsList( { dependencyName, versionsCache } ) {
+	if ( !versionsCache[ dependencyName ] ) {
+		console.log( chalk.blue( `⬇️ Downloading "${ dependencyName }" versions from npm...` ) );
+		const versionsJson = execSync( `npm view ${ dependencyName } versions --json`, { encoding: 'utf8' } );
+		versionsCache[ dependencyName ] = JSON.parse( versionsJson );
 	}
 
-	return versionsCache[ packageName ];
+	return versionsCache[ dependencyName ];
 }
 
 /**
- * @param {Object} options
- * @param {String} options.cwd
- * @param {Array.<String>} options.pkgJsonPatterns
- * @return {[Array.<Object>, Object.<String, String>]}
+ * @param {object} options
+ * @param {string} options.cwd
+ * @param {Array.<string>} options.pkgJsonPatterns
+ * @return {[Array.<object>, object.<string, string>]}
  */
 function getPackageJsons( { cwd, pkgJsonPatterns } ) {
 	const packageJsonPaths = globSync( pkgJsonPatterns, { absolute: true, cwd } );

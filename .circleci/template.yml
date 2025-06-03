@@ -119,7 +119,7 @@ jobs:
           command: yarn run lint
       - run:
           name: Validate versions of dependencies
-          command: yarn run check-dependencies:versions-match
+          command: yarn run check-versions-match
       - unless:
           # Upload the code coverage results for non-nightly builds only.
           condition: << pipeline.parameters.isNightly >>
