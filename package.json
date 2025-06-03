@@ -41,6 +41,7 @@
     "test": "node ./scripts/runtest.js",
     "coverage": "node ./scripts/runtest.js --coverage",
     "changelog": "node ./scripts/changelog.js",
+    "check-versions-match": "node scripts/ci/check-dependencies-versions-match.mjs",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
     "lint": "eslint",
