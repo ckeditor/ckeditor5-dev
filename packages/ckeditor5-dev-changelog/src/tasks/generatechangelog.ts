@@ -93,8 +93,7 @@ const main: GenerateChangelog = async ( {
 	const { isInternal, newVersion } = await getNewVersion( {
 		sectionsWithEntries,
 		oldVersion,
-		// TODO fix !
-		packageName: skipRootPackage ? npmPackageToCheck! : rootPackageName,
+		packageName: skipRootPackage && npmPackageToCheck ? npmPackageToCheck : rootPackageName,
 		nextVersion
 	} );
 
