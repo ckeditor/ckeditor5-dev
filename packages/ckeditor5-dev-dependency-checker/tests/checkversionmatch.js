@@ -69,6 +69,11 @@ describe( 'checkVersionMatch()', () => {
 			'dep2': [
 				'2.0.0',
 				'2.0.1'
+			],
+			'dep3': [
+				'3.0.0',
+				'3.0.1',
+				'3.0.2'
 			]
 		};
 
@@ -268,6 +273,22 @@ describe( 'checkVersionMatch()', () => {
 			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "2.0.1".',
 			'"dep2" in "barPkg" in version "2.0.0" should be set to "2.0.1".'
 		].join( '\n' ) );
+	} );
+
+	it( 'should not log about dependencies using different version ranges when they are an exception', () => {
+		options.versionExceptions = { 'dep3': '^' };
+		files[ './package.json' ].dependencies.dep3 = '^3.0.2';
+		files[ './packages/foo/package.json' ].dependencies.dep3 = '^3.0.2';
+		files[ './packages/bar/package.json' ].dependencies.dep3 = '^3.0.2';
+
+		checkVersionMatch( options );
+
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
+		expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
+		expect( processExitMock ).toHaveBeenCalledTimes( 0 );
+
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies are correct!' );
 	} );
 
 	it( 'should fix dependencies using different versions', () => {
