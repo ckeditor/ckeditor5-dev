@@ -12,5 +12,6 @@ const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..', '..' );
 
 checkVersionMatch( {
 	cwd: ROOT_DIRECTORY,
-	fix: shouldFix
+	fix: shouldFix,
+	allowRanges: true
 } );

@@ -23,6 +23,7 @@ const DEFAULT_PKG_JSON_PATTERNS = [
  * @param {Object} options
  * @param {string} options.cwd
  * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors.
+ * @param {boolean} [options.allowRanges=true] Whether the caret operator "^" is allowed.
  * @param {Function} [options.devDependenciesFilter]
  * @param {Array<String>} [options.pkgJsonPatterns]
  * @param {Object} [options.versionExceptions]
@@ -30,6 +31,7 @@ const DEFAULT_PKG_JSON_PATTERNS = [
 export default async function checkVersionMatch( {
 	cwd,
 	fix = false,
+	allowRanges = false,
 	devDependenciesFilter = () => true,
 	pkgJsonPatterns = DEFAULT_PKG_JSON_PATTERNS,
 	versionExceptions = {}
@@ -40,7 +42,13 @@ export default async function checkVersionMatch( {
 
 	const [ packageJsons, pathMappings ] = getPackageJsons( { cwd, pkgJsonPatterns } );
 
-	const expectedDependencies = getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache } );
+	const expectedDependencies = getExpectedDepsVersions( {
+		packageJsons,
+		devDependenciesFilter,
+		versionExceptions,
+		versionsCache,
+		allowRanges
+	} );
 
 	if ( fix ) {
 		fixDependenciesVersions( { expectedDependencies, packageJsons, pathMappings, devDependenciesFilter } );
@@ -144,9 +152,10 @@ function getWrongVersionErrorMsg( { dependency, name, version, expectedDependenc
  * @param {Function} options.devDependenciesFilter
  * @param {Object} options.versionExceptions
  * @param {Object} options.versionsCache
+ * @param {boolean} options.allowRanges
  * @return {Object.<String, String>} expectedDependencies
  */
-function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache } ) {
+function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges } ) {
 	return packageJsons
 		.reduce( ( expectedDependencies, packageJson ) => {
 			for ( const [ dependency, version ] of Object.entries( packageJson.dependencies || {} ) ) {
@@ -155,6 +164,7 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 					newVersion: version,
 					versionsCache,
 					versionExceptions,
+					allowRanges,
 					currentMaxVersion: expectedDependencies[ dependency ]
 				} );
 			}
@@ -169,6 +179,7 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 					newVersion: version,
 					versionsCache,
 					versionExceptions,
+					allowRanges,
 					currentMaxVersion: expectedDependencies[ dependency ]
 				} );
 			}
@@ -190,11 +201,16 @@ function getNewestVersion( {
 	packageName,
 	versionsCache,
 	versionExceptions,
+	allowRanges,
 	newVersion = '0.0.0',
 	currentMaxVersion = '0.0.0'
 } ) {
 	if ( versionExceptions[ packageName ] ) {
 		return newVersion;
+	}
+
+	if ( allowRanges ) {
+		return semver.gt( semver.minVersion( newVersion ), semver.minVersion( currentMaxVersion ) ) ? newVersion : currentMaxVersion;
 	}
 
 	const newMaxVersion = semver.valid( newVersion ) ?

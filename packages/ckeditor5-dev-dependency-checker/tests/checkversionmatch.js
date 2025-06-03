@@ -227,6 +227,27 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
+	it( 'should log about dev dependencies using different version ranges when ranges are allowed', () => {
+		options.allowRanges = true;
+		files[ './package.json' ].devDependencies.dep2 = '^2.0.0';
+
+		checkVersionMatch( options );
+
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
+
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
+		);
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+			'"dep2" in "fooPkg" in version "2.0.0" should be set to "^2.0.0".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "^2.0.0".'
+		].join( '\n' ) );
+	} );
+
 	it( 'should log about dev dependencies using different version ranges when a package has no devDependencies', () => {
 		files[ './package.json' ].devDependencies.dep2 = '^2.0.0';
 		delete files[ './packages/foo/package.json' ].devDependencies;
