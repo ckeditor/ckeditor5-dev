@@ -7,7 +7,7 @@ import upath from 'upath';
 import chalk from 'chalk';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { logInfo } from './loginfo.js';
-import { CHANGELOG_FILE } from '../constants.js';
+import { CHANGELOG_FILE } from './constants';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
 
 type RepositoryData = Pick<ChangesetPathsWithGithubUrl, 'cwd' | 'isRoot' | 'changesetPaths'>;

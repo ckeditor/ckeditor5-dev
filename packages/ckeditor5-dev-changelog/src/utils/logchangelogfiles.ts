@@ -13,7 +13,7 @@ import { logInfo } from './loginfo.js';
 export function logChangelogFiles(
 	sections: SectionsWithEntries,
 	changesToParse: number,
-	transformScope: TransformScope,
+	transformScope?: TransformScope,
 	isSinglePackage: boolean,
 	isNextVersionProvidedAsProp: boolean
 ): void {

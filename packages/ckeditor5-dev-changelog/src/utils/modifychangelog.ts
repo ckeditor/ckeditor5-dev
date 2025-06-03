@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
 import { truncateChangelog } from '../utils/truncatechangelog.js';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from './constants';
 
 /**
  * This function writes the generated changelog to the repository's changelog file.

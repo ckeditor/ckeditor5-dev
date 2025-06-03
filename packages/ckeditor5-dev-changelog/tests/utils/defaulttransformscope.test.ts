@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { defaultTransformScope } from '../../src/utils/defaulttransformscope.js';
-import { NPM_URL, ORGANISATION_NAMESPACE } from '../../src/constants.js';
+import { NPM_URL, ORGANISATION_NAMESPACE } from '../../src/utils/constants';
 
 vi.mock( '../../src/constants.js', () => ( {
 	NPM_URL: 'https://www.npmjs.com/package/',

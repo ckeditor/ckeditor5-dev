@@ -4,12 +4,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getExternalRepositoriesWithDefaults } from '../../src/utils/getexternalrepositorieswithdefaults.js';
+import { utils } from '../../src/utils/utils';
 import type { RepositoryConfig } from '../../src/types.js';
 
 describe( 'getExternalRepositoriesWithDefaults()', () => {
 	it( 'should return empty array when no repositories provided', () => {
-		const result = getExternalRepositoriesWithDefaults( [] );
+		const result = utils( [] );
 		expect( result ).toEqual( [] );
 	} );
 
@@ -18,7 +18,7 @@ describe( 'getExternalRepositoriesWithDefaults()', () => {
 			{ cwd: '/path/to/repo' }
 		];
 
-		const result = getExternalRepositoriesWithDefaults( repositories );
+		const result = utils( repositories );
 
 		expect( result ).toEqual( [
 			{ cwd: '/path/to/repo', packagesDirectory: 'packages', skipLinks: false }
@@ -30,7 +30,7 @@ describe( 'getExternalRepositoriesWithDefaults()', () => {
 			{ cwd: '/path/to/repo', packagesDirectory: 'custom-packages' }
 		];
 
-		const result = getExternalRepositoriesWithDefaults( repositories );
+		const result = utils( repositories );
 
 		expect( result ).toEqual( [
 			{ cwd: '/path/to/repo', packagesDirectory: 'custom-packages', skipLinks: false }
@@ -44,7 +44,7 @@ describe( 'getExternalRepositoriesWithDefaults()', () => {
 			{ cwd: '/path/to/repo3', shouldSkipLinks: false }
 		];
 
-		const result = getExternalRepositoriesWithDefaults( repositories );
+		const result = utils( repositories );
 
 		expect( result ).toEqual( [
 			{ cwd: '/path/to/repo1', packagesDirectory: 'packages', skipLinks: false },

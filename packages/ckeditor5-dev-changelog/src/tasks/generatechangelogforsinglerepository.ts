@@ -3,28 +3,29 @@
  * For licensing, see LICENSE.md.
  */
 
+import { generateChangelog } from '../utils/generatechangelog.js';
 import type { ConfigBase, GenerateChangelogEntryPoint } from '../types.js';
-import { generateChangelog } from './generatechangelog.js';
 
 type SingleRepositoryConfig = Omit<ConfigBase, 'packagesDirectory'>;
 
-export const generateChangelogForSingleRepository: GenerateChangelogEntryPoint<SingleRepositoryConfig> = async ( {
-	nextVersion,
-	cwd,
-	externalRepositories,
-	date,
-	shouldSkipLinks,
-	noWrite,
-	removeInputFiles
-} ) => {
+export const generateChangelogForSingleRepository: GenerateChangelogEntryPoint<SingleRepositoryConfig> = async options => {
+	const {
+		cwd,
+		date,
+		externalRepositories,
+		nextVersion,
+		disableFilesystemOperations,
+		shouldSkipLinks
+	} = options;
+
 	return generateChangelog( {
 		nextVersion,
 		cwd,
 		externalRepositories,
 		date,
 		shouldSkipLinks,
-		removeInputFiles,
-		noWrite,
-		singlePackage: true
+		disableFilesystemOperations,
+		isSinglePackage: true,
+		packagesDirectory: null
 	} );
 };

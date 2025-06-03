@@ -3,11 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../constants.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
+import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from './constants';
 import type { ReleaseInfo, Section } from '../types.js';
+import { getDateFormatted } from './getdateformatted';
 
 type NewChangelogOptions = {
+	cwd: string;
+	date: string;
 	oldVersion: string;
 	newVersion: string;
 	dateFormatted: string;
@@ -19,17 +22,20 @@ type NewChangelogOptions = {
 	packageJsons: Array<workspaces.PackageJson>;
 };
 
-export function getNewChangelog( {
+export async function getNewChangelog( {
+	cwd,
+	date,
 	oldVersion,
 	newVersion,
-	dateFormatted,
-	gitHubUrl,
 	sectionsToDisplay,
 	releasedPackagesInfo,
 	isInternal,
 	singlePackage,
 	packageJsons
-}: NewChangelogOptions ): string {
+}: NewChangelogOptions ): Promise<string> {
+	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
+	const dateFormatted = getDateFormatted( date );
+
 	const packagesNamesSorted = packageJsons.map( packageJson => packageJson.name ).sort();
 
 	const header = oldVersion === '0.0.1' ?

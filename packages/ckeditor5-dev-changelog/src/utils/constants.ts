@@ -4,7 +4,7 @@
  */
 
 import path from 'upath';
-import type { DeepReadonly, EntryType } from './types';
+import type { DeepReadonly, EntryType } from '../types';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
@@ -48,6 +48,7 @@ export const ISSUE_PATTERN = /^\d+$/;
 export const ISSUE_URL_PATTERN =
 	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
 
+// TODO: Remove support for aliases.
 export const TYPES = [
 	{ name: 'Feature' },
 	{ name: 'Other' },

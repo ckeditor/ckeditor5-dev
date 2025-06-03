@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getNewChangelog } from '../../src/utils/getnewchangelog.js';
-import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/constants.js';
+import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/utils/constants';
 import type { ReleaseInfo, Section } from '../../src/types.js';
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 

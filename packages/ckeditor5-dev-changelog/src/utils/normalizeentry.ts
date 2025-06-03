@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { TYPES } from '../constants.js';
+import { TYPES } from './constants';
 import type { ParsedFile, ValidatedType } from '../types.js';
 
 const typesToCast: Array<ValidatedType> = [

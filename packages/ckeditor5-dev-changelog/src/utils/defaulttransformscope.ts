@@ -4,7 +4,7 @@
  */
 
 import type { TransformScope } from '../types.js';
-import { NPM_URL } from '../constants.js';
+import { NPM_URL } from './constants';
 
 /**
  * Default transform scope.

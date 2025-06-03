@@ -7,40 +7,49 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import upath from 'upath';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
-import { CHANGESET_DIRECTORY } from '../constants';
+import { CHANGESET_DIRECTORY } from './constants';
+import { AsyncArray } from './asyncarray.js';
 
 /**
  * This function collects markdown files that contain changelog entries for processing.
  */
 export async function getChangesetFilePaths(
 	cwd: string,
-	externalRepositories: Array<Required<RepositoryConfig>>,
+	externalRepositories: Array<RepositoryConfig>,
 	skipLinks: boolean
 ): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const externalChangesetPaths = await Promise.all( externalRepositories.map( async repo => {
-		const changesetGlob = await glob( '**/*.md', { cwd: upath.join( repo.cwd, CHANGESET_DIRECTORY ), absolute: true } );
+	const externalChangesetPaths = await AsyncArray
+		.from( Promise.resolve( externalRepositories ) )
+		.map( async repo => {
+			const changesetGlob = await glob( '**/*.md', {
+				cwd: upath.join( repo.cwd, CHANGESET_DIRECTORY ),
+				absolute: true
+			} );
 
-		return {
-			changesetPaths: changesetGlob.map( path => upath.normalize( path ) ),
-			gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
-			skipLinks: repo.shouldSkipLinks,
-			cwd: repo.cwd,
-			isRoot: false
-		};
-	} ) );
+			return {
+				changesetPaths: changesetGlob.map( p => upath.normalize( p ) ),
+				gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
+				skipLinks: !!repo.shouldSkipLinks,
+				cwd: repo.cwd,
+				isRoot: false
+			};
+		} )
+		.then( async externalResults => {
+			const mainChangesetGlob = await glob( '**/*.md', {
+				cwd: upath.join( cwd, CHANGESET_DIRECTORY ),
+				absolute: true
+			} );
 
-	const mainChangesetGlob = await glob( '**/*.md', { cwd: upath.join( cwd, CHANGESET_DIRECTORY ), absolute: true } );
+			const mainEntry = {
+				changesetPaths: mainChangesetGlob.map( p => upath.normalize( p ) ),
+				gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
+				skipLinks,
+				cwd,
+				isRoot: true
+			};
 
-	const resolvedChangesetPaths = await Promise.all( [
-		{
-			changesetPaths: mainChangesetGlob.map( path => upath.normalize( path ) ),
-			gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
-			skipLinks,
-			cwd,
-			isRoot: true
-		},
-		...externalChangesetPaths
-	] );
+			return [ mainEntry, ...externalResults ];
+		} );
 
-	return resolvedChangesetPaths;
+	return externalChangesetPaths;
 }

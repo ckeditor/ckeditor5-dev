@@ -3,35 +3,32 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope, ValidatedFile, ValidatedType } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '../constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from './constants.js';
 import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
+import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope, ValidatedFile, ValidatedType } from '../types.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage }: {
+export function getSectionsWithEntries( { parsedFiles, packageNames, transformScope, isSinglePackage }: {
 	parsedFiles: Array<ParsedFile>;
-	packageJsons: Array<workspaces.PackageJson>;
-	transformScope: TransformScope;
-	singlePackage: boolean;
+	packageNames: Array<string>;
+	transformScope?: TransformScope;
+	isSinglePackage: boolean;
 } ): SectionsWithEntries {
-	const packagesNames = packageJsons.map( packageJson => packageJson.name );
-
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const normalizedEntry = normalizeEntry( entry, singlePackage );
-		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packagesNames, singlePackage );
+		const normalizedEntry = normalizeEntry( entry, isSinglePackage );
+		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packageNames, isSinglePackage );
 		const validatedData = validatedEntry.data;
 
-		const scope = getScopesLinks( validatedData.scope, transformScope );
+		const scope = isSinglePackage ? [] : getScopesLinks( validatedData.scope, transformScope! );
 		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
 		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
-		const section = getSection( { entry: validatedEntry, singlePackage, isValid } );
+		const section = getSection( { entry: validatedEntry, isSinglePackage, isValid } );
 		const contentWithCommunityCredits = getContentWithCommunityCredits( validatedEntry.content, validatedData.communityCredits );
 		const content = linkToGitHubUser( contentWithCommunityCredits );
 		const [ mainContent, ...restContent ] = formatContent( content );
@@ -131,13 +128,13 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( { entry, singlePackage, isValid }: { entry: ValidatedFile; singlePackage: boolean; isValid: boolean } ): SectionName {
+function getSection( { entry, isSinglePackage, isValid }: { entry: ValidatedFile; isSinglePackage: boolean; isValid: boolean } ): SectionName {
 	if ( !isValid ) {
 		return 'invalid';
 	}
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
-	if ( singlePackage ) {
+	if ( isSinglePackage ) {
 		const breakingChangeTypes: Array<ValidatedType> = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
 
 		if ( breakingChangeTypes.includes( entry.data.type ) ) {

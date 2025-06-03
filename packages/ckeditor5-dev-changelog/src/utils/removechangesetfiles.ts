@@ -9,7 +9,7 @@ import upath from 'upath';
 import { removeEmptyDirs } from './removeemptydirs.js';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 import { logInfo } from './loginfo.js';
-import { CHANGESET_DIRECTORY } from '../constants';
+import { CHANGESET_DIRECTORY } from './constants';
 
 /**
  * This function cleans up the changeset files that have been incorporated into the changelog.

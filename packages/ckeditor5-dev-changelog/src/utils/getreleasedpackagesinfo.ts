@@ -11,16 +11,15 @@ import { deduplicate } from './deduplicate';
  * Generates information about packages being released in the new version.
  * This function creates a summary of package versions and their changes.
  */
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packageJsons }: {
+export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packageNames }: {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
-	packageJsons: Array<workspaces.PackageJson>;
+	packageNames: Array<string>;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
-	const packageNames = deduplicate( packageJsons.map( packageName => packageName.name ) );
 
-	const newVersionReleases = getNewVersionReleases( packageJsons );
+	const newVersionReleases = getNewVersionReleases( packageNames );
 	const majorReleases = getScopeWithOrgNamespace( sections.major.entries, { packagesToRemove: newVersionReleases, packageNames } );
 	const minorReleases = getScopeWithOrgNamespace( sections.minor.entries, {
 		packagesToRemove: [ ...majorReleases, ...newVersionReleases ],

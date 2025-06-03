@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
 import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
-import { CHANGELOG_HEADER } from '../../src/constants.js';
+import { CHANGELOG_HEADER } from '../../src/utils/constants';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
 

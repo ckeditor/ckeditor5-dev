@@ -6,7 +6,7 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateChangelog } from '../src/generatechangelog.js';
-import { getPackageJsons } from '../src/utils/getreleasepackagespkgjsons.js';
+import { findPackages } from '../src/utils/getreleasepackagespkgjsons.js';
 import { getChangesetFilePaths } from '../src/utils/getchangesetfilepaths.js';
 import { getInputParsed } from '../src/utils/getinputparsed.js';
 import { getSectionsWithEntries } from '../src/utils/getsectionswithentries.js';
@@ -20,10 +20,10 @@ import { logChangelogFiles } from '../src/utils/logchangelogfiles.js';
 import { getNewChangelog } from '../src/utils/getnewchangelog.js';
 import { getDateFormatted } from '../src/utils/getdateformatted.js';
 import { defaultTransformScope } from '../src/utils/defaulttransformscope.js';
-import { getExternalRepositoriesWithDefaults } from '../src/utils/getexternalrepositorieswithdefaults.js';
+import { utils } from '../src/utils/utils';
 import { removeScope } from '../src/utils/removescope.js';
 import { commitChanges } from '../src/utils/commitchanges.js';
-import { SECTIONS } from '../src/constants.js';
+import { SECTIONS } from '../src/utils/constants';
 import { InternalError } from '../src/errors/internalerror.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
@@ -66,7 +66,7 @@ describe( 'generateChangelog()', () => {
 	};
 
 	beforeEach( () => {
-		vi.mocked( getPackageJsons ).mockResolvedValue( [
+		vi.mocked( findPackages ).mockResolvedValue( [
 			{ name: 'test-package', version: '1.0.0' }
 		] );
 		vi.mocked( workspaces.getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
@@ -76,7 +76,7 @@ describe( 'generateChangelog()', () => {
 			displayName: name,
 			npmUrl: `https://www.npmjs.com/package/${ name }`
 		} ) );
-		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( [] );
+		vi.mocked( utils ).mockReturnValue( [] );
 		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [
 			{
 				changesetPaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
@@ -207,8 +207,8 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( defaultOptions );
 
 		expect( removeScope ).toHaveBeenCalledTimes( 0 );
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( [] );
-		expect( getPackageJsons ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
+		expect( utils ).toHaveBeenCalledWith( [] );
+		expect( findPackages ).toHaveBeenCalledWith( '/home/ckeditor', 'packages', [] );
 
 		expect( getNewChangelog ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -338,7 +338,7 @@ describe( 'generateChangelog()', () => {
 			skipLinks: false
 		} ];
 
-		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( [ {
+		vi.mocked( utils ).mockReturnValue( [ {
 			cwd: '/external/repo',
 			packagesDirectory: 'packages',
 			skipLinks: false
@@ -350,8 +350,8 @@ describe( 'generateChangelog()', () => {
 			externalRepositories
 		} );
 
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( externalRepositories );
-		expect( getPackageJsons ).toHaveBeenCalledWith(
+		expect( utils ).toHaveBeenCalledWith( externalRepositories );
+		expect( findPackages ).toHaveBeenCalledWith(
 			'/home/ckeditor',
 			'packages',
 			[ {
@@ -550,7 +550,7 @@ describe( 'generateChangelog()', () => {
 			skipLinks: false
 		} ];
 
-		vi.mocked( getExternalRepositoriesWithDefaults ).mockReturnValue( externalRepositories );
+		vi.mocked( utils ).mockReturnValue( externalRepositories );
 
 		vi.mocked( getChangesetFilePaths ).mockResolvedValue( [
 			{
@@ -575,7 +575,7 @@ describe( 'generateChangelog()', () => {
 			externalRepositories
 		} );
 
-		expect( getExternalRepositoriesWithDefaults ).toHaveBeenCalledWith( externalRepositories );
+		expect( utils ).toHaveBeenCalledWith( externalRepositories );
 
 		expect( commitChanges ).toHaveBeenCalledWith( '1.0.1', [
 			{
@@ -627,7 +627,7 @@ describe( 'generateChangelog()', () => {
 		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
 		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
 
-		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+		vi.mocked( utils ).mockImplementation( () => {
 			throw new InternalError();
 		} );
 
@@ -644,7 +644,7 @@ describe( 'generateChangelog()', () => {
 		const processMock = vi.spyOn( process, 'exit' ).mockReturnValue( null as never );
 		const consoleMock = vi.spyOn( console, 'error' ).mockReturnValue( null as never );
 
-		vi.mocked( getExternalRepositoriesWithDefaults ).mockImplementation( () => {
+		vi.mocked( utils ).mockImplementation( () => {
 			throw new Error();
 		} );
 

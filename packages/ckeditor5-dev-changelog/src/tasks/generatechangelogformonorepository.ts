@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { generateChangelog } from './generatechangelog.js';
+import { generateChangelog } from '../utils/generatechangelog.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 
 type MonoRepositoryConfig = ConfigBase & MonoRepoConfigBase & {
@@ -11,19 +11,20 @@ type MonoRepositoryConfig = ConfigBase & MonoRepoConfigBase & {
 	transformScope: MonoRepoConfigBase[ 'transformScope' ];
 };
 
-export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<MonoRepositoryConfig> = async ( {
-	nextVersion,
-	cwd,
-	packagesDirectory,
-	externalRepositories,
-	transformScope,
-	date,
-	shouldSkipLinks,
-	skipRootPackage,
-	npmPackageToCheck,
-	noWrite,
-	removeInputFiles
-} ) => {
+export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<MonoRepositoryConfig> = async options => {
+	const {
+		date,
+		cwd,
+		externalRepositories,
+		nextVersion,
+		disableFilesystemOperations,
+		npmPackageToCheck,
+		packagesDirectory,
+		shouldSkipLinks,
+		skipRootPackage,
+		transformScope
+	} = options;
+
 	return generateChangelog( {
 		nextVersion,
 		cwd,
@@ -32,9 +33,8 @@ export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<Mon
 		transformScope,
 		date,
 		shouldSkipLinks,
-		removeInputFiles,
-		noWrite,
+		disableFilesystemOperations,
 		...( skipRootPackage && npmPackageToCheck ? { skipRootPackage: true, npmPackageToCheck } : { skipRootPackage: false } ),
-		singlePackage: false
+		isSinglePackage: false
 	} );
 };

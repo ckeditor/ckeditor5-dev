@@ -49,7 +49,13 @@ export default defineConfig( [
 					' * For licensing, see LICENSE.md.',
 					' */'
 				]
-			} ]
+			} ],
+			'ckeditor5-rules/require-file-extensions-in-imports': [
+				'error',
+				{
+					extensions: [ '.ts', '.js', '.json' ]
+				}
+			]
 		}
 	},
 	{

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS, TYPES } from './constants.js';
+import type { SECTIONS, TYPES } from './utils/constants';
 
 export type DeepReadonly<T> = {
 	readonly [P in keyof T]: DeepReadonly<T[P]>
@@ -26,11 +26,6 @@ export type ConfigBase = RepositoryConfig & {
 	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
 	 */
 	date?: string;
-
-	/**
-	 * Controls whether changeset files will be deleted after generating changelog.
-	 */
-	removeInputFiles?: boolean;
 };
 
 export type MonoRepoConfigBase = {
@@ -61,7 +56,7 @@ export type RepositoryConfig = {
 	/**
 	 * The directory containing the packages. Defaults to 'packages'.
 	 */
-	packagesDirectory?: string;
+	packagesDirectory: null | string;
 
 	/**
 	 * Whether to skip links in the changelog entries. Defaults to false.
@@ -70,7 +65,13 @@ export type RepositoryConfig = {
 };
 
 export type GenerateChangelogEntryPoint<K extends object> = <T extends boolean | undefined = undefined>(
-	config: K & { noWrite?: T }
+	config: K & {
+
+		/**
+		 * Controls whether changeset files will be deleted after generating changelog.
+		 */
+		disableFilesystemOperations?: T;
+	}
 ) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
 export type SectionName = keyof typeof SECTIONS;

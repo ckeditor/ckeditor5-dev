@@ -4,7 +4,7 @@
  */
 
 import type { ValidatedType, ParsedFile, ValidatedFile } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from '../constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from './constants';
 
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
