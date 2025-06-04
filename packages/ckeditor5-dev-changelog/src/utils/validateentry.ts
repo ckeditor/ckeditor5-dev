@@ -19,7 +19,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	const allowedTypesList = getAllowedTypesList();
 
 	if ( typeof data.type === 'undefined' ) {
-		validations.push( 'Provide a type with one of the values: "Feature", "Other" or "Fix" (case insensitive).' );
+		validations.push( `Provide a type with one of the values: ${ allowedTypesList } (case insensitive).` );
 
 		isValid = false;
 	} else if ( !allowedTypesArray.includes( data.type ) ) {
@@ -30,7 +30,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 	if ( singlePackage && [ 'Major breaking change', 'Minor breaking change' ].includes( data.type! ) ) {
 		validations.push(
-			`Breaking change "${ data.type }" should be generic: "breaking", for a single package mode (case insensitive).`
+			`Breaking change "${ data.type }" should be generic: "Breaking change", for a single package mode (case insensitive).`
 		);
 
 		isValid = false;
@@ -38,7 +38,8 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 	if ( !singlePackage && data.type === 'Breaking change' ) {
 		validations.push(
-			`Breaking change "${ data.type }" should be one of: "minor", "major", for a monorepo (case insensitive).`
+			`Breaking change "${ data.type }" should be one of: "Minor breaking change", "Major breaking change" ` +
+			'for a monorepo (case insensitive).'
 		);
 
 		isValid = false;
@@ -106,18 +107,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 function getAllowedTypesList(): string {
 	const formatter = new Intl.ListFormat( 'en-US', { style: 'long', type: 'disjunction' } );
-
-	const items = TYPES.map( type => {
-		let entry = `"${ type.name }"`;
-
-		if ( 'aliases' in type ) {
-			const list = type.aliases.map( alias => `"${ alias }"` ).join( ', ' );
-
-			entry += ` (${ list } ${ type.aliases.length > 1 ? 'are' : 'is' } also allowed)`;
-		}
-
-		return entry;
-	} );
+	const items = TYPES.map( type => `"${ type.name }"` );
 
 	return formatter.format( items );
 }

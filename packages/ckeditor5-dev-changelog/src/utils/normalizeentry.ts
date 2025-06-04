@@ -3,33 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { TYPES } from './constants';
 import type { ParsedFile, ValidatedType } from '../types.js';
 
-const typesToCast: Array<ValidatedType> = [
-	'Major breaking change',
-	'Minor breaking change'
-];
-
-export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): ParsedFile {
+export function normalizeEntry( entry: ParsedFile, isSinglePackage: boolean ): ParsedFile {
 	// Normalize type.
-	const typeCapitalized = capitalize( entry.data.type );
-	const matchingType = TYPES.find( type => {
-		if ( type.name === typeCapitalized ) {
-			return true;
-		}
-
-		if ( !( 'aliases' in type ) ) {
-			return false;
-		}
-
-		return ( type.aliases as ReadonlyArray<string> ).includes( typeCapitalized );
-	} );
-	let typeNormalized = matchingType ? matchingType.name : undefined;
-
-	if ( singlePackage && typesToCast.includes( typeNormalized! ) ) {
-		typeNormalized = 'Breaking change';
-	}
+	const typeNormalized = getTypeNormalized( entry.data.type, isSinglePackage );
 
 	// Normalize scope.
 	const scope = entry.data.scope;
@@ -58,6 +36,17 @@ export function normalizeEntry( entry: ParsedFile, singlePackage: boolean ): Par
 			communityCredits: communityCreditsNormalized
 		}
 	};
+}
+
+function getTypeNormalized( type: string | undefined, isSinglePackage: boolean ) {
+	const typeCapitalized = capitalize( type );
+	const expectedBreakingChangeTypes: Array<ValidatedType> = [ 'Major breaking change', 'Minor breaking change' ];
+
+	if ( isSinglePackage && expectedBreakingChangeTypes.includes( typeCapitalized as ValidatedType ) ) {
+		return 'Breaking change';
+	}
+
+	return typeCapitalized;
 }
 
 function capitalize( value: unknown ) {

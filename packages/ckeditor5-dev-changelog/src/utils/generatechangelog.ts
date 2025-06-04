@@ -35,10 +35,8 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		isSinglePackage,
 		transformScope,
 		npmPackageToCheck,
-
 		cwd = process.cwd(),
 		externalRepositories = [],
-
 		date = format( new Date(), 'yyyy-MM-dd' ),
 		shouldSkipLinks = false,
 		skipRootPackage = false,

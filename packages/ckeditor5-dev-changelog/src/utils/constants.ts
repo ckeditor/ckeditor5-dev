@@ -4,7 +4,7 @@
  */
 
 import path from 'upath';
-import type { DeepReadonly, EntryType } from '../types';
+import type { DeepReadonly, EntryType } from '../types.js';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
@@ -13,8 +13,6 @@ export const CHANGELOG_HEADER = 'Changelog\n=========';
 export const NPM_URL = 'https://www.npmjs.com/package';
 
 export const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
-
-export const PACKAGES_DIRECTORY_NAME = 'packages';
 
 export const CHANGESET_DIRECTORY = '.changelog';
 
@@ -48,12 +46,11 @@ export const ISSUE_PATTERN = /^\d+$/;
 export const ISSUE_URL_PATTERN =
 	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
 
-// TODO: Remove support for aliases.
 export const TYPES = [
 	{ name: 'Feature' },
 	{ name: 'Other' },
-	{ name: 'Fix', aliases: [ 'Fixes' ] },
-	{ name: 'Major breaking change', aliases: [ 'Major' ] },
-	{ name: 'Minor breaking change', aliases: [ 'Minor' ] },
-	{ name: 'Breaking change', aliases: [ 'Breaking' ] }
+	{ name: 'Fix' },
+	{ name: 'Major breaking change' },
+	{ name: 'Minor breaking change' },
+	{ name: 'Breaking change' }
 ] as const satisfies DeepReadonly<Array<EntryType>>;

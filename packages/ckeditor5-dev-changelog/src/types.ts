@@ -78,7 +78,6 @@ export type SectionName = keyof typeof SECTIONS;
 
 export type EntryType = {
 	name: string;
-	aliases?: Array<string>;
 };
 
 export type ValidatedType = typeof TYPES[ number ][ 'name' ];
