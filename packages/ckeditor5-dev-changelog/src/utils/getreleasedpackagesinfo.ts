@@ -6,16 +6,20 @@
 import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
 import { deduplicate } from './deduplicate.js';
 
-/**
- * Generates information about packages being released in the new version.
- * This function creates a summary of package versions and their changes.
- */
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packagesMetadata }: {
+type getReleasedPackagesInfoOptions = {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
 	packagesMetadata: Map<string, string>;
-} ): Promise<Array<ReleaseInfo>> {
+};
+
+/**
+ * Generates information about packages being released in the new version.
+ * This function creates a summary of package versions and their changes.
+ */
+export async function getReleasedPackagesInfo( options: getReleasedPackagesInfoOptions ): Promise<Array<ReleaseInfo>> {
+	const { sections, oldVersion, newVersion, packagesMetadata } = options;
+
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
 	const packageNames = [ ...packagesMetadata.keys() ];
 

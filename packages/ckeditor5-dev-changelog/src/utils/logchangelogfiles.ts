@@ -7,16 +7,20 @@ import chalk from 'chalk';
 import { type Entry, type Section, type SectionName, type SectionsWithEntries, type TransformScope } from '../types.js';
 import { logInfo } from './loginfo.js';
 
+type LogChangelogFilesOptions = {
+	sections: SectionsWithEntries;
+	numChangesToParse: number;
+	isSinglePackage: boolean;
+	isNextVersionProvidedAsProp: boolean;
+	transformScope?: TransformScope;
+};
+
 /**
  * This function provides a summary of changes that will be included in the changelog.
  */
-export function logChangelogFiles(
-	sections: SectionsWithEntries,
-	changesToParse: number,
-	isSinglePackage: boolean,
-	isNextVersionProvidedAsProp: boolean,
-	transformScope?: TransformScope
-): void {
+export function logChangelogFiles( options: LogChangelogFilesOptions ): void {
+	const { sections, numChangesToParse, isSinglePackage, isNextVersionProvidedAsProp, transformScope } = options;
+
 	if ( isNextVersionProvidedAsProp ) {
 		return;
 	}
@@ -53,7 +57,7 @@ export function logChangelogFiles(
 	logInfo( '3. A full issue link URL', { indent: 4 } );
 	logInfo( '* A scope field consists of existing packages.', { indent: 3 } );
 	logInfo( '' );
-	logInfo( `Found ${ changesToParse } entries to parse.`, { indent: 1 } );
+	logInfo( `Found ${ numChangesToParse } entries to parse.`, { indent: 1 } );
 	logInfo( '' );
 }
 

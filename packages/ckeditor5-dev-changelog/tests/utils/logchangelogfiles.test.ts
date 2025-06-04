@@ -38,7 +38,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.cyan ).toHaveBeenCalledWith( 'Listing the changes...' );
@@ -66,7 +66,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.green ).toHaveBeenCalledWith( '+' );
@@ -91,7 +91,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.red ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.red ).toHaveBeenCalledWith( 'Invalid changes:' );
@@ -122,7 +122,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		};
 
-		logChangelogFiles( sections as any );
+		logChangelogFiles( { sections: sections as any } );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.bold ).toHaveBeenCalledTimes( 1 );
@@ -150,7 +150,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.blue ).toHaveBeenCalledWith( 'Foo. Bar. Bom.:' );
@@ -164,7 +164,7 @@ describe( 'logChangelogFiles()', () => {
 			Feature: { title: 'Features', entries: [] } as any
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, '○ Listing the changes...' );
 		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'Legend:' ), expect.anything() );
@@ -189,7 +189,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith(
 			3,
@@ -230,7 +230,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.blue ).toHaveBeenCalledWith( 'Features:' );
@@ -268,7 +268,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ "Feature: First feature"', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '+ "Feature: Second feature"', expect.any( Object ) );
@@ -304,7 +304,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Invalid changes:', expect.any( Object ) );
@@ -328,7 +328,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Invalid changes:', expect.any( Object ) );
 		expect( logInfo ).not.toHaveBeenCalledWith( ( 'Validation details:' ), expect.any( Object ) );
@@ -353,7 +353,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, 'x "Feature: Feature with warnings"', expect.any( Object ) );
 	} );
@@ -409,7 +409,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Warning:', expect.any( Object ) );
@@ -453,7 +453,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Warning:', expect.any( Object ) );
@@ -480,7 +480,7 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( sections );
+		logChangelogFiles( { sections } );
 
 		expect( chalk.yellow ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.yellow ).toHaveBeenCalledWith( 'Warning:' );

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS, TYPES } from './utils/constants';
+import type { SECTIONS, TYPES } from './utils/constants.js';
 
 export type DeepReadonly<T> = {
 	readonly [P in keyof T]: DeepReadonly<T[P]>
@@ -100,7 +100,7 @@ export type ParsedFile = {
 	data: FileMetadata;
 	changesetPath: string;
 	gitHubUrl: string;
-	skipLinks: boolean;
+	shouldSkipLinks: boolean;
 };
 
 export type ValidatedFile = ParsedFile & {
@@ -130,7 +130,7 @@ export type TransformScope = ( name: string ) => {
 export type ChangesetPathsWithGithubUrl = {
 	changesetPaths: Array<string>;
 	gitHubUrl: string;
-	skipLinks: boolean;
+	shouldSkipLinks: boolean;
 	cwd: string;
 	isRoot: boolean;
 };

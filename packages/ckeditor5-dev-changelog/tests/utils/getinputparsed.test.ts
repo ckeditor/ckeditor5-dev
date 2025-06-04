@@ -71,7 +71,7 @@ describe( 'getInputParsed()', () => {
 			{
 				changesetPaths: [ changesetPath1, changesetPath2 ],
 				gitHubUrl,
-				skipLinks: false,
+				shouldSkipLinks: false,
 				cwd: '/changeset-path',
 				isRoot: false
 			}
@@ -165,14 +165,14 @@ describe( 'getInputParsed()', () => {
 			{
 				changesetPaths: [ changesetPath1 ],
 				gitHubUrl: gitHubUrl1,
-				skipLinks: false,
+				shouldSkipLinks: false,
 				cwd: '/changeset-path-1',
 				isRoot: false
 			},
 			{
 				changesetPaths: [ changesetPath2 ],
 				gitHubUrl: gitHubUrl2,
-				skipLinks: true,
+				shouldSkipLinks: true,
 				cwd: '/changeset-path-2',
 				isRoot: false
 			}
@@ -213,7 +213,7 @@ describe( 'getInputParsed()', () => {
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				cwd: '/changeset-path-1',
 				isRoot: false
 			}

@@ -57,7 +57,11 @@ describe( 'getChangesetFilePaths()', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks );
+		const result = await getChangesetFilePaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks
+		} );
 
 		expect( result ).toEqual( [
 			{
@@ -92,12 +96,15 @@ describe( 'getChangesetFilePaths()', () => {
 	it( 'should return only local changeset files if there are no external repositories', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [];
 
 		vi.mocked( glob ).mockResolvedValue( [ '/mock/current/changesets/file1.md' ] );
 
-		const result = await getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks );
+		const result = await getChangesetFilePaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks
+		} );
 
 		expect( result ).toEqual( [
 			{
@@ -116,7 +123,6 @@ describe( 'getChangesetFilePaths()', () => {
 	it( 'should return only external changeset files if there are no local files', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
@@ -133,7 +139,11 @@ describe( 'getChangesetFilePaths()', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks );
+		const result = await getChangesetFilePaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks
+		} );
 
 		expect( result ).toEqual( [
 			{
@@ -160,14 +170,17 @@ describe( 'getChangesetFilePaths()', () => {
 	it( 'should return an empty array when no changeset files exist in any repository', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
 		vi.mocked( glob ).mockImplementation( () => Promise.resolve( [] ) );
 
-		const result = await getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks );
+		const result = await getChangesetFilePaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks
+		} );
 
 		expect( result ).toEqual( [
 			{
@@ -192,7 +205,6 @@ describe( 'getChangesetFilePaths()', () => {
 	it( 'should handle errors gracefully by rejecting the promise', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
@@ -200,14 +212,13 @@ describe( 'getChangesetFilePaths()', () => {
 		vi.mocked( glob ).mockRejectedValueOnce( new Error( 'Glob failed' ) );
 
 		await expect(
-			getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks )
+			getChangesetFilePaths( { cwd, externalRepositories, shouldSkipLinks: rootSkipLinks } )
 		).rejects.toThrow( 'Glob failed' );
 	} );
 
 	it( 'should normalize paths from Windows-style to POSIX format', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const changesetsDirectory = 'changesets';
 		const externalRepositories: Array<Required<RepositoryConfig>> = [];
 
 		// Simulate Windows paths with backslashes
@@ -216,7 +227,11 @@ describe( 'getChangesetFilePaths()', () => {
 			'C:\\mock\\current\\changesets\\subfolder\\file2.md'
 		] );
 
-		const result = await getChangesetFilePaths( cwd, externalRepositories, rootSkipLinks );
+		const result = await getChangesetFilePaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks
+		} );
 
 		expect( result ).toEqual( [
 			{

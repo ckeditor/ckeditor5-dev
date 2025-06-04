@@ -251,7 +251,7 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should skip links when skipLinks is true', () => {
-		const parsedFiles = [ createParsedFile( { skipLinks: true } ) ];
+		const parsedFiles = [ createParsedFile( { shouldSkipLinks: true } ) ];
 
 		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
 

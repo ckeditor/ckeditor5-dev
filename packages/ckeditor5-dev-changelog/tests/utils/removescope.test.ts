@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 describe( 'removeScope()', () => {
 	it( 'should strip the scope from the data', () => {
 		const parsedChangesetFiles: Array<ParsedFile> = [ {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath1',
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
@@ -19,7 +19,7 @@ describe( 'removeScope()', () => {
 				scope: [ 'scope1' ]
 			}
 		}, {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath2',
 			gitHubUrl: 'gitHubUrl2',
 			content: 'content2',
@@ -52,7 +52,7 @@ describe( 'removeScope()', () => {
 
 	it( 'should not mutate the original object', () => {
 		const parsedChangesetFiles: Array<ParsedFile> = [ {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath1',
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
@@ -61,7 +61,7 @@ describe( 'removeScope()', () => {
 				scope: [ 'scope1' ]
 			}
 		}, {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath2',
 			gitHubUrl: 'gitHubUrl2',
 			content: 'content2',

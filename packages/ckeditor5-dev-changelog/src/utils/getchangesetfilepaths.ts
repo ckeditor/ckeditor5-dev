@@ -10,15 +10,19 @@ import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js'
 import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';
 
+type GetChangesetFilePathsOptions = {
+	cwd: string;
+	externalRepositories: Array<RepositoryConfig>;
+	shouldSkipLinks: boolean;
+};
+
 /**
  * This function collects markdown files that contain changelog entries for processing.
  */
-export async function getChangesetFilePaths(
-	cwd: string,
-	externalRepositories: Array<RepositoryConfig>,
-	skipLinks: boolean
-): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const externalChangesetPaths = await AsyncArray
+export async function getChangesetFilePaths( options: GetChangesetFilePathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
+	const { cwd, externalRepositories, shouldSkipLinks } = options;
+
+	return await AsyncArray
 		.from( Promise.resolve( externalRepositories ) )
 		.map( async repo => {
 			const changesetGlob = await glob( '**/*.md', {
@@ -29,7 +33,7 @@ export async function getChangesetFilePaths(
 			return {
 				changesetPaths: changesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
-				skipLinks: !!repo.shouldSkipLinks,
+				shouldSkipLinks: !!repo.shouldSkipLinks,
 				cwd: repo.cwd,
 				isRoot: false
 			};
@@ -43,13 +47,11 @@ export async function getChangesetFilePaths(
 			const mainEntry = {
 				changesetPaths: mainChangesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
-				skipLinks,
+				shouldSkipLinks,
 				cwd,
 				isRoot: true
 			};
 
 			return [ mainEntry, ...externalResults ];
 		} );
-
-	return externalChangesetPaths;
 }

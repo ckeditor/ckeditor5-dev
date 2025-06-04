@@ -48,7 +48,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	const packagesMetadata = await findPackages( { cwd, packagesDirectory, skipRootPackage, externalRepositories } );
 	const { version: oldVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
 
-	const changesetFilePaths = await getChangesetFilePaths( cwd, externalRepositories, shouldSkipLinks );
+	const changesetFilePaths = await getChangesetFilePaths( { cwd, externalRepositories, shouldSkipLinks } );
 	const parsedChangesetFiles = await getInputParsed( changesetFilePaths );
 
 	const sectionsWithEntries = getSectionsWithEntries( {
@@ -59,7 +59,13 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	} );
 
 	// Logging changes in the console.
-	logChangelogFiles( sectionsWithEntries, parsedChangesetFiles.length, isSinglePackage, !!nextVersion, transformScope );
+	logChangelogFiles( {
+		sections: sectionsWithEntries,
+		numChangesToParse: parsedChangesetFiles.length,
+		isSinglePackage,
+		isNextVersionProvidedAsProp: !!nextVersion,
+		transformScope
+	} );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
@@ -94,7 +100,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		return newChangelog as any;
 	}
 
-	await removeChangesetFiles( changesetFilePaths, cwd, externalRepositories );
+	await removeChangesetFiles( { changesetFilePaths, cwd, externalRepositories } );
 	await modifyChangelog( newChangelog, cwd );
 	await commitChanges(
 		newVersion,

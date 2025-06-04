@@ -11,15 +11,19 @@ import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScop
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 
-/**
- * This function categorizes changelog entries based on their types and packages.
- */
-export function getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage }: {
+type GetSectionsWithEntriesOptions = {
 	parsedFiles: Array<ParsedFile>;
 	packagesMetadata: Map<string, string>;
 	transformScope?: TransformScope;
 	isSinglePackage: boolean;
-} ): SectionsWithEntries {
+};
+
+/**
+ * This function categorizes changelog entries based on their types and packages.
+ */
+export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions ): SectionsWithEntries {
+	const { parsedFiles, packagesMetadata, transformScope, isSinglePackage } = options;
+
 	const packageNames = [ ...packagesMetadata.keys() ];
 
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
@@ -39,8 +43,8 @@ export function getSectionsWithEntries( { parsedFiles, packagesMetadata, transfo
 			'*',
 			scope ? `**${ scope }**:` : null,
 			mainContent,
-			!entry.skipLinks && see ? see : null,
-			!entry.skipLinks && closes ? closes : null
+			!entry.shouldSkipLinks && see ? see : null,
+			!entry.shouldSkipLinks && closes ? closes : null
 		].filter( Boolean ).join( ' ' );
 
 		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;

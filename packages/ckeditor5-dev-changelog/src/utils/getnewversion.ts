@@ -14,7 +14,7 @@ type NewVersionObj = {
 	newVersion: string;
 };
 
-export type GetNewVersionArgs = {
+export type GetNewVersionOptions = {
 	sectionsWithEntries: SectionsWithEntries;
 	oldVersion: string;
 	packageName: string;
@@ -24,12 +24,9 @@ export type GetNewVersionArgs = {
 /**
  * This function analyzes the changes and suggests the appropriate version bump.
  */
-export async function getNewVersion( {
-	sectionsWithEntries,
-	oldVersion,
-	packageName,
-	nextVersion
-}: GetNewVersionArgs ): Promise<NewVersionObj> {
+export async function getNewVersion( options: GetNewVersionOptions ): Promise<NewVersionObj> {
+	const { sectionsWithEntries, oldVersion, packageName, nextVersion } = options;
+
 	if ( nextVersion === 'internal' ) {
 		const internalVersionBump = getInternalVersionBump( oldVersion );
 

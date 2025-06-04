@@ -20,17 +20,19 @@ type NewChangelogOptions = {
 	packagesMetadata: Map<string, string>;
 };
 
-export async function getNewChangelog( {
-	cwd,
-	date,
-	oldVersion,
-	newVersion,
-	sectionsToDisplay,
-	releasedPackagesInfo,
-	isInternal,
-	isSinglePackage,
-	packagesMetadata
-}: NewChangelogOptions ): Promise<string> {
+export async function getNewChangelog( options: NewChangelogOptions ): Promise<string> {
+	const {
+		cwd,
+		date,
+		oldVersion,
+		newVersion,
+		sectionsToDisplay,
+		releasedPackagesInfo,
+		isInternal,
+		isSinglePackage,
+		packagesMetadata
+	} = options;
+
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
 	const dateFormatted = getDateFormatted( date );
 	const packagesNames = [ ...packagesMetadata.keys() ];

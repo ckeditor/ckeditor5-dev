@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getNewVersion, type GetNewVersionArgs } from '../../src/utils/getnewversion.js';
+import { getNewVersion, type GetNewVersionOptions } from '../../src/utils/getnewversion.js';
 import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
@@ -22,7 +22,7 @@ vi.mock( 'semver', () => {
 } );
 
 describe( 'getNewVersion()', () => {
-	let options: GetNewVersionArgs;
+	let options: GetNewVersionOptions;
 	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonorepository );
 	const mockedLogInfo = vi.mocked( logInfo );
 
