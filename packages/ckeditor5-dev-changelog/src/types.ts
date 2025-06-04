@@ -5,10 +5,6 @@
 
 import type { SECTIONS, TYPES } from './utils/constants.js';
 
-export type DeepReadonly<T> = {
-	readonly [P in keyof T]: DeepReadonly<T[P]>
-};
-
 export type ConfigBase = RepositoryConfig & {
 
 	/**
@@ -76,10 +72,6 @@ export type GenerateChangelogEntryPoint<K extends object> = <T extends boolean |
 
 export type SectionName = keyof typeof SECTIONS;
 
-export type EntryType = {
-	name: string;
-};
-
 export type ValidatedType = typeof TYPES[ number ][ 'name' ];
 
 export type Entry = {
@@ -100,10 +92,6 @@ export type ParsedFile = {
 	changesetPath: string;
 	gitHubUrl: string;
 	shouldSkipLinks: boolean;
-};
-
-export type ValidatedFile = ParsedFile & {
-	data: ValidatedFileMetadata;
 };
 
 export type Section = {
@@ -149,9 +137,6 @@ type FileMetadata = {
 	scope?: Array<string>;
 	closes?: Array<string>;
 	see?: Array<string>;
+	validations?: Array<string>;
 	communityCredits?: Array<string>;
-};
-
-type ValidatedFileMetadata = FileMetadata & {
-	type: ValidatedType;
 };

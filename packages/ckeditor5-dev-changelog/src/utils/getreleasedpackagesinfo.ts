@@ -61,7 +61,8 @@ function getScopeWithOrgNamespace( entries: Array<Entry> = [], { packagesToRemov
 	packageNames: Array<string>;
 } ) {
 	const scope = deduplicate( entries.flatMap( entry => entry.data.scope ?? [] ).filter( Boolean ) );
-	const packagesFullNames = scope.map( scope => packageNames.find( packageName => packageName.includes( scope ) )! );
+	// TODO fix replace with regex or move it to a separate function.
+	const packagesFullNames = scope.map( scope => packageNames.find( packageName => packageName.replace( /^@[^/]+\//, '' ) === scope )! );
 	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
 
 	return packagesNamesFiltered.sort();

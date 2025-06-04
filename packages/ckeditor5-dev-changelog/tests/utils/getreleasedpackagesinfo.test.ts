@@ -4,7 +4,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { getReleasedPackagesInfo } from '../../src/utils/getreleasedpackagesinfo.js';
 import type { SectionsWithEntries, Entry } from '../../src/types.js';
 
@@ -33,8 +32,6 @@ const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {}
 	...overrides
 } );
 
-const organisationNamespace = '@ckeditor';
-
 describe( 'getReleasedPackagesInfo()', () => {
 	it( 'should categorize new, major, minor, feature, and other releases correctly', async () => {
 		const sections = createSectionsWithEntries( {
@@ -43,19 +40,18 @@ describe( 'getReleasedPackagesInfo()', () => {
 			feature: { entries: [ createEntry( [ 'editor' ] ) ], title: 'Features' }
 		} );
 
-		const packageJsons: Array<workspaces.PackageJson> = [
-			{ name: '@ckeditor/core', version: '1.0.0' },
-			{ name: '@ckeditor/ui', version: '1.0.0' },
-			{ name: '@ckeditor/editor', version: '1.0.0' },
-			{ name: '@ckeditor/new-package', version: '0.0.1' }
-		];
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/core', '1.0.0' ],
+			[ '@ckeditor/ui', '1.0.0' ],
+			[ '@ckeditor/editor', '1.0.0' ],
+			[ '@ckeditor/new-package', '0.0.1' ]
+		] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -71,17 +67,16 @@ describe( 'getReleasedPackagesInfo()', () => {
 			major: { entries: [ createEntry( [ 'core', 'new-package' ] ) ], title: 'Major Breaking Changes' }
 		} );
 
-		const packageJsons: Array<workspaces.PackageJson> = [
-			{ name: '@ckeditor/core', version: '1.0.0' },
-			{ name: '@ckeditor/new-package', version: '0.0.1' }
-		];
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/core', '1.0.0' ],
+			[ '@ckeditor/new-package', '0.0.1' ]
+		] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -96,18 +91,17 @@ describe( 'getReleasedPackagesInfo()', () => {
 			minor: { entries: [ createEntry( [ 'ui', 'new-package', 'core' ] ) ], title: 'Minor' }
 		} );
 
-		const packageJsons: Array<workspaces.PackageJson> = [
-			{ name: '@ckeditor/core', version: '1.0.0' },
-			{ name: '@ckeditor/ui', version: '1.0.0' },
-			{ name: '@ckeditor/new-package', version: '0.0.1' }
-		];
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/core', '1.0.0' ],
+			[ '@ckeditor/ui', '1.0.0' ],
+			[ '@ckeditor/new-package', '0.0.1' ]
+		] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -125,20 +119,19 @@ describe( 'getReleasedPackagesInfo()', () => {
 			other: { entries: [ createEntry( [ 'other', 'ui', 'editor', 'core', 'new-package' ] ) ], title: '' }
 		} );
 
-		const packageJsons: Array<workspaces.PackageJson> = [
-			{ name: '@ckeditor/core', version: '1.0.0' },
-			{ name: '@ckeditor/ui', version: '1.0.0' },
-			{ name: '@ckeditor/editor', version: '1.0.0' },
-			{ name: '@ckeditor/other', version: '1.0.0' },
-			{ name: '@ckeditor/new-package', version: '0.0.1' }
-		];
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/core', '1.0.0' ],
+			[ '@ckeditor/ui', '1.0.0' ],
+			[ '@ckeditor/editor', '1.0.0' ],
+			[ '@ckeditor/other', '1.0.0' ],
+			[ '@ckeditor/new-package', '0.0.1' ]
+		] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -152,14 +145,13 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 	it( 'should return an empty array when there are no releases', async () => {
 		const sections = createSectionsWithEntries();
-		const packageJsons: Array<workspaces.PackageJson> = [];
+		const packagesMetadata = new Map();
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [] );
@@ -167,17 +159,16 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 	it( 'should handle only new package releases', async () => {
 		const sections = createSectionsWithEntries();
-		const packageJsons: Array<workspaces.PackageJson> = [
-			{ name: '@ckeditor/new-package-1', version: '0.0.1' },
-			{ name: '@ckeditor/new-package-2', version: '0.0.1' }
-		];
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/new-package-1', '0.0.1' ],
+			[ '@ckeditor/new-package-2', '0.0.1' ]
+		] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -186,15 +177,14 @@ describe( 'getReleasedPackagesInfo()', () => {
 	} );
 
 	it( 'should return only other releases when no categorized changes exist', async () => {
-		const packageJsons: Array<workspaces.PackageJson> = [ { name: '@ckeditor/uncategorized', version: '1.0.0' } ];
+		const packagesMetadata = new Map( [ [ '@ckeditor/uncategorized', '1.0.0' ] ] );
 		const sections = createSectionsWithEntries();
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -207,14 +197,13 @@ describe( 'getReleasedPackagesInfo()', () => {
 			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
 			minor: { entries: [ createEntry( [ 'core' ] ) ], title: 'Minor Breaking Changes' }
 		} );
-		const packageJsons: Array<workspaces.PackageJson> = [ { name: '@ckeditor/core', version: '1.0.0' } ];
+		const packagesMetadata = new Map( [ [ '@ckeditor/core', '1.0.0' ] ] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -228,14 +217,13 @@ describe( 'getReleasedPackagesInfo()', () => {
 		const sections = createSectionsWithEntries( {
 			major: { entries: [ entryWithoutScope ], title: 'Major Breaking Changes' }
 		} );
-		const packageJsons: Array<workspaces.PackageJson> = [ { name: '@ckeditor/test', version: '1.0.0' } ];
+		const packagesMetadata = new Map( [ [ '@ckeditor/test', '1.0.0' ] ] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
@@ -247,14 +235,13 @@ describe( 'getReleasedPackagesInfo()', () => {
 		const sections = createSectionsWithEntries( {
 			major: { entries: [ createEntry( [ 'core' ] ), createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' }
 		} );
-		const packageJsons: Array<workspaces.PackageJson> = [ { name: '@ckeditor/core', version: '1.0.0' } ];
+		const packagesMetadata = new Map( [ [ '@ckeditor/core', '1.0.0' ] ] );
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
 			oldVersion: '1.0.0',
 			newVersion: '2.0.0',
-			packageJsons,
-			organisationNamespace
+			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [

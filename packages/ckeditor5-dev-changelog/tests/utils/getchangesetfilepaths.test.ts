@@ -42,15 +42,15 @@ describe( 'getChangesetFilePaths()', () => {
 		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
-			if ( cwd === '/mock/current/changesets' ) {
+			if ( cwd === '/mock/current/.changelog' ) {
 				return Promise.resolve( [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ] );
 			}
 
-			if ( cwd === '/mock/repo1/changesets' ) {
+			if ( cwd === '/mock/repo1/.changelog' ) {
 				return Promise.resolve( [ '/mock/repo1/changesets/file3.md' ] );
 			}
 
-			if ( cwd === '/mock/repo2/changesets' ) {
+			if ( cwd === '/mock/repo2/.changelog' ) {
 				return Promise.resolve( [ '/mock/repo2/changesets/file4.md' ] );
 			}
 
@@ -67,30 +67,30 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: true,
+				shouldSkipLinks: true,
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
 				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: true,
+				shouldSkipLinks: true,
 				isRoot: false,
 				cwd: '/mock/repo1'
 			},
 			{
 				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo2',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				isRoot: false,
 				cwd: '/mock/repo2'
 			}
 		] );
 
 		expect( glob ).toHaveBeenCalledTimes( 3 );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/changesets', absolute: true } );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo1/changesets', absolute: true } );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo2/changesets', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/.changelog', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo1/.changelog', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo2/.changelog', absolute: true } );
 	} );
 
 	it( 'should return only local changeset files if there are no external repositories', async () => {
@@ -110,14 +110,14 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [ '/mock/current/changesets/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				isRoot: true,
 				cwd: '/mock/current'
 			}
 		] );
 
 		expect( glob ).toHaveBeenCalledTimes( 1 );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/changesets', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/.changelog', absolute: true } );
 	} );
 
 	it( 'should return only external changeset files if there are no local files', async () => {
@@ -128,11 +128,11 @@ describe( 'getChangesetFilePaths()', () => {
 		];
 
 		vi.mocked( glob ).mockImplementation( ( _, { cwd } ) => {
-			if ( cwd === '/mock/current/changesets' ) {
+			if ( cwd === '/mock/current/.changelog' ) {
 				return Promise.resolve( [] );
 			}
 
-			if ( cwd === '/mock/repo1/changesets' ) {
+			if ( cwd === '/mock/repo1/.changelog' ) {
 				return Promise.resolve( [ '/mock/repo1/changesets/file3.md' ] );
 			}
 
@@ -149,22 +149,22 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				cwd: '/mock/current',
 				isRoot: true
 			},
 			{
 				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				cwd: '/mock/repo1',
 				isRoot: false
 			}
 		] );
 
 		expect( glob ).toHaveBeenCalledTimes( 2 );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/changesets', absolute: true } );
-		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo1/changesets', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/.changelog', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/repo1/.changelog', absolute: true } );
 	} );
 
 	it( 'should return an empty array when no changeset files exist in any repository', async () => {
@@ -186,14 +186,14 @@ describe( 'getChangesetFilePaths()', () => {
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
 				changesetPaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				isRoot: false,
 				cwd: '/mock/repo1'
 			}
@@ -241,7 +241,7 @@ describe( 'getChangesetFilePaths()', () => {
 					'C:/mock/current/changesets/subfolder/file2.md'
 				],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				skipLinks: false,
+				shouldSkipLinks: false,
 				isRoot: true,
 				cwd: '/mock/current'
 			}

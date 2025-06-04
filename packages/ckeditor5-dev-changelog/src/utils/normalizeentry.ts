@@ -4,6 +4,7 @@
  */
 
 import type { ParsedFile, ValidatedType } from '../types.js';
+import { deduplicate } from './deduplicate.js';
 
 export function normalizeEntry( entry: ParsedFile, isSinglePackage: boolean ): ParsedFile {
 	// Normalize type.
@@ -12,7 +13,7 @@ export function normalizeEntry( entry: ParsedFile, isSinglePackage: boolean ): P
 	// Normalize scope.
 	const scope = entry.data.scope;
 	const scopeLowercase = scope?.filter( scope => scope ).map( scopeEntry => String( scopeEntry ).toLowerCase() );
-	const scopeNormalized = [ ...new Set( scopeLowercase ) ].sort();
+	const scopeNormalized = deduplicate( scopeLowercase ).sort();
 
 	// Normalize closes.
 	const closesNormalized = entry.data.closes?.filter( closes => closes ).map( closes => String( closes ) );

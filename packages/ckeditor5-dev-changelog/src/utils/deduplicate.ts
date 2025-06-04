@@ -3,6 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-export function deduplicate( packageNames: Array<string> ): Array<string> {
+export function deduplicate( packageNames: Array<string> | undefined ): Array<string> {
 	return [ ...new Set( packageNames ) ];
 }

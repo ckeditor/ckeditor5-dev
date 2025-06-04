@@ -17,7 +17,9 @@ vi.mock( 'chalk', () => ( {
 		blue: vi.fn( ( text: string ) => text ),
 		red: vi.fn( ( text: string ) => text ),
 		underline: vi.fn( ( text: string ) => text ),
-		bold: vi.fn( ( text: string ) => text )
+		bold: vi.fn( ( text: string ) => text ),
+		grey: vi.fn( ( text: string ) => text ),
+		italic: vi.fn( ( text: string ) => text )
 	}
 } ) );
 
@@ -38,7 +40,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.cyan ).toHaveBeenCalledWith( 'Listing the changes...' );
@@ -47,7 +54,7 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, '○ Listing the changes...' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ "Feature: Added new feature"', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): Added new feature', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '' );
 		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'Legend:' ), expect.anything() );
 	} );
@@ -66,12 +73,17 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.green ).toHaveBeenCalledWith( '+' );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ "Feature: Added new feature"', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): Added new feature', expect.any( Object ) );
 	} );
 
 	it( 'logs invalid section in red', () => {
@@ -91,11 +103,17 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.red ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.red ).toHaveBeenCalledWith( 'Invalid changes:' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Invalid changes:', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '» file:///repo/changelog/changeset-1.md', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- Missing type', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '- Incorrect format', expect.any( Object ) );
 	} );
@@ -122,7 +140,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		};
 
-		logChangelogFiles( { sections: sections as any } );
+		logChangelogFiles( {
+			sections: sections as any,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.bold ).toHaveBeenCalledTimes( 1 );
@@ -150,12 +173,16 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
 		expect( chalk.blue ).toHaveBeenCalledWith( 'Foo. Bar. Bom.:' );
 
-		// Updated call count to account for warning message
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Foo. Bar. Bom.:', expect.any( Object ) );
 	} );
 
@@ -164,7 +191,12 @@ describe( 'logChangelogFiles()', () => {
 			Feature: { title: 'Features', entries: [] } as any
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 0,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, '○ Listing the changes...' );
 		expect( logInfo ).toHaveBeenCalledWith( expect.stringContaining( 'Legend:' ), expect.anything() );
@@ -189,11 +221,16 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith(
 			3,
-			'+ "Feature (ckeditor5-ui, ckeditor5-core): Added new button component"',
+			'+ ckeditor5-ui, ckeditor5-core: Added new button component',
 			expect.any( Object )
 		);
 	} );
@@ -230,13 +267,17 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 2,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.blue ).toHaveBeenCalledWith( 'Features:' );
 		expect( chalk.blue ).toHaveBeenCalledWith( 'Bug fixes:' );
 
-		// Updated call count to account for warning message
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Bug fixes:', expect.any( Object ) );
 	} );
@@ -268,10 +309,15 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 2,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ "Feature: First feature"', expect.any( Object ) );
-		expect( logInfo ).toHaveBeenNthCalledWith( 4, '+ "Feature: Second feature"', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): First feature', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 4, '+ (no scope): Second feature', expect.any( Object ) );
 	} );
 
 	it( 'handles mixed valid and invalid sections correctly', () => {
@@ -304,7 +350,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 2,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Invalid changes:', expect.any( Object ) );
@@ -328,7 +379,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Invalid changes:', expect.any( Object ) );
 		expect( logInfo ).not.toHaveBeenCalledWith( ( 'Validation details:' ), expect.any( Object ) );
@@ -353,9 +409,14 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, 'x "Feature: Feature with warnings"', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, 'x (no scope): Feature with warnings', expect.any( Object ) );
 	} );
 
 	it( 'displays the warning section above the error one (both sections are available)', () => {
@@ -409,7 +470,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 3,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Warning:', expect.any( Object ) );
@@ -453,7 +519,12 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 2,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Warning:', expect.any( Object ) );
@@ -480,12 +551,17 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( { sections } );
+		logChangelogFiles( {
+			sections,
+			numChangesToParse: 1,
+			isSinglePackage: false,
+			isNextVersionProvidedAsProp: false
+		} );
 
 		expect( chalk.yellow ).toHaveBeenCalledTimes( 2 );
 		expect( chalk.yellow ).toHaveBeenCalledWith( 'Warning:' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Warning:', expect.any( Object ) );
-		expect( logInfo ).toHaveBeenNthCalledWith( 3, '- file:///repo/changelog/changeset-1.md', expect.any( Object ) );
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '» file:///repo/changelog/changeset-1.md', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- Invalid scope reference', expect.any( Object ) );
 	} );
 } );

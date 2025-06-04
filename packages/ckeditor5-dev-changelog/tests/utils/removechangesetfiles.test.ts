@@ -10,6 +10,7 @@ import fs from 'fs-extra';
 import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
 import upath from 'upath';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
+import { CHANGESET_DIRECTORY } from '../../src/utils/constants.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo' );
@@ -22,7 +23,6 @@ vi.mock( 'chalk', () => ( {
 
 describe( 'removeChangesetFiles()', () => {
 	const mockCwd = '/repo';
-	const mockChangelogDir = 'changelog';
 	const mockExternalRepos = [
 		{ cwd: '/external-repo-1', packagesDirectory: 'packages' },
 		{ cwd: '/external-repo-2', packagesDirectory: 'packages' }
@@ -60,14 +60,14 @@ describe( 'removeChangesetFiles()', () => {
 	it( 'removes empty directories for the main repository', async () => {
 		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
-		expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( mockCwd, mockChangelogDir ) );
+		expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( mockCwd, CHANGESET_DIRECTORY ) );
 	} );
 
 	it( 'removes empty directories for external repositories', async () => {
 		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
 		for ( const externalRepo of mockExternalRepos ) {
-			expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( externalRepo.cwd, mockChangelogDir ) );
+			expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( externalRepo.cwd, CHANGESET_DIRECTORY ) );
 		}
 	} );
 

@@ -7,7 +7,7 @@ import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from '
 import { linkToGitHubUser } from '../utils/linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
-import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope, ValidatedFile, ValidatedType } from '../types.js';
+import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 
@@ -147,7 +147,7 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( options: { entry: ValidatedFile; isSinglePackage: boolean; isValid: boolean } ): SectionName {
+function getSection( options: { entry: ParsedFile; isSinglePackage: boolean; isValid: boolean } ): SectionName {
 	const { entry, isSinglePackage, isValid } = options;
 
 	if ( !isValid ) {
@@ -156,9 +156,9 @@ function getSection( options: { entry: ValidatedFile; isSinglePackage: boolean; 
 
 	// If someone tries to use minor/major breaking change in a single package, we simply cast it to a generic breaking change.
 	if ( isSinglePackage ) {
-		const breakingChangeTypes: Array<ValidatedType> = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
+		const breakingChangeTypes = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
 
-		if ( breakingChangeTypes.includes( entry.data.type ) ) {
+		if ( breakingChangeTypes.includes( entry.data.type! ) ) {
 			return 'breaking';
 		}
 	} else {

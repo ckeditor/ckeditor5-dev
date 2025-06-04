@@ -6,7 +6,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
 import type { ParsedFile } from '../../src/types.js';
-import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { validateEntry } from '../../src/utils/validateentry.js';
 
 type RecursivePartial<T> = {
@@ -36,9 +35,9 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 
 describe( 'getSectionsWithEntries()', () => {
 	const organisationNamespace = '@ckeditor';
-	const singlePackage = false;
+	const isSinglePackage = false;
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
-	let packageJsons: Array<workspaces.PackageJson>;
+	let packagesMetadata: Map<string, string>;
 
 	beforeEach( () => {
 		transformScope = vi.fn( name => ( {
@@ -46,10 +45,10 @@ describe( 'getSectionsWithEntries()', () => {
 			npmUrl: `https://npmjs.com/package/${ name }`
 		} ) );
 
-		packageJsons = [
-			{ name: `${ organisationNamespace }/package-1`, version: '1.0.0' },
-			{ name: `${ organisationNamespace }/package-2`, version: '1.0.0' }
-		];
+		packagesMetadata = new Map( [
+			[ `${ organisationNamespace }/package-1`, '1.0.0' ],
+			[ `${ organisationNamespace }/package-2`, '1.0.0' ]
+		] );
 
 		vi.mocked( validateEntry ).mockImplementation( entry => {
 			const data = entry.data! || {};
@@ -89,7 +88,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Other' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.fix.entries ).toHaveLength( 1 );
@@ -101,7 +100,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: true } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -126,7 +125,7 @@ describe( 'getSectionsWithEntries()', () => {
 			isValid: false
 		} );
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -140,7 +139,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: true } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: true } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -153,7 +152,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Minor breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: false } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 1 );
@@ -166,7 +165,7 @@ describe( 'getSectionsWithEntries()', () => {
 			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage: false } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: false } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -182,7 +181,7 @@ describe( 'getSectionsWithEntries()', () => {
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -197,14 +196,14 @@ describe( 'getSectionsWithEntries()', () => {
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.invalid.entries ).toHaveLength( 0 );
 		expect( result.feature.entries ).toHaveLength( 1 );
 	} );
 
 	it( 'should handle an empty parsedFiles array', () => {
-		const result = getSectionsWithEntries( { parsedFiles: [], packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles: [], packagesMetadata, transformScope, isSinglePackage } );
 
 		Object.values( result ).forEach( section => expect( section.entries ).toHaveLength( 0 ) );
 	} );
@@ -212,7 +211,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should generate correct markdown links for scope and issues from the current repository', () => {
 		const parsedFiles = [ createParsedFile() ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -227,7 +226,7 @@ describe( 'getSectionsWithEntries()', () => {
 			see: [ 'mr-developer/cool-project.com#456' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -244,7 +243,7 @@ describe( 'getSectionsWithEntries()', () => {
 			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.feature.entries.length ).toEqual( 1 );
 		expect( result.invalid.entries.length ).toEqual( 0 );
@@ -253,7 +252,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should skip links when skipLinks is true', () => {
 		const parsedFiles = [ createParsedFile( { shouldSkipLinks: true } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -279,7 +278,7 @@ describe( 'getSectionsWithEntries()', () => {
 			isValid: false
 		} );
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.invalid.entries[ 0 ]!.message;
 
@@ -289,7 +288,7 @@ describe( 'getSectionsWithEntries()', () => {
 	it( 'should format the content properly', () => {
 		const parsedFiles = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -308,7 +307,7 @@ describe( 'getSectionsWithEntries()', () => {
 			closes: [ 'invalid-reference' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -320,7 +319,7 @@ describe( 'getSectionsWithEntries()', () => {
 			see: [ 'invalid-reference' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -335,7 +334,7 @@ describe( 'getSectionsWithEntries()', () => {
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.other.entries ).toHaveLength( 1 );
 		expect( result.warning.entries ).toHaveLength( 1 );
@@ -348,7 +347,7 @@ describe( 'getSectionsWithEntries()', () => {
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packageJsons, transformScope, singlePackage } );
+		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.feature.entries ).toHaveLength( 1 );
 		expect( result.warning.entries ).toHaveLength( 1 );

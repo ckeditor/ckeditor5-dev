@@ -17,7 +17,7 @@ vi.mock( 'chalk', () => ( {
 	}
 } ) );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( '../../src/constants.js', () => ( {
+vi.mock( '../../src/utils/constants.js', () => ( {
 	CHANGELOG_FILE: 'CHANGES.md'
 } ) );
 

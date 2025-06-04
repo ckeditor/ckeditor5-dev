@@ -3,12 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ValidatedType, ParsedFile, ValidatedFile } from '../types.js';
+import type { ValidatedType, ParsedFile } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from './constants.js';
 
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
-	validatedEntry: ValidatedFile;
+	validatedEntry: ParsedFile;
 } {
 	const noScopePackagesNames = packagesNames.map( packageName => packageName.replace( /@.*\//, '' ) );
 	const data = entry.data;

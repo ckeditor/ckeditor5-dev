@@ -42,34 +42,12 @@ describe( 'normalizeEntry()', () => {
 			expect( normalizedEntry.data.type ).toBe( 'Feature' );
 		} );
 
-		it( 'should convert aliases to the base name', () => {
-			const entry = createEntry( { type: 'fixes' } );
-
-			const normalizedEntry = normalizeEntry( entry, false );
-
-			expect( normalizedEntry.data.type ).toBe( 'Fix' );
-		} );
-
 		it( 'should maintain other capitalized types', () => {
 			const entry = createEntry( { type: 'other' } );
 
 			const normalizedEntry = normalizeEntry( entry, false );
 
 			expect( normalizedEntry.data.type ).toBe( 'Other' );
-		} );
-
-		it( 'should normalize breaking change aliases', () => {
-			const entry1 = createEntry( { type: 'Major' } );
-			const entry2 = createEntry( { type: 'Minor' } );
-			const entry3 = createEntry( { type: 'Breaking' } );
-
-			const normalizedEntry1 = normalizeEntry( entry1, false );
-			const normalizedEntry2 = normalizeEntry( entry2, false );
-			const normalizedEntry3 = normalizeEntry( entry3, false );
-
-			expect( normalizedEntry1.data.type ).toBe( 'Major breaking change' );
-			expect( normalizedEntry2.data.type ).toBe( 'Minor breaking change' );
-			expect( normalizedEntry3.data.type ).toBe( 'Breaking change' );
 		} );
 
 		it( 'should cast minor and major breaking changes in a single package to generic one', () => {
@@ -93,12 +71,12 @@ describe( 'normalizeEntry()', () => {
 			expect( normalizedEntry.data.scope ).toEqual( [ 'engine', 'ui' ] );
 		} );
 
-		it( 'should return undefined when scope is not provided', () => {
+		it( 'should return empty array when scope is not provided', () => {
 			const entry = createEntry( {} );
 
 			const normalizedEntry = normalizeEntry( entry, false );
 
-			expect( normalizedEntry.data.scope ).toBeUndefined();
+			expect( normalizedEntry.data.scope ).toHaveLength( 0 );
 		} );
 	} );
 

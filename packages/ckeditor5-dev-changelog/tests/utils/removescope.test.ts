@@ -32,7 +32,7 @@ describe( 'removeScope()', () => {
 		const result = removeScope( parsedChangesetFiles );
 
 		expect( result ).toEqual( [ {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath1',
 			gitHubUrl: 'gitHubUrl1',
 			content: 'content1',
@@ -40,7 +40,7 @@ describe( 'removeScope()', () => {
 				type: 'type1'
 			}
 		}, {
-			skipLinks: true,
+			shouldSkipLinks: true,
 			changesetPath: 'changesetPath2',
 			gitHubUrl: 'gitHubUrl2',
 			content: 'content2',

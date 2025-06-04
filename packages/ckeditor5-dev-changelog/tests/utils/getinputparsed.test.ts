@@ -83,13 +83,13 @@ describe( 'getInputParsed()', () => {
 				...matterResult1,
 				gitHubUrl,
 				changesetPath: changesetPath1,
-				skipLinks: false
+				shouldSkipLinks: false
 			},
 			{
 				...matterResult2,
 				gitHubUrl,
 				changesetPath: changesetPath2,
-				skipLinks: false
+				shouldSkipLinks: false
 			}
 		];
 
@@ -184,13 +184,13 @@ describe( 'getInputParsed()', () => {
 				...matterResult1,
 				gitHubUrl: gitHubUrl1,
 				changesetPath: changesetPath1,
-				skipLinks: false
+				shouldSkipLinks: false
 			},
 			{
 				...matterResult2,
 				gitHubUrl: gitHubUrl2,
 				changesetPath: changesetPath2,
-				skipLinks: true
+				shouldSkipLinks: true
 			}
 		];
 

@@ -6,15 +6,11 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
-import { CHANGELOG_HEADER } from '../../src/utils/constants';
+import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
 import fs from 'fs';
 
 vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../src/constants.js', () => ( {
-	CHANGELOG_HEADER: '# Changelog\n\n',
-	CHANGELOG_FILE: 'CHANGELOG.md'
-} ) );
 
 describe( 'truncateChangelog()', () => {
 	beforeEach( () => {
@@ -61,7 +57,7 @@ describe( 'truncateChangelog()', () => {
 			'1'
 		].join( '\n' );
 
-		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + changelogEntries );
+		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + '\n\n' + changelogEntries );
 
 		truncateChangelog( 2, '/custom/cwd' );
 
@@ -89,7 +85,7 @@ describe( 'truncateChangelog()', () => {
 
 		const expectedChangelogFooter = '\n';
 
-		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + expectedChangelogEntries );
+		vi.mocked( fs.readFileSync ).mockReturnValue( CHANGELOG_HEADER + '\n\n' + expectedChangelogEntries );
 
 		truncateChangelog( 2, 'cwd' );
 

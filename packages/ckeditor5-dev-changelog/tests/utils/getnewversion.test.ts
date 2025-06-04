@@ -86,7 +86,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'patch'
+			bumpType: 'patch',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -98,6 +99,7 @@ describe( 'getNewVersion()', () => {
 		expect( result.newVersion ).toBe( '50.0.0' );
 		expect( result.isInternal ).toBe( false );
 		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
 	} );
 
 	it( 'should return a minor version when minor entries are present', async () => {
@@ -114,7 +116,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'minor'
+			bumpType: 'minor',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -132,7 +135,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'minor'
+			bumpType: 'minor',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -150,7 +154,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'major'
+			bumpType: 'major',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -170,7 +175,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'major'
+			bumpType: 'major',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -182,6 +188,7 @@ describe( 'getNewVersion()', () => {
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( true );
 		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 1.0.1.' ) }` );
 	} );
 
 	it( 'should handle internal version when user provides "internal" as version', async () => {
@@ -194,7 +201,8 @@ describe( 'getNewVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
 			version: '1.0.0',
 			packageName: 'test-package',
-			bumpType: 'patch'
+			bumpType: 'patch',
+			displayValidationWarning: false
 		} );
 	} );
 
@@ -206,5 +214,46 @@ describe( 'getNewVersion()', () => {
 		await expect(
 			getNewVersion( options )
 		).rejects.toThrow( 'Unable to determine new version based on the version in root package.json.' );
+	} );
+
+	it( 'should set displayValidationWarning to true when invalid entries are present', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
+
+		options.sectionsWithEntries = createSectionsWithEntries(
+			{ invalid: { entries: [ createEntry( 'Invalid change' ) ], title: 'Invalid changes' } }
+		);
+
+		const result = await getNewVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.1' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
+			version: '1.0.0',
+			packageName: 'test-package',
+			bumpType: 'patch',
+			displayValidationWarning: true
+		} );
+	} );
+
+	it( 'should set displayValidationWarning to true when entries have validations', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
+
+		const entryWithValidation = createEntry( 'Some change' );
+		entryWithValidation.data.validations = [ 'Some validation warning' ];
+
+		options.sectionsWithEntries = createSectionsWithEntries(
+			{ fix: { entries: [ entryWithValidation ], title: 'Bug fixes' } }
+		);
+
+		const result = await getNewVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.1' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
+			version: '1.0.0',
+			packageName: 'test-package',
+			bumpType: 'patch',
+			displayValidationWarning: true
+		} );
 	} );
 } );
