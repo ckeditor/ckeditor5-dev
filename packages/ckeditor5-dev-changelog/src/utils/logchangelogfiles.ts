@@ -13,9 +13,9 @@ import { logInfo } from './loginfo.js';
 export function logChangelogFiles(
 	sections: SectionsWithEntries,
 	changesToParse: number,
-	transformScope?: TransformScope,
 	isSinglePackage: boolean,
-	isNextVersionProvidedAsProp: boolean
+	isNextVersionProvidedAsProp: boolean,
+	transformScope?: TransformScope
 ): void {
 	if ( isNextVersionProvidedAsProp ) {
 		return;
@@ -35,7 +35,7 @@ export function logChangelogFiles(
 			displayWarningEntry :
 			displayValidEntry;
 
-		section.entries.forEach( entries => displayCallback( entries, sectionName, transformScope, isSinglePackage ) );
+		section.entries.forEach( entries => displayCallback( entries, sectionName, isSinglePackage, transformScope ) );
 
 		logInfo( '' );
 	}
@@ -85,12 +85,16 @@ function displayWarningEntry( entry: Entry ): void {
 	}
 }
 
-function displayValidEntry( entry: Entry, sectionName: SectionName, transformScope: TransformScope, isSinglePackage: boolean ): void {
+function displayValidEntry( entry: Entry, sectionName: SectionName, isSinglePackage: boolean, transformScope?: TransformScope ): void {
 	const isEntryFullyValid = !entry.data.validations?.length;
-	const scopesWithoutCKEditor5Namespace = entry.data.scope?.map( scope => transformScope( scope ).displayName );
+	const scopeFormatted = transformScope ?
+		entry.data.scope?.map( scope => transformScope( scope ).displayName ) :
+		entry.data.scope;
+
 	const scope = entry.data.scope?.length ?
-		chalk.grey( scopesWithoutCKEditor5Namespace?.join( ', ' ) ) :
+		chalk.grey( scopeFormatted?.join( ', ' ) ) :
 		`${ chalk.italic( chalk.grey( '(no scope)' ) ) }`;
+
 	const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
 	const shouldTrimMessage = String( entry.data.mainContent ).length > 100;
 	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;

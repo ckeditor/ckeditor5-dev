@@ -7,19 +7,19 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { format } from 'date-fns';
 import chalk from 'chalk';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
-import { getSectionsWithEntries } from '../utils/getsectionswithentries.js';
-import { logChangelogFiles } from '../utils/logchangelogfiles.js';
-import { modifyChangelog } from '../utils/modifychangelog.js';
-import { getNewVersion } from '../utils/getnewversion.js';
-import { findPackages } from '../utils/findpackages.js';
-import { getReleasedPackagesInfo } from '../utils/getreleasedpackagesinfo.js';
-import { getChangesetFilePaths } from '../utils/getchangesetfilepaths.js';
-import { getInputParsed } from '../utils/getinputparsed.js';
-import { getSectionsToDisplay } from '../utils/getsectionstodisplay.js';
-import { logInfo } from '../utils/loginfo.js';
-import { getNewChangelog } from '../utils/getnewchangelog.js';
-import { removeChangesetFiles } from '../utils/removechangesetfiles.js';
-import { commitChanges } from '../utils/commitchanges.js';
+import { getSectionsWithEntries } from './getsectionswithentries.js';
+import { logChangelogFiles } from './logchangelogfiles.js';
+import { modifyChangelog } from './modifychangelog.js';
+import { getNewVersion } from './getnewversion.js';
+import { findPackages } from './findpackages.js';
+import { getReleasedPackagesInfo } from './getreleasedpackagesinfo.js';
+import { getChangesetFilePaths } from './getchangesetfilepaths.js';
+import { getInputParsed } from './getinputparsed.js';
+import { getSectionsToDisplay } from './getsectionstodisplay.js';
+import { logInfo } from './loginfo.js';
+import { getNewChangelog } from './getnewchangelog.js';
+import { removeChangesetFiles } from './removechangesetfiles.js';
+import { commitChanges } from './commitchanges.js';
 import { InternalError } from '../errors/internalerror.js';
 
 type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { isSinglePackage: boolean };
@@ -48,7 +48,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	// TODO: if: isSinglePackage = false, then require transformScope.
 	validateArguments( skipRootPackage, npmPackageToCheck );
 
-	const packageNames = await findPackages( { cwd, packagesDirectory, skipRootPackage, externalRepositories } );
+	const packagesMetadata = await findPackages( { cwd, packagesDirectory, skipRootPackage, externalRepositories } );
 	const { version: oldVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
 
 	const changesetFilePaths = await getChangesetFilePaths( cwd, externalRepositories, shouldSkipLinks );
@@ -56,13 +56,13 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 
 	const sectionsWithEntries = getSectionsWithEntries( {
 		parsedFiles: parsedChangesetFiles,
-		packageNames,
+		packagesMetadata,
 		transformScope,
 		isSinglePackage
 	} );
 
 	// Logging changes in the console.
-	logChangelogFiles( sectionsWithEntries, parsedChangesetFiles.length, transformScope, isSinglePackage, !!nextVersion );
+	logChangelogFiles( sectionsWithEntries, parsedChangesetFiles.length, isSinglePackage, !!nextVersion, transformScope );
 
 	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
 
@@ -78,7 +78,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		sections: sectionsWithEntries,
 		oldVersion,
 		newVersion,
-		packageNames
+		packagesMetadata
 	} );
 
 	const newChangelog = await getNewChangelog( {
@@ -89,12 +89,11 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		sectionsToDisplay,
 		releasedPackagesInfo,
 		isInternal,
-		packageJsons: packageNames,
+		packagesMetadata,
 		isSinglePackage
 	} );
 
 	if ( disableFilesystemOperations ) {
-		// TODO: Could we remove `as any`?
 		return newChangelog as any;
 	}
 

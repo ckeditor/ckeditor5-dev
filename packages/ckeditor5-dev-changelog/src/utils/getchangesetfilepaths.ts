@@ -7,7 +7,7 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import upath from 'upath';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
-import { CHANGESET_DIRECTORY } from './constants';
+import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';
 
 /**

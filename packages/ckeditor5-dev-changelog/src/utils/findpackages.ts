@@ -43,6 +43,6 @@ export async function findPackages( options: FindPackagesOptions ): Promise<Map<
 		.flat()
 		.map<workspaces.PackageJson>( packagePath => fs.readJson( packagePath ) )
 		.map<[ string, string ]>( ( { name, version } ) => [ name, version ] )
-		.then( entries => new Map( entries ) );
+		.then( entries => new Map( entries.sort( ( [ a ], [ b ] ) => a.localeCompare( b ) ) ) );
 }
 

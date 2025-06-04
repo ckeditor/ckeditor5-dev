@@ -3,23 +3,23 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
-import { deduplicate } from './deduplicate';
+import { deduplicate } from './deduplicate.js';
 
 /**
  * Generates information about packages being released in the new version.
  * This function creates a summary of package versions and their changes.
  */
-export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packageNames }: {
+export async function getReleasedPackagesInfo( { sections, oldVersion, newVersion, packagesMetadata }: {
 	sections: SectionsWithEntries;
 	oldVersion: string;
 	newVersion: string;
-	packageNames: Array<string>;
+	packagesMetadata: Map<string, string>;
 } ): Promise<Array<ReleaseInfo>> {
 	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
+	const packageNames = [ ...packagesMetadata.keys() ];
 
-	const newVersionReleases = getNewVersionReleases( packageNames );
+	const newVersionReleases = getNewVersionReleases( packagesMetadata );
 	const majorReleases = getScopeWithOrgNamespace( sections.major.entries, { packagesToRemove: newVersionReleases, packageNames } );
 	const minorReleases = getScopeWithOrgNamespace( sections.minor.entries, {
 		packagesToRemove: [ ...majorReleases, ...newVersionReleases ],
@@ -45,10 +45,10 @@ export async function getReleasedPackagesInfo( { sections, oldVersion, newVersio
 	].filter( release => release.packages?.length > 0 );
 }
 
-function getNewVersionReleases( packages: Array<workspaces.PackageJson> ) {
-	return packages
-		.filter( packageJson => packageJson.version === '0.0.1' )
-		.map( packageJson => packageJson.name )
+function getNewVersionReleases( packages: Map<string, string> ) {
+	return [ ...packages ]
+		.filter( ( [ , version ] ) => version === '0.0.1' )
+		.map( ( [ packageName ] ) => packageName )
 		.sort();
 }
 

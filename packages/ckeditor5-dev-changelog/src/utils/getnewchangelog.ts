@@ -4,22 +4,20 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from './constants';
+import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from './constants.js';
 import type { ReleaseInfo, Section } from '../types.js';
-import { getDateFormatted } from './getdateformatted';
+import { getDateFormatted } from './getdateformatted.js';
 
 type NewChangelogOptions = {
 	cwd: string;
 	date: string;
 	oldVersion: string;
 	newVersion: string;
-	dateFormatted: string;
-	gitHubUrl: string;
 	sectionsToDisplay: Array<Section>;
 	releasedPackagesInfo: Array<ReleaseInfo>;
 	isInternal: boolean;
-	singlePackage: boolean;
-	packageJsons: Array<workspaces.PackageJson>;
+	isSinglePackage: boolean;
+	packagesMetadata: Map<string, string>;
 };
 
 export async function getNewChangelog( {
@@ -30,13 +28,12 @@ export async function getNewChangelog( {
 	sectionsToDisplay,
 	releasedPackagesInfo,
 	isInternal,
-	singlePackage,
-	packageJsons
+	isSinglePackage,
+	packagesMetadata
 }: NewChangelogOptions ): Promise<string> {
 	const gitHubUrl = await workspaces.getRepositoryUrl( cwd, { async: true } );
 	const dateFormatted = getDateFormatted( date );
-
-	const packagesNamesSorted = packageJsons.map( packageJson => packageJson.name ).sort();
+	const packagesNames = [ ...packagesMetadata.keys() ];
 
 	const header = oldVersion === '0.0.1' ?
 		`## ${ newVersion } (${ dateFormatted })` :
@@ -60,7 +57,7 @@ export async function getNewChangelog( {
 		'',
 		SECTIONS.other.title + ':',
 		'',
-		packagesNamesSorted.map( name => `* [${ name }](${ NPM_URL }/${ name }/v/${ newVersion }): v${ oldVersion } => v${ newVersion }` )
+		packagesNames.map( name => `* [${ name }](${ NPM_URL }/${ name }/v/${ newVersion }): v${ oldVersion } => v${ newVersion }` )
 	].flat().join( '\n' );
 
 	const changelog = [
@@ -69,7 +66,7 @@ export async function getNewChangelog( {
 		isInternal ? 'Internal changes only (updated dependencies, documentation, etc.).\n' : sections
 	];
 
-	if ( !singlePackage ) {
+	if ( !isSinglePackage ) {
 		changelog.push(
 			'### Released packages',
 			'',

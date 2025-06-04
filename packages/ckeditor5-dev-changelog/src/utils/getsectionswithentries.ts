@@ -14,12 +14,14 @@ type DifferentRepoIssue = { owner: string; repository: string; number: string };
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( { parsedFiles, packageNames, transformScope, isSinglePackage }: {
+export function getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage }: {
 	parsedFiles: Array<ParsedFile>;
-	packageNames: Array<string>;
+	packagesMetadata: Map<string, string>;
 	transformScope?: TransformScope;
 	isSinglePackage: boolean;
 } ): SectionsWithEntries {
+	const packageNames = [ ...packagesMetadata.keys() ];
+
 	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
 		const normalizedEntry = normalizeEntry( entry, isSinglePackage );
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packageNames, isSinglePackage );
@@ -128,7 +130,9 @@ function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitH
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }
 
-function getSection( { entry, isSinglePackage, isValid }: { entry: ValidatedFile; isSinglePackage: boolean; isValid: boolean } ): SectionName {
+function getSection( options: { entry: ValidatedFile; isSinglePackage: boolean; isValid: boolean } ): SectionName {
+	const { entry, isSinglePackage, isValid } = options;
+
 	if ( !isValid ) {
 		return 'invalid';
 	}

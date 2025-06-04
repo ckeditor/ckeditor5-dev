@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getNewChangelog } from '../../src/utils/getnewchangelog.js';
-import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/utils/constants';
+import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/utils/constants.js';
 import type { ReleaseInfo, Section } from '../../src/types.js';
 import type { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
@@ -46,8 +46,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
-			singlePackage: false,
-			packageJsons: []
+			isSinglePackage: false,
+			packagesMetadata: []
 		} );
 
 		expect( result ).toContain( '## 1.0.0 (2023-04-15)' );
@@ -63,8 +63,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
-			singlePackage: false,
-			packageJsons: []
+			isSinglePackage: false,
+			packagesMetadata: []
 		} );
 
 		expect( result ).toContain( '## [1.1.0](https://github.com/ckeditor/ckeditor5/compare/v1.0.0...v1.1.0) (2023-04-15)' );
@@ -79,8 +79,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
-			singlePackage: false,
-			packageJsons: [
+			isSinglePackage: false,
+			packagesMetadata: [
 				createPackageJson( '@ckeditor/ckeditor5-package-a' ),
 				createPackageJson( '@ckeditor/ckeditor5-package-b' )
 			]
@@ -108,8 +108,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay,
 			releasedPackagesInfo: [],
 			isInternal: false,
-			singlePackage: false,
-			packageJsons: []
+			isSinglePackage: false,
+			packagesMetadata: []
 		} );
 
 		expect( result ).toContain( '### Features' );
@@ -138,8 +138,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo,
 			isInternal: false,
-			singlePackage: false,
-			packageJsons: []
+			isSinglePackage: false,
+			packagesMetadata: []
 		} );
 
 		expect( result ).toContain( '### Released packages' );
@@ -170,8 +170,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo,
 			isInternal: false,
-			singlePackage: true,
-			packageJsons: []
+			isSinglePackage: true,
+			packagesMetadata: []
 		} );
 
 		expect( result ).not.toContain( '### Released packages' );
@@ -191,8 +191,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
-			singlePackage: false,
-			packageJsons
+			isSinglePackage: false,
+			packagesMetadata: packageJsons
 		} );
 
 		expect( result ).toContain( SECTIONS.other.title + ':' );
@@ -219,8 +219,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
-			singlePackage: false,
-			packageJsons
+			isSinglePackage: false,
+			packagesMetadata: packageJsons
 		} );
 
 		const packageAIndex = result.indexOf( '@ckeditor/ckeditor5-package-a' );
@@ -240,8 +240,8 @@ describe( 'getNewChangelog()', () => {
 			sectionsToDisplay: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
-			singlePackage: false,
-			packageJsons: []
+			isSinglePackage: false,
+			packagesMetadata: []
 		} );
 
 		const detailsIndex = result.indexOf( '<details>' );
