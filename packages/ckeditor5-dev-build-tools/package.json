@@ -43,7 +43,7 @@
     "glob": "^11.0.2",
     "magic-string": "^0.30.6",
     "pofile": "^1.1.4",
-    "postcss": "^8.0.0",
+    "postcss": "^8.4.12",
     "postcss-mixins": "^11.0.0",
     "postcss-nesting": "^13.0.0",
     "purgecss": "^7.0.2",
@@ -59,7 +59,7 @@
     "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^3.1.1",
     "type-fest": "^4.10.2",
-    "typescript": "^5.6.0",
+    "typescript": "5.0.4",
     "vitest": "^3.1.1"
   },
   "scripts": {

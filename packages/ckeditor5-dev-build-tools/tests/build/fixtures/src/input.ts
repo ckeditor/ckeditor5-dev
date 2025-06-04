@@ -4,7 +4,7 @@
  */
 
 // Test importing JSON.
-import settings from './settings.json' with { type: 'json' };
+import settings from './settings.json' assert { type: 'json' };
 
 // Test importing SVG.
 // @ts-ignore
