@@ -45,9 +45,6 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		disableFilesystemOperations = false
 	} = options;
 
-	// TODO: if: isSinglePackage = false, then require transformScope.
-	validateArguments( skipRootPackage, npmPackageToCheck );
-
 	const packagesMetadata = await findPackages( { cwd, packagesDirectory, skipRootPackage, externalRepositories } );
 	const { version: oldVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
 
@@ -106,13 +103,6 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );
 };
-
-// TODO think if it's needed
-function validateArguments( skipRootPackage: undefined | boolean, npmPackageToCheck: string | undefined ) {
-	if ( skipRootPackage && npmPackageToCheck === undefined ) {
-		throw new Error( 'Provide npmPackageToCheck.' );
-	}
-}
 
 /**
  * Wrapper function that provides error handling for the changelog generation process.
