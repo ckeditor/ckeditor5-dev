@@ -31,7 +31,7 @@ export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions )
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packageNames, isSinglePackage );
 		const validatedData = validatedEntry.data;
 
-		const scope = isSinglePackage ? [] : getScopesLinks( validatedData.scope, transformScope! );
+		const scope = isSinglePackage ? null : getScopesLinks( validatedData.scope, transformScope! );
 		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
 		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, isSinglePackage, isValid } );
@@ -39,15 +39,7 @@ export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions )
 		const content = linkToGitHubUser( contentWithCommunityCredits );
 		const [ mainContent, ...restContent ] = formatContent( content );
 
-		const messageFirstLine = [
-			'*',
-			scope ? `**${ scope }**:` : null,
-			mainContent,
-			!entry.shouldSkipLinks && see ? see : null,
-			!entry.shouldSkipLinks && closes ? closes : null
-		].filter( Boolean ).join( ' ' );
-
-		const changeMessage = restContent.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
+		const changeMessage = getChangeMessage( { restContent, scope, mainContent, entry, see, closes } );
 
 		const newEntry: Entry = {
 			message: changeMessage,
@@ -69,6 +61,27 @@ export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions )
 
 		return sections;
 	}, getInitialSectionsWithEntries() );
+}
+
+type GetChangeMessageOptions = {
+	mainContent: string | undefined;
+	restContent: Array<string> | undefined;
+	entry: ParsedFile;
+	scope: string | null;
+	see: string | null;
+	closes: string | null;
+};
+
+function getChangeMessage( { restContent, scope, mainContent, entry, see, closes }: GetChangeMessageOptions ) {
+	const messageFirstLine = [
+		'*',
+		scope ? `**${ scope }**:` : null,
+		mainContent,
+		!entry.shouldSkipLinks && see ? see : null,
+		!entry.shouldSkipLinks && closes ? closes : null
+	].filter( Boolean ).join( ' ' );
+
+	return restContent?.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
 }
 
 function formatContent( content: string ) {
