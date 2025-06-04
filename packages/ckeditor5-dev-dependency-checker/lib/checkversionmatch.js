@@ -22,16 +22,21 @@ const DEFAULT_PKG_JSON_PATTERNS = [
 ];
 
 /**
- * This script ensures that all "dependencies" in package JSONs use the same versions of dependencies.
- * It also checks that all versions are pinned, and they don't use the caret operator "^".
+ * This script ensures that "dependencies" and "devDependencies" in package JSONs which match
+ * passed (or default) glob patterns use consistent dependencies versions. It also checks versions
+ * available on npm, bumps and pins a set version for dependencies using the "^" range operator.
  *
  * @param {object} options
  * @param {string} options.cwd
- * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors.
- * @param {boolean} [options.allowRanges=true] Whether the caret operator "^" is allowed.
- * @param {function} [options.devDependenciesFilter]
- * @param {Array.<string>} [options.pkgJsonPatterns]
- * @param {object} [options.versionExceptions]
+ * @param {boolean} [options.fix=false] Whether the script should automatically fix the errors instead of reporting them.
+ * @param {boolean} [options.allowRanges=false] It prevents dependencies using the "^" range operator from being bumped to
+ * latest version from npm matching them. Instead, they are bumped to highest version between them.
+ * @param {function} [options.devDependenciesFilter] Function that defines which "devDependencies" should be modified.
+ * All are modified by default
+ * @param {Array.<string>} [options.pkgJsonPatterns] Array of glob patterns to find `package.json` files to modify.
+ * By default, it modifies root `package.json` and `packages/*\/package.json` files.
+ * @param {object} [options.versionExceptions] Allows setting `allowRanges` for packages defined as keys of this object,
+ * instead of globally.
  */
 export default async function checkVersionMatch( {
 	cwd,
