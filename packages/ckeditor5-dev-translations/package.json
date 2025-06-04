@@ -27,11 +27,11 @@
     "@ckeditor/ckeditor5-dev-utils": "^49.0.2",
     "chalk": "^5.0.0",
     "fs-extra": "^11.0.0",
-    "glob": "^11.0.1",
+    "glob": "^11.0.2",
     "rimraf": "^6.0.1",
     "webpack-sources": "^3.0.0",
     "plural-forms": "^0.5.5",
-    "pofile": "^1.0.9",
+    "pofile": "^1.1.4",
     "upath": "^2.0.1"
   },
   "devDependencies": {
