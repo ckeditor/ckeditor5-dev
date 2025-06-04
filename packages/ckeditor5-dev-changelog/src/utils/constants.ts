@@ -4,7 +4,6 @@
  */
 
 import path from 'upath';
-import type { DeepReadonly, EntryType } from '../types.js';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
 
@@ -53,4 +52,4 @@ export const TYPES = [
 	{ name: 'Major breaking change' },
 	{ name: 'Minor breaking change' },
 	{ name: 'Breaking change' }
-] as const satisfies DeepReadonly<Array<EntryType>>;
+] as const;
