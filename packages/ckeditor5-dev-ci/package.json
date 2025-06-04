@@ -35,7 +35,7 @@
     "ckeditor5-dev-ci-circle-enable-auto-cancel-builds": "bin/circle-enable-auto-cancel-builds.js"
   },
   "dependencies": {
-    "@octokit/rest": "^21.0.0",
+    "@octokit/rest": "^22.0.0",
     "minimist": "^1.2.8",
     "slack-notify": "^2.0.6"
   },
