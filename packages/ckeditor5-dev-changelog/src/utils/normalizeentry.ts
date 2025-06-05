@@ -3,47 +3,50 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { ParsedFile, ValidatedType } from '../types.js';
-import { deduplicate } from './deduplicate.js';
+import type { FileMetadata, ParsedFile } from '../types.js';
 
-export function normalizeEntry( entry: ParsedFile, isSinglePackage: boolean ): ParsedFile {
+export function normalizeEntry( entry: ParsedFile<Partial<FileMetadata>>, isSinglePackage: boolean ): ParsedFile {
 	// Normalize type.
 	const typeNormalized = getTypeNormalized( entry.data.type, isSinglePackage );
 
 	// Normalize scope.
-	const scope = entry.data.scope;
-	const scopeLowercase = scope?.filter( scope => scope ).map( scopeEntry => String( scopeEntry ).toLowerCase() );
-	const scopeNormalized = deduplicate( scopeLowercase ).sort();
+	const scopeNormalized = toArray( entry.data.scope )
+		.filter( scope => scope )
+		.map( scopeEntry => String( scopeEntry ).toLowerCase() )
+		.sort();
 
 	// Normalize closes.
-	const closesNormalized = entry.data.closes?.filter( closes => closes ).map( closes => String( closes ) );
+	const closesNormalized = toArray( entry.data.closes )
+		.filter( closes => closes )
+		.map( closes => String( closes ) );
 
 	// Normalize see.
-	const seeNormalized = entry.data.see?.filter( see => see ).map( see => String( see ) );
+	const seeNormalized = toArray( entry.data.see )
+		.filter( see => see ).map( see => String( see ) );
 
 	// Normalize community credits.
-	const communityCreditsNormalized = entry.data.communityCredits
-		?.filter( see => see )
+	const communityCreditsNormalized = toArray( entry.data.communityCredits )
+		.filter( see => see )
 		.map( credits => ensureAt( String( credits ) ) );
 
 	return {
 		...entry,
 		data: {
-			...entry.data,
 			type: typeNormalized,
-			scope: scopeNormalized,
-			closes: closesNormalized,
-			see: seeNormalized,
-			communityCredits: communityCreditsNormalized
+			scope: deduplicate( scopeNormalized ),
+			closes: deduplicate( closesNormalized ),
+			see: deduplicate( seeNormalized ),
+			communityCredits: deduplicate( communityCreditsNormalized ),
+			validations: []
 		}
 	};
 }
 
-function getTypeNormalized( type: string | undefined, isSinglePackage: boolean ) {
+function getTypeNormalized( type: string | undefined, isSinglePackage: boolean ): string {
 	const typeCapitalized = capitalize( type );
-	const expectedBreakingChangeTypes: Array<ValidatedType> = [ 'Major breaking change', 'Minor breaking change' ];
+	const expectedBreakingChangeTypes = [ 'Major breaking change', 'Minor breaking change' ];
 
-	if ( isSinglePackage && expectedBreakingChangeTypes.includes( typeCapitalized as ValidatedType ) ) {
+	if ( isSinglePackage && expectedBreakingChangeTypes.includes( typeCapitalized ) ) {
 		return 'Breaking change';
 	}
 
@@ -58,4 +61,20 @@ function capitalize( value: unknown ) {
 
 function ensureAt( str: string ) {
 	return str.startsWith( '@' ) ? str : '@' + str;
+}
+
+function deduplicate( packageNames: Array<string> | undefined ): Array<string> {
+	return [ ...new Set( packageNames ) ];
+}
+
+function toArray( input: string | Array<string> | undefined ): Array<string> {
+	if ( !input ) {
+		return [];
+	}
+
+	if ( typeof input === 'string' ) {
+		return [ input ];
+	}
+
+	return input;
 }

@@ -24,7 +24,7 @@ export async function removeEmptyDirs( directory: string ): Promise<void> {
 		}
 	}
 
-	// Check again if directory is empty after processing subdirectories
+	// Check again if a directory is empty after processing subdirectories
 	if ( ( await fs.readdir( directory ) )?.length === 0 ) {
 		await fs.rmdir( directory );
 	}

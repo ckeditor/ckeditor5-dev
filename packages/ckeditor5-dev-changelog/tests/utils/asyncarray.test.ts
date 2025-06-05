@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { AsyncArray } from '../../src/utils/asyncarray';
+import { AsyncArray } from '../../src/utils/asyncarray.js';
 
 describe( 'AsyncArray', () => {
 	describe( 'from()', () => {

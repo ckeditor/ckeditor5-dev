@@ -34,7 +34,9 @@ describe( 'getNewVersion()', () => {
 			type: 'feature',
 			scope: [],
 			closes: [],
-			see: []
+			see: [],
+			validations: [],
+			communityCredits: []
 		},
 		changesetPath: ''
 	} );
@@ -61,8 +63,8 @@ describe( 'getNewVersion()', () => {
 		} );
 
 		options = {
-			sectionsWithEntries: createSectionsWithEntries(),
-			oldVersion: '1.0.0',
+			sections: createSectionsWithEntries(),
+			currentVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: undefined
 		};
@@ -105,7 +107,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should return a minor version when minor entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 
-		options.sectionsWithEntries = createSectionsWithEntries(
+		options.sections = createSectionsWithEntries(
 			{ minor: { entries: [ createEntry( 'Some minor change' ) ], title: 'Minor Breaking Changes' } }
 		);
 
@@ -124,7 +126,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should return a minor version when Feature entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 
-		options.sectionsWithEntries = createSectionsWithEntries(
+		options.sections = createSectionsWithEntries(
 			{ feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' } }
 		);
 
@@ -143,7 +145,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should return a major version when major entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0' );
 
-		options.sectionsWithEntries = createSectionsWithEntries(
+		options.sections = createSectionsWithEntries(
 			{ major: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' } }
 		);
 
@@ -162,7 +164,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should prioritize major version even if minor and feature entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0' );
 
-		options.sectionsWithEntries = createSectionsWithEntries( {
+		options.sections = createSectionsWithEntries( {
 			minor: { entries: [ createEntry( 'Some minor change' ) ], title: 'Minor Breaking Changes' },
 			major: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' },
 			feature: { entries: [ createEntry( 'Some feature' ) ], title: 'Features' }
@@ -208,7 +210,7 @@ describe( 'getNewVersion()', () => {
 
 	it( 'should throw an error when semver.inc returns null', async () => {
 		// Use an invalid version to test the error case
-		options.oldVersion = 'invalid-version';
+		options.currentVersion = 'invalid-version';
 		options.nextVersion = 'internal';
 
 		await expect(
@@ -219,7 +221,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should set displayValidationWarning to true when invalid entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
 
-		options.sectionsWithEntries = createSectionsWithEntries(
+		options.sections = createSectionsWithEntries(
 			{ invalid: { entries: [ createEntry( 'Invalid change' ) ], title: 'Invalid changes' } }
 		);
 
@@ -241,7 +243,7 @@ describe( 'getNewVersion()', () => {
 		const entryWithValidation = createEntry( 'Some change' );
 		entryWithValidation.data.validations = [ 'Some validation warning' ];
 
-		options.sectionsWithEntries = createSectionsWithEntries(
+		options.sections = createSectionsWithEntries(
 			{ fix: { entries: [ entryWithValidation ], title: 'Bug fixes' } }
 		);
 

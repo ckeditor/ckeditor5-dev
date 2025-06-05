@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS, TYPES } from './utils/constants.js';
+import type { SECTIONS } from './utils/constants.js';
 
 export type ConfigBase = RepositoryConfig & {
 
@@ -34,7 +34,7 @@ export type MonoRepoConfigBase = {
 	/**
 	 * Whether to include the root package name in the bumped packages versions section in the changelog.
 	 */
-	skipRootPackage?: unknown;
+	shouldIgnoreRootPackage?: unknown;
 
 	/**
 	 * The package that will be used when determining if the next version is available on npm.
@@ -72,23 +72,24 @@ export type GenerateChangelogEntryPoint<K extends object> = <T extends boolean |
 
 export type SectionName = keyof typeof SECTIONS;
 
-export type ValidatedType = typeof TYPES[ number ][ 'name' ];
-
 export type Entry = {
 	message: string;
-	data: FileMetadata & {
+	data: {
+		type: string;
+		scope: Array<string>;
 		mainContent: string | undefined;
 		restContent: Array<string>;
-		validations?: Array<string>;
-		seeLinks?: Array<LinkObject>;
-		closesLinks?: Array<LinkObject>;
+		communityCredits: Array<string>;
+		validations: Array<string>;
+		see: Array<LinkObject>;
+		closes: Array<LinkObject>;
 	};
 	changesetPath: string;
 };
 
-export type ParsedFile = {
+export type ParsedFile<T = FileMetadata> = {
 	content: string;
-	data: FileMetadata;
+	data: T;
 	changesetPath: string;
 	gitHubUrl: string;
 	shouldSkipLinks: boolean;
@@ -115,7 +116,7 @@ export type TransformScope = ( name: string ) => {
 };
 
 export type ChangesetPathsWithGithubUrl = {
-	changesetPaths: Array<string>;
+	filePaths: Array<string>;
 	gitHubUrl: string;
 	shouldSkipLinks: boolean;
 	cwd: string;
@@ -123,20 +124,20 @@ export type ChangesetPathsWithGithubUrl = {
 };
 
 type NpmPackageRequiredWhenSkipRootPackage = {
-	skipRootPackage?: true;
+	shouldIgnoreRootPackage?: true;
 	npmPackageToCheck: string;
 } | {
-	skipRootPackage?: false;
+	shouldIgnoreRootPackage?: false;
 	npmPackageToCheck?: never;
 };
 
-type LinkObject = { displayName: string; link: string };
+export type LinkObject = { displayName: string; link: string };
 
-type FileMetadata = {
-	type?: string;
-	scope?: Array<string>;
-	closes?: Array<string>;
-	see?: Array<string>;
-	validations?: Array<string>;
-	communityCredits?: Array<string>;
+export type FileMetadata = {
+	type: string;
+	scope: Array<string>;
+	closes: Array<string>;
+	see: Array<string>;
+	communityCredits: Array<string>;
+	validations: Array<string>;
 };

@@ -40,7 +40,7 @@ describe( 'findPackages()', () => {
 	it( 'should return an empty array when skipping the root repository package', async () => {
 		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValueOnce( [] );
 
-		await expect( findPackages( { cwd, packagesDirectory, externalRepositories: [], skipRootPackage: true } ) )
+		await expect( findPackages( { cwd, packagesDirectory, externalRepositories: [], shouldIgnoreRootPackage: true } ) )
 			.resolves.toEqual( new Map( [] ) );
 
 		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith(
@@ -66,7 +66,7 @@ describe( 'findPackages()', () => {
 			[ 'package1', '1.0.0' ],
 			[ 'package2', '1.0.0' ],
 			[ 'package3', '1.0.0' ],
-			[ 'package4', '1.0.0' ],
+			[ 'package4', '1.0.0' ]
 		] ) );
 
 		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith(

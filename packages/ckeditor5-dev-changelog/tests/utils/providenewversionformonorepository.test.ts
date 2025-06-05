@@ -4,22 +4,28 @@
  */
 
 import { npm } from '@ckeditor/ckeditor5-dev-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import chalk from 'chalk';
 import inquirer from 'inquirer';
 import semver, { type ReleaseType } from 'semver';
 import {
 	provideNewVersionForMonorepository
 } from '../../src/utils/providenewversionformonorepository.js';
+import { logInfo } from '../../src/utils/loginfo.js';
+import { UserAbortError } from '../../src/utils/useraborterror.js';
 
 vi.mock( 'inquirer' );
 vi.mock( 'chalk', () => ( {
 	default: {
-		underline: ( text: string ) => text,
-		cyan: ( text: string ) => text
+		underline: vi.fn( ( text: string ) => text ),
+		cyan: vi.fn( ( text: string ) => text ),
+		yellow: vi.fn( ( text: string ) => text ),
+		bold: vi.fn( ( text: string ) => text )
 	}
 } ) );
 vi.mock( 'semver' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../src/utils/loginfo.js' );
 
 describe( 'provideNewVersionForMonorepository()', () => {
 	const defaultOptions = {
@@ -29,6 +35,8 @@ describe( 'provideNewVersionForMonorepository()', () => {
 		indentLevel: 0
 	};
 
+	let processMock: MockInstance<typeof process.exit>;
+
 	beforeEach( () => {
 		vi.mocked( npm.manifest ).mockRejectedValue( new Error( 'Package not found' ) );
 		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
@@ -36,6 +44,13 @@ describe( 'provideNewVersionForMonorepository()', () => {
 		vi.mocked( semver.gt ).mockReturnValue( true );
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
 		vi.mocked( inquirer.prompt ).mockResolvedValue( { version: '1.0.1' } );
+
+		processMock = vi.spyOn( process, 'exit' ).mockImplementation( ( () => {
+		} ) as any );
+	} );
+
+	afterEach( () => {
+		processMock.mockRestore();
 	} );
 
 	describe( 'Version suggestion and prompt configuration', () => {
@@ -120,6 +135,46 @@ describe( 'provideNewVersionForMonorepository()', () => {
 			expect( filterFunction ).toBeDefined();
 			expect( filterFunction( '  1.0.1  ' ) ).toBe( '1.0.1' );
 			expect( filterFunction( ' internal ' ) ).toBe( 'internal' );
+		} );
+
+		it( 'should display a warning when found invalid changes', async () => {
+			vi.mocked( inquirer.prompt )
+				.mockImplementationOnce( () => {
+					return Promise.resolve( { continue: false } ) as any;
+				} );
+
+			await expect( provideNewVersionForMonorepository( {
+				...defaultOptions,
+				displayValidationWarning: true
+			} ) ).rejects.toThrow( UserAbortError );
+
+			expect( vi.mocked( chalk.bold ) ).toHaveBeenCalled();
+			expect( vi.mocked( chalk.underline ) ).toHaveBeenCalled();
+			expect( vi.mocked( chalk.yellow ) ).toHaveBeenCalled();
+			expect( vi.mocked( logInfo ) ).toHaveBeenCalledWith(
+				expect.stringContaining( 'WARNING: Invalid changes detected!' )
+			);
+			expect( vi.mocked( logInfo ) ).toHaveBeenCalledWith(
+				'You can cancel the process, fix the invalid files, and run the tool again.'
+			);
+			expect( vi.mocked( logInfo ) ).toHaveBeenCalledWith(
+				'Alternatively, you can continue - but invalid values will be lost.'
+			);
+		} );
+
+		it( 'should ask about the next version when user accepts the invalid changes', async () => {
+			vi.mocked( inquirer.prompt )
+				.mockImplementationOnce( () => {
+					return Promise.resolve( { continue: true } ) as any;
+				} )
+				.mockResolvedValueOnce( { version: '2.0.0' } );
+
+			const result = await provideNewVersionForMonorepository( {
+				...defaultOptions,
+				displayValidationWarning: true
+			} );
+
+			expect( result ).toBe( '2.0.0' );
 		} );
 	} );
 

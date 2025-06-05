@@ -4,26 +4,21 @@
  */
 
 import chalk from 'chalk';
-import { type Entry, type Section, type SectionName, type SectionsWithEntries, type TransformScope } from '../types.js';
 import { logInfo } from './loginfo.js';
+import type { Entry, Section, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 
-type LogChangelogFilesOptions = {
+type DisplayChangesOptions = {
 	sections: SectionsWithEntries;
-	numChangesToParse: number;
 	isSinglePackage: boolean;
-	isNextVersionProvidedAsProp: boolean;
 	transformScope?: TransformScope;
 };
 
 /**
  * This function provides a summary of changes that will be included in the changelog.
  */
-export function logChangelogFiles( options: LogChangelogFilesOptions ): void {
-	const { sections, numChangesToParse, isSinglePackage, isNextVersionProvidedAsProp, transformScope } = options;
-
-	if ( isNextVersionProvidedAsProp ) {
-		return;
-	}
+export function displayChanges( options: DisplayChangesOptions ): void {
+	const { sections, isSinglePackage, transformScope } = options;
+	let numberOfEntries = 0;
 
 	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
 
@@ -39,6 +34,7 @@ export function logChangelogFiles( options: LogChangelogFilesOptions ): void {
 			displayWarningEntry :
 			displayValidEntry;
 
+		numberOfEntries += section.entries.length;
 		section.entries.forEach( entries => displayCallback( entries, sectionName, isSinglePackage, transformScope ) );
 
 		logInfo( '' );
@@ -57,7 +53,7 @@ export function logChangelogFiles( options: LogChangelogFilesOptions ): void {
 	logInfo( '3. A full issue link URL', { indent: 4 } );
 	logInfo( '* A scope field consists of existing packages.', { indent: 3 } );
 	logInfo( '' );
-	logInfo( `Found ${ numChangesToParse } entries to parse.`, { indent: 1 } );
+	logInfo( `Found ${ numberOfEntries } entries to parse.`, { indent: 1 } );
 	logInfo( '' );
 }
 
@@ -71,7 +67,7 @@ function getTitleColor( sectionName: SectionName ) {
 
 	let defaultColor: ( value: string ) => string = chalk.blue;
 
-	if ( sectionName === 'major' || sectionName === 'minor' || sectionName === 'breaking' ) {
+	if ( isBreakingChangeSection( sectionName ) ) {
 		// To avoid tricks in tests, let's simplify the implementation.
 		defaultColor = ( value: string ) => {
 			return chalk.bold( chalk.blue( value ) );
@@ -79,6 +75,10 @@ function getTitleColor( sectionName: SectionName ) {
 	}
 
 	return defaultColor;
+}
+
+function isBreakingChangeSection( sectionName: SectionName ): boolean {
+	return sectionName === 'breaking' || sectionName === 'major' || sectionName === 'minor';
 }
 
 function displayWarningEntry( entry: Entry ): void {
@@ -92,17 +92,16 @@ function displayWarningEntry( entry: Entry ): void {
 function displayValidEntry( entry: Entry, sectionName: SectionName, isSinglePackage: boolean, transformScope?: TransformScope ): void {
 	const isEntryFullyValid = !entry.data.validations?.length;
 	const scopeFormatted = transformScope ?
-		entry.data.scope?.map( scope => transformScope( scope ).displayName ) :
+		entry.data.scope.map( scope => transformScope( scope ).displayName ) :
 		entry.data.scope;
 
-	const scope = entry.data.scope?.length ?
+	const scope = entry.data.scope.length ?
 		chalk.grey( scopeFormatted?.join( ', ' ) ) :
 		`${ chalk.italic( chalk.grey( '(no scope)' ) ) }`;
 
 	const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
 	const shouldTrimMessage = String( entry.data.mainContent ).length > 100;
 	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;
-	const isBreakingChange = sectionName === 'breaking' || sectionName === 'major' || sectionName === 'minor';
 
 	if ( isSinglePackage ) {
 		logInfo( `${ validationIndicator } ${ trimmedMessageContent }`, { indent: 2 } );
@@ -110,15 +109,15 @@ function displayValidEntry( entry: Entry, sectionName: SectionName, isSinglePack
 		logInfo( `${ validationIndicator } ${ scope }: ${ trimmedMessageContent }`, { indent: 2 } );
 	}
 
-	if ( !isBreakingChange ) {
+	if ( !isBreakingChangeSection( sectionName ) ) {
 		return;
 	}
 
-	if ( entry.data.seeLinks?.length ) {
-		logInfo( `- See: ${ entry.data.seeLinks.map( seeObj => seeObj.link ).join( ', ' ) }`, { indent: 3 } );
-	}
+	entry.data.see.forEach( ( { link } ) => {
+		logInfo( `- See: ${ link }`, { indent: 3 } );
+	} );
 
-	if ( entry.data.closesLinks?.length ) {
-		logInfo( `- Closes: ${ entry.data.closesLinks.map( closesObj => closesObj.link ).join( ', ' ) }`, { indent: 3 } );
-	}
+	entry.data.closes.forEach( ( { link } ) => {
+		logInfo( `- Closes: ${ link }`, { indent: 3 } );
+	} );
 }

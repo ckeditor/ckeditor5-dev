@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getSectionsWithEntries } from '../../src/utils/getsectionswithentries.js';
+import { groupEntriesBySection } from '../../src/utils/groupentriesbysection.js';
 import type { ParsedFile } from '../../src/types.js';
 import { validateEntry } from '../../src/utils/validateentry.js';
 
@@ -29,12 +29,13 @@ const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): Parse
 		scope: [ 'package-1' ],
 		closes: [ '123' ],
 		see: [ '456' ],
+		validations: [],
+		communityCredits: [],
 		...overrides.data
 	}
 } as any );
 
-describe( 'getSectionsWithEntries()', () => {
-	const organisationNamespace = '@ckeditor';
+describe( 'groupEntriesBySection()', () => {
 	const isSinglePackage = false;
 	let transformScope: ( name: string ) => { displayName: string; npmUrl: string };
 	let packagesMetadata: Map<string, string>;
@@ -46,8 +47,8 @@ describe( 'getSectionsWithEntries()', () => {
 		} ) );
 
 		packagesMetadata = new Map( [
-			[ `${ organisationNamespace }/package-1`, '1.0.0' ],
-			[ `${ organisationNamespace }/package-2`, '1.0.0' ]
+			[ '@ckeditor/package-1', '1.0.0' ],
+			[ '@ckeditor/package-2', '1.0.0' ]
 		] );
 
 		vi.mocked( validateEntry ).mockImplementation( entry => {
@@ -80,15 +81,14 @@ describe( 'getSectionsWithEntries()', () => {
 		vi.clearAllMocks();
 	} );
 
-	it( 'should correctly classify parsedFiles into sections', () => {
-		const parsedFiles = [
-
+	it( 'should correctly classify files into sections', () => {
+		const files = [
 			createParsedFile( { data: { type: 'Major breaking change' } } ),
 			createParsedFile( { data: { type: 'Fix' } } ),
 			createParsedFile( { data: { type: 'Other' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.fix.entries ).toHaveLength( 1 );
@@ -96,11 +96,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should correctly classify generic breaking changes', () => {
-		const parsedFiles = [
+		const files = [
 			createParsedFile( { data: { type: 'Breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: true } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage: true } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -109,11 +109,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify generic breaking changes in monorepo as invalid', () => {
-		const parsedFiles = [
+		const files = [
 			createParsedFile( { data: { type: 'Breaking change' } } )
 		];
 
-		const testFile = parsedFiles[ 0 ]!;
+		const testFile = files[ 0 ]!;
 		const testData = testFile.data as any;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
 			validatedEntry: {
@@ -125,7 +125,7 @@ describe( 'getSectionsWithEntries()', () => {
 			isValid: false
 		} );
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -134,12 +134,12 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should cast minor and major breaking changes to a generic ones in single packages', () => {
-		const parsedFiles = [
+		const files = [
 			createParsedFile( { data: { type: 'Minor breaking change' } } ),
 			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: true } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage: true } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -148,11 +148,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify minor breaking change in a monorepo', () => {
-		const parsedFiles = [
+		const files = [
 			createParsedFile( { data: { type: 'Minor breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: false } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage: false } );
 
 		expect( result.major.entries ).toHaveLength( 0 );
 		expect( result.minor.entries ).toHaveLength( 1 );
@@ -161,11 +161,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify major breaking change in a monorepo', () => {
-		const parsedFiles = [
+		const files = [
 			createParsedFile( { data: { type: 'Major breaking change' } } )
 		];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage: false } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage: false } );
 
 		expect( result.major.entries ).toHaveLength( 1 );
 		expect( result.minor.entries ).toHaveLength( 0 );
@@ -174,14 +174,14 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should not include see and closes when they are undefined', () => {
-		const parsedFiles = [ createParsedFile( {
+		const files = [ createParsedFile( {
 			data: {
-				see: undefined,
-				closes: undefined
+				see: [],
+				closes: []
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -190,28 +190,28 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should classify an entry as valid if the scope is undefined', () => {
-		const parsedFiles = [ createParsedFile( {
+		const files = [ createParsedFile( {
 			data: {
-				scope: undefined
+				scope: []
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.invalid.entries ).toHaveLength( 0 );
 		expect( result.feature.entries ).toHaveLength( 1 );
 	} );
 
-	it( 'should handle an empty parsedFiles array', () => {
-		const result = getSectionsWithEntries( { parsedFiles: [], packagesMetadata, transformScope, isSinglePackage } );
+	it( 'should handle an empty files array', () => {
+		const result = groupEntriesBySection( { files: [], packagesMetadata, transformScope, isSinglePackage } );
 
 		Object.values( result ).forEach( section => expect( section.entries ).toHaveLength( 0 ) );
 	} );
 
 	it( 'should generate correct markdown links for scope and issues from the current repository', () => {
-		const parsedFiles = [ createParsedFile() ];
+		const files = [ createParsedFile() ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -221,12 +221,12 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should generate correct markdown links for issues from other repositories', () => {
-		const parsedFiles = [ createParsedFile( { data: {
+		const files = [ createParsedFile( { data: {
 			closes: [ 'ckeditor/ckeditor5#123' ],
 			see: [ 'mr-developer/cool-project.com#456' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -239,20 +239,20 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should generate correct markdown links for GitHub issues with URL format', () => {
-		const parsedFiles = [ createParsedFile( { data: {
+		const files = [ createParsedFile( { data: {
 			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.feature.entries.length ).toEqual( 1 );
 		expect( result.invalid.entries.length ).toEqual( 0 );
 	} );
 
 	it( 'should skip links when skipLinks is true', () => {
-		const parsedFiles = [ createParsedFile( { shouldSkipLinks: true } ) ];
+		const files = [ createParsedFile( { shouldSkipLinks: true } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -261,11 +261,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should not add invalid links to the generated message', () => {
-		const parsedFiles = [ createParsedFile( { data: {
+		const files = [ createParsedFile( { data: {
 			closes: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
 		} } ) ];
 
-		const testFile = parsedFiles[ 0 ]!;
+		const testFile = files[ 0 ]!;
 		const testData = testFile.data as any;
 		vi.mocked( validateEntry ).mockReturnValueOnce( {
 			validatedEntry: {
@@ -278,7 +278,7 @@ describe( 'getSectionsWithEntries()', () => {
 			isValid: false
 		} );
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.invalid.entries[ 0 ]!.message;
 
@@ -286,9 +286,9 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should format the content properly', () => {
-		const parsedFiles = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
+		const files = [ createParsedFile( { content: 'Some content.\n\nSecond line.\n\nThird line.' } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -303,11 +303,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should handle invalid issue references that do not match any pattern (closes)', () => {
-		const parsedFiles = [ createParsedFile( { data: {
+		const files = [ createParsedFile( { data: {
 			closes: [ 'invalid-reference' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -315,11 +315,11 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should handle invalid issue references that do not match any pattern (see)', () => {
-		const parsedFiles = [ createParsedFile( { data: {
+		const files = [ createParsedFile( { data: {
 			see: [ 'invalid-reference' ]
 		} } ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		const message = result.feature.entries[ 0 ]!.message;
 
@@ -327,27 +327,27 @@ describe( 'getSectionsWithEntries()', () => {
 	} );
 
 	it( 'should include the partial valid entry in the "warning" section (checking `closes`)', () => {
-		const parsedFiles = [ createParsedFile( {
+		const files = [ createParsedFile( {
 			data: {
 				type: 'Other',
 				closes: [ 'invalid-reference' ]
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.other.entries ).toHaveLength( 1 );
 		expect( result.warning.entries ).toHaveLength( 1 );
 	} );
 
 	it( 'should include the partial valid entry in the "warning" section (checking `see`)', () => {
-		const parsedFiles = [ createParsedFile( {
+		const files = [ createParsedFile( {
 			data: {
 				see: [ 'invalid-reference' ]
 			}
 		} ) ];
 
-		const result = getSectionsWithEntries( { parsedFiles, packagesMetadata, transformScope, isSinglePackage } );
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
 		expect( result.feature.entries ).toHaveLength( 1 );
 		expect( result.warning.entries ).toHaveLength( 1 );

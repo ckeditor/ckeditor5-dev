@@ -6,13 +6,13 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { findChangelogEntryPaths } from '../../src/utils/findchangelogentrypaths.js';
 import type { RepositoryConfig } from '../../src/types.js';
-import { getChangesetFilePaths } from '../../src/utils/getchangesetfilepaths.js';
 
 vi.mock( 'glob' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'getChangesetFilePaths()', () => {
+describe( 'findChangelogEntryPaths()', () => {
 	beforeEach( () => {
 		vi.mocked( workspaces.getRepositoryUrl ).mockImplementation( ( ( cwd: string, options: object ) => {
 			expect( options ).to.haveOwnProperty( 'async', true );
@@ -57,7 +57,7 @@ describe( 'getChangesetFilePaths()', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( {
+		const result = await findChangelogEntryPaths( {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks
@@ -65,21 +65,21 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
+				filePaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				shouldSkipLinks: true,
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				filePaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				shouldSkipLinks: true,
 				isRoot: false,
 				cwd: '/mock/repo1'
 			},
 			{
-				changesetPaths: [ '/mock/repo2/changesets/file4.md' ],
+				filePaths: [ '/mock/repo2/changesets/file4.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo2',
 				shouldSkipLinks: false,
 				isRoot: false,
@@ -100,7 +100,7 @@ describe( 'getChangesetFilePaths()', () => {
 
 		vi.mocked( glob ).mockResolvedValue( [ '/mock/current/changesets/file1.md' ] );
 
-		const result = await getChangesetFilePaths( {
+		const result = await findChangelogEntryPaths( {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks
@@ -108,7 +108,7 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [ '/mock/current/changesets/file1.md' ],
+				filePaths: [ '/mock/current/changesets/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				shouldSkipLinks: false,
 				isRoot: true,
@@ -139,7 +139,7 @@ describe( 'getChangesetFilePaths()', () => {
 			return Promise.resolve( [] );
 		} );
 
-		const result = await getChangesetFilePaths( {
+		const result = await findChangelogEntryPaths( {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks
@@ -147,14 +147,14 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [],
+				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				shouldSkipLinks: false,
 				cwd: '/mock/current',
 				isRoot: true
 			},
 			{
-				changesetPaths: [ '/mock/repo1/changesets/file3.md' ],
+				filePaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				shouldSkipLinks: false,
 				cwd: '/mock/repo1',
@@ -176,7 +176,7 @@ describe( 'getChangesetFilePaths()', () => {
 
 		vi.mocked( glob ).mockImplementation( () => Promise.resolve( [] ) );
 
-		const result = await getChangesetFilePaths( {
+		const result = await findChangelogEntryPaths( {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks
@@ -184,14 +184,14 @@ describe( 'getChangesetFilePaths()', () => {
 
 		expect( result ).toEqual( [
 			{
-				changesetPaths: [],
+				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
 				shouldSkipLinks: false,
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
-				changesetPaths: [],
+				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				shouldSkipLinks: false,
 				isRoot: false,
@@ -212,7 +212,7 @@ describe( 'getChangesetFilePaths()', () => {
 		vi.mocked( glob ).mockRejectedValueOnce( new Error( 'Glob failed' ) );
 
 		await expect(
-			getChangesetFilePaths( { cwd, externalRepositories, shouldSkipLinks: rootSkipLinks } )
+			findChangelogEntryPaths( { cwd, externalRepositories, shouldSkipLinks: rootSkipLinks } )
 		).rejects.toThrow( 'Glob failed' );
 	} );
 
@@ -227,7 +227,7 @@ describe( 'getChangesetFilePaths()', () => {
 			'C:\\mock\\current\\changesets\\subfolder\\file2.md'
 		] );
 
-		const result = await getChangesetFilePaths( {
+		const result = await findChangelogEntryPaths( {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks
@@ -236,7 +236,7 @@ describe( 'getChangesetFilePaths()', () => {
 		expect( result ).toEqual( [
 			{
 				// upath.normalize converts backslashes to forward slashes
-				changesetPaths: [
+				filePaths: [
 					'C:/mock/current/changesets/file1.md',
 					'C:/mock/current/changesets/subfolder/file2.md'
 				],

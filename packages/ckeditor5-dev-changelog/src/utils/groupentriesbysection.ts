@@ -12,7 +12,7 @@ import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScop
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 
 type GetSectionsWithEntriesOptions = {
-	parsedFiles: Array<ParsedFile>;
+	files: Array<ParsedFile>;
 	packagesMetadata: Map<string, string>;
 	transformScope?: TransformScope;
 	isSinglePackage: boolean;
@@ -21,12 +21,12 @@ type GetSectionsWithEntriesOptions = {
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions ): SectionsWithEntries {
-	const { parsedFiles, packagesMetadata, transformScope, isSinglePackage } = options;
+export function groupEntriesBySection( options: GetSectionsWithEntriesOptions ): SectionsWithEntries {
+	const { files, packagesMetadata, transformScope, isSinglePackage } = options;
 
 	const packageNames = [ ...packagesMetadata.keys() ];
 
-	return parsedFiles.reduce<SectionsWithEntries>( ( sections, entry ) => {
+	return files.reduce<SectionsWithEntries>( ( sections, entry ) => {
 		const normalizedEntry = normalizeEntry( entry, isSinglePackage );
 		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packageNames, isSinglePackage );
 		const validatedData = validatedEntry.data;
@@ -44,11 +44,14 @@ export function getSectionsWithEntries( options: GetSectionsWithEntriesOptions )
 		const newEntry: Entry = {
 			message: changeMessage,
 			data: {
-				...validatedData,
 				mainContent,
 				restContent,
-				seeLinks: validatedData.see?.map( see => getIssueLinkObject( see, validatedEntry.gitHubUrl ) ),
-				closesLinks: validatedData.closes?.map( closes => getIssueLinkObject( closes, validatedEntry.gitHubUrl ) )
+				type: validatedData.type,
+				scope: validatedData.scope,
+				see: validatedData.see.map( see => getIssueLinkObject( see, validatedEntry.gitHubUrl ) ),
+				closes: validatedData.closes.map( closes => getIssueLinkObject( closes, validatedEntry.gitHubUrl ) ),
+				validations: validatedData.validations,
+				communityCredits: validatedData.communityCredits
 			},
 			changesetPath: validatedEntry.changesetPath
 		};
@@ -68,8 +71,8 @@ type GetChangeMessageOptions = {
 	restContent: Array<string> | undefined;
 	entry: ParsedFile;
 	scope: string | null;
-	see: string | null;
-	closes: string | null;
+	see: string;
+	closes: string;
 };
 
 function getChangeMessage( { restContent, scope, mainContent, entry, see, closes }: GetChangeMessageOptions ) {
@@ -77,17 +80,48 @@ function getChangeMessage( { restContent, scope, mainContent, entry, see, closes
 		'*',
 		scope ? `**${ scope }**:` : null,
 		mainContent,
-		!entry.shouldSkipLinks && see ? see : null,
-		!entry.shouldSkipLinks && closes ? closes : null
+		!entry.shouldSkipLinks && see.length ? see : null,
+		!entry.shouldSkipLinks && closes.length ? closes : null
 	].filter( Boolean ).join( ' ' );
 
-	return restContent?.length ? messageFirstLine + '\n\n  ' + restContent.join( '\n\n  ' ) : messageFirstLine;
+	if ( !restContent || !restContent.length ) {
+		return messageFirstLine;
+	}
+
+	return `${ messageFirstLine }\n\n${ restContent.map( line => {
+		if ( line.length ) {
+			return `  ${ line }`;
+		}
+		return line;
+	} ).join( '\n' ) }`;
 }
 
 function formatContent( content: string ) {
-	const contentByLines = content.trim().split( '\n\n' );
+	const lines = content.trim()
+		.split( '\n' )
+		.map( line => line.trimEnd() );
 
-	return contentByLines?.filter( line => line.length ).map( line => trimLineBreaks( line ).trim() );
+	const mainIndex = lines.findIndex( line => line.trim() !== '' );
+	const mainContent = lines[ mainIndex ] || '';
+	let restContent = lines.slice( mainIndex + 1 );
+
+	if ( restContent[ 0 ]?.trim() === '' ) {
+		restContent = restContent.slice( 1 );
+	}
+
+	const cleanedRestContent = restContent.reduce( ( acc, line ) => {
+		if ( line.trim() === '' ) {
+			if ( acc[ acc.length - 1 ] !== '' ) {
+				acc.push( '' );
+			}
+		} else {
+			acc.push( line );
+		}
+
+		return acc;
+	}, [] as Array<string> );
+
+	return [ mainContent, ...cleanedRestContent ];
 }
 
 function getContentWithCommunityCredits( content: string, communityCredits: Array<string> | undefined ) {
@@ -98,11 +132,7 @@ function getContentWithCommunityCredits( content: string, communityCredits: Arra
 	return content.concat( `\n\nThanks to ${ communityCredits?.join( ', ' ) }.` );
 }
 
-function getScopesLinks( scope: Array<string> | undefined, transformScope: TransformScope ): string | null {
-	if ( !scope ) {
-		return null;
-	}
-
+function getScopesLinks( scope: Array<string>, transformScope: TransformScope ): string {
 	return scope
 		.map( scope => transformScope( scope ) )
 		.map( ( { displayName, npmUrl } ) => `[${ displayName }](${ npmUrl })` )
@@ -133,9 +163,9 @@ function getIssueLinkObject( issue: string, gitHubUrl: string ) {
 	return { displayName: '', link: '' };
 }
 
-function getIssuesLinks( issues: Array<string> | undefined, prefix: string, gitHubUrl: string ): string | null {
-	if ( !issues?.length ) {
-		return null;
+function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string {
+	if ( !issues.length ) {
+		return '';
 	}
 
 	const links = issues.map( String ).map( issue => {
@@ -158,7 +188,7 @@ function getSection( options: { entry: ParsedFile; isSinglePackage: boolean; isV
 	if ( isSinglePackage ) {
 		const breakingChangeTypes = [ 'Minor breaking change', 'Major breaking change', 'Breaking change' ];
 
-		if ( breakingChangeTypes.includes( entry.data.type! ) ) {
+		if ( breakingChangeTypes.includes( entry.data.type ) ) {
 			return 'breaking';
 		}
 	} else {
@@ -171,7 +201,7 @@ function getSection( options: { entry: ParsedFile; isSinglePackage: boolean; isV
 		}
 	}
 
-	return entry.data.type?.toLowerCase() as SectionName;
+	return entry.data.type.toLowerCase() as SectionName;
 }
 
 function getInitialSectionsWithEntries(): SectionsWithEntries {
@@ -182,8 +212,4 @@ function getInitialSectionsWithEntries(): SectionsWithEntries {
 	}
 
 	return sections;
-}
-
-function trimLineBreaks( str: string ) {
-	return str.replace( /^[\r\n]+|[\r\n]+$/g, '' );
 }

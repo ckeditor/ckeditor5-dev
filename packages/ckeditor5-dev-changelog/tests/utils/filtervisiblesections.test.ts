@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getSectionsToDisplay } from '../../src/utils/getsectionstodisplay.js';
-import { InternalError } from '../../src/errors/internalerror.js';
+import { filterVisibleSections } from '../../src/utils/filtervisiblesections.js';
+import { InternalError } from '../../src/utils/internalerror.js';
 import type { SectionsWithEntries, Section, Entry } from '../../src/types.js';
 
 const createSection = ( title: string, entries: Array<Entry>, excludeInChangelog: boolean = false ): Section => ( {
@@ -16,7 +16,7 @@ const createSection = ( title: string, entries: Array<Entry>, excludeInChangelog
 
 const createEntry = ( message: string ): Entry => ( { message } ) as any;
 
-describe( 'getSectionsToDisplay()', () => {
+describe( 'filterVisibleSections()', () => {
 	it( 'should return only valid sections with entries', () => {
 		const sectionsWithEntries: SectionsWithEntries = {
 			major: createSection( 'Major Changes', [ createEntry( 'Breaking change' ) ] ),
@@ -29,7 +29,7 @@ describe( 'getSectionsToDisplay()', () => {
 			breaking: createSection( 'Breaking Changes', [] )
 		};
 
-		const result = getSectionsToDisplay( sectionsWithEntries );
+		const result = filterVisibleSections( sectionsWithEntries );
 
 		expect( result ).toEqual( expect.arrayContaining( [
 			expect.objectContaining( { title: 'Major Changes', entries: [ { message: 'Breaking change' } ] } )
@@ -53,7 +53,7 @@ describe( 'getSectionsToDisplay()', () => {
 		};
 
 		expect( () => {
-			getSectionsToDisplay( sectionsWithEntries );
+			filterVisibleSections( sectionsWithEntries );
 		} ).toThrow( InternalError );
 	} );
 } );

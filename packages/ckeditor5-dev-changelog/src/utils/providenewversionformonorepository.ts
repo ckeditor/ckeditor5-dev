@@ -9,6 +9,7 @@ import inquirer from 'inquirer';
 import { validateVersionAvailability } from './validateversionavailability.js';
 import { validateVersionHigherThanCurrent } from './validateversionhigherthancurrent.js';
 import { logInfo } from './loginfo.js';
+import { UserAbortError } from './useraborterror.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -33,10 +34,10 @@ type Question = {
 };
 
 type ConfirmationQuestion = {
-	type: 'input';
+	type: 'confirm';
 	name: 'continue';
 	message: string;
-	default: string;
+	default: boolean;
 	prefix: string;
 };
 
@@ -53,7 +54,7 @@ export async function provideNewVersionForMonorepository( options: Options ): Pr
 		const shouldContinue = await askContinueConfirmation( options.indentLevel );
 
 		if ( !shouldContinue ) {
-			process.exit( 0 );
+			throw new UserAbortError( 'Aborted while detecting invalid changes.' );
 		}
 	}
 
@@ -68,8 +69,10 @@ export async function provideNewVersionForMonorepository( options: Options ): Pr
  */
 function displayInvalidChangesWarning(): void {
 	logInfo( '' );
-	logInfo( chalk.yellow.bold( '⚠️  WARNING: Invalid changes detected!' ) );
-	logInfo( chalk.yellow( 'You can cancel this process, fix the sources, and rerun the tool.' ) );
+	logInfo( chalk.yellow( chalk.bold( `⚠️  ${ chalk.underline( 'WARNING: Invalid changes detected!' ) }` ) ) );
+	logInfo( '' );
+	logInfo( chalk.yellow( 'You can cancel the process, fix the invalid files, and run the tool again.' ) );
+	logInfo( chalk.yellow( 'Alternatively, you can continue - but invalid values will be lost.' ) );
 	logInfo( '' );
 }
 
@@ -78,17 +81,16 @@ function displayInvalidChangesWarning(): void {
  */
 async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boolean> {
 	const question: ConfirmationQuestion = {
-		type: 'input',
+		type: 'confirm',
 		name: 'continue',
 		message: 'Do you want to fix them? (Press Enter to cancel, or type anything to continue):',
-		default: '',
+		default: false,
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	};
 
-	const answers = await inquirer.prompt<{ continue: string }>( question as any );
+	const answers = await inquirer.prompt<{ continue: boolean }>( question as any );
 
-	// If user just pressed enter (empty response), they want to cancel
-	return answers.continue.trim() !== '';
+	return answers.continue;
 }
 
 /**

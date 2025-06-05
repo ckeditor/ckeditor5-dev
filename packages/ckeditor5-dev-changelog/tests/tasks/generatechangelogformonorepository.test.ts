@@ -42,7 +42,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				date: '2024-03-26',
 				shouldSkipLinks: false,
 				disableFilesystemOperations: false,
-				skipRootPackage: false,
+				shouldIgnoreRootPackage: false,
 				isSinglePackage: false
 			} );
 		} );
@@ -75,7 +75,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				date: '2024-03-26',
 				shouldSkipLinks: true,
 				disableFilesystemOperations: true,
-				skipRootPackage: false,
+				shouldIgnoreRootPackage: false,
 				isSinglePackage: false
 			} );
 		} );
@@ -91,21 +91,21 @@ describe( 'generateChangelogForMonoRepository()', () => {
 		} );
 	} );
 
-	describe( 'skipRootPackage handling', () => {
-		it( 'should set skipRootPackage to false when not provided', async () => {
+	describe( 'shouldIgnoreRootPackage handling', () => {
+		it( 'should set shouldIgnoreRootPackage to false when not provided', async () => {
 			await generateChangelogForMonoRepository( defaultOptions );
 
 			expect( generateChangelog ).toHaveBeenCalledWith(
 				expect.objectContaining( {
-					skipRootPackage: false
+					shouldIgnoreRootPackage: false
 				} )
 			);
 		} );
 
-		it( 'should set skipRootPackage to true when both skipRootPackage and npmPackageToCheck are provided', async () => {
+		it( 'should set shouldIgnoreRootPackage to true when both shouldIgnoreRootPackage and npmPackageToCheck are provided', async () => {
 			const optionsWithSkipRoot = {
 				...defaultOptions,
-				skipRootPackage: true as const,
+				shouldIgnoreRootPackage: true as const,
 				npmPackageToCheck: 'my-package'
 			};
 
@@ -113,53 +113,59 @@ describe( 'generateChangelogForMonoRepository()', () => {
 
 			expect( generateChangelog ).toHaveBeenCalledWith(
 				expect.objectContaining( {
-					skipRootPackage: true,
+					shouldIgnoreRootPackage: true,
 					npmPackageToCheck: 'my-package'
 				} )
 			);
 		} );
 
-		it( 'should set skipRootPackage to false when skipRootPackage is true but npmPackageToCheck is not provided', async () => {
-			// This test uses 'as any' because we're testing an invalid configuration
-			// that wouldn't normally pass TypeScript compilation
-			const optionsWithoutNpmPackage = {
-				cwd: '/home/ckeditor',
-				packagesDirectory: 'packages',
-				nextVersion: '1.1.0',
-				date: '2024-03-26',
-				externalRepositories: [],
-				shouldSkipLinks: false,
-				disableFilesystemOperations: false,
-				transformScope: ( name: string ) => ( {
-					displayName: name,
-					npmUrl: `https://www.npmjs.com/package/${ name }`
-				} ),
-				skipRootPackage: true
-			} as any;
+		it(
+			'should set shouldIgnoreRootPackage to false when shouldIgnoreRootPackage is true but npmPackageToCheck is not provided',
+			async () => {
+				// This test uses 'as any' because we're testing an invalid configuration
+				// that wouldn't normally pass TypeScript compilation
+				const optionsWithoutNpmPackage = {
+					cwd: '/home/ckeditor',
+					packagesDirectory: 'packages',
+					nextVersion: '1.1.0',
+					date: '2024-03-26',
+					externalRepositories: [],
+					shouldSkipLinks: false,
+					disableFilesystemOperations: false,
+					transformScope: ( name: string ) => ( {
+						displayName: name,
+						npmUrl: `https://www.npmjs.com/package/${ name }`
+					} ),
+					shouldIgnoreRootPackage: true
+				} as any;
 
-			await generateChangelogForMonoRepository( optionsWithoutNpmPackage );
+				await generateChangelogForMonoRepository( optionsWithoutNpmPackage );
 
-			expect( generateChangelog ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					skipRootPackage: false
-				} )
-			);
-		} );
+				expect( generateChangelog ).toHaveBeenCalledWith(
+					expect.objectContaining( {
+						shouldIgnoreRootPackage: false
+					} )
+				);
+			}
+		);
 
-		it( 'should set skipRootPackage to false when npmPackageToCheck is provided but skipRootPackage is false', async () => {
-			const optionsWithNpmPackageButNoSkip = {
-				...defaultOptions,
-				skipRootPackage: false as const
-			};
+		it(
+			'should set shouldIgnoreRootPackage to false when npmPackageToCheck is provided but shouldIgnoreRootPackage is false',
+			async () => {
+				const optionsWithNpmPackageButNoSkip = {
+					...defaultOptions,
+					shouldIgnoreRootPackage: false as const
+				};
 
-			await generateChangelogForMonoRepository( optionsWithNpmPackageButNoSkip );
+				await generateChangelogForMonoRepository( optionsWithNpmPackageButNoSkip );
 
-			expect( generateChangelog ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					skipRootPackage: false
-				} )
-			);
-		} );
+				expect( generateChangelog ).toHaveBeenCalledWith(
+					expect.objectContaining( {
+						shouldIgnoreRootPackage: false
+					} )
+				);
+			}
+		);
 	} );
 
 	describe( 'return value handling', () => {
@@ -204,7 +210,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				expect.objectContaining( {
 					cwd: '/home/ckeditor',
 					packagesDirectory: 'packages',
-					skipRootPackage: false,
+					shouldIgnoreRootPackage: false,
 					isSinglePackage: false
 				} )
 			);
@@ -350,7 +356,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 					npmUrl: `https://npm.com/${ name }`
 				} ),
 				shouldSkipLinks: false,
-				skipRootPackage: true as const,
+				shouldIgnoreRootPackage: true as const,
 				npmPackageToCheck: 'test-package',
 				disableFilesystemOperations: false
 			};

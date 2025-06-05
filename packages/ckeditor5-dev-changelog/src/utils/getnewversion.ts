@@ -15,8 +15,8 @@ type NewVersionObj = {
 };
 
 export type GetNewVersionOptions = {
-	sectionsWithEntries: SectionsWithEntries;
-	oldVersion: string;
+	sections: SectionsWithEntries;
+	currentVersion: string;
 	packageName: string;
 	nextVersion: string | undefined;
 };
@@ -25,10 +25,10 @@ export type GetNewVersionOptions = {
  * This function analyzes the changes and suggests the appropriate version bump.
  */
 export async function getNewVersion( options: GetNewVersionOptions ): Promise<NewVersionObj> {
-	const { sectionsWithEntries, oldVersion, packageName, nextVersion } = options;
+	const { sections, currentVersion, packageName, nextVersion } = options;
 
 	if ( nextVersion === 'internal' ) {
-		const internalVersionBump = getInternalVersionBump( oldVersion );
+		const internalVersionBump = getInternalVersionBump( currentVersion );
 
 		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ internalVersionBump.newVersion }.` ) }` );
 
@@ -45,35 +45,35 @@ export async function getNewVersion( options: GetNewVersionOptions ): Promise<Ne
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( sectionsWithEntries.minor.entries.length || sectionsWithEntries.feature.entries.length ) {
+	if ( sections.minor.entries.length || sections.feature.entries.length ) {
 		bumpType = 'minor';
 	}
 
-	if ( sectionsWithEntries.major.entries.length ) {
+	if ( sections.major.entries.length ) {
 		bumpType = 'major';
 	}
 
-	const areErrorsPresent = !!sectionsWithEntries.invalid.entries.length;
-	const areWarningsPresent = Object.values( sectionsWithEntries ).some( section =>
+	const areErrorsPresent = !!sections.invalid.entries.length;
+	const areWarningsPresent = Object.values( sections ).some( section =>
 		section.entries.some( entry => entry.data.validations && entry.data.validations.length > 0 )
 	);
 
 	const userProvidedVersion = await provideNewVersionForMonorepository( {
 		packageName,
 		bumpType,
-		version: oldVersion,
+		version: currentVersion,
 		displayValidationWarning: areErrorsPresent || areWarningsPresent
 	} );
 
 	if ( userProvidedVersion === 'internal' ) {
-		return getInternalVersionBump( oldVersion );
+		return getInternalVersionBump( currentVersion );
 	}
 
 	return { newVersion: userProvidedVersion, isInternal: false };
 }
 
-function getInternalVersionBump( oldVersion: string ) {
-	const version = semver.inc( oldVersion, 'patch' );
+function getInternalVersionBump( currentVersion: string ) {
+	const version = semver.inc( currentVersion, 'patch' );
 
 	if ( !version ) {
 		throw new Error( 'Unable to determine new version based on the version in root package.json.' );

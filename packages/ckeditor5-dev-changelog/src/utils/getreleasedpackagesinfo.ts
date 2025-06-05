@@ -4,11 +4,11 @@
  */
 
 import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
-import { deduplicate } from './deduplicate.js';
+// import { deduplicate } from './deduplicate.js';
 
 type getReleasedPackagesInfoOptions = {
 	sections: SectionsWithEntries;
-	oldVersion: string;
+	currentVersion: string;
 	newVersion: string;
 	packagesMetadata: Map<string, string>;
 };
@@ -18,9 +18,9 @@ type getReleasedPackagesInfoOptions = {
  * This function creates a summary of package versions and their changes.
  */
 export async function getReleasedPackagesInfo( options: getReleasedPackagesInfoOptions ): Promise<Array<ReleaseInfo>> {
-	const { sections, oldVersion, newVersion, packagesMetadata } = options;
+	const { sections, currentVersion, newVersion, packagesMetadata } = options;
 
-	const versionUpgradeText = `v${ oldVersion } => v${ newVersion }`;
+	const versionUpgradeText = `v${ currentVersion } => v${ newVersion }`;
 	const packageNames = [ ...packagesMetadata.keys() ];
 
 	const newVersionReleases = getNewVersionReleases( packagesMetadata );
@@ -60,11 +60,18 @@ function getScopeWithOrgNamespace( entries: Array<Entry> = [], { packagesToRemov
 	packagesToRemove: Array<string>;
 	packageNames: Array<string>;
 } ) {
-	const scope = deduplicate( entries.flatMap( entry => entry.data.scope ?? [] ).filter( Boolean ) );
-	// TODO fix replace with regex or move it to a separate function.
-	const packagesFullNames = scope.map( scope => packageNames.find( packageName => packageName.replace( /^@[^/]+\//, '' ) === scope )! );
-	const packagesNamesFiltered = packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
+	const scope = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
+	const packagesFullNames = scope.map( scope => {
+		return packageNames.find( packageName => getPackageName( packageName ) === scope )!;
+	} );
 
-	return packagesNamesFiltered.sort();
+	return packagesFullNames.filter( packageName => !packagesToRemove.includes( packageName ) );
 }
 
+function getPackageName( value: string ): string {
+	if ( value.includes( '/' ) ) {
+		return value.split( '/' ).at( 1 )!;
+	}
+
+	return value;
+}

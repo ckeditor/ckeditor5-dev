@@ -27,8 +27,13 @@ function createEntry( data: Record<string, any> ): ParsedFile {
 	return {
 		content: 'Test content',
 		data: {
+			see: [],
+			closes: [],
+			scope: [],
+			validations: [],
+			communityCredits: [],
 			...data
-		},
+		} as any,
 		changesetPath: 'path/to/changeset',
 		gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
 		shouldSkipLinks: false

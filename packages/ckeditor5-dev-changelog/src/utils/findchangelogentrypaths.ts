@@ -6,9 +6,9 @@
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { glob } from 'glob';
 import upath from 'upath';
-import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';
+import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 
 type GetChangesetFilePathsOptions = {
 	cwd: string;
@@ -19,10 +19,10 @@ type GetChangesetFilePathsOptions = {
 /**
  * This function collects markdown files that contain changelog entries for processing.
  */
-export async function getChangesetFilePaths( options: GetChangesetFilePathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
+export async function findChangelogEntryPaths( options: GetChangesetFilePathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
 	const { cwd, externalRepositories, shouldSkipLinks } = options;
 
-	return await AsyncArray
+	return AsyncArray
 		.from( Promise.resolve( externalRepositories ) )
 		.map( async repo => {
 			const changesetGlob = await glob( '**/*.md', {
@@ -31,7 +31,7 @@ export async function getChangesetFilePaths( options: GetChangesetFilePathsOptio
 			} );
 
 			return {
-				changesetPaths: changesetGlob.map( p => upath.normalize( p ) ),
+				filePaths: changesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
 				shouldSkipLinks: !!repo.shouldSkipLinks,
 				cwd: repo.cwd,
@@ -45,7 +45,7 @@ export async function getChangesetFilePaths( options: GetChangesetFilePathsOptio
 			} );
 
 			const mainEntry = {
-				changesetPaths: mainChangesetGlob.map( p => upath.normalize( p ) ),
+				filePaths: mainChangesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
 				shouldSkipLinks,
 				cwd,

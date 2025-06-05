@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import chalk from 'chalk';
-import { logChangelogFiles } from '../../src/utils/logchangelogfiles.js';
+import { displayChanges } from '../../src/utils/displaychanges.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { SectionsWithEntries } from '../../src/types.js';
 
@@ -25,7 +25,7 @@ vi.mock( 'chalk', () => ( {
 
 vi.mock( '../../src/utils/loginfo' );
 
-describe( 'logChangelogFiles()', () => {
+describe( 'displayChanges()', () => {
 	it( 'logs changes correctly for valid sections', () => {
 		const sections: SectionsWithEntries = {
 			Feature: {
@@ -33,18 +33,16 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Added new feature',
-						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature' },
+						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature', scope: [] },
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
@@ -66,18 +64,16 @@ describe( 'logChangelogFiles()', () => {
 				entries: [
 					{
 						message: 'Added new feature',
-						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature' },
+						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature', scope: [] },
 						changesetPath: '/repo/changelog/changeset-1.md'
 					}
 				]
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
@@ -103,11 +99,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.red ).toHaveBeenCalledTimes( 1 );
@@ -132,7 +126,10 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Feature',
 							mainContent: 'Added feature',
-							restContent: []
+							restContent: [],
+							scope: [],
+							see: [],
+							closes: []
 						},
 						changesetPath: '/repo/changelog/feature.md'
 					}
@@ -140,11 +137,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		};
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections: sections as any,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
@@ -153,6 +148,83 @@ describe( 'logChangelogFiles()', () => {
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, `◌ ${ title }:`, expect.any( Object ) );
 	} );
+
+	it.each( [
+		{
+			sectionKey: 'major',
+			title: 'Major breaking changes',
+			referenceType: 'closes',
+			closes: [ { link: 'url1' }, { link: 'url2' } ],
+			see: []
+		},
+		{
+			sectionKey: 'minor',
+			title: 'Minor breaking changes',
+			referenceType: 'closes',
+			closes: [ { link: 'url1' }, { link: 'url2' } ],
+			see: []
+		},
+		{
+			sectionKey: 'breaking',
+			title: 'Breaking changes',
+			referenceType: 'closes',
+			closes: [ { link: 'url1' }, { link: 'url2' } ],
+			see: []
+		},
+		{
+			sectionKey: 'major',
+			title: 'Major breaking changes',
+			referenceType: 'see',
+			closes: [],
+			see: [ { link: 'url1' }, { link: 'url2' } ]
+		},
+		{
+			sectionKey: 'minor',
+			title: 'Minor breaking changes',
+			referenceType: 'see',
+			closes: [],
+			see: [ { link: 'url1' }, { link: 'url2' } ]
+		},
+		{
+			sectionKey: 'breaking',
+			title: 'Breaking changes',
+			referenceType: 'see',
+			closes: [],
+			see: [ { link: 'url1' }, { link: 'url2' } ]
+		}
+	] )(
+		'should display the reference issues when processing $title ($referenceType)',
+		( { sectionKey, title, see, closes, referenceType } ) => {
+			const sections = {
+				[ sectionKey ]: {
+					title,
+					entries: [
+						{
+							message: 'Added feature',
+							data: {
+								type: 'Feature',
+								mainContent: 'Added feature',
+								restContent: [],
+								scope: [],
+								see,
+								closes
+							},
+							changesetPath: '/repo/changelog/feature.md'
+						}
+					]
+				}
+			};
+
+			displayChanges( {
+				sections: sections as any,
+				isSinglePackage: false
+			} );
+
+			const referenceWord = referenceType === 'closes' ? 'Closes' : 'See';
+
+			expect( logInfo ).toHaveBeenCalledWith( `- ${ referenceWord }: url1`, expect.any( Object ) );
+			expect( logInfo ).toHaveBeenCalledWith( `- ${ referenceWord }: url2`, expect.any( Object ) );
+		} );
 
 	it( 'should use the `titleInLogs` property instead of `title` if a section defines it', () => {
 		const sections: SectionsWithEntries = {
@@ -165,7 +237,8 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Feature',
 							mainContent: 'Added feature',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/feature.md'
 					}
@@ -173,11 +246,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
@@ -191,11 +262,9 @@ describe( 'logChangelogFiles()', () => {
 			Feature: { title: 'Features', entries: [] } as any
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 0,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, '○ Listing the changes...' );
@@ -221,11 +290,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith(
@@ -245,7 +312,8 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Feature',
 							mainContent: 'Added feature',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/feature.md'
 					}
@@ -259,7 +327,8 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Fix',
 							mainContent: 'Fixed bug',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/fix.md'
 					}
@@ -267,11 +336,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 2,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.blue ).toHaveBeenCalledTimes( 2 );
@@ -292,7 +359,8 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Feature',
 							mainContent: 'First feature',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/feature1.md'
 					},
@@ -301,7 +369,8 @@ describe( 'logChangelogFiles()', () => {
 						data: {
 							type: 'Feature',
 							mainContent: 'Second feature',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/feature2.md'
 					}
@@ -309,11 +378,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 2,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): First feature', expect.any( Object ) );
@@ -329,7 +396,8 @@ describe( 'logChangelogFiles()', () => {
 						message: 'Valid feature',
 						data: {
 							type: 'Feature',
-							restContent: []
+							restContent: [],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/valid.md'
 					}
@@ -342,7 +410,8 @@ describe( 'logChangelogFiles()', () => {
 						message: 'Invalid entry',
 						data: {
 							restContent: [],
-							validations: [ 'Invalid type' ]
+							validations: [ 'Invalid type' ],
+							scope: []
 						},
 						changesetPath: '/repo/changelog/invalid.md'
 					}
@@ -350,11 +419,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 2,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
@@ -379,11 +446,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Invalid changes:', expect.any( Object ) );
@@ -401,6 +466,7 @@ describe( 'logChangelogFiles()', () => {
 							type: 'Feature',
 							mainContent: 'Feature with warnings',
 							restContent: [],
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/warning-feature.md'
@@ -409,11 +475,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, 'x (no scope): Feature with warnings', expect.any( Object ) );
@@ -431,6 +495,7 @@ describe( 'logChangelogFiles()', () => {
 								'Added new feature',
 							restContent: [],
 							type: 'Feature',
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
@@ -448,6 +513,7 @@ describe( 'logChangelogFiles()', () => {
 								'Added new feature',
 							restContent: [],
 							type: 'Feature',
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
@@ -462,7 +528,9 @@ describe( 'logChangelogFiles()', () => {
 						message: 'Invalid entry with no details',
 						data: {
 							mainContent: 'Invalid entry',
-							restContent: []
+							restContent: [],
+							scope: [],
+							validations: []
 						},
 						changesetPath: '/repo/changelog/invalid-no-details.md'
 					}
@@ -470,11 +538,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 3,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
@@ -494,6 +560,7 @@ describe( 'logChangelogFiles()', () => {
 								'Added new feature',
 							restContent: [],
 							type: 'Feature',
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
@@ -511,6 +578,7 @@ describe( 'logChangelogFiles()', () => {
 								'Added new feature',
 							restContent: [],
 							type: 'Feature',
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
@@ -519,11 +587,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 2,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
@@ -543,6 +609,7 @@ describe( 'logChangelogFiles()', () => {
 								'Added new feature',
 							restContent: [],
 							type: 'Feature',
+							scope: [],
 							validations: [ 'Invalid scope reference' ]
 						},
 						changesetPath: '/repo/changelog/changeset-1.md'
@@ -551,11 +618,9 @@ describe( 'logChangelogFiles()', () => {
 			}
 		} as any;
 
-		logChangelogFiles( {
+		displayChanges( {
 			sections,
-			numChangesToParse: 1,
-			isSinglePackage: false,
-			isNextVersionProvidedAsProp: false
+			isSinglePackage: false
 		} );
 
 		expect( chalk.yellow ).toHaveBeenCalledTimes( 2 );

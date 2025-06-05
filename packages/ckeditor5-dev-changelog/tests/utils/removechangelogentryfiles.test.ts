@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { removeChangesetFiles } from '../../src/utils/removechangesetfiles.js';
+import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
 import { removeEmptyDirs } from '../../src/utils/removeemptydirs.js';
@@ -21,7 +21,7 @@ vi.mock( 'chalk', () => ( {
 	}
 } ) );
 
-describe( 'removeChangesetFiles()', () => {
+describe( 'removeChangelogEntryFiles()', () => {
 	const mockCwd = '/repo';
 	const mockExternalRepos = [
 		{ cwd: '/external-repo-1', packagesDirectory: 'packages' },
@@ -29,14 +29,14 @@ describe( 'removeChangesetFiles()', () => {
 	];
 	const mockChangesetFiles: Array<ChangesetPathsWithGithubUrl> = [
 		{
-			changesetPaths: [ '/repo/changelog/changeset-1.md' ],
+			filePaths: [ '/repo/changelog/changeset-1.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-1',
 			shouldSkipLinks: false,
 			cwd: '/changeset-path-1',
 			isRoot: false
 		},
 		{
-			changesetPaths: [ '/repo/changelog/changeset-2.md' ],
+			filePaths: [ '/repo/changelog/changeset-2.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-2',
 			shouldSkipLinks: false,
 			cwd: '/changeset-path-2',
@@ -45,26 +45,26 @@ describe( 'removeChangesetFiles()', () => {
 	];
 
 	it( 'logs the start of the process', async () => {
-		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
+		await removeChangelogEntryFiles( { entryPaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
 		expect( logInfo ).toHaveBeenCalledWith( '○ Removing the changeset files...' );
 	} );
 
 	it( 'removes each changeset file', async () => {
-		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
+		await removeChangelogEntryFiles( { entryPaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
 		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-1.md' );
 		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-2.md' );
 	} );
 
 	it( 'removes empty directories for the main repository', async () => {
-		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
+		await removeChangelogEntryFiles( { entryPaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
 		expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( mockCwd, CHANGESET_DIRECTORY ) );
 	} );
 
 	it( 'removes empty directories for external repositories', async () => {
-		await removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
+		await removeChangelogEntryFiles( { entryPaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } );
 
 		for ( const externalRepo of mockExternalRepos ) {
 			expect( removeEmptyDirs ).toHaveBeenCalledWith( upath.join( externalRepo.cwd, CHANGESET_DIRECTORY ) );
@@ -75,7 +75,7 @@ describe( 'removeChangesetFiles()', () => {
 		vi.mocked( fs.unlink ).mockRejectedValueOnce( new Error( 'ENOENT: no such file or directory' ) );
 
 		await expect(
-			removeChangesetFiles( { changesetFilePaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } )
+			removeChangelogEntryFiles( { entryPaths: mockChangesetFiles, cwd: mockCwd, externalRepositories: mockExternalRepos } )
 		).rejects.toThrow();
 	} );
 } );

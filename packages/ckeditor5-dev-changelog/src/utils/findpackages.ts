@@ -12,7 +12,7 @@ type FindPackagesOptions = {
 	cwd: string;
 	packagesDirectory: string | null;
 	externalRepositories: Array<RepositoryConfig>;
-	skipRootPackage?: boolean;
+	shouldIgnoreRootPackage?: boolean;
 };
 
 /**
@@ -23,7 +23,7 @@ export async function findPackages( options: FindPackagesOptions ): Promise<Map<
 		cwd,
 		packagesDirectory,
 		externalRepositories,
-		skipRootPackage = false
+		shouldIgnoreRootPackage = false
 	} = options;
 
 	const externalPackagesPromises = externalRepositories.map( externalRepository => {
@@ -35,7 +35,7 @@ export async function findPackages( options: FindPackagesOptions ): Promise<Map<
 	} );
 
 	const promise = Promise.all( [
-		workspaces.findPathsToPackages( cwd, packagesDirectory, { includeCwd: !skipRootPackage, includePackageJson: true } ),
+		workspaces.findPathsToPackages( cwd, packagesDirectory, { includeCwd: !shouldIgnoreRootPackage, includePackageJson: true } ),
 		...externalPackagesPromises
 	] );
 

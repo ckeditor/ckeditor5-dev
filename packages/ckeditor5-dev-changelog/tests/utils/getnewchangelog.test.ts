@@ -26,7 +26,9 @@ describe( 'getNewChangelog()', () => {
 				type: 'other',
 				scope: [],
 				closes: [],
-				see: []
+				see: [],
+				validations: [],
+				communityCredits: []
 			},
 			changesetPath: ''
 		} ) )
@@ -42,9 +44,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '0.0.1',
+			currentVersion: '0.0.1',
 			newVersion: '1.0.0',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
 			isSinglePackage: false,
@@ -59,9 +61,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.1.0',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
 			isSinglePackage: false,
@@ -82,9 +84,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.0.1',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
 			isSinglePackage: false,
@@ -95,7 +97,7 @@ describe( 'getNewChangelog()', () => {
 	} );
 
 	it( 'should include section entries in the changelog', async () => {
-		const sectionsToDisplay = [
+		const sections = [
 			createSection( 'Features', [
 				{ message: '* Added new feature A.' },
 				{ message: '* Added new feature B.' }
@@ -108,9 +110,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.1.0',
-			sectionsToDisplay,
+			sections,
 			releasedPackagesInfo: [],
 			isInternal: false,
 			isSinglePackage: false,
@@ -138,9 +140,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo,
 			isInternal: false,
 			isSinglePackage: false,
@@ -170,9 +172,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo,
 			isInternal: false,
 			isSinglePackage: true,
@@ -191,9 +193,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.0.1',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
 			isSinglePackage: false,
@@ -219,9 +221,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.0.1',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: true,
 			isSinglePackage: false,
@@ -241,9 +243,9 @@ describe( 'getNewChangelog()', () => {
 		const result = await getNewChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '1.1.0',
-			sectionsToDisplay: [],
+			sections: [],
 			releasedPackagesInfo: [],
 			isInternal: false,
 			isSinglePackage: false,

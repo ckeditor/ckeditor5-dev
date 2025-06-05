@@ -11,9 +11,9 @@ import { getDateFormatted } from './getdateformatted.js';
 type NewChangelogOptions = {
 	cwd: string;
 	date: string;
-	oldVersion: string;
+	currentVersion: string;
 	newVersion: string;
-	sectionsToDisplay: Array<Section>;
+	sections: Array<Section>;
 	releasedPackagesInfo: Array<ReleaseInfo>;
 	isInternal: boolean;
 	isSinglePackage: boolean;
@@ -24,9 +24,9 @@ export async function getNewChangelog( options: NewChangelogOptions ): Promise<s
 	const {
 		cwd,
 		date,
-		oldVersion,
+		currentVersion,
 		newVersion,
-		sectionsToDisplay,
+		sections,
 		releasedPackagesInfo,
 		isInternal,
 		isSinglePackage,
@@ -37,11 +37,11 @@ export async function getNewChangelog( options: NewChangelogOptions ): Promise<s
 	const dateFormatted = getDateFormatted( date );
 	const packagesNames = [ ...packagesMetadata.keys() ];
 
-	const header = oldVersion === '0.0.1' ?
+	const header = currentVersion === '0.0.1' ?
 		`## ${ newVersion } (${ dateFormatted })` :
-		`## [${ newVersion }](${ gitHubUrl }/compare/v${ oldVersion }...v${ newVersion }) (${ dateFormatted })`;
+		`## [${ newVersion }](${ gitHubUrl }/compare/v${ currentVersion }...v${ newVersion }) (${ dateFormatted })`;
 
-	const sections = sectionsToDisplay.map( ( { title, entries } ) => ( [
+	const sectionsAsString = sections.map( ( { title, entries } ) => ( [
 		`### ${ title }`,
 		'',
 		...entries.map( entry => entry.message ),
@@ -59,13 +59,13 @@ export async function getNewChangelog( options: NewChangelogOptions ): Promise<s
 		'',
 		SECTIONS.other.title + ':',
 		'',
-		packagesNames.map( name => `* [${ name }](${ NPM_URL }/${ name }/v/${ newVersion }): v${ oldVersion } => v${ newVersion }` )
+		packagesNames.map( name => `* [${ name }](${ NPM_URL }/${ name }/v/${ newVersion }): v${ currentVersion } => v${ newVersion }` )
 	].flat().join( '\n' );
 
 	const changelog = [
 		header,
 		'',
-		isInternal ? 'Internal changes only (updated dependencies, documentation, etc.).\n' : sections
+		isInternal ? 'Internal changes only (updated dependencies, documentation, etc.).\n' : sectionsAsString
 	];
 
 	if ( !isSinglePackage ) {

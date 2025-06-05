@@ -13,9 +13,9 @@ type SimpleParsedFile = Pick<ParsedFile, 'changesetPath' | 'gitHubUrl' | 'should
 /**
  * This function reads and processes the changeset files to extract changelog information.
  */
-export function getInputParsed( inputPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {
-	const fileEntries = inputPaths.reduce<Array<SimpleParsedFile>>( ( acc, { changesetPaths, gitHubUrl, shouldSkipLinks } ) => {
-		for ( const changesetPath of changesetPaths ) {
+export function parseChangelogEntries( entryPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {
+	const fileEntries = entryPaths.reduce<Array<SimpleParsedFile>>( ( acc, { filePaths, gitHubUrl, shouldSkipLinks } ) => {
+		for ( const changesetPath of filePaths ) {
 			acc.push( { changesetPath, gitHubUrl, shouldSkipLinks } );
 		}
 		return acc;

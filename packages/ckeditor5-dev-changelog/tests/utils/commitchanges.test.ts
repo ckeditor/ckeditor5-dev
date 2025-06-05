@@ -28,7 +28,7 @@ describe( 'commitChanges()', () => {
 
 	it( 'should print a message when committing changes (single repository)', async () => {
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] }
 		] );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
@@ -38,8 +38,8 @@ describe( 'commitChanges()', () => {
 
 	it( 'should print a message when committing changes (including external)', async () => {
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] },
-			{ cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-dev', isRoot: false, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] },
+			{ cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-dev', isRoot: false, filePaths: [] }
 		] );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
@@ -50,7 +50,7 @@ describe( 'commitChanges()', () => {
 
 	it( 'should include a changelog file when processing a root repository', async () => {
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] }
 		] );
 
 		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
@@ -63,13 +63,13 @@ describe( 'commitChanges()', () => {
 	} );
 
 	it( 'should not update the input array (reference) when adding a changelog file', async () => {
-		const changesetPaths: Array<string> = [];
+		const filePaths: Array<string> = [];
 
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths }
 		] );
 
-		expect( changesetPaths ).toHaveLength( 0 );
+		expect( filePaths ).toHaveLength( 0 );
 	} );
 
 	it( 'should include the input files when making a commit', async () => {
@@ -77,7 +77,7 @@ describe( 'commitChanges()', () => {
 			{
 				cwd: '/home/ckeditor/ckeditor5',
 				isRoot: false,
-				changesetPaths: [
+				filePaths: [
 					'/home/ckeditor/ckeditor5/changeset-1.md',
 					'/home/ckeditor/ckeditor5/changeset-2.md'
 				]
@@ -96,7 +96,7 @@ describe( 'commitChanges()', () => {
 
 	it( 'should use a specified version when defining the commit message', async () => {
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, filePaths: [] }
 		] );
 
 		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
@@ -108,7 +108,7 @@ describe( 'commitChanges()', () => {
 
 	it( 'should use the specified `cwd` path when making a commit', async () => {
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: false, filePaths: [] }
 		] );
 
 		expect( vi.mocked( tools.commit ) ).toHaveBeenCalledWith(
@@ -123,7 +123,7 @@ describe( 'commitChanges()', () => {
 			{
 				cwd: '/home/ckeditor/ckeditor5',
 				isRoot: true,
-				changesetPaths: [
+				filePaths: [
 					'/home/ckeditor/ckeditor5/.changelog/changeset-1.md',
 					'/home/ckeditor/ckeditor5/.changelog/changeset-2.md'
 				]
@@ -131,7 +131,7 @@ describe( 'commitChanges()', () => {
 			{
 				cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-dev',
 				isRoot: false,
-				changesetPaths: [
+				filePaths: [
 					'/home/ckeditor/ckeditor5/external/ckeditor5-dev/.changelog/changeset-1.md',
 					'/home/ckeditor/ckeditor5/external/ckeditor5-dev/.changelog/changeset-2.md',
 					'/home/ckeditor/ckeditor5/external/ckeditor5-dev/.changelog/changeset-3.md'
@@ -140,7 +140,7 @@ describe( 'commitChanges()', () => {
 			{
 				cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-internal',
 				isRoot: false,
-				changesetPaths: [
+				filePaths: [
 					'/home/ckeditor/ckeditor5/external/ckeditor5-internal/.changelog/changeset-1.md'
 				]
 			}
@@ -179,7 +179,7 @@ describe( 'commitChanges()', () => {
 		vi.mocked( tools.commit ).mockRejectedValueOnce( new Error( 'Commit failed' ) );
 
 		await commitChanges( '1.0.0', [
-			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, changesetPaths: [] }
+			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] }
 		] );
 
 		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );

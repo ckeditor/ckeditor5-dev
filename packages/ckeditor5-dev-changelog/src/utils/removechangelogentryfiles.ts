@@ -12,7 +12,7 @@ import { logInfo } from './loginfo.js';
 import { CHANGESET_DIRECTORY } from './constants.js';
 
 type RemoveChangesetFilesOptions = {
-	changesetFilePaths: Array<ChangesetPathsWithGithubUrl>;
+	entryPaths: Array<ChangesetPathsWithGithubUrl>;
 	cwd: string;
 	externalRepositories: Array<RepositoryConfig>;
 };
@@ -20,12 +20,12 @@ type RemoveChangesetFilesOptions = {
 /**
  * This function cleans up the changeset files that have been incorporated into the changelog.
  */
-export async function removeChangesetFiles( options: RemoveChangesetFilesOptions ): Promise<void> {
-	const { changesetFilePaths, cwd, externalRepositories } = options;
+export async function removeChangelogEntryFiles( options: RemoveChangesetFilesOptions ): Promise<void> {
+	const { entryPaths, cwd, externalRepositories } = options;
 
 	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
 
-	await Promise.all( changesetFilePaths.flatMap( repo => repo.changesetPaths ).map( file => fs.unlink( file ) ) );
+	await Promise.all( entryPaths.flatMap( repo => repo.filePaths ).map( file => fs.unlink( file ) ) );
 
 	await removeEmptyDirs( upath.join( cwd, CHANGESET_DIRECTORY ) );
 

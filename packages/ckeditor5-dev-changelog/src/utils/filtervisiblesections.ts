@@ -3,14 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
+import { InternalError } from './internalerror.js';
 import type { Section, SectionsWithEntries } from '../types.js';
-
-import { InternalError } from '../errors/internalerror.js';
 
 /**
  * This function determines which sections contain valid entries to be shown.
  */
-export function getSectionsToDisplay( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
+export function filterVisibleSections( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
 	const sectionsToDisplay = Object.entries( sectionsWithEntries )
 		.filter( ( [ , { entries, excludeInChangelog } ] ) => {
 			return entries?.length && !excludeInChangelog;

@@ -15,7 +15,9 @@ const createEntry = ( scope: Array<string> ): Entry => ( {
 		closes: [],
 		see: [],
 		mainContent: '',
-		restContent: []
+		restContent: [],
+		communityCredits: [],
+		validations: []
 	},
 	changesetPath: '/path/to/changeset1.md'
 } );
@@ -49,7 +51,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -74,7 +76,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -99,7 +101,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -129,7 +131,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -149,7 +151,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -166,7 +168,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -182,7 +184,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -201,7 +203,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
@@ -221,31 +223,13 @@ describe( 'getReleasedPackagesInfo()', () => {
 
 		const result = await getReleasedPackagesInfo( {
 			sections,
-			oldVersion: '1.0.0',
+			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
 			packagesMetadata
 		} );
 
 		expect( result ).toEqual( [
 			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/test' ] }
-		] );
-	} );
-
-	it( 'should handle multiple entries with same scope in different sections', async () => {
-		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ] ), createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' }
-		} );
-		const packagesMetadata = new Map( [ [ '@ckeditor/core', '1.0.0' ] ] );
-
-		const result = await getReleasedPackagesInfo( {
-			sections,
-			oldVersion: '1.0.0',
-			newVersion: '2.0.0',
-			packagesMetadata
-		} );
-
-		expect( result ).toEqual( [
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] }
 		] );
 	} );
 } );

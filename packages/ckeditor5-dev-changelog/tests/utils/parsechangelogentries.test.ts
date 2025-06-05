@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getInputParsed } from '../../src/utils/getinputparsed.js';
+import { parseChangelogEntries } from '../../src/utils/parsechangelogentries.js';
 import fs from 'fs-extra';
 import matter, { type GrayMatterFile } from 'gray-matter';
 import { describe, it, expect, vi } from 'vitest';
@@ -12,7 +12,7 @@ import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
 
-describe( 'getInputParsed()', () => {
+describe( 'parseChangelogEntries()', () => {
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/changeset1.md';
@@ -67,9 +67,9 @@ describe( 'getInputParsed()', () => {
 		} );
 
 		// Input data
-		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
 			{
-				changesetPaths: [ changesetPath1, changesetPath2 ],
+				filePaths: [ changesetPath1, changesetPath2 ],
 				gitHubUrl,
 				shouldSkipLinks: false,
 				cwd: '/changeset-path',
@@ -94,7 +94,7 @@ describe( 'getInputParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getInputParsed( changesetPathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( expectedResults );
@@ -161,16 +161,16 @@ describe( 'getInputParsed()', () => {
 		} );
 
 		// Input data
-		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
 			{
-				changesetPaths: [ changesetPath1 ],
+				filePaths: [ changesetPath1 ],
 				gitHubUrl: gitHubUrl1,
 				shouldSkipLinks: false,
 				cwd: '/changeset-path-1',
 				isRoot: false
 			},
 			{
-				changesetPaths: [ changesetPath2 ],
+				filePaths: [ changesetPath2 ],
 				gitHubUrl: gitHubUrl2,
 				shouldSkipLinks: true,
 				cwd: '/changeset-path-2',
@@ -195,7 +195,7 @@ describe( 'getInputParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getInputParsed( changesetPathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( expectedResults );
@@ -209,9 +209,9 @@ describe( 'getInputParsed()', () => {
 
 	it( 'should handle empty changeset paths array', async () => {
 		// Input data
-		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
 			{
-				changesetPaths: [],
+				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
 				shouldSkipLinks: false,
 				cwd: '/changeset-path-1',
@@ -220,7 +220,7 @@ describe( 'getInputParsed()', () => {
 		];
 
 		// Execute the function
-		const result = await getInputParsed( changesetPathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( [] );
@@ -230,10 +230,10 @@ describe( 'getInputParsed()', () => {
 
 	it( 'should handle empty input array', async () => {
 		// Input data
-		const changesetPathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [];
+		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [];
 
 		// Execute the function
-		const result = await getInputParsed( changesetPathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl );
 
 		// Assertions
 		expect( result ).toEqual( [] );
