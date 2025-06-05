@@ -20,6 +20,7 @@ import { logInfo } from './loginfo.js';
 import { getNewChangelog } from './getnewchangelog.js';
 import { removeChangesetFiles } from './removechangesetfiles.js';
 import { commitChanges } from './commitchanges.js';
+import { sortSectionEntries } from './sortentries.js';
 import { InternalError } from '../errors/internalerror.js';
 
 type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { isSinglePackage: boolean };
@@ -56,27 +57,30 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		isSinglePackage
 	} );
 
+	// Sort entries within each section according to the specified criteria
+	const sortedSectionsWithEntries = sortSectionEntries( sectionsWithEntries );
+
 	// Logging changes in the console.
 	logChangelogFiles( {
-		sections: sectionsWithEntries,
+		sections: sortedSectionsWithEntries,
 		numChangesToParse: parsedChangesetFiles.length,
 		isSinglePackage,
 		isNextVersionProvidedAsProp: !!nextVersion,
 		transformScope
 	} );
 
-	const sectionsToDisplay = getSectionsToDisplay( sectionsWithEntries );
+	const sectionsToDisplay = getSectionsToDisplay( sortedSectionsWithEntries );
 
 	// Displaying a prompt to provide a new version in the console.
 	const { isInternal, newVersion } = await getNewVersion( {
-		sectionsWithEntries,
+		sectionsWithEntries: sortedSectionsWithEntries,
 		oldVersion,
 		packageName: skipRootPackage && npmPackageToCheck ? npmPackageToCheck : rootPackageName,
 		nextVersion
 	} );
 
 	const releasedPackagesInfo = await getReleasedPackagesInfo( {
-		sections: sectionsWithEntries,
+		sections: sortedSectionsWithEntries,
 		oldVersion,
 		newVersion,
 		packagesMetadata
