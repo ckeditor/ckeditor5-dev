@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import checkVersionMatch from '../lib/checkversionmatch';
+import checkVersionMatch from '../lib/checkversionmatch.js';
 
 import fs from 'fs-extra';
 import { globSync } from 'glob';

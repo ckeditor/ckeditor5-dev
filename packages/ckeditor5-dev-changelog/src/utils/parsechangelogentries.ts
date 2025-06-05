@@ -6,7 +6,7 @@
 import fs from 'fs-extra';
 import matter from 'gray-matter';
 import { AsyncArray } from './asyncarray.js';
-import type { ChangesetPathsWithGithubUrl, ParsedFile } from '../types.js';
+import type { ChangesetPathsWithGithubUrl, FileMetadata, ParsedFile } from '../types.js';
 
 type SimpleParsedFile = Pick<ParsedFile, 'changesetPath' | 'gitHubUrl' | 'shouldSkipLinks'>;
 
@@ -24,7 +24,7 @@ export function parseChangelogEntries( entryPaths: Array<ChangesetPathsWithGithu
 	return AsyncArray
 		.from( Promise.resolve( fileEntries ) )
 		.map( async ( { changesetPath, gitHubUrl, shouldSkipLinks } ) => ( {
-			...matter( await fs.readFile( changesetPath, 'utf-8' ) ),
+			...( matter( await fs.readFile( changesetPath, 'utf-8' ) ) as unknown as { content: string; data: FileMetadata } ),
 			gitHubUrl,
 			changesetPath,
 			shouldSkipLinks

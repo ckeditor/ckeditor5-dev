@@ -6,7 +6,7 @@
 import { join } from 'upath';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as template from '../src/template.js';
-import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from '../src/utils/constants';
+import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from '../src/utils/constants.js';
 
 const EXPECTED_FILE_NAME = '20250526105803_ck_1234567890_git_branch_name.md';
 
