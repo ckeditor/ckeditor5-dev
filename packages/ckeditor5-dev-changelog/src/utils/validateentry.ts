@@ -47,11 +47,16 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 	const scopeValidated = [];
 
-	for ( const scopeName of data.scope ) {
-		if ( !noScopePackagesNames.includes( scopeName ) ) {
-			validations.push( `Scope "${ scopeName }" is not recognized as a valid package in the repository.` );
-		} else {
-			scopeValidated.push( scopeName );
+	if ( singlePackage ) {
+		// Skip scope validation for single package mode
+		scopeValidated.push( ...data.scope );
+	} else {
+		for ( const scopeName of data.scope ) {
+			if ( !noScopePackagesNames.includes( scopeName ) ) {
+				validations.push( `Scope "${ scopeName }" is not recognized as a valid package in the repository.` );
+			} else {
+				scopeValidated.push( scopeName );
+			}
 		}
 	}
 

@@ -186,6 +186,18 @@ describe( 'validateEntry()', () => {
 			);
 			expect( validatedEntry.data.scope ).toEqual( [ 'ckeditor5-engine' ] );
 		} );
+
+		it( 'should skip scope validation for scopes when singlePackage is true', () => {
+			const entry: ParsedFile = createEntry( { type: 'Feature', scope: [ 'ckeditor5-engine', 'unknown-package' ] } );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, true );
+
+			expect( isValid ).toBeTruthy();
+			expect( validatedEntry.data.validations ).not.toContain(
+				'Scope "unknown-package" is not recognized as a valid package in the repository.'
+			);
+			expect( validatedEntry.data.scope ).toEqual( [ 'ckeditor5-engine', 'unknown-package' ] );
+		} );
 	} );
 
 	describe( 'see validation', () => {
