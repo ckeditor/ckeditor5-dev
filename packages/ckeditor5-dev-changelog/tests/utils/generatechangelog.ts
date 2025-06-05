@@ -10,14 +10,14 @@ import { findPackages } from '../../src/utils/findpackages.js';
 import { findChangelogEntryPaths } from '../../src/utils/findchangelogentrypaths.js';
 import { parseChangelogEntries } from '../../src/utils/parsechangelogentries.js';
 import { groupEntriesBySection } from '../../src/utils/groupentriesbysection.js';
-import { getNewVersion } from '../../src/utils/getnewversion.js';
+import { determineNextVersion } from '../../src/utils/determinenextversion.js';
 import { filterVisibleSections } from '../../src/utils/filtervisiblesections.js';
-import { getReleasedPackagesInfo } from '../../src/utils/getreleasedpackagesinfo.js';
+import { composeReleaseSummary } from '../../src/utils/composereleasesummary.js';
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
 import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { displayChanges } from '../../src/utils/displaychanges.js';
-import { getNewChangelog } from '../../src/utils/getnewchangelog.js';
+import { composeChangelog } from '../../src/utils/composechangelog.js';
 import { commitChanges } from '../../src/utils/commitchanges.js';
 import { SECTIONS } from '../../src/utils/constants.js';
 import { InternalError } from '../../src/utils/internalerror.js';
@@ -28,14 +28,14 @@ vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
 vi.mock( '../../src/utils/groupentriesbysection.js' );
-vi.mock( '../../src/utils/getnewversion.js' );
+vi.mock( '../../src/utils/determinenextversion.js' );
 vi.mock( '../../src/utils/filtervisiblesections.js' );
-vi.mock( '../../src/utils/getreleasedpackagesinfo.js' );
+vi.mock( '../../src/utils/composereleasesummary.js' );
 vi.mock( '../../src/utils/modifychangelog.js' );
 vi.mock( '../../src/utils/removechangelogentryfiles.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/displaychanges.js' );
-vi.mock( '../../src/utils/getnewchangelog.js' );
+vi.mock( '../../src/utils/composechangelog.js' );
 vi.mock( '../../src/utils/commitchanges.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
@@ -136,7 +136,7 @@ describe( 'generateChangelog()', () => {
 				entries: []
 			}
 		} );
-		vi.mocked( getNewVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: false } ) );
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: false } ) );
 		vi.mocked( filterVisibleSections ).mockReturnValue( [
 			{
 				title: SECTIONS.feature.title,
@@ -157,14 +157,14 @@ describe( 'generateChangelog()', () => {
 				]
 			}
 		] );
-		vi.mocked( getReleasedPackagesInfo ).mockImplementation( () => Promise.resolve( [
+		vi.mocked( composeReleaseSummary ).mockImplementation( () => Promise.resolve( [
 			{
 				title: 'Released packages',
 				version: '1.0.1',
 				packages: [ 'test-package' ]
 			}
 		] ) );
-		vi.mocked( getNewChangelog ).mockImplementation( () => Promise.resolve( 'Mocked changelog content' ) );
+		vi.mocked( composeChangelog ).mockImplementation( () => Promise.resolve( 'Mocked changelog content' ) );
 		vi.mocked( modifyChangelog ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( removeChangelogEntryFiles ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
@@ -190,7 +190,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( options );
 
-		expect( getNewChangelog ).toHaveBeenCalledWith(
+		expect( composeChangelog ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				date: '2025-03-05'
 			} )
@@ -210,7 +210,7 @@ describe( 'generateChangelog()', () => {
 
 		await generateChangelog( options );
 
-		expect( getNewChangelog ).toHaveBeenCalledWith(
+		expect( composeChangelog ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				cwd: '/home/ckeditor/workspaces/ckeditor5-dev'
 			} )
@@ -232,7 +232,7 @@ describe( 'generateChangelog()', () => {
 			transformScope: defaultOptions.transformScope
 		} ) );
 
-		expect( getNewChangelog ).toHaveBeenCalledWith(
+		expect( composeChangelog ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				currentVersion: '1.0.0',
 				newVersion: '1.0.1',
@@ -275,19 +275,15 @@ describe( 'generateChangelog()', () => {
 			'Mocked changelog content',
 			'/home/ckeditor'
 		);
-		expect( removeChangelogEntryFiles ).toHaveBeenCalledWith( expect.objectContaining( {
-			entryPaths: [
-				{
-					filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
-					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					shouldSkipLinks: false,
-					isRoot: true,
-					cwd: '/home/ckeditor'
-				}
-			],
-			cwd: '/home/ckeditor',
-			externalRepositories: []
-		} ) );
+		expect( removeChangelogEntryFiles ).toHaveBeenCalledWith( [
+			{
+				filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+				shouldSkipLinks: false,
+				isRoot: true,
+				cwd: '/home/ckeditor'
+			}
+		] );
 		expect( logInfo ).toHaveBeenCalledWith( '○ Done!' );
 	} );
 
@@ -298,11 +294,11 @@ describe( 'generateChangelog()', () => {
 			isSinglePackage: true
 		} ) );
 
-		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( vi.mocked( composeChangelog ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			isSinglePackage: true
 		} ) );
 
-		expect( vi.mocked( getNewChangelog ) ).toHaveBeenCalled();
+		expect( vi.mocked( composeChangelog ) ).toHaveBeenCalled();
 		expect( vi.mocked( modifyChangelog ) ).toHaveBeenCalled();
 	} );
 
@@ -431,16 +427,16 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'handles internal changes correctly (`internal` is a version provided by a user)', async () => {
-		vi.mocked( getNewVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
 
 		await generateChangelog( defaultOptions );
 
-		expect( getNewVersion ).toHaveBeenCalledWith( {
+		expect( determineNextVersion ).toHaveBeenCalledWith( {
 			sections: expect.any( Object ),
 			currentVersion: '1.0.0',
 			packageName: 'test-package'
 		} );
-		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( composeChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
 			newVersion: '1.0.1'
 		} ) );
@@ -448,20 +444,20 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'handles internal changes correctly (`internal` is specified as `nextVersion`)', async () => {
-		vi.mocked( getNewVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
 
 		await generateChangelog( {
 			...defaultOptions,
 			nextVersion: 'internal'
 		} );
 
-		expect( getNewVersion ).toHaveBeenCalledWith( {
+		expect( determineNextVersion ).toHaveBeenCalledWith( {
 			sections: expect.any( Object ),
 			currentVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: 'internal'
 		} );
-		expect( getNewChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( composeChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
 			newVersion: '1.0.1'
 		} ) );
@@ -568,14 +564,14 @@ describe( 'generateChangelog()', () => {
 
 			expect( consoleMock ).toHaveBeenCalledTimes( 1 );
 			expect( consoleMock ).toHaveBeenCalledWith(
-				expect.stringContaining( 'No valid changesets found. Please verify that' )
+				expect.stringContaining( 'No valid entries were found. Please ensure that' )
 			);
 			expect( processMock ).toHaveBeenCalledTimes( 1 );
 			expect( processMock ).toHaveBeenCalledWith( 1 );
 		} );
 
 		it( 'exits the program without errors when a user aborts typing a new version', async () => {
-			vi.mocked( getNewVersion ).mockImplementation( () => {
+			vi.mocked( determineNextVersion ).mockImplementation( () => {
 				throw new TypeError( 'User force closed the prompt with SIGINT' );
 			} );
 
@@ -588,7 +584,7 @@ describe( 'generateChangelog()', () => {
 		} );
 
 		it( 'exits the program without errors when a user aborts after detecting invalid changes', async () => {
-			vi.mocked( getNewVersion ).mockImplementation( () => {
+			vi.mocked( determineNextVersion ).mockImplementation( () => {
 				throw new UserAbortError( 'Aborted while detecting invalid changes.' );
 			} );
 

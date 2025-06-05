@@ -5,16 +5,16 @@
 
 import chalk from 'chalk';
 import semver, { type ReleaseType } from 'semver';
-import type { SectionsWithEntries } from '../types.js';
-import { provideNewVersionForMonorepository } from './providenewversionformonorepository.js';
+import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
+import type { SectionsWithEntries } from '../types.js';
 
-type NewVersionObj = {
+type NextVersionOutput = {
 	isInternal: boolean;
 	newVersion: string;
 };
 
-export type GetNewVersionOptions = {
+export type DetermineNextVersionOptions = {
 	sections: SectionsWithEntries;
 	currentVersion: string;
 	packageName: string;
@@ -22,9 +22,15 @@ export type GetNewVersionOptions = {
 };
 
 /**
- * This function analyzes the changes and suggests the appropriate version bump.
+ * Determines the next version for a single package or a mono-repository setup based on
+ * the change sections, * user input, and semantic versioning rules.
+ *
+ * The function handles:
+ * * Automatic version bump calculation from categorized changelog sections (major, minor, patch).
+ * * Accepting explicit next version overrides, including a special `internal` version bump.
+ * * User prompts for version input when no explicit version is provided.
  */
-export async function getNewVersion( options: GetNewVersionOptions ): Promise<NewVersionObj> {
+export async function determineNextVersion( options: DetermineNextVersionOptions ): Promise<NextVersionOutput> {
 	const { sections, currentVersion, packageName, nextVersion } = options;
 
 	if ( nextVersion === 'internal' ) {
@@ -58,7 +64,7 @@ export async function getNewVersion( options: GetNewVersionOptions ): Promise<Ne
 		section.entries.some( entry => entry.data.validations && entry.data.validations.length > 0 )
 	);
 
-	const userProvidedVersion = await provideNewVersionForMonorepository( {
+	const userProvidedVersion = await provideNewVersion( {
 		packageName,
 		bumpType,
 		version: currentVersion,

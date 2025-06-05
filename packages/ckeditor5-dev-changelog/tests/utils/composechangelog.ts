@@ -5,13 +5,13 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { getNewChangelog } from '../../src/utils/getnewchangelog.js';
+import { composeChangelog } from '../../src/utils/composechangelog.js';
 import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from '../../src/utils/constants.js';
 import type { ReleaseInfo, Section } from '../../src/types.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'getNewChangelog()', () => {
+describe( 'composeChangelog()', () => {
 	beforeEach( () => {
 		vi.mocked( workspaces.getRepositoryUrl ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5' );
 	} );
@@ -41,7 +41,7 @@ describe( 'getNewChangelog()', () => {
 	} );
 
 	it( 'should return the correct header for initial release', async () => {
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '0.0.1',
@@ -58,7 +58,7 @@ describe( 'getNewChangelog()', () => {
 	} );
 
 	it( 'should return the correct header with comparison link for non-initial release', async () => {
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -81,7 +81,7 @@ describe( 'getNewChangelog()', () => {
 			[ '@ckeditor/ckeditor5-package-b', '1.0.0' ]
 		] );
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -107,7 +107,7 @@ describe( 'getNewChangelog()', () => {
 			] )
 		];
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -137,7 +137,7 @@ describe( 'getNewChangelog()', () => {
 			] )
 		];
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -169,7 +169,7 @@ describe( 'getNewChangelog()', () => {
 			] )
 		];
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -190,7 +190,7 @@ describe( 'getNewChangelog()', () => {
 			[ '@ckeditor/ckeditor5-package-b', '1.0.0' ]
 		] );
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -218,7 +218,7 @@ describe( 'getNewChangelog()', () => {
 			[ '@ckeditor/ckeditor5-package-b', '1.0.0' ]
 		] );
 
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',
@@ -240,7 +240,7 @@ describe( 'getNewChangelog()', () => {
 	} );
 
 	it( 'should include the complete changelog structure with details tag', async () => {
-		const result = await getNewChangelog( {
+		const result = await composeChangelog( {
 			cwd: '/test/repo',
 			date: '2023-04-15',
 			currentVersion: '1.0.0',

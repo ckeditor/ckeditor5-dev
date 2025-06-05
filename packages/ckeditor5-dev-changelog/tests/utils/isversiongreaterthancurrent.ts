@@ -5,15 +5,15 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import semver from 'semver';
-import { validateVersionHigherThanCurrent } from '../../src/utils/validateversionhigherthancurrent.js';
+import { isVersionGreaterThanCurrent } from '../../src/utils/isversiongreaterthancurrent.js';
 
 vi.mock( 'semver' );
 
-describe( 'validateVersionHigherThanCurrent', () => {
+describe( 'isVersionGreaterThanCurrent()', () => {
 	it( 'should accept "internal" as a special version', () => {
 		vi.mocked( semver.gt ).mockClear();
 
-		const result = validateVersionHigherThanCurrent( 'internal', '1.0.0' );
+		const result = isVersionGreaterThanCurrent( 'internal', '1.0.0' );
 
 		expect( result ).toBe( true );
 		expect( semver.gt ).not.toHaveBeenCalled();
@@ -22,7 +22,7 @@ describe( 'validateVersionHigherThanCurrent', () => {
 	it( 'should return error message when version is not greater than current', () => {
 		vi.mocked( semver.gt ).mockReturnValue( false );
 
-		const result = validateVersionHigherThanCurrent( '1.0.0', '1.0.0' );
+		const result = isVersionGreaterThanCurrent( '1.0.0', '1.0.0' );
 
 		expect( result ).toBe( 'Provided version must be higher than "1.0.0".' );
 		expect( semver.gt ).toHaveBeenCalledWith( '1.0.0', '1.0.0' );
@@ -31,7 +31,7 @@ describe( 'validateVersionHigherThanCurrent', () => {
 	it( 'should return true when version is greater than current', () => {
 		vi.mocked( semver.gt ).mockReturnValue( true );
 
-		const result = validateVersionHigherThanCurrent( '1.1.0', '1.0.0' );
+		const result = isVersionGreaterThanCurrent( '1.1.0', '1.0.0' );
 
 		expect( result ).toBe( true );
 		expect( semver.gt ).toHaveBeenCalledWith( '1.1.0', '1.0.0' );
@@ -48,7 +48,7 @@ describe( 'validateVersionHigherThanCurrent', () => {
 		( { proposal, current, output, expected } ) => {
 			vi.mocked( semver.gt ).mockReturnValue( output );
 
-			const result = validateVersionHigherThanCurrent( proposal, current );
+			const result = isVersionGreaterThanCurrent( proposal, current );
 
 			expect( result ).toBe( expected );
 			expect( semver.gt ).toHaveBeenCalledWith( proposal, current );

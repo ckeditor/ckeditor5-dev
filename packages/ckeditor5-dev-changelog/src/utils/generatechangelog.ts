@@ -9,14 +9,14 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { groupEntriesBySection } from './groupentriesbysection.js';
 import { displayChanges } from './displaychanges.js';
 import { modifyChangelog } from './modifychangelog.js';
-import { getNewVersion } from './getnewversion.js';
+import { determineNextVersion } from './determinenextversion.js';
 import { findPackages } from './findpackages.js';
-import { getReleasedPackagesInfo } from './getreleasedpackagesinfo.js';
+import { composeReleaseSummary } from './composereleasesummary.js';
 import { findChangelogEntryPaths } from './findchangelogentrypaths.js';
 import { parseChangelogEntries } from './parsechangelogentries.js';
 import { filterVisibleSections } from './filtervisiblesections.js';
 import { logInfo } from './loginfo.js';
-import { getNewChangelog } from './getnewchangelog.js';
+import { composeChangelog } from './composechangelog.js';
 import { removeChangelogEntryFiles } from './removechangelogentryfiles.js';
 import { commitChanges } from './commitchanges.js';
 import { InternalError } from './internalerror.js';
@@ -26,8 +26,21 @@ import { UserAbortError } from './useraborterror.js';
 type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { isSinglePackage: boolean };
 
 /**
- * This function handles the entire changelog generation process, including version management,
- * package information gathering, and changelog file updates.
+ * Orchestrates the full changelog generation workflow.
+ *
+ * This function:
+ * * Reads the current package version and metadata.
+ * * Locates all changelog entry files from the main and external repositories.
+ * * Parses, validates, and groups entries by their section.
+ * * Optionally displays the changes for manual inspection.
+ * * Prompts for the next version if not provided via `options.nextVersion`.
+ * * Computes the released package information based on version changes.
+ * * Assembles a new changelog based on the visible entries.
+ * * Optionally writes the new changelog to disk and removes the processed entry files.
+ * * Commits the changes (changelog and removed files) to the Git repository.
+ *
+ * If `disableFilesystemOperations` is enabled, file operations (writing/committing) will be skipped,
+ * and the assembled changelog object will be returned instead.
  */
 const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options => {
 	const {
@@ -74,21 +87,21 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	}
 
 	// Display a prompt to provide a new version in the console.
-	const { isInternal, newVersion } = await getNewVersion( {
+	const { isInternal, newVersion } = await determineNextVersion( {
 		currentVersion,
 		nextVersion,
 		sections: sectionsWithEntries,
 		packageName: shouldIgnoreRootPackage ? npmPackageToCheck! : rootPackageName
 	} );
 
-	const releasedPackagesInfo = await getReleasedPackagesInfo( {
+	const releasedPackagesInfo = await composeReleaseSummary( {
 		currentVersion,
 		newVersion,
 		packagesMetadata,
 		sections: sectionsWithEntries
 	} );
 
-	const newChangelog = await getNewChangelog( {
+	const newChangelog = await composeChangelog( {
 		currentVersion,
 		cwd,
 		date,
@@ -103,11 +116,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		return newChangelog as any;
 	}
 
-	await removeChangelogEntryFiles( {
-		cwd,
-		entryPaths,
-		externalRepositories
-	} );
+	await removeChangelogEntryFiles( entryPaths );
 	await modifyChangelog( newChangelog, cwd );
 	await commitChanges(
 		newVersion,
@@ -118,7 +127,12 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 };
 
 /**
- * Wrapper function that provides error handling for the changelog generation process.
+ * Entry point for generating a changelog with error handling.
+ *
+ * This wrapper ensures that:
+ * * Interruptions from the user (e.g., Ctrl+C or intentional aborts) exit silently with code 0.
+ * * Expected and unexpected internal errors are logged to the console and exit with code 1.
+ * * Other unexpected errors are re-thrown for higher-level handling.
  */
 export const generateChangelog: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options => {
 	return main( options )

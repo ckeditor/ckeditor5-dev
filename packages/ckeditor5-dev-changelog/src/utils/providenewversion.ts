@@ -6,8 +6,8 @@
 import semver, { type ReleaseType } from 'semver';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { validateVersionAvailability } from './validateversionavailability.js';
-import { validateVersionHigherThanCurrent } from './validateversionhigherthancurrent.js';
+import { checkVersionAvailability } from './checkversionavailability.js';
+import { isVersionGreaterThanCurrent } from './isversiongreaterthancurrent.js';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
 
@@ -42,10 +42,13 @@ type ConfirmationQuestion = {
 };
 
 /**
- * This function displays a prompt to provide a new version for all packages in the repository.
- * The version is being validated e.g. invalid version format or already used version are not accepted.
+ * Prompts the user to provide a new version for a package.
+ *
+ * Validates the input (version format, version higher than current, availability).
+ *
+ * Optionally shows warnings for invalid changes and allows user to abort.
  */
-export async function provideNewVersionForMonorepository( options: Options ): Promise<string> {
+export async function provideNewVersion( options: Options ): Promise<string> {
 	if ( options.displayValidationWarning ) {
 		// Display warning about invalid changes
 		displayInvalidChangesWarning();
@@ -136,13 +139,13 @@ function createVersionQuestion( options: Options ): Array<Question> {
 				return true;
 			}
 
-			const higherVersionValidation = validateVersionHigherThanCurrent( input, version );
+			const higherVersionValidation = isVersionGreaterThanCurrent( input, version );
 
 			if ( higherVersionValidation !== true ) {
 				return higherVersionValidation;
 			}
 
-			return validateVersionAvailability( input, packageName );
+			return checkVersionAvailability( input, packageName );
 		},
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	} ];

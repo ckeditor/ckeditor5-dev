@@ -6,10 +6,11 @@
 import { npm } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * Validates if the provided version is available in the npm registry.
+ * Checks whether the specified version is available for the given package in the npm registry.
+ *
+ * Skips validation for the special 'internal' version.
  */
-export async function validateVersionAvailability( version: string, packageName: string ): Promise<string | true> {
-	// Skip this validation for an 'internal' version.
+export async function checkVersionAvailability( version: string, packageName: string ): Promise<string | true> {
 	if ( version === 'internal' ) {
 		return true;
 	}

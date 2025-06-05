@@ -4,9 +4,8 @@
  */
 
 import type { Entry, ReleaseInfo, SectionsWithEntries } from '../types.js';
-// import { deduplicate } from './deduplicate.js';
 
-type getReleasedPackagesInfoOptions = {
+type ComposeReleaseSummaryOptions = {
 	sections: SectionsWithEntries;
 	currentVersion: string;
 	newVersion: string;
@@ -14,10 +13,16 @@ type getReleasedPackagesInfoOptions = {
 };
 
 /**
- * Generates information about packages being released in the new version.
- * This function creates a summary of package versions and their changes.
+ * Generates a categorized summary of packages released in the new version,
+ * including new packages, major, minor, feature, and other releases.
+ *
+ * This function analyzes changelog sections and package metadata to:
+ * * Identify new packages introduced with version '0.0.1'.
+ * * Group packages by release type based on the changelog sections: major, minor, and features.
+ * * Exclude packages already accounted for in higher-priority release categories from lower ones.
+ * * Provide a fallback category for "other releases" that don't fall into the above groups.
  */
-export async function getReleasedPackagesInfo( options: getReleasedPackagesInfoOptions ): Promise<Array<ReleaseInfo>> {
+export async function composeReleaseSummary( options: ComposeReleaseSummaryOptions ): Promise<Array<ReleaseInfo>> {
 	const { sections, currentVersion, newVersion, packagesMetadata } = options;
 
 	const versionUpgradeText = `v${ currentVersion } => v${ newVersion }`;

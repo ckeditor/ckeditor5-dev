@@ -4,14 +4,14 @@
  */
 
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from './constants.js';
-import { linkToGitHubUser } from '../utils/linktogithubuser.js';
+import { linkToGitHubUser } from './linktogithubuser.js';
 import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
 import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 
 type DifferentRepoIssue = { owner: string; repository: string; number: string };
 
-type GetSectionsWithEntriesOptions = {
+type GroupEntriesBySectionOptions = {
 	files: Array<ParsedFile>;
 	packagesMetadata: Map<string, string>;
 	transformScope?: TransformScope;
@@ -21,7 +21,7 @@ type GetSectionsWithEntriesOptions = {
 /**
  * This function categorizes changelog entries based on their types and packages.
  */
-export function groupEntriesBySection( options: GetSectionsWithEntriesOptions ): SectionsWithEntries {
+export function groupEntriesBySection( options: GroupEntriesBySectionOptions ): SectionsWithEntries {
 	const { files, packagesMetadata, transformScope, isSinglePackage } = options;
 
 	const packageNames = [ ...packagesMetadata.keys() ];

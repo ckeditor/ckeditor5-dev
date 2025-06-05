@@ -10,16 +10,16 @@ import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';
 import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 
-type GetChangesetFilePathsOptions = {
+type FindChangelogEntryPathsOptions = {
 	cwd: string;
 	externalRepositories: Array<RepositoryConfig>;
 	shouldSkipLinks: boolean;
 };
 
 /**
- * This function collects markdown files that contain changelog entries for processing.
+ * Gathers changelog entry file paths (Markdown files) from the main repository and any configured external repositories.
  */
-export async function findChangelogEntryPaths( options: GetChangesetFilePathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
+export async function findChangelogEntryPaths( options: FindChangelogEntryPathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
 	const { cwd, externalRepositories, shouldSkipLinks } = options;
 
 	return AsyncArray

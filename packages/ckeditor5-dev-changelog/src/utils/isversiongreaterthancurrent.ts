@@ -8,7 +8,7 @@ import semver from 'semver';
 /**
  * Validates if the provided version is higher than the current one.
  */
-export function validateVersionHigherThanCurrent( version: string, currentVersion: string ): string | true {
+export function isVersionGreaterThanCurrent( version: string, currentVersion: string ): string | true {
 	// Skip this validation for an 'internal' version
 	if ( version === 'internal' ) {
 		return true;

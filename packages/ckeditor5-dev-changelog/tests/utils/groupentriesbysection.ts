@@ -12,11 +12,10 @@ type RecursivePartial<T> = {
 	[P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-vi.mock( '../../src/utils/linktogithubuser', () => ( {
+vi.mock( '../../src/utils/linktogithubuser.js', () => ( {
 	linkToGitHubUser: vi.fn( content => content )
 } ) );
-
-vi.mock( '../../src/utils/validateentry' );
+vi.mock( '../../src/utils/validateentry.js' );
 
 const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
 	content: 'Some content',

@@ -7,7 +7,11 @@ import { InternalError } from './internalerror.js';
 import type { Section, SectionsWithEntries } from '../types.js';
 
 /**
- * This function determines which sections contain valid entries to be shown.
+ * Filters and returns only those changelog sections that:
+ * * Have at least one entry.
+ * * Are not explicitly marked to be excluded from the final changelog.
+ *
+ * This is used to determine which sections should be displayed or processed for changelog generation.
  */
 export function filterVisibleSections( sectionsWithEntries: SectionsWithEntries ): Array<Section> {
 	const sectionsToDisplay = Object.entries( sectionsWithEntries )

@@ -23,7 +23,7 @@ vi.mock( 'chalk', () => ( {
 	}
 } ) );
 
-vi.mock( '../../src/utils/loginfo' );
+vi.mock( '../../src/utils/loginfo.js' );
 
 describe( 'displayChanges()', () => {
 	it( 'logs changes correctly for valid sections', () => {

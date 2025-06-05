@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getReleasedPackagesInfo } from '../../src/utils/getreleasedpackagesinfo.js';
+import { composeReleaseSummary } from '../../src/utils/composereleasesummary.js';
 import type { SectionsWithEntries, Entry } from '../../src/types.js';
 
 const createEntry = ( scope: Array<string> ): Entry => ( {
@@ -49,7 +49,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 			[ '@ckeditor/new-package', '0.0.1' ]
 		] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -74,7 +74,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 			[ '@ckeditor/new-package', '0.0.1' ]
 		] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -99,7 +99,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 			[ '@ckeditor/new-package', '0.0.1' ]
 		] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -129,7 +129,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 			[ '@ckeditor/new-package', '0.0.1' ]
 		] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -149,7 +149,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 		const sections = createSectionsWithEntries();
 		const packagesMetadata = new Map();
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -166,7 +166,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 			[ '@ckeditor/new-package-2', '0.0.1' ]
 		] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -182,7 +182,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 		const packagesMetadata = new Map( [ [ '@ckeditor/uncategorized', '1.0.0' ] ] );
 		const sections = createSectionsWithEntries();
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -201,7 +201,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 		const packagesMetadata = new Map( [ [ '@ckeditor/core', '1.0.0' ] ] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',
@@ -221,7 +221,7 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 		const packagesMetadata = new Map( [ [ '@ckeditor/test', '1.0.0' ] ] );
 
-		const result = await getReleasedPackagesInfo( {
+		const result = await composeReleaseSummary( {
 			sections,
 			currentVersion: '1.0.0',
 			newVersion: '2.0.0',

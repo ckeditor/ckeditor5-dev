@@ -6,6 +6,14 @@
 import type { ParsedFile } from '../types.js';
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from './constants.js';
 
+/**
+ * Validates a changelog entry against expected types, scopes, and issue references.
+ *
+ * It checks if the type is valid and consistent with single or multi-package modes,
+ * verifies scopes against known package names, and ensures issue references are correctly formatted.
+ *
+ * Returns whether the entry is valid along with a validated version including any validation messages.
+ */
 export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, singlePackage: boolean ): {
 	isValid: boolean;
 	validatedEntry: ParsedFile;

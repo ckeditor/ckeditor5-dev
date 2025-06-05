@@ -8,7 +8,7 @@ import { NPM_URL, SECTIONS, VERSIONING_POLICY_URL } from './constants.js';
 import type { ReleaseInfo, Section } from '../types.js';
 import { getDateFormatted } from './getdateformatted.js';
 
-type NewChangelogOptions = {
+type ComposeChangelogOptions = {
 	cwd: string;
 	date: string;
 	currentVersion: string;
@@ -20,7 +20,16 @@ type NewChangelogOptions = {
 	packagesMetadata: Map<string, string>;
 };
 
-export async function getNewChangelog( options: NewChangelogOptions ): Promise<string> {
+/**
+ * Generates a formatted changelog string for a new version release.
+ *
+ * This function constructs the changelog content including
+ * * A version header with a link to the GitHub comparison view (except for an initial version).
+ * * Sections with grouped changelog entries and their messages.
+ * * A collapsible summary of released packages and their version bumps for a mono-repository setup.
+ * * Special handling for internal-only releases and single-package repositories.
+ */
+export async function composeChangelog( options: ComposeChangelogOptions ): Promise<string> {
 	const {
 		cwd,
 		date,

@@ -14,7 +14,14 @@ type DisplayChangesOptions = {
 };
 
 /**
- * This function provides a summary of changes that will be included in the changelog.
+ * Displays a formatted summary of all changelog entries grouped by sections (e.g., Features, Fixes, Breaking changes).
+ *
+ * This function:
+ * * Lists all non-empty changelog sections with appropriate formatting.
+ * * Differentiates between valid and invalid entries using visual indicators (`+` for valid, `x` for invalid).
+ * * Supports both mono-repository and single package repositories through the `isSinglePackage` flag.
+ * * Applies a transformation to scope names using the `transformScope` callback for a mono-repository setup.
+ * * Outputs a helpful legend for interpreting the entry indicators.
  */
 export function displayChanges( options: DisplayChangesOptions ): void {
 	const { sections, isSinglePackage, transformScope } = options;
@@ -38,7 +45,7 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 			numberOfEntries += section.entries.length;
 		}
 
-		section.entries.forEach( entries => displayCallback( entries, sectionName, isSinglePackage, transformScope ) );
+		section.entries.forEach( entry => displayCallback( entry, sectionName, isSinglePackage, transformScope ) );
 
 		logInfo( '' );
 	}
@@ -46,8 +53,8 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 	logInfo( '◌ ' + chalk.underline( 'Legend:' ), { indent: 1 } );
 	logInfo( `- Entries marked with ${ chalk.green( '+' ) } symbol are included in the changelog.`, { indent: 2 } );
 	logInfo(
-		'- Entries marked with ' + chalk.yellow( 'x' ) + ' symbol includes invalid references (see or/and closes) ' +
-		'or/and scope definitions. Please ensure that:',
+		'- Entries marked with ' + chalk.yellow( 'x' ) + ' symbol include invalid references (see and/or closes) ' +
+		'or scope definitions. Please ensure that:',
 		{ indent: 2 }
 	);
 	logInfo( '* Reference entries match one of the following formats:', { indent: 3 } );
@@ -60,7 +67,7 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 	logInfo( '' );
 }
 
-function getTitleColor( sectionName: SectionName ) {
+function getTitleColor( sectionName: SectionName ): ( value: string ) => string {
 	if ( sectionName === 'warning' ) {
 		return chalk.yellow;
 	}

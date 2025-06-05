@@ -3,16 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getNewVersion, type GetNewVersionOptions } from '../../src/utils/getnewversion.js';
-import { provideNewVersionForMonorepository } from '../../src/utils/providenewversionformonorepository.js';
+import { determineNextVersion, type DetermineNextVersionOptions } from '../../src/utils/determinenextversion.js';
+import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import type { Entry, SectionsWithEntries } from '../../src/types.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import semver from 'semver';
+import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
-vi.mock( '../../src/utils/providenewversionformonorepository' );
-vi.mock( '../../src/utils/loginfo' );
+vi.mock( '../../src/utils/providenewversion.js' );
+vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( 'semver', () => {
 	return {
 		default: {
@@ -21,9 +21,9 @@ vi.mock( 'semver', () => {
 	};
 } );
 
-describe( 'getNewVersion()', () => {
-	let options: GetNewVersionOptions;
-	const mockedProvideNewVersion = vi.mocked( provideNewVersionForMonorepository );
+describe( 'determineNextVersion()', () => {
+	let options: DetermineNextVersionOptions;
+	const mockedProvideNewVersion = vi.mocked( provideNewVersion );
 	const mockedLogInfo = vi.mocked( logInfo );
 
 	const createEntry = ( message: string ): Entry => ( {
@@ -73,7 +73,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should log the process start', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
 
-		await getNewVersion( options );
+		await determineNextVersion( options );
 
 		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 	} );
@@ -81,7 +81,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should return a patch version when there are no minor, major, or feature entries', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
@@ -96,7 +96,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should return provided version if it is not undefined or internal', async () => {
 		options.nextVersion = '50.0.0';
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '50.0.0' );
 		expect( result.isInternal ).toBe( false );
@@ -111,7 +111,7 @@ describe( 'getNewVersion()', () => {
 			{ minor: { entries: [ createEntry( 'Some minor change' ) ], title: 'Minor Breaking Changes' } }
 		);
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
@@ -130,7 +130,7 @@ describe( 'getNewVersion()', () => {
 			{ feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' } }
 		);
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
@@ -149,7 +149,7 @@ describe( 'getNewVersion()', () => {
 			{ major: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' } }
 		);
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
@@ -170,7 +170,7 @@ describe( 'getNewVersion()', () => {
 			feature: { entries: [ createEntry( 'Some feature' ) ], title: 'Features' }
 		} );
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
@@ -185,7 +185,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should handle internal version when nextVersion is set to "internal"', async () => {
 		options.nextVersion = 'internal';
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( true );
@@ -196,7 +196,7 @@ describe( 'getNewVersion()', () => {
 	it( 'should handle internal version when user provides "internal" as version', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( 'internal' );
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( true );
@@ -214,7 +214,7 @@ describe( 'getNewVersion()', () => {
 		options.nextVersion = 'internal';
 
 		await expect(
-			getNewVersion( options )
+			determineNextVersion( options )
 		).rejects.toThrow( 'Unable to determine new version based on the version in root package.json.' );
 	} );
 
@@ -225,7 +225,7 @@ describe( 'getNewVersion()', () => {
 			{ invalid: { entries: [ createEntry( 'Invalid change' ) ], title: 'Invalid changes' } }
 		);
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
@@ -247,7 +247,7 @@ describe( 'getNewVersion()', () => {
 			{ fix: { entries: [ entryWithValidation ], title: 'Bug fixes' } }
 		);
 
-		const result = await getNewVersion( options );
+		const result = await determineNextVersion( options );
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );

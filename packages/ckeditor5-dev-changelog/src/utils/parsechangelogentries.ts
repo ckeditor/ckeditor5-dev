@@ -11,7 +11,7 @@ import type { ChangesetPathsWithGithubUrl, FileMetadata, ParsedFile } from '../t
 type SimpleParsedFile = Pick<ParsedFile, 'changesetPath' | 'gitHubUrl' | 'shouldSkipLinks'>;
 
 /**
- * This function reads and processes the changeset files to extract changelog information.
+ * Reads and processes input files to extract changelog entries.
  */
 export function parseChangelogEntries( entryPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<Array<ParsedFile>> {
 	const fileEntries = entryPaths.reduce<Array<SimpleParsedFile>>( ( acc, { filePaths, gitHubUrl, shouldSkipLinks } ) => {

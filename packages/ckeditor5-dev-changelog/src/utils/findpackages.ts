@@ -16,7 +16,7 @@ type FindPackagesOptions = {
 };
 
 /**
- * This function gathers package information from both internal and external repositories.
+ * Retrieves the names and versions of packages found in both the main repository and any external repositories.
  */
 export async function findPackages( options: FindPackagesOptions ): Promise<Map<string, string>> {
 	const {

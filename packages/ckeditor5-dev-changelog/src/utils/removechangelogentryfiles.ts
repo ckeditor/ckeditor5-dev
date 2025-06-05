@@ -5,31 +5,19 @@
 
 import chalk from 'chalk';
 import fs from 'fs-extra';
-import upath from 'upath';
-import { removeEmptyDirs } from './removeemptydirs.js';
-import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
 import { logInfo } from './loginfo.js';
-import { CHANGESET_DIRECTORY } from './constants.js';
-
-type RemoveChangesetFilesOptions = {
-	entryPaths: Array<ChangesetPathsWithGithubUrl>;
-	cwd: string;
-	externalRepositories: Array<RepositoryConfig>;
-};
+import type { ChangesetPathsWithGithubUrl } from '../types.js';
 
 /**
- * This function cleans up the changeset files that have been incorporated into the changelog.
+ * Cleans up the input files that have been incorporated into the changelog by deleting them
+ * and removing any resulting empty directories both in the current repository and in any external repositories.
  */
-export async function removeChangelogEntryFiles( options: RemoveChangesetFilesOptions ): Promise<void> {
-	const { entryPaths, cwd, externalRepositories } = options;
-
+export async function removeChangelogEntryFiles( entryPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<void> {
 	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
 
-	await Promise.all( entryPaths.flatMap( repo => repo.filePaths ).map( file => fs.unlink( file ) ) );
-
-	await removeEmptyDirs( upath.join( cwd, CHANGESET_DIRECTORY ) );
-
-	for ( const externalRepo of externalRepositories ) {
-		await removeEmptyDirs( upath.join( externalRepo.cwd, CHANGESET_DIRECTORY ) );
-	}
+	await Promise.all(
+		entryPaths
+			.flatMap( repo => repo.filePaths )
+			.map( file => fs.unlink( file ) )
+	);
 }

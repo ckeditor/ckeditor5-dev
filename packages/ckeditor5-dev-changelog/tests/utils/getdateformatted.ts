@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getDateFormatted } from '../../src/utils/getdateformatted.js'; // Update the file path accordingly
+import { getDateFormatted } from '../../src/utils/getdateformatted.js';
 import { describe, it, expect } from 'vitest';
 
 describe( 'getDateFormatted()', () => {

@@ -8,9 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import semver, { type ReleaseType } from 'semver';
-import {
-	provideNewVersionForMonorepository
-} from '../../src/utils/providenewversionformonorepository.js';
+import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 
@@ -27,7 +25,7 @@ vi.mock( 'semver' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../src/utils/loginfo.js' );
 
-describe( 'provideNewVersionForMonorepository()', () => {
+describe( 'provideNewVersion()', () => {
 	const defaultOptions = {
 		packageName: 'test-package',
 		version: '1.0.0',
@@ -69,7 +67,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				vi.mocked( semver.inc ).mockReturnValueOnce( expectedVersion );
 				vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: expectedVersion } );
 
-				const result = await provideNewVersionForMonorepository( options as any );
+				const result = await provideNewVersion( options as any );
 
 				expect( result ).toBe( expectedVersion );
 				expect( semver.inc ).toHaveBeenCalledWith( '1.0.0', bumpType );
@@ -92,7 +90,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 			vi.mocked( semver.inc ).mockReturnValueOnce( null );
 			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: currentVersion } );
 
-			await provideNewVersionForMonorepository( options as any );
+			await provideNewVersion( options as any );
 
 			const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 			const question = mockCalls[ 0 ][ 0 ][ 0 ];
@@ -111,7 +109,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 
 				vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.1' } );
 
-				await provideNewVersionForMonorepository( options as any );
+				await provideNewVersion( options as any );
 
 				const mockCalls = vi.mocked( inquirer.prompt ).mock.calls as any;
 				const question = mockCalls[ mockCalls.length - 1 ][ 0 ][ 0 ];
@@ -130,7 +128,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			expect( filterFunction ).toBeDefined();
 			expect( filterFunction( '  1.0.1  ' ) ).toBe( '1.0.1' );
@@ -143,7 +141,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 					return Promise.resolve( { continue: false } ) as any;
 				} );
 
-			await expect( provideNewVersionForMonorepository( {
+			await expect( provideNewVersion( {
 				...defaultOptions,
 				displayValidationWarning: true
 			} ) ).rejects.toThrow( UserAbortError );
@@ -169,7 +167,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				} )
 				.mockResolvedValueOnce( { version: '2.0.0' } );
 
-			const result = await provideNewVersionForMonorepository( {
+			const result = await provideNewVersion( {
 				...defaultOptions,
 				displayValidationWarning: true
 			} );
@@ -187,7 +185,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockReturnValueOnce( null );
 			const invalidResult = await validateFunction( 'invalid' );
@@ -206,7 +204,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: 'internal' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockClear();
 
@@ -224,7 +222,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockReturnValueOnce( '0.9.9' );
 			vi.mocked( semver.gt ).mockReturnValueOnce( false );
@@ -245,7 +243,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: 'internal' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.gt ).mockClear();
 
@@ -263,7 +261,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
 			vi.mocked( semver.gt ).mockReturnValueOnce( true );
@@ -288,7 +286,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: 'internal' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( npm.checkVersionAvailability ).mockClear();
 
@@ -306,7 +304,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockClear();
 			vi.mocked( semver.gt ).mockClear();
@@ -334,7 +332,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 		] )( 'should return the version selected by the user: "%s"', async userVersion => {
 			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: userVersion } );
 
-			const result = await provideNewVersionForMonorepository( defaultOptions as any );
+			const result = await provideNewVersion( defaultOptions as any );
 
 			expect( result ).toBe( userVersion );
 		} );
@@ -349,7 +347,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
-			await provideNewVersionForMonorepository( defaultOptions as any );
+			await provideNewVersion( defaultOptions as any );
 
 			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
 			vi.mocked( semver.gt ).mockReturnValueOnce( true );
@@ -361,7 +359,7 @@ describe( 'provideNewVersionForMonorepository()', () => {
 		it( 'should handle rejection from inquirer.prompt', async () => {
 			vi.mocked( inquirer.prompt ).mockRejectedValueOnce( new Error( 'User canceled' ) );
 
-			await expect( provideNewVersionForMonorepository( defaultOptions as any ) ).rejects.toThrow( 'User canceled' );
+			await expect( provideNewVersion( defaultOptions as any ) ).rejects.toThrow( 'User canceled' );
 		} );
 	} );
 } );
