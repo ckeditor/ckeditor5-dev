@@ -34,7 +34,10 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 			displayWarningEntry :
 			displayValidEntry;
 
-		numberOfEntries += section.entries.length;
+		if ( sectionName !== 'warning' ) {
+			numberOfEntries += section.entries.length;
+		}
+
 		section.entries.forEach( entries => displayCallback( entries, sectionName, isSinglePackage, transformScope ) );
 
 		logInfo( '' );
