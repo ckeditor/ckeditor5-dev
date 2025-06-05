@@ -221,10 +221,12 @@ describe( 'groupEntriesBySection()', () => {
 	} );
 
 	it( 'should generate correct markdown links for issues from other repositories', () => {
-		const files = [ createParsedFile( { data: {
-			closes: [ 'ckeditor/ckeditor5#123' ],
-			see: [ 'mr-developer/cool-project.com#456' ]
-		} } ) ];
+		const files = [ createParsedFile( {
+			data: {
+				closes: [ 'ckeditor/ckeditor5#123' ],
+				see: [ 'mr-developer/cool-project.com#456' ]
+			}
+		} ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
@@ -239,9 +241,11 @@ describe( 'groupEntriesBySection()', () => {
 	} );
 
 	it( 'should generate correct markdown links for GitHub issues with URL format', () => {
-		const files = [ createParsedFile( { data: {
-			closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
-		} } ) ];
+		const files = [ createParsedFile( {
+			data: {
+				closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
+			}
+		} ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
@@ -261,9 +265,11 @@ describe( 'groupEntriesBySection()', () => {
 	} );
 
 	it( 'should not add invalid links to the generated message', () => {
-		const files = [ createParsedFile( { data: {
-			closes: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
-		} } ) ];
+		const files = [ createParsedFile( {
+			data: {
+				closes: [ '@https://github.com/ckeditor/ckeditor5/issues/123' ]
+			}
+		} ) ];
 
 		const testFile = files[ 0 ]!;
 		const testData = testFile.data as any;
@@ -303,9 +309,11 @@ describe( 'groupEntriesBySection()', () => {
 	} );
 
 	it( 'should handle invalid issue references that do not match any pattern (closes)', () => {
-		const files = [ createParsedFile( { data: {
-			closes: [ 'invalid-reference' ]
-		} } ) ];
+		const files = [ createParsedFile( {
+			data: {
+				closes: [ 'invalid-reference' ]
+			}
+		} ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
@@ -315,9 +323,11 @@ describe( 'groupEntriesBySection()', () => {
 	} );
 
 	it( 'should handle invalid issue references that do not match any pattern (see)', () => {
-		const files = [ createParsedFile( { data: {
-			see: [ 'invalid-reference' ]
-		} } ) ];
+		const files = [ createParsedFile( {
+			data: {
+				see: [ 'invalid-reference' ]
+			}
+		} ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
@@ -351,5 +361,118 @@ describe( 'groupEntriesBySection()', () => {
 
 		expect( result.feature.entries ).toHaveLength( 1 );
 		expect( result.warning.entries ).toHaveLength( 1 );
+	} );
+
+	it( 'should append community credits to the content', () => {
+		const files = [ createParsedFile( {
+			content: 'New feature added.',
+			data: {
+				communityCredits: [ '@user1', '@user2' ]
+			}
+		} ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).toContain( 'Thanks to @user1, @user2.' );
+	} );
+
+	it( 'should preserve spacing in formatted content', () => {
+		const content = `Headline.
+
+Extra description.
+
+Even more.`;
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Headline. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  Extra description.',
+			'',
+			'  Even more.'
+		] );
+	} );
+
+	it( 'should preserve spacing in formatted content (checking lists)', () => {
+		const content = `We just released a new version of the app with several improvements:
+
+- Improved dark mode contrast
+  - Adjusted background color to \`#1e1e1e\`
+  - Lightened text for better legibility
+- Added keyboard shortcuts
+  - \`Ctrl + K\` to open the command palette
+  - \`Ctrl + /\` to toggle comments`;
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: We just released a new version of the app with several improvements: See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  - Improved dark mode contrast',
+			'    - Adjusted background color to `#1e1e1e`',
+			'    - Lightened text for better legibility',
+			'  - Added keyboard shortcuts',
+			'    - `Ctrl + K` to open the command palette',
+			'    - `Ctrl + /` to toggle comments'
+		] );
+	} );
+
+	it( 'should preserve spacing in formatted content (reducing empty lines to one between blocks)', () => {
+		const content = `The website's background was set.
+
+We just released a new version of the app with several improvements:
+
+
+
+- Improved dark mode contrast
+  - Adjusted background color to \`#1e1e1e\`
+  - Lightened text for better legibility
+- Added keyboard shortcuts
+  - \`Ctrl + K\` to open the command palette
+  - \`Ctrl + /\` to toggle comments
+  
+  
+  
+  
+  
+Let us know what you think!
+
+
+
+`;
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: The website\'s background was set. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  We just released a new version of the app with several improvements:',
+			'',
+			'  - Improved dark mode contrast',
+			'    - Adjusted background color to `#1e1e1e`',
+			'    - Lightened text for better legibility',
+			'  - Added keyboard shortcuts',
+			'    - `Ctrl + K` to open the command palette',
+			'    - `Ctrl + /` to toggle comments',
+			'',
+			'  Let us know what you think!'
+		] );
 	} );
 } );
