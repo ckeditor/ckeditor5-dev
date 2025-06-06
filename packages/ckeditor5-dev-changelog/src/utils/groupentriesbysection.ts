@@ -111,7 +111,8 @@ function formatContent( content: string ) {
 
 	const cleanedRestContent = restContent.reduce( ( acc, line ) => {
 		if ( line.trim() === '' ) {
-			if ( acc.at( -1 ) !== '' ) {
+			// Only add empty line if the last item is not already an empty line
+			if ( acc.length > 0 && acc.at( -1 ) !== '' ) {
 				acc.push( '' );
 			}
 		} else {
