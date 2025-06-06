@@ -85,7 +85,7 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
 	const question: ConfirmationQuestion = {
 		type: 'confirm',
 		name: 'continue',
-		message: 'Do you want to fix them?',
+		message: 'Should continue?',
 		default: false,
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	};
