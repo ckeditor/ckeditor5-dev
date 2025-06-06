@@ -29,8 +29,9 @@ export default async function commit(
 	const gitKnownFiles = new Set(
 		gitKnownFilesOutput
 			.split( '\n' )
-			.map( x => upath.normalize( x.trim() ) )
-			.filter( x => x !== '' )
+			.map( filePath => filePath.trim() )
+			.filter( filePath => filePath !== '' )
+			.map( filePath => upath.normalize( filePath ) )
 	);
 
 	const filteredFiles = relativeFiles.filter( path => gitKnownFiles.has( path ) );
