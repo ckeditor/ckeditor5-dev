@@ -474,4 +474,33 @@ Let us know what you think!
 			'  Let us know what you think!'
 		] );
 	} );
+
+	it( 'should remove multiple consecutive empty lines and preserve maximum two line breaks', () => {
+		const content = `
+
+Message.
+
+
+Line two.
+
+
+Line three.
+
+`;
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: Message. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  Line two.',
+			'',
+			'  Line three.'
+		] );
+	} );
 } );
