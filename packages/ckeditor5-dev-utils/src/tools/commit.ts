@@ -16,8 +16,25 @@ export default async function commit(
 
 	const git = simpleGit( { baseDir: cwd } );
 
+	// Ensure Git tracks the files.
+	const gitKnownFilesOutput = await git.raw( [ 'ls-files', '--error-unmatch', ...files ] )
+		.catch( () => '' );
+
+	const gitKnownFiles = new Set(
+		gitKnownFilesOutput
+			.split( '\n' )
+			.map( x => x.trim() )
+			.filter( x => x !== '' )
+	);
+
+	const filteredFiles = files.filter( path => gitKnownFiles.has( path ) );
+
+	if ( !filteredFiles.length ) {
+		return;
+	}
+
 	const makeCommit = async () => {
-		for ( const chunk of splitPathsIntoChunks( files ) ) {
+		for ( const chunk of splitPathsIntoChunks( filteredFiles ) ) {
 			await git.add( chunk );
 		}
 
