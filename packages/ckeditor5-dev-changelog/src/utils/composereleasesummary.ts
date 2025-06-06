@@ -65,8 +65,12 @@ function getScopeWithOrgNamespace( entries: Array<Entry> = [], { packagesToRemov
 	packagesToRemove: Array<string>;
 	packageNames: Array<string>;
 } ) {
-	const scope = entries.flatMap( entry => entry.data.scope ).filter( Boolean );
-	const packagesFullNames = scope.map( scope => {
+	const uniqueScopes = entries
+		.flatMap( entry => entry.data.scope )
+		.filter( Boolean )
+		.filter( ( item, index, array ) => array.indexOf( item ) === index );
+
+	const packagesFullNames = uniqueScopes.map( scope => {
 		return packageNames.find( packageName => getPackageName( packageName ) === scope )!;
 	} );
 
