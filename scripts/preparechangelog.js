@@ -5,8 +5,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { generateChangelogForMonoRepository } from '@ckeditor/ckeditor5-dev-changelog';
 import { parseArgs } from 'util';
+import { generateChangelogForMonoRepository } from '@ckeditor/ckeditor5-dev-changelog';
+import { CKEDITOR5_DEV_ROOT, PACKAGES_DIRECTORY } from './utils/constants.js';
 
 const { values: options } = parseArgs( {
 	options: {
@@ -22,10 +23,11 @@ const { values: options } = parseArgs( {
 } );
 
 const changelogOptions = {
-	cwd: process.cwd(),
-	packages: 'packages',
-	date: options.date,
-	disableFilesystemOperations: options.dryRun,
+	cwd: CKEDITOR5_DEV_ROOT,
+	packagesDirectory: PACKAGES_DIRECTORY,
+	disableFilesystemOperations: options[ 'dry-run' ],
+	shouldIgnoreRootPackage: true,
+	npmPackageToCheck: '@ckeditor/ckeditor5-dev-release-tools',
 	transformScope: name => {
 		const prefix = 'ckeditor5-dev-';
 		const isCkeditorDev = name.startsWith( prefix );
@@ -36,6 +38,10 @@ const changelogOptions = {
 		};
 	}
 };
+
+if ( options.date ) {
+	changelogOptions.date = options.date;
+}
 
 generateChangelogForMonoRepository( changelogOptions )
 	.then( maybeChangelog => {
