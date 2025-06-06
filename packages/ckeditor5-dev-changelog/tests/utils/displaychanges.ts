@@ -82,6 +82,105 @@ describe( 'displayChanges()', () => {
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): Added new feature', expect.any( Object ) );
 	} );
 
+	it( 'uses the specified `transformScope` callback to define a displayed name', () => {
+		const sections: SectionsWithEntries = {
+			Feature: {
+				title: 'Features',
+				entries: [
+					{
+						message: 'Added new feature',
+						data: { mainContent: 'Added new feature', restContent: [], type: 'Feature', scope: [ 'foo' ] },
+						changesetPath: '/repo/changelog/changeset-1.md'
+					}
+				]
+			}
+		} as any;
+
+		displayChanges( {
+			sections,
+			isSinglePackage: false,
+			transformScope: () => {
+				return {
+					displayName: 'bar',
+					npmUrl: 'npm'
+				};
+			}
+		} );
+
+		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
+		expect( chalk.green ).toHaveBeenCalledWith( '+' );
+
+		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ bar: Added new feature', expect.any( Object ) );
+	} );
+
+	it( 'truncates the long entry (a mono-repository mode)', () => {
+		const sections: SectionsWithEntries = {
+			Feature: {
+				title: 'Features',
+				entries: [
+					{
+						message: 'Added new feature',
+						data: {
+							mainContent: 'Added new feature. This is a very long description that should be truncated.'.repeat( 3 ),
+							restContent: [],
+							type: 'Feature',
+							scope: []
+						},
+						changesetPath: '/repo/changelog/changeset-1.md'
+					}
+				]
+			}
+		} as any;
+
+		displayChanges( {
+			sections,
+			isSinglePackage: false
+		} );
+
+		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
+		expect( chalk.green ).toHaveBeenCalledWith( '+' );
+
+		expect( logInfo ).toHaveBeenNthCalledWith(
+			3,
+			'+ (no scope): Added new feature. This is a very long description that should be truncated.Added new feature. This ...',
+			expect.any( Object )
+		);
+	} );
+
+	it( 'truncates the long entry (a single package mode)', () => {
+		const sections: SectionsWithEntries = {
+			Feature: {
+				title: 'Features',
+				entries: [
+					{
+						message: 'Added new feature',
+						data: {
+							mainContent: 'Added new feature. This is a very long description that should be truncated.'.repeat( 3 ),
+							restContent: [],
+							type: 'Feature',
+							scope: []
+						},
+						changesetPath: '/repo/changelog/changeset-1.md'
+					}
+				]
+			}
+		} as any;
+
+		displayChanges( {
+			sections,
+			isSinglePackage: true
+		} );
+
+		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
+		expect( chalk.green ).toHaveBeenCalledWith( '+' );
+
+		expect( logInfo ).toHaveBeenNthCalledWith(
+			3,
+			'+ Added new feature. This is a very long description that should be truncated.Added new feature. This ...',
+			expect.any( Object )
+		);
+	} );
+
 	it( 'logs invalid section in red', () => {
 		const sections: SectionsWithEntries = {
 			invalid: {

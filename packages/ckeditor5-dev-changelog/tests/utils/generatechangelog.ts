@@ -426,6 +426,22 @@ describe( 'generateChangelog()', () => {
 		expect( displayChanges ).toHaveBeenCalledTimes( 0 );
 	} );
 
+	it( 'uses the provided package name when `shouldIgnoreRootPackage=true`', async () => {
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
+
+		await generateChangelog( {
+			...defaultOptions,
+			shouldIgnoreRootPackage: true,
+			npmPackageToCheck: 'ckeditor5-dev'
+		} );
+
+		expect( determineNextVersion ).toHaveBeenCalledWith( {
+			sections: expect.any( Object ),
+			currentVersion: '1.0.0',
+			packageName: 'ckeditor5-dev'
+		} );
+	} );
+
 	it( 'handles internal changes correctly (`internal` is a version provided by a user)', async () => {
 		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
 

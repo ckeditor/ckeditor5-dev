@@ -22,7 +22,9 @@ const createEntry = ( scope: Array<string> ): Entry => ( {
 	changesetPath: '/path/to/changeset1.md'
 } );
 
-const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {} ): SectionsWithEntries => ( {
+const createSectionsWithEntries = (
+	overrides: Partial<SectionsWithEntries> = {}
+): SectionsWithEntries => ( {
 	major: { entries: [], title: 'Major Breaking Changes' },
 	minor: { entries: [], title: 'Minor Breaking Changes' },
 	breaking: { entries: [], title: 'Breaking Changes' },
@@ -37,16 +39,25 @@ const createSectionsWithEntries = ( overrides: Partial<SectionsWithEntries> = {}
 describe( 'getReleasedPackagesInfo()', () => {
 	it( 'should categorize new, major, minor, feature, and other releases correctly', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
-			minor: { entries: [ createEntry( [ 'ui' ] ) ], title: 'Minor Breaking Changes' },
-			feature: { entries: [ createEntry( [ 'editor' ] ) ], title: 'Features' }
+			major: {
+				entries: [ createEntry( [ 'ckeditor5-core' ] ) ],
+				title: 'Major Breaking Changes'
+			},
+			minor: {
+				entries: [ createEntry( [ 'ckeditor5-ui' ] ) ],
+				title: 'Minor Breaking Changes'
+			},
+			feature: {
+				entries: [ createEntry( [ 'ckeditor5-editor-classic' ] ) ],
+				title: 'Features'
+			}
 		} );
 
 		const packagesMetadata = new Map( [
-			[ '@ckeditor/core', '1.0.0' ],
-			[ '@ckeditor/ui', '1.0.0' ],
-			[ '@ckeditor/editor', '1.0.0' ],
-			[ '@ckeditor/new-package', '0.0.1' ]
+			[ '@ckeditor/ckeditor5-core', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-ui', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-editor-classic', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-new-package', '0.0.1' ]
 		] );
 
 		const result = await composeReleaseSummary( {
@@ -57,21 +68,68 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
-			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] },
-			{ title: 'Releases containing new features:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/editor' ] }
+			{
+				title: 'New packages:',
+				version: 'v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-new-package' ]
+			},
+			{
+				title: 'Major releases (contain major breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-core' ]
+			},
+			{
+				title: 'Minor releases (contain minor breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-ui' ]
+			},
+			{
+				title: 'Releases containing new features:',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-editor-classic' ]
+			}
+		] );
+	} );
+
+	it( 'should categorize a non-scoped package', async () => {
+		const sections = createSectionsWithEntries( {
+			feature: {
+				entries: [ createEntry( [ 'ckeditor5' ] ) ],
+				title: 'Features'
+			}
+		} );
+
+		const packagesMetadata = new Map( [
+			[ 'ckeditor5', '1.0.0' ]
+		] );
+
+		const result = await composeReleaseSummary( {
+			sections,
+			currentVersion: '1.0.0',
+			newVersion: '1.1.0',
+			packagesMetadata
+		} );
+
+		expect( result ).toEqual( [
+			{
+				title: 'Releases containing new features:',
+				version: 'v1.0.0 => v1.1.0',
+				packages: [ 'ckeditor5' ]
+			}
 		] );
 	} );
 
 	it( 'should filter out new version releases from major releases', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core', 'new-package' ] ) ], title: 'Major Breaking Changes' }
+			major: {
+				entries: [ createEntry( [ 'ckeditor5-core', 'ckeditor5-new-package' ] ) ],
+				title: 'Major Breaking Changes'
+			}
 		} );
 
 		const packagesMetadata = new Map( [
-			[ '@ckeditor/core', '1.0.0' ],
-			[ '@ckeditor/new-package', '0.0.1' ]
+			[ '@ckeditor/ckeditor5-core', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-new-package', '0.0.1' ]
 		] );
 
 		const result = await composeReleaseSummary( {
@@ -82,21 +140,38 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] }
+			{
+				title: 'New packages:',
+				version: 'v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-new-package' ]
+			},
+			{
+				title: 'Major releases (contain major breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-core' ]
+			}
 		] );
 	} );
 
 	it( 'should filter out new version releases and major releases from minor releases', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major' },
-			minor: { entries: [ createEntry( [ 'ui', 'new-package', 'core' ] ) ], title: 'Minor' }
+			major: { entries: [ createEntry( [ 'ckeditor5-core' ] ) ], title: 'Major' },
+			minor: {
+				entries: [
+					createEntry( [
+						'ckeditor5-ui',
+						'ckeditor5-new-package',
+						'ckeditor5-core'
+					] )
+				],
+				title: 'Minor'
+			}
 		} );
 
 		const packagesMetadata = new Map( [
-			[ '@ckeditor/core', '1.0.0' ],
-			[ '@ckeditor/ui', '1.0.0' ],
-			[ '@ckeditor/new-package', '0.0.1' ]
+			[ '@ckeditor/ckeditor5-core', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-ui', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-new-package', '0.0.1' ]
 		] );
 
 		const result = await composeReleaseSummary( {
@@ -107,26 +182,63 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
-			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] }
+			{
+				title: 'New packages:',
+				version: 'v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-new-package' ]
+			},
+			{
+				title: 'Major releases (contain major breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-core' ]
+			},
+			{
+				title: 'Minor releases (contain minor breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-ui' ]
+			}
 		] );
 	} );
 
 	it( 'should filter out new version, minor, major nad new feature releases from other releases', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ] ) ], title: '' },
-			minor: { entries: [ createEntry( [ 'ui', 'new-package', 'core' ] ) ], title: '' },
-			feature: { entries: [ createEntry( [ 'editor', 'new-package' ] ) ], title: '' },
-			other: { entries: [ createEntry( [ 'other', 'ui', 'editor', 'core', 'new-package' ] ) ], title: '' }
+			major: { entries: [ createEntry( [ 'ckeditor5-core' ] ) ], title: '' },
+			minor: {
+				entries: [
+					createEntry( [
+						'ckeditor5-ui',
+						'ckeditor5-new-package',
+						'ckeditor5-core'
+					] )
+				],
+				title: ''
+			},
+			feature: {
+				entries: [
+					createEntry( [ 'ckeditor5-editor-classic', 'ckeditor5-new-package' ] )
+				],
+				title: ''
+			},
+			other: {
+				entries: [
+					createEntry( [
+						'ckeditor5-other',
+						'ckeditor5-ui',
+						'ckeditor5-editor-classic',
+						'ckeditor5-core',
+						'ckeditor5-new-package'
+					] )
+				],
+				title: ''
+			}
 		} );
 
 		const packagesMetadata = new Map( [
-			[ '@ckeditor/core', '1.0.0' ],
-			[ '@ckeditor/ui', '1.0.0' ],
-			[ '@ckeditor/editor', '1.0.0' ],
-			[ '@ckeditor/other', '1.0.0' ],
-			[ '@ckeditor/new-package', '0.0.1' ]
+			[ '@ckeditor/ckeditor5-core', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-ui', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-editor-classic', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-other', '1.0.0' ],
+			[ '@ckeditor/ckeditor5-new-package', '0.0.1' ]
 		] );
 
 		const result = await composeReleaseSummary( {
@@ -137,11 +249,31 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package' ] },
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] },
-			{ title: 'Minor releases (contain minor breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/ui' ] },
-			{ title: 'Releases containing new features:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/editor' ] },
-			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/other' ] }
+			{
+				title: 'New packages:',
+				version: 'v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-new-package' ]
+			},
+			{
+				title: 'Major releases (contain major breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-core' ]
+			},
+			{
+				title: 'Minor releases (contain minor breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-ui' ]
+			},
+			{
+				title: 'Releases containing new features:',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-editor-classic' ]
+			},
+			{
+				title: 'Other releases:',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-other' ]
+			}
 		] );
 	} );
 
@@ -162,8 +294,8 @@ describe( 'getReleasedPackagesInfo()', () => {
 	it( 'should handle only new package releases', async () => {
 		const sections = createSectionsWithEntries();
 		const packagesMetadata = new Map( [
-			[ '@ckeditor/new-package-1', '0.0.1' ],
-			[ '@ckeditor/new-package-2', '0.0.1' ]
+			[ '@ckeditor/ckeditor5-new-package-1', '0.0.1' ],
+			[ '@ckeditor/ckeditor5-new-package-2', '0.0.1' ]
 		] );
 
 		const result = await composeReleaseSummary( {
@@ -174,7 +306,14 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'New packages:', version: 'v2.0.0', packages: [ '@ckeditor/new-package-1', '@ckeditor/new-package-2' ] }
+			{
+				title: 'New packages:',
+				version: 'v2.0.0',
+				packages: [
+					'@ckeditor/ckeditor5-new-package-1',
+					'@ckeditor/ckeditor5-new-package-2'
+				]
+			}
 		] );
 	} );
 
@@ -190,16 +329,26 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/uncategorized' ] }
+			{
+				title: 'Other releases:',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/uncategorized' ]
+			}
 		] );
 	} );
 
 	it( 'should remove duplicate package names in scope', async () => {
 		const sections = createSectionsWithEntries( {
-			major: { entries: [ createEntry( [ 'core' ] ) ], title: 'Major Breaking Changes' },
-			minor: { entries: [ createEntry( [ 'core' ] ) ], title: 'Minor Breaking Changes' }
+			major: {
+				entries: [ createEntry( [ 'ckeditor5-core' ] ) ],
+				title: 'Major Breaking Changes'
+			},
+			minor: {
+				entries: [ createEntry( [ 'ckeditor5-core' ] ) ],
+				title: 'Minor Breaking Changes'
+			}
 		} );
-		const packagesMetadata = new Map( [ [ '@ckeditor/core', '1.0.0' ] ] );
+		const packagesMetadata = new Map( [ [ '@ckeditor/ckeditor5-core', '1.0.0' ] ] );
 
 		const result = await composeReleaseSummary( {
 			sections,
@@ -209,7 +358,11 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'Major releases (contain major breaking changes):', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/core' ] }
+			{
+				title: 'Major releases (contain major breaking changes):',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/ckeditor5-core' ]
+			}
 		] );
 	} );
 
@@ -229,7 +382,11 @@ describe( 'getReleasedPackagesInfo()', () => {
 		} );
 
 		expect( result ).toEqual( [
-			{ title: 'Other releases:', version: 'v1.0.0 => v2.0.0', packages: [ '@ckeditor/test' ] }
+			{
+				title: 'Other releases:',
+				version: 'v1.0.0 => v2.0.0',
+				packages: [ '@ckeditor/test' ]
+			}
 		] );
 	} );
 } );

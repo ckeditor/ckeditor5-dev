@@ -49,6 +49,12 @@ describe( 'normalizeEntry', () => {
 			expect( result.data.scope ).toEqual( [ 'api', 'utils' ] );
 		} );
 
+		it( 'should replace a string value with an array when normalizing "scope"', () => {
+			const input = wrapInput( { scope: 'as-string' as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.scope ).toEqual( [ 'as-string' ] );
+		} );
+
 		it( 'deduplicates scope entries', () => {
 			const input = wrapInput( { scope: [ 'api', 'api', 'utils', 'utils' ] } );
 			const result = normalizeEntry( input, false );
@@ -73,6 +79,12 @@ describe( 'normalizeEntry', () => {
 			expect( result.data.see ).toEqual( [ 'ref1', 'ref2' ] );
 		} );
 
+		it( 'should replace a string value with an array when normalizing "see"', () => {
+			const input = wrapInput( { see: 'as-string' as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.see ).toEqual( [ 'as-string' ] );
+		} );
+
 		it( 'deduplicates see entries', () => {
 			const input = wrapInput( { see: [ 'ref1', 'ref1', 'ref2' ] } );
 			const result = normalizeEntry( input, false );
@@ -87,6 +99,12 @@ describe( 'normalizeEntry', () => {
 			expect( result.data.closes ).toEqual( [ '#123', '#456' ] );
 		} );
 
+		it( 'should replace a string value with an array when normalizing "closes"', () => {
+			const input = wrapInput( { closes: 'as-string' as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.closes ).toEqual( [ 'as-string' ] );
+		} );
+
 		it( 'deduplicates closes entries', () => {
 			const input = wrapInput( { closes: [ '#123', '#123', '#456' ] } );
 			const result = normalizeEntry( input, false );
@@ -99,6 +117,12 @@ describe( 'normalizeEntry', () => {
 			const input = wrapInput( { communityCredits: [ 'user1', '@user2', '', null as any, undefined ] } );
 			const result = normalizeEntry( input, false );
 			expect( result.data.communityCredits ).toEqual( [ '@user1', '@user2' ] );
+		} );
+
+		it( 'should replace a string value with an array when normalizing "communityCredits"', () => {
+			const input = wrapInput( { communityCredits: 'as-string' as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.communityCredits ).toEqual( [ '@as-string' ] );
 		} );
 
 		it( 'deduplicates communityCredits entries', () => {

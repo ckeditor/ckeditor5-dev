@@ -102,16 +102,16 @@ function formatContent( content: string ) {
 		.map( line => line.trimEnd() );
 
 	const mainIndex = lines.findIndex( line => line.trim() !== '' );
-	const mainContent = lines[ mainIndex ] || '';
+	const mainContent = lines.at( mainIndex )!;
 	let restContent = lines.slice( mainIndex + 1 );
 
-	if ( restContent[ 0 ]?.trim() === '' ) {
+	if ( restContent.at( 0 )?.trim() === '' ) {
 		restContent = restContent.slice( 1 );
 	}
 
 	const cleanedRestContent = restContent.reduce( ( acc, line ) => {
 		if ( line.trim() === '' ) {
-			if ( acc[ acc.length - 1 ] !== '' ) {
+			if ( acc.at( -1 ) !== '' ) {
 				acc.push( '' );
 			}
 		} else {
