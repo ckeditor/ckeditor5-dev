@@ -7,11 +7,14 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
-import { truncateChangelog } from '../utils/truncatechangelog.js';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
+import { truncateChangelog } from './truncatechangelog.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from './constants.js';
 
 /**
- * This function writes the generated changelog to the repository's changelog file.
+ * This function writes the generated changelog content to the repository's changelog file.
+ *
+ * It reads the existing changelog (if any), inserts the new changelog content after the defined header,
+ * writes the updated content back to the changelog file, and truncates the changelog to keep a manageable length.
  */
 export async function modifyChangelog( newChangelog: string, cwd: string ): Promise<void> {
 	const changelogPath = upath.join( cwd, CHANGELOG_FILE );
@@ -32,7 +35,7 @@ async function readExistingChangelog( changelogPath: string ): Promise<string> {
 	try {
 		return await fs.readFile( changelogPath, 'utf-8' );
 	} catch {
-		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found. Creating a new one.' ) }` );
+		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found.' ) }` );
 
 		return '';
 	}

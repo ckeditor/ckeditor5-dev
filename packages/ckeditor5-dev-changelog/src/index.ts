@@ -3,4 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-export { generateChangelog } from './generatechangelog.js';
+export { generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository.js';
+export { generateChangelogForSingleRepository } from './tasks/generatechangelogforsinglerepository.js';
+
+export type { ConfigBase, MonoRepoConfigBase, RepositoryConfig } from './types.js';

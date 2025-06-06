@@ -4,7 +4,9 @@
  */
 
 /**
- * This function provides consistent logging format for changelog generation process.
+ * This function provides a consistent logging format for the changelog generation process.
+ *
+ * It logs the given text to the console, optionally indenting it by a specified number of levels.
  */
 export function logInfo( text: string, { indent }: { indent: number } = { indent: 0 } ): void {
 	console.log( ' '.repeat( indent * 3 ) + text );

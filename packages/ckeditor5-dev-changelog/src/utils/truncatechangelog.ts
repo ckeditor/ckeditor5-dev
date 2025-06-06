@@ -6,7 +6,7 @@
 import fs from 'fs';
 import upath from 'upath';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../constants.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from './constants.js';
 
 /**
  * This function limits the size of the changelog by removing older entries.

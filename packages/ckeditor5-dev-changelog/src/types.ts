@@ -3,21 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { SECTIONS, TYPES } from './constants.js';
+import type { SECTIONS } from './utils/constants.js';
 
-export type DeepReadonly<T> = {
-	readonly [P in keyof T]: DeepReadonly<T[P]>
-};
-
-/**
- * Configuration options for generating a changelog.
- */
-export type GenerateChangelog = {
-
-	/**
-	 * The current working directory of the repository.
-	 */
-	cwd?: string;
+export type ConfigBase = RepositoryConfig & {
 
 	/**
 	 * The next version number to use. If not provided, will be calculated based on changes.
@@ -31,44 +19,29 @@ export type GenerateChangelog = {
 	externalRepositories?: Array<RepositoryConfig>;
 
 	/**
+	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
+	 */
+	date?: string;
+};
+
+export type MonoRepoConfigBase = {
+
+	/**
 	 * Function to transform package scopes in the changelog entries.
 	 */
 	transformScope?: TransformScope;
 
 	/**
-	 * The date to use for the changelog entry. Defaults to current date in YYYY-MM-DD format.
+	 * Whether to include the root package name in the bumped packages versions section in the changelog.
 	 */
-	date?: RawDateString;
+	shouldIgnoreRootPackage?: unknown;
 
 	/**
-	 * Directory containing the changeset files. Defaults to '.changelog'.
+	 * The package that will be used when determining if the next version is available on npm.
 	 */
-	changesetsDirectory?: string;
+	npmPackageToCheck?: unknown;
+} & NpmPackageRequiredWhenSkipRootPackage;
 
-	/**
-	 * The organisation namespace to use for the changelog. Defaults to '@ckeditor'.
-	 */
-	organisationNamespace?: string;
-
-	/**
-	 * Whether changelog is for a single package rather than a monorepo.
-	 */
-	singlePackage?: boolean;
-
-	/**
-	 * Whether changelog should be returned by the script instead of saving it to a file.
-	 */
-	noWrite?: boolean;
-
-	/**
-	 * Controls whether changeset files will be deleted after generating changelog.
-	 */
-	removeInputFiles?: boolean;
-};
-
-/**
- * Configuration options for a repository.
- */
 export type RepositoryConfig = {
 
 	/**
@@ -79,54 +52,47 @@ export type RepositoryConfig = {
 	/**
 	 * The directory containing the packages. Defaults to 'packages'.
 	 */
-	packagesDirectory?: string;
+	packagesDirectory: null | string;
 
 	/**
 	 * Whether to skip links in the changelog entries. Defaults to false.
 	 */
-	skipLinks?: boolean;
+	shouldSkipLinks?: boolean;
 };
+
+export type GenerateChangelogEntryPoint<K extends object> = <T extends boolean | undefined = undefined>(
+	config: K & {
+
+		/**
+		 * Controls whether changeset files will be deleted after generating changelog.
+		 */
+		disableFilesystemOperations?: T;
+	}
+) => Promise<T extends true ? string : void>; // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
 export type SectionName = keyof typeof SECTIONS;
 
-export type EntryType = {
-	name: string;
-	aliases?: Array<string>;
-};
-
-export type ValidatedType = typeof TYPES[ number ][ 'name' ];
-
 export type Entry = {
 	message: string;
-	data: FileMetadata & {
+	data: {
+		type: string;
+		scope: Array<string>;
 		mainContent: string | undefined;
 		restContent: Array<string>;
-		validations?: Array<string>;
+		communityCredits: Array<string>;
+		validations: Array<string>;
+		see: Array<LinkObject>;
+		closes: Array<LinkObject>;
 	};
 	changesetPath: string;
 };
 
-type FileMetadata = {
-	type?: string;
-	scope?: Array<string>;
-	closes?: Array<string>;
-	see?: Array<string>;
-};
-
-type ValidatedFileMetadata = FileMetadata & {
-	type: ValidatedType;
-};
-
-export type ParsedFile = {
+export type ParsedFile<T = FileMetadata> = {
 	content: string;
-	data: FileMetadata;
+	data: T;
 	changesetPath: string;
 	gitHubUrl: string;
-	skipLinks: boolean;
-};
-
-export type ValidatedFile = ParsedFile & {
-	data: ValidatedFileMetadata;
+	shouldSkipLinks: boolean;
 };
 
 export type Section = {
@@ -150,17 +116,28 @@ export type TransformScope = ( name: string ) => {
 };
 
 export type ChangesetPathsWithGithubUrl = {
-	changesetPaths: Array<string>;
+	filePaths: Array<string>;
 	gitHubUrl: string;
-	skipLinks: boolean;
+	shouldSkipLinks: boolean;
 	cwd: string;
 	isRoot: boolean;
 };
 
-type oneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type zeroToNine = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type YYYY = `20${ zeroToNine }${ zeroToNine }`;
-type MM = `0${ oneToNine }` | `1${ 0 | 1 | 2 }`;
-type DD = `0${ oneToNine }` | `${ 1 | 2 }${ zeroToNine }` | `3${ 0 | 1 }`;
+type NpmPackageRequiredWhenSkipRootPackage = {
+	shouldIgnoreRootPackage?: true;
+	npmPackageToCheck: string;
+} | {
+	shouldIgnoreRootPackage?: false;
+	npmPackageToCheck?: never;
+};
 
-export type RawDateString = `${ YYYY }-${ MM }-${ DD }`;
+export type LinkObject = { displayName: string; link: string };
+
+export type FileMetadata = {
+	type: string;
+	scope: Array<string>;
+	closes: Array<string>;
+	see: Array<string>;
+	communityCredits: Array<string>;
+	validations: Array<string>;
+};
