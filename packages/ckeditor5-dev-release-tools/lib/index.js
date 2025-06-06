@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { npm, workspaces } from '@ckeditor/ckeditor5-dev-utils';
+
 export { default as generateChangelogForSinglePackage } from './tasks/generatechangelogforsinglepackage.js';
 export { default as generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository.js';
 export { default as updateDependencies } from './tasks/updatedependencies.js';
@@ -33,3 +35,32 @@ export { default as validateRepositoryToRelease } from './utils/validatereposito
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
 export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
 export { default as provideToken } from './utils/providetoken.js';
+
+// Backwards compatibility for the old API.
+export const checkVersionAvailability = ( ...args ) => {
+	process.emitWarning(
+		'The `checkVersionAvailability()` function has been moved and will be removed in the upcoming release (v51). ' +
+		'Use the `npm` namespace from `@ckeditor/ckeditor5-dev-utils` instead.',
+		{
+			type: 'DeprecationWarning',
+			code: 'DEP0002',
+			detail: 'https://github.com/ckeditor/ckeditor5-dev/blob/master/DEPRECATIONS.md#dep0002-checkversionavailability'
+		}
+	);
+
+	return npm.checkVersionAvailability( ...args );
+};
+
+export const findPathsToPackages = ( ...args ) => {
+	process.emitWarning(
+		'The `findPathsToPackages()` function has been moved and will be removed in the upcoming release (v51). ' +
+		'Use the `workspaces` namespace from `@ckeditor/ckeditor5-dev-utils` instead.',
+		{
+			type: 'DeprecationWarning',
+			code: 'DEP0003',
+			detail: 'https://github.com/ckeditor/ckeditor5-dev/blob/master/DEPRECATIONS.md#dep0003-findpathstopackages'
+		}
+	);
+
+	return workspaces.findPathsToPackages( ...args );
+};

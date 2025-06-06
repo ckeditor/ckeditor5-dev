@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { npm, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import generateChangelogForSinglePackage from '../lib/tasks/generatechangelogforsinglepackage.js';
 import generateChangelogForMonoRepository from '../lib/tasks/generatechangelogformonorepository.js';
 import updateDependencies from '../lib/tasks/updatedependencies.js';
@@ -37,6 +38,7 @@ import provideToken from '../lib/utils/providetoken.js';
 
 import * as index from '../lib/index.js';
 
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../lib/tasks/generatechangelogforsinglepackage' );
 vi.mock( '../lib/tasks/generatechangelogformonorepository' );
 vi.mock( '../lib/tasks/updatedependencies' );
@@ -250,6 +252,70 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( provideToken ).to.be.a( 'function' );
 			expect( index.provideToken ).to.equal( provideToken );
+		} );
+	} );
+
+	// Backwards compatibility for the old API.
+
+	describe( 'checkVersionAvailability()', () => {
+		let emitWarningSpy;
+
+		beforeEach( () => {
+			emitWarningSpy = vi.spyOn( process, 'emitWarning' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should be a function', () => {
+			vi.mocked( npm.checkVersionAvailability ).mockReturnValue( 0 );
+
+			expect( index.checkVersionAvailability ).to.be.a( 'function' );
+			expect( index.checkVersionAvailability( 1, true, null ) ).to.equal( 0 );
+
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( 1, true, null );
+		} );
+
+		it( 'should emit a deprecation warning', () => {
+			index.checkVersionAvailability();
+
+			expect( emitWarningSpy ).toHaveBeenCalledTimes( 1 );
+			expect( emitWarningSpy ).toHaveBeenCalledWith(
+				expect.any( String ),
+				expect.objectContaining( {
+					type: 'DeprecationWarning',
+					code: 'DEP0002'
+				} )
+			);
+		} );
+	} );
+
+	describe( 'findPathsToPackages()', () => {
+		let emitWarningSpy;
+
+		beforeEach( () => {
+			emitWarningSpy = vi.spyOn( process, 'emitWarning' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should be a function', () => {
+			vi.mocked( workspaces.findPathsToPackages ).mockReturnValue( 0 );
+
+			expect( index.findPathsToPackages ).to.be.a( 'function' );
+			expect( index.findPathsToPackages( 1, true, null ) ).to.equal( 0 );
+
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith( 1, true, null );
+		} );
+
+		it( 'should emit a deprecation warning', () => {
+			index.findPathsToPackages();
+
+			expect( emitWarningSpy ).toHaveBeenCalledTimes( 1 );
+			expect( emitWarningSpy ).toHaveBeenCalledWith(
+				expect.any( String ),
+				expect.objectContaining( {
+					type: 'DeprecationWarning',
+					code: 'DEP0003'
+				} )
+			);
 		} );
 	} );
 } );

@@ -17,6 +17,7 @@
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-bump-year": "^49.0.2",
     "@ckeditor/ckeditor5-dev-ci": "^49.0.2",
+    "@ckeditor/ckeditor5-dev-changelog": "^0.0.1",
     "@ckeditor/ckeditor5-dev-dependency-checker": "^49.0.2",
     "@ckeditor/ckeditor5-dev-release-tools": "^49.0.2",
     "@inquirer/prompts": "^7.5.0",
@@ -37,11 +38,12 @@
     "upath": "^2.0.1"
   },
   "scripts": {
+    "nice": "ckeditor5-dev-changelog-create-entry",
     "postinstall": "node ./scripts/postinstall.js",
     "test": "node ./scripts/runtest.js",
     "coverage": "node ./scripts/runtest.js --coverage",
-    "changelog": "node ./scripts/changelog.js",
     "check-versions-match": "node scripts/ci/check-dependencies-versions-match.mjs",
+    "release:prepare-changelog": "node ./scripts/preparechangelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
     "lint": "eslint",

@@ -389,4 +389,73 @@ describe( 'getReleasedPackagesInfo()', () => {
 			}
 		] );
 	} );
+
+	it( 'should not include the same package twice in the generated summary (the same section)', async () => {
+		const sections = createSectionsWithEntries( {
+			feature: {
+				entries: [
+					createEntry( [ 'ckeditor5-utils' ] ),
+					createEntry( [ 'ckeditor5-utils' ] )
+				],
+				title: 'Features'
+			}
+		} );
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/ckeditor5-utils', '1.0.0' ]
+		] );
+
+		const result = await composeReleaseSummary( {
+			sections,
+			currentVersion: '1.0.0',
+			newVersion: '1.1.0',
+			packagesMetadata
+		} );
+
+		expect( result ).toEqual( [
+			{
+				title: 'Releases containing new features:',
+				version: 'v1.0.0 => v1.1.0',
+				packages: [
+					'@ckeditor/ckeditor5-utils'
+				]
+			}
+		] );
+	} );
+
+	it( 'should not include the same package twice in the generated summary (different sections)', async () => {
+		const sections = createSectionsWithEntries( {
+			feature: {
+				entries: [
+					createEntry( [ 'ckeditor5-utils' ] )
+				],
+				title: 'Features'
+			},
+			other: {
+				entries: [
+					createEntry( [ 'ckeditor5-utils' ] )
+				],
+				title: 'Other changes'
+			}
+		} );
+		const packagesMetadata = new Map( [
+			[ '@ckeditor/ckeditor5-utils', '1.0.0' ]
+		] );
+
+		const result = await composeReleaseSummary( {
+			sections,
+			currentVersion: '1.0.0',
+			newVersion: '1.1.0',
+			packagesMetadata
+		} );
+
+		expect( result ).toEqual( [
+			{
+				title: 'Releases containing new features:',
+				version: 'v1.0.0 => v1.1.0',
+				packages: [
+					'@ckeditor/ckeditor5-utils'
+				]
+			}
+		] );
+	} );
 } );
