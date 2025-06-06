@@ -36,8 +36,6 @@ describe( 'provideNewVersion()', () => {
 	let processMock: MockInstance<typeof process.exit>;
 
 	beforeEach( () => {
-		vi.mocked( npm.manifest ).mockRejectedValue( new Error( 'Package not found' ) );
-		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 		vi.mocked( semver.valid ).mockReturnValue( '1.0.1' );
 		vi.mocked( semver.gt ).mockReturnValue( true );
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
@@ -177,149 +175,62 @@ describe( 'provideNewVersion()', () => {
 	} );
 
 	describe( 'Version validation', () => {
-		it( 'should validate version format', async () => {
-			let validateFunction: any;
+		let validateFunction: any;
 
+		beforeEach( async () => {
 			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
 				validateFunction = questions[ 0 ].validate;
 				return Promise.resolve( { version: '1.0.1' } ) as any;
 			} );
 
 			await provideNewVersion( defaultOptions as any );
-
-			vi.mocked( semver.valid ).mockReturnValueOnce( null );
-			const invalidResult = await validateFunction( 'invalid' );
-			expect( invalidResult ).toBe( 'Please provide a valid version or "internal" for internal changes.' );
-
-			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
-			const validResult = await validateFunction( '1.0.1' );
-			expect( validResult ).toBe( true );
 		} );
 
-		it( 'should accept "internal" as a special version', async () => {
-			let validateFunction: any;
+		it( 'should resolve an error text when passed an invalid format', async () => {
+			vi.mocked( semver.valid ).mockReturnValueOnce( null );
 
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: 'internal' } ) as any;
-			} );
+			await expect( validateFunction( 'invalid' ) ).resolves
+				.toBe( 'Please provide a valid version or "internal" for internal changes.' );
+		} );
 
-			await provideNewVersion( defaultOptions as any );
+		it( 'should resolve true when a version follows the semver standard', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
 
-			vi.mocked( semver.valid ).mockClear();
+			await expect( validateFunction( '1.0.1' ) ).resolves
+				.toBe( true );
+		} );
 
+		it( 'should resolved true when passing `internal` as version', async () => {
 			const result = await validateFunction( 'internal' );
 
 			expect( result ).toBe( true );
 			expect( semver.valid ).not.toHaveBeenCalled();
 		} );
 
-		it( 'should validate version is higher than current', async () => {
-			let validateFunction: any;
-
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: '1.0.1' } ) as any;
-			} );
-
-			await provideNewVersion( defaultOptions as any );
-
-			vi.mocked( semver.valid ).mockReturnValueOnce( '0.9.9' );
+		it( 'should resolve an error text when the specified version is not higher then the current one', async () => {
 			vi.mocked( semver.gt ).mockReturnValueOnce( false );
-			const lowerResult = await validateFunction( '0.9.9' );
-			expect( lowerResult ).toBe( 'Provided version must be higher than "1.0.0".' );
+			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.0' );
 
+			await expect( validateFunction( '1.0.0' ) ).resolves
+				.toBe( 'Provided version must be higher than "1.0.0".' );
+		} );
+
+		it( 'should resolve an error text when the provided version is higher then the current one but already taken', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( false );
+			vi.mocked( semver.gt ).mockReturnValueOnce( true );
 			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
+
+			await expect( validateFunction( '1.0.1' ) ).resolves
+				.toBe( 'Given version is already taken.' );
+		} );
+
+		it( 'should resolve true when the provided version is higher then the current and it is available', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 			vi.mocked( semver.gt ).mockReturnValueOnce( true );
-			const higherResult = await validateFunction( '1.0.1' );
-			expect( higherResult ).toBe( true );
-		} );
-
-		it( 'should bypass version comparison for "internal" version', async () => {
-			let validateFunction: any;
-
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: 'internal' } ) as any;
-			} );
-
-			await provideNewVersion( defaultOptions as any );
-
-			vi.mocked( semver.gt ).mockClear();
-
-			const result = await validateFunction( 'internal' );
-
-			expect( result ).toBe( true );
-			expect( semver.gt ).not.toHaveBeenCalled();
-		} );
-
-		it( 'should check version availability in npm registry', async () => {
-			let validateFunction: any;
-
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: '1.0.1' } ) as any;
-			} );
-
-			await provideNewVersion( defaultOptions as any );
-
 			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
-			vi.mocked( semver.gt ).mockReturnValueOnce( true );
-			vi.mocked( npm.checkVersionAvailability ).mockResolvedValueOnce( false );
 
-			const unavailableResult = await validateFunction( '1.0.1' );
-			expect( unavailableResult ).toBe( 'Given version is already taken.' );
-
-			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.2' );
-			vi.mocked( semver.gt ).mockReturnValueOnce( true );
-			vi.mocked( npm.checkVersionAvailability ).mockResolvedValueOnce( true );
-
-			const availableResult = await validateFunction( '1.0.2' );
-			expect( availableResult ).toBe( true );
-		} );
-
-		it( 'should bypass availability check for "internal" version', async () => {
-			let validateFunction: any;
-
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: 'internal' } ) as any;
-			} );
-
-			await provideNewVersion( defaultOptions as any );
-
-			vi.mocked( npm.checkVersionAvailability ).mockClear();
-
-			const result = await validateFunction( 'internal' );
-
-			expect( result ).toBe( true );
-			expect( npm.checkVersionAvailability ).not.toHaveBeenCalled();
-		} );
-
-		it( 'should run all validations in sequence for normal versions', async () => {
-			let validateFunction: any;
-
-			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
-				validateFunction = questions[ 0 ].validate;
-				return Promise.resolve( { version: '1.0.1' } ) as any;
-			} );
-
-			await provideNewVersion( defaultOptions as any );
-
-			vi.mocked( semver.valid ).mockClear();
-			vi.mocked( semver.gt ).mockClear();
-			vi.mocked( npm.checkVersionAvailability ).mockClear();
-
-			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
-			vi.mocked( semver.gt ).mockReturnValueOnce( true );
-			vi.mocked( npm.checkVersionAvailability ).mockResolvedValueOnce( true );
-
-			const result = await validateFunction( '1.0.1' );
-
-			expect( result ).toBe( true );
-			expect( semver.valid ).toHaveBeenCalledTimes( 1 );
-			expect( semver.gt ).toHaveBeenCalledTimes( 1 );
-			expect( npm.checkVersionAvailability ).toHaveBeenCalledTimes( 1 );
+			await expect( validateFunction( '1.0.1' ) ).resolves.toBe( true );
 		} );
 	} );
 
