@@ -214,6 +214,8 @@ describe( 'provideNewVersion()', () => {
 
 			await expect( validateFunction( '1.0.0' ) ).resolves
 				.toBe( 'Provided version must be higher than "1.0.0".' );
+
+			expect( vi.mocked( semver.gt ) ).toHaveBeenCalledWith( '1.0.0', '1.0.0' );
 		} );
 
 		it( 'should resolve an error text when the provided version is higher then the current one but already taken', async () => {
@@ -223,6 +225,8 @@ describe( 'provideNewVersion()', () => {
 
 			await expect( validateFunction( '1.0.1' ) ).resolves
 				.toBe( 'Given version is already taken.' );
+
+			expect( vi.mocked( semver.gt ) ).toHaveBeenCalledWith( '1.0.1', '1.0.0' );
 		} );
 
 		it( 'should resolve true when the provided version is higher then the current and it is available', async () => {
