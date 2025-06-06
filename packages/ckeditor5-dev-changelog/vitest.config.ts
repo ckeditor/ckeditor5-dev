@@ -9,6 +9,9 @@ export default defineConfig( {
 	test: {
 		testTimeout: 10000,
 		restoreMocks: true,
+		include: [
+			'tests/**/*.ts'
+		],
 		coverage: {
 			provider: 'v8',
 			include: [

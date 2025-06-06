@@ -21,7 +21,7 @@ export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<Mon
 		npmPackageToCheck,
 		packagesDirectory,
 		shouldSkipLinks,
-		skipRootPackage,
+		shouldIgnoreRootPackage,
 		transformScope
 	} = options;
 
@@ -34,7 +34,11 @@ export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<Mon
 		date,
 		shouldSkipLinks,
 		disableFilesystemOperations,
-		...( skipRootPackage && npmPackageToCheck ? { skipRootPackage: true, npmPackageToCheck } : { skipRootPackage: false } ),
+		...(
+			shouldIgnoreRootPackage && npmPackageToCheck ?
+				{ shouldIgnoreRootPackage: true, npmPackageToCheck } :
+				{ shouldIgnoreRootPackage: false }
+		),
 		isSinglePackage: false
 	} );
 };

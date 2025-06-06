@@ -8,7 +8,7 @@ import { promisify, styleText, parseArgs } from 'util';
 import { exec } from 'child_process';
 import path from 'upath';
 import { format } from 'date-fns';
-import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './utils/constants';
+import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './utils/constants.js';
 
 /**
  * Options for the `generateTemplate` function.
