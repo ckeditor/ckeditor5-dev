@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "49.0.2",
+  "version": "50.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -15,11 +15,11 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-bump-year": "^49.0.2",
-    "@ckeditor/ckeditor5-dev-ci": "^49.0.2",
+    "@ckeditor/ckeditor5-dev-bump-year": "^50.0.0",
+    "@ckeditor/ckeditor5-dev-ci": "^50.0.0",
     "@ckeditor/ckeditor5-dev-changelog": "^0.0.1",
-    "@ckeditor/ckeditor5-dev-dependency-checker": "^49.0.2",
-    "@ckeditor/ckeditor5-dev-release-tools": "^49.0.2",
+    "@ckeditor/ckeditor5-dev-dependency-checker": "^50.0.0",
+    "@ckeditor/ckeditor5-dev-release-tools": "^50.0.0",
     "@inquirer/prompts": "^7.5.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^22.0.0",
