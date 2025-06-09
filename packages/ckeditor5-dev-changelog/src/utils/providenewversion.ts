@@ -123,7 +123,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 
 			// The provided version must be higher than the current version.
 			if ( !semver.gt( newVersion, version ) ) {
-				return `Provided version must be higher than "${ newVersion }".`;
+				return `Provided version must be higher than "${ version }".`;
 			}
 
 			const isAvailable = await npm.checkVersionAvailability( newVersion, packageName );
