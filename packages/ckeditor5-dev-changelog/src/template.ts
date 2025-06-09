@@ -99,7 +99,18 @@ export async function generateTemplate(
 	try {
 		await copyFile( TEMPLATE_FILE, outputPath, constants.COPYFILE_EXCL );
 
-		console.log( styleText( [ 'green', 'bold' ], `Changelog file created: ${ path.relative( process.cwd(), outputPath ) }` ) );
+		const indent = ' '.repeat( 3 );
+		const relativePath = path.relative( process.cwd(), outputPath );
+
+		console.log( styleText( 'green', '✅ The changelog file has been successfully created.' ) );
+		console.log( '' );
+		console.log( '✍️ Please fill it with relevant information about your changes.' );
+		console.log( indent + styleText( 'cyan', `file://${ outputPath }` ) );
+		console.log( '' );
+		console.log( '📥 Once done, commit the changelog file:' );
+
+		console.log( indent + styleText( 'gray', `$ git add ${ relativePath }` ) );
+		console.log( indent + styleText( 'gray', '$ git commit -m "..."' ) );
 	} catch ( error: any ) {
 		if ( retries <= 0 ) {
 			console.error( styleText( [ 'red', 'bold' ], 'Error: Generating changelog file failed with the following error:' ) );

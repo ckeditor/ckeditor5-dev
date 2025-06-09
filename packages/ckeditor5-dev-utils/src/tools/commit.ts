@@ -4,6 +4,7 @@
  */
 
 import { simpleGit } from 'simple-git';
+import upath from 'upath';
 
 const CHUNK_LENGTH_LIMIT = 4000;
 
@@ -15,9 +16,32 @@ export default async function commit(
 	}
 
 	const git = simpleGit( { baseDir: cwd } );
+	const relativeFiles = files.map( filePath => {
+		const normalized = upath.normalize( filePath );
+
+		return upath.relative( cwd, normalized );
+	} );
+
+	// Ensure Git tracks the files.
+	const gitKnownFilesOutput = await git.raw( [ 'ls-files', '--error-unmatch', ...relativeFiles ] )
+		.catch( () => '' );
+
+	const gitKnownFiles = new Set(
+		gitKnownFilesOutput
+			.split( '\n' )
+			.map( filePath => filePath.trim() )
+			.filter( filePath => filePath !== '' )
+			.map( filePath => upath.normalize( filePath ) )
+	);
+
+	const filteredFiles = relativeFiles.filter( path => gitKnownFiles.has( path ) );
+
+	if ( !filteredFiles.length ) {
+		return;
+	}
 
 	const makeCommit = async () => {
-		for ( const chunk of splitPathsIntoChunks( files ) ) {
+		for ( const chunk of splitPathsIntoChunks( filteredFiles ) ) {
 			await git.add( chunk );
 		}
 

@@ -31,7 +31,7 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 
 		isValid = false;
 	} else if ( !allowedTypesArray.includes( data.type ) ) {
-		validations.push( `Type "${ data.type }" should be one of: ${ allowedTypesList } (case insensitive).` );
+		validations.push( `Type is required and should be one of: ${ allowedTypesList } (case insensitive).` );
 
 		isValid = false;
 	}

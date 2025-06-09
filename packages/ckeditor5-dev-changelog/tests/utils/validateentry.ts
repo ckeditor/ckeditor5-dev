@@ -63,7 +63,7 @@ describe( 'validateEntry()', () => {
 
 			expect( isValid ).toBeFalsy();
 			expect( validatedEntry.data.validations ).toEqual( [
-				'Type "Unknown" should be one of: "Feature", "Other", "Fix", ' +
+				'Type is required and should be one of: "Feature", "Other", "Fix", ' +
 				'"Major breaking change", "Minor breaking change", or "Breaking change" (case insensitive).'
 			] );
 		} );

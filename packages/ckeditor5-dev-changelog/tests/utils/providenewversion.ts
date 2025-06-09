@@ -210,12 +210,12 @@ describe( 'provideNewVersion()', () => {
 
 		it( 'should resolve an error text when the specified version is not higher then the current one', async () => {
 			vi.mocked( semver.gt ).mockReturnValueOnce( false );
-			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.0' );
+			vi.mocked( semver.valid ).mockReturnValueOnce( '0.0.1' );
 
-			await expect( validateFunction( '1.0.0' ) ).resolves
+			await expect( validateFunction( '0.0.1' ) ).resolves
 				.toBe( 'Provided version must be higher than "1.0.0".' );
 
-			expect( vi.mocked( semver.gt ) ).toHaveBeenCalledWith( '1.0.0', '1.0.0' );
+			expect( vi.mocked( semver.gt ) ).toHaveBeenCalledWith( '0.0.1', '1.0.0' );
 		} );
 
 		it( 'should resolve an error text when the provided version is higher then the current one but already taken', async () => {

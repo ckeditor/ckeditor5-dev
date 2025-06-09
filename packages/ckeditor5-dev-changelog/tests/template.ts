@@ -143,7 +143,11 @@ describe( 'generateTemplate', () => {
 		await template.generateTemplate();
 
 		expect( mocks.log ).toHaveBeenCalledWith(
-			expect.stringContaining( `Changelog file created: ${ join( CHANGESET_DIRECTORY, EXPECTED_FILE_NAME ) }` )
+			expect.stringContaining( 'The changelog file has been successfully created.' )
+		);
+
+		expect( mocks.log ).toHaveBeenCalledWith(
+			expect.stringContaining( `file://${ join( process.cwd(), '.changelog', EXPECTED_FILE_NAME ) }` )
 		);
 	} );
 
