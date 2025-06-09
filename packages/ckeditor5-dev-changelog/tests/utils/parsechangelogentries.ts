@@ -6,13 +6,19 @@
 import { parseChangelogEntries } from '../../src/utils/parsechangelogentries.js';
 import fs from 'fs-extra';
 import matter, { type GrayMatterFile } from 'gray-matter';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
+import { sortEntriesByScopeAndDate } from '../../src/utils/sortentriesbyscopeanddate.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'gray-matter' );
+vi.mock( '../../src/utils/sortentriesbyscopeanddate.js' );
 
 describe( 'parseChangelogEntries()', () => {
+	beforeEach( () => {
+		vi.mocked( sortEntriesByScopeAndDate ).mockImplementation( entries => entries );
+	} );
+
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/changeset1.md';
@@ -239,5 +245,48 @@ describe( 'parseChangelogEntries()', () => {
 		expect( result ).toEqual( [] );
 		expect( fs.readFile ).not.toHaveBeenCalled();
 		expect( matter ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should call sortEntriesByScopeAndDate', async () => {
+		// Mock data
+		const changesetPath = '/path/to/changeset.md';
+		const gitHubUrl = 'https://github.com/test/repo';
+		const fileContent = 'file content';
+		const matterResult = {
+			content: 'parsed content',
+			data: { type: 'feature', scope: [ 'ui' ] }
+		};
+
+		// Simple mock setup
+		vi.mocked( fs.readFile ).mockResolvedValue( fileContent as any );
+		vi.mocked( matter ).mockReturnValue( matterResult as any );
+
+		// Input data
+		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+			{
+				filePaths: [ changesetPath ],
+				gitHubUrl,
+				shouldSkipLinks: false,
+				cwd: '/test',
+				isRoot: false
+			}
+		];
+
+		// Expected parsed entry that should be passed to sortEntriesByScopeAndDate
+		const expectedParsedEntries = [
+			{
+				...matterResult,
+				gitHubUrl,
+				changesetPath,
+				shouldSkipLinks: false
+			}
+		];
+
+		// Execute the function
+		await parseChangelogEntries( filePathsWithGithubUrl );
+
+		// Verify sortEntriesByScopeAndDate is called with correct arguments
+		expect( sortEntriesByScopeAndDate ).toHaveBeenCalledTimes( 1 );
+		expect( sortEntriesByScopeAndDate ).toHaveBeenCalledWith( expectedParsedEntries );
 	} );
 } );

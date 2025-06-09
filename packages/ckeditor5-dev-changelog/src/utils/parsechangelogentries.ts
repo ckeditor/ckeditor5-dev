@@ -7,6 +7,7 @@ import fs from 'fs-extra';
 import matter from 'gray-matter';
 import { AsyncArray } from './asyncarray.js';
 import type { ChangesetPathsWithGithubUrl, FileMetadata, ParsedFile } from '../types.js';
+import { sortEntriesByScopeAndDate } from './sortentriesbyscopeanddate.js';
 
 type SimpleParsedFile = Pick<ParsedFile, 'changesetPath' | 'gitHubUrl' | 'shouldSkipLinks'>;
 
@@ -29,5 +30,5 @@ export function parseChangelogEntries( entryPaths: Array<ChangesetPathsWithGithu
 			changesetPath,
 			shouldSkipLinks
 		} ) )
-		.then( value => value );
+		.then( entries => sortEntriesByScopeAndDate( entries ) );
 }
