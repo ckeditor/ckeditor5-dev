@@ -104,7 +104,7 @@ export async function generateTemplate(
 
 		console.log( styleText( 'green', '✅ The changelog file has been successfully created.' ) );
 		console.log( '' );
-		console.log( '✍️ Please fill in with relevant information about your changes.' );
+		console.log( '✍️ Please fill it with relevant information about your changes.' );
 		console.log( indent + styleText( 'cyan', `file://${ outputPath }` ) );
 		console.log( '' );
 		console.log( '📥 Once done, commit the changelog file:' );
