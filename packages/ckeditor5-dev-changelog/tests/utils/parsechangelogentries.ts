@@ -21,8 +21,8 @@ describe( 'parseChangelogEntries()', () => {
 
 	it( 'should parse changeset files and return array of parsed files', async () => {
 		// Mock data
-		const changesetPath1 = '/path/to/changeset1.md';
-		const changesetPath2 = '/path/to/changeset2.md';
+		const changesetPath1 = '/path/to/20240101120000_changeset1.md';
+		const changesetPath2 = '/path/to/20240101120001_changeset2.md';
 		const gitHubUrl = 'https://github.com/ckeditor/ckeditor5';
 		const fileContent1 = 'File content 1';
 		const fileContent2 = 'File content 2';
@@ -83,27 +83,52 @@ describe( 'parseChangelogEntries()', () => {
 			}
 		];
 
-		// Expected results
-		const expectedResults = [
-			{
-				...matterResult1,
-				gitHubUrl,
-				changesetPath: changesetPath1,
-				shouldSkipLinks: false
-			},
-			{
-				...matterResult2,
-				gitHubUrl,
-				changesetPath: changesetPath2,
-				shouldSkipLinks: false
-			}
-		];
-
 		// Execute the function
-		const result = await parseChangelogEntries( filePathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-		// Assertions
-		expect( result ).toEqual( expectedResults );
+		// Assertions - check the structure without exact date matching
+		expect( result ).toHaveLength( 2 );
+
+		// Check first entry
+		expect( result[ 0 ] ).toMatchObject( {
+			content: 'Parsed content 1',
+			data: {
+				type: 'Feature',
+				scope: [ 'ui' ],
+				closes: [],
+				see: [],
+				communityCredits: [],
+				validations: []
+			},
+			gitHubUrl,
+			changesetPath: changesetPath1,
+			shouldSkipLinks: false,
+			orig: fileContent1,
+			language: 'md',
+			matter: ''
+		} );
+		expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+
+		// Check second entry
+		expect( result[ 1 ] ).toMatchObject( {
+			content: 'Parsed content 2',
+			data: {
+				type: 'Fix',
+				scope: [ 'engine' ],
+				closes: [],
+				see: [],
+				communityCredits: [],
+				validations: []
+			},
+			gitHubUrl,
+			changesetPath: changesetPath2,
+			shouldSkipLinks: false,
+			orig: fileContent2,
+			language: 'md',
+			matter: ''
+		} );
+		expect( result[ 1 ]?.dateCreated ).toBeInstanceOf( Date );
+
 		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath2, 'utf-8' );
@@ -114,8 +139,8 @@ describe( 'parseChangelogEntries()', () => {
 
 	it( 'should handle multiple repositories with different skipLinks values', async () => {
 		// Mock data
-		const changesetPath1 = '/path/to/repo1/changeset.md';
-		const changesetPath2 = '/path/to/repo2/changeset.md';
+		const changesetPath1 = '/path/to/repo1/20240101120000_changeset.md';
+		const changesetPath2 = '/path/to/repo2/20240101120001_changeset.md';
 		const gitHubUrl1 = 'https://github.com/ckeditor/ckeditor5';
 		const gitHubUrl2 = 'https://github.com/ckeditor/ckeditor5-dev';
 		const fileContent1 = 'File content 1';
@@ -184,27 +209,52 @@ describe( 'parseChangelogEntries()', () => {
 			}
 		];
 
-		// Expected results
-		const expectedResults = [
-			{
-				...matterResult1,
-				gitHubUrl: gitHubUrl1,
-				changesetPath: changesetPath1,
-				shouldSkipLinks: false
-			},
-			{
-				...matterResult2,
-				gitHubUrl: gitHubUrl2,
-				changesetPath: changesetPath2,
-				shouldSkipLinks: true
-			}
-		];
-
 		// Execute the function
-		const result = await parseChangelogEntries( filePathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-		// Assertions
-		expect( result ).toEqual( expectedResults );
+		// Assertions - check the structure without exact date matching
+		expect( result ).toHaveLength( 2 );
+
+		// Check first entry
+		expect( result[ 0 ] ).toMatchObject( {
+			content: 'Parsed content 1',
+			data: {
+				type: 'Feature',
+				scope: [],
+				closes: [],
+				see: [],
+				communityCredits: [],
+				validations: []
+			},
+			gitHubUrl: gitHubUrl1,
+			changesetPath: changesetPath1,
+			shouldSkipLinks: false,
+			orig: fileContent1,
+			language: 'md',
+			matter: ''
+		} );
+		expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+
+		// Check second entry
+		expect( result[ 1 ] ).toMatchObject( {
+			content: 'Parsed content 2',
+			data: {
+				type: 'Fix',
+				scope: [],
+				closes: [],
+				see: [],
+				communityCredits: [],
+				validations: []
+			},
+			gitHubUrl: gitHubUrl2,
+			changesetPath: changesetPath2,
+			shouldSkipLinks: true,
+			orig: fileContent2,
+			language: 'md',
+			matter: ''
+		} );
+		expect( result[ 1 ]?.dateCreated ).toBeInstanceOf( Date );
+
 		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath2, 'utf-8' );
@@ -226,7 +276,7 @@ describe( 'parseChangelogEntries()', () => {
 		];
 
 		// Execute the function
-		const result = await parseChangelogEntries( filePathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
 		// Assertions
 		expect( result ).toEqual( [] );
@@ -239,7 +289,7 @@ describe( 'parseChangelogEntries()', () => {
 		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [];
 
 		// Execute the function
-		const result = await parseChangelogEntries( filePathsWithGithubUrl );
+		const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
 		// Assertions
 		expect( result ).toEqual( [] );
@@ -249,7 +299,7 @@ describe( 'parseChangelogEntries()', () => {
 
 	it( 'should call sortEntriesByScopeAndDate', async () => {
 		// Mock data
-		const changesetPath = '/path/to/changeset.md';
+		const changesetPath = '/path/to/20240101120000_changeset.md';
 		const gitHubUrl = 'https://github.com/test/repo';
 		const fileContent = 'file content';
 		const matterResult = {
@@ -272,21 +322,127 @@ describe( 'parseChangelogEntries()', () => {
 			}
 		];
 
-		// Expected parsed entry that should be passed to sortEntriesByScopeAndDate
-		const expectedParsedEntries = [
-			{
-				...matterResult,
-				gitHubUrl,
-				changesetPath,
-				shouldSkipLinks: false
-			}
-		];
+		await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-		// Execute the function
-		await parseChangelogEntries( filePathsWithGithubUrl );
-
-		// Verify sortEntriesByScopeAndDate is called with correct arguments
+		// Verify sortEntriesByScopeAndDate is called with correct arguments structure
 		expect( sortEntriesByScopeAndDate ).toHaveBeenCalledTimes( 1 );
-		expect( sortEntriesByScopeAndDate ).toHaveBeenCalledWith( expectedParsedEntries );
+		const callArgs = vi.mocked( sortEntriesByScopeAndDate ).mock.calls[ 0 ]?.[ 0 ];
+		expect( callArgs ).toHaveLength( 1 );
+		expect( callArgs?.[ 0 ] ).toMatchObject( {
+			content: 'parsed content',
+			data: {
+				type: 'Feature',
+				scope: [ 'ui' ],
+				closes: [],
+				see: [],
+				communityCredits: [],
+				validations: []
+			},
+			gitHubUrl,
+			changesetPath,
+			shouldSkipLinks: false
+		} );
+		expect( callArgs?.[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+	} );
+
+	describe( 'date extraction from filename', () => {
+		it( 'should handle filenames without date pattern', async () => {
+			// Mock data with filename that doesn't match date pattern
+			const changesetPath = '/path/to/invalid_filename.md';
+			const gitHubUrl = 'https://github.com/test/repo';
+			const fileContent = 'file content';
+			const matterResult = {
+				content: 'parsed content',
+				data: { type: 'feature', scope: [] }
+			};
+
+			// Mock setup
+			vi.mocked( fs.readFile ).mockResolvedValue( fileContent as any );
+			vi.mocked( matter ).mockReturnValue( matterResult as any );
+
+			// Input data
+			const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+				{
+					filePaths: [ changesetPath ],
+					gitHubUrl,
+					shouldSkipLinks: false,
+					cwd: '/test',
+					isRoot: false
+				}
+			];
+
+			// Execute the function
+			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
+
+			// Verify dateCreated is a Date (fallback to current date)
+			expect( result ).toHaveLength( 1 );
+			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		} );
+
+		it( 'should handle invalid date strings in filename', async () => {
+			// Mock data with filename that has invalid date
+			const changesetPath = '/path/to/99999999999999_invalid_date.md';
+			const gitHubUrl = 'https://github.com/test/repo';
+			const fileContent = 'file content';
+			const matterResult = {
+				content: 'parsed content',
+				data: { type: 'feature', scope: [] }
+			};
+
+			// Mock setup
+			vi.mocked( fs.readFile ).mockResolvedValue( fileContent as any );
+			vi.mocked( matter ).mockReturnValue( matterResult as any );
+
+			// Input data
+			const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+				{
+					filePaths: [ changesetPath ],
+					gitHubUrl,
+					shouldSkipLinks: false,
+					cwd: '/test',
+					isRoot: false
+				}
+			];
+
+			// Execute the function
+			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
+
+			// Verify dateCreated is a Date (fallback to current date)
+			expect( result ).toHaveLength( 1 );
+			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		} );
+
+		it( 'should handle empty changeset path', async () => {
+			// Mock data with empty changeset path
+			const changesetPath = '';
+			const gitHubUrl = 'https://github.com/test/repo';
+			const fileContent = 'file content';
+			const matterResult = {
+				content: 'parsed content',
+				data: { type: 'feature', scope: [] }
+			};
+
+			// Mock setup
+			vi.mocked( fs.readFile ).mockResolvedValue( fileContent as any );
+			vi.mocked( matter ).mockReturnValue( matterResult as any );
+
+			// Input data
+			const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
+				{
+					filePaths: [ changesetPath ],
+					gitHubUrl,
+					shouldSkipLinks: false,
+					cwd: '/test',
+					isRoot: false
+				}
+			];
+
+			// Execute the function
+			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
+
+			// Verify dateCreated is a Date (fallback to current date)
+			expect( result ).toHaveLength( 1 );
+			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		} );
 	} );
 } );

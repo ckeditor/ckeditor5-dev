@@ -9,7 +9,7 @@ import type { ParsedFile } from '../../src/types.js';
 
 function createMockEntry(
 	scope: Array<string>,
-	changesetPath: string,
+	dateCreated: Date,
 	content: string = 'Test content',
 	gitHubUrl: string = 'https://github.com/test/repo',
 	shouldSkipLinks: boolean = false
@@ -24,7 +24,8 @@ function createMockEntry(
 			communityCredits: [],
 			validations: []
 		},
-		changesetPath,
+		changesetPath: '',
+		dateCreated,
 		gitHubUrl,
 		shouldSkipLinks
 	};
@@ -33,59 +34,59 @@ function createMockEntry(
 describe( 'sortEntriesByScopeAndDate()', () => {
 	it( 'should sort entries with single scope alphabetically by scope name, then by date (older first)', () => {
 		const entries = [
-			createMockEntry( [ 'ui' ], 'path/20240102120000_feature.md' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'ui' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'engine' ], 'path/20240103120000_feature.md' )
+			createMockEntry( [ 'ui' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'ui' ], new Date( 2025, 3, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'engine' ], new Date( 2025, 4, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
 		expect( sorted[ 0 ]?.data.scope ).toEqual( [ 'core' ] );
-		expect( sorted[ 0 ]?.changesetPath ).toBe( 'path/20240101120000_feature.md' );
+		expect( sorted[ 0 ]?.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 1 ]?.data.scope ).toEqual( [ 'engine' ] );
-		expect( sorted[ 1 ]?.changesetPath ).toBe( 'path/20240103120000_feature.md' );
+		expect( sorted[ 1 ]?.dateCreated ).toEqual( new Date( 2025, 4, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 2 ]?.data.scope ).toEqual( [ 'ui' ] );
-		expect( sorted[ 2 ]?.changesetPath ).toBe( 'path/20240101120000_feature.md' );
+		expect( sorted[ 2 ]?.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 3 ]?.data.scope ).toEqual( [ 'ui' ] );
-		expect( sorted[ 3 ]?.changesetPath ).toBe( 'path/20240102120000_feature.md' );
+		expect( sorted[ 3 ]?.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort entries with same single scope by date (older first)', () => {
 		const entries = [
-			createMockEntry( [ 'core' ], 'path/20240103120000_feature.md' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'core' ], 'path/20240102120000_feature.md' )
+			createMockEntry( [ 'core' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core' ], new Date( 2025, 3, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
 		expect( sorted ).toHaveLength( 3 );
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/20240102120000_feature.md' );
-		expect( sorted[ 2 ]!.changesetPath ).toBe( 'path/20240103120000_feature.md' );
+		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort entries with same number of scopes by date (older first)', () => {
 		const entries = [
-			createMockEntry( [ 'ui', 'engine' ], 'path/20240103120000_feature.md' ),
-			createMockEntry( [ 'core', 'utils' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'widget', 'typing' ], 'path/20240102120000_feature.md' )
+			createMockEntry( [ 'ui', 'engine' ], new Date( 2025, 3, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core', 'utils' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'widget', 'typing' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/20240102120000_feature.md' );
-		expect( sorted[ 2 ]!.changesetPath ).toBe( 'path/20240103120000_feature.md' );
+		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort by number of scopes (more scopes first)', () => {
 		const entries = [
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'ui', 'engine', 'widget' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'utils', 'typing' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [], 'path/20240101120000_feature.md' )
+			createMockEntry( [ 'core' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'ui', 'engine', 'widget' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'utils', 'typing' ], new Date( 2025, 3, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [], new Date( 2025, 4, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
@@ -98,28 +99,22 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 	it( 'should handle entries without scope', () => {
 		const entries = [
-			createMockEntry( [], 'path/20240103120000_feature.md' ),
-			createMockEntry( [], 'path/20240101120000_feature.md' ),
-			createMockEntry( [], 'path/20240102120000_feature.md' )
+			createMockEntry( [], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [], new Date( 2025, 3, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/20240102120000_feature.md' );
-		expect( sorted[ 2 ]!.changesetPath ).toBe( 'path/20240103120000_feature.md' );
+		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should handle entries with undefined scope as empty array', () => {
 		const entriesWithUndefinedScope = [
-			{
-				...createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ),
-				data: {
-					...createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ).data,
-					scope: undefined as any
-				}
-			},
-			createMockEntry( [ 'ui' ], 'path/20240101120000_feature.md' )
+			createMockEntry( undefined as any, new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'ui' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entriesWithUndefinedScope );
@@ -129,64 +124,13 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 		expect( sorted[ 1 ]!.data.scope ).toBeUndefined();
 	} );
 
-	it( 'should handle filenames without date pattern (fallback to current date)', () => {
-		const entries = [
-			createMockEntry( [ 'core' ], 'path/invalid-filename.md' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entries );
-
-		// Entry with valid date should come first (older date)
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/invalid-filename.md' );
-	} );
-
-	it( 'should handle filenames with invalid date format (fallback to current date)', () => {
-		const entries = [
-			createMockEntry( [ 'core' ], 'path/99999999999999_feature.md' ), // Invalid date
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entries );
-
-		// Entry with valid date should come first (older date)
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/99999999999999_feature.md' );
-	} );
-
-	it( 'should handle filenames without extension or path separators', () => {
-		const entries = [
-			createMockEntry( [ 'core' ], '20240102120000_feature.md' ),
-			createMockEntry( [ 'core' ], '20240101120000_feature.md' )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entries );
-
-		expect( sorted[ 0 ]!.changesetPath ).toBe( '20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( '20240102120000_feature.md' );
-	} );
-
-	it( 'should handle empty filename (fallback to current date)', () => {
-		const entries = [
-			createMockEntry( [ 'core' ], '' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entries );
-
-		// Entry with valid date should come first (older date)
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( '' );
-	} );
-
 	it( 'should handle mixed scenarios with different scope counts and dates', () => {
 		const entries = [
-			createMockEntry( [ 'ui' ], 'path/20240103120000_feature.md' ),
-			createMockEntry( [ 'core', 'utils', 'engine' ], 'path/20240102120000_feature.md' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' ),
-			createMockEntry( [ 'widget', 'typing' ], 'path/20240104120000_feature.md' ),
-			createMockEntry( [], 'path/20240105120000_feature.md' )
+			createMockEntry( [ 'ui' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core', 'utils', 'engine' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core' ], new Date( 2025, 3, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'widget', 'typing' ], new Date( 2025, 4, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [], new Date( 2025, 5, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
@@ -205,8 +149,8 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 	it( 'should modify the original array (sort mutates)', () => {
 		const entries = [
-			createMockEntry( [ 'ui' ], 'path/20240102120000_feature.md' ),
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' )
+			createMockEntry( [ 'ui' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( [ 'core' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) )
 		];
 		const originalEntries = [ ...entries ];
 
@@ -229,7 +173,7 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 	it( 'should handle single entry', () => {
 		const entries = [
-			createMockEntry( [ 'core' ], 'path/20240101120000_feature.md' )
+			createMockEntry( [ 'core' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entries );
@@ -240,26 +184,14 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 	it( 'should handle entries when all scopes are undefined', () => {
 		const entriesWithUndefinedScopes = [
-			{
-				...createMockEntry( [ 'test' ], 'path/20240102120000_feature.md' ),
-				data: {
-					...createMockEntry( [ 'test' ], 'path/20240102120000_feature.md' ).data,
-					scope: undefined as any
-				}
-			},
-			{
-				...createMockEntry( [ 'test' ], 'path/20240101120000_feature.md' ),
-				data: {
-					...createMockEntry( [ 'test' ], 'path/20240101120000_feature.md' ).data,
-					scope: undefined as any
-				}
-			}
+			createMockEntry( undefined as any, new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
+			createMockEntry( undefined as any, new Date( 2025, 2, 1, 0, 0, 0, 0 ) )
 		];
 
 		const sorted = sortEntriesByScopeAndDate( entriesWithUndefinedScopes );
 
 		// When both scopes are undefined, should fall back to date sorting (older first)
-		expect( sorted[ 0 ]!.changesetPath ).toBe( 'path/20240101120000_feature.md' );
-		expect( sorted[ 1 ]!.changesetPath ).toBe( 'path/20240102120000_feature.md' );
+		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
 	} );
 } );
