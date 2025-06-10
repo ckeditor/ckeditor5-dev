@@ -26,6 +26,7 @@ vi.mock( '../../src/utils/constants.js', () => {
 function createEntry( data: Record<string, any> ): ParsedFile {
 	return {
 		content: 'Test content',
+		createdAt: new Date(),
 		data: {
 			see: [],
 			closes: [],

@@ -11,6 +11,7 @@ function wrapInput(
 	partialData: Partial<FileMetadata>
 ): ParsedFile<Partial<FileMetadata>> {
 	return {
+		createdAt: new Date(),
 		content: '',
 		changesetPath: '',
 		gitHubUrl: '',
