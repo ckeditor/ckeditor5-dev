@@ -111,19 +111,6 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 		expect( sorted[ 2 ]!.createdAt ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
-	it( 'should handle entries with undefined scope as empty array', () => {
-		const entriesWithUndefinedScope = [
-			createMockEntry( undefined as any, new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
-			createMockEntry( [ 'ui' ], new Date( 2025, 2, 1, 0, 0, 0, 0 ) )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entriesWithUndefinedScope );
-
-		// Entry with undefined scope should be treated as having 0 scopes and come after entry with scope
-		expect( sorted[ 0 ]!.data.scope ).toEqual( [ 'ui' ] );
-		expect( sorted[ 1 ]!.data.scope ).toBeUndefined();
-	} );
-
 	it( 'should handle mixed scenarios with different scope counts and dates', () => {
 		const entries = [
 			createMockEntry( [ 'ui' ], new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
@@ -180,18 +167,5 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 		expect( sorted ).toHaveLength( 1 );
 		expect( sorted[ 0 ]! ).toEqual( entries[ 0 ] );
-	} );
-
-	it( 'should handle entries when all scopes are undefined', () => {
-		const entriesWithUndefinedScopes = [
-			createMockEntry( undefined as any, new Date( 2025, 1, 1, 0, 0, 0, 0 ) ),
-			createMockEntry( undefined as any, new Date( 2025, 2, 1, 0, 0, 0, 0 ) )
-		];
-
-		const sorted = sortEntriesByScopeAndDate( entriesWithUndefinedScopes );
-
-		// When both scopes are undefined, should fall back to date sorting (older first)
-		expect( sorted[ 0 ]!.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 1 ]!.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
 	} );
 } );

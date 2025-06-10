@@ -297,7 +297,7 @@ describe( 'parseChangelogEntries()', () => {
 		expect( matter ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should call sortEntriesByScopeAndDate', async () => {
+	it( 'should sort entries', async () => {
 		// Mock data
 		const changesetPath = '/path/to/20240101120000_changeset.md';
 		const gitHubUrl = 'https://github.com/test/repo';
@@ -324,11 +324,12 @@ describe( 'parseChangelogEntries()', () => {
 
 		await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-		// Verify sortEntriesByScopeAndDate is called with correct arguments structure
+		// Verify sortEntriesByScopeAndDate is called with the correct arguments structure.
 		expect( sortEntriesByScopeAndDate ).toHaveBeenCalledTimes( 1 );
-		const callArgs = vi.mocked( sortEntriesByScopeAndDate ).mock.calls[ 0 ]?.[ 0 ];
+		const callArgs = vi.mocked( sortEntriesByScopeAndDate ).mock.calls[ 0 ]![ 0 ];
+
 		expect( callArgs ).toHaveLength( 1 );
-		expect( callArgs?.[ 0 ] ).toMatchObject( {
+		expect( callArgs[ 0 ] ).toMatchObject( {
 			content: 'parsed content',
 			data: {
 				type: 'Feature',
@@ -342,12 +343,12 @@ describe( 'parseChangelogEntries()', () => {
 			changesetPath,
 			shouldSkipLinks: false
 		} );
-		expect( callArgs?.[ 0 ]?.createdAt ).toBeInstanceOf( Date );
+		expect( callArgs[ 0 ]!.createdAt ).toBeInstanceOf( Date );
 	} );
 
 	describe( 'date extraction from filename', () => {
 		it( 'should handle filenames without date pattern', async () => {
-			// Mock data with filename that doesn't match date pattern
+			// Mock data with filename that doesn't match a date pattern.
 			const changesetPath = '/path/to/invalid_filename.md';
 			const gitHubUrl = 'https://github.com/test/repo';
 			const fileContent = 'file content';

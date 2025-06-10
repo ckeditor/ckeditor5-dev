@@ -5,11 +5,11 @@
 
 import fs from 'fs-extra';
 import matter from 'gray-matter';
-import { AsyncArray } from './asyncarray.js';
-import type { ChangesetPathsWithGithubUrl, FileMetadata, ParsedFile } from '../types.js';
-import { sortEntriesByScopeAndDate } from './sortentriesbyscopeanddate.js';
 import { isValid, parse } from 'date-fns';
+import { AsyncArray } from './asyncarray.js';
+import { sortEntriesByScopeAndDate } from './sortentriesbyscopeanddate.js';
 import { normalizeEntry } from './normalizeentry.js';
+import type { ChangesetPathsWithGithubUrl, FileMetadata, ParsedFile } from '../types.js';
 
 type SimpleParsedFile = Pick<ParsedFile, 'changesetPath' | 'gitHubUrl' | 'shouldSkipLinks'>;
 
@@ -41,25 +41,25 @@ export function parseChangelogEntries(
 }
 
 /**
- * Extracts date from changeset filename.
- * Expects format: YYYYMMDDHHMMSS_description.md
+ * Extracts date from an entry filename (`YYYYMMDDHHMMSS_*.md`).
+ *
+ * Defaults to the current date if the filename does not match the expected format.
  */
 function extractDateFromFilename( changesetPath: string ): Date {
+	const now = new Date();
 	const filename = changesetPath.split( '/' ).pop() || '';
 	const dateMatch = filename.match( /^(\d{14})_/ );
 
 	if ( !dateMatch || !dateMatch[ 1 ] ) {
-		// Fallback to current date if no date pattern found
-		return new Date();
+		// Fallback to the current date if no date pattern found.
+		return now;
 	}
 
-	const dateStr = dateMatch[ 1 ];
-	const parsedDate = parse( dateStr, 'yyyyMMddHHmmss', new Date() );
+	const parsedDate = parse( dateMatch[ 1 ], 'yyyyMMddHHmmss', now );
 
-	// Validate the parsed date
+	// Validate the parsed date and fallback to the current date when failed.
 	if ( !isValid( parsedDate ) ) {
-		// Fallback to current date if parsing failed
-		return new Date();
+		return now;
 	}
 
 	return parsedDate;
