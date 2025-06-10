@@ -34,7 +34,7 @@ export function parseChangelogEntries(
 			gitHubUrl,
 			changesetPath,
 			shouldSkipLinks,
-			dateCreated: extractDateFromFilename( changesetPath )
+			createdAt: extractDateFromFilename( changesetPath )
 		} ) )
 		.map( entry => normalizeEntry( entry, isSinglePackage ) )
 		.then( entries => sortEntriesByScopeAndDate( entries ) );

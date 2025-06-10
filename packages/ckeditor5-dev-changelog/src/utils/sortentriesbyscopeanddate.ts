@@ -26,12 +26,12 @@ export function sortEntriesByScopeAndDate( entries: Array<ParsedFile> ): Array<P
 			}
 
 			// Same scope - sort by date (older first)
-			return a.dateCreated.getTime() - b.dateCreated.getTime();
+			return a.createdAt.getTime() - b.createdAt.getTime();
 		}
 
 		// Both have same amount of scopes - sort by date (older first)
 		if ( aScopeCount === bScopeCount ) {
-			return a.dateCreated.getTime() - b.dateCreated.getTime();
+			return a.createdAt.getTime() - b.createdAt.getTime();
 		}
 
 		// Sort by amount of scopes

@@ -107,7 +107,7 @@ describe( 'parseChangelogEntries()', () => {
 			language: 'md',
 			matter: ''
 		} );
-		expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		expect( result[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 
 		// Check second entry
 		expect( result[ 1 ] ).toMatchObject( {
@@ -127,7 +127,7 @@ describe( 'parseChangelogEntries()', () => {
 			language: 'md',
 			matter: ''
 		} );
-		expect( result[ 1 ]?.dateCreated ).toBeInstanceOf( Date );
+		expect( result[ 1 ]?.createdAt ).toBeInstanceOf( Date );
 
 		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
@@ -233,7 +233,7 @@ describe( 'parseChangelogEntries()', () => {
 			language: 'md',
 			matter: ''
 		} );
-		expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		expect( result[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 
 		// Check second entry
 		expect( result[ 1 ] ).toMatchObject( {
@@ -253,7 +253,7 @@ describe( 'parseChangelogEntries()', () => {
 			language: 'md',
 			matter: ''
 		} );
-		expect( result[ 1 ]?.dateCreated ).toBeInstanceOf( Date );
+		expect( result[ 1 ]?.createdAt ).toBeInstanceOf( Date );
 
 		expect( fs.readFile ).toHaveBeenCalledTimes( 2 );
 		expect( fs.readFile ).toHaveBeenCalledWith( changesetPath1, 'utf-8' );
@@ -342,7 +342,7 @@ describe( 'parseChangelogEntries()', () => {
 			changesetPath,
 			shouldSkipLinks: false
 		} );
-		expect( callArgs?.[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+		expect( callArgs?.[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 	} );
 
 	describe( 'date extraction from filename', () => {
@@ -374,9 +374,9 @@ describe( 'parseChangelogEntries()', () => {
 			// Execute the function
 			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-			// Verify dateCreated is a Date (fallback to current date)
+			// Verify createdAt is a Date (fallback to current date)
 			expect( result ).toHaveLength( 1 );
-			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+			expect( result[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 		} );
 
 		it( 'should handle invalid date strings in filename', async () => {
@@ -407,9 +407,9 @@ describe( 'parseChangelogEntries()', () => {
 			// Execute the function
 			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-			// Verify dateCreated is a Date (fallback to current date)
+			// Verify createdAt is a Date (fallback to current date)
 			expect( result ).toHaveLength( 1 );
-			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+			expect( result[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 		} );
 
 		it( 'should handle empty changeset path', async () => {
@@ -440,9 +440,9 @@ describe( 'parseChangelogEntries()', () => {
 			// Execute the function
 			const result = await parseChangelogEntries( filePathsWithGithubUrl, true );
 
-			// Verify dateCreated is a Date (fallback to current date)
+			// Verify createdAt is a Date (fallback to current date)
 			expect( result ).toHaveLength( 1 );
-			expect( result[ 0 ]?.dateCreated ).toBeInstanceOf( Date );
+			expect( result[ 0 ]?.createdAt ).toBeInstanceOf( Date );
 		} );
 	} );
 } );

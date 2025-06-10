@@ -9,7 +9,7 @@ import type { ParsedFile } from '../../src/types.js';
 
 function createMockEntry(
 	scope: Array<string>,
-	dateCreated: Date,
+	createdAt: Date,
 	content: string = 'Test content',
 	gitHubUrl: string = 'https://github.com/test/repo',
 	shouldSkipLinks: boolean = false
@@ -25,7 +25,7 @@ function createMockEntry(
 			validations: []
 		},
 		changesetPath: '',
-		dateCreated,
+		createdAt,
 		gitHubUrl,
 		shouldSkipLinks
 	};
@@ -43,13 +43,13 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 		const sorted = sortEntriesByScopeAndDate( entries );
 
 		expect( sorted[ 0 ]?.data.scope ).toEqual( [ 'core' ] );
-		expect( sorted[ 0 ]?.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 0 ]?.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 1 ]?.data.scope ).toEqual( [ 'engine' ] );
-		expect( sorted[ 1 ]?.dateCreated ).toEqual( new Date( 2025, 4, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]?.createdAt ).toEqual( new Date( 2025, 4, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 2 ]?.data.scope ).toEqual( [ 'ui' ] );
-		expect( sorted[ 2 ]?.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]?.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
 		expect( sorted[ 3 ]?.data.scope ).toEqual( [ 'ui' ] );
-		expect( sorted[ 3 ]?.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 3 ]?.createdAt ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort entries with same single scope by date (older first)', () => {
@@ -62,9 +62,9 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 		const sorted = sortEntriesByScopeAndDate( entries );
 
 		expect( sorted ).toHaveLength( 3 );
-		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 0 ]!.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.createdAt ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort entries with same number of scopes by date (older first)', () => {
@@ -76,9 +76,9 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
-		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 0 ]!.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.createdAt ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should sort by number of scopes (more scopes first)', () => {
@@ -106,9 +106,9 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 
 		const sorted = sortEntriesByScopeAndDate( entries );
 
-		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 2 ]!.dateCreated ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 0 ]!.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 2 ]!.createdAt ).toEqual( new Date( 2025, 3, 1, 0, 0, 0, 0 ) );
 	} );
 
 	it( 'should handle entries with undefined scope as empty array', () => {
@@ -191,7 +191,7 @@ describe( 'sortEntriesByScopeAndDate()', () => {
 		const sorted = sortEntriesByScopeAndDate( entriesWithUndefinedScopes );
 
 		// When both scopes are undefined, should fall back to date sorting (older first)
-		expect( sorted[ 0 ]!.dateCreated ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
-		expect( sorted[ 1 ]!.dateCreated ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 0 ]!.createdAt ).toEqual( new Date( 2025, 1, 1, 0, 0, 0, 0 ) );
+		expect( sorted[ 1 ]!.createdAt ).toEqual( new Date( 2025, 2, 1, 0, 0, 0, 0 ) );
 	} );
 } );

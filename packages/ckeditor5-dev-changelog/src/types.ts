@@ -91,7 +91,7 @@ export type ParsedFile<T = FileMetadata> = {
 	content: string;
 	data: T;
 	changesetPath: string;
-	dateCreated: Date;
+	createdAt: Date;
 	gitHubUrl: string;
 	shouldSkipLinks: boolean;
 };
