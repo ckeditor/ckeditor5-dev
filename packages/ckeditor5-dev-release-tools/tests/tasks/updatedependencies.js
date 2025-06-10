@@ -6,10 +6,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import updateDependencies from '../../lib/tasks/updatedependencies.js';
-import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 vi.mock( 'fs-extra' );
-vi.mock( '../../lib/utils/findpathstopackages.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'updateDependencies()', () => {
 	beforeEach( () => {
@@ -18,7 +18,7 @@ describe( 'updateDependencies()', () => {
 
 	describe( 'preparing options', () => {
 		beforeEach( () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [] );
 		} );
 
 		it( 'should use provided `cwd` to search for packages', async () => {
@@ -28,7 +28,7 @@ describe( 'updateDependencies()', () => {
 
 			await updateDependencies( options );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				'/work/another/project',
 				null,
 				expect.any( Object )
@@ -38,7 +38,7 @@ describe( 'updateDependencies()', () => {
 		it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
 			await updateDependencies( {} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				'/work/project',
 				null,
 				expect.any( Object )
@@ -48,7 +48,7 @@ describe( 'updateDependencies()', () => {
 		it( 'should search for "package.json" files', async () => {
 			await updateDependencies( {} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				null,
 				expect.objectContaining( {
@@ -60,7 +60,7 @@ describe( 'updateDependencies()', () => {
 		it( 'should include a package included in the "cwd"', async () => {
 			await updateDependencies( {} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				null,
 				expect.objectContaining( {
@@ -74,7 +74,7 @@ describe( 'updateDependencies()', () => {
 				packagesDirectory: 'packages'
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				'packages',
 				expect.any( Object )
@@ -86,7 +86,7 @@ describe( 'updateDependencies()', () => {
 				packagesDirectory: 'path\\to\\packages\\'
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				'path/to/packages',
 				expect.any( Object )
@@ -99,7 +99,7 @@ describe( 'updateDependencies()', () => {
 				packagesDirectory: 'packages'
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				expect.anything(),
 				expect.objectContaining( {
@@ -117,7 +117,7 @@ describe( 'updateDependencies()', () => {
 				packagesDirectoryFilter
 			} );
 
-			expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 				expect.anything(),
 				expect.anything(),
 				expect.objectContaining( {
@@ -135,7 +135,7 @@ describe( 'updateDependencies()', () => {
 		} );
 
 		it( 'should read and write `package.json` for each found package', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [
 				'/work/project/package.json',
 				'/work/project/packages/ckeditor5-foo/package.json',
 				'/work/project/packages/ckeditor5-bar/package.json'
@@ -171,7 +171,7 @@ describe( 'updateDependencies()', () => {
 		} );
 
 		it( 'should update eligible dependencies from the `dependencies` key', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				dependencies: {
@@ -209,7 +209,7 @@ describe( 'updateDependencies()', () => {
 		} );
 
 		it( 'should update eligible dependencies from the `devDependencies` key', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				devDependencies: {
@@ -247,7 +247,7 @@ describe( 'updateDependencies()', () => {
 		} );
 
 		it( 'should update eligible dependencies from the `peerDependencies` key', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				peerDependencies: {
@@ -285,7 +285,7 @@ describe( 'updateDependencies()', () => {
 		} );
 
 		it( 'should not update any package if `shouldUpdateVersionCallback` callback resolves falsy value', async () => {
-			vi.mocked( findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
+			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
 			vi.mocked( fs ).readJson.mockResolvedValue( {
 				dependencies: {

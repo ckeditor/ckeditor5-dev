@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { packument } from './pacotecacheless.js';
+import { npm, tools, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from './getchangelog.js';
-import getPackageJson from './getpackagejson.js';
 
 /**
  * Returns a last created version in changelog file.
@@ -43,9 +41,9 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
  * @returns {Promise.<string|null>}
  */
 export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
-	const packageName = getPackageJson( cwd ).name;
+	const { name: packageName } = workspaces.getPackageJson( cwd );
 
-	return packument( packageName )
+	return npm.packument( packageName )
 		.then( result => {
 			const lastVersion = Object.keys( result.versions )
 				.filter( version => {
@@ -147,7 +145,7 @@ export function getLastTagFromGit() {
  * @returns {string}
  */
 export function getCurrent( cwd = process.cwd() ) {
-	return getPackageJson( cwd ).version;
+	return workspaces.getPackageJson( cwd ).version;
 }
 
 /**

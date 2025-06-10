@@ -24,7 +24,6 @@ export default defineConfig( {
 			include: [
 				'src/**'
 			],
-
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}
 	}

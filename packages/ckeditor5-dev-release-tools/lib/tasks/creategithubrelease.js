@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { Octokit } from '@octokit/rest';
-import * as transformCommitUtils from '../utils/transformcommitutils.js';
 import getNpmTagFromVersion from '../utils/getnpmtagfromversion.js';
-
-const { getRepositoryUrl } = transformCommitUtils;
 
 /**
  * Create a GitHub release.
@@ -32,7 +30,7 @@ export default async function createGithubRelease( options ) {
 		auth: `token ${ token }`
 	} );
 
-	const repositoryUrl = getRepositoryUrl( cwd );
+	const repositoryUrl = workspaces.getRepositoryUrl( cwd );
 	const [ repositoryName, repositoryOwner ] = repositoryUrl.split( '/' ).reverse();
 
 	if ( await shouldCreateRelease( github, repositoryOwner, repositoryName, version ) ) {

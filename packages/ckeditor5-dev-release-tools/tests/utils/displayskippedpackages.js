@@ -5,8 +5,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import chalk from 'chalk';
-import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import getPackageJson from '../../lib/utils/getpackagejson.js';
+import { logger, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import displaySkippedPackages from '../../lib/utils/displayskippedpackages.js';
 
 const stubs = vi.hoisted( () => {
@@ -34,16 +33,18 @@ vi.mock( 'chalk', () => ( {
 	default: stubs.chalk
 } ) );
 vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
-	logger: vi.fn( () => stubs.logger )
+	logger: vi.fn( () => stubs.logger ),
+	workspaces: {
+		getPackageJson: vi.fn()
+	}
 } ) );
 vi.mock( '../../lib/utils/constants.js', () => ( {
 	CLI_INDENT_SIZE: 1
 } ) );
-vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'displaySkippedPackages()', () => {
 	it( 'displays name of packages that have been skipped', () => {
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-foo' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-bar' } );
 

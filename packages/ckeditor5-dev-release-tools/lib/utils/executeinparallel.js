@@ -9,7 +9,7 @@ import os from 'os';
 import fs from 'fs/promises';
 import { Worker } from 'worker_threads';
 import { registerAbortController, deregisterAbortController } from './abortcontroller.js';
-import findPathsToPackages from './findpathstopackages.js';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
 
@@ -47,7 +47,7 @@ export default async function executeInParallel( options ) {
 	} = options;
 
 	const concurrencyAsInteger = Math.floor( concurrency ) || 1;
-	const packagesToProcess = await findPathsToPackages( cwd, packagesDirectory, {
+	const packagesToProcess = await workspaces.findPathsToPackages( cwd, packagesDirectory, {
 		packagesDirectoryFilter
 	} );
 

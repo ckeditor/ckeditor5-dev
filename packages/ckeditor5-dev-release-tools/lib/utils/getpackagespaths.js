@@ -5,8 +5,7 @@
 
 import path from 'path';
 import { minimatch } from 'minimatch';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import getPackageJson from './getpackagejson.js';
+import { tools, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Returns an object with two collections of paths to packages which are located in single repository.
@@ -49,7 +48,7 @@ export default function getPackagesPaths( options ) {
 		const dependencyPath = path.join( packagesPath, directory );
 
 		try {
-			const dependencyName = getPackageJson( dependencyPath ).name;
+			const { name: dependencyName } = workspaces.getPackageJson( dependencyPath );
 
 			if ( isValidPackage( dependencyName ) ) {
 				pathsCollection.matched.add( dependencyPath );

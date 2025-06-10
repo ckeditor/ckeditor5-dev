@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import fs from 'fs-extra';
 import upath from 'upath';
-import findPathsToPackages from '../utils/findpathstopackages.js';
 
 const { normalizeTrim } = upath;
 
@@ -40,7 +40,7 @@ export default async function updateDependencies( options ) {
 		cwd = process.cwd()
 	} = options;
 
-	const pkgJsonPaths = await findPathsToPackages(
+	const pkgJsonPaths = await workspaces.findPathsToPackages(
 		cwd,
 		packagesDirectory ? normalizeTrim( packagesDirectory ) : null,
 		{

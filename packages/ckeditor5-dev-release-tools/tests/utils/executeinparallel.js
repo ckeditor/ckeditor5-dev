@@ -3,12 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import os from 'os';
 import fs from 'fs/promises';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { registerAbortController, deregisterAbortController } from '../../lib/utils/abortcontroller.js';
 import executeInParallel from '../../lib/utils/executeinparallel.js';
-import findPathsToPackages from '../../lib/utils/findpathstopackages.js';
-import os from 'os';
 
 const stubs = vi.hoisted( () => ( {
 	WorkerMock: class {
@@ -45,7 +45,7 @@ vi.mock( 'crypto', () => ( {
 	}
 } ) );
 
-vi.mock( '../../lib/utils/findpathstopackages.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'fs/promises' );
 vi.mock( '../../lib/utils/abortcontroller.js' );
 
@@ -55,7 +55,7 @@ describe( 'executeInParallel()', () => {
 	beforeEach( () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/ckeditor' );
 
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [
 			'/home/ckeditor/my-packages/package-01',
 			'/home/ckeditor/my-packages/package-02',
 			'/home/ckeditor/my-packages/package-03',
@@ -92,7 +92,7 @@ describe( 'executeInParallel()', () => {
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			'/home/ckeditor',
 			'my-packages',
 			expect.any( Object )
@@ -120,7 +120,7 @@ describe( 'executeInParallel()', () => {
 	} );
 
 	it( 'should execute the specified `taskToExecute` on packages found in the `packagesDirectory` that are not filtered', async () => {
-		vi.mocked( findPathsToPackages ).mockResolvedValue( [
+		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [
 			'/home/ckeditor/my-packages/package-01',
 			'/home/ckeditor/my-packages/package-03',
 			'/home/ckeditor/my-packages/package-04'
@@ -136,7 +136,7 @@ describe( 'executeInParallel()', () => {
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			'/home/ckeditor',
 			'my-packages',
 			expect.objectContaining( { packagesDirectoryFilter } )
@@ -166,7 +166,11 @@ describe( 'executeInParallel()', () => {
 		const promise = executeInParallel( options );
 		await delay( 0 );
 
-		expect( vi.mocked( findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith( '/custom/cwd', 'my-packages', expect.any( Object ) );
+		expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+			'/custom/cwd',
+			'my-packages',
+			expect.any( Object )
+		);
 
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 

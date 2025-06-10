@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import createGithubRelease from '../../lib/tasks/creategithubrelease.js';
 import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
-import * as transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 
 const stubs = vi.hoisted( () => ( {
 	constructor: vi.fn(),
@@ -14,6 +14,7 @@ const stubs = vi.hoisted( () => ( {
 	createRelease: vi.fn()
 } ) );
 
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '@octokit/rest', () => ( {
 	Octokit: class {
 		constructor( ...args ) {
@@ -26,8 +27,6 @@ vi.mock( '@octokit/rest', () => ( {
 		}
 	}
 } ) );
-
-vi.mock( '../../lib/utils/transformcommitutils.js' );
 vi.mock( '../../lib/utils/getnpmtagfromversion.js' );
 
 describe( 'createGithubRelease()', () => {
@@ -46,7 +45,7 @@ describe( 'createGithubRelease()', () => {
 		stubs.createRelease.mockResolvedValue();
 
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'latest' );
-		vi.mocked( transformCommitUtils.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
+		vi.mocked( workspaces.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 	} );
 
 	it( 'should be a function', () => {

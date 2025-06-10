@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { npm, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import generateChangelogForSinglePackage from '../lib/tasks/generatechangelogforsinglepackage.js';
 import generateChangelogForMonoRepository from '../lib/tasks/generatechangelogformonorepository.js';
 import updateDependencies from '../lib/tasks/updatedependencies.js';
@@ -31,14 +32,13 @@ import {
 } from '../lib/utils/versions.js';
 import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
-import checkVersionAvailability from '../lib/utils/checkversionavailability.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 import provideToken from '../lib/utils/providetoken.js';
-import findPathsToPackages from '../lib/utils/findpathstopackages.js';
 
 import * as index from '../lib/index.js';
 
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../lib/tasks/generatechangelogforsinglepackage' );
 vi.mock( '../lib/tasks/generatechangelogformonorepository' );
 vi.mock( '../lib/tasks/updatedependencies' );
@@ -57,7 +57,6 @@ vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
 vi.mock( '../lib/utils/isversionpublishablefortag' );
 vi.mock( '../lib/utils/providetoken' );
-vi.mock( '../lib/utils/findpathstopackages' );
 
 describe( 'dev-release-tools/index', () => {
 	describe( 'generateChangelogForSinglePackage()', () => {
@@ -242,13 +241,6 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'checkVersionAvailability()', () => {
-		it( 'should be a function', () => {
-			expect( checkVersionAvailability ).to.be.a( 'function' );
-			expect( index.checkVersionAvailability ).to.equal( checkVersionAvailability );
-		} );
-	} );
-
 	describe( 'isVersionPublishableForTag()', () => {
 		it( 'should be a function', () => {
 			expect( isVersionPublishableForTag ).to.be.a( 'function' );
@@ -263,10 +255,67 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'findPathsToPackages()', () => {
+	// Backwards compatibility for the old API.
+
+	describe( 'checkVersionAvailability()', () => {
+		let emitWarningSpy;
+
+		beforeEach( () => {
+			emitWarningSpy = vi.spyOn( process, 'emitWarning' ).mockImplementation( () => {} );
+		} );
+
 		it( 'should be a function', () => {
-			expect( findPathsToPackages ).to.be.a( 'function' );
-			expect( index.findPathsToPackages ).to.equal( findPathsToPackages );
+			vi.mocked( npm.checkVersionAvailability ).mockReturnValue( 0 );
+
+			expect( index.checkVersionAvailability ).to.be.a( 'function' );
+			expect( index.checkVersionAvailability( 1, true, null ) ).to.equal( 0 );
+
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( 1, true, null );
+		} );
+
+		it( 'should emit a deprecation warning', () => {
+			index.checkVersionAvailability();
+
+			expect( emitWarningSpy ).toHaveBeenCalledTimes( 1 );
+			expect( emitWarningSpy ).toHaveBeenCalledWith(
+				expect.any( String ),
+				expect.objectContaining( {
+					type: 'DeprecationWarning',
+					code: 'DEP0002'
+				} )
+			);
+		} );
+	} );
+
+	describe( 'findPathsToPackages()', () => {
+		let emitWarningSpy;
+
+		beforeEach( () => {
+			emitWarningSpy = vi.spyOn( process, 'emitWarning' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should be a function', () => {
+			vi.mocked( workspaces.findPathsToPackages ).mockReturnValue( 0 );
+
+			expect( index.findPathsToPackages ).to.be.a( 'function' );
+			expect( index.findPathsToPackages( 1, true, null ) ).to.equal( 0 );
+
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledWith( 1, true, null );
+		} );
+
+		it( 'should emit a deprecation warning', () => {
+			index.findPathsToPackages();
+
+			expect( emitWarningSpy ).toHaveBeenCalledTimes( 1 );
+			expect( emitWarningSpy ).toHaveBeenCalledWith(
+				expect.any( String ),
+				expect.objectContaining( {
+					type: 'DeprecationWarning',
+					code: 'DEP0003'
+				} )
+			);
 		} );
 	} );
 } );

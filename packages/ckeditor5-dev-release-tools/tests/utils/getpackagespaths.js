@@ -4,8 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import getPackageJson from '../../lib/utils/getpackagejson.js';
+import { tools, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import getPackagesPaths from '../../lib/utils/getpackagespaths.js';
 
 vi.mock( 'path', () => ( {
@@ -15,7 +14,6 @@ vi.mock( 'path', () => ( {
 	}
 } ) );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'getPackagesPaths()', () => {
 	it( 'returns all found packages', () => {
@@ -25,7 +23,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-utils'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
@@ -57,7 +55,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-utils'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
@@ -89,7 +87,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-utils'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
@@ -121,7 +119,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-editor-inline'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )
@@ -160,7 +158,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-editor-inline'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )
@@ -201,7 +199,7 @@ describe( 'getPackagesPaths()', () => {
 			'ckeditor5-editor-inline'
 		] );
 
-		vi.mocked( getPackageJson )
+		vi.mocked( workspaces.getPackageJson )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
 			.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )

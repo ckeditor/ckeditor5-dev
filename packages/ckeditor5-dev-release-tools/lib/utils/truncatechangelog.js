@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { CHANGELOG_HEADER } from './constants.js';
-import { getRepositoryUrl } from './transformcommitutils.js';
 import saveChangelog from './savechangelog.js';
 import getChangelog from './getchangelog.js';
 
@@ -33,7 +33,7 @@ export default function truncateChangelog( length, cwd = process.cwd() ) {
 	const truncatedEntries = entries.slice( 0, length );
 
 	const changelogFooter = entries.length > truncatedEntries.length ?
-		`\n\n---\n\nTo see all releases, visit the [release page](${ getRepositoryUrl( cwd ) }/releases).\n` :
+		`\n\n---\n\nTo see all releases, visit the [release page](${ workspaces.getRepositoryUrl( cwd ) }/releases).\n` :
 		'\n';
 
 	const truncatedChangelog = CHANGELOG_HEADER + truncatedEntries.join( '\n' ).trim() + changelogFooter;

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": [
+      "./types/ckeditor5-dev-translations.d.ts",
+      "./types/shelljs.d.ts",
+    ]
+  },
+  "include": [
+    "src",
+    "tests"
+  ]
+}

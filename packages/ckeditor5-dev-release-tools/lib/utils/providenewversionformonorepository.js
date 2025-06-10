@@ -7,7 +7,7 @@ import inquirer from 'inquirer';
 import semver from 'semver';
 import chalk from 'chalk';
 import { CLI_INDENT_SIZE } from './constants.js';
-import checkVersionAvailability from './checkversionavailability.js';
+import { npm } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Asks a user for providing the new version for a major release.
@@ -50,7 +50,7 @@ export default async function provideNewVersionForMonoRepository( options ) {
 				return `Provided version must be higher than "${ version }".`;
 			}
 
-			const isAvailable = await checkVersionAvailability( input, packageName );
+			const isAvailable = await npm.checkVersionAvailability( input, packageName );
 
 			if ( !isAvailable ) {
 				return 'Given version is already taken.';
