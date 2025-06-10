@@ -6,13 +6,13 @@
 # - Other
 # - Major breaking change
 # - Minor breaking change
-# - Breaking change
 #
 # For guidance on breaking changes, see:
 # https://ckeditor.com/docs/ckeditor5/latest/updating/versioning-policy.html#major-and-minor-breaking-changes
 type:
 
 # Optional: Affected package(s), using short names.
+# Can be skipped when processing a non-mono-repository.
 # Example: ckeditor5-core
 scope:
   - 
@@ -35,7 +35,7 @@ see:
 
 # Optional: Community contributors.
 # Format:
-# - @{github-username}
+# - {github-username}
 communityCredits:
   - 
 ---
