@@ -1,6 +1,60 @@
 Changelog
 =========
 
+## [50.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v50.0.0...v50.1.0) (June 10, 2025)
+
+### Features
+
+* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: Initial version of the `@ckeditor/ckeditor5-dev-changelog` package that uses markdown files as the source of changelogs instead of Git commits. Closes [ckeditor/ckeditor5#18051](https://github.com/ckeditor/ckeditor5/issues/18051).
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Created new namespaces: `workspaces` and `npm`.
+
+  * `workspaces`  exposes the following functions:
+    * `findPathsToPackages()`
+    * `getPackageJson()`
+    * `getRepositoryUrl()`
+  * `npm` exposes the following functions:
+    * `checkVersionAvailability()`
+    * `manifest()` - a wrapper over the `packote` package that prevents using any cache
+    * `packument()` - as above.
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Added a new function to the `tools` namespace: `tools.commit()`. See [ckeditor/ckeditor5#18051](https://github.com/ckeditor/ckeditor5/issues/18051).
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `checkVersionAvailability()` and `findPathsToPackages()` functions exported by the `@ckeditor/ckeditor5-dev-release-tools` package have been moved to the `@ckeditor/ckeditor5-dev-utils` package.
+
+  For backward compatibility, they are still available in the `@ckeditor/ckeditor5-dev-release-tools` package and will be removed in the next major release.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+New packages:
+
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/50.1.0): v50.1.0
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/50.1.0): v50.0.0 => v50.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/50.1.0): v50.0.0 => v50.1.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/50.1.0): v50.0.0 => v50.1.0
+</details>
+
+
 ## [50.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v49.0.2...v50.0.0) (2025-06-09)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
@@ -167,58 +221,6 @@ Releases containing new features:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/49.0.0): v48.0.0 => v49.0.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/49.0.0): v48.0.0 => v49.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/49.0.0): v48.0.0 => v49.0.0
-</details>
-
-
-## [48.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v47.1.1...v48.0.0) (2025-04-22)
-
-### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Bump `puppeteer` to `^24.0.0`.
-
-### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Renamed the `noSpinner` option to `silent`.
-
-### Features
-
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Improved performance, allowing the time needed to process the entire CKEditor 5 documentation to be reduced by about 90% (from 50 min to 5). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c98845a3f34364632d2d70d1828d945b6c7c0341))
-
-### Bug fixes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Fixed the `push()` task having erroneously escaped tag. Closes [ckeditor/ckeditor5#18354](https://github.com/ckeditor/ckeditor5/issues/18354). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/be77674b3d90ad04eaa76d2992a6c5cba64f1f50))
-
-### Other changes
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Support for jobs with the "skipped" status. Closes [ckeditor/ckeditor5#18359](https://github.com/ckeditor/ckeditor5/issues/18359). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/06188327b07a9ee209089725bd9c0fcbd268b73b))
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Update the `puppeteer` package to the latest version. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/25ba28ef210b24351d2712c783315a2b8c939d1d))
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Ignore errors from a predefined list of external hosts used in CKEditor 5 documentation and manual tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/25ba28ef210b24351d2712c783315a2b8c939d1d))
-* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: The package sources are now written in TypeScript. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/25ba28ef210b24351d2712c783315a2b8c939d1d))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/48.0.0): v47.1.1 => v48.0.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/48.0.0): v47.1.1 => v48.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/48.0.0): v47.1.1 => v48.0.0
 </details>
 
 ---
