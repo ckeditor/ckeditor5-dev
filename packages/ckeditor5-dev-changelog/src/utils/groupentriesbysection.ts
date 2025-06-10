@@ -5,7 +5,6 @@
 
 import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, SECTIONS } from './constants.js';
 import { linkToGitHubUser } from './linktogithubuser.js';
-import { normalizeEntry } from './normalizeentry.js';
 import { validateEntry } from './validateentry.js';
 import type { Entry, ParsedFile, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 
@@ -27,8 +26,7 @@ export function groupEntriesBySection( options: GroupEntriesBySectionOptions ): 
 	const packageNames = [ ...packagesMetadata.keys() ];
 
 	return files.reduce<SectionsWithEntries>( ( sections, entry ) => {
-		const normalizedEntry = normalizeEntry( entry, isSinglePackage );
-		const { validatedEntry, isValid } = validateEntry( normalizedEntry, packageNames, isSinglePackage );
+		const { validatedEntry, isValid } = validateEntry( entry, packageNames, isSinglePackage );
 		const validatedData = validatedEntry.data;
 
 		const scope = isSinglePackage ? null : getScopesLinks( validatedData.scope, transformScope! );
@@ -111,7 +109,8 @@ function formatContent( content: string ) {
 
 	const cleanedRestContent = restContent.reduce( ( acc, line ) => {
 		if ( line.trim() === '' ) {
-			if ( acc.at( -1 ) !== '' ) {
+			// Only add empty line if the last item is not already an empty line
+			if ( acc.length > 0 && acc.at( -1 ) !== '' ) {
 				acc.push( '' );
 			}
 		} else {

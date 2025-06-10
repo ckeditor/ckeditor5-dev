@@ -83,6 +83,7 @@ describe( 'generateChangelog()', () => {
 					communityCredits: [],
 					validations: []
 				},
+				createdAt: new Date(),
 				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
 				shouldSkipLinks: false

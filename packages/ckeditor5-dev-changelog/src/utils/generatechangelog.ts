@@ -69,7 +69,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		externalRepositories,
 		shouldSkipLinks
 	} );
-	const parsedChangesetFiles = await parseChangelogEntries( entryPaths );
+	const parsedChangesetFiles = await parseChangelogEntries( entryPaths, isSinglePackage );
 	const sectionsWithEntries = groupEntriesBySection( {
 		packagesMetadata,
 		transformScope,
