@@ -26,4 +26,4 @@ closes:
   - https://github.com/ckeditor/ckeditor5/issues/18665
 ---
 
-Fix changelog entry generation on published version of `dev-changelog` package.
+The template file for the changelog entries generator is included in the published package to avoid issues when using the `ckeditor5-dev-changelog-create-entry` binary script.
