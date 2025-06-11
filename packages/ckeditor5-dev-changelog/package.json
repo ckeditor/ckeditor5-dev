@@ -21,7 +21,8 @@
   "types": "dist/index.d.ts",
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "template"
   ],
   "bin": {
     "ckeditor5-dev-changelog-create-entry": "bin/generate-template.js"
