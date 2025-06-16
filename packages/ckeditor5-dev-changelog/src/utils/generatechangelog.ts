@@ -77,6 +77,14 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		files: parsedChangesetFiles
 	} );
 
+	// Exit when no changelog entries exist.
+	if ( !parsedChangesetFiles.length ) {
+		logInfo( '' );
+		logInfo( chalk.bold( 'ℹ️  No changelog entries found, so there is nothing to prepare a changelog from.' ) );
+
+		return disableFilesystemOperations ? '' : undefined;
+	}
+
 	// Log changes in the console only when `nextVersion` is not provided.
 	if ( !nextVersion ) {
 		displayChanges( {
@@ -112,6 +120,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		releasedPackagesInfo,
 		sections: filterVisibleSections( sectionsWithEntries )
 	} );
+
 	if ( disableFilesystemOperations ) {
 		return newChangelog as any;
 	}

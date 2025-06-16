@@ -40,7 +40,8 @@ vi.mock( '../../src/utils/commitchanges.js' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		green: ( text: string ) => text,
-		red: ( text: string ) => text
+		red: ( text: string ) => text,
+		bold: ( text: string ) => text
 	}
 } ) );
 
@@ -540,6 +541,17 @@ describe( 'generateChangelog()', () => {
 		] );
 	} );
 
+	it( 'displays info if no changelog entries exist and quits', async () => {
+		vi.mocked( parseChangelogEntries ).mockResolvedValue( [] );
+
+		await generateChangelog( defaultOptions );
+
+		expect( logInfo ).toHaveBeenCalledWith( 'ℹ️  No changelog entries found, so there is nothing to prepare a changelog from.' );
+
+		expect( modifyChangelog ).not.toHaveBeenCalled();
+		expect( commitChanges ).not.toHaveBeenCalled();
+	} );
+
 	describe( 'disableFilesystemOperations=true', () => {
 		it( 'returns the changelog instead of writing to a file when in `disableFilesystemOperations=true` mode', async () => {
 			await expect( generateChangelog( { ...defaultOptions, disableFilesystemOperations: true } ) )
@@ -553,6 +565,13 @@ describe( 'generateChangelog()', () => {
 			await generateChangelog( { ...defaultOptions, disableFilesystemOperations: true } );
 
 			expect( commitChanges ).toHaveBeenCalledTimes( 0 );
+		} );
+
+		it( 'returns empty string if no changelog entries exist in `disableFilesystemOperations=true` mode', async () => {
+			vi.mocked( parseChangelogEntries ).mockResolvedValue( [] );
+
+			await expect( generateChangelog( { ...defaultOptions, disableFilesystemOperations: true } ) )
+				.resolves.toEqual( '' );
 		} );
 	} );
 
