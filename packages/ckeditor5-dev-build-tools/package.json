@@ -32,7 +32,7 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-swc": "^0.4.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-typescript": "12.1.2",
     "@rollup/pluginutils": "^5.1.0",
     "@swc/core": "^1.4.8",
     "chalk": "^5.0.0",
