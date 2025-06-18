@@ -227,7 +227,8 @@ export async function build(
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
-			name: args.name
+			name: args.name,
+			inlineDynamicImports: true
 		} );
 
 		if ( !args.browser || !args.name ) {
