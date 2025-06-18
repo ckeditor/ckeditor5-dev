@@ -4,7 +4,7 @@
  */
 
 import type { ParsedFile } from '../types.js';
-import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, TYPES } from './constants.js';
+import { ISSUE_PATTERN, ISSUE_SLUG_PATTERN, ISSUE_URL_PATTERN, NICK_NAME_PATTERN, TYPES } from './constants.js';
 
 /**
  * Validates a changelog entry against expected types, scopes, and issue references.
@@ -99,6 +99,18 @@ export function validateEntry( entry: ParsedFile, packagesNames: Array<string>, 
 	}
 
 	data.closes = closesValidated;
+
+	const communityCreditsValidated = [];
+
+	for ( const nickName of data.communityCredits ) {
+		if ( !nickName.match( NICK_NAME_PATTERN ) ) {
+			validations.push( `Community username "${ nickName }" is not valid GitHub username.` );
+		} else {
+			communityCreditsValidated.push( nickName );
+		}
+	}
+
+	data.communityCredits = communityCreditsValidated;
 
 	const validatedEntry = {
 		...entry,
