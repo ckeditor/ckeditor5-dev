@@ -39,6 +39,7 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/fs-extra": "^11.0.4",
