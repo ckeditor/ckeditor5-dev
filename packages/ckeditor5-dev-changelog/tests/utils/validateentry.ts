@@ -12,6 +12,7 @@ vi.mock( '../../src/utils/constants.js', () => {
 		ISSUE_PATTERN: /^\d+$/,
 		ISSUE_SLUG_PATTERN: /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/,
 		ISSUE_URL_PATTERN: /^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/,
+		NICK_NAME_PATTERN: /^@[a-z0-9-_]+$/i,
 		TYPES: [
 			{ name: 'Feature' },
 			{ name: 'Other' },
@@ -317,22 +318,62 @@ describe( 'validateEntry()', () => {
 		} );
 	} );
 
+	describe( 'communityCredits validation', () => {
+		it( 'should add validation message but remain valid when community username is not valid GitHub username', () => {
+			const entry: ParsedFile = createEntry( { type: 'Feature', communityCredits: [ '@i n v a l i d n a m e' ] } );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
+
+			expect( isValid ).toBeTruthy();
+			expect( validatedEntry.data.validations ).toContain(
+				'Community username "@i n v a l i d n a m e" is not valid GitHub username.'
+			);
+			expect( validatedEntry.data.communityCredits ).toEqual( [] );
+		} );
+
+		it( 'should return valid when community username is valid GitHub username', () => {
+			const entry: ParsedFile = createEntry( { type: 'Feature', communityCredits: [ '@exampleName123' ] } );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
+
+			expect( isValid ).toBeTruthy();
+			expect( validatedEntry.data.communityCredits ).toEqual( [ '@exampleName123' ] );
+		} );
+
+		it( 'should filter out invalid community usernames while keeping valid ones', () => {
+			const entry: ParsedFile = createEntry( {
+				type: 'Feature',
+				communityCredits: [ '@i n v a l i d n a m e', '@exampleName123' ]
+			} );
+
+			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
+
+			expect( isValid ).toBeTruthy();
+			expect( validatedEntry.data.validations ).toContain(
+				'Community username "@i n v a l i d n a m e" is not valid GitHub username.'
+			);
+			expect( validatedEntry.data.communityCredits ).toEqual( [ '@exampleName123' ] );
+		} );
+	} );
+
 	describe( 'multiple validations', () => {
 		it( 'should collect multiple validation errors but only mark as invalid for critical errors', () => {
 			const entry: ParsedFile = createEntry( {
 				type: 'Unknown',
 				scope: [ 'unknown-package' ],
 				see: [ 'invalid-reference' ],
-				closes: [ 'invalid-reference' ]
+				closes: [ 'invalid-reference' ],
+				communityCredits: [ '@i n v a l i d n a m e' ]
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );
 
 			expect( isValid ).toBeFalsy();
-			expect( validatedEntry.data.validations?.length ).toBe( 4 );
+			expect( validatedEntry.data.validations?.length ).toBe( 5 );
 			expect( validatedEntry.data.scope ).toEqual( [] );
 			expect( validatedEntry.data.see ).toEqual( [] );
 			expect( validatedEntry.data.closes ).toEqual( [] );
+			expect( validatedEntry.data.communityCredits ).toEqual( [] );
 		} );
 
 		it( 'should return valid for a completely valid entry', () => {
@@ -340,7 +381,8 @@ describe( 'validateEntry()', () => {
 				type: 'Feature',
 				scope: [ 'ckeditor5-engine' ],
 				see: [ '1234' ],
-				closes: [ 'ckeditor/ckeditor5#5678' ]
+				closes: [ 'ckeditor/ckeditor5#5678' ],
+				communityCredits: [ '@exampleName123' ]
 			} );
 
 			const { isValid, validatedEntry } = validateEntry( entry, packageNames, false );

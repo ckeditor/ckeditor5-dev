@@ -45,6 +45,8 @@ export const ISSUE_PATTERN = /^\d+$/;
 export const ISSUE_URL_PATTERN =
 	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
 
+export const NICK_NAME_PATTERN = /^@[a-z0-9-_]+$/i;
+
 export const TYPES = [
 	{ name: 'Feature' },
 	{ name: 'Other' },
