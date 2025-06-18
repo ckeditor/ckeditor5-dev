@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "50.1.1",
+  "version": "50.1.2",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -23,7 +23,7 @@
     "dist"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-translations": "^50.1.1",
+    "@ckeditor/ckeditor5-dev-translations": "^50.1.2",
     "@types/postcss-import": "^14.0.3",
     "@types/through2": "^2.0.41",
     "chalk": "^5.0.0",
