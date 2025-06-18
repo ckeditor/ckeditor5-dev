@@ -4,6 +4,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { builtinModules } from 'module';
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';
@@ -21,7 +22,8 @@ const pkg = JSON.parse(
 // List of external dependencies
 const externals = [
 	...Object.keys( pkg.dependencies || {} ),
-	...Object.keys( pkg.peerDependencies || {} )
+	...Object.keys( pkg.peerDependencies || {} ),
+	...builtinModules
 ];
 
 export default defineConfig( {

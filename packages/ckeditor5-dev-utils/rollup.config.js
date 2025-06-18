@@ -4,8 +4,10 @@
  */
 
 import { readFileSync } from 'fs';
+import { builtinModules } from 'module';
 import path from 'upath';
 import { defineConfig } from 'rollup';
+import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
@@ -20,7 +22,8 @@ const pkg = JSON.parse(
 // List of external dependencies
 const externals = [
 	...Object.keys( pkg.dependencies || {} ),
-	...Object.keys( pkg.peerDependencies || {} )
+	...Object.keys( pkg.peerDependencies || {} ),
+	...builtinModules
 ];
 
 export default defineConfig( {
@@ -47,10 +50,11 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
-		typescript(),
+		commonjs(),
 		nodeResolve( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
-		} )
+		} ),
+		typescript()
 	]
 } );
