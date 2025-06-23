@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "types": "tsc --noEmit",
-    "build": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.js --forceExit",
     "dev": "rollup -c rollup.config.js --watch"
   },
   "dependencies": {
