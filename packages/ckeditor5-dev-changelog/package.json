@@ -48,7 +48,7 @@
     "vitest": "^3.1.1"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.js --forceExit",
     "dev": "rollup -c rollup.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
