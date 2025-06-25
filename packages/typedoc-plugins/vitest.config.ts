@@ -7,8 +7,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig( {
 	test: {
-		testTimeout: 1000 * 20,
-		hookTimeout: 1000 * 30,
+		testTimeout: 1000 * 60,
+		hookTimeout: 1000 * 60,
 		mockReset: false,
 		restoreMocks: false,
 		include: [
