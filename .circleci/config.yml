@@ -40,7 +40,8 @@ commands:
 
 jobs:
   generate_configuration:
-    machine: true
+    docker:
+      - image: cimg/node:lts
     steps:
       - checkout
       - install_ssh_keys_command
