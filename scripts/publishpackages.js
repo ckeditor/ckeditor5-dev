@@ -69,7 +69,7 @@ const tasks = new Listr( [
 		}
 	},
 	{
-		title: 'Mark v43.0.0 as "latest" (GitHub)',
+		title: 'Mark v43 as "latest" (GitHub)',
 		task: async () => {
 			const github = new Octokit( {
 				version: '3.0.0',
@@ -79,7 +79,7 @@ const tasks = new Listr( [
 			return github.request( 'PATCH /repos/{owner}/{repo}/releases/{release_id}', {
 				owner: 'ckeditor',
 				repo: 'ckeditor5-dev',
-				release_id: 185171763, // v43.0.1
+				release_id: 227938481, // v43.1.0
 				make_latest: true
 			} );
 		}
