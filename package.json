@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "43.0.1",
+  "version": "43.1.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -14,9 +14,9 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^43.0.1",
-    "@ckeditor/ckeditor5-dev-release-tools": "^43.0.1",
-    "@ckeditor/ckeditor5-dev-bump-year": "^43.0.1",
+    "@ckeditor/ckeditor5-dev-ci": "^43.1.0",
+    "@ckeditor/ckeditor5-dev-release-tools": "^43.1.0",
+    "@ckeditor/ckeditor5-dev-bump-year": "^43.1.0",
     "coveralls": "^3.1.1",
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^6.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-transifex",
-  "version": "43.0.1",
+  "version": "43.1.0",
   "description": "Used to download and upload translations using the Transifex service.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -23,8 +23,8 @@
   "dependencies": {
     "fs-extra": "^11.2.0",
     "del": "^5.1.0",
-    "@ckeditor/ckeditor5-dev-utils": "^43.0.1",
-    "@ckeditor/ckeditor5-dev-translations": "^43.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^43.1.0",
+    "@ckeditor/ckeditor5-dev-translations": "^43.1.0",
     "chalk": "^4.0.0",
     "inquirer": "^7.1.0",
     "@transifex/api": "^4.2.1",

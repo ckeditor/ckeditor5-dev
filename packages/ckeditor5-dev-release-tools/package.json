@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "43.0.1",
+  "version": "43.1.0",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -21,7 +21,7 @@
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^43.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^43.1.0",
     "@octokit/rest": "^19.0.0",
     "chalk": "^4.0.0",
     "cli-columns": "^4.0.0",
