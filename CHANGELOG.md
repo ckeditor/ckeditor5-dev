@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [43.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v43.0.1...v43.1.0) (2025-06-26)
+
+### Features
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Add support for importing raw file content by appending `?raw` query parameter to the import path. See [ckeditor/ckeditor5#18745](https://github.com/ckeditor/ckeditor5/issues/18745). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/553a2d0cff8864f3b5cae88479150bc9f7d8fc62))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/43.1.0): v43.0.1 => v43.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/43.1.0): v43.0.1 => v43.1.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/43.1.0): v43.0.1 => v43.1.0
+</details>
+
+
 ## [43.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v43.0.0...v43.0.1) (2024-11-13)
 
 ### Bug fixes
@@ -177,43 +212,6 @@ Other releases:
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/42.1.0): v42.0.1 => v42.1.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/42.1.0): v42.0.1 => v42.1.0
 </details>
-
-
-## [42.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v42.0.0...v42.0.1) (2024-08-13)
-
-### Bug fixes
-
-* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added a Chrome flag to prevent displaying the search engine choice screen that disrupts automated tests in windowed mode. Closes [ckeditor/ckeditor5#16825](https://github.com/ckeditor/ckeditor5/issues/16825). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4f7291f1f8114ed0184f11a51c74752c6d8ecaa9))
-
-### Other changes
-
-* **[stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot)**: Aligned stale bot to recent changes in the GitHub GraphQL API in the `repository.labels` connection. GitHub recently started returning a lot of mismatched labels for the query and now stale bot ensures that only the required ones are used. Closes [ckeditor/ckeditor5#16872](https://github.com/ckeditor/ckeditor5/issues/16872). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/666daf6cfe52b5ce63e7937168022eb86fcb4f9c))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/42.0.1): v42.0.0 => v42.0.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/42.0.1): v42.0.0 => v42.0.1
-</details>
-
 
 ---
 
