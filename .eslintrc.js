@@ -13,7 +13,8 @@ module.exports = {
 	ignorePatterns: [
 		'**/dist/*',
 		'**/coverage/**',
-		'**/node_modules/**'
+		'**/node_modules/**',
+		'packages/ckeditor5-dev-build-tools/tests/build/fixtures/src/input.ts'
 	],
 	rules: {
 		'no-console': 'off',

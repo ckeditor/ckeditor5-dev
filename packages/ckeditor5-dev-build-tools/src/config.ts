@@ -23,6 +23,7 @@ import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { addBanner } from './plugins/banner.js';
 import { emitCss } from './plugins/emitCss.js';
+import { rawImport } from './plugins/rawImport.js';
 import { replaceImports } from './plugins/replace.js';
 import { splitCss } from './plugins/splitCss.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
@@ -115,6 +116,11 @@ export async function getRollupConfig( options: BuildOptions ) {
 		},
 
 		plugins: [
+			/**
+			 * Allows importing raw file content using the `?raw` query parameter in the import path.
+			 */
+			rawImport(),
+
 			/**
 			 * Converts CommonJS modules to ES6.
 			 */
