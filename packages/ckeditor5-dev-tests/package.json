@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "50.1.2",
+  "version": "50.2.0",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@babel/core": "^7.10.5",
-    "@ckeditor/ckeditor5-dev-translations": "^50.1.2",
-    "@ckeditor/ckeditor5-dev-utils": "^50.1.2",
+    "@ckeditor/ckeditor5-dev-translations": "^50.2.0",
+    "@ckeditor/ckeditor5-dev-utils": "^50.2.0",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
     "@types/chai": "^4.3.5",
     "@types/karma-sinon-chai": "^2.0.2",
