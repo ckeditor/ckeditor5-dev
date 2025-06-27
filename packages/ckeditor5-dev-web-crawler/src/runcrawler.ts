@@ -47,6 +47,13 @@ interface CrawlerOptions {
 	exclusions?: Array<string>;
 
 	/**
+	 * Timeout in milliseconds after which the crawler will stop crawling the page. 15 seconds by default.
+	 *
+	 * @default 15000
+	 */
+	timeout?: number;
+
+	/**
 	 * Number of concurrent pages (browser tabs) to be used during crawling. One by default.
 	 *
 	 * @default Half of the number of CPU cores.
@@ -102,6 +109,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		url,
 		depth = Infinity,
 		exclusions = [],
+		timeout = DEFAULT_TIMEOUT,
 		concurrency = DEFAULT_CONCURRENCY,
 		disableBrowserSandbox = false,
 		ignoreHTTPSErrors = false,
@@ -141,7 +149,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 
 	const cluster: Cluster<QueueData, void> = await Cluster.launch( {
 		concurrency: Cluster.CONCURRENCY_PAGE,
-		timeout: DEFAULT_TIMEOUT,
+		timeout,
 		retryLimit: DEFAULT_REMAINING_ATTEMPTS,
 		maxConcurrency: concurrency,
 		puppeteerOptions,

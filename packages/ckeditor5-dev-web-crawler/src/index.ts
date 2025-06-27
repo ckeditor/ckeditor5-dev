@@ -7,4 +7,4 @@
 
 export { default as runCrawler } from './runcrawler.js';
 export { getBaseUrl, isUrlValid, toArray } from './utils.js';
-export { DEFAULT_CONCURRENCY } from './constants.js';
+export { DEFAULT_CONCURRENCY, DEFAULT_TIMEOUT } from './constants.js';
