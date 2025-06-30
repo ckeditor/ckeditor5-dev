@@ -42,7 +42,10 @@ export const IGNORED_HOSTS = [
 	'fonts.googleapis.com',
 
 	// See: https://github.com/ckeditor/ckeditor5/issues/18519.
-	'if-cdn.com'
+	'if-cdn.com',
+
+	// Uploadcare CDN likes to fail randomly.
+	'ucarecdn.com'
 ];
 
 export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
