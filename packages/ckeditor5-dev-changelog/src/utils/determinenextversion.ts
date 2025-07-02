@@ -51,12 +51,10 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( sections.minor.entries.length || sections.feature.entries.length ) {
-		bumpType = 'minor';
-	}
-
-	if ( sections.major.entries.length ) {
+	if ( sections.major.entries.length || sections.breaking.entries.length ) {
 		bumpType = 'major';
+	} else if ( sections.minor.entries.length || sections.feature.entries.length ) {
+		bumpType = 'minor';
 	}
 
 	const areErrorsPresent = !!sections.invalid.entries.length;
