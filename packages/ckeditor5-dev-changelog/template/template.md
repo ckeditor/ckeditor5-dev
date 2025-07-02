@@ -38,6 +38,8 @@ see:
 # - {github-username}
 communityCredits:
   - 
+
+# Before committing, consider removing all comments to reduce file size and enhance readability.
 ---
 
 Required concise and meaningful summary of the change.
