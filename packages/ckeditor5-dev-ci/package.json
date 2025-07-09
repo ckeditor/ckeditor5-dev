@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
-  "version": "50.3.0",
+  "version": "50.3.1",
   "description": "Utils used on various Continuous Integration services.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
