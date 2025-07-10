@@ -158,7 +158,10 @@ describe( 'generateTemplate', () => {
 		await template.generateTemplate();
 
 		expect( mocks.warn ).toHaveBeenCalledOnce();
-		expect( mocks.warn.mock.calls[ 0 ] ).toEqual( expect.arrayContaining( [ 'You are on a protected branch!' ] ) );
+		expect( mocks.warn.mock.calls[ 0 ] ).toEqual( expect.arrayContaining( [
+			'You are on a protected branch!',
+			'Consider creating a new branch for your changes.'
+		] ) );
 	} );
 
 	it( 'retries creating the file if it already exists', async () => {
