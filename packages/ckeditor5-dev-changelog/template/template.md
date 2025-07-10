@@ -9,10 +9,10 @@
 #
 # For guidance on breaking changes, see:
 # https://ckeditor.com/docs/ckeditor5/latest/updating/versioning-policy.html#major-and-minor-breaking-changes
-type:
+type: 
 
 # Optional: Affected package(s), using short names.
-# Can be skipped when processing a non-mono-repository.
+# Leave empty when used in a single-package repository.
 # Example: ckeditor5-core
 scope:
   - 
