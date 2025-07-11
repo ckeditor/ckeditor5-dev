@@ -157,10 +157,10 @@ describe( 'generateTemplate', () => {
 
 		await template.generateTemplate();
 
-		console.log( {
+		throw new Error( JSON.stringify( {
 			a: mocks.warn.mock.calls[ 0 ],
 			b: [ 'You are on a protected branch!' ]
-		} );
+		} ) );
 
 		expect( mocks.warn ).toHaveBeenCalledOnce();
 		expect( mocks.warn.mock.calls[ 0 ] ).toEqual( expect.arrayContaining( [ 'You are on a protected branch!' ] ) );
