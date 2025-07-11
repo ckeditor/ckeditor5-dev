@@ -7,6 +7,7 @@ import { join } from 'upath';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as template from '../src/template.js';
 import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from '../src/utils/constants.js';
+import stripAnsi from 'strip-ansi';
 
 const EXPECTED_FILE_NAME = '20250526105803_ck_1234567890_git_branch_name.md';
 
@@ -157,13 +158,8 @@ describe( 'generateTemplate', () => {
 
 		await template.generateTemplate();
 
-		throw new Error( JSON.stringify( {
-			a: mocks.warn.mock.calls[ 0 ],
-			b: [ 'You are on a protected branch!' ]
-		} ) );
-
 		expect( mocks.warn ).toHaveBeenCalledOnce();
-		expect( mocks.warn.mock.calls[ 0 ] ).toEqual( expect.arrayContaining( [ 'You are on a protected branch!' ] ) );
+		expect( mocks.warn.mock.calls[ 0 ]?.map( stripAnsi ) ).toEqual( expect.arrayContaining( [ 'You are on a protected branch!' ] ) );
 	} );
 
 	it( 'retries creating the file if it already exists', async () => {
