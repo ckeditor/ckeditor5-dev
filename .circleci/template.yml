@@ -82,7 +82,7 @@ commands:
 jobs:
   notify_ci_failure:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     parameters:
       hideAuthor:
         type: string
@@ -111,7 +111,7 @@ jobs:
 
   validate_and_tests:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     resource_class: large
     steps:
       - checkout
@@ -146,7 +146,7 @@ jobs:
 
   release_prepare:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     resource_class: large
     steps:
       - checkout
@@ -157,7 +157,7 @@ jobs:
 
   trigger_release_process:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     steps:
       - checkout
       - bootstrap_repository_command
@@ -182,7 +182,7 @@ jobs:
 
   release_project:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     resource_class: large
     steps:
       - checkout

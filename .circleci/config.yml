@@ -41,7 +41,7 @@ commands:
 jobs:
   generate_configuration:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:22.12.0
     steps:
       - checkout
       - install_ssh_keys_command
