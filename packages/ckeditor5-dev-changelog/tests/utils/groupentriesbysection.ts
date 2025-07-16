@@ -239,7 +239,7 @@ describe( 'groupEntriesBySection()', () => {
 		);
 	} );
 
-	it( 'should generate correct markdown links for GitHub issues with URL format', () => {
+	it( 'should generate correct markdown links for GitHub issues with URL format from current repository', () => {
 		const files = [ createParsedFile( {
 			data: {
 				closes: [ 'https://github.com/ckeditor/ckeditor5/issues/123' ]
@@ -250,6 +250,31 @@ describe( 'groupEntriesBySection()', () => {
 
 		expect( result.feature.entries.length ).toEqual( 1 );
 		expect( result.invalid.entries.length ).toEqual( 0 );
+
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).toContain(
+			'Closes [#123](https://github.com/ckeditor/ckeditor5/issues/123).'
+		);
+	} );
+
+	it( 'should generate correct markdown links for GitHub issues with URL format from other repository', () => {
+		const files = [ createParsedFile( {
+			data: {
+				closes: [ 'https://github.com/foo/bar/issues/123' ]
+			}
+		} ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+
+		expect( result.feature.entries.length ).toEqual( 1 );
+		expect( result.invalid.entries.length ).toEqual( 0 );
+
+		const message = result.feature.entries[ 0 ]!.message;
+
+		expect( message ).toContain(
+			'Closes [foo/bar#123](https://github.com/foo/bar/issues/123).'
+		);
 	} );
 
 	it( 'should skip links when skipLinks is true', () => {

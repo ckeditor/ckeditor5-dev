@@ -25,6 +25,16 @@ const DEFAULT_OPTIONS: GenerateTemplateOptions = {
 };
 
 /**
+ * List of branch names that are usually protected.
+ */
+const PROTECTED_BRANCHES = [
+	'master',
+	'main',
+	'release',
+	'stable'
+];
+
+/**
  * Reads CLI arguments and turn the keys into camelcase.
  */
 function getCliArguments(): Partial<GenerateTemplateOptions> {
@@ -76,9 +86,8 @@ async function getFormattedGitBranchName(): Promise<string> {
  * Returns a filename for the template file based on the current date and git branch name.
  * The filename is formatted as `YYYYMMDDHHMMSS_{GIT_BRANCH_NAME}.md`.
  */
-export async function getFileName(): Promise<string> {
+function getFileName( gitBranchName: string ): string {
 	const date = format( new Date(), 'yyyyMMddHHmmss' );
-	const gitBranchName = await getFormattedGitBranchName();
 
 	return `${ date }_${ gitBranchName }.md`;
 }
@@ -91,7 +100,8 @@ export async function generateTemplate(
 	retries = 5
 ): Promise<void> {
 	const options: GenerateTemplateOptions = normalizeOptions( args );
-	const filename = await getFileName();
+	const gitBranchName = await getFormattedGitBranchName();
+	const filename = getFileName( gitBranchName );
 	const outputPath = path.resolve( options.directory, filename );
 
 	await mkdir( options.directory, { recursive: true } );
@@ -99,18 +109,25 @@ export async function generateTemplate(
 	try {
 		await copyFile( TEMPLATE_FILE, outputPath, constants.COPYFILE_EXCL );
 
-		const indent = ' '.repeat( 3 );
+		const indent = ' '.repeat( 2 );
 		const relativePath = path.relative( process.cwd(), outputPath );
 
-		console.log( styleText( 'green', '✅ The changelog file has been successfully created.' ) );
+		console.log( styleText( 'green', '◌ The changelog file has been successfully created.' ) );
 		console.log( '' );
-		console.log( '✍️ Please fill it with relevant information about your changes.' );
-		console.log( indent + styleText( 'cyan', `file://${ outputPath }` ) );
+		console.log( '◌ Please fill it with relevant information about your changes.' );
+		console.log( indent + styleText( [ 'cyan', 'bold' ], `file://${ outputPath }` ) );
 		console.log( '' );
-		console.log( '📥 Once done, commit the changelog file:' );
+		console.log( '◌ Once done, commit the changelog file:' );
+		console.log( styleText( 'gray', indent + styleText( 'gray', `$ git add ${ relativePath }` ) ) );
+		console.log( styleText( 'gray', indent + styleText( 'gray', '$ git commit -m "..."' ) ) );
 
-		console.log( indent + styleText( 'gray', `$ git add ${ relativePath }` ) );
-		console.log( indent + styleText( 'gray', '$ git commit -m "..."' ) );
+		if ( PROTECTED_BRANCHES.includes( gitBranchName ) ) {
+			console.log( '' );
+			console.warn(
+				styleText( [ 'red', 'bold' ], 'You are on a protected branch!' ),
+				styleText( 'red', 'Consider creating a new branch for your changes.' )
+			);
+		}
 	} catch ( error: any ) {
 		if ( retries <= 0 ) {
 			console.error( styleText( [ 'red', 'bold' ], 'Error: Generating changelog file failed with the following error:' ) );

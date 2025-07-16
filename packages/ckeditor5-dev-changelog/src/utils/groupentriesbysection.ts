@@ -156,6 +156,10 @@ function getIssueLinkObject( issue: string, gitHubUrl: string ) {
 	if ( repoUrlMatch ) {
 		const { owner, repository, number } = repoUrlMatch.groups as DifferentRepoIssue;
 
+		if ( issue.startsWith( gitHubUrl ) ) {
+			return { displayName: `#${ number }`, link: issue };
+		}
+
 		return { displayName: `${ owner }/${ repository }#${ number }`, link: issue };
 	}
 

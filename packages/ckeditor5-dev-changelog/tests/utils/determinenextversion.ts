@@ -78,7 +78,7 @@ describe( 'determineNextVersion()', () => {
 		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
 	} );
 
-	it( 'should return a patch version when there are no minor, major, or feature entries', async () => {
+	it( 'should return a patch bump version when there are no breaking changes or feature entries', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1' );
 
 		const result = await determineNextVersion( options );
@@ -104,11 +104,11 @@ describe( 'determineNextVersion()', () => {
 		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
 	} );
 
-	it( 'should return a minor version when minor entries are present', async () => {
+	it( 'should return a minor bump version when "MINOR BREAKING CHANGE" entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 
 		options.sections = createSectionsWithEntries(
-			{ minor: { entries: [ createEntry( 'Some minor change' ) ], title: 'Minor Breaking Changes' } }
+			{ minor: { entries: [ createEntry( 'Minor breaking change' ) ], title: 'Minor Breaking Changes' } }
 		);
 
 		const result = await determineNextVersion( options );
@@ -123,7 +123,7 @@ describe( 'determineNextVersion()', () => {
 		} );
 	} );
 
-	it( 'should return a minor version when Feature entries are present', async () => {
+	it( 'should return a minor bump version when Feature entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0' );
 
 		options.sections = createSectionsWithEntries(
@@ -142,11 +142,11 @@ describe( 'determineNextVersion()', () => {
 		} );
 	} );
 
-	it( 'should return a major version when major entries are present', async () => {
+	it( 'should return a major bump version when "BREAKING CHANGE" entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0' );
 
 		options.sections = createSectionsWithEntries(
-			{ major: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' } }
+			{ breaking: { entries: [ createEntry( 'Breaking change' ) ], title: 'Major Breaking Changes' } }
 		);
 
 		const result = await determineNextVersion( options );
@@ -161,7 +161,26 @@ describe( 'determineNextVersion()', () => {
 		} );
 	} );
 
-	it( 'should prioritize major version even if minor and feature entries are present', async () => {
+	it( 'should return a major bump version when "MAJOR BREAKING CHANGE" entries are present', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0' );
+
+		options.sections = createSectionsWithEntries(
+			{ major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' } }
+		);
+
+		const result = await determineNextVersion( options );
+
+		expect( result.newVersion ).toBe( '2.0.0' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
+			version: '1.0.0',
+			packageName: 'test-package',
+			bumpType: 'major',
+			displayValidationWarning: false
+		} );
+	} );
+
+	it( 'should prioritize "MAJOR BREAKING CHANGE" version even if "MINOR BREAKING CHANGES" and feature entries are present', async () => {
 		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0' );
 
 		options.sections = createSectionsWithEntries( {
