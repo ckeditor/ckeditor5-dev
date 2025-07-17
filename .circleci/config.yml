@@ -55,8 +55,6 @@ jobs:
 
             readonly PROTECTED_BRANCHES=(
               master
-              release
-              stable
             )
 
             readonly ALLOWED_PATTERNS=(
