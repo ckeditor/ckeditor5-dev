@@ -52,6 +52,9 @@ jobs:
 
             PIPELINE_EVENT_ACTION="<< pipeline.event.action >>"
             PIPELINE_GIT_BRANCH="<< pipeline.git.branch >>"
+            
+            echo PIPELINE_EVENT_ACTION=$PIPELINE_EVENT_ACTION
+            echo PIPELINE_GIT_BRANCH=$PIPELINE_GIT_BRANCH
 
             readonly PROTECTED_BRANCHES=(
               master
