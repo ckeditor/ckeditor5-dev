@@ -1,0 +1,128 @@
+# This is the based configuration required by CircleCI to run a build.
+#
+# The repository uses the dynamic configuration to generate
+# tasks for executing tests and checking the code coverage.
+#
+# This configuration aims to prepare a complete design and continue checking
+# the repository in a new workflow.
+#
+# To modify the commands to execute on CI, review the following files:
+# - scripts/ci/generate-circleci-configuration.js - the script that creates the `config-tests.yml` file used on the new workflow.
+# - .circleci/template.yml - the template filled with data to execute.
+#
+# Useful resources:
+# - https://circleci.com/docs/using-dynamic-configuration/
+version: 2.1
+
+setup: true
+
+parameters:
+  triggerCommitHash:
+    type: string
+    default: ""
+  isNightly:
+    type: boolean
+    default: false
+  isRelease:
+    type: boolean
+    default: false
+
+orbs:
+  continuation: circleci/continuation@0.1.2
+
+commands:
+  install_ssh_keys_command:
+    description: "Install SSH keys"
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "a0:41:a2:56:c8:7d:3f:29:41:d1:87:92:fd:50:2b:6b"
+
+jobs:
+  branch_protection_filter:
+    machine: true
+    resource_class: medium
+    steps:
+      - run:
+          name: Check if the build should continue.
+          command: |
+            #!/usr/bin/env bash
+
+            set -euo pipefail
+
+            PIPELINE_EVENT_ACTION="<< pipeline.event.action >>"
+            PIPELINE_GIT_BRANCH="<< pipeline.git.branch >>"
+            
+            # Check what happens when applying a suggestion.
+            echo PIPELINE_EVENT_ACTION=$PIPELINE_EVENT_ACTION
+            echo PIPELINE_GIT_BRANCH=$PIPELINE_GIT_BRANCH
+
+            readonly PROTECTED_BRANCHES=(
+              master
+            )
+
+            readonly ALLOWED_PATTERNS=(
+              '^epic/'
+              '/epic/'
+            )
+
+            is_protected_branch() {
+              for b in "${PROTECTED_BRANCHES[@]}"; do
+                [[ $PIPELINE_GIT_BRANCH == "$b" ]] && return 0
+              done
+
+              return 1
+            }
+
+            matches_allowed_pattern() {
+              for pattern in "${ALLOWED_PATTERNS[@]}"; do
+                [[ $PIPELINE_GIT_BRANCH =~ $pattern ]] && return 0
+              done
+
+              return 1
+            }
+
+            should_allow_pipeline() {
+              # Allow for non-push events. A job could be trigger via API, a pull request, or a scheduled event.
+              [[ $PIPELINE_EVENT_ACTION != "push" ]] && return 0
+
+              # Direct commits on protected branches (after merging a pull request).
+              is_protected_branch && return 0
+
+              # Epic branches (direct commits or merged pull requests).
+              matches_allowed_pattern && return 0
+
+              # Most probably a direct commit on a feature branch.
+              return 1
+            }
+
+            if ! should_allow_pipeline; then
+              circleci-agent step halt
+              exit 1
+            fi
+
+            exit 0
+
+  generate_configuration:
+    docker:
+      - image: cimg/node:22.12.0
+    steps:
+      - checkout
+      - install_ssh_keys_command
+      - run:
+          name: Install dependencies
+          command: yarn install
+      - run:
+          name: Generate a new configuration to check all packages in the repository
+          command: node scripts/ci/generate-circleci-configuration.js
+      - continuation/continue:
+          configuration_path: .circleci/config-tests.yml
+
+workflows:
+  version: 2
+  config:
+    jobs:
+      - branch_protection_filter
+      - generate_configuration:
+          requires:
+            - branch_protection_filter
