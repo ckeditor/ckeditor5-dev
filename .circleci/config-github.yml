@@ -1,5 +1,6 @@
 # This is the based configuration required by CircleCI to run a build.
 #
+#
 # The repository uses the dynamic configuration to generate
 # tasks for executing tests and checking the code coverage.
 #
