@@ -56,7 +56,6 @@ jobs:
             # Check what happens when applying a suggestion.
             echo PIPELINE_EVENT_ACTION=$PIPELINE_EVENT_ACTION
             echo PIPELINE_GIT_BRANCH=$PIPELINE_GIT_BRANCH
-            echo CIRCLE_PULL_REQUESTS=$CIRCLE_PULL_REQUESTS
             echo CIRCLE_PULL_REQUEST=$CIRCLE_PULL_REQUEST
 
             readonly PROTECTED_BRANCHES=(
