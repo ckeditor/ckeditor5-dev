@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import semver, { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
+import { detectReleaseChannel } from './detectreleasechannel.js';
 import type { SectionsWithEntries } from '../types.js';
 
 type NextVersionOutput = {
@@ -19,6 +20,7 @@ export type DetermineNextVersionOptions = {
 	currentVersion: string;
 	packageName: string;
 	nextVersion: string | undefined;
+	releaseType: any;
 };
 
 /**
@@ -31,7 +33,7 @@ export type DetermineNextVersionOptions = {
  * * User prompts for version input when no explicit version is provided.
  */
 export async function determineNextVersion( options: DetermineNextVersionOptions ): Promise<NextVersionOutput> {
-	const { sections, currentVersion, packageName, nextVersion } = options;
+	const { sections, currentVersion, packageName, nextVersion, releaseType } = options;
 
 	if ( nextVersion === 'internal' ) {
 		const internalVersionBump = getInternalVersionBump( currentVersion );
@@ -51,7 +53,9 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( sections.major.entries.length || sections.breaking.entries.length ) {
+	if ( releaseType === 'prerelease' ) {
+		bumpType = 'prerelease';
+	} else if ( sections.major.entries.length || sections.breaking.entries.length ) {
 		bumpType = 'major';
 	} else if ( sections.minor.entries.length || sections.feature.entries.length ) {
 		bumpType = 'minor';
@@ -66,6 +70,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 		packageName,
 		bumpType,
 		version: currentVersion,
+		releaseChannel: detectReleaseChannel( currentVersion ),
 		displayValidationWarning: areErrorsPresent || areWarningsPresent
 	} );
 

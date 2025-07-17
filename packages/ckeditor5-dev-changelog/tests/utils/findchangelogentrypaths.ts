@@ -249,4 +249,84 @@ describe( 'findChangelogEntryPaths()', () => {
 
 		expect( glob ).toHaveBeenCalledTimes( 1 );
 	} );
+
+	it( 'should use nested directory pattern when includeAllChannels is true', async () => {
+		const rootSkipLinks = false;
+		const cwd = '/mock/current';
+		const externalRepositories: Array<Required<RepositoryConfig>> = [];
+
+		vi.mocked( glob ).mockResolvedValue( [
+			'/mock/current/changesets/file1.md',
+			'/mock/current/changesets/alpha/file2.md',
+			'/mock/current/changesets/beta/file3.md'
+		] );
+
+		const result = await findChangelogEntryPaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks,
+			includeAllChannels: true
+		} );
+
+		expect( result ).toEqual( [
+			{
+				filePaths: [
+					'/mock/current/changesets/file1.md',
+					'/mock/current/changesets/alpha/file2.md',
+					'/mock/current/changesets/beta/file3.md'
+				],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				shouldSkipLinks: false,
+				isRoot: true,
+				cwd: '/mock/current'
+			}
+		] );
+
+		expect( glob ).toHaveBeenCalledWith( '**/*.md', { cwd: '/mock/current/.changelog', absolute: true } );
+	} );
+
+	it( 'should use *.md glob pattern when includeAllChannels is false', async () => {
+		const rootSkipLinks = false;
+		const cwd = '/mock/current';
+		const externalRepositories: Array<Required<RepositoryConfig>> = [
+			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
+		];
+
+		vi.mocked( glob ).mockImplementation( ( pattern, { cwd } ) => {
+			if ( pattern === '*.md' && cwd === '/mock/current/.changelog' ) {
+				return Promise.resolve( [ '/mock/current/changesets/file1.md' ] );
+			}
+			if ( pattern === '*.md' && cwd === '/mock/repo1/.changelog' ) {
+				return Promise.resolve( [ '/mock/repo1/changesets/file2.md' ] );
+			}
+			return Promise.resolve( [] );
+		} );
+
+		const result = await findChangelogEntryPaths( {
+			cwd,
+			externalRepositories,
+			shouldSkipLinks: rootSkipLinks,
+			includeAllChannels: false
+		} );
+
+		expect( result ).toEqual( [
+			{
+				filePaths: [ '/mock/current/changesets/file1.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/current',
+				shouldSkipLinks: false,
+				isRoot: true,
+				cwd: '/mock/current'
+			},
+			{
+				filePaths: [ '/mock/repo1/changesets/file2.md' ],
+				gitHubUrl: 'https://github.com/ckeditor/repo1',
+				shouldSkipLinks: false,
+				isRoot: false,
+				cwd: '/mock/repo1'
+			}
+		] );
+
+		expect( glob ).toHaveBeenCalledWith( '*.md', { cwd: '/mock/current/.changelog', absolute: true } );
+		expect( glob ).toHaveBeenCalledWith( '*.md', { cwd: '/mock/repo1/.changelog', absolute: true } );
+	} );
 } );

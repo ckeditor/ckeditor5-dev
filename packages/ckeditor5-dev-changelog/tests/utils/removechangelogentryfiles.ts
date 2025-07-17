@@ -3,13 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs-extra';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
-vi.mock( 'fs-extra' );
+let mockReaddir: any;
+let mockRm: any;
+
+vi.mock( 'fs/promises', () => ( {
+	readdir: ( ...args: Array<any> ) => mockReaddir( ...args ),
+	rm: ( ...args: Array<any> ) => mockRm( ...args )
+} ) );
 vi.mock( 'chalk', () => ( {
 	default: {
 		cyan: ( text: string ) => text
@@ -35,24 +40,32 @@ describe( 'removeChangelogEntryFiles()', () => {
 		}
 	];
 
-	it( 'logs the start of the process', async () => {
+	beforeEach( () => {
+		vi.clearAllMocks();
+		mockReaddir = vi.fn().mockResolvedValue( [
+			{ name: 'changeset-1.md', isFile: () => true, isDirectory: () => false },
+			{ name: '.gitkeep', isFile: () => true, isDirectory: () => false }
+		] );
+		mockRm = vi.fn().mockResolvedValue( undefined );
+	} );
+
+	it( 'should log the start of the process', async () => {
 		await removeChangelogEntryFiles( mockChangesetFiles );
 
 		expect( logInfo ).toHaveBeenCalledWith( '○ Removing the changeset files...' );
 	} );
 
-	it( 'removes each changeset file', async () => {
+	it( 'should remove each changeset file', async () => {
 		await removeChangelogEntryFiles( mockChangesetFiles );
 
-		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-1.md' );
-		expect( fs.unlink ).toHaveBeenCalledWith( '/repo/changelog/changeset-2.md' );
+		expect( mockReaddir ).toHaveBeenCalledWith( '/changeset-path-1/.changelog', { withFileTypes: true } );
+		expect( mockReaddir ).toHaveBeenCalledWith( '/changeset-path-2/.changelog', { withFileTypes: true } );
+		expect( mockRm ).toHaveBeenCalledWith( '/changeset-path-1/.changelog/changeset-1.md', { recursive: true, force: true } );
 	} );
 
-	it( 'throws error when invalid file path passed to unlink', async () => {
-		vi.mocked( fs.unlink ).mockRejectedValueOnce( new Error( 'ENOENT: no such file or directory' ) );
+	it( 'should skip .gitkeep files', async () => {
+		await removeChangelogEntryFiles( mockChangesetFiles );
 
-		await expect(
-			removeChangelogEntryFiles( mockChangesetFiles )
-		).rejects.toThrow();
+		expect( mockRm ).not.toHaveBeenCalledWith( expect.stringContaining( '.gitkeep' ), expect.anything() );
 	} );
 } );

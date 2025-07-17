@@ -18,8 +18,11 @@ import { filterVisibleSections } from './filtervisiblesections.js';
 import { logInfo } from './loginfo.js';
 import { composeChangelog } from './composechangelog.js';
 import { removeChangelogEntryFiles } from './removechangelogentryfiles.js';
+import { moveChangelogEntryFiles } from './movechangelogentryfiles.js';
 import { commitChanges } from './commitchanges.js';
 import { InternalError } from './internalerror.js';
+import { promptReleaseType } from './promptreleasetype.js';
+import { detectReleaseChannel } from './detectreleasechannel.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { UserAbortError } from './useraborterror.js';
 
@@ -64,11 +67,19 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		shouldIgnoreRootPackage,
 		externalRepositories
 	} );
+
+	// Determine release type upfront.
+	const releaseType = await promptReleaseType();
+
+	// Get appropriate entry paths based on release type.
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,
 		externalRepositories,
-		shouldSkipLinks
+		shouldSkipLinks,
+		includeAllChannels: releaseType === 'latest'
 	} );
+
+	// Parse and group entries once.
 	const parsedChangesetFiles = await parseChangelogEntries( entryPaths, isSinglePackage );
 	const sectionsWithEntries = groupEntriesBySection( {
 		packagesMetadata,
@@ -98,6 +109,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	const { isInternal, newVersion } = await determineNextVersion( {
 		currentVersion,
 		nextVersion,
+		releaseType,
 		sections: sectionsWithEntries,
 		packageName: shouldIgnoreRootPackage ? npmPackageToCheck! : rootPackageName
 	} );
@@ -125,7 +137,14 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		return newChangelog as any;
 	}
 
-	await removeChangelogEntryFiles( entryPaths );
+	// Handle changelog entry files based on release type.
+	if ( releaseType === 'latest' ) {
+		await removeChangelogEntryFiles( entryPaths );
+	} else {
+		const targetChannel = detectReleaseChannel( newVersion );
+		await moveChangelogEntryFiles( entryPaths, targetChannel );
+	}
+
 	await modifyChangelog( newChangelog, cwd );
 	await commitChanges(
 		newVersion,

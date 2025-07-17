@@ -13,13 +13,12 @@ import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/providenewversion.js' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'semver', () => {
-	return {
-		default: {
-			inc: vi.fn()
-		}
-	};
-} );
+vi.mock( 'semver', () => ( {
+	default: {
+		inc: vi.fn(),
+		prerelease: vi.fn()
+	}
+} ) );
 
 describe( 'determineNextVersion()', () => {
 	let options: DetermineNextVersionOptions;
@@ -61,12 +60,14 @@ describe( 'determineNextVersion()', () => {
 
 			return null;
 		} );
+		vi.mocked( semver.prerelease ).mockImplementation( () => null );
 
 		options = {
 			sections: createSectionsWithEntries(),
 			currentVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: undefined
+			nextVersion: undefined,
+			releaseType: undefined
 		};
 	} );
 
@@ -89,7 +90,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -119,7 +121,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'minor',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -138,7 +141,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'minor',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -157,7 +161,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'major',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -176,7 +181,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'major',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -197,7 +203,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'major',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -223,7 +230,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -235,6 +243,27 @@ describe( 'determineNextVersion()', () => {
 		await expect(
 			determineNextVersion( options )
 		).rejects.toThrow( 'Unable to determine new version based on the version in root package.json.' );
+	} );
+
+	it( 'should return a prerelease bump version when releaseType is prerelease', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-alpha.1' );
+		options.releaseType = 'prerelease';
+		options.sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' },
+			feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.0-alpha.1' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
+			version: '1.0.0',
+			packageName: 'test-package',
+			bumpType: 'prerelease',
+			displayValidationWarning: false,
+			releaseChannel: 'latest'
+		} );
 	} );
 
 	it( 'should set displayValidationWarning to true when invalid entries are present', async () => {
@@ -252,7 +281,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: true
+			displayValidationWarning: true,
+			releaseChannel: 'latest'
 		} );
 	} );
 
@@ -274,7 +304,8 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: true
+			displayValidationWarning: true,
+			releaseChannel: 'latest'
 		} );
 	} );
 } );

@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
+import type { ReleaseChannel } from './detectreleasechannel.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -16,6 +17,7 @@ type Options = {
 	packageName: string;
 	version: string;
 	bumpType: ReleaseType;
+	releaseChannel: ReleaseChannel;
 	indentLevel?: number;
 	displayValidationWarning: boolean;
 };
@@ -99,8 +101,8 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
  * Creates a prompt question for version input with validation.
  */
 function createVersionQuestion( options: Options ): Array<Question> {
-	const { version, packageName, bumpType, indentLevel = 0 } = options;
-	const suggestedVersion = semver.inc( version, bumpType ) || version;
+	const { version, packageName, bumpType, releaseChannel, indentLevel = 0 } = options;
+	const suggestedVersion = getSuggestedVersion( bumpType, version, releaseChannel ) || version;
 	const message = 'Type the new version ' +
 		`(current: "${ version }", suggested: "${ suggestedVersion }", or "internal" for internal changes):`;
 
@@ -137,4 +139,17 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		},
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	} ];
+}
+
+function getSuggestedVersion( bumpType: ReleaseType, version: string, releaseChannel: ReleaseChannel ) {
+	if ( bumpType === 'prerelease' && releaseChannel !== 'latest' ) {
+		return semver.inc( version, bumpType, releaseChannel );
+	} else if ( bumpType === 'prerelease' && releaseChannel === 'latest' ) {
+		// Using 'premajor` and `alpha` channel for a case, when introducing a prerelease for the next major.
+		// E.g. 1.0.0 -> 2.0.0-alpha.0.
+
+		return semver.inc( version, 'premajor', 'alpha' );
+	} else {
+		return semver.inc( version, bumpType );
+	}
 }
