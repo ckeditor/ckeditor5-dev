@@ -53,7 +53,7 @@ jobs:
             PIPELINE_EVENT_ACTION="<< pipeline.event.action >>"
             PIPELINE_GIT_BRANCH="<< pipeline.git.branch >>"
             
-			# Check what happens when applying a suggestion.
+            # Check what happens when applying a suggestion.
             echo PIPELINE_EVENT_ACTION=$PIPELINE_EVENT_ACTION
             echo PIPELINE_GIT_BRANCH=$PIPELINE_GIT_BRANCH
 
