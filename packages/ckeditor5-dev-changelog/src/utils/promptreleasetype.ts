@@ -4,11 +4,10 @@
  */
 
 import { select } from '@inquirer/prompts';
-
-export type ChangelogReleaseType = 'latest' | 'prerelease';
+import type { ChangelogReleaseType } from '../types.js';
 
 /**
- * Prompts the user to choose between latest or prerelease when transitioning from a prerelease version.
+ * Prompts the user to choose between latest or prerelease.
  */
 export async function promptReleaseType(): Promise<ChangelogReleaseType> {
 	const answer = await select( {

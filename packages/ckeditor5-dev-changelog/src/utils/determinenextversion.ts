@@ -8,7 +8,7 @@ import semver, { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
 import { detectReleaseChannel } from './detectreleasechannel.js';
-import type { SectionsWithEntries } from '../types.js';
+import type { ChangelogReleaseType, SectionsWithEntries } from '../types.js';
 
 type NextVersionOutput = {
 	isInternal: boolean;
@@ -20,7 +20,7 @@ export type DetermineNextVersionOptions = {
 	currentVersion: string;
 	packageName: string;
 	nextVersion: string | undefined;
-	releaseType: any;
+	releaseType: ChangelogReleaseType;
 };
 
 /**

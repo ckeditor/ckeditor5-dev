@@ -68,10 +68,8 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		externalRepositories
 	} );
 
-	// Determine release type upfront.
 	const releaseType = await promptReleaseType();
 
-	// Get appropriate entry paths based on release type.
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,
 		externalRepositories,
@@ -79,7 +77,6 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		includeAllChannels: releaseType === 'latest'
 	} );
 
-	// Parse and group entries once.
 	const parsedChangesetFiles = await parseChangelogEntries( entryPaths, isSinglePackage );
 	const sectionsWithEntries = groupEntriesBySection( {
 		packagesMetadata,
