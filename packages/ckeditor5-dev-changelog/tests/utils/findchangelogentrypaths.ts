@@ -265,7 +265,7 @@ describe( 'findChangelogEntryPaths()', () => {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks,
-			includeAllChannels: true
+			includeSubdirectories: true
 		} );
 
 		expect( result ).toEqual( [
@@ -306,7 +306,7 @@ describe( 'findChangelogEntryPaths()', () => {
 			cwd,
 			externalRepositories,
 			shouldSkipLinks: rootSkipLinks,
-			includeAllChannels: false
+			includeSubdirectories: false
 		} );
 
 		expect( result ).toEqual( [

@@ -25,6 +25,7 @@ import { SECTIONS } from '../../src/utils/constants.js';
 import { InternalError } from '../../src/utils/internalerror.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
+import { getReleaseTypeFromVersion } from '../../src/utils/getreleasetypefromversion.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../src/utils/detectreleasechannel.js' );
@@ -32,6 +33,7 @@ vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
 vi.mock( '../../src/utils/promptreleasetype.js' );
+vi.mock( '../../src/utils/getreleasetypefromversion.js' );
 vi.mock( '../../src/utils/groupentriesbysection.js' );
 vi.mock( '../../src/utils/determinenextversion.js' );
 vi.mock( '../../src/utils/filtervisiblesections.js' );
@@ -176,9 +178,10 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( composeChangelog ).mockImplementation( () => Promise.resolve( 'Mocked changelog content' ) );
 		vi.mocked( modifyChangelog ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( removeChangelogEntryFiles ).mockImplementation( () => Promise.resolve() );
-		vi.mocked( moveChangelogEntryFiles ).mockImplementation( () => Promise.resolve() );
+		vi.mocked( moveChangelogEntryFiles ).mockImplementation( entryPaths => Promise.resolve( entryPaths ) );
 		vi.mocked( detectReleaseChannel ).mockReturnValue( 'alpha' );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
+		vi.mocked( getReleaseTypeFromVersion ).mockReturnValue( 'latest' );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -194,6 +197,23 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( defaultOptions );
 
 		expect( promptReleaseType ).toHaveBeenCalled();
+	} );
+
+	it( 'calls getReleaseTypeFromVersion when nextVersion is provided', async () => {
+		await generateChangelog( {
+			...defaultOptions,
+			nextVersion: '1.0.1'
+		} );
+
+		expect( getReleaseTypeFromVersion ).toHaveBeenCalledWith( '1.0.1' );
+		expect( promptReleaseType ).not.toHaveBeenCalled();
+	} );
+
+	it( 'calls promptReleaseType when nextVersion is not provided', async () => {
+		await generateChangelog( defaultOptions );
+
+		expect( promptReleaseType ).toHaveBeenCalled();
+		expect( getReleaseTypeFromVersion ).not.toHaveBeenCalled();
 	} );
 
 	it( 'formats the date correctly if not specified', async () => {
@@ -489,7 +509,8 @@ describe( 'generateChangelog()', () => {
 			sections: expect.any( Object ),
 			currentVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: 'internal'
+			nextVersion: 'internal',
+			releaseType: 'latest'
 		} );
 		expect( composeChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
 			isInternal: true,
@@ -558,23 +579,23 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	describe( 'release type handling', () => {
-		it( 'calls findChangelogEntryPaths with includeAllChannels=true when releaseType is latest', async () => {
+		it( 'calls findChangelogEntryPaths with includeSubdirectories=true when releaseType is latest', async () => {
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'latest' );
 
 			await generateChangelog( defaultOptions );
 
 			expect( findChangelogEntryPaths ).toHaveBeenCalledWith( expect.objectContaining( {
-				includeAllChannels: true
+				includeSubdirectories: true
 			} ) );
 		} );
 
-		it( 'calls findChangelogEntryPaths with includeAllChannels=false when releaseType is not latest', async () => {
+		it( 'calls findChangelogEntryPaths with includeSubdirectories=false when releaseType is not latest', async () => {
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
 
 			await generateChangelog( defaultOptions );
 
 			expect( findChangelogEntryPaths ).toHaveBeenCalledWith( expect.objectContaining( {
-				includeAllChannels: false
+				includeSubdirectories: false
 			} ) );
 		} );
 
@@ -633,6 +654,52 @@ describe( 'generateChangelog()', () => {
 			await generateChangelog( defaultOptions );
 
 			expect( moveChangelogEntryFiles ).toHaveBeenCalledWith( expectedEntryPaths, 'alpha' );
+		} );
+
+		it( 'calls commitChanges with original entryPaths for latest release', async () => {
+			vi.mocked( promptReleaseType ).mockResolvedValue( 'latest' );
+
+			await generateChangelog( defaultOptions );
+
+			expect( commitChanges ).toHaveBeenCalledWith( '1.0.1', [
+				{
+					cwd: '/home/ckeditor',
+					isRoot: true,
+					filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ]
+				}
+			] );
+		} );
+
+		it( 'calls commitChanges with moved entryPaths for prerelease', async () => {
+			const movedEntryPaths = [
+				{
+					filePaths: [
+						'/home/ckeditor/.changelog/alpha/changeset-1.md',
+						'/home/ckeditor/.changelog/changeset-1.md'
+					],
+					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
+					shouldSkipLinks: false,
+					isRoot: true,
+					cwd: '/home/ckeditor'
+				}
+			];
+
+			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
+			vi.mocked( detectReleaseChannel ).mockReturnValue( 'alpha' );
+			vi.mocked( moveChangelogEntryFiles ).mockImplementation( () => Promise.resolve( movedEntryPaths ) );
+
+			await generateChangelog( defaultOptions );
+
+			expect( commitChanges ).toHaveBeenCalledWith( '1.0.1', [
+				{
+					cwd: '/home/ckeditor',
+					isRoot: true,
+					filePaths: [
+						'/home/ckeditor/.changelog/alpha/changeset-1.md',
+						'/home/ckeditor/.changelog/changeset-1.md'
+					]
+				}
+			] );
 		} );
 	} );
 

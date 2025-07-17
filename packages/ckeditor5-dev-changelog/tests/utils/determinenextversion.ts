@@ -67,7 +67,7 @@ describe( 'determineNextVersion()', () => {
 			currentVersion: '1.0.0',
 			packageName: 'test-package',
 			nextVersion: undefined,
-			releaseType: undefined
+			releaseType: 'latest'
 		};
 	} );
 

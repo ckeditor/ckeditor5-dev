@@ -10,17 +10,16 @@ import type { ChangelogReleaseType } from '../types.js';
  * Prompts the user to choose between latest or prerelease
  */
 export async function promptReleaseType(): Promise<ChangelogReleaseType> {
-	const { releaseType } = await inquirer.prompt( [
+	const { isPrerelease } = await inquirer.prompt( [
 		{
-			type: 'list',
-			name: 'releaseType',
-			message: 'Select the release type?',
-			choices: [
-				{ name: 'Latest (stable) release', value: 'latest' },
-				{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
-			]
+			type: 'confirm',
+			name: 'isPrerelease',
+			message: 'Is it a pre-release?',
+			default: false
 		}
 	] );
+
+	const releaseType = isPrerelease ? 'prerelease' : 'latest';
 
 	return releaseType as ChangelogReleaseType;
 }

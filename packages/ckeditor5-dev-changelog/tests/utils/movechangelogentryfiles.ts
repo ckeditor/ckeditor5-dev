@@ -6,11 +6,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { moveChangelogEntryFiles } from '../../src/utils/movechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
+import { simpleGit } from 'simple-git';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo.js' );
+vi.mock( 'simple-git' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		cyan: ( text: string ) => text
@@ -20,14 +22,14 @@ vi.mock( 'chalk', () => ( {
 describe( 'moveChangelogEntryFiles()', () => {
 	const mockEntryPaths: Array<ChangesetPathsWithGithubUrl> = [
 		{
-			filePaths: [ '/repo1changelog/file1', '/repo1changelog/file2.md' ],
+			filePaths: [ '/repo1/.changelog/file1.md', '/repo1/.changelog/file2.md' ],
 			gitHubUrl: 'https://github.com/ckeditor/repo1',
 			shouldSkipLinks: false,
 			cwd: '/repo1',
 			isRoot: true
 		},
 		{
-			filePaths: [ '/repo2changelog/file3.md' ],
+			filePaths: [ '/repo2/.changelog/file3.md' ],
 			gitHubUrl: 'https://github.com/ckeditor/repo2',
 			shouldSkipLinks: true,
 			cwd: '/repo2',
@@ -35,10 +37,15 @@ describe( 'moveChangelogEntryFiles()', () => {
 		}
 	];
 
+	const mockGit = {
+		add: vi.fn().mockResolvedValue( undefined )
+	};
+
 	beforeEach( () => {
 		vi.clearAllMocks();
 		vi.mocked( fs.ensureDir ).mockResolvedValue();
-		vi.mocked( fs.move ).mockResolvedValue();
+		vi.mocked( fs.renameSync ).mockImplementation( () => {} );
+		vi.mocked( simpleGit ).mockReturnValue( mockGit as any );
 	} );
 
 	it( 'should log the start of the process', async () => {
@@ -57,32 +64,70 @@ describe( 'moveChangelogEntryFiles()', () => {
 		expect( fs.ensureDir ).toHaveBeenCalledTimes( 2 );
 	} );
 
-	it( 'should move all files to the target directory', async () => {
+	it( 'should move all files to the target directory using renameSync', async () => {
 		const targetChannel = 'rc';
 		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
 
-		expect( fs.move ).toHaveBeenCalledWith(
-			'/repo1changelog/file1',
-			'/repo1/.changelog/rc/file1',
-			{ overwrite: true }
+		expect( fs.renameSync ).toHaveBeenCalledWith(
+			'/repo1/.changelog/file1.md',
+			'/repo1/.changelog/rc/file1.md'
 		);
-		expect( fs.move ).toHaveBeenCalledWith(
-			'/repo1changelog/file2.md',
-			'/repo1/.changelog/rc/file2.md',
-			{ overwrite: true }
+		expect( fs.renameSync ).toHaveBeenCalledWith(
+			'/repo1/.changelog/file2.md',
+			'/repo1/.changelog/rc/file2.md'
 		);
-		expect( fs.move ).toHaveBeenCalledWith(
-			'/repo2changelog/file3.md',
-			'/repo2/.changelog/rc/file3.md',
-			{ overwrite: true }
+		expect( fs.renameSync ).toHaveBeenCalledWith(
+			'/repo2/.changelog/file3.md',
+			'/repo2/.changelog/rc/file3.md'
 		);
-		expect( fs.move ).toHaveBeenCalledTimes( 3 );
+		expect( fs.renameSync ).toHaveBeenCalledTimes( 3 );
+	} );
+
+	it( 'should add files to git before and after moving', async () => {
+		const targetChannel = 'alpha';
+		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+
+		// Check git.add calls for each file (before and after move)
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/file1.md' );
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/alpha/file1.md' );
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/file2.md' );
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/alpha/file2.md' );
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo2/.changelog/file3.md' );
+		expect( mockGit.add ).toHaveBeenCalledWith( '/repo2/.changelog/alpha/file3.md' );
+		expect( mockGit.add ).toHaveBeenCalledTimes( 6 );
+	} );
+
+	it( 'should return modified entry paths with both original and target file paths', async () => {
+		const targetChannel = 'beta';
+		const result = await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+
+		expect( result ).toHaveLength( 2 );
+
+		// First repository
+		expect( result[ 0 ]! ).toEqual( {
+			...mockEntryPaths[ 0 ],
+			filePaths: [
+				'/repo1/.changelog/beta/file1.md',
+				'/repo1/.changelog/file1.md',
+				'/repo1/.changelog/beta/file2.md',
+				'/repo1/.changelog/file2.md'
+			]
+		} );
+
+		// Second repository
+		expect( result[ 1 ]! ).toEqual( {
+			...mockEntryPaths[ 1 ],
+			filePaths: [
+				'/repo2/.changelog/beta/file3.md',
+				'/repo2/.changelog/file3.md'
+			]
+		} );
 	} );
 
 	it( 'should handle single repository with single file', async () => {
 		const singleEntryPaths: Array<ChangesetPathsWithGithubUrl> = [
 			{
-				filePaths: [ '/repo1changelog/file1' ],
+				filePaths: [ '/repo1/.changelog/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
 				shouldSkipLinks: false,
 				cwd: '/repo1',
@@ -90,14 +135,17 @@ describe( 'moveChangelogEntryFiles()', () => {
 			}
 		];
 		const targetChannel = 'latest';
-		await moveChangelogEntryFiles( singleEntryPaths, targetChannel );
+		const result = await moveChangelogEntryFiles( singleEntryPaths, targetChannel );
 
 		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/latest' );
-		expect( fs.move ).toHaveBeenCalledWith(
-			'/repo1changelog/file1',
-			'/repo1/.changelog/latest/file1',
-			{ overwrite: true }
+		expect( fs.renameSync ).toHaveBeenCalledWith(
+			'/repo1/.changelog/file1.md',
+			'/repo1/.changelog/latest/file1.md'
 		);
+		expect( result[ 0 ]!.filePaths ).toEqual( [
+			'/repo1/.changelog/latest/file1.md',
+			'/repo1/.changelog/file1.md'
+		] );
 	} );
 
 	it( 'should handle empty file paths array', async () => {
@@ -111,23 +159,28 @@ describe( 'moveChangelogEntryFiles()', () => {
 			}
 		];
 		const targetChannel = 'alpha';
-		await moveChangelogEntryFiles( emptyEntryPaths, targetChannel );
+		const result = await moveChangelogEntryFiles( emptyEntryPaths, targetChannel );
 
 		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/alpha' );
-		expect( fs.move ).not.toHaveBeenCalled();
+		expect( fs.renameSync ).not.toHaveBeenCalled();
+		expect( mockGit.add ).not.toHaveBeenCalled();
+		expect( result[ 0 ]!.filePaths ).toEqual( [] );
 	} );
 
-	it( 'should handle different target channels', async () => {
-		const channels = [ 'alpha', 'rc', 'latest' ] as const;
+	it.each( [
+		'alpha',
+		'beta',
+		'rc',
+		'latest'
+	] as const )( 'should handle target channel %s', async channel => {
+		vi.clearAllMocks();
+		vi.mocked( simpleGit ).mockReturnValue( mockGit as any );
 
-		for ( const channel of channels ) {
-			vi.clearAllMocks();
-			await moveChangelogEntryFiles( mockEntryPaths, channel );
+		await moveChangelogEntryFiles( mockEntryPaths, channel );
 
-			expect( logInfo ).toHaveBeenCalledWith( `○ Moving changelog entries to ${ channel }/ directory...` );
-			expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ channel }` );
-			expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo2/.changelog/${ channel }` );
-		}
+		expect( logInfo ).toHaveBeenCalledWith( `○ Moving changelog entries to ${ channel }/ directory...` );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ channel }` );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo2/.changelog/${ channel }` );
 	} );
 
 	it( 'should handle fs.ensureDir errors', async () => {
@@ -139,13 +192,24 @@ describe( 'moveChangelogEntryFiles()', () => {
 			.rejects.toThrow( 'Directory creation failed' );
 	} );
 
-	it( 'should handle fs.move errors', async () => {
+	it( 'should handle fs.renameSync errors', async () => {
 		const targetChannel = 'beta';
-		const error = new Error( 'File move failed' );
-		vi.mocked( fs.move ).mockRejectedValueOnce( error );
+		const error = new Error( 'File rename failed' );
+		vi.mocked( fs.renameSync ).mockImplementationOnce( () => {
+			throw error;
+		} );
 
 		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
-			.rejects.toThrow( 'File move failed' );
+			.rejects.toThrow( 'File rename failed' );
+	} );
+
+	it( 'should handle git.add errors', async () => {
+		const targetChannel = 'rc';
+		const error = new Error( 'Git add failed' );
+		vi.mocked( mockGit.add ).mockRejectedValueOnce( error );
+
+		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
+			.rejects.toThrow( 'Git add failed' );
 	} );
 
 	it( 'should preserve file names when moving', async () => {
@@ -162,15 +226,13 @@ describe( 'moveChangelogEntryFiles()', () => {
 
 		await moveChangelogEntryFiles( entryPathsWithComplexNames, targetChannel );
 
-		expect( fs.move ).toHaveBeenCalledWith(
+		expect( fs.renameSync ).toHaveBeenCalledWith(
 			'/repo1/.changelog/2025111200_feature-branch.md',
-			'/repo1/.changelog/rc/2025111200_feature-branch.md',
-			{ overwrite: true }
+			'/repo1/.changelog/rc/2025111200_feature-branch.md'
 		);
-		expect( fs.move ).toHaveBeenCalledWith(
+		expect( fs.renameSync ).toHaveBeenCalledWith(
 			'/repo1/.changelog/20250111300_fix-bug-123.md',
-			'/repo1/.changelog/rc/20250111300_fix-bug-123.md',
-			{ overwrite: true }
+			'/repo1/.changelog/rc/20250111300_fix-bug-123.md'
 		);
 	} );
 } );

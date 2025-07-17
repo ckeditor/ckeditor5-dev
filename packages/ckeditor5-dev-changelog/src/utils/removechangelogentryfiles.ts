@@ -4,11 +4,9 @@
  */
 
 import chalk from 'chalk';
-import upath from 'upath';
-import { rm, readdir } from 'fs/promises';
+import fs from 'fs-extra';
 import { logInfo } from './loginfo.js';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
-import { CHANGESET_DIRECTORY } from './constants.js';
 
 /**
  * Cleans up the input files that have been incorporated into the changelog by deleting them
@@ -17,16 +15,9 @@ import { CHANGESET_DIRECTORY } from './constants.js';
 export async function removeChangelogEntryFiles( entryPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<void> {
 	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
 
-	for ( const repo of entryPaths ) {
-		const changesetDirectory = upath.join( repo.cwd, CHANGESET_DIRECTORY );
-		const entries = await readdir( changesetDirectory, { withFileTypes: true } );
-
-		for ( const entry of entries ) {
-			if ( entry.name === '.gitkeep' ) {
-				continue;
-			}
-
-			await rm( upath.join( changesetDirectory, entry.name ), { recursive: true, force: true } );
-		}
-	}
+	await Promise.all(
+		entryPaths
+			.flatMap( repo => repo.filePaths )
+			.map( file => fs.unlink( file ) )
+	);
 }

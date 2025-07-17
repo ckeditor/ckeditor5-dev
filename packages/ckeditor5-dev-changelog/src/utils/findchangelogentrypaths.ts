@@ -14,15 +14,15 @@ type FindChangelogEntryPathsOptions = {
 	cwd: string;
 	externalRepositories: Array<RepositoryConfig>;
 	shouldSkipLinks: boolean;
-	includeAllChannels?: boolean;
+	includeSubdirectories?: boolean;
 };
 
 /**
  * Gathers changelog entry file paths (Markdown files) from the main repository and any configured external repositories.
  */
 export async function findChangelogEntryPaths( options: FindChangelogEntryPathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const { cwd, externalRepositories, shouldSkipLinks, includeAllChannels = true } = options;
-	const globPattern = includeAllChannels ? '**/*.md' : '*.md';
+	const { cwd, externalRepositories, shouldSkipLinks, includeSubdirectories = true } = options;
+	const globPattern = includeSubdirectories ? '**/*.md' : '*.md';
 
 	return AsyncArray
 		.from( Promise.resolve( externalRepositories ) )
