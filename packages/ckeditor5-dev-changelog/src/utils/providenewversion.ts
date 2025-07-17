@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
-import type { ReleaseChannel } from './detectreleasechannel.js';
+import { type ReleaseChannel } from '../types.js';
 
 const CLI_INDENT_SIZE = 3;
 

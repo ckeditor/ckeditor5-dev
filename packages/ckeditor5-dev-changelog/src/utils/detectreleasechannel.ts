@@ -4,8 +4,7 @@
  */
 
 import semver from 'semver';
-
-export type ReleaseChannel = 'alpha' | 'beta' | 'rc' | 'latest';
+import { type ReleaseChannel } from '../types.js';
 
 /**
  * Detects the release channel from a version string.

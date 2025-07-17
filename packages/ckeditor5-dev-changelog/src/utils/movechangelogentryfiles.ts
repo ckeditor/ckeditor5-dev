@@ -7,8 +7,7 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { logInfo } from './loginfo.js';
-import type { ChangesetPathsWithGithubUrl } from '../types.js';
-import type { ReleaseChannel } from './detectreleasechannel.js';
+import type { ChangesetPathsWithGithubUrl, ReleaseChannel } from '../types.js';
 import { CHANGESET_DIRECTORY } from './constants.js';
 
 /**

@@ -144,3 +144,5 @@ export type FileMetadata = {
 };
 
 export type ChangelogReleaseType = 'latest' | 'prerelease';
+
+export type ReleaseChannel = 'alpha' | 'beta' | 'rc' | 'latest';
