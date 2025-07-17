@@ -5,9 +5,9 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
-import { select } from '@inquirer/prompts';
+import inquirer from 'inquirer';
 
-vi.mock( '@inquirer/prompts' );
+vi.mock( 'inquirer' );
 
 describe( 'promptReleaseType()', () => {
 	beforeEach( () => {
@@ -15,71 +15,69 @@ describe( 'promptReleaseType()', () => {
 	} );
 
 	it( 'should return latest when user selects latest release', async () => {
-		vi.mocked( select ).mockResolvedValue( 'latest' );
+		vi.mocked( inquirer.prompt ).mockResolvedValue( { releaseType: 'latest' } );
 
 		const result = await promptReleaseType();
 
 		expect( result ).toBe( 'latest' );
-		expect( select ).toHaveBeenCalledWith( {
+		expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 			message: 'Select the release type?',
+			name: 'releaseType',
+			type: 'list',
 			choices: [
 				{ name: 'Latest (stable) release', value: 'latest' },
 				{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
 			]
-		} );
+		} ] );
 	} );
 
 	it( 'should return prerelease when user selects prerelease', async () => {
-		vi.mocked( select ).mockResolvedValue( 'prerelease' );
+		vi.mocked( inquirer.prompt ).mockResolvedValue( { releaseType: 'prerelease' } );
 
 		const result = await promptReleaseType();
 
 		expect( result ).toBe( 'prerelease' );
-		expect( select ).toHaveBeenCalledWith( {
+		expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 			message: 'Select the release type?',
+			name: 'releaseType',
+			type: 'list',
 			choices: [
 				{ name: 'Latest (stable) release', value: 'latest' },
 				{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
 			]
-		} );
+		} ] );
 	} );
 
 	it( 'should call select with correct configuration', async () => {
-		vi.mocked( select ).mockResolvedValue( 'latest' );
+		vi.mocked( inquirer.prompt ).mockResolvedValue( { releaseType: 'latest' } );
 
 		await promptReleaseType();
 
-		expect( select ).toHaveBeenCalledTimes( 1 );
-		expect( select ).toHaveBeenCalledWith( {
+		expect( inquirer.prompt ).toHaveBeenCalledTimes( 1 );
+		expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 			message: 'Select the release type?',
+			name: 'releaseType',
+			type: 'list',
 			choices: [
 				{ name: 'Latest (stable) release', value: 'latest' },
 				{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
 			]
-		} );
+		} ] );
 	} );
 
 	it( 'should handle select rejection', async () => {
 		const error = new Error( 'User canceled' );
-		vi.mocked( select ).mockRejectedValue( error );
+		vi.mocked( inquirer.prompt ).mockRejectedValue( error );
 
 		await expect( promptReleaseType() ).rejects.toThrow( 'User canceled' );
 	} );
 
 	it( 'should handle select throwing an error', async () => {
 		const error = new Error( 'Prompt failed' );
-		vi.mocked( select ).mockImplementation( () => {
+		vi.mocked( inquirer.prompt ).mockImplementation( () => {
 			throw error;
 		} );
 
 		await expect( promptReleaseType() ).rejects.toThrow( 'Prompt failed' );
-	} );
-
-	it( 'should return the correct type when select returns unexpected value', async () => {
-		vi.mocked( select ).mockResolvedValue( 'latest' as any );
-
-		const result = await promptReleaseType();
-
-		expect( result ).toBe( 'latest' );
 	} );
 } );

@@ -3,20 +3,24 @@
  * For licensing, see LICENSE.md.
  */
 
-import { select } from '@inquirer/prompts';
+import inquirer from 'inquirer';
 import type { ChangelogReleaseType } from '../types.js';
 
 /**
- * Prompts the user to choose between latest or prerelease.
+ * Prompts the user to choose between latest or prerelease
  */
 export async function promptReleaseType(): Promise<ChangelogReleaseType> {
-	const answer = await select( {
-		message: 'Select the release type?',
-		choices: [
-			{ name: 'Latest (stable) release', value: 'latest' },
-			{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
-		]
-	} );
+	const { releaseType } = await inquirer.prompt( [
+		{
+			type: 'list',
+			name: 'releaseType',
+			message: 'Select the release type?',
+			choices: [
+				{ name: 'Latest (stable) release', value: 'latest' },
+				{ name: 'Pre-release (alpha/beta/rc)', value: 'prerelease' }
+			]
+		}
+	] );
 
-	return answer as ChangelogReleaseType;
+	return releaseType as ChangelogReleaseType;
 }
