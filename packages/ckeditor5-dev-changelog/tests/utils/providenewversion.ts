@@ -141,7 +141,8 @@ describe( 'provideNewVersion()', () => {
 
 			await expect( provideNewVersion( {
 				...defaultOptions,
-				displayValidationWarning: true
+				displayValidationWarning: true,
+				releaseChannel: 'alpha'
 			} ) ).rejects.toThrow( UserAbortError );
 
 			expect( vi.mocked( chalk.bold ) ).toHaveBeenCalled();
@@ -167,7 +168,8 @@ describe( 'provideNewVersion()', () => {
 
 			const result = await provideNewVersion( {
 				...defaultOptions,
-				displayValidationWarning: true
+				displayValidationWarning: true,
+				releaseChannel: 'alpha'
 			} );
 
 			expect( result ).toBe( '2.0.0' );
@@ -276,5 +278,74 @@ describe( 'provideNewVersion()', () => {
 
 			await expect( provideNewVersion( defaultOptions as any ) ).rejects.toThrow( 'User canceled' );
 		} );
+	} );
+
+	describe( 'Release channel support', () => {
+		it( 'should suggest prerelease version with specific channel when bumpType is prerelease and channel is not latest', async () => {
+			const options = {
+				...defaultOptions,
+				bumpType: 'prerelease' as ReleaseType,
+				releaseChannel: 'alpha'
+			};
+
+			vi.mocked( semver.inc ).mockReturnValueOnce( '100-alpha.0' );
+			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.0' } );
+
+			await provideNewVersion( options as any );
+
+			expect( semver.inc ).toHaveBeenCalledWith( '1.0.0', 'prerelease', 'alpha' );
+		} );
+
+		it( 'should suggest premajor version with alpha channel when bumpType is prerelease and channel is latest', async () => {
+			const options = {
+				...defaultOptions,
+				bumpType: 'prerelease' as ReleaseType,
+				releaseChannel: 'latest'
+			};
+
+			vi.mocked( semver.inc ).mockReturnValueOnce( '200-alpha.0' );
+			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.0' } );
+
+			await provideNewVersion( options as any );
+
+			expect( semver.inc ).toHaveBeenCalledWith( '1.0.0', 'premajor', 'alpha' );
+		} );
+
+		it( 'should suggest regular version when bumpType is not prerelease', async () => {
+			const options = {
+				...defaultOptions,
+				bumpType: 'patch' as ReleaseType,
+				releaseChannel: 'alpha'
+			};
+
+			vi.mocked( semver.inc ).mockReturnValueOnce( '1.0.1' );
+			vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: '1.0.0' } );
+
+			await provideNewVersion( options as any );
+
+			expect( semver.inc ).toHaveBeenCalledWith( '1.0.0', 'patch' );
+		} );
+
+		it.each( [
+			[ 'beta', '1.0.0-beta.0' ],
+			[ 'rc', '1.0.0-rc.0' ],
+			[ 'alpha', '1.0.0-alpha.0' ]
+		] )(
+			'should suggest correct prerelease version for channel %s',
+			async ( channel, expectedVersion ) => {
+				const options = {
+					...defaultOptions,
+					bumpType: 'prerelease' as ReleaseType,
+					releaseChannel: channel
+				};
+
+				vi.mocked( semver.inc ).mockReturnValueOnce( expectedVersion );
+				vi.mocked( inquirer.prompt ).mockResolvedValueOnce( { version: expectedVersion } );
+
+				await provideNewVersion( options as any );
+
+				expect( semver.inc ).toHaveBeenCalledWith( '1.0.0', 'prerelease', channel );
+			}
+		);
 	} );
 } );

@@ -142,3 +142,7 @@ export type FileMetadata = {
 	communityCredits: Array<string>;
 	validations: Array<string>;
 };
+
+export type ChangelogReleaseType = 'latest' | 'prerelease';
+
+export type ReleaseChannel = 'alpha' | 'beta' | 'rc' | 'latest';
