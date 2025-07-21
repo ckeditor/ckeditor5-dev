@@ -176,6 +176,37 @@ describe( 'commit()', () => {
 		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Changelog v1.0.0.' );
 	} );
 
+	it( 'should commit a tracked file with a space in its name', async () => {
+		stubs.git.raw!.mockResolvedValue( '100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	"my file with space.txt"\n' );
+
+		await commit( {
+			cwd: '/home/ckeditor',
+			message: 'Commit file with space',
+			files: [
+				'my file with space.txt'
+			]
+		} );
+
+		expect( stubs.git.add ).toHaveBeenCalledWith( [ 'my file with space.txt' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Commit file with space' );
+	} );
+
+	it( 'should commit an untracked but existing file with a space in its name', async () => {
+		stubs.git.raw!.mockResolvedValue( '' );
+		vi.mocked( fs.access ).mockResolvedValue( undefined );
+
+		await commit( {
+			cwd: '/home/ckeditor',
+			message: 'Commit untracked file with space',
+			files: [
+				'my file with space.txt'
+			]
+		} );
+
+		expect( stubs.git.add ).toHaveBeenCalledWith( [ 'my file with space.txt' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Commit untracked file with space' );
+	} );
+
 	it( 'should skip commit if status is clean', async () => {
 		stubs.git.status!.mockResolvedValue( { isClean: () => true } );
 
