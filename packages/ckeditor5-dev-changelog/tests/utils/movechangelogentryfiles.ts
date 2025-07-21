@@ -68,19 +68,19 @@ describe( 'moveChangelogEntryFiles()', () => {
 		const targetChannel = 'rc';
 		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
 
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file1.md',
 			'/repo1/.changelog/rc/file1.md'
 		);
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file2.md',
 			'/repo1/.changelog/rc/file2.md'
 		);
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo2/.changelog/file3.md',
 			'/repo2/.changelog/rc/file3.md'
 		);
-		expect( fs.renameSync ).toHaveBeenCalledTimes( 3 );
+		expect( fs.rename ).toHaveBeenCalledTimes( 3 );
 	} );
 
 	it( 'should add files to git before and after moving', async () => {
@@ -138,7 +138,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 		const result = await moveChangelogEntryFiles( singleEntryPaths, targetChannel );
 
 		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/latest' );
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file1.md',
 			'/repo1/.changelog/latest/file1.md'
 		);
@@ -195,7 +195,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 	it( 'should handle fs.renameSync errors', async () => {
 		const targetChannel = 'beta';
 		const error = new Error( 'File rename failed' );
-		vi.mocked( fs.renameSync ).mockImplementationOnce( () => {
+		vi.mocked( fs.rename ).mockImplementationOnce( () => {
 			throw error;
 		} );
 
@@ -226,11 +226,11 @@ describe( 'moveChangelogEntryFiles()', () => {
 
 		await moveChangelogEntryFiles( entryPathsWithComplexNames, targetChannel );
 
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/2025111200_feature-branch.md',
 			'/repo1/.changelog/rc/2025111200_feature-branch.md'
 		);
-		expect( fs.renameSync ).toHaveBeenCalledWith(
+		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/20250111300_fix-bug-123.md',
 			'/repo1/.changelog/rc/20250111300_fix-bug-123.md'
 		);
