@@ -83,20 +83,6 @@ describe( 'moveChangelogEntryFiles()', () => {
 		expect( fs.rename ).toHaveBeenCalledTimes( 3 );
 	} );
 
-	it( 'should add files to git before and after moving', async () => {
-		const targetChannel = 'alpha';
-		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
-
-		// Check git.add calls for each file (before and after move)
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/file1.md' );
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/alpha/file1.md' );
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/file2.md' );
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo1/.changelog/alpha/file2.md' );
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo2/.changelog/file3.md' );
-		expect( mockGit.add ).toHaveBeenCalledWith( '/repo2/.changelog/alpha/file3.md' );
-		expect( mockGit.add ).toHaveBeenCalledTimes( 6 );
-	} );
-
 	it( 'should return modified entry paths with both original and target file paths', async () => {
 		const targetChannel = 'beta';
 		const result = await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
@@ -201,15 +187,6 @@ describe( 'moveChangelogEntryFiles()', () => {
 
 		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
 			.rejects.toThrow( 'File rename failed' );
-	} );
-
-	it( 'should handle git.add errors', async () => {
-		const targetChannel = 'rc';
-		const error = new Error( 'Git add failed' );
-		vi.mocked( mockGit.add ).mockRejectedValueOnce( error );
-
-		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
-			.rejects.toThrow( 'Git add failed' );
 	} );
 
 	it( 'should preserve file names when moving', async () => {

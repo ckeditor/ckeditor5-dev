@@ -9,12 +9,11 @@ import upath from 'upath';
 import { logInfo } from './loginfo.js';
 import type { ChangesetPathsWithGithubUrl, ReleaseChannel } from '../types.js';
 import { CHANGESET_DIRECTORY } from './constants.js';
-import { simpleGit } from 'simple-git';
 
 /**
  * Moves changelog entry files to cycle-specific directories instead of deleting them.
  * This preserves the history of changes across prerelease cycles.
- * @returns Array of entry paths that were modified by the move operation
+ * Returns an array of entry paths that were modified by the move operation
  */
 export async function moveChangelogEntryFiles(
 	entryPaths: Array<ChangesetPathsWithGithubUrl>,
@@ -27,7 +26,6 @@ export async function moveChangelogEntryFiles(
 
 	for ( const repo of entryPaths ) {
 		const { cwd, filePaths } = repo;
-		const git = simpleGit( cwd );
 		const changelogDir = upath.join( cwd, CHANGESET_DIRECTORY );
 		const targetPath = upath.join( changelogDir, targetDir );
 
@@ -39,9 +37,7 @@ export async function moveChangelogEntryFiles(
 			const fileName = upath.basename( filePath );
 			const targetFilePath = upath.join( targetPath, fileName );
 
-			await git.add( filePath );
 			await fs.rename( filePath, targetFilePath );
-			await git.add( targetFilePath );
 
 			modifiedFilePaths.push( targetFilePath );
 			modifiedFilePaths.push( filePath );
