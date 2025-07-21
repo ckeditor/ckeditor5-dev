@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import commit from '../../src/tools/commit.js';
 import { simpleGit } from 'simple-git';
 import { glob } from 'glob';
@@ -35,8 +35,8 @@ describe( 'commit()', () => {
 		vi.mocked( glob ).mockResolvedValue( [] );
 
 		stubs.git.raw!.mockResolvedValue( [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	package.json',
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	packages/ckeditor5-foo/package.json'
 		].join( '\n' ) );
 	} );
 
@@ -133,7 +133,9 @@ describe( 'commit()', () => {
 		}
 	] )( 'should commit $title', async ( { cwd, files, tracked, expected } ) => {
 		// Setup Git-tracked files
-		stubs.git.raw!.mockResolvedValue( tracked.join( '\n' ) );
+		stubs.git.raw!.mockResolvedValue(
+			tracked.map( f => `100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	${ f }` ).join( '\n' )
+		);
 
 		// Mock access for untracked files to simulate presence
 		vi.mocked( fs.access ).mockImplementation( async path => {
@@ -154,7 +156,9 @@ describe( 'commit()', () => {
 	} );
 
 	it( 'should commit a tracked file that has been removed', async () => {
-		stubs.git.raw!.mockResolvedValue( 'tracked-file-that-is-no-longer-here.txt\n' );
+		stubs.git.raw!.mockResolvedValue(
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	tracked-file-that-is-no-longer-here.txt\n'
+		);
 		vi.mocked( fs.access ).mockRejectedValue( new Error( 'ENOENT: no such file or directory' ) );
 
 		await commit( {
@@ -215,7 +219,7 @@ describe( 'commit()', () => {
 	it( 'should skip untracked files that do not exist on disk and commit valid tracked ones using absolute paths', async () => {
 		// Simulate tracked files: only `CHANGELOG.md` is tracked.
 		stubs.git.raw!.mockResolvedValue( [
-			'CHANGELOG.md'
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	CHANGELOG.md'
 		].join( '\n' ) );
 
 		// Only allow access to `CHANGELOG.md`, reject others
@@ -243,7 +247,7 @@ describe( 'commit()', () => {
 	it( 'should skip untracked files that do not exist on disk and commit valid tracked ones using relative paths', async () => {
 		// Simulate tracked files: only `CHANGELOG.md` is tracked.
 		stubs.git.raw!.mockResolvedValue( [
-			'CHANGELOG.md'
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	CHANGELOG.md'
 		].join( '\n' ) );
 
 		// Only allow access to `CHANGELOG.md`, reject others
@@ -271,7 +275,9 @@ describe( 'commit()', () => {
 	it( 'should split adding files to commit into chunks if they exceed the character limit', async () => {
 		const files = Array.from( { length: 200 }, ( _, i ) => `dir/verylongfilename_${ i }.js` );
 
-		stubs.git.raw!.mockResolvedValue( files.join( '\n' ) );
+		stubs.git.raw!.mockResolvedValue(
+			files.map( f => `100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	${ f }` ).join( '\n' )
+		);
 		stubs.git.status!.mockResolvedValue( { isClean: () => false } );
 		vi.mocked( fs.access ).mockResolvedValue( undefined );
 
