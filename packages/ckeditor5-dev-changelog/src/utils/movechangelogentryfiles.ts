@@ -40,7 +40,7 @@ export async function moveChangelogEntryFiles(
 			const targetFilePath = upath.join( targetPath, fileName );
 
 			await git.add( filePath );
-			fs.renameSync( filePath, targetFilePath );
+			await fs.rename( filePath, targetFilePath );
 			await git.add( targetFilePath );
 
 			modifiedFilePaths.push( targetFilePath );
