@@ -9,6 +9,7 @@ import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
 import { simpleGit } from 'simple-git';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
+import { PRE_RELEASE_DIRECTORY } from '../../src/utils/constants.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo.js' );
@@ -49,43 +50,39 @@ describe( 'moveChangelogEntryFiles()', () => {
 	} );
 
 	it( 'should log the start of the process', async () => {
-		const targetChannel = 'alpha';
-		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+		await moveChangelogEntryFiles( mockEntryPaths );
 
-		expect( logInfo ).toHaveBeenCalledWith( '○ Moving changelog entries to alpha/ directory...' );
+		expect( logInfo ).toHaveBeenCalledWith( `○ Moving changelog entries to ${ PRE_RELEASE_DIRECTORY }/ directory...` );
 	} );
 
 	it( 'should create target directory for each repository', async () => {
-		const targetChannel = 'beta';
-		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+		await moveChangelogEntryFiles( mockEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/beta' );
-		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo2/.changelog/beta' );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo2/.changelog/${ PRE_RELEASE_DIRECTORY }` );
 		expect( fs.ensureDir ).toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'should move all files to the target directory using renameSync', async () => {
-		const targetChannel = 'rc';
-		await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+		await moveChangelogEntryFiles( mockEntryPaths );
 
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file1.md',
-			'/repo1/.changelog/rc/file1.md'
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file1.md`
 		);
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file2.md',
-			'/repo1/.changelog/rc/file2.md'
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file2.md`
 		);
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo2/.changelog/file3.md',
-			'/repo2/.changelog/rc/file3.md'
+			`/repo2/.changelog/${ PRE_RELEASE_DIRECTORY }/file3.md`
 		);
 		expect( fs.rename ).toHaveBeenCalledTimes( 3 );
 	} );
 
 	it( 'should return modified entry paths with both original and target file paths', async () => {
-		const targetChannel = 'beta';
-		const result = await moveChangelogEntryFiles( mockEntryPaths, targetChannel );
+		const result = await moveChangelogEntryFiles( mockEntryPaths );
 
 		expect( result ).toHaveLength( 2 );
 
@@ -93,9 +90,9 @@ describe( 'moveChangelogEntryFiles()', () => {
 		expect( result[ 0 ]! ).toEqual( {
 			...mockEntryPaths[ 0 ],
 			filePaths: [
-				'/repo1/.changelog/beta/file1.md',
+				`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file1.md`,
 				'/repo1/.changelog/file1.md',
-				'/repo1/.changelog/beta/file2.md',
+				`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file2.md`,
 				'/repo1/.changelog/file2.md'
 			]
 		} );
@@ -104,7 +101,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 		expect( result[ 1 ]! ).toEqual( {
 			...mockEntryPaths[ 1 ],
 			filePaths: [
-				'/repo2/.changelog/beta/file3.md',
+				`/repo2/.changelog/${ PRE_RELEASE_DIRECTORY }/file3.md`,
 				'/repo2/.changelog/file3.md'
 			]
 		} );
@@ -120,16 +117,15 @@ describe( 'moveChangelogEntryFiles()', () => {
 				isRoot: true
 			}
 		];
-		const targetChannel = 'latest';
-		const result = await moveChangelogEntryFiles( singleEntryPaths, targetChannel );
+		const result = await moveChangelogEntryFiles( singleEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/latest' );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file1.md',
-			'/repo1/.changelog/latest/file1.md'
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file1.md`
 		);
 		expect( result[ 0 ]!.filePaths ).toEqual( [
-			'/repo1/.changelog/latest/file1.md',
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file1.md`,
 			'/repo1/.changelog/file1.md'
 		] );
 	} );
@@ -144,53 +140,33 @@ describe( 'moveChangelogEntryFiles()', () => {
 				isRoot: true
 			}
 		];
-		const targetChannel = 'alpha';
-		const result = await moveChangelogEntryFiles( emptyEntryPaths, targetChannel );
+		const result = await moveChangelogEntryFiles( emptyEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( '/repo1/.changelog/alpha' );
+		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
 		expect( fs.renameSync ).not.toHaveBeenCalled();
 		expect( mockGit.add ).not.toHaveBeenCalled();
 		expect( result[ 0 ]!.filePaths ).toEqual( [] );
 	} );
 
-	it.each( [
-		'alpha',
-		'beta',
-		'rc',
-		'latest'
-	] as const )( 'should handle target channel %s', async channel => {
-		vi.clearAllMocks();
-		vi.mocked( simpleGit ).mockReturnValue( mockGit as any );
-
-		await moveChangelogEntryFiles( mockEntryPaths, channel );
-
-		expect( logInfo ).toHaveBeenCalledWith( `○ Moving changelog entries to ${ channel }/ directory...` );
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ channel }` );
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo2/.changelog/${ channel }` );
-	} );
-
 	it( 'should handle fs.ensureDir errors', async () => {
-		const targetChannel = 'alpha';
 		const error = new Error( 'Directory creation failed' );
 		vi.mocked( fs.ensureDir ).mockRejectedValueOnce( error );
 
-		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
+		await expect( moveChangelogEntryFiles( mockEntryPaths ) )
 			.rejects.toThrow( 'Directory creation failed' );
 	} );
 
 	it( 'should handle fs.renameSync errors', async () => {
-		const targetChannel = 'beta';
 		const error = new Error( 'File rename failed' );
 		vi.mocked( fs.rename ).mockImplementationOnce( () => {
 			throw error;
 		} );
 
-		await expect( moveChangelogEntryFiles( mockEntryPaths, targetChannel ) )
+		await expect( moveChangelogEntryFiles( mockEntryPaths ) )
 			.rejects.toThrow( 'File rename failed' );
 	} );
 
 	it( 'should preserve file names when moving', async () => {
-		const targetChannel = 'rc';
 		const entryPathsWithComplexNames: Array<ChangesetPathsWithGithubUrl> = [
 			{
 				filePaths: [ '/repo1/.changelog/2025111200_feature-branch.md', '/repo1/.changelog/20250111300_fix-bug-123.md' ],
@@ -201,15 +177,15 @@ describe( 'moveChangelogEntryFiles()', () => {
 			}
 		];
 
-		await moveChangelogEntryFiles( entryPathsWithComplexNames, targetChannel );
+		await moveChangelogEntryFiles( entryPathsWithComplexNames );
 
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/2025111200_feature-branch.md',
-			'/repo1/.changelog/rc/2025111200_feature-branch.md'
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/2025111200_feature-branch.md`
 		);
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/20250111300_fix-bug-123.md',
-			'/repo1/.changelog/rc/20250111300_fix-bug-123.md'
+			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/20250111300_fix-bug-123.md`
 		);
 	} );
 } );

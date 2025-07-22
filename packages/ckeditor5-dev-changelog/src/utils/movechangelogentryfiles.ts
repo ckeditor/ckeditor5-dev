@@ -7,8 +7,8 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { logInfo } from './loginfo.js';
-import type { ChangesetPathsWithGithubUrl, ReleaseChannel } from '../types.js';
-import { CHANGESET_DIRECTORY } from './constants.js';
+import type { ChangesetPathsWithGithubUrl } from '../types.js';
+import { CHANGESET_DIRECTORY, PRE_RELEASE_DIRECTORY } from './constants.js';
 
 /**
  * Moves changelog entry files to cycle-specific directories instead of deleting them.
@@ -16,10 +16,9 @@ import { CHANGESET_DIRECTORY } from './constants.js';
  * Returns an array of entry paths that were modified by the move operation
  */
 export async function moveChangelogEntryFiles(
-	entryPaths: Array<ChangesetPathsWithGithubUrl>,
-	targetChannel: ReleaseChannel
+	entryPaths: Array<ChangesetPathsWithGithubUrl>
 ): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const targetDir = targetChannel;
+	const targetDir = PRE_RELEASE_DIRECTORY;
 	const modifiedEntryPaths: Array<ChangesetPathsWithGithubUrl> = [];
 
 	logInfo( `○ ${ chalk.cyan( `Moving changelog entries to ${ targetDir }/ directory...` ) }` );

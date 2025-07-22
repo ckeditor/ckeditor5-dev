@@ -15,6 +15,8 @@ export const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest
 
 export const CHANGESET_DIRECTORY = '.changelog';
 
+export const PRE_RELEASE_DIRECTORY = 'pre-release';
+
 export const TEMPLATE_FILE = path.join( import.meta.dirname, '../template/template.md' );
 
 export const SECTIONS = {

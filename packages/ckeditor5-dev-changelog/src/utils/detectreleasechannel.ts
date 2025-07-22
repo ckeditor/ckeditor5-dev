@@ -4,27 +4,35 @@
  */
 
 import semver from 'semver';
-import { type ReleaseChannel } from '../types.js';
+import chalk from 'chalk';
+import type { ReleaseChannel } from '../types.js';
+import { logInfo } from './loginfo.js';
 
 /**
  * Detects the release channel from a version string.
  */
-export function detectReleaseChannel( version: string ): ReleaseChannel {
+export function detectReleaseChannel( version: string, promotePrerelease: boolean = false ): ReleaseChannel {
 	const prerelease = semver.prerelease( version );
 
 	if ( !prerelease ) {
 		return 'latest';
 	}
 
-	const [ channel ] = prerelease as [ string ];
+	const currentChannel = prerelease[ 0 ] as ReleaseChannel;
 
-	if ( channel.startsWith( 'beta' ) ) {
-		return 'beta';
+	if ( promotePrerelease ) {
+		if ( currentChannel === 'alpha' ) {
+			return 'beta';
+		}
+
+		if ( currentChannel === 'beta' ) {
+			return 'rc';
+		}
+
+		logInfo( chalk.yellow( `Warning! Unknown release channel to promote from ${ currentChannel }.` ) );
+
+		return 'alpha';
 	}
 
-	if ( channel.startsWith( 'rc' ) ) {
-		return 'rc';
-	}
-
-	return 'alpha';
+	return currentChannel;
 }

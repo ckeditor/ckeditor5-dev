@@ -12,26 +12,20 @@ describe( 'getReleaseTypeFromVersion()', () => {
 	} );
 
 	it( 'should return latest for major.minor.patch version', () => {
-		const result = getReleaseTypeFromVersion( '1.0.0' );
+		const result = getReleaseTypeFromVersion( '1.0.0', '2.0.0' );
 
 		expect( result ).toBe( 'latest' );
 	} );
 
-	it( 'should return prerelease for alpha version', () => {
-		const result = getReleaseTypeFromVersion( '1.0.0-alpha.1' );
+	it( 'should return prerelease for same channel version', () => {
+		const result = getReleaseTypeFromVersion( '1.0.0-alpha.1', '1.0.0-alpha.2' );
 
 		expect( result ).toBe( 'prerelease' );
 	} );
 
-	it( 'should return prerelease for beta version', () => {
-		const result = getReleaseTypeFromVersion( '1.0.0-beta.2' );
+	it( 'should return prerelease promote for different channels', () => {
+		const result = getReleaseTypeFromVersion( '1.0.0-alpha.1', '1.0.0-beta.0' );
 
-		expect( result ).toBe( 'prerelease' );
-	} );
-
-	it( 'should return prerelease for rc version', () => {
-		const result = getReleaseTypeFromVersion( '1.0.0-rc.3' );
-
-		expect( result ).toBe( 'prerelease' );
+		expect( result ).toBe( 'prerelease-promote' );
 	} );
 } );

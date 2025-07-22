@@ -22,7 +22,6 @@ import { moveChangelogEntryFiles } from './movechangelogentryfiles.js';
 import { commitChanges } from './commitchanges.js';
 import { InternalError } from './internalerror.js';
 import { promptReleaseType } from './promptreleasetype.js';
-import { detectReleaseChannel } from './detectreleasechannel.js';
 import { getReleaseTypeFromVersion } from './getreleasetypefromversion.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { UserAbortError } from './useraborterror.js';
@@ -69,13 +68,13 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		externalRepositories
 	} );
 
-	const releaseType = nextVersion ? getReleaseTypeFromVersion( nextVersion ) : await promptReleaseType();
+	const releaseType = nextVersion ? getReleaseTypeFromVersion( currentVersion, nextVersion ) : await promptReleaseType( currentVersion );
 
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,
 		externalRepositories,
 		shouldSkipLinks,
-		includeSubdirectories: releaseType === 'latest'
+		includeSubdirectories: releaseType === 'latest' || releaseType === 'prerelease-promote'
 	} );
 
 	const parsedChangesetFiles = await parseChangelogEntries( entryPaths, isSinglePackage );
@@ -141,8 +140,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	if ( releaseType === 'latest' ) {
 		await removeChangelogEntryFiles( entryPaths );
 	} else {
-		const targetChannel = detectReleaseChannel( newVersion );
-		pathsToCommit = await moveChangelogEntryFiles( entryPaths, targetChannel );
+		pathsToCommit = await moveChangelogEntryFiles( entryPaths );
 	}
 
 	await modifyChangelog( newChangelog, cwd );

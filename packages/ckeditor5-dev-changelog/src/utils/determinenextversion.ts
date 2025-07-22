@@ -53,7 +53,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( releaseType === 'prerelease' ) {
+	if ( releaseType === 'prerelease' || releaseType === 'prerelease-promote' ) {
 		bumpType = 'prerelease';
 	} else if ( sections.major.entries.length || sections.breaking.entries.length ) {
 		bumpType = 'major';
@@ -70,7 +70,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 		packageName,
 		bumpType,
 		version: currentVersion,
-		releaseChannel: detectReleaseChannel( currentVersion ),
+		releaseChannel: detectReleaseChannel( currentVersion, releaseType === 'prerelease-promote' ),
 		displayValidationWarning: areErrorsPresent || areWarningsPresent
 	} );
 

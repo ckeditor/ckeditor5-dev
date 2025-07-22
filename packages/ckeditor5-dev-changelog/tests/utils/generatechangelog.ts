@@ -16,7 +16,6 @@ import { composeReleaseSummary } from '../../src/utils/composereleasesummary.js'
 import { modifyChangelog } from '../../src/utils/modifychangelog.js';
 import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { moveChangelogEntryFiles } from '../../src/utils/movechangelogentryfiles.js';
-import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { displayChanges } from '../../src/utils/displaychanges.js';
 import { composeChangelog } from '../../src/utils/composechangelog.js';
@@ -28,7 +27,6 @@ import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
 import { getReleaseTypeFromVersion } from '../../src/utils/getreleasetypefromversion.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../src/utils/detectreleasechannel.js' );
 vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
@@ -179,7 +177,6 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( modifyChangelog ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( removeChangelogEntryFiles ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( moveChangelogEntryFiles ).mockImplementation( entryPaths => Promise.resolve( entryPaths ) );
-		vi.mocked( detectReleaseChannel ).mockReturnValue( 'alpha' );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( getReleaseTypeFromVersion ).mockReturnValue( 'latest' );
 	} );
@@ -205,7 +202,7 @@ describe( 'generateChangelog()', () => {
 			nextVersion: '1.0.1'
 		} );
 
-		expect( getReleaseTypeFromVersion ).toHaveBeenCalledWith( '1.0.1' );
+		expect( getReleaseTypeFromVersion ).toHaveBeenCalledWith( '1.0.0', '1.0.1' );
 		expect( promptReleaseType ).not.toHaveBeenCalled();
 	} );
 
@@ -589,6 +586,16 @@ describe( 'generateChangelog()', () => {
 			} ) );
 		} );
 
+		it( 'calls findChangelogEntryPaths with includeSubdirectories=true when releaseType is prerelease-promote', async () => {
+			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease-promote' );
+
+			await generateChangelog( defaultOptions );
+
+			expect( findChangelogEntryPaths ).toHaveBeenCalledWith( expect.objectContaining( {
+				includeSubdirectories: true
+			} ) );
+		} );
+
 		it( 'calls findChangelogEntryPaths with includeSubdirectories=false when releaseType is not latest', async () => {
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
 
@@ -608,14 +615,12 @@ describe( 'generateChangelog()', () => {
 			expect( moveChangelogEntryFiles ).not.toHaveBeenCalled();
 		} );
 
-		it( 'calls moveChangelogEntryFiles and detectReleaseChannel when releaseType is not latest', async () => {
+		it( 'calls moveChangelogEntryFiles when releaseType is not latest', async () => {
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
-			vi.mocked( detectReleaseChannel ).mockReturnValue( 'beta' );
 
 			await generateChangelog( defaultOptions );
 
-			expect( detectReleaseChannel ).toHaveBeenCalledWith( '1.0.1' );
-			expect( moveChangelogEntryFiles ).toHaveBeenCalledWith( expect.any( Array ), 'beta' );
+			expect( moveChangelogEntryFiles ).toHaveBeenCalledWith( expect.any( Array ) );
 			expect( removeChangelogEntryFiles ).not.toHaveBeenCalled();
 		} );
 
@@ -649,11 +654,10 @@ describe( 'generateChangelog()', () => {
 			];
 
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
-			vi.mocked( detectReleaseChannel ).mockReturnValue( 'alpha' );
 
 			await generateChangelog( defaultOptions );
 
-			expect( moveChangelogEntryFiles ).toHaveBeenCalledWith( expectedEntryPaths, 'alpha' );
+			expect( moveChangelogEntryFiles ).toHaveBeenCalledWith( expectedEntryPaths );
 		} );
 
 		it( 'calls commitChanges with original entryPaths for latest release', async () => {
@@ -685,7 +689,6 @@ describe( 'generateChangelog()', () => {
 			];
 
 			vi.mocked( promptReleaseType ).mockResolvedValue( 'prerelease' );
-			vi.mocked( detectReleaseChannel ).mockReturnValue( 'alpha' );
 			vi.mocked( moveChangelogEntryFiles ).mockImplementation( () => Promise.resolve( movedEntryPaths ) );
 
 			await generateChangelog( defaultOptions );

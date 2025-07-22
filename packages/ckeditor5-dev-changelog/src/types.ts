@@ -143,6 +143,9 @@ export type FileMetadata = {
 	validations: Array<string>;
 };
 
-export type ChangelogReleaseType = 'latest' | 'prerelease';
+export type ChangelogReleaseType =
+	'latest' | // e.g. 1.0.0 -> 2.0.0 or 2.0.0-beta.1 -> 2.0.0.
+	'prerelease' | // e.g. 1.0.0 -> 2.0.0-alpha.0 or 2.0.0-alpha.0 -> 2.0.0-alpha.1.
+	'prerelease-promote'; // e.g. 2.0.0-alpha.1 -> 2.0.0-beta.0.
 
 export type ReleaseChannel = 'alpha' | 'beta' | 'rc' | 'latest';

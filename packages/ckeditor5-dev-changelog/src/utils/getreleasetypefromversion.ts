@@ -6,12 +6,17 @@
 import { type ChangelogReleaseType } from '../types.js';
 import semver from 'semver';
 
-export function getReleaseTypeFromVersion( version: string ): ChangelogReleaseType {
-	const prerelease = semver.prerelease( version );
+export function getReleaseTypeFromVersion( currentVersion: string, nextVersion: string ): ChangelogReleaseType {
+	const currentVersionPrerelease = semver.prerelease( currentVersion );
+	const nextVersionPrerelease = semver.prerelease( nextVersion );
 
-	if ( !prerelease ) {
+	if ( !nextVersionPrerelease ) {
 		return 'latest';
 	}
 
-	return 'prerelease';
+	if ( nextVersionPrerelease[ 0 ] === currentVersionPrerelease?.[ 0 ] ) {
+		return 'prerelease';
+	}
+
+	return 'prerelease-promote';
 }
