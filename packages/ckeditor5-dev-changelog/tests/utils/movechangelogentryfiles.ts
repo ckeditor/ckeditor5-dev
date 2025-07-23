@@ -43,9 +43,8 @@ describe( 'moveChangelogEntryFiles()', () => {
 	};
 
 	beforeEach( () => {
-		vi.clearAllMocks();
 		vi.mocked( fs.ensureDir ).mockResolvedValue();
-		vi.mocked( fs.renameSync ).mockImplementation( () => {} );
+		vi.mocked( fs.rename ).mockResolvedValue();
 		vi.mocked( simpleGit ).mockReturnValue( mockGit as any );
 	} );
 
@@ -63,7 +62,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 		expect( fs.ensureDir ).toHaveBeenCalledTimes( 2 );
 	} );
 
-	it( 'should move all files to the target directory using renameSync', async () => {
+	it( 'should move all files to the target directory using rename', async () => {
 		await moveChangelogEntryFiles( mockEntryPaths );
 
 		expect( fs.rename ).toHaveBeenCalledWith(
@@ -143,7 +142,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 		const result = await moveChangelogEntryFiles( emptyEntryPaths );
 
 		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
-		expect( fs.renameSync ).not.toHaveBeenCalled();
+		expect( fs.rename ).not.toHaveBeenCalled();
 		expect( mockGit.add ).not.toHaveBeenCalled();
 		expect( result[ 0 ]!.filePaths ).toEqual( [] );
 	} );
@@ -156,11 +155,9 @@ describe( 'moveChangelogEntryFiles()', () => {
 			.rejects.toThrow( 'Directory creation failed' );
 	} );
 
-	it( 'should handle fs.renameSync errors', async () => {
+	it( 'should handle fs.rename errors', async () => {
 		const error = new Error( 'File rename failed' );
-		vi.mocked( fs.rename ).mockImplementationOnce( () => {
-			throw error;
-		} );
+		vi.mocked( fs.rename ).mockRejectedValueOnce( error );
 
 		await expect( moveChangelogEntryFiles( mockEntryPaths ) )
 			.rejects.toThrow( 'File rename failed' );

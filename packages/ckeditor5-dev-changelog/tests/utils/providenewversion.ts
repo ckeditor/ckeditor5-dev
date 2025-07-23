@@ -11,6 +11,7 @@ import semver, { type ReleaseType } from 'semver';
 import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
+import type { ChangelogReleaseType } from '../../src/types.js';
 
 vi.mock( 'inquirer' );
 vi.mock( 'chalk', () => ( {
@@ -30,6 +31,7 @@ describe( 'provideNewVersion()', () => {
 		packageName: 'test-package',
 		version: '1.0.0',
 		bumpType: 'patch' as ReleaseType,
+		releaseType: 'latest' as ChangelogReleaseType,
 		indentLevel: 0
 	};
 
@@ -38,7 +40,9 @@ describe( 'provideNewVersion()', () => {
 	beforeEach( () => {
 		vi.mocked( semver.valid ).mockReturnValue( '1.0.1' );
 		vi.mocked( semver.gt ).mockReturnValue( true );
+		vi.mocked( semver.gte ).mockReturnValue( true );
 		vi.mocked( semver.inc ).mockReturnValue( '1.0.1' );
+		vi.mocked( semver.prerelease ).mockReturnValue( null ); // This means that prerelease was called on latest e.g. 1.0.0
 		vi.mocked( inquirer.prompt ).mockResolvedValue( { version: '1.0.1' } );
 
 		processMock = vi.spyOn( process, 'exit' ).mockImplementation( ( () => {
@@ -237,6 +241,132 @@ describe( 'provideNewVersion()', () => {
 			vi.mocked( semver.valid ).mockReturnValueOnce( '1.0.1' );
 
 			await expect( validateFunction( '1.0.1' ) ).resolves.toBe( true );
+		} );
+	} );
+
+	describe( 'Prerelease version validation', () => {
+		let validateFunction: any;
+
+		it( 'should resolve an error when releaseType is latest and version contains a suffix', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.prerelease ).mockReturnValue( [ 'alpha', 0 ] );
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1' } ) as any;
+			} );
+
+			await provideNewVersion( { ...defaultOptions, releaseType: 'latest' } as any );
+
+			await expect( validateFunction( '2.0.1-alpha.0' ) ).resolves
+				.toBe( 'You chose a latest release path. Please provide a version without a channel suffix.' );
+		} );
+
+		it( 'should resolve an error when releaseType is prerelease-promote and version does not contain a suffix', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( null )
+				.mockReturnValueOnce( [ 'alpha', 0 ] );
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1' } ) as any;
+			} );
+
+			await provideNewVersion( { ...defaultOptions, releaseType: 'prerelease-promote' } as any );
+
+			await expect( validateFunction( '2.0.0' ) ).resolves
+				.toBe( 'You chose a prerelease release path. Please provide a version with a channel suffix.' );
+		} );
+
+		it( 'should resolve an error when releaseType is prerelease and version does not contain a suffix', async () => {
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( null ) // Next version.
+				.mockReturnValueOnce( [ 'alpha', 0 ] ); // Current version,
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( { ...defaultOptions, releaseType: 'prerelease' } as any );
+
+			await expect( validateFunction( '2.0.0' ) ).resolves
+				.toBe( 'You chose a prerelease release path. Please provide a version with a channel suffix.' );
+		} );
+
+		it( 'should resolve an error when releaseType is prerelease-promote and version suffix is equal to current', async () => {
+			vi.mocked( semver.inc ).mockReturnValue( '1.0.1-beta.0' );
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.gte ).mockReturnValue( false ); // 1.0.1-alpha.1 is not >= 1.0.1-beta.0
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( [ 'alpha', 1 ] ) // Next version.
+				.mockReturnValueOnce( [ 'alpha', 0 ] ); // Current version.
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'prerelease-promote',
+				bumpType: 'prerelease',
+				releaseChannel: 'alpha',
+				version: '1.0.1-alpha.0'
+			} as any );
+
+			await expect( validateFunction( '1.0.1-alpha.1' ) ).resolves
+				.toBe( 'Provided version must be higher or equal to 1.0.1-beta.0.' );
+		} );
+
+		it( 'should resolve an error when releaseType is prerelease and version suffix is different than current', async () => {
+			vi.mocked( semver.inc ).mockReturnValue( '1.0.1-beta.0' );
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( [ 'beta', 1 ] ) // Next version.
+				.mockReturnValueOnce( [ 'alpha', 0 ] ); // Current version.
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'prerelease',
+				bumpType: 'prerelease',
+				releaseChannel: 'beta',
+				version: '1.0.1-alpha.0'
+			} as any );
+
+			await expect( validateFunction( '1.0.1-alpha.1' ) ).resolves
+				.toBe( 'Provided channel must be the same existing channel alpha.' );
+		} );
+
+		it( 'should resolve an error when releaseType is latest and version contains suffix', async () => {
+			vi.mocked( semver.inc ).mockReturnValue( '1.0.1-beta.0' );
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( [ 'beta', 1 ] ) // Next version.
+				.mockReturnValueOnce( [ 'alpha', 0 ] ); // Current version.
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'latest',
+				bumpType: 'prerelease',
+				releaseChannel: 'beta',
+				version: '1.0.1-alpha.0'
+			} as any );
+
+			await expect( validateFunction( '1.0.1-alpha.1' ) ).resolves
+				.toBe( 'You chose a latest release path. Please provide a version without a channel suffix.' );
 		} );
 	} );
 

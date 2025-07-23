@@ -22,7 +22,7 @@ import { moveChangelogEntryFiles } from './movechangelogentryfiles.js';
 import { commitChanges } from './commitchanges.js';
 import { InternalError } from './internalerror.js';
 import { promptReleaseType } from './promptreleasetype.js';
-import { getReleaseTypeFromVersion } from './getreleasetypefromversion.js';
+import { getReleaseType } from './getreleasetype.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { UserAbortError } from './useraborterror.js';
 
@@ -68,7 +68,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		externalRepositories
 	} );
 
-	const releaseType = nextVersion ? getReleaseTypeFromVersion( currentVersion, nextVersion ) : await promptReleaseType( currentVersion );
+	const releaseType = nextVersion ? getReleaseType( currentVersion, nextVersion ) : await promptReleaseType( currentVersion );
 
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,

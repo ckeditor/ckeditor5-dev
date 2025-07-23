@@ -69,6 +69,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 	const userProvidedVersion = await provideNewVersion( {
 		packageName,
 		bumpType,
+		releaseType,
 		version: currentVersion,
 		releaseChannel: detectReleaseChannel( currentVersion, releaseType === 'prerelease-promote' ),
 		displayValidationWarning: areErrorsPresent || areWarningsPresent

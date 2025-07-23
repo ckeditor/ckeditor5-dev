@@ -24,14 +24,14 @@ import { SECTIONS } from '../../src/utils/constants.js';
 import { InternalError } from '../../src/utils/internalerror.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
-import { getReleaseTypeFromVersion } from '../../src/utils/getreleasetypefromversion.js';
+import { getReleaseType } from '../../src/utils/getreleasetype.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
 vi.mock( '../../src/utils/promptreleasetype.js' );
-vi.mock( '../../src/utils/getreleasetypefromversion.js' );
+vi.mock( '../../src/utils/getreleasetype.js' );
 vi.mock( '../../src/utils/groupentriesbysection.js' );
 vi.mock( '../../src/utils/determinenextversion.js' );
 vi.mock( '../../src/utils/filtervisiblesections.js' );
@@ -178,7 +178,7 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( removeChangelogEntryFiles ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( moveChangelogEntryFiles ).mockImplementation( entryPaths => Promise.resolve( entryPaths ) );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
-		vi.mocked( getReleaseTypeFromVersion ).mockReturnValue( 'latest' );
+		vi.mocked( getReleaseType ).mockReturnValue( 'latest' );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -202,7 +202,7 @@ describe( 'generateChangelog()', () => {
 			nextVersion: '1.0.1'
 		} );
 
-		expect( getReleaseTypeFromVersion ).toHaveBeenCalledWith( '1.0.0', '1.0.1' );
+		expect( getReleaseType ).toHaveBeenCalledWith( '1.0.0', '1.0.1' );
 		expect( promptReleaseType ).not.toHaveBeenCalled();
 	} );
 
@@ -210,7 +210,7 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( defaultOptions );
 
 		expect( promptReleaseType ).toHaveBeenCalled();
-		expect( getReleaseTypeFromVersion ).not.toHaveBeenCalled();
+		expect( getReleaseType ).not.toHaveBeenCalled();
 	} );
 
 	it( 'formats the date correctly if not specified', async () => {

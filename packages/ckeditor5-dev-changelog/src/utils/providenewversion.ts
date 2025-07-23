@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
-import { type ReleaseChannel } from '../types.js';
+import type { ChangelogReleaseType, ReleaseChannel } from '../types.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -20,6 +20,7 @@ type Options = {
 	releaseChannel: ReleaseChannel;
 	indentLevel?: number;
 	displayValidationWarning: boolean;
+	releaseType: ChangelogReleaseType;
 };
 
 type VersionValidationResult = string | true;
@@ -101,7 +102,7 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
  * Creates a prompt question for version input with validation.
  */
 function createVersionQuestion( options: Options ): Array<Question> {
-	const { version, packageName, bumpType, releaseChannel, indentLevel = 0 } = options;
+	const { version, packageName, bumpType, releaseChannel, releaseType, indentLevel = 0 } = options;
 	const suggestedVersion = getSuggestedVersion( bumpType, version, releaseChannel ) || version;
 	const message = 'Type the new version ' +
 		`(current: "${ version }", suggested: "${ suggestedVersion }", or "internal" for internal changes):`;
@@ -133,6 +134,25 @@ function createVersionQuestion( options: Options ): Array<Question> {
 			// Check against availability in the npm registry.
 			if ( !isAvailable ) {
 				return 'Given version is already taken.';
+			}
+
+			const prerelease = semver.prerelease( newVersion )!;
+			const currentPrerelease = semver.prerelease( version )!;
+
+			if ( ( releaseType === 'prerelease-promote' || releaseType === 'prerelease' ) && !prerelease ) {
+				return 'You chose a prerelease release path. Please provide a version with a channel suffix.';
+			}
+
+			if ( releaseType === 'prerelease-promote' && !semver.gte( newVersion, suggestedVersion ) ) {
+				return `Provided version must be higher or equal to ${ suggestedVersion }.`;
+			}
+
+			if ( releaseType === 'prerelease' && currentPrerelease[ 0 ] !== prerelease[ 0 ] ) {
+				return `Provided channel must be the same existing channel ${ currentPrerelease[ 0 ] }.`;
+			}
+
+			if ( releaseType === 'latest' && prerelease ) {
+				return 'You chose a latest release path. Please provide a version without a channel suffix.';
 			}
 
 			return true;

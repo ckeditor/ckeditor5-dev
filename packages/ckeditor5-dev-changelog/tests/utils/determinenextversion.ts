@@ -95,7 +95,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'patch',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -128,7 +129,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'minor',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -149,7 +151,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'minor',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -170,7 +173,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'major',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -191,7 +195,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'major',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -214,7 +219,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'major',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -243,7 +249,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'patch',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -275,7 +282,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'prerelease',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'prerelease'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -296,7 +304,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'prerelease',
 			displayValidationWarning: false,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'prerelease-promote'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', true );
 	} );
@@ -317,7 +326,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'patch',
 			displayValidationWarning: true,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -341,7 +351,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'patch',
 			displayValidationWarning: true,
-			releaseChannel: 'latest'
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
@@ -359,7 +370,8 @@ describe( 'determineNextVersion()', () => {
 			packageName: 'test-package',
 			bumpType: 'patch',
 			displayValidationWarning: false,
-			releaseChannel: 'beta'
+			releaseChannel: 'beta',
+			releaseType: 'latest'
 		} );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
