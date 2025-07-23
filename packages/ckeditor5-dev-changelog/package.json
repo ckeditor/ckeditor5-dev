@@ -36,7 +36,6 @@
     "gray-matter": "^4.0.3",
     "inquirer": "^12.5.2",
     "semver": "^7.6.3",
-    "simple-git": "^3.27.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
