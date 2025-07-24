@@ -136,23 +136,23 @@ function createVersionQuestion( options: Options ): Array<Question> {
 				return 'Given version is already taken.';
 			}
 
-			const prerelease = semver.prerelease( newVersion )!;
-			const currentPrerelease = semver.prerelease( version )!;
+			const [ newChannel ] = semver.prerelease( newVersion ) || [ 'latest' ];
+			const [ currentChannel ] = semver.prerelease( version ) || [ 'latest' ];
 
-			if ( ( releaseType === 'prerelease-promote' || releaseType === 'prerelease' ) && !prerelease ) {
-				return 'You chose a prerelease release path. Please provide a version with a channel suffix.';
+			if ( ( releaseType === 'prerelease-promote' || releaseType === 'prerelease' ) && newChannel === 'latest' ) {
+				return 'You chose the "pre-release" release type. Please provide a version with a channel suffix.';
 			}
 
 			if ( releaseType === 'prerelease-promote' && !semver.gte( newVersion, suggestedVersion ) ) {
 				return `Provided version must be higher or equal to ${ suggestedVersion }.`;
 			}
 
-			if ( releaseType === 'prerelease' && currentPrerelease[ 0 ] !== prerelease[ 0 ] ) {
-				return `Provided channel must be the same existing channel ${ currentPrerelease[ 0 ] }.`;
+			if ( releaseType === 'prerelease' && currentChannel !== 'latest' && currentChannel !== newChannel ) {
+				return `Provided channel must be the same existing channel ${ currentChannel }.`;
 			}
 
-			if ( releaseType === 'latest' && prerelease ) {
-				return 'You chose a latest release path. Please provide a version without a channel suffix.';
+			if ( releaseType === 'latest' && newChannel !== 'latest' ) {
+				return 'You chose the "latest" release type. Please provide a version without a channel suffix.';
 			}
 
 			return true;

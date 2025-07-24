@@ -259,7 +259,7 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( { ...defaultOptions, releaseType: 'latest' } as any );
 
 			await expect( validateFunction( '2.0.1-alpha.0' ) ).resolves
-				.toBe( 'You chose a latest release path. Please provide a version without a channel suffix.' );
+				.toBe( 'You chose the "latest" release type. Please provide a version without a channel suffix.' );
 		} );
 
 		it( 'should resolve an error when releaseType is prerelease-promote and version does not contain a suffix', async () => {
@@ -276,7 +276,7 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( { ...defaultOptions, releaseType: 'prerelease-promote' } as any );
 
 			await expect( validateFunction( '2.0.0' ) ).resolves
-				.toBe( 'You chose a prerelease release path. Please provide a version with a channel suffix.' );
+				.toBe( 'You chose the "pre-release" release type. Please provide a version with a channel suffix.' );
 		} );
 
 		it( 'should resolve an error when releaseType is prerelease and version does not contain a suffix', async () => {
@@ -293,7 +293,7 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( { ...defaultOptions, releaseType: 'prerelease' } as any );
 
 			await expect( validateFunction( '2.0.0' ) ).resolves
-				.toBe( 'You chose a prerelease release path. Please provide a version with a channel suffix.' );
+				.toBe( 'You chose the "pre-release" release type. Please provide a version with a channel suffix.' );
 		} );
 
 		it( 'should resolve an error when releaseType is prerelease-promote and version suffix is equal to current', async () => {
@@ -366,7 +366,31 @@ describe( 'provideNewVersion()', () => {
 			} as any );
 
 			await expect( validateFunction( '1.0.1-alpha.1' ) ).resolves
-				.toBe( 'You chose a latest release path. Please provide a version without a channel suffix.' );
+				.toBe( 'You chose the "latest" release type. Please provide a version without a channel suffix.' );
+		} );
+
+		it( 'should accept a valid prerelease version when current version is 1.0.0 and user provides 2.0.0-alpha.0', async () => {
+			vi.mocked( semver.inc ).mockReturnValue( '2.0.0-alpha.0' );
+			vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
+			vi.mocked( semver.gt ).mockReturnValue( true ); // 2.0.0-alpha.0 > 1.0.0
+			vi.mocked( semver.prerelease )
+				.mockReturnValueOnce( [ 'alpha', 0 ] ) // Next version (2.0.0-alpha.0)
+				.mockReturnValueOnce( null ); // Current version (1.0.0) - no prerelease
+
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				validateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '2.0.0-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'prerelease',
+				bumpType: 'prerelease',
+				releaseChannel: 'alpha',
+				version: '1.0.0'
+			} as any );
+
+			await expect( validateFunction( '2.0.0-alpha.0' ) ).resolves.toBe( true );
 		} );
 	} );
 

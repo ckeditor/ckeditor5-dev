@@ -7,13 +7,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { moveChangelogEntryFiles } from '../../src/utils/movechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'fs-extra';
-import { simpleGit } from 'simple-git';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { PRE_RELEASE_DIRECTORY } from '../../src/utils/constants.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'simple-git' );
 vi.mock( 'chalk', () => ( {
 	default: {
 		cyan: ( text: string ) => text
@@ -45,7 +43,6 @@ describe( 'moveChangelogEntryFiles()', () => {
 	beforeEach( () => {
 		vi.mocked( fs.ensureDir ).mockResolvedValue();
 		vi.mocked( fs.rename ).mockResolvedValue();
-		vi.mocked( simpleGit ).mockReturnValue( mockGit as any );
 	} );
 
 	it( 'should log the start of the process', async () => {
