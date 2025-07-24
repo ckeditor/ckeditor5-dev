@@ -114,9 +114,16 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		message,
 		filter: ( newVersion: string ) => newVersion.trim(),
 		async validate( newVersion: string ): Promise<VersionValidationResult> {
+			const [ newChannel ] = semver.prerelease( newVersion ) || [ 'latest' ];
+			const [ currentChannel ] = semver.prerelease( version ) || [ 'latest' ];
+
 			// Allow 'internal' as a special version.
-			if ( newVersion === 'internal' ) {
+			if ( newVersion === 'internal' && releaseType === 'latest' && currentChannel === 'latest' ) {
 				return true;
+			}
+
+			if ( newVersion === 'internal' && ( releaseType !== 'latest' || currentChannel !== 'latest' ) ) {
+				return 'Internal release is only allowed on the latest channel.';
 			}
 
 			// Require a semver valid version, e.g., `1.0.0`, `1.0.0-alpha.0`, etc.
@@ -135,9 +142,6 @@ function createVersionQuestion( options: Options ): Array<Question> {
 			if ( !isAvailable ) {
 				return 'Given version is already taken.';
 			}
-
-			const [ newChannel ] = semver.prerelease( newVersion ) || [ 'latest' ];
-			const [ currentChannel ] = semver.prerelease( version ) || [ 'latest' ];
 
 			if ( ( releaseType === 'prerelease-promote' || releaseType === 'prerelease' ) && newChannel === 'latest' ) {
 				return 'You chose the "pre-release" release type. Please provide a version with a channel suffix.';

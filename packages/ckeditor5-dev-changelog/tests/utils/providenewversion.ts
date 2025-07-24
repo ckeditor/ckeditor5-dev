@@ -207,10 +207,81 @@ describe( 'provideNewVersion()', () => {
 				.toBe( true );
 		} );
 
-		it( 'should resolved true when passing `internal` as version', async () => {
+		it( 'should resolve true when passing `internal` as version on latest channel', async () => {
 			const result = await validateFunction( 'internal' );
 
 			expect( result ).toBe( true );
+			expect( semver.valid ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should resolve an error when passing `internal` as version on prerelease channel', async () => {
+			// Reset the semver.prerelease mock to ensure clean state
+			vi.mocked( semver.prerelease ).mockReset();
+
+			// Mock semver.prerelease to return alpha for the current version (1.0.0-alpha.0)
+			vi.mocked( semver.prerelease ).mockReturnValue( [ 'alpha', 0 ] );
+
+			// Create a new validate function with a prerelease current version
+			let newValidateFunction: any;
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				newValidateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1-alpha.0' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				version: '1.0.0-alpha.0'
+			} as any );
+
+			const result = await newValidateFunction( 'internal' );
+
+			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
+			expect( semver.valid ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should resolve an error when passing `internal` as version with prerelease releaseType', async () => {
+			// Mock current version to be latest
+			vi.mocked( semver.prerelease ).mockReturnValueOnce( null );
+
+			// Create a new validate function with prerelease releaseType
+			let newValidateFunction: any;
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				newValidateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'prerelease',
+				version: '1.0.0'
+			} as any );
+
+			const result = await newValidateFunction( 'internal' );
+
+			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
+			expect( semver.valid ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should resolve an error when passing `internal` as version with prerelease-promote releaseType', async () => {
+			// Mock current version to be latest
+			vi.mocked( semver.prerelease ).mockReturnValueOnce( null );
+
+			// Create a new validate function with prerelease-promote releaseType
+			let newValidateFunction: any;
+			vi.mocked( inquirer.prompt ).mockImplementationOnce( ( questions: any ) => {
+				newValidateFunction = questions[ 0 ].validate;
+				return Promise.resolve( { version: '1.0.1' } ) as any;
+			} );
+
+			await provideNewVersion( {
+				...defaultOptions,
+				releaseType: 'prerelease-promote',
+				version: '1.0.0'
+			} as any );
+
+			const result = await newValidateFunction( 'internal' );
+
+			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
 			expect( semver.valid ).not.toHaveBeenCalled();
 		} );
 

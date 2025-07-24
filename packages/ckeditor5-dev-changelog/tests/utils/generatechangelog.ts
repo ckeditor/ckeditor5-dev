@@ -25,8 +25,10 @@ import { InternalError } from '../../src/utils/internalerror.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
 import { getReleaseType } from '../../src/utils/getreleasetype.js';
+import { validateNextVersion } from '../../src/utils/validatenextversion.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../src/utils/validatenextversion.js' );
 vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
@@ -179,6 +181,7 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( moveChangelogEntryFiles ).mockImplementation( entryPaths => Promise.resolve( entryPaths ) );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( getReleaseType ).mockReturnValue( 'latest' );
+		vi.mocked( validateNextVersion ).mockImplementation( () => {} );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -194,6 +197,15 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( defaultOptions );
 
 		expect( promptReleaseType ).toHaveBeenCalled();
+	} );
+
+	it( 'calls validateNextVersion with current version and nextVersion', async () => {
+		await generateChangelog( {
+			...defaultOptions,
+			nextVersion: '1.0.1'
+		} );
+
+		expect( validateNextVersion ).toHaveBeenCalledWith( '1.0.0', '1.0.1' );
 	} );
 
 	it( 'calls getReleaseTypeFromVersion when nextVersion is provided', async () => {
@@ -757,16 +769,14 @@ describe( 'generateChangelog()', () => {
 		it( 'handles `InternalError` properly', async () => {
 			// Mock `findPackages` to return a rejected promise with `InternalError`.
 			vi.mocked( findPackages ).mockImplementation( () => {
-				return Promise.reject( new InternalError() );
+				return Promise.reject( new InternalError( 'Test error.' ) );
 			} );
 
 			// `generateChangelog()` does not throw expected errors.
 			await generateChangelog( defaultOptions );
 
 			expect( consoleMock ).toHaveBeenCalledTimes( 1 );
-			expect( consoleMock ).toHaveBeenCalledWith(
-				expect.stringContaining( 'No valid entries were found. Please ensure that' )
-			);
+			expect( consoleMock ).toHaveBeenCalledWith( expect.stringContaining( 'Test error.' ) );
 			expect( processMock ).toHaveBeenCalledTimes( 1 );
 			expect( processMock ).toHaveBeenCalledWith( 1 );
 		} );
