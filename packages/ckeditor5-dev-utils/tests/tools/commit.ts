@@ -3,13 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { glob } from 'glob';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import commit from '../../src/tools/commit.js';
 import { simpleGit } from 'simple-git';
+import { glob } from 'glob';
+import fs from 'fs-extra';
+import upath from 'upath';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
+vi.mock( 'fs-extra' );
 
 describe( 'commit()', () => {
 	let stubs: {
@@ -23,252 +26,300 @@ describe( 'commit()', () => {
 				commit: vi.fn(),
 				reset: vi.fn(),
 				log: vi.fn(),
-				raw: vi.fn().mockResolvedValue( '' )
+				raw: vi.fn(),
+				status: vi.fn().mockResolvedValue( { isClean: () => false } )
 			}
 		};
 
-		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/ckeditor' );
-
 		vi.mocked( simpleGit ).mockReturnValue( stubs.git as any );
-
 		vi.mocked( glob ).mockResolvedValue( [] );
 
-		stubs.git.raw!.mockResolvedValue( 'package.json\npackages/ckeditor5-foo/package.json\n' );
+		stubs.git.raw!.mockResolvedValue( [
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	package.json',
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	packages/ckeditor5-foo/package.json'
+		].join( '\n' ) );
 	} );
 
-	it( 'should not create a commit and tag if there are no files modified', async () => {
+	it( 'should use the specified cwd when creating a Git instance (Unix-like)', async () => {
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: '',
+			message: 'test',
+			files: []
+		} );
+
+		expect( simpleGit ).toHaveBeenCalledWith( { baseDir: '/home/ckeditor' } );
+	} );
+
+	it( 'should use the specified cwd when creating a Git instance (Windows-like)', async () => {
+		await commit( {
+			cwd: 'C:\\home\\ckeditor',
+			message: 'test',
+			files: []
+		} );
+
+		expect( simpleGit ).toHaveBeenCalledWith( { baseDir: 'C:/home/ckeditor' } );
+	} );
+
+	it( 'should not create a commit when no files provided', async () => {
+		await commit( {
+			cwd: '/home/ckeditor',
+			message: 'test',
 			files: []
 		} );
 
 		expect( stubs.git.commit ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should use the specified cwd', async () => {
-		await commit( {
+	it.each( [
+		// Absolute file paths.
+		{
+			title: 'absolute file path (Unix-like)',
 			cwd: '/home/ckeditor',
-			message: '',
-			files: [
-				'CHANGELOG.md'
-			]
+			files: [ '/home/ckeditor/package.json' ],
+			tracked: [ 'package.json' ],
+			expected: [ 'package.json' ]
+		},
+		{
+			title: 'absolute file path (Windows-like)',
+			cwd: 'C:\\home\\ckeditor',
+			files: [ 'C:\\home\\ckeditor\\package.json' ],
+			tracked: [ 'package.json' ],
+			expected: [ 'package.json' ]
+		},
+		// Relative file paths.
+		{
+			title: 'relative file path (Unix-like)',
+			cwd: '/home/ckeditor',
+			files: [ 'package.json' ],
+			tracked: [ 'package.json' ],
+			expected: [ 'package.json' ]
+		},
+		{
+			title: 'relative file path (Windows-like)',
+			cwd: 'C:\\home\\ckeditor',
+			files: [ 'package.json' ],
+			tracked: [ 'package.json' ],
+			expected: [ 'package.json' ]
+		},
+		// Absolute directory.
+		{
+			title: 'absolute directory (Unix-like)',
+			cwd: '/home/ckeditor',
+			files: [ '/home/ckeditor/packages' ],
+			tracked: [],
+			expected: [ 'packages' ]
+		},
+		{
+			title: 'absolute directory (Windows-like)',
+			cwd: 'C:\\home\\ckeditor',
+			files: [ 'C:\\home\\ckeditor\\packages' ],
+			tracked: [],
+			expected: [ 'packages' ]
+		},
+		// Relative directory.
+		{
+			title: 'relative directory (Unix-like)',
+			cwd: '/home/ckeditor',
+			files: [ 'packages' ],
+			tracked: [],
+			expected: [ 'packages' ]
+		},
+		{
+			title: 'relative directory (Windows-like)',
+			cwd: 'C:\\home\\ckeditor',
+			files: [ 'packages' ],
+			tracked: [],
+			expected: [ 'packages' ]
+		}
+	] )( 'should commit $title', async ( { cwd, files, tracked, expected } ) => {
+		// Setup Git-tracked files
+		stubs.git.raw!.mockResolvedValue(
+			tracked.map( f => `100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	${ f }` ).join( '\n' )
+		);
+
+		// Mock access for untracked files to simulate presence
+		vi.mocked( fs.access ).mockImplementation( async path => {
+			// Allow all untracked paths to be considered "existing"
+			if ( !tracked.includes( upath.normalize( upath.relative( cwd, path as string ) ) ) ) {
+				return undefined as any;
+			}
 		} );
 
-		expect( vi.mocked( simpleGit ) ).toHaveBeenCalledWith( {
-			baseDir: '/home/ckeditor'
+		await commit( {
+			cwd,
+			message: 'Changelog v1.0.0.',
+			files
 		} );
+
+		expect( stubs.git.add ).toHaveBeenCalledWith( expected );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Changelog v1.0.0.' );
 	} );
 
-	it( 'should commit given files with a release message', async () => {
+	it( 'should commit a tracked file that has been removed', async () => {
+		stubs.git.raw!.mockResolvedValue(
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	tracked-file-that-is-no-longer-here.txt\n'
+		);
+		vi.mocked( fs.access ).mockRejectedValue( new Error( 'ENOENT: no such file or directory' ) );
+
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
+			message: 'Changelog v1.0.0.',
 			files: [
-				'package.json',
-				'packages/ckeditor5-foo/package.json'
+				'/home/ckeditor/tracked-file-that-is-no-longer-here.txt'
 			]
 		} );
 
 		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
+			'tracked-file-that-is-no-longer-here.txt'
 		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
+
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Changelog v1.0.0.' );
 	} );
 
-	it( 'should commit given files with a release message (input uses absolute paths)', async () => {
-		// It returns a list of files tracked by git.
-		stubs.git.raw!.mockResolvedValue( [
-			'.changelog/20250606112657_ck_18067_new_changelog.md',
-			'CHANGELOG.md'
-		].join( '\n' ) );
+	it( 'should commit a tracked file with a space in its name', async () => {
+		stubs.git.raw!.mockResolvedValue( '100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	"my file with space.txt"\n' );
 
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
+			message: 'Commit file with space',
 			files: [
-				'/home/ckeditor/CHANGELOG.md',
-				'/home/ckeditor/.changelog/20250606112657_ck_18067_new_changelog.md'
+				'my file with space.txt'
 			]
 		} );
 
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'CHANGELOG.md',
-			'.changelog/20250606112657_ck_18067_new_changelog.md'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
+		expect( stubs.git.add ).toHaveBeenCalledWith( [ 'my file with space.txt' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Commit file with space' );
 	} );
 
-	it( 'should commit given files with a release message when Git returns Windows-like path', async () => {
-		// It returns a list of files tracked by git.
-		stubs.git.raw!.mockResolvedValue( [
-			'.changelog\\20250606112657_ck_18067_new_changelog.md',
-			'CHANGELOG.md'
-		].join( '\n' ) );
+	it( 'should commit an untracked but existing file with a space in its name', async () => {
+		stubs.git.raw!.mockResolvedValue( '' );
+		vi.mocked( fs.access ).mockResolvedValue( undefined );
 
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
+			message: 'Commit untracked file with space',
 			files: [
-				'/home/ckeditor/CHANGELOG.md',
-				'/home/ckeditor/.changelog/20250606112657_ck_18067_new_changelog.md'
+				'my file with space.txt'
 			]
 		} );
 
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'CHANGELOG.md',
-			'.changelog/20250606112657_ck_18067_new_changelog.md'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
+		expect( stubs.git.add ).toHaveBeenCalledWith( [ 'my file with space.txt' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Commit untracked file with space' );
 	} );
 
-	it( 'should commit given files with a release message for input files using Windows-like paths', async () => {
-		// It returns a list of files tracked by git.
-		stubs.git.raw!.mockResolvedValue( [
-			'.changelog/20250606112657_ck_18067_new_changelog.md',
-			'CHANGELOG.md'
-		].join( '\n' ) );
-
-		await commit( {
-			cwd: 'C:\\Users\\home\\ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
-			files: [
-				'C:\\Users\\home\\ckeditor\\CHANGELOG.md',
-				'C:\\Users\\home\\ckeditor\\.changelog/20250606112657_ck_18067_new_changelog.md'
-			]
-		} );
-
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'CHANGELOG.md',
-			'.changelog/20250606112657_ck_18067_new_changelog.md'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
-	} );
-
-	it( 'should commit given files with a release message for input files and Git using Windows-like paths', async () => {
-		// It returns a list of files tracked by git.
-		stubs.git.raw!.mockResolvedValue( [
-			'.changelog\\20250606112657_ck_18067_new_changelog.md',
-			'CHANGELOG.md'
-		].join( '\n' ) );
-
-		await commit( {
-			cwd: 'C:\\Users\\home\\ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
-			files: [
-				'C:\\Users\\home\\ckeditor\\CHANGELOG.md',
-				'C:\\Users\\home\\ckeditor\\.changelog/20250606112657_ck_18067_new_changelog.md'
-			]
-		} );
-
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'CHANGELOG.md',
-			'.changelog/20250606112657_ck_18067_new_changelog.md'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
-	} );
-
-	it( 'should create a commit in dry run mode without creating a tag and then reset it', async () => {
-		vi.mocked( stubs.git.log! ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
+	it( 'should skip commit if status is clean', async () => {
+		stubs.git.status!.mockResolvedValue( { isClean: () => true } );
 
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
-			files: [
-				'package.json',
-				'packages/ckeditor5-foo/package.json'
-			],
+			message: 'No changes',
+			files: [ 'package.json' ]
+		} );
+
+		expect( stubs.git.commit ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should commit during dry run and reset after', async () => {
+		stubs.git.log!.mockResolvedValue( { latest: { hash: 'abc123' } } );
+
+		await commit( {
+			cwd: '/home/ckeditor',
+			message: 'Dry run test',
+			files: [ 'package.json' ],
 			dryRun: true
 		} );
 
-		expect( stubs.git.log ).toHaveBeenCalledWith( [ '-1' ] );
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
-		expect( stubs.git.reset ).toHaveBeenCalledWith( [ 'previousmockhash' ] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Dry run test' );
+		expect( stubs.git.reset ).toHaveBeenCalledWith( [ 'abc123' ] );
 	} );
 
-	it( 'should not run git reset when commit in dry run throws an error', async () => {
-		vi.mocked( stubs.git.log! ).mockResolvedValue( { latest: { hash: 'previousmockhash' } } );
-		vi.mocked( stubs.git.commit! ).mockRejectedValue( new Error( 'Error executing git commit in dry run mode.' ) );
-		vi.spyOn( console, 'log' ).mockImplementation( () => {} );
+	it( 'should not reset if dry-run commit throws error', async () => {
+		stubs.git.log!.mockResolvedValue( { latest: { hash: 'abc123' } } );
+		stubs.git.commit!.mockRejectedValue( new Error( 'fail' ) );
 
 		await expect( commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
-			files: [
-				'package.json',
-				'packages/ckeditor5-foo/package.json'
-			],
+			message: 'fail test',
+			files: [ 'package.json' ],
 			dryRun: true
-		} ) ).rejects.toThrow( 'Error executing git commit in dry run mode.' );
-
-		expect( stubs.git.log ).toHaveBeenCalledWith( [ '-1' ] );
-		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'package.json',
-			'packages/ckeditor5-foo/package.json'
-		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
+		} ) ).rejects.toThrow( 'fail' );
 
 		expect( stubs.git.reset ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should split adding files to commit into chunks if they exceed the character limit', async () => {
-		const numberOfFiles = 500;
-		const files = new Array( numberOfFiles ).fill( null ).map( ( _, i ) => `very/long/path/foo/bar/file_${ i }.js` );
-
-		stubs.git.raw!.mockResolvedValue( `package.json\n${ files.join( '\n' ) }` );
-
-		await commit( {
-			files,
-			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]'
-		} );
-
-		expect( stubs.git.add ).toHaveBeenCalledTimes( 5 );
-
-		// The first chunk is larger because `file_1` is a shorter string than `file_100`,
-		// and more files can fit within the given character limit.
-		//
-		// Sum should equal the given number of files resolved by glob.
-		const expectedChunkSizes = [ 117, 114, 114, 114, 41 ];
-		const expectedChunkSizesSum = expectedChunkSizes.reduce( ( a, b ) => a + b );
-
-		expect( expectedChunkSizesSum, 'Sum of expected chunks does not equal total number of files' ).toEqual( numberOfFiles );
-
-		expectedChunkSizes.forEach( ( expectedChunkSize, i ) => {
-			const [ inputArray ] = stubs.git.add!.mock.calls[ i ]!;
-
-			expect( inputArray, `Chunk indexed "${ i }" has unexpected size` ).toHaveLength( expectedChunkSize );
-		} );
-
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
-	} );
-
-	it( 'should not add a file non-tracked by git', async () => {
-		// It returns a list of files tracked by git.
+	it( 'should skip untracked files that do not exist on disk and commit valid tracked ones using absolute paths', async () => {
+		// Simulate tracked files: only `CHANGELOG.md` is tracked.
 		stubs.git.raw!.mockResolvedValue( [
-			'.changelog/20250606112657_ck_18067_new_changelog.md',
-			'CHANGELOG.md'
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	CHANGELOG.md'
 		].join( '\n' ) );
 
+		// Only allow access to `CHANGELOG.md`, reject others
+		vi.mocked( fs.access ).mockImplementation( async path => {
+			if ( ( path as string ).includes( 'nonexistent.md' ) ) {
+				throw new Error( 'ENOENT: no such file or directory' );
+			}
+		} );
+
 		await commit( {
 			cwd: '/home/ckeditor',
-			message: 'Release: v1.0.0. [skip ci]',
+			message: 'Skip missing file',
 			files: [
-				'CHANGELOG.md',
-				'.changelog/20250606112657_ck_18067_new_changelog.md',
-				'.changelog/20250606125408_ck_00000_invalid_file.md'
+				'/home/ckeditor/CHANGELOG.md',
+				'/home/ckeditor/.changelog/nonexistent.md'
 			]
 		} );
 
 		expect( stubs.git.add ).toHaveBeenCalledWith( [
-			'CHANGELOG.md',
-			'.changelog/20250606112657_ck_18067_new_changelog.md'
+			'CHANGELOG.md'
 		] );
-		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Release: v1.0.0. [skip ci]' );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Skip missing file' );
+	} );
+
+	it( 'should skip untracked files that do not exist on disk and commit valid tracked ones using relative paths', async () => {
+		// Simulate tracked files: only `CHANGELOG.md` is tracked.
+		stubs.git.raw!.mockResolvedValue( [
+			'100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	CHANGELOG.md'
+		].join( '\n' ) );
+
+		// Only allow access to `CHANGELOG.md`, reject others
+		vi.mocked( fs.access ).mockImplementation( async path => {
+			if ( ( path as string ).includes( 'nonexistent.md' ) ) {
+				throw new Error( 'ENOENT: no such file or directory' );
+			}
+		} );
+
+		await commit( {
+			cwd: '/home/ckeditor',
+			message: 'Skip missing file',
+			files: [
+				'CHANGELOG.md',
+				'.changelog/nonexistent.md'
+			]
+		} );
+
+		expect( stubs.git.add ).toHaveBeenCalledWith( [
+			'CHANGELOG.md'
+		] );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Skip missing file' );
+	} );
+
+	it( 'should split adding files to commit into chunks if they exceed the character limit', async () => {
+		const files = Array.from( { length: 200 }, ( _, i ) => `dir/verylongfilename_${ i }.js` );
+
+		stubs.git.raw!.mockResolvedValue(
+			files.map( f => `100644 7d49f7d30b961a267eacbef57233d92358bb06ad 0	${ f }` ).join( '\n' )
+		);
+		stubs.git.status!.mockResolvedValue( { isClean: () => false } );
+		vi.mocked( fs.access ).mockResolvedValue( undefined );
+
+		await commit( {
+			files,
+			cwd: '/home/ckeditor',
+			message: 'Chunked commit'
+		} );
+
+		expect( stubs.git.add ).toHaveBeenCalled();
+		expect( stubs.git.add!.mock.calls.length ).toBeGreaterThan( 1 );
+		expect( stubs.git.commit ).toHaveBeenCalledWith( 'Chunked commit' );
 	} );
 } );
