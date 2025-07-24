@@ -12,9 +12,6 @@ import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import WebpackNotifierPlugin from './webpacknotifierplugin.js';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
-
 const require = createRequire( import.meta.url );
 
 /**
@@ -100,7 +97,7 @@ export default function getWebpackConfigForManualTests( options ) {
 		resolveLoader: {
 			modules: [
 				'node_modules',
-				path.resolve( __dirname, '..', '..', '..', 'node_modules' )
+				path.resolve( import.meta.dirname, '..', '..', '..', 'node_modules' )
 			]
 		}
 	};
@@ -114,7 +111,7 @@ export default function getWebpackConfigForManualTests( options ) {
 			//
 			// Example:
 			//
-			// After running `yarn run manual -f alignment` we have:
+			// After running `pnpm run manual -f alignment` we have:
 			// - the `[base]` placeholder contains only the file name: `alignment.js`,
 			// - the `[file]` placeholder contains the relative path to the test file: `ckeditor5-alignment/tests/manual/alignment.js`.
 			//
@@ -143,7 +140,7 @@ export default function getWebpackConfigForManualTests( options ) {
 		// It leads to the CKEditor 5 duplicated modules error.
 		//
 		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
-		const manifestPath = path.join( options.cwd, 'build', 'ckeditor5-dll.manifest.json' );
+		const manifestPath = fileURLToPath( import.meta.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' ) );
 		const dllReferencePlugin = new webpack.DllReferencePlugin( {
 			manifest: require( manifestPath ),
 			scope: 'ckeditor5/src',

@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { fileURLToPath } from 'url';
 import chalk from 'chalk';
-import path from 'path';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIdentityFile: true } );
@@ -17,7 +17,7 @@ const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIde
 options.disableWatch = process.argv.includes( '--disable-watch' );
 
 // "Lark" is the default theme for tests.
-options.themePath = path.resolve( options.cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
+options.themePath = fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-theme-lark' ) );
 
 tests.runManualTests( options )
 	.catch( error => {

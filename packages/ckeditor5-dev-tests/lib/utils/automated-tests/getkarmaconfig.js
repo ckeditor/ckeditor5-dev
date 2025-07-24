@@ -4,24 +4,26 @@
  */
 
 import path from 'path';
-import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
-
-const require = createRequire( import.meta.url );
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
-
-const AVAILABLE_REPORTERS = [
-	'mocha',
-	'dots'
-];
+import { createRequire } from 'module';
+import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
 
 /**
  * @param {object} options
  * @returns {object}
  */
 export default function getKarmaConfig( options ) {
+	const require = createRequire( import.meta.url );
+	const AVAILABLE_REPORTERS = [
+		'mocha',
+		'dots'
+	];
+
+	const relativeUtilsPath = path.relative(
+		process.cwd(),
+		path.dirname( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-utils/package.json' ) ) )
+	);
+
 	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
 		throw new Error( `Specified reporter is not supported. Available reporters: ${ AVAILABLE_REPORTERS.join( ', ' ) }.` );
 	}
@@ -60,17 +62,23 @@ export default function getKarmaConfig( options ) {
 
 		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
-			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/',
+			'/assets/': path.resolve( '/base', relativeUtilsPath, 'tests/_assets' ) + '/',
 
 			// See: https://github.com/ckeditor/ckeditor5/issues/8823.
-			'/example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png',
-			'/www.example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png'
+			'/example.com/image.png': path.resolve( '/base', relativeUtilsPath, 'tests/_assets/sample.png' ),
+			'/www.example.com/image.png': path.resolve( '/base', relativeUtilsPath, 'tests/_assets/sample.png' )
 		},
 
 		// List of files/patterns to load in the browser.
 		files: [
 			options.entryFile,
-			{ pattern: 'packages/ckeditor5-utils/tests/_assets/**/*', watched: false, included: false, served: true, nocache: false }
+			{
+				pattern: path.resolve( relativeUtilsPath, 'tests/_assets/**/*' ),
+				watched: false,
+				included: false,
+				served: true,
+				nocache: false
+			}
 		],
 
 		// Preprocess matching files before serving them to the browser.
@@ -134,7 +142,7 @@ export default function getKarmaConfig( options ) {
 	// Notification is enabled by default when executing all tests.
 	if ( options.notify || !options.files ) {
 		karmaConfig.reporters.push( 'karmanotifier' );
-		karmaConfig.plugins.push( require( path.join( __dirname, 'karmanotifier.js' ) ) );
+		karmaConfig.plugins.push( require( path.join( import.meta.dirname, 'karmanotifier.js' ) ) );
 	}
 
 	if ( options.watch || options.server ) {
