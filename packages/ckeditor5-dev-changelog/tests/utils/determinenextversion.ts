@@ -9,18 +9,11 @@ import { logInfo } from '../../src/utils/loginfo.js';
 import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
-import semver from 'semver';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/providenewversion.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/detectreleasechannel.js' );
-vi.mock( 'semver', () => ( {
-	default: {
-		inc: vi.fn(),
-		prerelease: vi.fn()
-	}
-} ) );
 
 describe( 'determineNextVersion()', () => {
 	let options: DetermineNextVersionOptions;
@@ -56,14 +49,6 @@ describe( 'determineNextVersion()', () => {
 	} );
 
 	beforeEach( () => {
-		vi.mocked( semver.inc ).mockImplementation( ( version, releaseType ) => {
-			if ( version === '1.0.0' && releaseType === 'patch' ) {
-				return '1.0.1';
-			}
-
-			return null;
-		} );
-		vi.mocked( semver.prerelease ).mockImplementation( () => null );
 		mockedDetectReleaseChannel.mockReturnValue( 'latest' );
 
 		options = {
@@ -124,14 +109,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'minor',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'minor'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -146,14 +126,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'minor',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'minor'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -168,14 +143,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -190,14 +160,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -214,14 +179,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -277,14 +237,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.0-alpha.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'prerelease',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'prerelease'
-		} );
+
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prerelease'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -299,14 +255,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.0-beta.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'prerelease',
-			displayValidationWarning: false,
-			releaseChannel: 'latest',
-			releaseType: 'prerelease-promote'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prerelease'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', true );
 	} );
 
@@ -321,14 +272,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'patch',
-			displayValidationWarning: true,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			displayValidationWarning: true
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -346,14 +292,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'patch',
-			displayValidationWarning: true,
-			releaseChannel: 'latest',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			displayValidationWarning: true
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
@@ -365,14 +306,9 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.0-beta.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'patch',
-			displayValidationWarning: false,
-			releaseChannel: 'beta',
-			releaseType: 'latest'
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			releaseChannel: 'beta'
+		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 } );

@@ -3,13 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-import { npm } from '@ckeditor/ckeditor5-dev-utils';
 import semver, { type ReleaseType } from 'semver';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
 import type { ChangelogReleaseType, ReleaseChannel } from '../types.js';
+import { validateInputVersion } from './validateinputversion.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -23,15 +23,13 @@ type Options = {
 	releaseType: ChangelogReleaseType;
 };
 
-type VersionValidationResult = string | true;
-
 type Question = {
 	type: 'input';
 	name: 'version';
 	default: string;
 	message: string;
 	filter: ( input: string ) => string;
-	validate: ( input: string ) => Promise<VersionValidationResult>;
+	validate: ( input: string ) => Promise<string | true>;
 	prefix: string;
 };
 
@@ -113,54 +111,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		default: suggestedVersion,
 		message,
 		filter: ( newVersion: string ) => newVersion.trim(),
-		async validate( newVersion: string ): Promise<VersionValidationResult> {
-			const [ newChannel ] = semver.prerelease( newVersion ) || [ 'latest' ];
-			const [ currentChannel ] = semver.prerelease( version ) || [ 'latest' ];
-
-			// Allow 'internal' as a special version.
-			if ( newVersion === 'internal' && releaseType === 'latest' && currentChannel === 'latest' ) {
-				return true;
-			}
-
-			if ( newVersion === 'internal' && ( releaseType !== 'latest' || currentChannel !== 'latest' ) ) {
-				return 'Internal release is only allowed on the latest channel.';
-			}
-
-			// Require a semver valid version, e.g., `1.0.0`, `1.0.0-alpha.0`, etc.
-			if ( !semver.valid( newVersion ) ) {
-				return 'Please provide a valid version or "internal" for internal changes.';
-			}
-
-			// The provided version must be higher than the current version.
-			if ( !semver.gt( newVersion, version ) ) {
-				return `Provided version must be higher than "${ version }".`;
-			}
-
-			const isAvailable = await npm.checkVersionAvailability( newVersion, packageName );
-
-			// Check against availability in the npm registry.
-			if ( !isAvailable ) {
-				return 'Given version is already taken.';
-			}
-
-			if ( ( releaseType === 'prerelease-promote' || releaseType === 'prerelease' ) && newChannel === 'latest' ) {
-				return 'You chose the "pre-release" release type. Please provide a version with a channel suffix.';
-			}
-
-			if ( releaseType === 'prerelease-promote' && !semver.gte( newVersion, suggestedVersion ) ) {
-				return `Provided version must be higher or equal to ${ suggestedVersion }.`;
-			}
-
-			if ( releaseType === 'prerelease' && currentChannel !== 'latest' && currentChannel !== newChannel ) {
-				return `Provided channel must be the same existing channel ${ currentChannel }.`;
-			}
-
-			if ( releaseType === 'latest' && newChannel !== 'latest' ) {
-				return 'You chose the "latest" release type. Please provide a version without a channel suffix.';
-			}
-
-			return true;
-		},
+		validate: ( newVersion: string ) => validateInputVersion( { newVersion, version, releaseType, packageName, suggestedVersion } ),
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	} ];
 }
