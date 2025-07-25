@@ -18,10 +18,14 @@ import { filterVisibleSections } from './filtervisiblesections.js';
 import { logInfo } from './loginfo.js';
 import { composeChangelog } from './composechangelog.js';
 import { removeChangelogEntryFiles } from './removechangelogentryfiles.js';
+import { moveChangelogEntryFiles } from './movechangelogentryfiles.js';
 import { commitChanges } from './commitchanges.js';
 import { InternalError } from './internalerror.js';
+import { promptReleaseType } from './promptreleasetype.js';
+import { getReleaseType } from './getreleasetype.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { UserAbortError } from './useraborterror.js';
+import { validateNextVersion } from './validatenextversion.js';
 
 type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { isSinglePackage: boolean };
 
@@ -58,17 +62,25 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	} = options;
 
 	const { version: currentVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
+
+	validateNextVersion( currentVersion, nextVersion );
+
 	const packagesMetadata = await findPackages( {
 		cwd,
 		packagesDirectory,
 		shouldIgnoreRootPackage,
 		externalRepositories
 	} );
+
+	const releaseType = nextVersion ? getReleaseType( currentVersion, nextVersion ) : await promptReleaseType( currentVersion );
+
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,
 		externalRepositories,
-		shouldSkipLinks
+		shouldSkipLinks,
+		includeSubdirectories: releaseType === 'latest' || releaseType === 'prerelease-promote'
 	} );
+
 	const parsedChangesetFiles = await parseChangelogEntries( entryPaths, isSinglePackage );
 	const sectionsWithEntries = groupEntriesBySection( {
 		packagesMetadata,
@@ -98,6 +110,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	const { isInternal, newVersion } = await determineNextVersion( {
 		currentVersion,
 		nextVersion,
+		releaseType,
 		sections: sectionsWithEntries,
 		packageName: shouldIgnoreRootPackage ? npmPackageToCheck! : rootPackageName
 	} );
@@ -125,11 +138,19 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		return newChangelog as any;
 	}
 
-	await removeChangelogEntryFiles( entryPaths );
+	let pathsToCommit = entryPaths;
+
+	// Handle changelog entry files based on release type.
+	if ( releaseType === 'latest' ) {
+		await removeChangelogEntryFiles( entryPaths );
+	} else {
+		pathsToCommit = await moveChangelogEntryFiles( entryPaths );
+	}
+
 	await modifyChangelog( newChangelog, cwd );
 	await commitChanges(
 		newVersion,
-		entryPaths.map( ( { cwd, isRoot, filePaths } ) => ( { cwd, isRoot, filePaths } ) )
+		pathsToCommit.map( ( { cwd, isRoot, filePaths } ) => ( { cwd, isRoot, filePaths } ) )
 	);
 
 	logInfo( '○ ' + chalk.green( 'Done!' ) );

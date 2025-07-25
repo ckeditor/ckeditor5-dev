@@ -6,25 +6,20 @@
 import { determineNextVersion, type DetermineNextVersionOptions } from '../../src/utils/determinenextversion.js';
 import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
+import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
-import semver from 'semver';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/providenewversion.js' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'semver', () => {
-	return {
-		default: {
-			inc: vi.fn()
-		}
-	};
-} );
+vi.mock( '../../src/utils/detectreleasechannel.js' );
 
 describe( 'determineNextVersion()', () => {
 	let options: DetermineNextVersionOptions;
 	const mockedProvideNewVersion = vi.mocked( provideNewVersion );
 	const mockedLogInfo = vi.mocked( logInfo );
+	const mockedDetectReleaseChannel = vi.mocked( detectReleaseChannel );
 
 	const createEntry = ( message: string ): Entry => ( {
 		message,
@@ -54,19 +49,14 @@ describe( 'determineNextVersion()', () => {
 	} );
 
 	beforeEach( () => {
-		vi.mocked( semver.inc ).mockImplementation( ( version, releaseType ) => {
-			if ( version === '1.0.0' && releaseType === 'patch' ) {
-				return '1.0.1';
-			}
-
-			return null;
-		} );
+		mockedDetectReleaseChannel.mockReturnValue( 'latest' );
 
 		options = {
 			sections: createSectionsWithEntries(),
 			currentVersion: '1.0.0',
 			packageName: 'test-package',
-			nextVersion: undefined
+			nextVersion: undefined,
+			releaseType: 'latest'
 		};
 	} );
 
@@ -89,8 +79,11 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should return provided version if it is not undefined or internal', async () => {
@@ -102,6 +95,7 @@ describe( 'determineNextVersion()', () => {
 		expect( result.isInternal ).toBe( false );
 		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
 		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
+		expect( mockedDetectReleaseChannel ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should return a minor bump version when "MINOR BREAKING CHANGE" entries are present', async () => {
@@ -115,12 +109,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'minor',
-			displayValidationWarning: false
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'minor'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should return a minor bump version when Feature entries are present', async () => {
@@ -134,12 +126,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.1.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'minor',
-			displayValidationWarning: false
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'minor'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should return a major bump version when "BREAKING CHANGE" entries are present', async () => {
@@ -153,12 +143,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should return a major bump version when "MAJOR BREAKING CHANGE" entries are present', async () => {
@@ -172,12 +160,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should prioritize "MAJOR BREAKING CHANGE" version even if "MINOR BREAKING CHANGES" and feature entries are present', async () => {
@@ -193,12 +179,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '2.0.0' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'major',
-			displayValidationWarning: false
-		} );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'major'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should handle internal version when nextVersion is set to "internal"', async () => {
@@ -210,6 +194,7 @@ describe( 'determineNextVersion()', () => {
 		expect( result.isInternal ).toBe( true );
 		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
 		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 1.0.1.' ) }` );
+		expect( mockedDetectReleaseChannel ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should handle internal version when user provides "internal" as version', async () => {
@@ -223,8 +208,11 @@ describe( 'determineNextVersion()', () => {
 			version: '1.0.0',
 			packageName: 'test-package',
 			bumpType: 'patch',
-			displayValidationWarning: false
+			displayValidationWarning: false,
+			releaseChannel: 'latest',
+			releaseType: 'latest'
 		} );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should throw an error when semver.inc returns null', async () => {
@@ -235,6 +223,42 @@ describe( 'determineNextVersion()', () => {
 		await expect(
 			determineNextVersion( options )
 		).rejects.toThrow( 'Unable to determine new version based on the version in root package.json.' );
+	} );
+
+	it( 'should return a prerelease bump version when releaseType is prerelease', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-alpha.1' );
+		options.releaseType = 'prerelease';
+		options.sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' },
+			feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.0-alpha.1' );
+		expect( result.isInternal ).toBe( false );
+
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prerelease'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
+	} );
+
+	it( 'should call detectReleaseChannel with promotePrerelease=true when releaseType is prerelease-promote', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-beta.0' );
+		options.releaseType = 'prerelease-promote';
+		options.sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.0-beta.0' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prerelease'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', true );
 	} );
 
 	it( 'should set displayValidationWarning to true when invalid entries are present', async () => {
@@ -248,12 +272,10 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'patch',
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
 			displayValidationWarning: true
-		} );
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
 	it( 'should set displayValidationWarning to true when entries have validations', async () => {
@@ -270,11 +292,23 @@ describe( 'determineNextVersion()', () => {
 
 		expect( result.newVersion ).toBe( '1.0.1' );
 		expect( result.isInternal ).toBe( false );
-		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( {
-			version: '1.0.0',
-			packageName: 'test-package',
-			bumpType: 'patch',
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
 			displayValidationWarning: true
-		} );
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
+	} );
+
+	it( 'should use the release channel returned by detectReleaseChannel', async () => {
+		mockedDetectReleaseChannel.mockReturnValue( 'beta' );
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-beta.1' );
+
+		const result = await determineNextVersion( options );
+
+		expect( result.newVersion ).toBe( '1.0.0-beta.1' );
+		expect( result.isInternal ).toBe( false );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			releaseChannel: 'beta'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 } );

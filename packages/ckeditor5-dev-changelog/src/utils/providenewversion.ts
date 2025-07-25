@@ -3,12 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-import { npm } from '@ckeditor/ckeditor5-dev-utils';
 import semver, { type ReleaseType } from 'semver';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
+import type { ChangelogReleaseType, ReleaseChannel } from '../types.js';
+import { validateInputVersion } from './validateinputversion.js';
 
 const CLI_INDENT_SIZE = 3;
 
@@ -16,11 +17,11 @@ type Options = {
 	packageName: string;
 	version: string;
 	bumpType: ReleaseType;
+	releaseChannel: ReleaseChannel;
 	indentLevel?: number;
 	displayValidationWarning: boolean;
+	releaseType: ChangelogReleaseType;
 };
-
-type VersionValidationResult = string | true;
 
 type Question = {
 	type: 'input';
@@ -28,7 +29,7 @@ type Question = {
 	default: string;
 	message: string;
 	filter: ( input: string ) => string;
-	validate: ( input: string ) => Promise<VersionValidationResult>;
+	validate: ( input: string ) => Promise<string | true>;
 	prefix: string;
 };
 
@@ -99,8 +100,8 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
  * Creates a prompt question for version input with validation.
  */
 function createVersionQuestion( options: Options ): Array<Question> {
-	const { version, packageName, bumpType, indentLevel = 0 } = options;
-	const suggestedVersion = semver.inc( version, bumpType ) || version;
+	const { version, packageName, bumpType, releaseChannel, releaseType, indentLevel = 0 } = options;
+	const suggestedVersion = getSuggestedVersion( bumpType, version, releaseChannel ) || version;
 	const message = 'Type the new version ' +
 		`(current: "${ version }", suggested: "${ suggestedVersion }", or "internal" for internal changes):`;
 
@@ -110,31 +111,20 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		default: suggestedVersion,
 		message,
 		filter: ( newVersion: string ) => newVersion.trim(),
-		async validate( newVersion: string ): Promise<VersionValidationResult> {
-			// Allow 'internal' as a special version.
-			if ( newVersion === 'internal' ) {
-				return true;
-			}
-
-			// Require a semver valid version, e.g., `1.0.0`, `1.0.0-alpha.0`, etc.
-			if ( !semver.valid( newVersion ) ) {
-				return 'Please provide a valid version or "internal" for internal changes.';
-			}
-
-			// The provided version must be higher than the current version.
-			if ( !semver.gt( newVersion, version ) ) {
-				return `Provided version must be higher than "${ version }".`;
-			}
-
-			const isAvailable = await npm.checkVersionAvailability( newVersion, packageName );
-
-			// Check against availability in the npm registry.
-			if ( !isAvailable ) {
-				return 'Given version is already taken.';
-			}
-
-			return true;
-		},
+		validate: ( newVersion: string ) => validateInputVersion( { newVersion, version, releaseType, packageName, suggestedVersion } ),
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
 	} ];
+}
+
+function getSuggestedVersion( bumpType: ReleaseType, version: string, releaseChannel: ReleaseChannel ) {
+	if ( bumpType === 'prerelease' && releaseChannel !== 'latest' ) {
+		return semver.inc( version, bumpType, releaseChannel );
+	} else if ( bumpType === 'prerelease' && releaseChannel === 'latest' ) {
+		// Using 'premajor` and `alpha` channel for a case, when introducing a prerelease for the next major.
+		// E.g. 1.0.0 -> 2.0.0-alpha.0.
+
+		return semver.inc( version, 'premajor', 'alpha' );
+	} else {
+		return semver.inc( version, bumpType );
+	}
 }
