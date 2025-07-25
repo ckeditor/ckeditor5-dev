@@ -9,7 +9,7 @@ export type ConfigBase = RepositoryConfig & {
 
 	/**
 	 * The next version number to use. If not provided, will be calculated based on changes.
-	 * Can be a semver string.
+	 * Must be a valid version in terms of the semantic versioning specification.
 	 */
 	nextVersion?: string;
 
