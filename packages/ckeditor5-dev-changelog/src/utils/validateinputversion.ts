@@ -18,22 +18,12 @@ type ValidateOptions = {
 export async function validateInputVersion( options: ValidateOptions ): Promise<string | true> {
 	const { newVersion, version, releaseType, packageName, suggestedVersion } = options;
 
-	const isInternal = newVersion === 'internal';
-
 	const [ newChannel ] = semver.prerelease( newVersion ) || [ 'latest' ];
 	const [ currentChannel ] = semver.prerelease( version ) || [ 'latest' ];
 
-	// Special‑case: internal releases.
-	if ( isInternal ) {
-		if ( releaseType === 'latest' && currentChannel === 'latest' ) {
-			return true;
-		}
-		return 'Internal release is only allowed on the latest channel.';
-	}
-
 	// Generic semantic‑version checks.
 	if ( !semver.valid( newVersion ) ) {
-		return 'Please provide a valid version or "internal" for internal changes.';
+		return 'Please provide a valid version.';
 	}
 
 	if ( !semver.gt( newVersion, version ) ) {
