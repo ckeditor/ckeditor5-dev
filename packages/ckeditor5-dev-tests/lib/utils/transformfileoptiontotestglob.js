@@ -14,6 +14,7 @@ const EXTERNAL_DIR_NAME = 'external';
  *  * "<external-package-name>" - matches tests in root of external package.
  *  * "*" - matches all packages' files.
  *  * "foo"  - matches all tests from a package.
+ *  * "ckeditor5-foo" - matches all tests from a package (full package name).
  *  * "!foo" - matches all tests except from a package.
  *  * "foo/bar/" - matches all tests from a package and a subdirectory.
  *  * "foo/bar" - matches all tests from a package (or root) with specific filename.
@@ -97,6 +98,7 @@ function doesPatternMatchExternalRepositoryName( pattern ) {
  * @returns {string}
  */
 function transformSinglePattern( pattern, options ) {
+	const isFullPackageName = /^!?ckeditor5?-/.test( pattern );
 	const chunks = pattern.match( /[a-z1-9|*-]+/g );
 	const output = [];
 
@@ -110,7 +112,9 @@ function transformSinglePattern( pattern, options ) {
 
 	output.push( ...process.cwd().split( path.sep ) );
 
-	if ( packageName !== 'ckeditor5' ) {
+	if ( packageName === 'ckeditor5' || isFullPackageName ) {
+		output.push( ...packagesDirectory, packageName );
+	} else {
 		output.push( ...packagesDirectory, `${ prefix }-${ packageName }` );
 	}
 
