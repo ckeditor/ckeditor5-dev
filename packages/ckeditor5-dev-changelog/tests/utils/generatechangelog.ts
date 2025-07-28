@@ -25,10 +25,8 @@ import { InternalError } from '../../src/utils/internalerror.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 import { promptReleaseType } from '../../src/utils/promptreleasetype.js';
 import { getReleaseType } from '../../src/utils/getreleasetype.js';
-import { validateNextVersion } from '../../src/utils/validatenextversion.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../src/utils/validatenextversion.js' );
 vi.mock( '../../src/utils/findpackages.js' );
 vi.mock( '../../src/utils/findchangelogentrypaths.js' );
 vi.mock( '../../src/utils/parsechangelogentries.js' );
@@ -147,7 +145,7 @@ describe( 'generateChangelog()', () => {
 				entries: []
 			}
 		} );
-		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: false } ) );
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( '1.0.1' ) );
 		vi.mocked( filterVisibleSections ).mockReturnValue( [
 			{
 				title: SECTIONS.feature.title,
@@ -181,7 +179,6 @@ describe( 'generateChangelog()', () => {
 		vi.mocked( moveChangelogEntryFiles ).mockImplementation( entryPaths => Promise.resolve( entryPaths ) );
 		vi.mocked( commitChanges ).mockImplementation( () => Promise.resolve() );
 		vi.mocked( getReleaseType ).mockReturnValue( 'latest' );
-		vi.mocked( validateNextVersion ).mockImplementation( () => {} );
 	} );
 
 	it( 'uses async operations on `workspaces`', async () => {
@@ -197,15 +194,6 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( defaultOptions );
 
 		expect( promptReleaseType ).toHaveBeenCalled();
-	} );
-
-	it( 'calls validateNextVersion with current version and nextVersion', async () => {
-		await generateChangelog( {
-			...defaultOptions,
-			nextVersion: '1.0.1'
-		} );
-
-		expect( validateNextVersion ).toHaveBeenCalledWith( '1.0.0', '1.0.1' );
 	} );
 
 	it( 'calls getReleaseTypeFromVersion when nextVersion is provided', async () => {
@@ -310,11 +298,7 @@ describe( 'generateChangelog()', () => {
 						packages: [ 'test-package' ]
 					}
 				],
-				isInternal: false,
-				isSinglePackage: false,
-				packagesMetadata: new Map( [
-					[ 'test-package', '1.0.0' ]
-				] )
+				isSinglePackage: false
 			} )
 		);
 
@@ -474,7 +458,7 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'uses the provided package name when `shouldIgnoreRootPackage=true`', async () => {
-		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
+		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( '1.0.1' ) );
 
 		await generateChangelog( {
 			...defaultOptions,
@@ -487,45 +471,6 @@ describe( 'generateChangelog()', () => {
 			currentVersion: '1.0.0',
 			packageName: 'ckeditor5-dev'
 		} );
-	} );
-
-	it( 'handles internal changes correctly (`internal` is a version provided by a user)', async () => {
-		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
-
-		await generateChangelog( defaultOptions );
-
-		expect( determineNextVersion ).toHaveBeenCalledWith( {
-			sections: expect.any( Object ),
-			currentVersion: '1.0.0',
-			packageName: 'test-package'
-		} );
-		expect( composeChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
-			isInternal: true,
-			newVersion: '1.0.1'
-		} ) );
-		expect( modifyChangelog ).toHaveBeenCalled();
-	} );
-
-	it( 'handles internal changes correctly (`internal` is specified as `nextVersion`)', async () => {
-		vi.mocked( determineNextVersion ).mockImplementation( () => Promise.resolve( { newVersion: '1.0.1', isInternal: true } ) );
-
-		await generateChangelog( {
-			...defaultOptions,
-			nextVersion: 'internal'
-		} );
-
-		expect( determineNextVersion ).toHaveBeenCalledWith( {
-			sections: expect.any( Object ),
-			currentVersion: '1.0.0',
-			packageName: 'test-package',
-			nextVersion: 'internal',
-			releaseType: 'latest'
-		} );
-		expect( composeChangelog ).toHaveBeenCalledWith( expect.objectContaining( {
-			isInternal: true,
-			newVersion: '1.0.1'
-		} ) );
-		expect( modifyChangelog ).toHaveBeenCalled();
 	} );
 
 	it( 'commits the removed the entry files and the updated changelog file', async () => {

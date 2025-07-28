@@ -166,21 +166,6 @@ describe( 'generateChangelogForSingleRepository()', () => {
 			);
 		} );
 
-		it( 'should handle nextVersion as "internal"', async () => {
-			const optionsWithInternalVersion = {
-				...defaultOptions,
-				nextVersion: 'internal' as const
-			};
-
-			await generateChangelogForSingleRepository( optionsWithInternalVersion );
-
-			expect( generateChangelog ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					nextVersion: 'internal'
-				} )
-			);
-		} );
-
 		it( 'should handle custom date format', async () => {
 			const optionsWithCustomDate = {
 				...defaultOptions,

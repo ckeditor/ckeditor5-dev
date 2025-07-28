@@ -21,55 +21,23 @@ describe( 'validateInputVersion()', () => {
 		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 	} );
 
-	describe( 'internal version validation', () => {
-		it( 'should return true for internal version on latest channel with latest release type', async () => {
+	describe( 'semver validation', () => {
+		it( 'should return error for internal version', async () => {
 			const result = await validateInputVersion( {
 				...defaultOptions,
 				newVersion: 'internal'
 			} );
 
-			expect( result ).toBe( true );
+			expect( result ).toBe( 'Please provide a valid version.' );
 		} );
 
-		it( 'should return error for internal version on prerelease channel', async () => {
-			const result = await validateInputVersion( {
-				...defaultOptions,
-				newVersion: 'internal',
-				version: '1.0.0-alpha.0'
-			} );
-
-			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
-		} );
-
-		it( 'should return error for internal version with prerelease release type', async () => {
-			const result = await validateInputVersion( {
-				...defaultOptions,
-				newVersion: 'internal',
-				releaseType: 'prerelease'
-			} );
-
-			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
-		} );
-
-		it( 'should return error for internal version with prerelease-promote release type', async () => {
-			const result = await validateInputVersion( {
-				...defaultOptions,
-				newVersion: 'internal',
-				releaseType: 'prerelease-promote'
-			} );
-
-			expect( result ).toBe( 'Internal release is only allowed on the latest channel.' );
-		} );
-	} );
-
-	describe( 'semver validation', () => {
 		it( 'should return error for invalid semver version', async () => {
 			const result = await validateInputVersion( {
 				...defaultOptions,
 				newVersion: 'invalid-version'
 			} );
 
-			expect( result ).toBe( 'Please provide a valid version or "internal" for internal changes.' );
+			expect( result ).toBe( 'Please provide a valid version.' );
 		} );
 
 		it( 'should return error when version is not higher than current', async () => {
