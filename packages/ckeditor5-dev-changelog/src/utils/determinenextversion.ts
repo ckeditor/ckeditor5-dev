@@ -4,16 +4,11 @@
  */
 
 import chalk from 'chalk';
-import semver, { type ReleaseType } from 'semver';
+import { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
 import { detectReleaseChannel } from './detectreleasechannel.js';
 import type { ChangelogReleaseType, SectionsWithEntries } from '../types.js';
-
-type NextVersionOutput = {
-	isInternal: boolean;
-	newVersion: string;
-};
 
 export type DetermineNextVersionOptions = {
 	sections: SectionsWithEntries;
@@ -29,24 +24,16 @@ export type DetermineNextVersionOptions = {
  *
  * The function handles:
  * * Automatic version bump calculation from categorized changelog sections (major, minor, patch).
- * * Accepting explicit next version overrides, including a special `internal` version bump.
+ * * Version bump for prerelease channels.
  * * User prompts for version input when no explicit version is provided.
  */
-export async function determineNextVersion( options: DetermineNextVersionOptions ): Promise<NextVersionOutput> {
+export async function determineNextVersion( options: DetermineNextVersionOptions ): Promise<string> {
 	const { sections, currentVersion, packageName, nextVersion, releaseType } = options;
-
-	if ( nextVersion === 'internal' ) {
-		const internalVersionBump = getInternalVersionBump( currentVersion );
-
-		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ internalVersionBump.newVersion }.` ) }` );
-
-		return internalVersionBump;
-	}
 
 	if ( nextVersion ) {
 		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ nextVersion }.` ) }` );
 
-		return { newVersion: nextVersion, isInternal: false };
+		return nextVersion;
 	}
 
 	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
@@ -75,19 +62,5 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 		displayValidationWarning: areErrorsPresent || areWarningsPresent
 	} );
 
-	if ( userProvidedVersion === 'internal' ) {
-		return getInternalVersionBump( currentVersion );
-	}
-
-	return { newVersion: userProvidedVersion, isInternal: false };
-}
-
-function getInternalVersionBump( currentVersion: string ) {
-	const version = semver.inc( currentVersion, 'patch' );
-
-	if ( !version ) {
-		throw new Error( 'Unable to determine new version based on the version in root package.json.' );
-	}
-
-	return { newVersion: version, isInternal: true };
+	return userProvidedVersion;
 }

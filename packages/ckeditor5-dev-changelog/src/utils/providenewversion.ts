@@ -103,7 +103,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 	const { version, packageName, bumpType, releaseChannel, releaseType, indentLevel = 0 } = options;
 	const suggestedVersion = getSuggestedVersion( bumpType, version, releaseChannel ) || version;
 	const message = 'Type the new version ' +
-		`(current: "${ version }", suggested: "${ suggestedVersion }", or "internal" for internal changes):`;
+		`(current: "${ version }", suggested: "${ suggestedVersion }":`;
 
 	return [ {
 		type: 'input',

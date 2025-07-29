@@ -25,7 +25,6 @@ import { promptReleaseType } from './promptreleasetype.js';
 import { getReleaseType } from './getreleasetype.js';
 import type { ConfigBase, GenerateChangelogEntryPoint, MonoRepoConfigBase } from '../types.js';
 import { UserAbortError } from './useraborterror.js';
-import { validateNextVersion } from './validatenextversion.js';
 
 type GenerateChangelogConfig = ConfigBase & MonoRepoConfigBase & { isSinglePackage: boolean };
 
@@ -62,8 +61,6 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	} = options;
 
 	const { version: currentVersion, name: rootPackageName } = await workspaces.getPackageJson( cwd, { async: true } );
-
-	validateNextVersion( currentVersion, nextVersion );
 
 	const packagesMetadata = await findPackages( {
 		cwd,
@@ -107,7 +104,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	}
 
 	// Display a prompt to provide a new version in the console.
-	const { isInternal, newVersion } = await determineNextVersion( {
+	const newVersion = await determineNextVersion( {
 		currentVersion,
 		nextVersion,
 		releaseType,
@@ -127,9 +124,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		cwd,
 		date,
 		newVersion,
-		isInternal,
 		isSinglePackage,
-		packagesMetadata,
 		releasedPackagesInfo,
 		sections: filterVisibleSections( sectionsWithEntries )
 	} );

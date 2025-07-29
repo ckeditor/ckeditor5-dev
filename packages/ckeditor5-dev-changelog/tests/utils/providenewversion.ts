@@ -235,13 +235,6 @@ describe( 'provideNewVersion()', () => {
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].message ).toContain( 'suggested: "1.0.1"' );
 		} );
-
-		it( 'should mention internal option in prompt message', async () => {
-			await provideNewVersion( defaultOptions );
-
-			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( promptCall[ 0 ].message ).toContain( 'or "internal" for internal changes' );
-		} );
 	} );
 
 	describe( 'edge cases', () => {
@@ -251,14 +244,6 @@ describe( 'provideNewVersion()', () => {
 			const result = await provideNewVersion( defaultOptions );
 
 			expect( result ).toBe( '' );
-		} );
-
-		it( 'should handle internal version input', async () => {
-			vi.mocked( inquirer.prompt ).mockResolvedValue( { version: 'internal' } as any );
-
-			const result = await provideNewVersion( defaultOptions );
-
-			expect( result ).toBe( 'internal' );
 		} );
 
 		it( 'should fall back to current version when getSuggestedVersion returns null', async () => {
