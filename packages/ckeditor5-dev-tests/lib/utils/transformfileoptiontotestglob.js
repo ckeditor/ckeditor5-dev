@@ -107,15 +107,20 @@ function transformSinglePattern( pattern, options ) {
 
 	const prefix = options.useCKEditorPrefix ? 'ckeditor' : 'ckeditor5';
 	const packagesDirectory = options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ];
-	const packageName = isExclusionPattern ? `!(${ chunks.shift() })*` : chunks.shift();
+	const packageName = chunks.shift();
 	const filename = isFilenamePattern ? chunks.pop() : '*';
 
 	output.push( ...process.cwd().split( path.sep ) );
 
-	if ( packageName === 'ckeditor5' || isFullPackageName ) {
-		output.push( ...packagesDirectory, packageName );
+	// Build package path based on pattern type and package name
+	if ( isExclusionPattern ) {
+		output.push(
+			...buildExclusionPath( packageName, prefix, packagesDirectory, options.externalPackages )
+		);
 	} else {
-		output.push( ...packagesDirectory, `${ prefix }-${ packageName }` );
+		output.push(
+			...buildInclusionPath( packageName, isFullPackageName, prefix, packagesDirectory )
+		);
 	}
 
 	output.push( 'tests' );
@@ -127,4 +132,40 @@ function transformSinglePattern( pattern, options ) {
 	output.push( ...chunks, '**', `${ filename }.{js,ts}` );
 
 	return output.join( path.posix.sep );
+}
+
+/**
+ * Builds the package path for exclusion patterns.
+ */
+function buildExclusionPath( packageName, prefix, packagesDirectory, externalPackages ) {
+	const result = [ ...packagesDirectory ];
+
+	if ( packageName === 'ckeditor5' ) {
+		// Special case for excluding ckeditor5 package
+		if ( externalPackages ) {
+			result.push( `!(${ packageName })*` );
+		} else {
+			result.push( `!(${ packageName })`, '*' );
+		}
+	} else {
+		// For other packages, exclude them from the prefixed pattern
+		result.push( `${ prefix }-!(${ packageName })*` );
+	}
+
+	return result;
+}
+
+/**
+ * Builds the package path for inclusion patterns.
+ */
+function buildInclusionPath( packageName, isFullPackageName, prefix, packagesDirectory ) {
+	const result = [ ...packagesDirectory ];
+
+	if ( packageName === 'ckeditor5' || isFullPackageName ) {
+		result.push( packageName );
+	} else {
+		result.push( `${ prefix }-${ packageName }` );
+	}
+
+	return result;
 }

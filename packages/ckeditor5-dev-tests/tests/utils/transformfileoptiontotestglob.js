@@ -19,13 +19,19 @@ describe( 'transformFileOptionToTestGlob()', () => {
 		vi.mocked( fs ).existsSync.mockReturnValue( true );
 	} );
 
-	describe( 'converts "ckeditor5" to pattern matching all root package tests', () => {
+	describe( 'converts "ckeditor5" to pattern matching package tests', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'ckeditor5' ) ).to.deep.equal( [ '/workspace/tests/**/*.{js,ts}' ] );
+			expect( transformFileOptionToTestGlob( 'ckeditor5' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5/tests/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/**/*.{js,ts}'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'ckeditor5', true ) ).to.deep.equal( [ '/workspace/tests/manual/**/*.{js,ts}' ] );
+			expect( transformFileOptionToTestGlob( 'ckeditor5', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5/tests/manual/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/manual/**/*.{js,ts}'
+			] );
 		} );
 	} );
 
@@ -88,6 +94,13 @@ describe( 'transformFileOptionToTestGlob()', () => {
 	} );
 
 	describe( 'converts "!package-name" to pattern matching all tests except from this package', () => {
+		it( 'for automated tests (ckeditor5 exception exclusion)', () => {
+			expect( transformFileOptionToTestGlob( '!ckeditor5' ) ).to.deep.equal( [
+				'/workspace/packages/!(ckeditor5)/*/tests/**/*.{js,ts}',
+				'/workspace/external/*/packages/!(ckeditor5)*/tests/**/*.{js,ts}'
+			] );
+		} );
+
 		it( 'for automated tests (single exclusion)', () => {
 			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.{js,ts}',
@@ -126,9 +139,10 @@ describe( 'transformFileOptionToTestGlob()', () => {
 	} );
 
 	describe( 'converts "package-name/directory/" to pattern matching all tests from a package (or root) and a subdirectory', () => {
-		it( 'for automated tests (root)', () => {
+		it( 'for automated tests (exception for ckeditor5 package)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/memory/' ) ).to.deep.equal( [
-				'/workspace/tests/memory/**/*.{js,ts}'
+				'/workspace/packages/ckeditor5/tests/memory/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/memory/**/*.{js,ts}'
 			] );
 		} );
 
@@ -159,9 +173,10 @@ describe( 'transformFileOptionToTestGlob()', () => {
 			] );
 		} );
 
-		it( 'for manual tests (root)', () => {
+		it( 'for manual tests (exception for ckeditor5 package)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/memory/', true ) ).to.deep.equal( [
-				'/workspace/tests/manual/memory/**/*.{js,ts}'
+				'/workspace/packages/ckeditor5/tests/manual/memory/**/*.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/manual/memory/**/*.{js,ts}'
 			] );
 		} );
 
@@ -194,9 +209,10 @@ describe( 'transformFileOptionToTestGlob()', () => {
 	} );
 
 	describe( 'converts "package-name/filename" to pattern matching all tests from a package (or root) with specific filename', () => {
-		it( 'for automated tests (root)', () => {
+		it( 'for automated tests (exception for ckeditor5 package)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/utils' ) ).to.deep.equal( [
-				'/workspace/tests/**/utils.{js,ts}'
+				'/workspace/packages/ckeditor5/tests/**/utils.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/**/utils.{js,ts}'
 			] );
 		} );
 
@@ -218,9 +234,10 @@ describe( 'transformFileOptionToTestGlob()', () => {
 			] );
 		} );
 
-		it( 'for manual tests (root)', () => {
+		it( 'for manual tests (exception for ckeditor5 package)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/utils', true ) ).to.deep.equal( [
-				'/workspace/tests/manual/**/utils.{js,ts}'
+				'/workspace/packages/ckeditor5/tests/manual/**/utils.{js,ts}',
+				'/workspace/external/*/packages/ckeditor5/tests/manual/**/utils.{js,ts}'
 			] );
 		} );
 
