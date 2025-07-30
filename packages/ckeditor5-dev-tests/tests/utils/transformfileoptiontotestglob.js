@@ -24,6 +24,42 @@ describe( 'transformFileOptionToTestGlob()', () => {
 		] );
 	} );
 
+	describe( 'converts "*" to pattern matching all packages\' files', () => {
+		it( 'for automated tests', () => {
+			expect( transformFileOptionToTestGlob( '*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5/tests/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-engine/tests/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-alignment/tests/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-core/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-alignment/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-alignment/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests', () => {
+			expect( transformFileOptionToTestGlob( '*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5/tests/manual/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-engine/tests/manual/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-alignment/tests/manual/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-core/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-alignment/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-alignment/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/manual/**/*.{js,ts}'
+			] );
+		} );
+	} );
+
 	describe( 'handles specific package patterns', () => {
 		it( 'for automated tests with specific package', () => {
 			expect( transformFileOptionToTestGlob( 'engine' ) ).to.deep.equal( [

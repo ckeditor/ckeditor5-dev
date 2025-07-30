@@ -30,6 +30,7 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 	// In the current implementation we are assuming that pattern is a single package name when it's not negation.
 	const packagesToFilter = shouldExclude ? parseNegationArg( pattern ) : [ pattern ];
 	const packagesToFilterWithoutPrefix = packagesToFilter.map( packageName => packageName.replace( 'ckeditor5-', '' ) );
+	const shouldFilter = pattern !== '*' && packagesToFilterWithoutPrefix.length > 0;
 
 	const testsDirectory = isManualTest ? 'tests/manual' : 'tests';
 
@@ -40,7 +41,7 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 
 	const packages = packagesPaths.flatMap( path =>
 		fs.readdirSync( path )
-			.filter( directory => filterByPackagesNames( directory, packagesToFilterWithoutPrefix, shouldExclude ) )
+			.filter( directory => shouldFilter ? filterByPackagesNames( directory, packagesToFilterWithoutPrefix, shouldExclude ) : true )
 			.map( directory => upath.join( path, directory ) )
 	);
 
