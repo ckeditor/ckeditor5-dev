@@ -92,6 +92,32 @@ describe( 'transformFileOptionToTestGlob()', () => {
 				'/workspace/external/repo2/packages/ckeditor5/tests/manual/**/*.{js,ts}'
 			] );
 		} );
+
+		it( 'for automated tests (wildcard support)', () => {
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'ckeditor5-engine', 'ckeditor5-editor-classic', 'ckeditor5-editor-inline' ] );
+
+			expect( transformFileOptionToTestGlob( 'editor-*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-editor-classic/tests/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-editor-inline/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-editor-classic/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-editor-inline/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-editor-classic/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-editor-inline/tests/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (wildcard support)', () => {
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'ckeditor5-engine', 'ckeditor5-editor-classic', 'ckeditor5-editor-inline' ] );
+
+			expect( transformFileOptionToTestGlob( 'editor-*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.{js,ts}',
+				'/workspace/packages/ckeditor5-editor-inline/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-editor-classic/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-editor-inline/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-editor-classic/tests/manual/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-editor-inline/tests/manual/**/*.{js,ts}'
+			] );
+		} );
 	} );
 
 	describe( 'handles negation patterns', () => {

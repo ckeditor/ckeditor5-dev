@@ -68,7 +68,12 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 
 function filterByPackagesNames( directory, packagesToFilter, shouldExclude ) {
 	const packageNameWithoutPrefix = directory.replace( 'ckeditor5-', '' );
-	const shouldIncludePackage = packagesToFilter.includes( packageNameWithoutPrefix );
+
+	const shouldIncludePackage = packagesToFilter.some( pattern => {
+		const regex = new RegExp( pattern.replaceAll( '*', '.*' ) );
+
+		return regex.test( packageNameWithoutPrefix );
+	} );
 
 	return shouldExclude ? !shouldIncludePackage : shouldIncludePackage;
 }
