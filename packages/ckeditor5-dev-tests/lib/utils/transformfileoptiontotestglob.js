@@ -68,14 +68,21 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 
 function filterByPackagesNames( directory, packagesToFilter, shouldExclude ) {
 	const packageNameWithoutPrefix = directory.replace( 'ckeditor5-', '' );
+	const isWildcardSearch = packagesToFilter.some( pattern => pattern.includes( '*' ) );
 
-	const shouldIncludePackage = packagesToFilter.some( pattern => {
-		const regex = new RegExp( pattern.replaceAll( '*', '.*' ) );
-
-		return regex.test( packageNameWithoutPrefix );
-	} );
+	const shouldIncludePackage = isWildcardSearch ?
+		matchesWildcardPattern( packageNameWithoutPrefix, packagesToFilter ) :
+		packagesToFilter.includes( packageNameWithoutPrefix );
 
 	return shouldExclude ? !shouldIncludePackage : shouldIncludePackage;
+}
+
+function matchesWildcardPattern( packageName, patterns ) {
+	return patterns.some( pattern => {
+		const regex = new RegExp( pattern.replaceAll( '*', '.*' ) );
+
+		return regex.test( packageName );
+	} );
 }
 
 function parsePattern( pattern, shouldStripRest ) {
