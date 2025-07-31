@@ -358,6 +358,14 @@ describe( 'transformFileOptionToTestGlob()', () => {
 			] );
 		} );
 
+		it( 'for automated tests (nested directories with wildcard file)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/editor/utils/*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}'
+			] );
+		} );
+
 		it( 'for manual tests (package)', () => {
 			expect( transformFileOptionToTestGlob( 'core/utils', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-core/tests/manual/**/utils.{js,ts}',
@@ -371,6 +379,14 @@ describe( 'transformFileOptionToTestGlob()', () => {
 				'/workspace/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}',
 				'/workspace/external/repo1/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}',
 				'/workspace/external/repo2/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (nested directories with wildcard file)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/editor/utils/*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}'
 			] );
 		} );
 	} );
