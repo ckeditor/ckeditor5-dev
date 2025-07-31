@@ -51,19 +51,13 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 			.map( directory => upath.join( path, directory ) )
 	);
 
-	if ( isFilenamePattern ) {
-		const fileName = pattern.split( '/' ).at( -1 );
-		const directory = pattern.split( '/' ).slice( 1, -1 ).join( '/' );
-		const optionalDirectory = directory ? `/${ directory }` : '';
+	if ( isFilenamePattern || isDirectoryPattern ) {
+		const parts = pattern.split( '/' );
+		const fileName = isFilenamePattern ? parts.at( -1 ) : '*';
+		const subDirectory = parts.slice( 1, -1 ).join( '/' );
+		const subPath = subDirectory ? `/${ subDirectory }` : '';
 
-		return packages.map( path => `${ path }/${ testsDirectory }${ optionalDirectory }/**/${ fileName }.{js,ts}` );
-	}
-
-	if ( isDirectoryPattern ) {
-		const directory = pattern.split( '/' ).slice( 1, -1 ).join( '/' );
-		const optionalDirectory = directory ? `/${ directory }` : '';
-
-		return packages.map( path => `${ path }/${ testsDirectory }${ optionalDirectory }/**/*.{js,ts}` );
+		return packages.map( path => `${ path }/${ testsDirectory }${ subPath }/**/${ fileName }.{js,ts}` );
 	}
 
 	return packages.map( path => `${ path }/${ testsDirectory }/**/*.{js,ts}` );
