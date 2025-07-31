@@ -225,6 +225,18 @@ describe( 'transformFileOptionToTestGlob()', () => {
 	} );
 
 	describe( 'handles package name filtering correctly', () => {
+		it( 'filters packages by name with ckeditor5- prefix', () => {
+			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'ckeditor5-engine', 'ckeditor5-core', 'other-package' ] );
+
+			const result = transformFileOptionToTestGlob( 'ckeditor5-engine' );
+
+			expect( result ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/**/*.{js,ts}'
+			] );
+		} );
+
 		it( 'filters packages by name without ckeditor5- prefix', () => {
 			vi.mocked( fs ).readdirSync.mockReturnValue( [ 'ckeditor5-engine', 'ckeditor5-core', 'other-package' ] );
 
