@@ -264,4 +264,88 @@ describe( 'transformFileOptionToTestGlob()', () => {
 			] );
 		} );
 	} );
+
+	describe( 'converts "package-name/directory/" to pattern matching all tests from a package (or root) and a subdirectory', () => {
+		it( 'for automated tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/utils/' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/utils/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for automated tests (wildcard support)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/bold*/' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/bold*/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/bold*/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/bold*/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for automated tests (nested directories)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/editor/utils/' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/editor/utils/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/utils/', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/manual/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/manual/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/manual/utils/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (wildcard support)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/bold*/', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/manual/bold*/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/manual/bold*/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/manual/bold*/**/*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (nested directories)', () => {
+			expect( transformFileOptionToTestGlob( 'engine/editor/utils/', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-engine/tests/manual/editor/utils/**/*.{js,ts}'
+			] );
+		} );
+	} );
+
+	describe( 'converts "package-name/filename" to pattern matching all tests from a package (or root) with specific filename', () => {
+		it( 'for automated tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'core/utils' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-core/tests/**/utils.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/**/utils.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/**/utils.{js,ts}'
+			] );
+		} );
+
+		it( 'for automated tests (wildcard support)', () => {
+			expect( transformFileOptionToTestGlob( 'core/bold*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-core/tests/**/bold*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/**/bold*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/**/bold*.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'core/utils', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-core/tests/manual/**/utils.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/manual/**/utils.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/manual/**/utils.{js,ts}'
+			] );
+		} );
+
+		it( 'for manual tests (wildcard support)', () => {
+			expect( transformFileOptionToTestGlob( 'core/bold*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}',
+				'/workspace/external/repo1/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}',
+				'/workspace/external/repo2/packages/ckeditor5-core/tests/manual/**/bold*.{js,ts}'
+			] );
+		} );
+	} );
 } );
