@@ -42,7 +42,7 @@ import requireDll from '../utils/requiredll.js';
 export default function runManualTests( options ) {
 	const log = logger();
 	const cwd = process.cwd();
-	const buildDir = path.join( cwd, 'build', '.manual-tests' );
+	const buildDir = path.join( cwd, 'packages', 'ckeditor5', 'build', '.manual-tests' );
 	const isFilesFlagProvided = ( options.files && options.files.length );
 	const files = isFilesFlagProvided ? options.files : [ '*', 'ckeditor5' ];
 	const dedupedFileTestGlobs = [ ...new Set( files.flatMap( file => transformFileOptionToTestGlob( file, true ) ) ) ];
