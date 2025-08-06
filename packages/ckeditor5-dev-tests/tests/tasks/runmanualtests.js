@@ -173,16 +173,14 @@ describe( 'runManualTests()', () => {
 
 		await runManualTests( defaultOptions );
 
-		expect( vi.mocked( removeDir ) ).toHaveBeenCalledExactlyOnceWith(
-			'workspace/packages/ckeditor5/build/.manual-tests', expect.any( Object )
-		);
+		expect( vi.mocked( removeDir ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/build/.manual-tests', expect.any( Object ) );
 		expect( vi.mocked( createManualTestServer ) ).toHaveBeenCalledExactlyOnceWith(
-			'workspace/packages/ckeditor5/build/.manual-tests',
+			'workspace/build/.manual-tests',
 			undefined,
 			expect.any( Function )
 		);
 		expect( vi.mocked( compileManualTestHtmlFiles ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
-			buildDir: 'workspace/packages/ckeditor5/build/.manual-tests',
+			buildDir: 'workspace/build/.manual-tests',
 			sourceFiles: [
 				'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
 				'workspace/packages/ckeditor5-bar/tests/manual/feature-b.js',
@@ -194,7 +192,7 @@ describe( 'runManualTests()', () => {
 		} ) );
 		expect( vi.mocked( compileManualTestScripts ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
 			cwd: 'workspace',
-			buildDir: 'workspace/packages/ckeditor5/build/.manual-tests',
+			buildDir: 'workspace/build/.manual-tests',
 			sourceFiles: [
 				'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
 				'workspace/packages/ckeditor5-bar/tests/manual/feature-b.js',
