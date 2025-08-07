@@ -22,7 +22,7 @@ export type DetermineNextVersionOptions = {
 
 /**
  * Determines the next version for a single package or a mono-repository setup based on
- * the change sections, * user input, and semantic versioning rules.
+ * the change sections, user input, and semantic versioning rules.
  *
  * The function handles:
  * * Automatic version bump calculation from categorized changelog sections (major, minor, patch).
