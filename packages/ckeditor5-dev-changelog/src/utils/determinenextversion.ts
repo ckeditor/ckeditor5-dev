@@ -8,6 +8,8 @@ import { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
 import { detectReleaseChannel } from './detectreleasechannel.js';
+import { validateInputVersion } from './validateinputversion.js';
+import { InternalError } from './internalerror.js';
 import type { ChangelogReleaseType, SectionsWithEntries } from '../types.js';
 
 export type DetermineNextVersionOptions = {
@@ -32,6 +34,24 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 
 	if ( nextVersion ) {
 		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ nextVersion }.` ) }` );
+
+		const isNightlyVersion = nextVersion.startsWith( '0.0.0-' );
+
+		if ( isNightlyVersion ) {
+			return nextVersion;
+		}
+
+		const validationResult = await validateInputVersion( {
+			newVersion: nextVersion,
+			suggestedVersion: nextVersion,
+			version: currentVersion,
+			releaseType,
+			packageName
+		} );
+
+		if ( typeof validationResult === 'string' ) {
+			throw new InternalError( validationResult );
+		}
 
 		return nextVersion;
 	}
