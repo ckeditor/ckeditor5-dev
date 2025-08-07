@@ -8,15 +8,15 @@ import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { validateInputVersion } from '../../src/utils/validateinputversion.js';
+import { InternalError } from '../../src/utils/internalerror.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
-import { InternalError } from '../../src/utils/internalerror.js';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/providenewversion.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/detectreleasechannel.js' );
-vi.mock( '../../src/utils/validateInputVersion.js' );
+vi.mock( '../../src/utils/validateinputversion.js' );
 
 describe( 'determineNextVersion()', () => {
 	let options: DetermineNextVersionOptions;
