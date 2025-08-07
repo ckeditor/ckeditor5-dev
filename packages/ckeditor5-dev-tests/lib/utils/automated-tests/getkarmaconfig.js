@@ -6,6 +6,7 @@
 import path from 'path';
 import { createRequire } from 'module';
 import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
+import { resolvePath } from '../resolve-path.js';
 
 const require = createRequire( import.meta.url );
 
@@ -13,11 +14,6 @@ const AVAILABLE_REPORTERS = [
 	'mocha',
 	'dots'
 ];
-
-const utilsAssets = path.resolve(
-	require.resolve( '@ckeditor/ckeditor5-utils/package.json', { paths: [ process.cwd() ] } ),
-	'..', 'tests', '_assets'
-);
 
 /**
  * @param {object} options
@@ -30,6 +26,10 @@ export default function getKarmaConfig( options ) {
 
 	const basePath = process.cwd();
 	const coverageDir = path.join( basePath, 'coverage' );
+	const utilsAssets = path.resolve(
+		resolvePath( '@ckeditor/ckeditor5-utils/package.json', { paths: [ basePath ] } ),
+		'..', 'tests', '_assets'
+	);
 
 	const preprocessorMap = {
 		[ options.entryFile ]: [ 'webpack' ]
