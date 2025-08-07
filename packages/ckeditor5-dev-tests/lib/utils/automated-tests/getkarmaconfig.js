@@ -4,13 +4,11 @@
  */
 
 import path from 'path';
-import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
+import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
+import { resolvePath } from '../resolve-path.js';
 
 const require = createRequire( import.meta.url );
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 const AVAILABLE_REPORTERS = [
 	'mocha',
@@ -28,6 +26,10 @@ export default function getKarmaConfig( options ) {
 
 	const basePath = process.cwd();
 	const coverageDir = path.join( basePath, 'coverage' );
+	const utilsAssets = path.resolve(
+		resolvePath( '@ckeditor/ckeditor5-utils/package.json', { paths: [ basePath ] } ),
+		'..', 'tests', '_assets'
+	);
 
 	const preprocessorMap = {
 		[ options.entryFile ]: [ 'webpack' ]
@@ -58,19 +60,25 @@ export default function getKarmaConfig( options ) {
 			require.resolve( 'karma-webpack' )
 		],
 
-		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
+		// Files saved in directory `ckeditor5-utils/tests/_assets/` package are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
-			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/',
+			'/assets/': utilsAssets + '/',
 
 			// See: https://github.com/ckeditor/ckeditor5/issues/8823.
-			'/example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png',
-			'/www.example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png'
+			'/example.com/image.png': path.join( utilsAssets, 'sample.png' ),
+			'/www.example.com/image.png': path.join( utilsAssets, 'sample.png' )
 		},
 
 		// List of files/patterns to load in the browser.
 		files: [
 			options.entryFile,
-			{ pattern: 'packages/ckeditor5-utils/tests/_assets/**/*', watched: false, included: false, served: true, nocache: false }
+			{
+				pattern: path.resolve( utilsAssets, '**', '*' ),
+				watched: false,
+				included: false,
+				served: true,
+				nocache: false
+			}
 		],
 
 		// Preprocess matching files before serving them to the browser.
@@ -134,7 +142,7 @@ export default function getKarmaConfig( options ) {
 	// Notification is enabled by default when executing all tests.
 	if ( options.notify || !options.files ) {
 		karmaConfig.reporters.push( 'karmanotifier' );
-		karmaConfig.plugins.push( require( path.join( __dirname, 'karmanotifier.js' ) ) );
+		karmaConfig.plugins.push( require( path.join( import.meta.dirname, 'karmanotifier.js' ) ) );
 	}
 
 	if ( options.watch || options.server ) {
