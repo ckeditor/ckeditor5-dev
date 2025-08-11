@@ -3,17 +3,28 @@
  * For licensing, see LICENSE.md.
  */
 
+import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
 import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';
 
-vi.mock( 'path', () => ( {
-	default: {
-		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
-		dirname: vi.fn()
-	}
-} ) );
+vi.mock( 'path', async () => {
+	const originalModule = await vi.importActual( 'path' );
+
+	return {
+		default: {
+			join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
+			dirname: vi.fn(),
+			resolve: originalModule.resolve
+		}
+	};
+} );
+
 vi.mock( '../../../lib/utils/automated-tests/getwebpackconfig.js' );
+
+vi.mock( '../../../lib/utils/resolve-path.js', () => ( {
+	resolvePath: ( pathToResolve, options ) => path.join( options.paths[ 0 ], 'node_modules', pathToResolve )
+} ) );
 
 describe( 'getKarmaConfig()', () => {
 	const originalEnv = process.env;
@@ -110,7 +121,7 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.files ).toEqual( expect.arrayContaining( [
 			'workspace/entry-file.js',
 			expect.objectContaining( {
-				pattern: 'packages/ckeditor5-utils/tests/_assets/**/*'
+				pattern: expect.stringContaining( 'ckeditor5-utils/tests/_assets/**/*' )
 			} )
 		] ) );
 	} );
