@@ -7,6 +7,8 @@ import { determineNextVersion, type DetermineNextVersionOptions } from '../../sr
 import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
+import { validateInputVersion } from '../../src/utils/validateinputversion.js';
+import { InternalError } from '../../src/utils/internalerror.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
@@ -14,12 +16,14 @@ import type { Entry, SectionsWithEntries } from '../../src/types.js';
 vi.mock( '../../src/utils/providenewversion.js' );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/detectreleasechannel.js' );
+vi.mock( '../../src/utils/validateinputversion.js' );
 
 describe( 'determineNextVersion()', () => {
 	let options: DetermineNextVersionOptions;
 	const mockedProvideNewVersion = vi.mocked( provideNewVersion );
 	const mockedLogInfo = vi.mocked( logInfo );
 	const mockedDetectReleaseChannel = vi.mocked( detectReleaseChannel );
+	const mockedValidateInputVersion = vi.mocked( validateInputVersion );
 
 	const createEntry = ( message: string ): Entry => ( {
 		message,
@@ -50,6 +54,7 @@ describe( 'determineNextVersion()', () => {
 
 	beforeEach( () => {
 		mockedDetectReleaseChannel.mockReturnValue( 'latest' );
+		mockedValidateInputVersion.mockResolvedValue( true );
 
 		options = {
 			sections: createSectionsWithEntries(),
@@ -85,15 +90,52 @@ describe( 'determineNextVersion()', () => {
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
-	it( 'should return provided version if it is not undefined', async () => {
+	it( 'should validate provided version if it is defined', async () => {
+		options.nextVersion = '50.0.0';
+
+		await determineNextVersion( options );
+
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
+		expect( mockedValidateInputVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			newVersion: '50.0.0',
+			suggestedVersion: '50.0.0'
+		} ) );
+	} );
+
+	it( 'should return provided version if it pass the validation', async () => {
 		options.nextVersion = '50.0.0';
 
 		const result = await determineNextVersion( options );
 
 		expect( result ).toBe( '50.0.0' );
 		expect( mockedProvideNewVersion ).not.toHaveBeenCalled();
-		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
 		expect( mockedDetectReleaseChannel ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should return provided nightly version without validation', async () => {
+		options.nextVersion = '0.0.0-nightly-20250806.0';
+
+		const result = await determineNextVersion( options );
+
+		expect( result ).toBe( '0.0.0-nightly-20250806.0' );
+		expect( mockedValidateInputVersion ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw an error if provided version does not pass the validation', async () => {
+		mockedValidateInputVersion.mockResolvedValue( 'Invalid version.' );
+
+		options.nextVersion = '50.0.0';
+
+		await determineNextVersion( options )
+			.then(
+				() => {
+					throw new Error( 'Expected to throw.' );
+				},
+				err => {
+					expect( err ).toBeInstanceOf( InternalError );
+					expect( err.message ).to.equal( 'Invalid version.' );
+				}
+			);
 	} );
 
 	it( 'should return a minor bump version when "MINOR BREAKING CHANGE" entries are present', async () => {
