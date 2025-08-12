@@ -11,6 +11,10 @@ import chalk from 'chalk';
 import { parseAsync } from 'oxc-parser';
 import { walk } from 'oxc-walker';
 
+const DEPCHECK_IGNORE_DEFAULT = [
+	'ckeditor5-root'
+];
+
 /**
  * Checks dependencies sequentially in all provided packages.
  *
@@ -75,6 +79,8 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	};
 
 	const depcheckIgnore = Array.isArray( packageJson.depcheckIgnore ) ? packageJson.depcheckIgnore : [];
+
+	depcheckIgnore.push( ...DEPCHECK_IGNORE_DEFAULT );
 
 	depCheckOptions.ignoreMatches.push( ...depcheckIgnore );
 
