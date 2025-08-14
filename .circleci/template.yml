@@ -154,9 +154,6 @@ jobs:
                     circleci-agent step halt
                   fi
             - run:
-                name: Install the "coveralls" package
-                command: pnpm add coveralls --global
-            - run:
                 name: Upload code coverage
                 command: cat coverage/lcov.info | pnpm exec coveralls
 
