@@ -52,10 +52,11 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		isSinglePackage,
 		transformScope,
 		npmPackageToCheck,
+		linkFilter,
+		shouldSkipLinks,
 		cwd = process.cwd(),
 		externalRepositories = [],
 		date = format( new Date(), 'yyyy-MM-dd' ),
-		shouldSkipLinks = false,
 		shouldIgnoreRootPackage = false,
 		disableFilesystemOperations = false
 	} = options;
@@ -74,6 +75,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	const entryPaths = await findChangelogEntryPaths( {
 		cwd,
 		externalRepositories,
+		linkFilter,
 		shouldSkipLinks,
 		includeSubdirectories: releaseType === 'latest' || releaseType === 'prerelease-promote'
 	} );

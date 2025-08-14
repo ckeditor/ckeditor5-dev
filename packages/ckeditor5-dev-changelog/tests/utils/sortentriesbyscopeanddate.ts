@@ -5,14 +5,14 @@
 
 import { describe, it, expect } from 'vitest';
 import { sortEntriesByScopeAndDate } from '../../src/utils/sortentriesbyscopeanddate.js';
-import type { ParsedFile } from '../../src/types.js';
+import type { LinkFilter, ParsedFile } from '../../src/types.js';
 
 function createMockEntry(
 	scope: Array<string>,
 	createdAt: Date,
 	content: string = 'Test content',
 	gitHubUrl: string = 'https://github.com/test/repo',
-	shouldSkipLinks: boolean = false
+	linkFilter: LinkFilter = () => true
 ): ParsedFile {
 	return {
 		content,
@@ -27,7 +27,7 @@ function createMockEntry(
 		changesetPath: '',
 		createdAt,
 		gitHubUrl,
-		shouldSkipLinks
+		linkFilter
 	};
 }
 

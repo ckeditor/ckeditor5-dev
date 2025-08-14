@@ -8,12 +8,13 @@ import { glob } from 'glob';
 import upath from 'upath';
 import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';
-import type { ChangesetPathsWithGithubUrl, RepositoryConfig } from '../types.js';
+import type { ChangesetPathsWithGithubUrl, LinkFilter, RepositoryConfig } from '../types.js';
 
 type FindChangelogEntryPathsOptions = {
 	cwd: string;
 	externalRepositories: Array<RepositoryConfig>;
-	shouldSkipLinks: boolean;
+	linkFilter?: LinkFilter;
+	shouldSkipLinks?: boolean;
 	includeSubdirectories?: boolean;
 };
 
@@ -21,7 +22,7 @@ type FindChangelogEntryPathsOptions = {
  * Gathers changelog entry file paths (Markdown files) from the main repository and any configured external repositories.
  */
 export async function findChangelogEntryPaths( options: FindChangelogEntryPathsOptions ): Promise<Array<ChangesetPathsWithGithubUrl>> {
-	const { cwd, externalRepositories, shouldSkipLinks, includeSubdirectories = true } = options;
+	const { cwd, externalRepositories, includeSubdirectories = true } = options;
 	const globPattern = includeSubdirectories ? '**/*.md' : '*.md';
 
 	return AsyncArray
@@ -35,7 +36,7 @@ export async function findChangelogEntryPaths( options: FindChangelogEntryPathsO
 			return {
 				filePaths: changesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( repo.cwd, { async: true } ),
-				shouldSkipLinks: !!repo.shouldSkipLinks,
+				linkFilter: getLinkFilter( repo ),
 				cwd: repo.cwd,
 				isRoot: false
 			};
@@ -49,11 +50,21 @@ export async function findChangelogEntryPaths( options: FindChangelogEntryPathsO
 			const mainEntry = {
 				filePaths: mainChangesetGlob.map( p => upath.normalize( p ) ),
 				gitHubUrl: await workspaces.getRepositoryUrl( cwd, { async: true } ),
-				shouldSkipLinks,
+				linkFilter: getLinkFilter( options ),
 				cwd,
 				isRoot: true
 			};
 
 			return [ mainEntry, ...externalResults ];
 		} );
+}
+
+type GetLinkFilterOptions = Pick<FindChangelogEntryPathsOptions, 'shouldSkipLinks' | 'linkFilter'>;
+
+function getLinkFilter( options: GetLinkFilterOptions ): LinkFilter {
+	if ( typeof options.shouldSkipLinks === 'boolean' ) {
+		return () => !options.shouldSkipLinks;
+	}
+
+	return options.linkFilter || ( () => true );
 }

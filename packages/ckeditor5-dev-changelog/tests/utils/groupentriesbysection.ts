@@ -20,7 +20,7 @@ vi.mock( '../../src/utils/validateentry.js' );
 const createParsedFile = ( overrides: RecursivePartial<ParsedFile> = {} ): ParsedFile => ( {
 	content: 'Some content',
 	gitHubUrl: 'https://github.com/ckeditor',
-	skipLinks: false,
+	linkFilter: () => true,
 	changesetPath: 'path/to/changeset',
 	...overrides,
 	data: {
@@ -277,8 +277,8 @@ describe( 'groupEntriesBySection()', () => {
 		);
 	} );
 
-	it( 'should skip links when skipLinks is true', () => {
-		const files = [ createParsedFile( { shouldSkipLinks: true } ) ];
+	it( 'should skip links when linkFilter is set to return false', () => {
+		const files = [ createParsedFile( { linkFilter: () => false } ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
 
@@ -286,6 +286,17 @@ describe( 'groupEntriesBySection()', () => {
 
 		expect( message ).not.toContain( 'Closes [#123]' );
 		expect( message ).not.toContain( 'See [#456]' );
+	} );
+
+	it( 'should pass full GitHub URL to link filter', () => {
+		const linkFilter = vi.fn( () => false );
+		const files = [ createParsedFile( { linkFilter } ) ];
+
+		groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+
+		expect( linkFilter ).toHaveBeenCalledTimes( 2 );
+		expect( linkFilter ).toHaveBeenCalledWith( 'https://github.com/ckeditor/issues/123' );
+		expect( linkFilter ).toHaveBeenCalledWith( 'https://github.com/ckeditor/issues/456' );
 	} );
 
 	it( 'should not add invalid links to the generated message', () => {
@@ -466,11 +477,11 @@ We just released a new version of the app with several improvements:
 - Added keyboard shortcuts
   - \`Ctrl + K\` to open the command palette
   - \`Ctrl + /\` to toggle comments
-  
-  
-  
-  
-  
+
+
+
+
+
 Let us know what you think!
 
 

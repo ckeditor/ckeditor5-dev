@@ -26,6 +26,7 @@ describe( 'parseChangelogEntries()', () => {
 		const gitHubUrl = 'https://github.com/ckeditor/ckeditor5';
 		const fileContent1 = 'File content 1';
 		const fileContent2 = 'File content 2';
+		const linkFilter = () => false;
 
 		const matterResult1: GrayMatterFile<string> = {
 			content: 'Parsed content 1',
@@ -77,7 +78,7 @@ describe( 'parseChangelogEntries()', () => {
 			{
 				filePaths: [ changesetPath1, changesetPath2 ],
 				gitHubUrl,
-				shouldSkipLinks: false,
+				linkFilter,
 				cwd: '/changeset-path',
 				isRoot: false
 			}
@@ -102,7 +103,7 @@ describe( 'parseChangelogEntries()', () => {
 			},
 			gitHubUrl,
 			changesetPath: changesetPath1,
-			shouldSkipLinks: false,
+			linkFilter,
 			orig: fileContent1,
 			language: 'md',
 			matter: ''
@@ -122,7 +123,7 @@ describe( 'parseChangelogEntries()', () => {
 			},
 			gitHubUrl,
 			changesetPath: changesetPath2,
-			shouldSkipLinks: false,
+			linkFilter,
 			orig: fileContent2,
 			language: 'md',
 			matter: ''
@@ -137,7 +138,7 @@ describe( 'parseChangelogEntries()', () => {
 		expect( matter ).toHaveBeenCalledWith( fileContent2 );
 	} );
 
-	it( 'should handle multiple repositories with different skipLinks values', async () => {
+	it( 'should handle multiple repositories with different linkFilter values', async () => {
 		// Mock data
 		const changesetPath1 = '/path/to/repo1/20240101120000_changeset.md';
 		const changesetPath2 = '/path/to/repo2/20240101120001_changeset.md';
@@ -145,6 +146,8 @@ describe( 'parseChangelogEntries()', () => {
 		const gitHubUrl2 = 'https://github.com/ckeditor/ckeditor5-dev';
 		const fileContent1 = 'File content 1';
 		const fileContent2 = 'File content 2';
+		const linkFilter1 = () => true;
+		const linkFilter2 = () => false;
 
 		const matterResult1: GrayMatterFile<string> = {
 			content: 'Parsed content 1',
@@ -196,14 +199,14 @@ describe( 'parseChangelogEntries()', () => {
 			{
 				filePaths: [ changesetPath1 ],
 				gitHubUrl: gitHubUrl1,
-				shouldSkipLinks: false,
+				linkFilter: linkFilter1,
 				cwd: '/changeset-path-1',
 				isRoot: false
 			},
 			{
 				filePaths: [ changesetPath2 ],
 				gitHubUrl: gitHubUrl2,
-				shouldSkipLinks: true,
+				linkFilter: linkFilter2,
 				cwd: '/changeset-path-2',
 				isRoot: false
 			}
@@ -228,7 +231,7 @@ describe( 'parseChangelogEntries()', () => {
 			},
 			gitHubUrl: gitHubUrl1,
 			changesetPath: changesetPath1,
-			shouldSkipLinks: false,
+			linkFilter: linkFilter1,
 			orig: fileContent1,
 			language: 'md',
 			matter: ''
@@ -248,7 +251,7 @@ describe( 'parseChangelogEntries()', () => {
 			},
 			gitHubUrl: gitHubUrl2,
 			changesetPath: changesetPath2,
-			shouldSkipLinks: true,
+			linkFilter: linkFilter2,
 			orig: fileContent2,
 			language: 'md',
 			matter: ''
@@ -264,12 +267,15 @@ describe( 'parseChangelogEntries()', () => {
 	} );
 
 	it( 'should handle empty changeset paths array', async () => {
+		// Mock data
+		const linkFilter = () => false;
+
 		// Input data
 		const filePathsWithGithubUrl: Array<ChangesetPathsWithGithubUrl> = [
 			{
 				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				shouldSkipLinks: false,
+				linkFilter,
 				cwd: '/changeset-path-1',
 				isRoot: false
 			}
@@ -302,6 +308,7 @@ describe( 'parseChangelogEntries()', () => {
 		const changesetPath = '/path/to/20240101120000_changeset.md';
 		const gitHubUrl = 'https://github.com/test/repo';
 		const fileContent = 'file content';
+		const linkFilter = () => false;
 		const matterResult = {
 			content: 'parsed content',
 			data: { type: 'feature', scope: [ 'ui' ] }
@@ -316,7 +323,7 @@ describe( 'parseChangelogEntries()', () => {
 			{
 				filePaths: [ changesetPath ],
 				gitHubUrl,
-				shouldSkipLinks: false,
+				linkFilter,
 				cwd: '/test',
 				isRoot: false
 			}
@@ -341,7 +348,7 @@ describe( 'parseChangelogEntries()', () => {
 			},
 			gitHubUrl,
 			changesetPath,
-			shouldSkipLinks: false
+			linkFilter
 		} );
 		expect( callArgs[ 0 ]!.createdAt ).toBeInstanceOf( Date );
 	} );
@@ -352,6 +359,7 @@ describe( 'parseChangelogEntries()', () => {
 			const changesetPath = '/path/to/invalid_filename.md';
 			const gitHubUrl = 'https://github.com/test/repo';
 			const fileContent = 'file content';
+			const linkFilter = () => false;
 			const matterResult = {
 				content: 'parsed content',
 				data: { type: 'feature', scope: [] }
@@ -366,7 +374,7 @@ describe( 'parseChangelogEntries()', () => {
 				{
 					filePaths: [ changesetPath ],
 					gitHubUrl,
-					shouldSkipLinks: false,
+					linkFilter,
 					cwd: '/test',
 					isRoot: false
 				}
@@ -385,6 +393,7 @@ describe( 'parseChangelogEntries()', () => {
 			const changesetPath = '/path/to/99999999999999_invalid_date.md';
 			const gitHubUrl = 'https://github.com/test/repo';
 			const fileContent = 'file content';
+			const linkFilter = () => false;
 			const matterResult = {
 				content: 'parsed content',
 				data: { type: 'feature', scope: [] }
@@ -399,7 +408,7 @@ describe( 'parseChangelogEntries()', () => {
 				{
 					filePaths: [ changesetPath ],
 					gitHubUrl,
-					shouldSkipLinks: false,
+					linkFilter,
 					cwd: '/test',
 					isRoot: false
 				}
@@ -418,6 +427,7 @@ describe( 'parseChangelogEntries()', () => {
 			const changesetPath = '';
 			const gitHubUrl = 'https://github.com/test/repo';
 			const fileContent = 'file content';
+			const linkFilter = () => false;
 			const matterResult = {
 				content: 'parsed content',
 				data: { type: 'feature', scope: [] }
@@ -432,7 +442,7 @@ describe( 'parseChangelogEntries()', () => {
 				{
 					filePaths: [ changesetPath ],
 					gitHubUrl,
-					shouldSkipLinks: false,
+					linkFilter,
 					cwd: '/test',
 					isRoot: false
 				}
