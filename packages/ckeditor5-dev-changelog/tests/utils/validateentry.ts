@@ -38,7 +38,7 @@ function createEntry( data: Record<string, any> ): ParsedFile {
 		} as any,
 		changesetPath: 'path/to/changeset',
 		gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-		shouldSkipLinks: false
+		linkFilter: () => true
 	};
 }
 

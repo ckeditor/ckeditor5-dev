@@ -16,6 +16,7 @@ describe( 'generateChangelogForSingleRepository()', () => {
 		date: '2024-03-26',
 		externalRepositories: [],
 		shouldSkipLinks: false,
+		linkFilter: () => true,
 		disableFilesystemOperations: false
 	};
 
@@ -34,6 +35,7 @@ describe( 'generateChangelogForSingleRepository()', () => {
 				externalRepositories: [],
 				date: '2024-03-26',
 				shouldSkipLinks: false,
+				linkFilter: defaultOptions.linkFilter,
 				disableFilesystemOperations: false,
 				isSinglePackage: true,
 				packagesDirectory: null
@@ -64,6 +66,7 @@ describe( 'generateChangelogForSingleRepository()', () => {
 				externalRepositories: customOptions.externalRepositories,
 				date: '2024-03-26',
 				shouldSkipLinks: true,
+				linkFilter: defaultOptions.linkFilter,
 				disableFilesystemOperations: true,
 				isSinglePackage: true,
 				packagesDirectory: null
@@ -147,6 +150,7 @@ describe( 'generateChangelogForSingleRepository()', () => {
 				externalRepositories: undefined,
 				date: undefined,
 				shouldSkipLinks: undefined,
+				linkFilter: undefined,
 				disableFilesystemOperations: undefined
 			} ) );
 		} );
@@ -321,6 +325,7 @@ describe( 'generateChangelogForSingleRepository()', () => {
 				date: '2024-01-01',
 				externalRepositories: [],
 				shouldSkipLinks: false,
+				linkFilter: () => true,
 				disableFilesystemOperations: false
 			};
 

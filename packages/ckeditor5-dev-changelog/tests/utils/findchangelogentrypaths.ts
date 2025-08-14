@@ -36,7 +36,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should return file paths from both local and external repositories', async () => {
 		const rootSkipLinks = true;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [
+		const externalRepositories: Array<RepositoryConfig> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: true },
 			{ cwd: '/mock/repo2', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
@@ -67,21 +67,21 @@ describe( 'findChangelogEntryPaths()', () => {
 			{
 				filePaths: [ '/mock/current/changesets/file1.md', '/mock/current/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: true,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
 				filePaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: true,
+				linkFilter: expect.any( Function ),
 				isRoot: false,
 				cwd: '/mock/repo1'
 			},
 			{
 				filePaths: [ '/mock/repo2/changesets/file4.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo2',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: false,
 				cwd: '/mock/repo2'
 			}
@@ -96,7 +96,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should return only local changeset files if there are no external repositories', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [];
+		const externalRepositories: Array<RepositoryConfig> = [];
 
 		vi.mocked( glob ).mockResolvedValue( [ '/mock/current/changesets/file1.md' ] );
 
@@ -110,7 +110,7 @@ describe( 'findChangelogEntryPaths()', () => {
 			{
 				filePaths: [ '/mock/current/changesets/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			}
@@ -123,7 +123,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should return only external changeset files if there are no local files', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [
+		const externalRepositories: Array<RepositoryConfig> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
@@ -149,14 +149,14 @@ describe( 'findChangelogEntryPaths()', () => {
 			{
 				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				cwd: '/mock/current',
 				isRoot: true
 			},
 			{
 				filePaths: [ '/mock/repo1/changesets/file3.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				cwd: '/mock/repo1',
 				isRoot: false
 			}
@@ -170,7 +170,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should return an empty array when no changeset files exist in any repository', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [
+		const externalRepositories: Array<RepositoryConfig> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
@@ -186,14 +186,14 @@ describe( 'findChangelogEntryPaths()', () => {
 			{
 				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
 				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: false,
 				cwd: '/mock/repo1'
 			}
@@ -205,7 +205,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should handle errors gracefully by rejecting the promise', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [
+		const externalRepositories: Array<RepositoryConfig> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
@@ -219,7 +219,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should normalize paths from Windows-style to POSIX format', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [];
+		const externalRepositories: Array<RepositoryConfig> = [];
 
 		// Simulate Windows paths with backslashes
 		vi.mocked( glob ).mockResolvedValue( [
@@ -241,7 +241,7 @@ describe( 'findChangelogEntryPaths()', () => {
 					'C:/mock/current/changesets/subfolder/file2.md'
 				],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			}
@@ -253,7 +253,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should use nested directory pattern when includeAllChannels is true', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [];
+		const externalRepositories: Array<RepositoryConfig> = [];
 
 		vi.mocked( glob ).mockResolvedValue( [
 			'/mock/current/changesets/file1.md',
@@ -276,7 +276,7 @@ describe( 'findChangelogEntryPaths()', () => {
 					'/mock/current/changesets/beta/file3.md'
 				],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			}
@@ -288,7 +288,7 @@ describe( 'findChangelogEntryPaths()', () => {
 	it( 'should use *.md glob pattern when includeAllChannels is false', async () => {
 		const rootSkipLinks = false;
 		const cwd = '/mock/current';
-		const externalRepositories: Array<Required<RepositoryConfig>> = [
+		const externalRepositories: Array<RepositoryConfig> = [
 			{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
 		];
 
@@ -313,14 +313,14 @@ describe( 'findChangelogEntryPaths()', () => {
 			{
 				filePaths: [ '/mock/current/changesets/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/current',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/mock/current'
 			},
 			{
 				filePaths: [ '/mock/repo1/changesets/file2.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: false,
 				cwd: '/mock/repo1'
 			}
@@ -328,5 +328,127 @@ describe( 'findChangelogEntryPaths()', () => {
 
 		expect( glob ).toHaveBeenCalledWith( '*.md', { cwd: '/mock/current/.changelog', absolute: true } );
 		expect( glob ).toHaveBeenCalledWith( '*.md', { cwd: '/mock/repo1/.changelog', absolute: true } );
+	} );
+
+	describe( 'linkFilter callback', () => {
+		beforeEach( () => {
+			vi.mocked( glob ).mockResolvedValue( [] );
+		} );
+
+		it( 'should return true if shouldSkipLinks is false', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories,
+				shouldSkipLinks: false
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+		} );
+
+		it( 'should return false if shouldSkipLinks is true', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: true }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories,
+				shouldSkipLinks: true
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( false );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( false );
+		} );
+
+		it( 'should use linkFilter function if it is set', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages', linkFilter: () => false }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories,
+				linkFilter: () => false
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( false );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( false );
+		} );
+
+		it( 'should use default linkFilter function if it is not set', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages' }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+		} );
+
+		it( 'should use shouldSkipLinks if both shouldSkipLinks and linkFilter are set', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages', shouldSkipLinks: false, linkFilter: () => false }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories,
+				shouldSkipLinks: false,
+				linkFilter: () => false
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+		} );
+
+		it( 'should allow defining custom logic for root and external repositories', async () => {
+			const cwd = '/mock/current';
+			const externalRepositories: Array<RepositoryConfig> = [
+				{ cwd: '/mock/repo1', packagesDirectory: 'packages', linkFilter: () => false }
+			];
+
+			const result = await findChangelogEntryPaths( {
+				cwd,
+				externalRepositories,
+				linkFilter: resourceUrl => resourceUrl.endsWith( '123' )
+			} );
+
+			const linkFilterRootRepo = result.find( item => item.cwd === '/mock/current' )!.linkFilter;
+			const linkFilterExternalRepo = result.find( item => item.cwd === '/mock/repo1' )!.linkFilter;
+
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( true );
+			expect( linkFilterRootRepo( 'https://github.com/ckeditor/current/issues/999' ) ).toEqual( false );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/123' ) ).toEqual( false );
+			expect( linkFilterExternalRepo( 'https://github.com/ckeditor/current/issues/999' ) ).toEqual( false );
+		} );
 	} );
 } );

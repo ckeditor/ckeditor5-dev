@@ -15,7 +15,7 @@ function wrapInput(
 		content: '',
 		changesetPath: '',
 		gitHubUrl: '',
-		shouldSkipLinks: false,
+		linkFilter: () => true,
 		data: partialData
 	};
 }

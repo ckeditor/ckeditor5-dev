@@ -20,6 +20,7 @@ export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<Mon
 		disableFilesystemOperations,
 		npmPackageToCheck,
 		packagesDirectory,
+		linkFilter,
 		shouldSkipLinks,
 		shouldIgnoreRootPackage,
 		transformScope
@@ -32,6 +33,7 @@ export const generateChangelogForMonoRepository: GenerateChangelogEntryPoint<Mon
 		externalRepositories,
 		transformScope,
 		date,
+		linkFilter,
 		shouldSkipLinks,
 		disableFilesystemOperations,
 		...(

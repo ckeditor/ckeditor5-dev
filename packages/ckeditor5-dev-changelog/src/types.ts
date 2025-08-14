@@ -55,6 +55,13 @@ export type RepositoryConfig = {
 	packagesDirectory: null | string;
 
 	/**
+	 * Function that decides whether to filter out a link in the changelog entry.
+	 * If `shouldSkipLinks` flag is set, the `shouldSkipLinks` flag takes precedence over the `linkFilter` function.
+	 * No links are skipped by default.
+	 */
+	linkFilter?: LinkFilter;
+
+	/**
 	 * Whether to skip links in the changelog entries. Defaults to false.
 	 */
 	shouldSkipLinks?: boolean;
@@ -93,7 +100,7 @@ export type ParsedFile<T = FileMetadata> = {
 	changesetPath: string;
 	createdAt: Date;
 	gitHubUrl: string;
-	shouldSkipLinks: boolean;
+	linkFilter: LinkFilter;
 };
 
 export type Section = {
@@ -119,7 +126,7 @@ export type TransformScope = ( name: string ) => {
 export type ChangesetPathsWithGithubUrl = {
 	filePaths: Array<string>;
 	gitHubUrl: string;
-	shouldSkipLinks: boolean;
+	linkFilter: LinkFilter;
 	cwd: string;
 	isRoot: boolean;
 };
@@ -133,6 +140,8 @@ type NpmPackageRequiredWhenSkipRootPackage = {
 };
 
 export type LinkObject = { displayName: string; link: string };
+
+export type LinkFilter = ( resourceUrl: string ) => boolean;
 
 export type FileMetadata = {
 	type: string;
