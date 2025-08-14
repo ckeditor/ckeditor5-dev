@@ -48,8 +48,7 @@
     "release:publish-packages": "node ./scripts/publishpackages.js",
     "lint": "eslint",
     "precommit": "lint-staged",
-    "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
-    "reinstall": "yarn run clean && yarn install",
+    "reinstall": "pnpx rimraf --glob \"./**/node_modules\" && pnpm install",
     "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {

@@ -128,7 +128,7 @@ function parseArguments( args ) {
 		],
 
 		default: {
-			task: 'yarn ckeditor5-dev-ci-notify-circle-status',
+			task: 'pnpm ckeditor5-dev-ci-notify-circle-status',
 			ignore: []
 		}
 	};

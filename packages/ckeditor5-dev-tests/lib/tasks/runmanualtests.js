@@ -205,7 +205,7 @@ export default function runManualTests( options ) {
 				stdio: 'inherit'
 			};
 
-			spawn( 'yarnpkg', [ 'run', 'dll:build' ], spawnOptions )
+			spawn( 'pnpm', [ 'run', 'dll:build' ], spawnOptions )
 				.on( 'close', exitCode => {
 					if ( exitCode ) {
 						return reject( new Error( `Building DLLs in ${ repositoryName } finished with an error.` ) );
