@@ -1,0 +1,13 @@
+packages:
+  - /*
+  - packages/*
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
+  - puppeteer
+
+shellEmulator: true
+shamefullyHoist: true
+preferFrozenLockfile: true
+linkWorkspacePackages: true
