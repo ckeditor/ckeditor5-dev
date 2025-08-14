@@ -155,10 +155,10 @@ jobs:
                   fi
             - run:
                 name: Install the "coveralls" package
-                command: pnpm add coveralls
+                command: pnpm add coveralls --global
             - run:
                 name: Upload code coverage
-                command: cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+                command: cat coverage/lcov.info | pnpm exec coveralls
 
   release_prepare:
     docker:
