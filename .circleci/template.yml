@@ -16,6 +16,10 @@ commands:
     description: "Bootstrap the repository"
     steps:
       - install_ssh_keys_command
+      - restore_cache:
+          name: Restore pnpm cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
           name: Install pnpm package manager
           command: |
@@ -26,6 +30,11 @@ commands:
       - run:
           name: Install dependencies
           command: pnpm install
+      - save_cache:
+          name: Save pnpm cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
       - prepare_environment_variables_commands
 
   install_ssh_keys_command:
