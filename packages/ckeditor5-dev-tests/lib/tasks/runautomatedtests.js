@@ -4,7 +4,6 @@
  */
 
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
 import chalk from 'chalk';
@@ -15,9 +14,6 @@ import karmaLogger from 'karma/lib/logger.js';
 import karma from 'karma';
 import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
 import upath from 'upath';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = upath.dirname( __filename );
 
 // Glob patterns that should be ignored. It means if a specified test file is located under path
 // that matches to these patterns, the file will be skipped.
@@ -99,17 +95,17 @@ function createEntryFile( globPatterns, production ) {
 	}
 
 	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( __dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
+	allFiles.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
-	allFiles.push( upath.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
+	allFiles.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
+	allFiles.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
 
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = upath.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' );
+	const assertionsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'assertions' );
 	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
 		return [
 			assertionFileName,
