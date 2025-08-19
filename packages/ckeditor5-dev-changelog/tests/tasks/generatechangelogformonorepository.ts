@@ -17,6 +17,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 		date: '2024-03-26',
 		externalRepositories: [],
 		shouldSkipLinks: false,
+		linkFilter: () => true,
 		disableFilesystemOperations: false,
 		transformScope: ( name: string ) => ( {
 			displayName: name,
@@ -41,6 +42,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				transformScope: defaultOptions.transformScope,
 				date: '2024-03-26',
 				shouldSkipLinks: false,
+				linkFilter: defaultOptions.linkFilter,
 				disableFilesystemOperations: false,
 				shouldIgnoreRootPackage: false,
 				isSinglePackage: false
@@ -74,6 +76,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				transformScope: customOptions.transformScope,
 				date: '2024-03-26',
 				shouldSkipLinks: true,
+				linkFilter: defaultOptions.linkFilter,
 				disableFilesystemOperations: true,
 				shouldIgnoreRootPackage: false,
 				isSinglePackage: false
@@ -235,6 +238,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 				externalRepositories: undefined,
 				date: undefined,
 				shouldSkipLinks: undefined,
+				linkFilter: undefined,
 				disableFilesystemOperations: undefined
 			} ) );
 		} );
@@ -356,6 +360,7 @@ describe( 'generateChangelogForMonoRepository()', () => {
 					npmUrl: `https://npm.com/${ name }`
 				} ),
 				shouldSkipLinks: false,
+				linkFilter: () => true,
 				shouldIgnoreRootPackage: true as const,
 				npmPackageToCheck: 'test-package',
 				disableFilesystemOperations: false

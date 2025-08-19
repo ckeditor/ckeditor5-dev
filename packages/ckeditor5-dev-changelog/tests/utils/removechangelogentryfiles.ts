@@ -22,14 +22,14 @@ describe( 'removeChangelogEntryFiles()', () => {
 		{
 			filePaths: [ '/repo/changelog/changeset-1.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-1',
-			shouldSkipLinks: false,
+			linkFilter: () => true,
 			cwd: '/changeset-path-1',
 			isRoot: true
 		},
 		{
 			filePaths: [ '/repo/changelog/changeset-2.md' ],
 			gitHubUrl: 'https://github.com/repo/changelog/changeset-2',
-			shouldSkipLinks: false,
+			linkFilter: () => true,
 			cwd: '/changeset-path-2',
 			isRoot: false
 		}

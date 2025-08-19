@@ -29,15 +29,19 @@ export function groupEntriesBySection( options: GroupEntriesBySectionOptions ): 
 		const { validatedEntry, isValid } = validateEntry( entry, packageNames, isSinglePackage );
 		const validatedData = validatedEntry.data;
 
+		const closesLinks = filterLinks( validatedData.closes, validatedEntry );
+		const closes = getIssuesLinks( closesLinks, 'Closes' );
+
+		const seeLinks = filterLinks( validatedData.see, validatedEntry );
+		const see = getIssuesLinks( seeLinks, 'See' );
+
 		const scope = isSinglePackage ? null : getScopesLinks( validatedData.scope, transformScope! );
-		const closes = getIssuesLinks( validatedData.closes, 'Closes', validatedEntry.gitHubUrl );
-		const see = getIssuesLinks( validatedData.see, 'See', validatedEntry.gitHubUrl );
 		const section = getSection( { entry: validatedEntry, isSinglePackage, isValid } );
 		const contentWithCommunityCredits = getContentWithCommunityCredits( validatedEntry.content, validatedData.communityCredits );
 		const content = linkToGitHubUser( contentWithCommunityCredits );
 		const [ mainContent, ...restContent ] = formatContent( content );
 
-		const changeMessage = getChangeMessage( { restContent, scope, mainContent, entry, see, closes } );
+		const changeMessage = getChangeMessage( { restContent, scope, mainContent, see, closes } );
 
 		const newEntry: Entry = {
 			message: changeMessage,
@@ -46,8 +50,8 @@ export function groupEntriesBySection( options: GroupEntriesBySectionOptions ): 
 				restContent,
 				type: validatedData.type,
 				scope: validatedData.scope,
-				see: validatedData.see.map( see => getIssueLinkObject( see, validatedEntry.gitHubUrl ) ),
-				closes: validatedData.closes.map( closes => getIssueLinkObject( closes, validatedEntry.gitHubUrl ) ),
+				see: seeLinks,
+				closes: closesLinks,
 				validations: validatedData.validations,
 				communityCredits: validatedData.communityCredits
 			},
@@ -67,19 +71,29 @@ export function groupEntriesBySection( options: GroupEntriesBySectionOptions ): 
 type GetChangeMessageOptions = {
 	mainContent: string | undefined;
 	restContent: Array<string> | undefined;
-	entry: ParsedFile;
 	scope: string | null;
 	see: string;
 	closes: string;
 };
 
-function getChangeMessage( { restContent, scope, mainContent, entry, see, closes }: GetChangeMessageOptions ) {
+type IssueLinkObject = {
+	displayName: string;
+	link: string;
+};
+
+function filterLinks( links: Array<string>, entry: ParsedFile ) {
+	return links
+		.map( link => getIssueLinkObject( link, entry.gitHubUrl ) )
+		.filter( ( { link } ) => entry.linkFilter( link ) );
+}
+
+function getChangeMessage( { restContent, scope, mainContent, see, closes }: GetChangeMessageOptions ) {
 	const messageFirstLine = [
 		'*',
 		scope ? `**${ scope }**:` : null,
 		mainContent,
-		!entry.shouldSkipLinks && see.length ? see : null,
-		!entry.shouldSkipLinks && closes.length ? closes : null
+		see.length ? see : null,
+		closes.length ? closes : null
 	].filter( Boolean ).join( ' ' );
 
 	if ( !restContent || !restContent.length ) {
@@ -139,7 +153,7 @@ function getScopesLinks( scope: Array<string>, transformScope: TransformScope ):
 		.join( ', ' );
 }
 
-function getIssueLinkObject( issue: string, gitHubUrl: string ) {
+function getIssueLinkObject( issue: string, gitHubUrl: string ): IssueLinkObject {
 	if ( issue.match( ISSUE_PATTERN ) ) {
 		return { displayName: `#${ issue }`, link: `${ gitHubUrl }/issues/${ issue }` };
 	}
@@ -167,16 +181,12 @@ function getIssueLinkObject( issue: string, gitHubUrl: string ) {
 	return { displayName: '', link: '' };
 }
 
-function getIssuesLinks( issues: Array<string>, prefix: string, gitHubUrl: string ): string {
+function getIssuesLinks( issues: Array<IssueLinkObject>, prefix: string ): string {
 	if ( !issues.length ) {
 		return '';
 	}
 
-	const links = issues.map( String ).map( issue => {
-		const { displayName, link } = getIssueLinkObject( issue, gitHubUrl );
-
-		return `[${ displayName }](${ link })`;
-	} );
+	const links = issues.map( issue => `[${ issue.displayName }](${ issue.link })` );
 
 	return `${ prefix } ${ links.join( ', ' ) }.`;
 }

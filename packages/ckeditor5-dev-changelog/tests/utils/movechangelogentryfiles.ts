@@ -23,14 +23,14 @@ describe( 'moveChangelogEntryFiles()', () => {
 		{
 			filePaths: [ '/repo1/.changelog/file1.md', '/repo1/.changelog/file2.md' ],
 			gitHubUrl: 'https://github.com/ckeditor/repo1',
-			shouldSkipLinks: false,
+			linkFilter: () => true,
 			cwd: '/repo1',
 			isRoot: true
 		},
 		{
 			filePaths: [ '/repo2/.changelog/file3.md' ],
 			gitHubUrl: 'https://github.com/ckeditor/repo2',
-			shouldSkipLinks: true,
+			linkFilter: () => true,
 			cwd: '/repo2',
 			isRoot: false
 		}
@@ -108,7 +108,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 			{
 				filePaths: [ '/repo1/.changelog/file1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				cwd: '/repo1',
 				isRoot: true
 			}
@@ -131,7 +131,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 			{
 				filePaths: [],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				cwd: '/repo1',
 				isRoot: true
 			}
@@ -165,7 +165,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 			{
 				filePaths: [ '/repo1/.changelog/2025111200_feature-branch.md', '/repo1/.changelog/20250111300_fix-bug-123.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/repo1',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				cwd: '/repo1',
 				isRoot: true
 			}

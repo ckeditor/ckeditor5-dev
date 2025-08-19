@@ -75,7 +75,7 @@ describe( 'generateChangelog()', () => {
 			{
 				filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				isRoot: true,
 				cwd: '/home/ckeditor'
 			}
@@ -94,7 +94,7 @@ describe( 'generateChangelog()', () => {
 				createdAt: new Date(),
 				changesetPath: '/home/ckeditor/.changelog/changeset-1.md',
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				shouldSkipLinks: false
+				linkFilter: () => true
 			}
 		] ) );
 		vi.mocked( groupEntriesBySection ).mockReturnValue( {
@@ -310,7 +310,7 @@ describe( 'generateChangelog()', () => {
 			{
 				filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				shouldSkipLinks: false,
+				linkFilter: expect.any( Function ),
 				isRoot: true,
 				cwd: '/home/ckeditor'
 			}
@@ -342,6 +342,8 @@ describe( 'generateChangelog()', () => {
 	} );
 
 	it( 'allows defining the external repositories', async () => {
+		const linkFilter = () => true;
+
 		const externalRepositories = [ {
 			cwd: '/external/repo',
 			packagesDirectory: 'packages',
@@ -351,6 +353,7 @@ describe( 'generateChangelog()', () => {
 		await generateChangelog( {
 			...defaultOptions,
 			shouldSkipLinks: true,
+			linkFilter,
 			externalRepositories
 		} );
 
@@ -362,7 +365,8 @@ describe( 'generateChangelog()', () => {
 		expect( findChangelogEntryPaths ).toHaveBeenCalledWith( expect.objectContaining( {
 			cwd: '/home/ckeditor',
 			externalRepositories,
-			shouldSkipLinks: true
+			shouldSkipLinks: true,
+			linkFilter
 		} ) );
 	} );
 
@@ -496,14 +500,14 @@ describe( 'generateChangelog()', () => {
 			{
 				filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				isRoot: true,
 				cwd: '/home/ckeditor'
 			},
 			{
 				filePaths: [ '/home/ckeditor5/external/ckeditor5-dev/.changelog/changeset-1.md' ],
 				gitHubUrl: 'https://github.com/ckeditor/ckeditor5-dev',
-				shouldSkipLinks: false,
+				linkFilter: () => true,
 				cwd: '/home/ckeditor5/external/ckeditor5-dev',
 				isRoot: false
 			}
@@ -586,7 +590,7 @@ describe( 'generateChangelog()', () => {
 				{
 					filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					shouldSkipLinks: false,
+					linkFilter: expect.any( Function ),
 					isRoot: true,
 					cwd: '/home/ckeditor'
 				}
@@ -604,7 +608,7 @@ describe( 'generateChangelog()', () => {
 				{
 					filePaths: [ '/home/ckeditor/.changelog/changeset-1.md' ],
 					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					shouldSkipLinks: false,
+					linkFilter: expect.any( Function ),
 					isRoot: true,
 					cwd: '/home/ckeditor'
 				}
@@ -639,7 +643,7 @@ describe( 'generateChangelog()', () => {
 						'/home/ckeditor/.changelog/changeset-1.md'
 					],
 					gitHubUrl: 'https://github.com/ckeditor/ckeditor5',
-					shouldSkipLinks: false,
+					linkFilter: () => true,
 					isRoot: true,
 					cwd: '/home/ckeditor'
 				}

@@ -15,6 +15,7 @@ export const generateChangelogForSingleRepository: GenerateChangelogEntryPoint<S
 		externalRepositories,
 		nextVersion,
 		disableFilesystemOperations,
+		linkFilter,
 		shouldSkipLinks
 	} = options;
 
@@ -23,6 +24,7 @@ export const generateChangelogForSingleRepository: GenerateChangelogEntryPoint<S
 		cwd,
 		externalRepositories,
 		date,
+		linkFilter,
 		shouldSkipLinks,
 		disableFilesystemOperations,
 		isSinglePackage: true,
