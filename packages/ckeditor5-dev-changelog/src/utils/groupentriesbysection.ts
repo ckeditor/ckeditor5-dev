@@ -97,7 +97,8 @@ function getChangeMessage( { restContent, scope, mainContent, entry, see, closes
 function formatContent( content: string ) {
 	const lines = content.trim()
 		.split( '\n' )
-		.map( line => line.trimEnd() );
+		.map( line => line.trimEnd() )
+		.map( line => normalizeListMarker( line ) );
 
 	const mainIndex = lines.findIndex( line => line.trim() !== '' );
 	const mainContent = lines.at( mainIndex )!;
@@ -215,4 +216,10 @@ function getInitialSectionsWithEntries(): SectionsWithEntries {
 	}
 
 	return sections;
+}
+
+function normalizeListMarker( line: string ): string {
+	const listMarkerRegexp = /^(\s*)[-+](\s*)/;
+
+	return line.replace( listMarkerRegexp, '$1*$2' );
 }
