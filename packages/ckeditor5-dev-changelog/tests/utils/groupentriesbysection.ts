@@ -438,12 +438,12 @@ Even more.`;
 	it( 'should preserve spacing in formatted content (checking lists)', () => {
 		const content = `We just released a new version of the app with several improvements:
 
-- Improved dark mode contrast
-  - Adjusted background color to \`#1e1e1e\`
-  - Lightened text for better legibility
-- Added keyboard shortcuts
-  - \`Ctrl + K\` to open the command palette
-  - \`Ctrl + /\` to toggle comments`;
+* Improved dark mode contrast
+  * Adjusted background color to \`#1e1e1e\`
+  * Lightened text for better legibility
+* Added keyboard shortcuts
+  * \`Ctrl + K\` to open the command palette
+  * \`Ctrl + /\` to toggle comments`;
 		const files = [ createParsedFile( { content } ) ];
 
 		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
@@ -455,12 +455,12 @@ Even more.`;
 			// eslint-disable-next-line @stylistic/max-len
 			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: We just released a new version of the app with several improvements: See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
 			'',
-			'  - Improved dark mode contrast',
-			'    - Adjusted background color to `#1e1e1e`',
-			'    - Lightened text for better legibility',
-			'  - Added keyboard shortcuts',
-			'    - `Ctrl + K` to open the command palette',
-			'    - `Ctrl + /` to toggle comments'
+			'  * Improved dark mode contrast',
+			'    * Adjusted background color to `#1e1e1e`',
+			'    * Lightened text for better legibility',
+			'  * Added keyboard shortcuts',
+			'    * `Ctrl + K` to open the command palette',
+			'    * `Ctrl + /` to toggle comments'
 		] );
 	} );
 
@@ -471,12 +471,12 @@ We just released a new version of the app with several improvements:
 
 
 
-- Improved dark mode contrast
-  - Adjusted background color to \`#1e1e1e\`
-  - Lightened text for better legibility
-- Added keyboard shortcuts
-  - \`Ctrl + K\` to open the command palette
-  - \`Ctrl + /\` to toggle comments
+* Improved dark mode contrast
+  * Adjusted background color to \`#1e1e1e\`
+  * Lightened text for better legibility
+* Added keyboard shortcuts
+  * \`Ctrl + K\` to open the command palette
+  * \`Ctrl + /\` to toggle comments
 
 
 
@@ -500,14 +500,102 @@ Let us know what you think!
 			'',
 			'  We just released a new version of the app with several improvements:',
 			'',
-			'  - Improved dark mode contrast',
-			'    - Adjusted background color to `#1e1e1e`',
-			'    - Lightened text for better legibility',
-			'  - Added keyboard shortcuts',
-			'    - `Ctrl + K` to open the command palette',
-			'    - `Ctrl + /` to toggle comments',
+			'  * Improved dark mode contrast',
+			'    * Adjusted background color to `#1e1e1e`',
+			'    * Lightened text for better legibility',
+			'  * Added keyboard shortcuts',
+			'    * `Ctrl + K` to open the command palette',
+			'    * `Ctrl + /` to toggle comments',
 			'',
 			'  Let us know what you think!'
+		] );
+	} );
+
+	it( 'should normalize "-" and "+" list markers', () => {
+		const content = [
+			'We just released a new version of the app with several improvements:',
+			'',
+			'- Improved dark mode contrast',
+			'  - Adjusted background color to `#1e1e1e`',
+			'  - Lightened text for better legibility',
+			'+ Added keyboard shortcuts',
+			'  + `Ctrl + K` to open the command palette',
+			'  + `Ctrl + /` to toggle comments'
+		].join( '\n' );
+
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: We just released a new version of the app with several improvements: See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  * Improved dark mode contrast',
+			'    * Adjusted background color to `#1e1e1e`',
+			'    * Lightened text for better legibility',
+			'  * Added keyboard shortcuts',
+			'    * `Ctrl + K` to open the command palette',
+			'    * `Ctrl + /` to toggle comments'
+		] );
+	} );
+
+	it( 'should keep numbered list markers', () => {
+		const content = [
+			'We just released a new version of the app with several improvements:',
+			'',
+			'1. Improved dark mode contrast',
+			'  1.1. Adjusted background color to `#1e1e1e`',
+			'  1.2. Lightened text for better legibility',
+			'2. Added keyboard shortcuts',
+			'  2.1. `Ctrl + K` to open the command palette',
+			'  2.2. `Ctrl + /` to toggle comments'
+		].join( '\n' );
+
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: We just released a new version of the app with several improvements: See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  1. Improved dark mode contrast',
+			'    1.1. Adjusted background color to `#1e1e1e`',
+			'    1.2. Lightened text for better legibility',
+			'  2. Added keyboard shortcuts',
+			'    2.1. `Ctrl + K` to open the command palette',
+			'    2.2. `Ctrl + /` to toggle comments'
+		] );
+	} );
+
+	it( 'should keep "-" and "+" characters when they are not list markers', () => {
+		const content = [
+			'A line with -, + and * characters.',
+			'',
+			'- List item with -, + and * characters.',
+			'  + Nested list item with -, + and * characters.'
+		].join( '\n' );
+
+		const files = [ createParsedFile( { content } ) ];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage } );
+		const message = result.feature.entries[ 0 ]!.message;
+
+		const messageAsArray = message.split( '\n' );
+
+		expect( messageAsArray ).toStrictEqual( [
+			// eslint-disable-next-line @stylistic/max-len
+			'* **[DisplayName-package-1](https://npmjs.com/package/package-1)**: A line with -, + and * characters. See [#456](https://github.com/ckeditor/issues/456). Closes [#123](https://github.com/ckeditor/issues/123).',
+			'',
+			'  * List item with -, + and * characters.',
+			'    * Nested list item with -, + and * characters.'
 		] );
 	} );
 
