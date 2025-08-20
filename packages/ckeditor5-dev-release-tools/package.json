@@ -26,27 +26,18 @@
     "@octokit/rest": "^22.0.0",
     "chalk": "^5.0.0",
     "cli-columns": "^4.0.0",
-    "compare-func": "^2.0.0",
-    "concat-stream": "^2.0.0",
-    "conventional-changelog-writer": "^8.0.0",
-    "conventional-commits-filter": "^5.0.0",
-    "conventional-commits-parser": "^6.0.0",
-    "date-fns": "^4.0.0",
-    "es-toolkit": "^1.35.0",
     "fs-extra": "^11.0.0",
-    "git-raw-commits": "^5.0.0",
     "glob": "^11.0.2",
     "inquirer": "^12.5.2",
-    "minimatch": "^10.0.1",
     "semver": "^7.6.3",
     "shell-escape": "^0.2.0",
     "simple-git": "^3.27.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "date-fns": "^4.0.0",
     "jest-extended": "^5.0.3",
     "vitest": "^3.1.1",
-    "handlebars": "^4.7.6",
     "mock-fs": "^5.2.0"
   },
   "scripts": {

@@ -19,11 +19,4 @@ describe( 'constants', () => {
 	it( '#CHANGELOG_HEADER', async () => {
 		expect( constants.CHANGELOG_HEADER ).to.be.a( 'string' );
 	} );
-	it( '#CLI_INDENT_SIZE', async () => {
-		expect( constants.CLI_INDENT_SIZE ).to.be.a( 'number' );
-	} );
-
-	it( '#CLI_COMMIT_INDENT_SIZE', async () => {
-		expect( constants.CLI_COMMIT_INDENT_SIZE ).to.be.a( 'number' );
-	} );
 } );

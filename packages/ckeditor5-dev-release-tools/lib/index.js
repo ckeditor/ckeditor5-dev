@@ -5,8 +5,6 @@
 
 import { npm, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
-export { default as generateChangelogForSinglePackage } from './tasks/generatechangelogforsinglepackage.js';
-export { default as generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository.js';
 export { default as updateDependencies } from './tasks/updatedependencies.js';
 export { default as commitAndTag } from './tasks/commitandtag.js';
 export { default as createGithubRelease } from './tasks/creategithubrelease.js';
@@ -29,7 +27,6 @@ export {
 } from './utils/versions.js';
 export { default as getChangesForVersion } from './utils/getchangesforversion.js';
 export { default as getChangelog } from './utils/getchangelog.js';
-export { default as saveChangelog } from './utils/savechangelog.js';
 export { default as executeInParallel } from './utils/executeinparallel.js';
 export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
