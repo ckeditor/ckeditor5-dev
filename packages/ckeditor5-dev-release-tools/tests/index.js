@@ -5,8 +5,6 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { npm, workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import generateChangelogForSinglePackage from '../lib/tasks/generatechangelogforsinglepackage.js';
-import generateChangelogForMonoRepository from '../lib/tasks/generatechangelogformonorepository.js';
 import updateDependencies from '../lib/tasks/updatedependencies.js';
 import commitAndTag from '../lib/tasks/commitandtag.js';
 import createGithubRelease from '../lib/tasks/creategithubrelease.js';
@@ -18,7 +16,6 @@ import updateVersions from '../lib/tasks/updateversions.js';
 import cleanUpPackages from '../lib/tasks/cleanuppackages.js';
 import getChangesForVersion from '../lib/utils/getchangesforversion.js';
 import getChangelog from '../lib/utils/getchangelog.js';
-import saveChangelog from '../lib/utils/savechangelog.js';
 import {
 	getLastFromChangelog,
 	getLastPreRelease,
@@ -39,8 +36,6 @@ import provideToken from '../lib/utils/providetoken.js';
 import * as index from '../lib/index.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../lib/tasks/generatechangelogforsinglepackage' );
-vi.mock( '../lib/tasks/generatechangelogformonorepository' );
 vi.mock( '../lib/tasks/updatedependencies' );
 vi.mock( '../lib/tasks/commitandtag' );
 vi.mock( '../lib/tasks/creategithubrelease' );
@@ -59,20 +54,6 @@ vi.mock( '../lib/utils/isversionpublishablefortag' );
 vi.mock( '../lib/utils/providetoken' );
 
 describe( 'dev-release-tools/index', () => {
-	describe( 'generateChangelogForSinglePackage()', () => {
-		it( 'should be a function', () => {
-			expect( index.generateChangelogForSinglePackage ).to.be.a( 'function' );
-			expect( index.generateChangelogForSinglePackage ).to.equal( generateChangelogForSinglePackage );
-		} );
-	} );
-
-	describe( 'generateChangelogForMonoRepository()', () => {
-		it( 'should be a function', () => {
-			expect( generateChangelogForMonoRepository ).to.be.a( 'function' );
-			expect( index.generateChangelogForMonoRepository ).to.equal( generateChangelogForMonoRepository );
-		} );
-	} );
-
 	describe( 'updateDependencies()', () => {
 		it( 'should be a function', () => {
 			expect( updateDependencies ).to.be.a( 'function' );
@@ -217,13 +198,6 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( getChangelog ).to.be.a( 'function' );
 			expect( index.getChangelog ).to.equal( getChangelog );
-		} );
-	} );
-
-	describe( 'saveChangelog()', () => {
-		it( 'should be a function', () => {
-			expect( saveChangelog ).to.be.a( 'function' );
-			expect( index.saveChangelog ).to.equal( saveChangelog );
 		} );
 	} );
 
