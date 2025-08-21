@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-stale-bot",
-  "version": "51.0.0",
+  "version": "51.1.0",
   "description": "A stale bot is used to mark issues and pull requests that have not recently been updated.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -25,7 +25,7 @@
     "ckeditor5-dev-stale-bot": "bin/stale-bot.js"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^51.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^51.1.0",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
     "fs-extra": "^11.0.0",
