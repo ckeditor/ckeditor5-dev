@@ -648,7 +648,7 @@ describe( 'runManualTests()', () => {
 
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -658,7 +658,7 @@ describe( 'runManualTests()', () => {
 				}
 			);
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -698,7 +698,7 @@ describe( 'runManualTests()', () => {
 
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -708,7 +708,7 @@ describe( 'runManualTests()', () => {
 				}
 			);
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -744,7 +744,7 @@ describe( 'runManualTests()', () => {
 				.rejects.toThrow( 'Building DLLs in ckeditor5 finished with an error.' );
 
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledExactlyOnceWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -771,7 +771,7 @@ describe( 'runManualTests()', () => {
 			await runManualTests( defaultOptions );
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 3 );
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -781,7 +781,7 @@ describe( 'runManualTests()', () => {
 				}
 			);
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',
@@ -791,7 +791,7 @@ describe( 'runManualTests()', () => {
 				}
 			);
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'yarnpkg',
+				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
 					encoding: 'utf8',

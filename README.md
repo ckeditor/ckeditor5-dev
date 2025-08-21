@@ -25,7 +25,7 @@ This repository is a monorepo. It contains multiple npm packages.
 ## Cloning
 
 1. Clone this repository.
-2. Do `yarn install` inside (this package uses yarn workspaces).
+2. Do `pnpm install` inside (this package uses pnpm workspaces).
 3. You're ready to go!
 
 ## Testing
@@ -33,7 +33,7 @@ This repository is a monorepo. It contains multiple npm packages.
 Tests:
 
 ```bash
-yarn run test
+pnpm run test
 ```
 
 Each package defines its own tests. To run them, change your working directory and use the `test` script.
@@ -41,7 +41,7 @@ Each package defines its own tests. To run them, change your working directory a
 Code coverage:
 
 ```bash
-yarn run coverage
+pnpm run coverage
 ```
 
 ## Releasing packages
@@ -52,7 +52,7 @@ Before you start, you need to prepare the changelog entries.
 
 1. Make sure the `#master` branch is up-to-date: `git fetch && git checkout master && git pull`.
 1. Prepare a release branch: `git checkout -b release-[YYYYMMDD]` where `YYYYMMDD` is the current day.
-1. Generate the changelog entries: `yarn run release:prepare-changelog`.
+1. Generate the changelog entries: `pnpm run release:prepare-changelog`.
 1. Commit all changes and prepare a new pull request targeting the `#master` branch.
 1. Ping the `@ckeditor/ckeditor-5-platform` team to review the pull request and trigger the release process.
 

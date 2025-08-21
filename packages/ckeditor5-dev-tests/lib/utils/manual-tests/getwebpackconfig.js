@@ -114,7 +114,7 @@ export default function getWebpackConfigForManualTests( options ) {
 			//
 			// Example:
 			//
-			// After running `yarn run manual -f alignment` we have:
+			// After running `pnpm run manual -f alignment` we have:
 			// - the `[base]` placeholder contains only the file name: `alignment.js`,
 			// - the `[file]` placeholder contains the relative path to the test file: `ckeditor5-alignment/tests/manual/alignment.js`.
 			//

@@ -12,11 +12,7 @@ import * as tests from '../lib/index.js';
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
 if ( options.files.length === 0 ) {
-	if ( options.cwd.endsWith( 'ckeditor5' ) ) {
-		options.files = [ '*' ];
-	} else {
-		options.files = [ '/' ];
-	}
+	options.files = [ '*' ];
 }
 
 // "Lark" is the default theme for tests.
