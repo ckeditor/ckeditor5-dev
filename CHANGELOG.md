@@ -1,6 +1,49 @@
 Changelog
 =========
 
+## [51.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v51.0.0...v51.1.0) (August 21, 2025)
+
+### Features
+
+* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: Added a top-level `linkFilter()` callback option for changelog generators that determines which issue links should be preserved in the generated changelog and which should be removed. If the `shouldSkipLinks` flag is also provided, the `shouldSkipLinks` flag takes precedence over the `linkFilter()` callback to maintain backward compatibility. Closes [ckeditor/ckeditor5#18936](https://github.com/ckeditor/ckeditor5/issues/18936).
+
+### Bug fixes
+
+* Don't hardcode the path to the `@ckeditor/ckeditor5-theme-lark` package.
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs), [typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Bumped TypeDoc to the latest version: v0.28.9. Closes [ckeditor/ckeditor5#18905](https://github.com/ckeditor/ckeditor5/issues/18905).
+* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: Normalized Markdown lists in the generated changelog and from now on lists are always defined by the `*` character. Closes [ckeditor/ckeditor5#18908](https://github.com/ckeditor/ckeditor5/issues/18908).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/51.1.0): v51.0.0 => v51.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/51.1.0): v51.0.0 => v51.1.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/51.1.0): v51.0.0 => v51.1.0
+</details>
+
+
 ## [51.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v50.3.1...v51.0.0) (August 12, 2025)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
@@ -176,42 +219,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/50.2.0): v50.1.2 => v50.2.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/50.2.0): v50.1.2 => v50.2.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/50.2.0): v50.1.2 => v50.2.0
-</details>
-
-
-## [50.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v50.1.1...v50.1.2) (June 18, 2025)
-
-### Bug fixes
-
-* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: Added validation for a username provided in the community contributors section. Closes [ckeditor/ckeditor5#18670](https://github.com/ckeditor/ckeditor5/issues/18670).
-* Downgrade `@rollup/plugin-typescript` to version `12.1.2` to fix failing builds. Closes [ckeditor/ckeditor5#18731](https://github.com/ckeditor/ckeditor5/issues/18731).
-
-### Other changes
-
-* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: When there are no changelog entries found, the changelog generator script informs about it in the terminal and exits. Closes [ckeditor/ckeditor5#18661](https://github.com/ckeditor/ckeditor5/issues/18661).
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/50.1.2): v50.1.1 => v50.1.2
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/50.1.2): v50.1.1 => v50.1.2
 </details>
 
 ---
