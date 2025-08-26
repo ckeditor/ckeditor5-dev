@@ -167,7 +167,7 @@ export default function runManualTests( options ) {
 			.map( relativePath => path.resolve( relativePath ) )
 			.sort( absolutePath => {
 				// The CKEditor 5 repository must be built first, before the other external repositories.
-				if ( !/[\\/]external[\\/]/.test( absolutePath ) ) {
+				if ( absolutePath.includes( 'external/ckeditor5/' ) ) {
 					return -1;
 				}
 

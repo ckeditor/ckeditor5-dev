@@ -143,9 +143,10 @@ export default function getWebpackConfigForManualTests( options ) {
 		// It leads to the CKEditor 5 duplicated modules error.
 		//
 		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
-		const manifestPath = path.join( 'ckeditor5', 'build', 'ckeditor5-dll.manifest.json' );
+		const coreDllManifest = require.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' );
+
 		const dllReferencePlugin = new webpack.DllReferencePlugin( {
-			manifest: require( manifestPath ),
+			manifest: require( coreDllManifest ),
 			scope: 'ckeditor5/src',
 			name: 'CKEditor5.dll'
 		} );
