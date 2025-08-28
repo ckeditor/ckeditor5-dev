@@ -122,9 +122,8 @@ describe( 'runManualTests()', () => {
 				// Pattern for finding `package.json` in all repositories.
 				// External repositories are first, then the root repository.
 				'{,external/*/}package.json': [
-					'workspace/ckeditor5/external/ckeditor5-internal/package.json',
-					'workspace/ckeditor5/external/collaboration-features/package.json',
-					'workspace/ckeditor5/package.json'
+					'workspace/ckeditor5-commercial/external/ckeditor5/package.json',
+					'workspace/ckeditor5-commercial/package.json'
 				]
 			};
 
@@ -568,27 +567,21 @@ describe( 'runManualTests()', () => {
 			consoleStub.mockRestore();
 
 			// The `path.resolve()` calls are not sorted, so it is called in the same order as data returned from `glob`.
-			expect( vi.mocked( path ).resolve ).toHaveBeenCalledTimes( 3 );
-			expect( vi.mocked( path ).resolve ).toHaveBeenCalledWith( 'workspace/ckeditor5/external/ckeditor5-internal/package.json' );
-			expect( vi.mocked( path ).resolve ).toHaveBeenCalledWith( 'workspace/ckeditor5/external/collaboration-features/package.json' );
-			expect( vi.mocked( path ).resolve ).toHaveBeenCalledWith( 'workspace/ckeditor5/package.json' );
+			expect( vi.mocked( path ).resolve ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( path ).resolve ).toHaveBeenCalledWith( 'workspace/ckeditor5-commercial/external/ckeditor5/package.json' );
+			expect( vi.mocked( path ).resolve ).toHaveBeenCalledWith( 'workspace/ckeditor5-commercial/package.json' );
 
 			// The `fs.readFileSync()` calls are sorted: root repository first, then external ones.
-			expect( vi.mocked( fs ).readFileSync ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( fs ).readFileSync ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( fs ).readFileSync ).toHaveBeenNthCalledWith(
 				1,
-				'/absolute/path/to/workspace/ckeditor5/package.json',
+				'/absolute/path/to/workspace/ckeditor5-commercial/external/ckeditor5/package.json',
 				'utf-8'
 			);
 
 			expect( vi.mocked( fs ).readFileSync ).toHaveBeenNthCalledWith(
 				2,
-				'/absolute/path/to/workspace/ckeditor5/external/ckeditor5-internal/package.json',
-				'utf-8'
-			);
-			expect( vi.mocked( fs ).readFileSync ).toHaveBeenNthCalledWith(
-				3,
-				'/absolute/path/to/workspace/ckeditor5/external/collaboration-features/package.json',
+				'/absolute/path/to/workspace/ckeditor5-commercial/package.json',
 				'utf-8'
 			);
 		} );
@@ -653,7 +646,7 @@ describe( 'runManualTests()', () => {
 				{
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5',
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial',
 					stdio: 'inherit'
 				}
 			);
@@ -663,7 +656,7 @@ describe( 'runManualTests()', () => {
 				{
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5/external/ckeditor5-internal',
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial/external/ckeditor5',
 					stdio: 'inherit'
 				}
 			);
@@ -703,7 +696,7 @@ describe( 'runManualTests()', () => {
 				{
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5',
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial',
 					stdio: 'inherit'
 				}
 			);
@@ -713,7 +706,7 @@ describe( 'runManualTests()', () => {
 				{
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5/external/ckeditor5-internal',
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial/external/ckeditor5',
 					stdio: 'inherit'
 				}
 			);
@@ -722,7 +715,7 @@ describe( 'runManualTests()', () => {
 		it( 'should reject a promise if building DLLs has failed', async () => {
 			vi.mocked( inquirer ).prompt.mockResolvedValue( { confirm: true } );
 			vi.mocked( fs ).readFileSync.mockImplementation( input => {
-				if ( input === '/absolute/path/to/workspace/ckeditor5/external/collaboration-features/package.json' ) {
+				if ( input === '/absolute/path/to/workspace/ckeditor5-commercial/package.json' ) {
 					return JSON.stringify( {
 						name: 'ckeditor5-example-package',
 						scripts: {
@@ -749,7 +742,7 @@ describe( 'runManualTests()', () => {
 				{
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5',
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial/external/ckeditor5',
 					stdio: 'inherit'
 				}
 			);
@@ -769,14 +762,14 @@ describe( 'runManualTests()', () => {
 			vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 
 			await runManualTests( defaultOptions );
-			expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
 				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial/external/ckeditor5',
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5',
 					stdio: 'inherit'
 				}
 			);
@@ -784,19 +777,9 @@ describe( 'runManualTests()', () => {
 				'pnpm',
 				[ 'run', 'dll:build' ],
 				{
+					cwd: '/absolute/path/to/workspace/ckeditor5-commercial',
 					encoding: 'utf8',
 					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5/external/ckeditor5-internal',
-					stdio: 'inherit'
-				}
-			);
-			expect( vi.mocked( spawn ) ).toHaveBeenCalledWith(
-				'pnpm',
-				[ 'run', 'dll:build' ],
-				{
-					encoding: 'utf8',
-					shell: true,
-					cwd: '/absolute/path/to/workspace/ckeditor5/external/collaboration-features',
 					stdio: 'inherit'
 				}
 			);
