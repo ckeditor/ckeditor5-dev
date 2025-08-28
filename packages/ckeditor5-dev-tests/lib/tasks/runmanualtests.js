@@ -167,7 +167,7 @@ export default function runManualTests( options ) {
 			.map( relativePath => path.resolve( relativePath ) )
 			.sort( absolutePath => {
 				// The CKEditor 5 repository must be built first, before the other external repositories.
-				if ( !/[\\/]external[\\/]/.test( absolutePath ) ) {
+				if ( /[\\/]external[\\/]ckeditor5/.test( absolutePath ) ) {
 					return -1;
 				}
 
@@ -205,7 +205,7 @@ export default function runManualTests( options ) {
 				stdio: 'inherit'
 			};
 
-			spawn( 'yarnpkg', [ 'run', 'dll:build' ], spawnOptions )
+			spawn( 'pnpm', [ 'run', 'dll:build' ], spawnOptions )
 				.on( 'close', exitCode => {
 					if ( exitCode ) {
 						return reject( new Error( `Building DLLs in ${ repositoryName } finished with an error.` ) );

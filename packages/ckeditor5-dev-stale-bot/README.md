@@ -13,7 +13,7 @@ More information about development tools packages can be found at the following 
 To execute the stale bot, run the following command:
 
 ```bash
-yarn run ckeditor5-dev-stale-bot [<args>...]
+pnpm run ckeditor5-dev-stale-bot [<args>...]
 ```
 
 This script accepts the following arguments:
