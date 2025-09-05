@@ -40,6 +40,7 @@ export const IGNORED_HOSTS = [
 	'iframe.ly',
 	'jsfiddle.net',
 	'fonts.googleapis.com',
+	'kapa.ai',
 
 	// See: https://github.com/ckeditor/ckeditor5/issues/18519.
 	'if-cdn.com'
