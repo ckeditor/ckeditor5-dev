@@ -3,25 +3,45 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { simpleGit } from 'simple-git';
 
 import validateRepositoryToRelease from '../../lib/utils/validaterepositorytorelease.js';
 
-vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'simple-git' );
 
 describe( 'validateRepositoryToRelease()', () => {
-	it( 'resolves an empty array if validation passes (remote branch exists)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
+	let current, behind;
 
-		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
+	beforeEach( () => {
+		vi.stubGlobal( 'process', { cwd: () => 'current/working/directory' } );
 
-		expect( errors ).to.be.an( 'Array' );
-		expect( errors.length ).to.equal( 0 );
+		vi.mocked( simpleGit ).mockReturnValue( {
+			status: async () => ( { current, behind } )
+		} );
 	} );
 
-	it( 'resolves an empty array if validation passes (missing remote branch)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master' );
+	it( 'passes the default cwd to simpleGit', async () => {
+		current = 'master';
+		behind = 0;
+
+		await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
+
+		expect( simpleGit ).toHaveBeenCalledExactlyOnceWith( { baseDir: 'current/working/directory' } );
+	} );
+
+	it( 'passes the specified cwd to simpleGit', async () => {
+		current = 'master';
+		behind = 0;
+
+		await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0', cwd: 'custom/working/directory' } );
+
+		expect( simpleGit ).toHaveBeenCalledExactlyOnceWith( { baseDir: 'custom/working/directory' } );
+	} );
+
+	it( 'resolves an empty array if validation passes', async () => {
+		current = 'master';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -30,7 +50,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'resolves an array with errors if the release changes are not defined', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
+		current = 'master';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: null, version: '1.0.0' } );
 
@@ -39,7 +60,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'resolves an array with errors if the specified version is not a string', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
+		current = 'master';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: null } );
 
@@ -48,7 +70,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'resolves an array with errors if the specified version is empty string', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
+		current = 'master';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '' } );
 
@@ -56,8 +79,9 @@ describe( 'validateRepositoryToRelease()', () => {
 		expect( errors[ 0 ] ).to.equal( 'Passed an invalid version ("").' );
 	} );
 
-	it( 'resolves an array with errors if current branch is not "master" (remote branch exists)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
+	it( 'resolves an array with errors if current branch is not "master"', async () => {
+		current = 'develop';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -65,26 +89,9 @@ describe( 'validateRepositoryToRelease()', () => {
 		expect( errors[ 0 ] ).to.equal( 'Not on the "#master" branch.' );
 	} );
 
-	it( 'resolves an array with errors if current branch is not "master" (missing remote branch)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## develop' );
-
-		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
-
-		expect( errors.length ).to.equal( 1 );
-		expect( errors[ 0 ] ).to.equal( 'Not on the "#master" branch.' );
-	} );
-
-	it( 'resolves an array with errors if master is behind with origin (remote branch exists)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master [behind 2]' );
-
-		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
-
-		expect( errors.length ).to.equal( 1 );
-		expect( errors[ 0 ] ).to.equal( 'The branch is behind with the remote.' );
-	} );
-
-	it( 'resolves an array with errors if master is behind with origin (missing remote branch)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## master [behind 2]' );
+	it( 'resolves an array with errors if master is behind with origin', async () => {
+		current = 'master';
+		behind = 2;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -93,7 +100,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'allows skipping the branch check', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
+		current = 'develop';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0', ignoreBranchCheck: true } );
 
@@ -101,7 +109,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'uses non-master branch for releasing if specified', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## release...origin/release' );
+		current = 'release';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( { branch: 'release', changes: 'Some changes.', version: '1.0.0' } );
 
@@ -110,7 +119,8 @@ describe( 'validateRepositoryToRelease()', () => {
 	} );
 
 	it( 'allows skipping the branch check (even if specified)', async () => {
-		vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
+		current = 'develop';
+		behind = 0;
 
 		const errors = await validateRepositoryToRelease( {
 			branch: 'release',
