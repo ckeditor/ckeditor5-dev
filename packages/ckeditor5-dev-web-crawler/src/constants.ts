@@ -40,6 +40,7 @@ export const IGNORED_HOSTS = [
 	'iframe.ly',
 	'jsfiddle.net',
 	'fonts.googleapis.com',
+	'kapa.ai',
 
 	// See: https://github.com/ckeditor/ckeditor5/issues/18519.
 	'if-cdn.com'
@@ -47,7 +48,7 @@ export const IGNORED_HOSTS = [
 
 export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
 
-export const DEFAULT_TIMEOUT = 15 * 1000;
+export const DEFAULT_TIMEOUT = 30 * 1000;
 
 export const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
 
