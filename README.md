@@ -24,6 +24,9 @@ This repository is a monorepo. It contains multiple npm packages.
 
 ## Cloning
 
+> [!NOTE]
+> This project requires **pnpm v10** or higher. You can check your version with `pnpm --version` and update if needed with `npm install -g pnpm@latest`.
+
 1. Clone this repository.
 2. Do `pnpm install` inside (this package uses pnpm workspaces).
 3. You're ready to go!
