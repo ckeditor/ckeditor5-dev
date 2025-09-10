@@ -9,19 +9,19 @@ importers:
   .:
     devDependencies:
       '@ckeditor/ckeditor5-dev-bump-year':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:packages/ckeditor5-dev-bump-year
       '@ckeditor/ckeditor5-dev-changelog':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:packages/ckeditor5-dev-changelog
       '@ckeditor/ckeditor5-dev-ci':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:packages/ckeditor5-dev-ci
       '@ckeditor/ckeditor5-dev-dependency-checker':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:packages/ckeditor5-dev-dependency-checker
       '@ckeditor/ckeditor5-dev-release-tools':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:packages/ckeditor5-dev-release-tools
       '@inquirer/prompts':
         specifier: ^7.5.0
@@ -187,7 +187,7 @@ importers:
   packages/ckeditor5-dev-changelog:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -261,7 +261,7 @@ importers:
   packages/ckeditor5-dev-dependency-checker:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -295,7 +295,7 @@ importers:
   packages/ckeditor5-dev-docs:
     dependencies:
       '@ckeditor/typedoc-plugins':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../typedoc-plugins
       glob:
         specifier: ^11.0.2
@@ -323,7 +323,7 @@ importers:
   packages/ckeditor5-dev-release-tools:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       '@octokit/rest':
         specifier: ^22.0.0
@@ -372,7 +372,7 @@ importers:
   packages/ckeditor5-dev-stale-bot:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -409,10 +409,10 @@ importers:
         specifier: ^7.10.5
         version: 7.28.0
       '@ckeditor/ckeditor5-dev-translations':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-translations
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       '@ckeditor/ckeditor5-inspector':
         specifier: ^5.0.0
@@ -563,7 +563,7 @@ importers:
         specifier: ^7.18.9
         version: 7.28.0
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -597,7 +597,7 @@ importers:
   packages/ckeditor5-dev-utils:
     dependencies:
       '@ckeditor/ckeditor5-dev-translations':
-        specifier: ^51.1.0
+        specifier: ^52.0.0
         version: link:../ckeditor5-dev-translations
       '@types/postcss-import':
         specifier: ^14.0.3
