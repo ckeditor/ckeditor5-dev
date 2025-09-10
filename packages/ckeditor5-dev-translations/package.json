@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-translations",
-  "version": "52.0.0",
+  "version": "53.0.0",
   "description": "CKEditor 5 translations plugin for webpack.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@babel/parser": "^7.18.9",
     "@babel/traverse": "^7.18.9",
-    "@ckeditor/ckeditor5-dev-utils": "^52.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^53.0.0",
     "chalk": "^5.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^11.0.2",
