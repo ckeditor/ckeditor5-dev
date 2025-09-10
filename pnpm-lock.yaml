@@ -8,21 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@ckeditor/ckeditor5-dev-bump-year':
-        specifier: ^52.0.0
-        version: link:packages/ckeditor5-dev-bump-year
-      '@ckeditor/ckeditor5-dev-changelog':
-        specifier: ^52.0.0
-        version: link:packages/ckeditor5-dev-changelog
-      '@ckeditor/ckeditor5-dev-ci':
-        specifier: ^52.0.0
-        version: link:packages/ckeditor5-dev-ci
-      '@ckeditor/ckeditor5-dev-dependency-checker':
-        specifier: ^52.0.0
-        version: link:packages/ckeditor5-dev-dependency-checker
-      '@ckeditor/ckeditor5-dev-release-tools':
-        specifier: ^52.0.0
-        version: link:packages/ckeditor5-dev-release-tools
       '@inquirer/prompts':
         specifier: ^7.5.0
         version: 7.8.2(@types/node@22.17.1)
