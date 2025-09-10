@@ -121,7 +121,7 @@ const tasks = new Listr( [
 	},
 	{
 		title: 'Updating `pnpm-lock.yaml` file.',
-		task: () => tools.shExec( 'pnpm install', { async: true, verbosity: 'silent' } )
+		task: () => tools.shExec( 'pnpm install --lockfile-only', { async: true, verbosity: 'silent' } )
 	},
 	{
 		title: 'Run the "build" command in `ckeditor5-*` packages.',
@@ -160,7 +160,8 @@ const tasks = new Listr( [
 				version: latestVersion,
 				files: [
 					'package.json',
-					`${ PACKAGES_DIRECTORY }/*/package.json`
+					`${ PACKAGES_DIRECTORY }/*/package.json`,
+					'pnpm-lock.yaml'
 				]
 			} );
 		},
