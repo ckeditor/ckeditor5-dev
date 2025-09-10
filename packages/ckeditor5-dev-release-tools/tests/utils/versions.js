@@ -16,7 +16,10 @@ import {
 	getNextInternal,
 	getLastTagFromGit,
 	getCurrent,
-	getDateIdentifier
+	getDateIdentifier,
+	getLastFromTag,
+	isLatestStableRelease,
+	isVersionPublishableForTag
 } from '../../lib/utils/versions.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
@@ -558,6 +561,122 @@ describe( 'versions', () => {
 			vi.mocked( workspaces.getPackageJson ).mockReturnValue( { version: '0.1.2' } );
 
 			expect( getCurrent() ).to.equal( '0.1.2' );
+		} );
+	} );
+
+	describe( 'getLastFromTag()', () => {
+		it( 'should ask for the version from the provided npm tag', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
+
+			await getLastFromTag( 'package-name', 'latest' );
+
+			expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
+		} );
+
+		it( 'should return the received version', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
+
+			const result = await getLastFromTag( 'package-name', 'latest' );
+
+			expect( result ).to.equal( '1.0.0' );
+		} );
+
+		it( 'should return null if npm tag is not published yet', async () => {
+			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+
+			const result = await getLastFromTag( 'package-name', 'latest' );
+
+			expect( result ).to.equal( null );
+		} );
+	} );
+
+	describe( 'isLatestStableRelease()', () => {
+		it( 'should ask for the version from the "latest" npm tag', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
+
+			await isLatestStableRelease( 'package-name', '1.0.0' );
+
+			expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
+		} );
+
+		it( 'should return false for a pre-release', async () => {
+			const result = await isLatestStableRelease( 'package-name', '1.0.0-alpha.0' );
+
+			expect( result ).to.equal( false );
+		} );
+
+		it( 'should return false if given version is lower than the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isLatestStableRelease( 'package-name', '1.0.0' );
+
+			expect( result ).to.equal( false );
+		} );
+
+		it( 'should return true if given version is equal to the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isLatestStableRelease( 'package-name', '1.0.1' );
+
+			expect( result ).to.equal( true );
+		} );
+
+		it( 'should return true if given version is greater than the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isLatestStableRelease( 'package-name', '1.0.2' );
+
+			expect( result ).to.equal( true );
+		} );
+
+		it( 'should return true if "latest" npm tag is not published yet', async () => {
+			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+
+			const result = await isLatestStableRelease( 'package-name', '1.0.0' );
+
+			expect( result ).to.equal( true );
+		} );
+	} );
+
+	describe( 'isVersionPublishableForTag()', () => {
+		it( 'should ask for the version from the provided npm tag', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
+
+			await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
+
+			expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@alpha' );
+		} );
+
+		it( 'should return false if given version is lower than the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'latest' );
+
+			expect( result ).to.equal( false );
+		} );
+
+		it( 'should return false if given version is equal to the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isVersionPublishableForTag( 'package-name', '1.0.1', 'latest' );
+
+			expect( result ).to.equal( false );
+		} );
+
+		it( 'should return true if given version is greater than the latest published', async () => {
+			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
+
+			const result = await isVersionPublishableForTag( 'package-name', '1.0.2', 'latest' );
+
+			expect( result ).to.equal( true );
+		} );
+
+		it( 'should return true if given npm tag is not published yet', async () => {
+			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+
+			const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
+
+			expect( result ).to.equal( true );
 		} );
 	} );
 } );

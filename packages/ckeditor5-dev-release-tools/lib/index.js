@@ -23,14 +23,16 @@ export {
 	getNextInternal,
 	getCurrent,
 	getDateIdentifier,
-	getLastTagFromGit
+	getLastTagFromGit,
+	getLastFromTag,
+	isLatestStableRelease,
+	isVersionPublishableForTag
 } from './utils/versions.js';
 export { default as getChangesForVersion } from './utils/getchangesforversion.js';
 export { default as getChangelog } from './utils/getchangelog.js';
 export { default as executeInParallel } from './utils/executeinparallel.js';
 export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
-export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
 export { default as provideToken } from './utils/providetoken.js';
 
 // Backwards compatibility for the old API.
