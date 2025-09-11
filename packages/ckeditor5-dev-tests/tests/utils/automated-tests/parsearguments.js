@@ -359,7 +359,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should be null by default, if allowDefaultIdentityFile was not passed', () => {
-			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+			existingFiles.push( '/home/project/scripts/presets/staging-ff.js' );
 
 			const options = parseArguments( [], {} );
 
@@ -367,15 +367,15 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should point to the default value by default', () => {
-			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+			existingFiles.push( '/home/project/scripts/presets/staging-ff.js' );
 
 			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
 
-			expect( options.identityFile ).to.equal( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+			expect( options.identityFile ).to.equal( '/home/project/scripts/presets/staging-ff.js' );
 		} );
 
 		it( 'should point to the passed value', () => {
-			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+			existingFiles.push( '/home/project/scripts/presets/staging-ff.js' );
 
 			const options = parseArguments( [ '--identity-file', 'configs/identity.js' ], { allowDefaultIdentityFile: true } );
 
@@ -383,7 +383,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should be false if --no-identity-file was passed', () => {
-			existingFiles.push( '/home/project/external/ckeditor5-commercial/scripts/presets/staging-ff.js' );
+			existingFiles.push( '/home/project/scripts/presets/staging-ff.js' );
 
 			const options = parseArguments( [ '--no-identity-file' ], { allowDefaultIdentityFile: true } );
 
