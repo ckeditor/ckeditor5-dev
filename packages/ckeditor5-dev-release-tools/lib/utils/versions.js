@@ -171,7 +171,7 @@ export function getDateIdentifier() {
  * @param {string} npmTag
  * @returns {Promise.<string|null>}
  */
-export function getLastFromTag( packageName, npmTag ) {
+export function getVersionForTag( packageName, npmTag ) {
 	return npm.manifest( `${ packageName }@${ npmTag }` )
 		.then( result => result.version )
 		.catch( () => null );
@@ -186,12 +186,12 @@ export function getLastFromTag( packageName, npmTag ) {
  * @param {string} version
  * @returns {Promise.<boolean>}
  */
-export async function isLatestStableRelease( packageName, version ) {
+export async function isLatestOrNextStableVersion( packageName, version ) {
 	if ( semver.prerelease( version ) ) {
 		return false;
 	}
 
-	const npmVersion = await getLastFromTag( packageName, 'latest' );
+	const npmVersion = await getVersionForTag( packageName, 'latest' );
 
 	if ( npmVersion && semver.lt( version, npmVersion ) ) {
 		return false;
@@ -209,7 +209,7 @@ export async function isLatestStableRelease( packageName, version ) {
  * @returns {Promise.<boolean>}
  */
 export async function isVersionPublishableForTag( packageName, version, npmTag ) {
-	const npmVersion = await getLastFromTag( packageName, npmTag );
+	const npmVersion = await getVersionForTag( packageName, npmTag );
 
 	if ( npmVersion && semver.lte( version, npmVersion ) ) {
 		return false;

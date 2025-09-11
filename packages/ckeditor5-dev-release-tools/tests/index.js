@@ -26,8 +26,8 @@ import {
 	getCurrent,
 	getDateIdentifier,
 	getLastTagFromGit,
-	getLastFromTag,
-	isLatestStableRelease,
+	getVersionForTag,
+	isLatestOrNextStableVersion,
 	isVersionPublishableForTag
 } from '../lib/utils/versions.js';
 import executeInParallel from '../lib/utils/executeinparallel.js';
@@ -181,17 +181,17 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'getLastFromTag()', () => {
+	describe( 'getVersionForTag()', () => {
 		it( 'should be a function', () => {
-			expect( getLastFromTag ).to.be.a( 'function' );
-			expect( index.getLastFromTag ).to.equal( getLastFromTag );
+			expect( getVersionForTag ).to.be.a( 'function' );
+			expect( index.getVersionForTag ).to.equal( getVersionForTag );
 		} );
 	} );
 
-	describe( 'isLatestStableRelease()', () => {
+	describe( 'isLatestOrNextStableVersion()', () => {
 		it( 'should be a function', () => {
-			expect( isLatestStableRelease ).to.be.a( 'function' );
-			expect( index.isLatestStableRelease ).to.equal( isLatestStableRelease );
+			expect( isLatestOrNextStableVersion ).to.be.a( 'function' );
+			expect( index.isLatestOrNextStableVersion ).to.equal( isLatestOrNextStableVersion );
 		} );
 	} );
 

@@ -24,8 +24,8 @@ export {
 	getCurrent,
 	getDateIdentifier,
 	getLastTagFromGit,
-	getLastFromTag,
-	isLatestStableRelease,
+	getVersionForTag,
+	isLatestOrNextStableVersion,
 	isVersionPublishableForTag
 } from './utils/versions.js';
 export { default as getChangesForVersion } from './utils/getchangesforversion.js';

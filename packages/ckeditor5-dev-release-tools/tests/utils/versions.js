@@ -17,8 +17,8 @@ import {
 	getLastTagFromGit,
 	getCurrent,
 	getDateIdentifier,
-	getLastFromTag,
-	isLatestStableRelease,
+	getVersionForTag,
+	isLatestOrNextStableVersion,
 	isVersionPublishableForTag
 } from '../../lib/utils/versions.js';
 
@@ -564,11 +564,11 @@ describe( 'versions', () => {
 		} );
 	} );
 
-	describe( 'getLastFromTag()', () => {
+	describe( 'getVersionForTag()', () => {
 		it( 'should ask for the version from the provided npm tag', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
 
-			await getLastFromTag( 'package-name', 'latest' );
+			await getVersionForTag( 'package-name', 'latest' );
 
 			expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
 		} );
@@ -576,7 +576,7 @@ describe( 'versions', () => {
 		it( 'should return the received version', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
 
-			const result = await getLastFromTag( 'package-name', 'latest' );
+			const result = await getVersionForTag( 'package-name', 'latest' );
 
 			expect( result ).to.equal( '1.0.0' );
 		} );
@@ -584,23 +584,23 @@ describe( 'versions', () => {
 		it( 'should return null if npm tag is not published yet', async () => {
 			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
 
-			const result = await getLastFromTag( 'package-name', 'latest' );
+			const result = await getVersionForTag( 'package-name', 'latest' );
 
 			expect( result ).to.equal( null );
 		} );
 	} );
 
-	describe( 'isLatestStableRelease()', () => {
+	describe( 'isLatestOrNextStableVersion()', () => {
 		it( 'should ask for the version from the "latest" npm tag', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.0' } );
 
-			await isLatestStableRelease( 'package-name', '1.0.0' );
+			await isLatestOrNextStableVersion( 'package-name', '1.0.0' );
 
 			expect( npm.manifest ).toHaveBeenCalledExactlyOnceWith( 'package-name@latest' );
 		} );
 
 		it( 'should return false for a pre-release', async () => {
-			const result = await isLatestStableRelease( 'package-name', '1.0.0-alpha.0' );
+			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.0-alpha.0' );
 
 			expect( result ).to.equal( false );
 		} );
@@ -608,7 +608,7 @@ describe( 'versions', () => {
 		it( 'should return false if given version is lower than the latest published', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
 
-			const result = await isLatestStableRelease( 'package-name', '1.0.0' );
+			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.0' );
 
 			expect( result ).to.equal( false );
 		} );
@@ -616,7 +616,7 @@ describe( 'versions', () => {
 		it( 'should return true if given version is equal to the latest published', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
 
-			const result = await isLatestStableRelease( 'package-name', '1.0.1' );
+			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.1' );
 
 			expect( result ).to.equal( true );
 		} );
@@ -624,7 +624,7 @@ describe( 'versions', () => {
 		it( 'should return true if given version is greater than the latest published', async () => {
 			vi.mocked( npm.manifest ).mockResolvedValue( { version: '1.0.1' } );
 
-			const result = await isLatestStableRelease( 'package-name', '1.0.2' );
+			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.2' );
 
 			expect( result ).to.equal( true );
 		} );
@@ -632,7 +632,7 @@ describe( 'versions', () => {
 		it( 'should return true if "latest" npm tag is not published yet', async () => {
 			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
 
-			const result = await isLatestStableRelease( 'package-name', '1.0.0' );
+			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.0' );
 
 			expect( result ).to.equal( true );
 		} );
