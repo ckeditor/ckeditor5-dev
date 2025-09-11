@@ -12,6 +12,7 @@ import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { confirm } from '@inquirer/prompts';
 import { globSync } from 'glob';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';
 import runBuildCommand from './utils/runbuildcommand.js';
@@ -119,6 +120,10 @@ const tasks = new Listr( [
 		}
 	},
 	{
+		title: 'Updating `pnpm-lock.yaml` file.',
+		task: () => tools.shExec( 'pnpm install --lockfile-only', { async: true, verbosity: 'silent' } )
+	},
+	{
 		title: 'Run the "build" command in `ckeditor5-*` packages.',
 		task: ( ctx, task ) => {
 			return releaseTools.executeInParallel( {
@@ -155,7 +160,8 @@ const tasks = new Listr( [
 				version: latestVersion,
 				files: [
 					'package.json',
-					`${ PACKAGES_DIRECTORY }/*/package.json`
+					`${ PACKAGES_DIRECTORY }/*/package.json`,
+					'pnpm-lock.yaml'
 				]
 			} );
 		},

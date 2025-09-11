@@ -11,14 +11,18 @@ parameters:
     type: boolean
     default: false
 
+orbs:
+  node: circleci/node@7.1.1
+
 commands:
   bootstrap_repository_command:
     description: "Bootstrap the repository"
     steps:
       - install_ssh_keys_command
-      - run:
-          name: Install dependencies
-          command: yarn install
+      - node/install-pnpm:
+          version: "10"
+      - node/install-packages:
+          pkg-manager: pnpm
       - prepare_environment_variables_commands
 
   install_ssh_keys_command:
@@ -106,7 +110,7 @@ jobs:
             CKE5_SLACK_NOTIFY_HIDE_AUTHOR: << parameters.hideAuthor >>
             CKE5_PIPELINE_NUMBER: << pipeline.number >>
           name: Waiting for other jobs to finish and sending notification on failure
-          command: yarn ckeditor5-dev-ci-circle-workflow-notifier
+          command: pnpm ckeditor5-dev-ci-circle-workflow-notifier
           no_output_timeout: 1h
 
   validate_and_tests:
@@ -118,10 +122,10 @@ jobs:
       - bootstrap_repository_command
       - run:
           name: Execute ESLint
-          command: yarn run lint
+          command: pnpm run lint
       - run:
           name: Validate versions of dependencies
-          command: yarn run check-versions-match
+          command: pnpm run check-versions-match
       - unless:
           # Upload the code coverage results for non-nightly builds only.
           condition: << pipeline.parameters.isNightly >>
@@ -138,11 +142,8 @@ jobs:
                     circleci-agent step halt
                   fi
             - run:
-                name: Install the "coveralls" package
-                command: yarn add --ignore-workspace-root-check coveralls
-            - run:
                 name: Upload code coverage
-                command: cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+                command: cat coverage/lcov.info | pnpm exec coveralls
 
   release_prepare:
     docker:
@@ -153,7 +154,7 @@ jobs:
       - bootstrap_repository_command
       - run:
           name: Check if packages are ready to be released
-          command: yarn run release:prepare-packages --verbose --compile-only
+          command: pnpm run release:prepare-packages --verbose --compile-only
 
   trigger_release_process:
     docker:
@@ -178,7 +179,7 @@ jobs:
             fi
       - run:
           name: Trigger the release pipeline
-          command: yarn ckeditor5-dev-ci-trigger-circle-build
+          command: pnpm ckeditor5-dev-ci-trigger-circle-build
 
   release_project:
     docker:
@@ -209,7 +210,7 @@ jobs:
             # Do not fail if the Node script ends with non-zero exit code.
             set +e
 
-            yarn ckeditor5-dev-ci-is-job-triggered-by-member
+            pnpm ckeditor5-dev-ci-is-job-triggered-by-member
             EXIT_CODE=$( echo $? )
 
             if [ ${EXIT_CODE} -ne 0 ];
@@ -219,7 +220,7 @@ jobs:
             fi
       - run:
           name: Disable the redundant workflows option
-          command: yarn ckeditor5-dev-ci-circle-disable-auto-cancel-builds
+          command: pnpm ckeditor5-dev-ci-circle-disable-auto-cancel-builds
       - run:
           name: Prepare the new version to release
           command: npm run release:prepare-packages -- --verbose
@@ -228,7 +229,7 @@ jobs:
           command: npm run release:publish-packages -- --verbose --npm-tag next
       - run:
           name: Enable the redundant workflows option
-          command: yarn ckeditor5-dev-ci-circle-enable-auto-cancel-builds
+          command: pnpm ckeditor5-dev-ci-circle-enable-auto-cancel-builds
           when: always
       - run:
           name: Pack the "release/" directory (in case of failure)

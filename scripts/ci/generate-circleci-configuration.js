@@ -54,8 +54,8 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 	);
 
 	const stepsToAdd = [
-		...generateSteps( packagesWithTypes, 'yarn run types', 'Check types for "$1"' ),
-		...generateSteps( packagesWithTests, 'yarn run coverage', 'Execute tests for "$1"' ),
+		...generateSteps( packagesWithTypes, 'pnpm run types', 'Check types for "$1"' ),
+		...generateSteps( packagesWithTests, 'pnpm run coverage', 'Execute tests for "$1"' ),
 		{
 			run: {
 				name: 'Combine coverage reports into a single file',

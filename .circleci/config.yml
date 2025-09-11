@@ -28,6 +28,7 @@ parameters:
     default: false
 
 orbs:
+  node: circleci/node@7.1.1
   continuation: circleci/continuation@0.1.2
 
 commands:
@@ -45,9 +46,10 @@ jobs:
     steps:
       - checkout
       - install_ssh_keys_command
-      - run:
-          name: Install dependencies
-          command: yarn install
+      - node/install-pnpm:
+          version: "10"
+      - node/install-packages:
+          pkg-manager: pnpm
       - run:
           name: Generate a new configuration to check all packages in the repository
           command: node scripts/ci/generate-circleci-configuration.js

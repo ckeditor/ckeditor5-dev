@@ -13,7 +13,7 @@ In order to run CKEditor 5 tests integrated into an IntelliJ IDE of your prefere
 Use this configuration for running tests as you would use `--files` directive:
 
 ```bash
-yarn run test --files=engine,basic-styles
+pnpm run test --files=engine,basic-styles
 ```
 
 1. In the IDE, go to _Run_ > _Edit configurations..._:
@@ -54,6 +54,6 @@ It is convenient to directly navigate from a failed test output message containi
 
 ### Running tests with coverage
 
-To run tests with coverage (`yarn run test -c`) add the `-c` switch when defining new configuration to "Karma options" field.
+To run tests with coverage (`pnpm run test -c`) add the `-c` switch when defining new configuration to "Karma options" field.
 
 **Note**: Must be combined with `-s` switch to display the coverage in files inside IDE.
