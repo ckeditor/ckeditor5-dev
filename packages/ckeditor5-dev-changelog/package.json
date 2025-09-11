@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-changelog",
-  "version": "53.0.0",
+  "version": "53.1.0",
   "description": "A CKEditor 5 development tool for handling changelogs.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -28,7 +28,7 @@
     "ckeditor5-dev-changelog-create-entry": "bin/generate-template.js"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^53.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^53.1.0",
     "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
     "fs-extra": "^11.0.0",
