@@ -284,7 +284,7 @@ export default function parseArguments( args, settings = {} ) {
 			return;
 		}
 
-		const defaultFilePath = path.join( options.cwd, 'external', 'ckeditor5-commercial', 'scripts', 'presets', 'staging-ff.js' );
+		const defaultFilePath = path.join( options.cwd, 'scripts', 'presets', 'staging-ff.js' );
 
 		if ( !fs.existsSync( defaultFilePath ) ) {
 			return;
