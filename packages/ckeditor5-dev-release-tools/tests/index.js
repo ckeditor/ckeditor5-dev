@@ -25,12 +25,14 @@ import {
 	getNextInternal,
 	getCurrent,
 	getDateIdentifier,
-	getLastTagFromGit
+	getLastTagFromGit,
+	getVersionForTag,
+	isLatestOrNextStableVersion,
+	isVersionPublishableForTag
 } from '../lib/utils/versions.js';
 import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
-import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 import provideToken from '../lib/utils/providetoken.js';
 
 import * as index from '../lib/index.js';
@@ -50,7 +52,6 @@ vi.mock( '../lib/utils/getnpmtagfromversion' );
 vi.mock( '../lib/utils/changelog' );
 vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
-vi.mock( '../lib/utils/isversionpublishablefortag' );
 vi.mock( '../lib/utils/providetoken' );
 
 describe( 'dev-release-tools/index', () => {
@@ -180,6 +181,27 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
+	describe( 'getVersionForTag()', () => {
+		it( 'should be a function', () => {
+			expect( getVersionForTag ).to.be.a( 'function' );
+			expect( index.getVersionForTag ).to.equal( getVersionForTag );
+		} );
+	} );
+
+	describe( 'isLatestOrNextStableVersion()', () => {
+		it( 'should be a function', () => {
+			expect( isLatestOrNextStableVersion ).to.be.a( 'function' );
+			expect( index.isLatestOrNextStableVersion ).to.equal( isLatestOrNextStableVersion );
+		} );
+	} );
+
+	describe( 'isVersionPublishableForTag()', () => {
+		it( 'should be a function', () => {
+			expect( isVersionPublishableForTag ).to.be.a( 'function' );
+			expect( index.isVersionPublishableForTag ).to.equal( isVersionPublishableForTag );
+		} );
+	} );
+
 	describe( 'getNpmTagFromVersion()', () => {
 		it( 'should be a function', () => {
 			expect( getNpmTagFromVersion ).to.be.a( 'function' );
@@ -212,13 +234,6 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( validateRepositoryToRelease ).to.be.a( 'function' );
 			expect( index.validateRepositoryToRelease ).to.equal( validateRepositoryToRelease );
-		} );
-	} );
-
-	describe( 'isVersionPublishableForTag()', () => {
-		it( 'should be a function', () => {
-			expect( isVersionPublishableForTag ).to.be.a( 'function' );
-			expect( index.isVersionPublishableForTag ).to.equal( isVersionPublishableForTag );
 		} );
 	} );
 

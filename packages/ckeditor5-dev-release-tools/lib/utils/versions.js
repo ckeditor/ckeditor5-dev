@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import semver from 'semver';
 import { npm, tools, workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from './getchangelog.js';
 
@@ -160,6 +161,61 @@ export function getDateIdentifier() {
 	const day = today.getDate().toString().padStart( 2, '0' );
 
 	return `${ year }${ month }${ day }`;
+}
+
+/**
+ * Returns the latest version of the package on the npm tag.
+ * If the package does not have any version on that tag yet, `null` is returned.
+ *
+ * @param {string} packageName
+ * @param {string} npmTag
+ * @returns {Promise.<string|null>}
+ */
+export function getVersionForTag( packageName, npmTag ) {
+	return npm.manifest( `${ packageName }@${ npmTag }` )
+		.then( result => result.version )
+		.catch( () => null );
+}
+
+/**
+ * Checks if the version can be considered as the newest stable release of the package.
+ * It checks whether the version given in the argument is or could be the latest version.
+ * The package may not have this version published on npm yet, but it is also considered as the latest stable.
+ *
+ * @param {string} packageName
+ * @param {string} version
+ * @returns {Promise.<boolean>}
+ */
+export async function isLatestOrNextStableVersion( packageName, version ) {
+	if ( semver.prerelease( version ) ) {
+		return false;
+	}
+
+	const npmVersion = await getVersionForTag( packageName, 'latest' );
+
+	if ( npmVersion && semver.lt( version, npmVersion ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Verifies if the package can be published in the provided version on the npm tag.
+ *
+ * @param {string} packageName
+ * @param {string} version
+ * @param {string} npmTag
+ * @returns {Promise.<boolean>}
+ */
+export async function isVersionPublishableForTag( packageName, version, npmTag ) {
+	const npmVersion = await getVersionForTag( packageName, npmTag );
+
+	if ( npmVersion && semver.lte( version, npmVersion ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
