@@ -3,13 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
 import chalk from 'chalk';
 import { globSync } from 'glob';
 import { minimatch } from 'minimatch';
-import { mkdirp } from 'mkdirp';
+import { randomUUID } from 'crypto';
+import { groupBy } from 'es-toolkit/compat';
 import karmaLogger from 'karma/lib/logger.js';
 import karma from 'karma';
 import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
@@ -25,10 +26,10 @@ const IGNORE_GLOBS = [
 ];
 
 // An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests' );
 
 export default function runAutomatedTests( options ) {
-	return Promise.resolve().then( () => {
+	return Promise.resolve().then( async () => {
 		if ( !options.production ) {
 			console.warn( chalk.yellow(
 				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
@@ -38,14 +39,16 @@ export default function runAutomatedTests( options ) {
 
 		const globPatterns = transformFilesToTestGlob( options.files );
 
-		createEntryFile( globPatterns, options.production );
+		const entryFiles = createEntryFiles( globPatterns, options.production );
 
-		const optionsForKarma = Object.assign( {}, options, {
-			entryFile: ENTRY_FILE_PATH,
-			globPatterns
-		} );
+		for ( const entryFile of entryFiles ) {
+			const optionsForKarma = Object.assign( {}, options, {
+				entryFile,
+				globPatterns
+			} );
 
-		return runKarma( optionsForKarma );
+			await runKarma( optionsForKarma );
+		}
 	} );
 }
 
@@ -63,8 +66,8 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns, production ) {
-	mkdirp.sync( upath.dirname( ENTRY_FILE_PATH ) );
+function createEntryFiles( globPatterns, production ) {
+	fs.emptyDirSync( ENTRY_FILE_PATH );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
 	const log = karmaLogger.create( 'config' );
@@ -94,46 +97,60 @@ function createEntryFile( globPatterns, production ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
-
-	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
-	allFiles.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
-
-	const entryFileContent = allFiles
-		.map( file => 'import "' + file + '";' );
-
-	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'assertions' );
-	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
-		return [
-			assertionFileName,
-			upath.parse( assertionFileName ).name.replace( /-([a-z])/g, value => value[ 1 ].toUpperCase() )
-		];
+	const groups = groupBy( allFiles, item => {
+		return item.match( /\/packages\/[^/]+\// )[ 0 ];
 	} );
 
-	// Two loops are needed to achieve correct order in `ckeditor5/build/.automated-tests/entry-point.js`.
-	for ( const [ fileName, functionName ] of customAssertions ) {
-		entryFileContent.push( `import ${ functionName }Factory from "${ assertionsDir }/${ fileName }";` );
-	}
-	for ( const [ , functionName ] of customAssertions ) {
-		entryFileContent.push( `${ functionName }Factory( chai );` );
+	const entryFiles = [];
+
+	for ( const group of Object.values( groups ) ) {
+		// Set global license key in the `before` hook.
+		group.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
+
+		// Inject the leak detector root hooks. Need to be split into two parts due to #598.
+		group.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
+		group.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
+
+		const entryFileContent = group
+			.map( file => 'import "' + file + '";' );
+
+		// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
+		const assertionsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'assertions' );
+		const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
+			return [
+				assertionFileName,
+				upath.parse( assertionFileName ).name.replace( /-([a-z])/g, value => value[ 1 ].toUpperCase() )
+			];
+		} );
+
+		// Two loops are needed to achieve correct order in `ckeditor5/build/.automated-tests/entry-point.js`.
+		for ( const [ fileName, functionName ] of customAssertions ) {
+			entryFileContent.push( `import ${ functionName }Factory from "${ assertionsDir }/${ fileName }";` );
+		}
+		for ( const [ , functionName ] of customAssertions ) {
+			entryFileContent.push( `${ functionName }Factory( chai );` );
+		}
+
+		if ( production ) {
+			entryFileContent.unshift( assertConsoleUsageToThrowErrors() );
+		}
+
+		const entryFilePath = upath.join( ENTRY_FILE_PATH, randomUUID() + '.js' );
+
+		fs.writeFileSync( entryFilePath, entryFileContent.join( '\n' ) + '\n' );
+
+		// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
+		// A ugly hack blocks the loop and tests are executed once.
+		// See: https://github.com/webpack/watchpack/issues/25.
+		const now = Date.now() / 1000;
+		// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
+		const then = now - 10;
+		fs.utimesSync( entryFilePath, then, then );
+
+		entryFiles.push( entryFilePath );
 	}
 
-	if ( production ) {
-		entryFileContent.unshift( assertConsoleUsageToThrowErrors() );
-	}
-
-	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
-
-	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
-	// A ugly hack blocks the loop and tests are executed once.
-	// See: https://github.com/webpack/watchpack/issues/25.
-	const now = Date.now() / 1000;
-	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
-	const then = now - 10;
-	fs.utimesSync( ENTRY_FILE_PATH, then, then );
+	return entryFiles;
 }
 
 function assertConsoleUsageToThrowErrors() {
