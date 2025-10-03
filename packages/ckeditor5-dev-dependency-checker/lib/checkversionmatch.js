@@ -11,6 +11,8 @@ import semver from 'semver';
 import { globSync } from 'glob';
 import { execSync } from 'child_process';
 
+const PNPM_WORKSPACE_VERSION = 'workspace:*';
+
 const DEPENDENCY_TYPES = [
 	'dependencies',
 	'devDependencies'
@@ -160,6 +162,12 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 
 			Object.entries( packageJson[ dependencyType ] ).forEach( ( [ dependencyName, version ] ) => {
 				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
+					return;
+				}
+
+				if ( devDependenciesFilter( dependencyName ) ) {
+					expectedDependencies[ dependencyName ] = PNPM_WORKSPACE_VERSION;
+
 					return;
 				}
 
