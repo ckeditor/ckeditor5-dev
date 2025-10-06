@@ -39,6 +39,8 @@ const DEFAULT_PKG_JSON_PATTERNS = [
  * By default, it modifies root `package.json` and `packages/*\/package.json` files.
  * @param {object} [options.versionExceptions] Allows setting `allowRanges` for packages defined as keys of this object,
  * instead of globally.
+ * @param {boolean} [options.useWorkspace] If true, it requires packages from devDependenciesFilter callback to have version
+ * set to `workspace:*`.
  */
 export default async function checkVersionMatch( {
 	cwd,
@@ -46,7 +48,8 @@ export default async function checkVersionMatch( {
 	allowRanges = false,
 	devDependenciesFilter = () => true,
 	pkgJsonPatterns = DEFAULT_PKG_JSON_PATTERNS,
-	versionExceptions = {}
+	versionExceptions = {},
+	useWorkspace = false
 } ) {
 	console.log( chalk.blue( '🔍 Starting checking dependencies versions...' ) );
 
@@ -59,7 +62,8 @@ export default async function checkVersionMatch( {
 		devDependenciesFilter,
 		versionExceptions,
 		versionsCache,
-		allowRanges
+		allowRanges,
+		useWorkspace
 	} );
 
 	if ( fix ) {
@@ -151,9 +155,10 @@ function checkDependenciesMatch( { packageJsons, devDependenciesFilter, expected
  * @param {object} options.versionExceptions
  * @param {object} options.versionsCache
  * @param {boolean} options.allowRanges
+ * @param {boolean} options.useWorkspace
  * @return {object.<string, string>} expectedDependencies
  */
-function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges } ) {
+function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges, useWorkspace } ) {
 	return packageJsons.reduce( ( expectedDependencies, packageJson ) => {
 		DEPENDENCY_TYPES.forEach( dependencyType => {
 			if ( !packageJson[ dependencyType ] ) {
@@ -165,7 +170,7 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 					return;
 				}
 
-				if ( devDependenciesFilter( dependencyName ) ) {
+				if ( useWorkspace && devDependenciesFilter( dependencyName ) ) {
 					expectedDependencies[ dependencyName ] = PNPM_WORKSPACE_VERSION;
 
 					return;
@@ -206,6 +211,11 @@ function getNewestVersion( {
 } ) {
 	if ( versionExceptions[ dependencyName ] ) {
 		return newVersion;
+	}
+
+	// Handle workspace:* versions - they should not be processed by semver
+	if ( newVersion === PNPM_WORKSPACE_VERSION || currentMaxVersion === PNPM_WORKSPACE_VERSION ) {
+		return PNPM_WORKSPACE_VERSION;
 	}
 
 	if ( allowRanges ) {

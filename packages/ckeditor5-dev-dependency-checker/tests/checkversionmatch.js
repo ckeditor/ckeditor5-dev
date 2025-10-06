@@ -102,14 +102,6 @@ describe( 'checkVersionMatch()', () => {
 	} );
 
 	it( 'should log about dependencies being correct', () => {
-		// Set all dependencies to workspace:* to match the new expected behavior
-		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/foo/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/foo/package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/bar/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/bar/package.json' ].devDependencies.dep2 = 'workspace:*';
-
 		checkVersionMatch( options );
 
 		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
@@ -135,12 +127,8 @@ describe( 'checkVersionMatch()', () => {
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "1.0.1" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep1" in "fooPkg" in version "1.0.0" should be set to "1.0.1".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "1.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -149,22 +137,20 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep1" versions from npm...' );
 
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "^1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep1" in "rootPkg" in version "^1.0.0" should be set to "1.0.1".',
+			'"dep1" in "fooPkg" in version "1.0.0" should be set to "1.0.1".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "1.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -174,21 +160,19 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep1" versions from npm...' );
 
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "^1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep1" in "rootPkg" in version "^1.0.0" should be set to "1.0.1".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "1.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -221,12 +205,8 @@ describe( 'checkVersionMatch()', () => {
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "2.0.1" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep2" in "fooPkg" in version "2.0.0" should be set to "2.0.1".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "2.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -235,22 +215,20 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep2" versions from npm...' );
 
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "2.0.1".',
+			'"dep2" in "fooPkg" in version "2.0.0" should be set to "2.0.1".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "2.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -270,12 +248,8 @@ describe( 'checkVersionMatch()', () => {
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep2" in "fooPkg" in version "2.0.0" should be set to "^2.0.0".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "^2.0.0".'
 		].join( '\n' ) );
 	} );
 
@@ -285,38 +259,27 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep2" versions from npm...' );
 
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "rootPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep2" in "rootPkg" in version "^2.0.0" should be set to "2.0.1".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "2.0.1".'
 		].join( '\n' ) );
 	} );
 
 	it( 'should not log about dependencies using different version ranges when they are an exception', () => {
 		options.versionExceptions = { 'dep3': '^' };
-		// Use a filter that excludes dep3 so it uses the old logic with exceptions
-		options.devDependenciesFilter = depName => depName !== 'dep3';
 		files[ './package.json' ].dependencies.dep3 = '^3.0.2';
 		files[ './packages/foo/package.json' ].dependencies.dep3 = '^3.0.2';
 		files[ './packages/bar/package.json' ].dependencies.dep3 = '^3.0.2';
-		// Set all other dependencies to workspace:* to match the new expected behavior
-		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/foo/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/foo/package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/bar/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/bar/package.json' ].devDependencies.dep2 = 'workspace:*';
 
 		checkVersionMatch( options );
 
@@ -349,10 +312,10 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'rootPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.1'
 				},
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.0'
 				}
 			},
 			{ 'spaces': 2 }
@@ -362,10 +325,10 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'fooPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.1'
 				},
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.0'
 				}
 			},
 			{ 'spaces': 2 }
@@ -375,10 +338,10 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'barPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.1'
 				},
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.0'
 				}
 			},
 			{ 'spaces': 2 }
@@ -407,10 +370,10 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'rootPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.0'
 				},
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.1'
 				}
 			},
 			{ 'spaces': 2 }
@@ -420,7 +383,7 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'fooPkg',
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.1'
 				}
 			},
 			{ 'spaces': 2 }
@@ -430,18 +393,21 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'barPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.0'
 				},
 				devDependencies: {
-					dep2: 'workspace:*'
+					dep2: '2.0.1'
 				}
 			},
 			{ 'spaces': 2 }
 		);
 	} );
 
-	it( 'should expect workspace:* for all dependencies when they are present in workspace', () => {
-		// Set all dependencies to workspace:* to match the new expected behavior
+	// TODO check
+
+	it( 'should expect workspace:* for all dependencies when useWorkspace is and not devDependenciesFilter is provided', () => {
+		options.useWorkspace = true;
+		// Set all dependencies to workspace:* to match the expected behavior
 		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
 		files[ './package.json' ].devDependencies.dep2 = 'workspace:*';
 		files[ './packages/foo/package.json' ].dependencies.dep1 = 'workspace:*';
@@ -459,8 +425,8 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies are correct!' );
 	} );
 
-	it( 'should expect workspace:* for dependencies that are not workspace:*', () => {
-		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
+	it( 'should expect specific versions for dependencies that are not matching', () => {
+		files[ './package.json' ].dependencies.dep1 = '1.0.1';
 		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
 		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
 
@@ -476,11 +442,8 @@ describe( 'checkVersionMatch()', () => {
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep2" in "rootPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
-			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+			'"dep1" in "fooPkg" in version "1.0.0" should be set to "1.0.1".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "1.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -580,7 +543,94 @@ describe( 'checkVersionMatch()', () => {
 					dep1: 'workspace:*'
 				},
 				devDependencies: {
-					dep2: '2.0.1' // Should remain unchanged
+					dep2: '2.0.1' // Should remain unchanged due to filter
+				}
+			},
+			{ 'spaces': 2 }
+		);
+	} );
+
+	it( 'should expect workspace:* for dependencies that are not workspace:* when useWorkspace is true', () => {
+		options.useWorkspace = true;
+		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
+		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
+		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
+
+		checkVersionMatch( options );
+
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
+
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
+		);
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+			'"dep2" in "rootPkg" in version "2.0.0" should be set to "workspace:*".',
+			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
+			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
+			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+		].join( '\n' ) );
+	} );
+
+	it( 'should fix dependencies to workspace:* when useWorkspace is true', () => {
+		options.useWorkspace = true;
+		options.fix = true;
+		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
+		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
+		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
+
+		checkVersionMatch( options );
+
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
+		expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
+		expect( processExitMock ).toHaveBeenCalledTimes( 0 );
+
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies fixed!' );
+
+		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
+
+		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 1,
+			'./package.json',
+			{
+				name: 'rootPkg',
+				dependencies: {
+					dep1: 'workspace:*'
+				},
+				devDependencies: {
+					dep2: 'workspace:*'
+				}
+			},
+			{ 'spaces': 2 }
+		);
+
+		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 2,
+			'./packages/foo/package.json',
+			{
+				name: 'fooPkg',
+				dependencies: {
+					dep1: 'workspace:*'
+				},
+				devDependencies: {
+					dep2: 'workspace:*'
+				}
+			},
+			{ 'spaces': 2 }
+		);
+
+		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 3,
+			'./packages/bar/package.json',
+			{
+				name: 'barPkg',
+				dependencies: {
+					dep1: 'workspace:*'
+				},
+				devDependencies: {
+					dep2: 'workspace:*'
 				}
 			},
 			{ 'spaces': 2 }
