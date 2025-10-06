@@ -14,7 +14,8 @@ const hoists = vi.hoisted( () => ( {
 	chalk: {
 		blue: vi.fn( input => input ),
 		green: vi.fn( input => input ),
-		red: vi.fn( input => input )
+		red: vi.fn( input => input ),
+		yellow: vi.fn( input => input )
 	}
 } ) );
 
@@ -464,7 +465,7 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 3 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
@@ -474,8 +475,14 @@ describe( 'checkVersionMatch()', () => {
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+			'"dep1" in "rootPkg" in version "workspace:*" should be set to "1.0.1".',
 			'"dep3" in "rootPkg" in version "^3.0.1" should be set to "^3.0.2".',
-			'"dep3" in "barPkg" in version "^3.0.0" should be set to "^3.0.2".'
+			'"dep2" in "rootPkg" in version "workspace:*" should be set to "2.0.1".',
+			'"dep1" in "fooPkg" in version "workspace:*" should be set to "1.0.1".',
+			'"dep2" in "fooPkg" in version "workspace:*" should be set to "2.0.1".',
+			'"dep1" in "barPkg" in version "workspace:*" should be set to "1.0.1".',
+			'"dep3" in "barPkg" in version "^3.0.0" should be set to "^3.0.2".',
+			'"dep2" in "barPkg" in version "workspace:*" should be set to "2.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -495,20 +502,26 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 4 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
-		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep3" versions from npm...' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '⬇️ Downloading "dep1" versions from npm...' );
 
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
 			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
 		);
 		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+			'"dep1" in "rootPkg" in version "workspace:*" should be set to "1.0.1".',
 			'"dep3" in "rootPkg" in version "^3.0.1" should be set to "3.0.2".',
+			'"dep2" in "rootPkg" in version "workspace:*" should be set to "2.0.1".',
+			'"dep1" in "fooPkg" in version "workspace:*" should be set to "1.0.1".',
 			'"dep3" in "fooPkg" in version "^3.0.2" should be set to "3.0.2".',
-			'"dep3" in "barPkg" in version "^3.0.0" should be set to "3.0.2".'
+			'"dep2" in "fooPkg" in version "workspace:*" should be set to "2.0.1".',
+			'"dep1" in "barPkg" in version "workspace:*" should be set to "1.0.1".',
+			'"dep3" in "barPkg" in version "^3.0.0" should be set to "3.0.2".',
+			'"dep2" in "barPkg" in version "workspace:*" should be set to "2.0.1".'
 		].join( '\n' ) );
 	} );
 
@@ -525,12 +538,12 @@ describe( 'checkVersionMatch()', () => {
 
 		checkVersionMatch( options );
 
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 3 );
 		expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
 		expect( processExitMock ).toHaveBeenCalledTimes( 0 );
 
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
-		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies fixed!' );
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 3, '✅  All dependencies fixed!' );
 
 		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
 
@@ -540,7 +553,7 @@ describe( 'checkVersionMatch()', () => {
 			{
 				name: 'rootPkg',
 				dependencies: {
-					dep1: 'workspace:*'
+					dep1: '1.0.1'
 				},
 				devDependencies: {
 					dep2: '2.0.1' // Should remain unchanged due to filter

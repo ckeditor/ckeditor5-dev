@@ -166,13 +166,13 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 			}
 
 			Object.entries( packageJson[ dependencyType ] ).forEach( ( [ dependencyName, version ] ) => {
-				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
-					return;
-				}
-
 				if ( useWorkspace && devDependenciesFilter( dependencyName ) ) {
 					expectedDependencies[ dependencyName ] = PNPM_WORKSPACE_VERSION;
 
+					return;
+				}
+
+				if ( dependencyType === 'devDependencies' && !devDependenciesFilter( dependencyName ) ) {
 					return;
 				}
 
@@ -213,9 +213,12 @@ function getNewestVersion( {
 		return newVersion;
 	}
 
-	// Handle workspace:* versions - they should not be processed by semver
+	// If workspace:* detected when useWorkspace is not set to true, getting the newest version from npm.
 	if ( newVersion === PNPM_WORKSPACE_VERSION || currentMaxVersion === PNPM_WORKSPACE_VERSION ) {
-		return PNPM_WORKSPACE_VERSION;
+		const versions = getVersionsList( { dependencyName, versionsCache } );
+		const stableVersions = versions.filter( v => !semver.prerelease( v ) );
+
+		return stableVersions.sort( semver.rcompare )[ 0 ];
 	}
 
 	if ( allowRanges ) {
