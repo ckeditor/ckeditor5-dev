@@ -14,8 +14,7 @@ const hoists = vi.hoisted( () => ( {
 	chalk: {
 		blue: vi.fn( input => input ),
 		green: vi.fn( input => input ),
-		red: vi.fn( input => input ),
-		yellow: vi.fn( input => input )
+		red: vi.fn( input => input )
 	}
 } ) );
 
