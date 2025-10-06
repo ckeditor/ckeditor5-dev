@@ -404,8 +404,6 @@ describe( 'checkVersionMatch()', () => {
 		);
 	} );
 
-	// TODO check
-
 	it( 'should expect workspace:* for all dependencies when useWorkspace is and not devDependenciesFilter is provided', () => {
 		options.useWorkspace = true;
 		// Set all dependencies to workspace:* to match the expected behavior
