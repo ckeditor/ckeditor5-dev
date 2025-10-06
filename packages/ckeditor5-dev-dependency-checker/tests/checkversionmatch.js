@@ -403,48 +403,6 @@ describe( 'checkVersionMatch()', () => {
 		);
 	} );
 
-	it( 'should expect workspace:* for all dependencies when useWorkspace is and not devDependenciesFilter is provided', () => {
-		options.useWorkspace = true;
-		// Set all dependencies to workspace:* to match the expected behavior
-		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/foo/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/foo/package.json' ].devDependencies.dep2 = 'workspace:*';
-		files[ './packages/bar/package.json' ].dependencies.dep1 = 'workspace:*';
-		files[ './packages/bar/package.json' ].devDependencies.dep2 = 'workspace:*';
-
-		checkVersionMatch( options );
-
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 2 );
-		expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
-		expect( processExitMock ).toHaveBeenCalledTimes( 0 );
-
-		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
-		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies are correct!' );
-	} );
-
-	it( 'should expect specific versions for dependencies that are not matching', () => {
-		files[ './package.json' ].dependencies.dep1 = '1.0.1';
-		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
-		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
-
-		checkVersionMatch( options );
-
-		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
-		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
-		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
-
-		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
-
-		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
-			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
-		);
-		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-			'"dep1" in "fooPkg" in version "1.0.0" should be set to "1.0.1".',
-			'"dep1" in "barPkg" in version "1.0.0" should be set to "1.0.1".'
-		].join( '\n' ) );
-	} );
-
 	it( 'should test allowRanges logic for dependencies not in workspace filter', () => {
 		// Use a filter that excludes dep3 so it uses the old logic with allowRanges
 		options.devDependenciesFilter = depName => depName !== 'dep3';
@@ -583,6 +541,30 @@ describe( 'checkVersionMatch()', () => {
 			'"dep2" in "fooPkg" in version "2.0.0" should be set to "workspace:*".',
 			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".',
 			'"dep2" in "barPkg" in version "2.0.0" should be set to "workspace:*".'
+		].join( '\n' ) );
+	} );
+
+	it( 'should expect workspace:* for filtered dependencies that are not workspace:* when useWorkspace is true', () => {
+		options.useWorkspace = true;
+		options.devDependenciesFilter = depName => depName !== 'dep2';
+		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
+		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
+		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
+
+		checkVersionMatch( options );
+
+		expect( consoleLogMock ).toHaveBeenCalledTimes( 1 );
+		expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+		expect( processExitMock ).toHaveBeenCalledTimes( 1 );
+
+		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
+
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+			'❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:'
+		);
+		expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+			'"dep1" in "fooPkg" in version "1.0.0" should be set to "workspace:*".',
+			'"dep1" in "barPkg" in version "1.0.0" should be set to "workspace:*".'
 		].join( '\n' ) );
 	} );
 
