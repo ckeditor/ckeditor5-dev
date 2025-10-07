@@ -172,7 +172,7 @@ importers:
   packages/ckeditor5-dev-changelog:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -246,7 +246,7 @@ importers:
   packages/ckeditor5-dev-dependency-checker:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -280,7 +280,7 @@ importers:
   packages/ckeditor5-dev-docs:
     dependencies:
       '@ckeditor/typedoc-plugins':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../typedoc-plugins
       glob:
         specifier: ^11.0.2
@@ -308,7 +308,7 @@ importers:
   packages/ckeditor5-dev-release-tools:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       '@octokit/rest':
         specifier: ^22.0.0
@@ -357,7 +357,7 @@ importers:
   packages/ckeditor5-dev-stale-bot:
     dependencies:
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -394,10 +394,10 @@ importers:
         specifier: ^7.10.5
         version: 7.28.0
       '@ckeditor/ckeditor5-dev-translations':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-translations
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       '@ckeditor/ckeditor5-inspector':
         specifier: ^5.0.0
@@ -548,7 +548,7 @@ importers:
         specifier: ^7.18.9
         version: 7.28.0
       '@ckeditor/ckeditor5-dev-utils':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       chalk:
         specifier: ^5.0.0
@@ -582,7 +582,7 @@ importers:
   packages/ckeditor5-dev-utils:
     dependencies:
       '@ckeditor/ckeditor5-dev-translations':
-        specifier: ^53.2.0
+        specifier: workspace:*
         version: link:../ckeditor5-dev-translations
       '@types/postcss-import':
         specifier: ^14.0.3
