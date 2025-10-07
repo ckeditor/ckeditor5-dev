@@ -2,8 +2,6 @@
 type: Feature
 scope:
   - ckeditor5-dev-dependency-checker
-see:
-  - ckeditor/ckeditor5-commercial#8556
 ---
 
 Updated the `checkVersionMatch()` function to support the [`workspace:*`](https://pnpm.io/workspaces) protocol for dependencies.
