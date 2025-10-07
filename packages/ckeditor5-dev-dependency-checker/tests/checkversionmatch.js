@@ -518,8 +518,8 @@ describe( 'checkVersionMatch()', () => {
 		);
 	} );
 
-	it( 'should expect workspace:* for dependencies that are not workspace:* when useWorkspace is true', () => {
-		options.useWorkspace = true;
+	it( 'should expect workspace:* for dependencies that are not workspace:* when workspacePackages are specified', () => {
+		options.workspacePackages = [ 'dep1', 'dep2', 'dep3' ];
 		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
 		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
 		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
@@ -544,9 +544,8 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should expect workspace:* for filtered dependencies that are not workspace:* when useWorkspace is true', () => {
-		options.useWorkspace = true;
-		options.devDependenciesFilter = depName => depName !== 'dep2';
+	it( 'should expect workspace:* for filtered dependencies that are not workspace:* when workspacePakcages are specified', () => {
+		options.workspacePackages = [ 'dep1', 'dep3' ];
 		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
 		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
 		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';
@@ -568,9 +567,9 @@ describe( 'checkVersionMatch()', () => {
 		].join( '\n' ) );
 	} );
 
-	it( 'should fix dependencies to workspace:* when useWorkspace is true', () => {
-		options.useWorkspace = true;
+	it( 'should fix dependencies to workspace:* when workspacePackages are specified', () => {
 		options.fix = true;
+		options.workspacePackages = [ 'dep1', 'dep2', 'dep3' ];
 		files[ './package.json' ].dependencies.dep1 = 'workspace:*';
 		files[ './packages/foo/package.json' ].dependencies.dep1 = '1.0.0';
 		files[ './packages/bar/package.json' ].dependencies.dep1 = '1.0.0';

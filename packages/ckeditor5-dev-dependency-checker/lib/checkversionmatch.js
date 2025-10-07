@@ -39,8 +39,7 @@ const DEFAULT_PKG_JSON_PATTERNS = [
  * By default, it modifies root `package.json` and `packages/*\/package.json` files.
  * @param {object} [options.versionExceptions] Allows setting `allowRanges` for packages defined as keys of this object,
  * instead of globally.
- * @param {boolean} [options.useWorkspace] If true, it requires packages from devDependenciesFilter callback to have version
- * set to `workspace:*`.
+ * @param {Array.<string>} [options.workspacePackages] Array of packages that should use `workspace:*` as version.
  */
 export default async function checkVersionMatch( {
 	cwd,
@@ -49,7 +48,7 @@ export default async function checkVersionMatch( {
 	devDependenciesFilter = () => true,
 	pkgJsonPatterns = DEFAULT_PKG_JSON_PATTERNS,
 	versionExceptions = {},
-	useWorkspace = false
+	workspacePackages = []
 } ) {
 	console.log( chalk.blue( '🔍 Starting checking dependencies versions...' ) );
 
@@ -63,7 +62,7 @@ export default async function checkVersionMatch( {
 		versionExceptions,
 		versionsCache,
 		allowRanges,
-		useWorkspace
+		workspacePackages
 	} );
 
 	if ( fix ) {
@@ -155,10 +154,12 @@ function checkDependenciesMatch( { packageJsons, devDependenciesFilter, expected
  * @param {object} options.versionExceptions
  * @param {object} options.versionsCache
  * @param {boolean} options.allowRanges
- * @param {boolean} options.useWorkspace
+ * @param {Array.<string>} options.workspacePackages
  * @return {object.<string, string>} expectedDependencies
  */
-function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges, useWorkspace } ) {
+function getExpectedDepsVersions( options ) {
+	const { packageJsons, devDependenciesFilter, versionExceptions, versionsCache, allowRanges, workspacePackages } = options;
+
 	return packageJsons.reduce( ( expectedDependencies, packageJson ) => {
 		DEPENDENCY_TYPES.forEach( dependencyType => {
 			if ( !packageJson[ dependencyType ] ) {
@@ -166,7 +167,7 @@ function getExpectedDepsVersions( { packageJsons, devDependenciesFilter, version
 			}
 
 			Object.entries( packageJson[ dependencyType ] ).forEach( ( [ dependencyName, version ] ) => {
-				if ( useWorkspace && devDependenciesFilter( dependencyName ) ) {
+				if ( workspacePackages.length && workspacePackages.includes( dependencyName ) ) {
 					expectedDependencies[ dependencyName ] = PNPM_WORKSPACE_VERSION;
 
 					return;
@@ -213,7 +214,7 @@ function getNewestVersion( {
 		return newVersion;
 	}
 
-	// If workspace:* detected when useWorkspace is not set to true, getting the newest version from npm.
+	// If workspace:* detected when workspacePackages is empty, getting the newest version from npm.
 	if ( newVersion === PNPM_WORKSPACE_VERSION || currentMaxVersion === PNPM_WORKSPACE_VERSION ) {
 		const versions = getVersionsList( { dependencyName, versionsCache } );
 		const stableVersions = versions.filter( v => !semver.prerelease( v ) );
