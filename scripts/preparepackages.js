@@ -12,7 +12,6 @@ import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { confirm } from '@inquirer/prompts';
 import { globSync } from 'glob';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';
 import runBuildCommand from './utils/runbuildcommand.js';
@@ -100,30 +99,6 @@ const tasks = new Listr( [
 		}
 	},
 	{
-		title: 'Updating dependencies.',
-		task: () => {
-			return releaseTools.updateDependencies( {
-				version: '^' + latestVersion,
-				packagesDirectory: PACKAGES_DIRECTORY,
-				shouldUpdateVersionCallback: packageName => {
-					return CKEDITOR5_DEV_PACKAGES.includes( packageName.split( '/' )[ 1 ] );
-				}
-			} );
-		},
-		skip: () => {
-			// When compiling the packages only, do not validate the release.
-			if ( cliArguments.compileOnly ) {
-				return true;
-			}
-
-			return false;
-		}
-	},
-	{
-		title: 'Updating `pnpm-lock.yaml` file.',
-		task: () => tools.shExec( 'pnpm install --lockfile-only', { async: true, verbosity: 'silent' } )
-	},
-	{
 		title: 'Run the "build" command in `ckeditor5-*` packages.',
 		task: ( ctx, task ) => {
 			return releaseTools.executeInParallel( {
@@ -141,6 +116,18 @@ const tasks = new Listr( [
 				outputDirectory: RELEASE_DIRECTORY,
 				packagesDirectory: PACKAGES_DIRECTORY,
 				packagesToCopy: cliArguments.packages
+			} );
+		}
+	},
+	{
+		title: 'Updating dependencies.',
+		task: () => {
+			return releaseTools.updateDependencies( {
+				version: '^' + latestVersion,
+				packagesDirectory: RELEASE_DIRECTORY,
+				shouldUpdateVersionCallback: packageName => {
+					return CKEDITOR5_DEV_PACKAGES.includes( packageName.split( '/' )[ 1 ] );
+				}
 			} );
 		}
 	},

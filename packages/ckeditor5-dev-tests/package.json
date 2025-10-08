@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@babel/core": "^7.10.5",
-    "@ckeditor/ckeditor5-dev-translations": "^53.2.0",
-    "@ckeditor/ckeditor5-dev-utils": "^53.2.0",
+    "@ckeditor/ckeditor5-dev-translations": "workspace:*",
+    "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "@ckeditor/ckeditor5-inspector": "^5.0.0",
     "@types/chai": "^4.3.5",
     "@types/karma-sinon-chai": "^2.0.2",
