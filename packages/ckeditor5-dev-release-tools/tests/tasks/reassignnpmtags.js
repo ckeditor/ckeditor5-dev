@@ -98,6 +98,21 @@ describe( 'reassignNpmTags()', () => {
 		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package2@1.0.1 latest' );
 	} );
 
+	it( 'should accept a custom dist tag', async () => {
+		stubs.exec.mockResolvedValue( { stdout: '+lts-v47' } );
+
+		await reassignNpmTags( {
+			npmOwner: 'authorized-user',
+			version: '1.0.1',
+			packages: [ 'package1', 'package2' ],
+			npmTag: 'lts-v47'
+		} );
+
+		expect( stubs.exec ).toHaveBeenCalledTimes( 2 );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package1@1.0.1 lts-v47' );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package2@1.0.1 lts-v47' );
+	} );
+
 	it( 'should continue updating packages even if first package update fails', async () => {
 		stubs.exec
 			.mockRejectedValueOnce( new Error( 'is already set to version' ) )
