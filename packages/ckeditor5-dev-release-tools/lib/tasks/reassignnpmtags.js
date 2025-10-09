@@ -23,9 +23,17 @@ const execPromise = util.promisify( exec );
  * @param {string} options.npmOwner User that is authorized to release packages.
  * @param {string} options.version Specifies the version of packages to reassign the tags for.
  * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
+ * @param {string} [options.npmTag='latest'] Npm dist-tag to assign.
  * @returns {Promise}
  */
-export default async function reassignNpmTags( { npmOwner, version, packages } ) {
+export default async function reassignNpmTags( options ) {
+	const {
+		npmOwner,
+		version,
+		packages,
+		npmTag = 'latest'
+	} = options;
+
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];
@@ -36,7 +44,7 @@ export default async function reassignNpmTags( { npmOwner, version, packages } )
 	counter.start();
 
 	const updateTagPromises = packages.map( async packageName => {
-		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } latest`;
+		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`;
 		const updateLatestTagRetryable = retry( () => execPromise( command ) );
 		await updateLatestTagRetryable()
 			.then( response => {
