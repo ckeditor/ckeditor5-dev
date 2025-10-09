@@ -83,6 +83,28 @@ commands:
             echo export CKE5_GITHUB_REPOSITORY_SLUG="$CKE5_GITHUB_ORGANIZATION/$CKE5_GITHUB_REPOSITORY" >> $BASH_ENV
             echo export CKE5_COMMIT_SHA1=$CIRCLE_SHA1 >> $BASH_ENV
 
+  upload_coverage_data_to_codecov_command:
+    description: "Install Codecov CLI"
+    steps:
+      - run:
+          name: Install Codecov CLI
+          command: |
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+            curl -Os https://cli.codecov.io/latest/linux/codecov
+            curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+
+            shasum -a 256 -c codecov.SHA256SUM
+            sudo chmod +x codecov
+            ./codecov --version
+      - run:
+          name: Run Codecov CLI
+          command: |
+            ./codecov upload-process \
+              --token $CODECOV_TOKEN \
+              --file coverage/lcov.info
+
 jobs:
   notify_ci_failure:
     docker:
@@ -101,7 +123,7 @@ jobs:
           command: |
             #!/bin/bash
 
-            if [[ -z ${COVERALLS_REPO_TOKEN} ]];
+            if [[ -z ${CODECOV_TOKEN} ]];
             then
               circleci-agent step halt
             fi
@@ -137,13 +159,11 @@ jobs:
                 command: |
                   #!/bin/bash
 
-                  if [[ -z ${COVERALLS_REPO_TOKEN} ]];
+                  if [[ -z ${CODECOV_TOKEN} ]];
                   then
                     circleci-agent step halt
                   fi
-            - run:
-                name: Upload code coverage
-                command: cat coverage/lcov.info | pnpm exec coveralls
+            - upload_coverage_data_to_codecov_command
 
   release_prepare:
     docker:
