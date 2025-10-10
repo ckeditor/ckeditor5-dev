@@ -34,7 +34,7 @@ function main() {
 		const testScript = coverage ? 'coverage' : 'test';
 
 		try {
-			execSync( `npm run  --silent ${ testScript }`, {
+			execSync( `npm run --silent ${ testScript }`, {
 				stdio: 'inherit',
 				cwd: path.join( cwd, relativePath )
 			} );
