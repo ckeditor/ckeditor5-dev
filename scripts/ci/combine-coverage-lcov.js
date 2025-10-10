@@ -16,7 +16,7 @@ const coverageFile = path.join( cwd, 'coverage', 'lcov.info' );
 fs.emptyDirSync( path.join( coverageFile, '..' ) );
 fs.ensureFileSync( path.join( coverageFile ) );
 
-// Merge separate reports into a single file that would be sent to Coveralls.
+// Merge separate reports into a single file that would be sent to Codecov.
 for ( const lcovPath of globSync( './packages/*/coverage/lcov.info' ) ) {
 	const relativePackagePath = path.join( lcovPath, '..', '..' );
 	const content = fs.readFileSync( lcovPath, 'utf-8' )

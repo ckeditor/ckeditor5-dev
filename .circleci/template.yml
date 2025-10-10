@@ -13,6 +13,7 @@ parameters:
 
 orbs:
   node: circleci/node@7.1.1
+  codecov: codecov/codecov@5.4.3
 
 commands:
   bootstrap_repository_command:
@@ -101,7 +102,7 @@ jobs:
           command: |
             #!/bin/bash
 
-            if [[ -z ${COVERALLS_REPO_TOKEN} ]];
+            if [[ -z ${CODECOV_TOKEN} ]];
             then
               circleci-agent step halt
             fi
@@ -137,13 +138,13 @@ jobs:
                 command: |
                   #!/bin/bash
 
-                  if [[ -z ${COVERALLS_REPO_TOKEN} ]];
+                  if [[ -z ${CODECOV_TOKEN} ]];
                   then
                     circleci-agent step halt
                   fi
-            - run:
-                name: Upload code coverage
-                command: cat coverage/lcov.info | pnpm exec coveralls
+            - codecov/upload:
+                files: coverage/lcov.info
+                disable_search: true
 
   release_prepare:
     docker:
