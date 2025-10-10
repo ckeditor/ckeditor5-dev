@@ -3,12 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+import { resolveLoader } from './resolve-loader.js';
+
 export default function getIconsLoader( { matchExtensionOnly = false }: { matchExtensionOnly?: boolean } = {} ): {
 	test: RegExp;
 	use: Array<string>;
 } {
 	return {
 		test: matchExtensionOnly ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
-		use: [ 'raw-loader' ]
+		use: [ resolveLoader( 'raw-loader' ) ]
 	};
 }

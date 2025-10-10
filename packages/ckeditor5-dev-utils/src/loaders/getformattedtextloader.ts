@@ -3,9 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
+import { resolveLoader } from './resolve-loader.js';
+
 export default function getFormattedTextLoader(): { test: RegExp; use: Array<string> } {
 	return {
 		test: /\.(txt|html|rtf)$/,
-		use: [ 'raw-loader' ]
+		use: [ resolveLoader( 'raw-loader' ) ]
 	};
 }

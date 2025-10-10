@@ -4,6 +4,7 @@
  */
 
 import path from 'path';
+import { resolveLoader } from './resolve-loader.js';
 
 type CoverageLoaderConfig = {
 	test: RegExp;
@@ -24,7 +25,7 @@ export default function getCoverageLoader( { files }: { files: Array<Array<strin
 		test: /\.[jt]s$/,
 		use: [
 			{
-				loader: 'babel-loader',
+				loader: resolveLoader( 'babel-loader' ),
 				options: {
 					plugins: [
 						'babel-plugin-istanbul'

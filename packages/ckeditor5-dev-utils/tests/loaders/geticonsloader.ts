@@ -16,7 +16,7 @@ describe( 'getIconsLoader()', () => {
 
 		expect( svgLoader ).to.be.an( 'object' );
 		expect( svgLoader ).to.have.property( 'use' );
-		expect( svgLoader.use ).to.include( 'raw-loader' );
+		expect( svgLoader.use[ 0 ] ).to.include( 'raw-loader' );
 		expect( svgLoader ).to.have.property( 'test' );
 
 		const svgRegExp = svgLoader.test;
@@ -30,7 +30,7 @@ describe( 'getIconsLoader()', () => {
 
 		expect( svgLoader ).to.be.an( 'object' );
 		expect( svgLoader ).to.have.property( 'use' );
-		expect( svgLoader.use ).to.include( 'raw-loader' );
+		expect( svgLoader.use[ 0 ] ).to.include( 'raw-loader' );
 		expect( svgLoader ).to.have.property( 'test' );
 
 		const svgRegExp = svgLoader.test;
