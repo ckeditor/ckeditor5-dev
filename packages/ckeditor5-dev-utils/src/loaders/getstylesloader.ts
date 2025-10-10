@@ -4,6 +4,7 @@
  */
 
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { resolveLoader } from './resolve-loader.js';
 import { getPostCssConfig } from '../styles/index.js';
 
 type GetStylesLoaderOptions = {
@@ -40,7 +41,7 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 	} = options;
 
 	const getBundledLoader = () => ( {
-		loader: 'style-loader',
+		loader: resolveLoader( 'style-loader' ),
 		options: {
 			injectType: 'singletonStyleTag',
 			attributes: {
@@ -57,9 +58,9 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 		test: /\.css$/,
 		use: [
 			extractToSeparateFile ? getExtractedLoader() : getBundledLoader(),
-			'css-loader',
+			resolveLoader( 'css-loader' ),
 			skipPostCssLoader ? null : {
-				loader: 'postcss-loader',
+				loader: resolveLoader( 'postcss-loader' ),
 				options: {
 					postcssOptions: getPostCssConfig( {
 						themeImporter: { themePath },

@@ -4,6 +4,7 @@
  */
 
 import getDebugLoader from './getdebugloader.js';
+import { resolveLoader } from './resolve-loader.js';
 
 type TypeScriptLoaderOptions = {
 	configFile?: string;
@@ -35,7 +36,7 @@ export default function getTypeScriptLoader( options: TypeScriptLoaderOptions = 
 		test: /\.ts$/,
 		use: [
 			{
-				loader: 'esbuild-loader',
+				loader: resolveLoader( 'esbuild-loader' ),
 				options: {
 					target: 'es2022',
 					tsconfig: configFile

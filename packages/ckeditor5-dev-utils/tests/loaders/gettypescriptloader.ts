@@ -25,7 +25,7 @@ describe( 'getTypeScriptLoader()', () => {
 		expect( 'C:\\Program Files\\ckeditor\\plugin.ts' ).to.match( tsLoader.test, 'Windows' );
 		expect( '/home/ckeditor/plugin.ts' ).to.match( tsLoader.test, 'Linux' );
 
-		const esbuildLoader = tsLoader.use.find( item => item.loader === 'esbuild-loader' );
+		const esbuildLoader = tsLoader.use.find( item => item.loader.includes( 'esbuild-loader' ) );
 
 		expect( esbuildLoader ).to.be.an( 'object' );
 		expect( esbuildLoader ).to.have.property( 'options' );
@@ -44,7 +44,7 @@ describe( 'getTypeScriptLoader()', () => {
 		expect( 'C:\\Program Files\\ckeditor\\plugin.ts' ).to.match( tsLoader.test, 'Windows' );
 		expect( '/home/ckeditor/plugin.ts' ).to.match( tsLoader.test, 'Linux' );
 
-		const esbuildLoader = tsLoader.use.find( item => item.loader === 'esbuild-loader' );
+		const esbuildLoader = tsLoader.use.find( item => item.loader.includes( 'esbuild-loader' ) );
 
 		expect( esbuildLoader ).to.be.an( 'object' );
 		expect( esbuildLoader ).to.have.property( 'options' );
@@ -66,7 +66,7 @@ describe( 'getTypeScriptLoader()', () => {
 		} );
 
 		const ckDebugLoaderIndex = tsLoader.use.findIndex( item => item.loader.endsWith( 'ck-debug-loader' ) );
-		const tsLoaderIndex = tsLoader.use.findIndex( item => item.loader === 'esbuild-loader' );
+		const tsLoaderIndex = tsLoader.use.findIndex( item => item.loader.includes( 'esbuild-loader' ) );
 
 		// Webpack reads the "use" array from back to the front.
 		expect( ckDebugLoaderIndex ).to.equal( 1 );

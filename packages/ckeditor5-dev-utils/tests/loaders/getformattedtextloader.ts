@@ -16,7 +16,7 @@ describe( 'getFormattedTextLoader()', () => {
 
 		expect( textLoader ).to.be.an( 'object' );
 		expect( textLoader ).to.have.property( 'use' );
-		expect( textLoader.use ).to.include( 'raw-loader' );
+		expect( textLoader.use[ 0 ] ).to.include( 'raw-loader' );
 		expect( textLoader ).to.have.property( 'test' );
 
 		const loaderRegExp = textLoader.test;

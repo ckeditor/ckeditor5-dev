@@ -33,7 +33,7 @@ describe( 'getCoverageLoader()', () => {
 
 		const babelLoader = coverageLoader.use.at( 0 )!;
 
-		expect( babelLoader.loader ).to.equal( 'babel-loader' );
+		expect( babelLoader.loader ).to.include( 'babel-loader' );
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage (include glob check)', () => {

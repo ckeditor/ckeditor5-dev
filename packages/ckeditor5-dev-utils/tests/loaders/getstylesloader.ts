@@ -44,7 +44,7 @@ describe( 'getStylesLoader()', () => {
 		const styleLoader = loader.use[ 0 ];
 
 		expect( styleLoader ).to.be.an( 'object' );
-		expect( styleLoader ).to.have.property( 'loader', 'style-loader' );
+		expect( ( styleLoader as any ).loader ).to.include( 'style-loader' );
 		expect( styleLoader ).to.have.property( 'options' );
 
 		const options = typeof styleLoader === 'object' && styleLoader.options;
@@ -66,7 +66,7 @@ describe( 'getStylesLoader()', () => {
 		const postCssLoader = loader.use.at( -1 );
 
 		expect( postCssLoader ).to.be.an( 'object' );
-		expect( postCssLoader ).to.have.property( 'loader', 'postcss-loader' );
+		expect( ( postCssLoader as any ).loader ).to.include( 'postcss-loader' );
 		expect( postCssLoader ).to.have.property( 'options' );
 
 		const options = typeof postCssLoader === 'object' && postCssLoader.options;
@@ -89,7 +89,7 @@ describe( 'getStylesLoader()', () => {
 		} as any );
 
 		for ( const definition of loader.use ) {
-			expect( ( definition as any ).loader ).to.not.equal( 'postcss-loader' );
+			expect( typeof definition === 'object' ? definition.loader : definition ).to.not.include( 'postcss-loader' );
 		}
 	} );
 
@@ -100,6 +100,6 @@ describe( 'getStylesLoader()', () => {
 
 		const cssLoader = loader.use.at( -1 );
 
-		expect( cssLoader ).to.be.equal( 'css-loader' );
+		expect( cssLoader ).to.include( 'css-loader' );
 	} );
 } );
