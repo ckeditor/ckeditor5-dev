@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import { resolveLoader } from '../../src/loaders/resolve-loader.js';
 
@@ -15,6 +16,6 @@ describe( 'resolveLoader()', () => {
 		const loaderPath = resolveLoader( 'babel-loader' );
 
 		expect( loaderPath ).to.be.a( 'string' );
-		expect( loaderPath ).toEndWith( '/node_modules/babel-loader/lib/index.js' );
+		expect( loaderPath ).toEndWith( join( 'node_modules', 'babel-loader', 'lib', 'index.js' ) );
 	} );
 } );
