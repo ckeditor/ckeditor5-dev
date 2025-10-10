@@ -13,6 +13,7 @@ parameters:
 
 orbs:
   node: circleci/node@7.1.1
+  codecov: codecov/codecov@5.4.3
 
 commands:
   bootstrap_repository_command:
@@ -83,27 +84,6 @@ commands:
             echo export CKE5_GITHUB_REPOSITORY_SLUG="$CKE5_GITHUB_ORGANIZATION/$CKE5_GITHUB_REPOSITORY" >> $BASH_ENV
             echo export CKE5_COMMIT_SHA1=$CIRCLE_SHA1 >> $BASH_ENV
 
-  upload_coverage_data_to_codecov_command:
-    description: "Install Codecov CLI"
-    steps:
-      - run:
-          name: Install Codecov CLI
-          command: |
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-            shasum -a 256 -c codecov.SHA256SUM
-            chmod +x codecov
-            ./codecov --version
-      - run:
-          name: Run Codecov CLI
-          command: |
-            ./codecov upload-process \
-              --token $CODECOV_TOKEN \
-              --file coverage/lcov.info
-
 jobs:
   notify_ci_failure:
     docker:
@@ -162,7 +142,9 @@ jobs:
                   then
                     circleci-agent step halt
                   fi
-            - upload_coverage_data_to_codecov_command
+            - codecov/upload:
+                files: coverage/lcov.info
+                disable_search: true
 
   release_prepare:
     docker:
