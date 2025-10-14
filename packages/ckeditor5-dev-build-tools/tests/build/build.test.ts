@@ -500,3 +500,11 @@ test( 'Replace - import from core and from commercial (browser = true)', async (
 	expect( inputFileContent ).toContain( 'import { Users } from \'ckeditor5-collaboration/src/collaboration-core.js\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Users } from \'ckeditor5-premium-features\'' );
 } );
+
+test( 'should not throw when processing a file including a dynamic import expression', async () => {
+	await expect( build( {
+		input: 'src/dynamic-import.js',
+		browser: true,
+		name: 're-export-banner'
+	} ) ).resolves.toBeTruthy();
+} );
