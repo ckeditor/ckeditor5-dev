@@ -134,6 +134,7 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	const umdBundle = await build.write( {
 		format: 'umd',
 		file: path.join( dir, `${ name }.umd.js` ),
+		inlineDynamicImports: true,
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name,
@@ -225,6 +226,7 @@ export async function build(
 		const bundle = await build.write( {
 			format: 'esm',
 			file: args.output,
+			inlineDynamicImports: true,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
 			name: args.name
