@@ -7,17 +7,27 @@ import { glob } from 'glob';
 import fs from 'fs-extra';
 import upath from 'upath';
 
+const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: 'conjunction' } );
+
 /**
  * @param {object} options
  * @param {string} baseDir Base directory from which `packages` are resolved.
  * @param {string} [commonFeatureName] Common name to use in all licenses instead of individual feature names.
  * @param {string} [mainPackageName] Designated package that contains collected licenses from all other packages.
  * @param {boolean} [fix=false] Whether to fix license files instead of printing errors.
+ * @param {array} [additionalCopyrights] Map of additional copyrights to add to the ones parsed from dependencies.
  * @param {function} authorDisclaimerCallback Function with access to feature name that should return author disclaimer.
  *
  * @returns {number} Exit code of the script indicated whether it passed or errored.
  */
-export async function validateLicenseFiles( { baseDir, commonFeatureName, mainPackageName, fix, authorDisclaimerCallback } ) {
+export async function validateLicenseFiles( {
+	baseDir,
+	commonFeatureName,
+	mainPackageName,
+	fix,
+	additionalCopyrights = [],
+	authorDisclaimerCallback
+} ) {
 	const packagePaths = ( await glob( upath.join( baseDir, 'packages', '*' ) ) ).sort();
 
 	// Collect versioning and licensing data of all dependencies.
@@ -37,7 +47,7 @@ export async function validateLicenseFiles( { baseDir, commonFeatureName, mainPa
 			const externalDependencyPath = upath.join( packagePath, 'node_modules', externalDependency );
 			const externalDependencyPkgJsonPath = upath.join( externalDependencyPath, 'package.json' );
 			const externalDependencyLicensePath = ( await glob( upath.join( externalDependencyPath, '*' ) ) )
-				.find( path => path.split( '/' ).at( -1 ).match( /license/i ) );
+				.find( path => upath.basename( path ).match( /license/i ) );
 
 			if ( !externalDependencyLicensePath ) {
 				console.warn( `⚠️  \`${ externalDependency }\` does not include any license file, skipping.` );
@@ -58,9 +68,16 @@ export async function validateLicenseFiles( { baseDir, commonFeatureName, mainPa
 			// 	externalDependencyPkgJson.author.name :
 			// 	externalDependencyPkgJson.author;
 			dependencyData.license = externalDependencyPkgJson.license;
-			dependencyData.copyright = externalDependencyLicense.match( /(?<=^|\n[ \t]*?)Copyright.+/ )?.[ 0 ];
+			dependencyData.copyright = getCopyright( externalDependencyLicense );
 
 			dependencyMapItem.dependencies.push( dependencyData );
+		}
+
+		const additionalCopyrightsPackage = additionalCopyrights
+			.find( ( { packageName } ) => upath.basename( packagePath ) === packageName );
+
+		if ( additionalCopyrightsPackage ) {
+			dependencyMapItem.dependencies.push( ...additionalCopyrightsPackage.dependencies );
 		}
 
 		return dependencyMapItem;
@@ -68,7 +85,7 @@ export async function validateLicenseFiles( { baseDir, commonFeatureName, mainPa
 
 	if ( mainPackageName ) {
 		// Copying all dependencies to the main package.
-		const mainPackage = dependencyMap.find( ( { packagePath } ) => packagePath.split( '/' ).at( -1 ) === mainPackageName );
+		const mainPackage = dependencyMap.find( ( { packagePath } ) => upath.basename( packagePath ) === mainPackageName );
 		mainPackage.dependencies = dependencyMap.reduce( ( output, item ) => {
 			item.dependencies.forEach( dependency => {
 				const itemAlreadyPresent = output.some( ( { name } ) => name === dependency.name );
@@ -145,4 +162,16 @@ function getLicenseList( featureName, dependencies ) {
 			.map( ( { name, copyright } ) => `* ${ name } - ${ copyright }` ),
 		''
 	] );
+}
+
+function getCopyright( externalDependencyLicense ) {
+	const matches = externalDependencyLicense.match( /(?<=^|\n[ \t]*?)Copyright.+/g );
+
+	if ( !matches ) {
+		return null;
+	}
+
+	return conjunctionFormatter.format(
+		matches.map( match => match.replace( /\.$/, '' ) ) // Strip preexisting trailing dot.
+	) + '.'; // Add the trailing dot back.
 }
