@@ -229,12 +229,21 @@ importers:
       '@octokit/rest':
         specifier: ^22.0.0
         version: 22.0.0
+      fs-extra:
+        specifier: ^11.0.0
+        version: 11.3.1
+      glob:
+        specifier: ^11.0.2
+        version: 11.0.3
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
       slack-notify:
         specifier: ^2.0.6
         version: 2.0.7
+      upath:
+        specifier: ^2.0.1
+        version: 2.0.1
     devDependencies:
       vitest:
         specifier: ^3.1.1
@@ -10644,7 +10653,7 @@ snapshots:
 
   path-scurry@2.0.0:
     dependencies:
-      lru-cache: 11.1.0
+      lru-cache: 11.2.2
       minipass: 7.1.2
 
   path-to-regexp@1.9.0:

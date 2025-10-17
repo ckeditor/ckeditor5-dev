@@ -36,8 +36,11 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.0",
+    "fs-extra": "^11.0.0",
+    "glob": "^11.0.2",
     "minimist": "^1.2.8",
-    "slack-notify": "^2.0.6"
+    "slack-notify": "^2.0.6",
+    "upath": "^2.0.1"
   },
   "devDependencies": {
     "vitest": "^3.1.1"
