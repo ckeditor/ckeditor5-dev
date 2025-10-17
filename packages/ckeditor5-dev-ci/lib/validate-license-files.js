@@ -49,6 +49,7 @@ export async function validateLicenseFiles( {
 			const externalDependencyLicensePath = ( await glob( upath.join( externalDependencyPath, '*' ) ) )
 				.find( path => upath.basename( path ).match( /license/i ) );
 
+			// TODO: Cross reference with `additionalCopyrights` to check whether it was provided there before printing a warning.
 			if ( !externalDependencyLicensePath ) {
 				console.warn( `⚠️  \`${ externalDependency }\` does not include any license file, skipping.` );
 
