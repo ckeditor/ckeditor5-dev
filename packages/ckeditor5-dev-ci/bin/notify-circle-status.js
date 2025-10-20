@@ -5,6 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { parseArgs } from 'util';
 import slackNotify from 'slack-notify';
 import formatMessage from '../lib/format-message.js';
 
@@ -30,24 +31,6 @@ const {
 	 */
 	CKE5_CIRCLE_TOKEN,
 
-	/**
-	 * Required. Webhook URL of the Slack channel where the notification should be sent.
-	 */
-	CKE5_SLACK_WEBHOOK_URL,
-
-	/**
-	 * Optional. If both are defined, the script will use the URL as the commit URL.
-	 * Otherwise, URL will be constructed using current repository data.
-	 */
-	CKE5_TRIGGER_REPOSITORY_SLUG,
-	CKE5_TRIGGER_COMMIT_HASH,
-
-	/**
-	 * Optional. If set to "true", commit author will be hidden.
-	 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
-	 */
-	CKE5_SLACK_NOTIFY_HIDE_AUTHOR,
-
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
 	CIRCLE_BUILD_NUM,
@@ -56,6 +39,47 @@ const {
 	CIRCLE_SHA1,
 	CIRCLE_WORKFLOW_ID
 } = process.env;
+
+const {
+	values: {
+		'slack-webhook-url': CKE5_SLACK_WEBHOOK_URL,
+		'trigger-repository-slug': CKE5_TRIGGER_REPOSITORY_SLUG,
+		'trigger-commit-hash': CKE5_TRIGGER_COMMIT_HASH,
+		'slack-notify-hide-author': CKE5_SLACK_NOTIFY_HIDE_AUTHOR
+	}
+} = parseArgs( {
+	options: {
+		/**
+		 * Required. Webhook URL of the Slack channel where the notification should be sent.
+		 */
+		'slack-webhook-url': {
+			type: 'string',
+			default: process.env.CKE5_SLACK_WEBHOOK_URL
+		},
+
+		/**
+		 * Optional. If both are defined, the script will use the URL as the commit URL.
+		 * Otherwise, URL will be constructed using current repository data.
+		 */
+		'trigger-repository-slug': {
+			type: 'string',
+			default: process.env.CKE5_TRIGGER_REPOSITORY_SLUG
+		},
+		'trigger-commit-hash': {
+			type: 'string',
+			default: process.env.CKE5_TRIGGER_COMMIT_HASH
+		},
+
+		/**
+		 * Optional. If set to "true", commit author will be hidden.
+		 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
+		 */
+		'slack-notify-hide-author': {
+			type: 'boolean',
+			default: process.env.CKE5_SLACK_NOTIFY_HIDE_AUTHOR
+		}
+	}
+} );
 
 notifyCircleStatus();
 
