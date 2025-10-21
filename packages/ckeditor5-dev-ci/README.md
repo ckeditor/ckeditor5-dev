@@ -8,7 +8,22 @@ Utils for [CKEditor 5](https://ckeditor.com) CI builds.
 
 Contains tools for sending Slack notifications by Travis or Circle CI.
 
-More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
+Available commands:
+
+- `ckeditor5-dev-ci-notify-travis-status`,
+- `ckeditor5-dev-ci-notify-circle-status`,
+- `ckeditor5-dev-ci-circle-workflow-notifier`,
+- `ckeditor5-dev-ci-allocate-swap-memory`,
+- `ckeditor5-dev-ci-install-latest-chrome`,
+- `ckeditor5-dev-ci-is-job-triggered-by-member`,
+- `ckeditor5-dev-ci-is-workflow-restarted`,
+- `ckeditor5-dev-ci-trigger-circle-build`,
+- `ckeditor5-dev-ci-circle-disable-auto-cancel-builds`,
+- `ckeditor5-dev-ci-circle-enable-auto-cancel-builds`.
+
+These commands accept a mix of environment variables and command line arguments. Environment variables are preferred when value comes from CI environment or is sensitive (like tokens). Command line arguments are preferred when value is static or local to a given repository (like Slack channel name).
+
+See the individual files in the `bin/` folder for documentation about each command and their usage.
 
 ## Changelog
 
