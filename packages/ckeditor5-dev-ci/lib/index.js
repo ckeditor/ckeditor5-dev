@@ -3,6 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-export { validateLicenseFiles } from './validate-license-files.js';
 export { default as getJobApprover } from './utils/get-job-approver.js';
 export { members } from './data/index.js';
