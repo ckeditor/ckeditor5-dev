@@ -44,7 +44,8 @@
     "lint": "eslint",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
-    "check-dependencies": "ckeditor5-dev-dependency-checker"
+    "check-dependencies": "ckeditor5-dev-dependency-checker",
+    "validate-licenses": "node scripts/validate-licenses.mjs"
   },
   "lint-staged": {
     "**/*": [

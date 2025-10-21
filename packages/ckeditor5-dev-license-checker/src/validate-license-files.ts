@@ -1,0 +1,312 @@
+/**
+ * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+import { glob, readFile, writeFile } from 'fs/promises';
+import upath from 'upath';
+
+type CopyrightOverride = {
+	packageName: string;
+	dependencies: Array<{
+		license: string;
+		name: string;
+		copyright: string;
+	}>;
+};
+
+type DependencyMapItem = {
+	packageName: string;
+	packagePath: string;
+	dependencies: Array<{
+		license: string;
+		name: string;
+		copyright: string | null;
+	}>;
+};
+
+type ValidationItem = {
+	licensePath: string;
+	licenseMissing?: boolean;
+	sectionMissing?: boolean;
+	updateNeeded?: boolean;
+	updated?: boolean;
+};
+
+const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: 'conjunction' } );
+
+/**
+ * @param options
+ * @param options.fix Whether to fix license files instead of printing errors.
+ * @param options.processRoot Whether validation should process the root.
+ * @param options.processPackages Whether validation should process `packages/*`.
+ * @param options.isPublic Whether license should use disclaimer meant for open source repositories.
+ * @param options.rootDir Base directory.
+ * @param options.projectName Project name referred to in the licenses.
+ * @param options.mainPackageName Designated package that contains collected licenses from all other packages.
+ * @param options.copyrightOverrides Map of of copyright that can both add new ones, as well as override existing ones.
+ *
+ * @returns Exit code of the script that indicates whether it passed or errored.
+ */
+export async function validateLicenseFiles( {
+	fix = false,
+	processRoot = false,
+	processPackages = false,
+	isPublic = false,
+	rootDir,
+	projectName,
+	mainPackageName,
+	copyrightOverrides = []
+}: {
+	fix?: boolean;
+	processRoot?: boolean;
+	processPackages?: boolean;
+	isPublic?: boolean;
+	rootDir: string;
+	projectName: string;
+	mainPackageName?: string;
+	copyrightOverrides?: Array<CopyrightOverride>;
+} ): Promise<number> {
+	const packagePaths = [];
+
+	if ( processRoot ) {
+		packagePaths.push( rootDir );
+	}
+
+	if ( processPackages ) {
+		packagePaths.push( ...await Array.fromAsync( glob( upath.join( rootDir, 'packages', '*' ) ) ) );
+	}
+
+	if ( !processRoot && !processPackages ) {
+		console.error( 'You have to set at least one of: `processRoot` or `processPackages`.' );
+
+		return 1;
+	}
+
+	// Collect versioning and licensing data of all dependencies.
+	const dependencyMap = await Promise.all( packagePaths.map( async packagePath => {
+		const pkgJsonPath = upath.join( packagePath, 'package.json' );
+		const pkgJsonContent = JSON.parse( await readFile( pkgJsonPath, 'utf-8' ) );
+		const dependencyNames = Object.keys( pkgJsonContent.dependencies || {} )
+			.filter( dependency => !dependency.match( /(ckeditor)|(cksource)/i ) );
+
+		const packageName = pkgJsonContent.name;
+
+		const dependencyMapItem: DependencyMapItem = {
+			packageName,
+			packagePath,
+			dependencies: []
+		};
+
+		const copyrightOverridesPackage = copyrightOverrides
+			.find( ( { packageName: overridePackageName } ) => packageName === overridePackageName );
+
+		if ( copyrightOverridesPackage ) {
+			dependencyMapItem.dependencies.push( ...copyrightOverridesPackage.dependencies );
+		}
+
+		for ( const dependencyName of dependencyNames ) {
+			// If override already exists, skip parsing the dependency.
+			if ( dependencyMapItem.dependencies.some( ( { name } ) => name === dependencyName ) ) {
+				continue;
+			}
+
+			const dependencyPath = upath.join( packagePath, 'node_modules', dependencyName );
+			const dependencyPkgJsonPath = upath.join( dependencyPath, 'package.json' );
+			const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
+
+			dependencyMapItem.dependencies.push( {
+				name: dependencyName,
+				license: dependencyPkgJsonContent.license,
+				copyright: await getCopyright( dependencyPath )
+			} );
+		}
+
+		return dependencyMapItem;
+	} ) );
+
+	console.info( 'Validating licenses in following packages:' );
+	console.info( dependencyMap.map( ( { packageName } ) => ` - ${ packageName }` ).join( '\n' ) );
+
+	// Looking for missing copyright messages.
+	const missingCopyrightLists = dependencyMap
+		.map( ( { packageName, dependencies } ) => {
+			const missingCopyrights = dependencies
+				.filter( ( { copyright } ) => !copyright )
+				.map( ( { name } ) => ` - ${ name }` );
+
+			if ( missingCopyrights.length ) {
+				return [
+					`${ packageName }:`,
+					...missingCopyrights,
+					''
+				].join( '\n' );
+			}
+		} )
+		.filter( Boolean );
+
+	if ( missingCopyrightLists.length ) {
+		console.error( '❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n' );
+		console.error( missingCopyrightLists.join( '\n' ) );
+
+		return 1;
+	}
+
+	// Copying all dependencies to the main package.
+	if ( mainPackageName ) {
+		const mainPackage = dependencyMap.find( ( { packageName } ) => packageName === mainPackageName )!;
+		mainPackage.dependencies = dependencyMap.reduce<DependencyMapItem['dependencies']>( ( output, item ) => {
+			item.dependencies.forEach( dependency => {
+				const itemAlreadyPresent = output.some( ( { name } ) => name === dependency.name );
+
+				if ( !itemAlreadyPresent ) {
+					output.push( dependency );
+				}
+			} );
+
+			return output;
+		}, [] );
+	}
+
+	// Validate ckeditor license files.
+	const validationPromises: Array<Promise<ValidationItem | undefined>> = dependencyMap.map( async ( { packagePath, dependencies } ) => {
+		const licenseSectionPattern = /(?<=\n)Sources of Intellectual Property Included in .*?\n[\S\s]*?(?=(\nTrademarks\n)|$)/;
+		const header = `Sources of Intellectual Property Included in ${ projectName }`;
+		const licensePath = upath.join( packagePath, 'LICENSE.md' );
+		const license = await readFile( licensePath, 'utf-8' );
+
+		if ( typeof license !== 'string' ) {
+			return { licensePath, licenseMissing: true };
+		}
+
+		if ( !license.match( licenseSectionPattern ) ) {
+			return { licensePath, sectionMissing: true };
+		}
+
+		const newLicense = license.replace( licenseSectionPattern, [
+			header,
+			'-'.repeat( header.length ),
+			'',
+			getAuthorDisclaimer( projectName, isPublic ),
+			'',
+			...getLicenseList( projectName, dependencies )
+		].filter( item => typeof item === 'string' ).join( '\n' ) );
+
+		if ( fix ) {
+			await writeFile( licensePath, newLicense, 'utf-8' );
+
+			return { licensePath, updated: true };
+		}
+
+		if ( license !== newLicense ) {
+			return { licensePath, updateNeeded: true };
+		}
+	} );
+
+	const validationReturnValues: Array<ValidationItem> = ( await Promise.all( validationPromises ) )
+		.filter( ( validationValue ): validationValue is ValidationItem => Boolean( validationValue ) );
+
+	const updatedLicenses = validationReturnValues.filter( ( { updated } ) => updated );
+	const licensesToFix = validationReturnValues.filter( ( { updated } ) => !updated );
+
+	if ( updatedLicenses.length ) {
+		console.info( '\nUpdated the following license files:' );
+		console.info( makeList( updatedLicenses ) );
+	}
+
+	if ( !licensesToFix.length ) {
+		console.info( '\nValidation complete.' );
+
+		return 0;
+	}
+
+	const licensesMissing = licensesToFix.filter( ( { licenseMissing } ) => licenseMissing );
+	const sectionsMissing = licensesToFix.filter( ( { sectionMissing } ) => sectionMissing );
+	const updatesNeeded = licensesToFix.filter( ( { updateNeeded } ) => updateNeeded );
+
+	if ( licensesMissing.length ) {
+		console.error( '\nFollowing license files are missing. Please create them:' );
+		console.error( makeList( licensesMissing ) );
+	}
+
+	if ( sectionsMissing.length ) {
+		console.error( [
+			'\nFailed to detect license section in following files.',
+			'Please add an `Sources of Intellectual Property Included in ...` section to them:'
+		].join( ' ' ) );
+		console.error( makeList( sectionsMissing ) );
+	}
+
+	if ( updatesNeeded.length ) {
+		console.error( '\nFollowing license files are not up to date. Please run this script with `--fix` option and review the changes.' );
+		console.error( makeList( updatesNeeded ) );
+	}
+
+	return 1;
+}
+
+function getAuthorDisclaimer( projectName: string, isPublic: boolean ): string {
+	const authorDisclaimer = [
+		`Where not otherwise indicated, all ${ projectName } content is authored`,
+		'by CKSource engineers and consists of CKSource-owned intellectual property.'
+	];
+
+	if ( isPublic ) {
+		authorDisclaimer.push(
+			`In some specific instances, ${ projectName } will incorporate work done by`,
+			'developers outside of CKSource with their express permission.'
+		);
+	}
+
+	return authorDisclaimer.join( ' ' );
+}
+
+function getLicenseTypeHeader( projectName: string, licenseType: string ): string {
+	return [
+		'The following libraries are included in',
+		projectName,
+		`under the [${ licenseType } license](https://opensource.org/licenses/${ licenseType }):`
+	].join( ' ' );
+}
+
+function getLicenseList( projectName: string, dependencies: DependencyMapItem['dependencies'] ): Array<string> {
+	const licenseTypes = removeDuplicateStrings( dependencies.flatMap( dependency => dependency.license ) );
+
+	return licenseTypes.sort().flatMap( licenseType => [
+		getLicenseTypeHeader( projectName, licenseType ),
+		'',
+		...dependencies
+			.filter( ( { license } ) => license === licenseType )
+			.sort( ( a, b ) => a.name.localeCompare( b.name ) )
+			.map( ( { name, copyright } ) => `* ${ name } - ${ copyright }` ),
+		''
+	] );
+}
+
+async function getCopyright( dependencyPath: string ): Promise<string | null> {
+	const dependencyRootFilePaths = await Array.fromAsync( glob( upath.join( dependencyPath, '*' ) ) );
+	const dependencyLicensePath = dependencyRootFilePaths.find( path => upath.basename( path ).match( /license/i ) );
+
+	if ( !dependencyLicensePath ) {
+		return null;
+	}
+
+	const dependencyLicenseContent = await readFile( dependencyLicensePath, 'utf-8' );
+	const matches = dependencyLicenseContent.match( /(?<=^|\n[ \t]*?)Copyright.+/g );
+
+	if ( !matches ) {
+		return null;
+	}
+
+	return conjunctionFormatter.format(
+		matches.map( match => match.replace( /\.$/, '' ) ) // Strip preexisting trailing dot.
+	) + '.'; // Add the trailing dot back.
+}
+
+function removeDuplicateStrings<T>( array: Array<T> ): Array<T> {
+	return Array.from( new Set( array ) );
+}
+
+function makeList( array: Array<ValidationItem> ): string {
+	return array.map( ( { licensePath } ) => ` - ${ licensePath }` ).join( '\n' );
+}
