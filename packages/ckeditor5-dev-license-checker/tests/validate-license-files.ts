@@ -1022,7 +1022,7 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
-					'❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
+					'\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
 				);
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
 					'project-root-package:',
@@ -1058,7 +1058,7 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
-					'❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
+					'\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
 				);
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
 					'project-root-package:',

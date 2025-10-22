@@ -146,7 +146,7 @@ export async function validateLicenseFiles( {
 		.filter( Boolean );
 
 	if ( missingCopyrightLists.length ) {
-		console.error( '❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n' );
+		console.error( '\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n' );
 		console.error( missingCopyrightLists.join( '\n' ) );
 
 		return 1;

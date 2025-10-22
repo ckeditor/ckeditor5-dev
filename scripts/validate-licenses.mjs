@@ -12,6 +12,9 @@ const { fix } = parseArgs( { options: {
 	'fix': { type: 'boolean', default: false }
 } } ).values;
 
+const minimistOverride = { license: 'MIT', name: 'minimist', copyright: 'Copyright (c) 2013 James Halliday and contributors.' };
+const simpleGitOverride = { license: 'MIT', name: 'simple-git', copyright: 'Copyright (c) 2022 Steve King.' };
+
 validateLicenseFiles( {
 	fix,
 	processRoot: true,
@@ -23,52 +26,63 @@ validateLicenseFiles( {
 	copyrightOverrides: [ {
 		packageName: '@ckeditor/ckeditor5-dev-build-tools',
 		dependencies: [
-			{ license: 'MIT', name: '@rollup/plugin-terser', copyright: 'foo' },
-			{ license: 'MIT', name: '@swc/core', copyright: 'foo' },
-			{ license: 'MIT', name: 'cssnano-preset-lite', copyright: 'foo' },
-			{ license: 'MIT', name: 'rollup-plugin-svg-import', copyright: 'foo' }
+			{
+				license: 'MIT',
+				name: '@rollup/plugin-terser',
+				copyright: 'Copyright (c) 2019 RollupJS Plugin Contributors (https://github.com/rollup/plugins/graphs/contributors).'
+			},
+			{ license: 'Apache-2.0', name: '@swc/core', copyright: 'Copyright 2024 SWC contributors.' },
+			{
+				license: 'MIT',
+				name: 'cssnano-preset-lite',
+				copyright: 'Copyright (c) Ben Briggs <beneb.info@gmail.com> (http://beneb.info).'
+			},
+			{ license: 'MIT', name: 'rollup-plugin-svg-import', copyright: 'Copyright (C) korywka (https://github.com/korywka).' }
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-ci',
 		dependencies: [
-			{ license: 'MIT', name: 'minimist', copyright: 'foo' }
+			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-dependency-checker',
 		dependencies: [
-			{ license: 'MIT', name: 'minimist', copyright: 'foo' },
-			{ license: 'MIT', name: 'oxc-walker', copyright: 'foo' }
+			minimistOverride,
+			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' }
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-release-tools',
 		dependencies: [
-			{ license: 'MIT', name: 'shell-escape', copyright: 'foo' },
-			{ license: 'MIT', name: 'simple-git', copyright: 'foo' }
+			{ license: 'MIT', name: 'shell-escape', copyright: 'Copyright (c) Martin PANEL (https://github.com/xxorax).' },
+			simpleGitOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-stale-bot',
 		dependencies: [
-			{ license: 'MIT', name: 'minimist', copyright: 'foo' }
+			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-tests',
 		dependencies: [
-			{ license: 'MIT', name: 'karma-sinon', copyright: 'foo' },
-			{ license: 'MIT', name: 'minimist', copyright: 'foo' },
-			{ license: 'MIT', name: 'typescript', copyright: 'foo' }
+			{ license: 'MIT', name: 'karma-sinon', copyright: 'TODO: https://github.com/yanoosh/karma-sinon/blob/master/LICENSE' },
+			minimistOverride,
+			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' }
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-utils',
 		dependencies: [
-			{ license: 'MIT', name: 'simple-git', copyright: 'foo' },
-			{ license: 'MIT', name: 'through2', copyright: 'foo' }
+			simpleGitOverride,
+			{ license: 'MIT', name: 'through2', copyright: 'Copyright (c) Rod Vagg (the "Original Author") and additional contributors.' }
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-web-crawler',
 		dependencies: [
-			{ license: 'MIT', name: 'puppeteer', copyright: 'foo' }
+			{ license: 'Apache-2.0', name: 'puppeteer', copyright: 'Copyright 2017-2025 Google Inc.' }
 		]
 	} ]
 } ).then( exitCode => {
 	process.exit( exitCode );
 } );
+
+// TODO:
+// ckeditor5-dev-docs - typedoc
