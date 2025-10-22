@@ -67,7 +67,7 @@ export async function validateLicenseFiles( {
 	mainPackageName?: string;
 	copyrightOverrides?: Array<CopyrightOverride>;
 } ): Promise<number> {
-	const packagePaths = [];
+	const packagePaths: Array<string> = [];
 
 	if ( processRoot ) {
 		packagePaths.push( rootDir );
@@ -173,17 +173,17 @@ export async function validateLicenseFiles( {
 		const licenseSectionPattern = /(?<=\n)Sources of Intellectual Property Included in .*?\n[\S\s]*?(?=(\nTrademarks\n)|$)/;
 		const header = `Sources of Intellectual Property Included in ${ projectName }`;
 		const licensePath = upath.join( packagePath, 'LICENSE.md' );
-		const license = await readFile( licensePath, 'utf-8' );
+		const currentLicense = await readFile( licensePath, 'utf-8' );
 
-		if ( typeof license !== 'string' ) {
+		if ( typeof currentLicense !== 'string' ) {
 			return { licensePath, licenseMissing: true };
 		}
 
-		if ( !license.match( licenseSectionPattern ) ) {
+		if ( !currentLicense.match( licenseSectionPattern ) ) {
 			return { licensePath, sectionMissing: true };
 		}
 
-		const newLicense = license.replace( licenseSectionPattern, [
+		const newLicense = currentLicense.replace( licenseSectionPattern, [
 			header,
 			'-'.repeat( header.length ),
 			'',
@@ -192,15 +192,17 @@ export async function validateLicenseFiles( {
 			...getLicenseList( projectName, dependencies )
 		].filter( item => typeof item === 'string' ).join( '\n' ) );
 
+		if ( currentLicense === newLicense ) {
+			return;
+		}
+
 		if ( fix ) {
 			await writeFile( licensePath, newLicense, 'utf-8' );
 
 			return { licensePath, updated: true };
 		}
 
-		if ( license !== newLicense ) {
-			return { licensePath, updateNeeded: true };
-		}
+		return { licensePath, updateNeeded: true };
 	} );
 
 	const validationReturnValues: Array<ValidationItem> = ( await Promise.all( validationPromises ) )
