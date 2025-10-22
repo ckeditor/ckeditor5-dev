@@ -26,7 +26,15 @@ describe( 'validateLicenseFiles', () => {
 		consoleInfoMock = vi.spyOn( console, 'info' ).mockImplementation( () => {} );
 		consoleErrorMock = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
 
-		vi.mocked( readFile ).mockImplementation( async path => fileContentMap[ path as string ]! );
+		vi.mocked( readFile ).mockImplementation( async path => {
+			const key = path as string;
+
+			if ( key in fileContentMap ) {
+				return fileContentMap[ key ]!;
+			}
+
+			throw new Error( `ENOENT: no such file or directory, open '${ key }'` );
+		} );
 		vi.mocked( writeFile ).mockImplementation( async () => {} );
 		vi.mocked( glob ).mockImplementation( async function* ( path ): AsyncGenerator<string> {
 			const pathPattern = new RegExp( ( path as string ).replace( '*', '[^/]+' ) );

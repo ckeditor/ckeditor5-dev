@@ -74,7 +74,7 @@ export async function validateLicenseFiles( {
 	}
 
 	if ( processPackages ) {
-		packagePaths.push( ...await Array.fromAsync( glob( upath.join( rootDir, 'packages', '*' ) ) ) );
+		packagePaths.push( ...await fromAsync( glob( upath.join( rootDir, 'packages', '*' ) ) ) );
 	}
 
 	if ( !processRoot && !processPackages ) {
@@ -173,9 +173,11 @@ export async function validateLicenseFiles( {
 		const licenseSectionPattern = /(?<=\n)Sources of Intellectual Property Included in .*?\n[\S\s]*?(?=(\nTrademarks\n)|$)/;
 		const header = `Sources of Intellectual Property Included in ${ projectName }`;
 		const licensePath = upath.join( packagePath, 'LICENSE.md' );
-		const currentLicense = await readFile( licensePath, 'utf-8' );
+		let currentLicense;
 
-		if ( typeof currentLicense !== 'string' ) {
+		try {
+			currentLicense = await readFile( licensePath, 'utf-8' );
+		} catch {
 			return { licensePath, licenseMissing: true };
 		}
 
@@ -286,7 +288,7 @@ function getLicenseList( projectName: string, dependencies: DependencyMapItem['d
 }
 
 async function getCopyright( dependencyPath: string ): Promise<string | null> {
-	const dependencyRootFilePaths = await Array.fromAsync( glob( upath.join( dependencyPath, '*' ) ) );
+	const dependencyRootFilePaths = await fromAsync( glob( upath.join( dependencyPath, '*' ) ) );
 	const dependencyLicensePath = dependencyRootFilePaths.find( path => upath.basename( path ).match( /license/i ) );
 
 	if ( !dependencyLicensePath ) {
@@ -311,4 +313,17 @@ function removeDuplicateStrings<T>( array: Array<T> ): Array<T> {
 
 function makeList( array: Array<ValidationItem> ): string {
 	return array.map( ( { licensePath } ) => ` - ${ licensePath }` ).join( '\n' );
+}
+
+// TODO: Replace with `Array.fromAsync()` once we upgrade to TS 5.5
+async function fromAsync<T>( iterable: AsyncIterable<T> ): Promise<Array<T>> {
+	const result: Array<T> = [];
+
+	if ( iterable[ Symbol.asyncIterator ] ) {
+		for await ( const item of iterable ) {
+			result.push( item );
+		}
+	}
+
+	return result;
 }

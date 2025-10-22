@@ -127,6 +127,9 @@ jobs:
       - run:
           name: Validate versions of dependencies
           command: pnpm run check-versions-match
+      - run:
+          name: Validate license files
+          command: pnpm run validate-licenses
       - unless:
           # Upload the code coverage results for non-nightly builds only.
           condition: << pipeline.parameters.isNightly >>

@@ -15,6 +15,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@ckeditor/ckeditor5-dev-license-checker": "workspace:*",
     "@inquirer/prompts": "^7.5.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^22.0.0",
