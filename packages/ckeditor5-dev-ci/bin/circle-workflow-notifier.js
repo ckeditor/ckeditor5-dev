@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { parseArgs } from 'util';
 import { execSync } from 'child_process';
-import minimist from 'minimist';
 import processJobStatuses from '../lib/process-job-statuses.js';
 import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
 
@@ -35,7 +35,7 @@ import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
 // See: https://github.com/ckeditor/ckeditor5/issues/16403.
 //
 // By defining the `--ignore` option, you can skip waiting for particular jobs.
-// You can also specify jobs to ignore
+// You can also specify jobs to ignore.
 //
 // Let's consider the example below:
 //   ┌─────┐     ┌─────┐
@@ -54,7 +54,7 @@ import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
 // The assumption is that "Job D" is the approval job. To ignore it and its children, you can execute
 // the notifier like this:
 //
-// $ ckeditor5-dev-ci-circle-workflow-notifier --ignore "Job D" --ignore "Job E"
+// $ ckeditor5-dev-ci-circle-workflow-notifier --ignore="Job D" --ignore="Job E"
 
 const {
 	/**
@@ -67,7 +67,19 @@ const {
 	CIRCLE_JOB
 } = process.env;
 
-const { task, ignore } = parseArguments( process.argv.slice( 2 ) );
+const { values: { task, ignore } } = parseArgs( {
+	options: {
+		task: {
+			type: 'string',
+			default: 'pnpm ckeditor5-dev-ci-notify-circle-status'
+		},
+		ignore: {
+			type: 'string',
+			multiple: true,
+			default: []
+		}
+	}
+} );
 
 waitForOtherJobsAndSendNotification()
 	.catch( err => {
@@ -112,34 +124,4 @@ async function getOtherJobsData() {
 	const data = await response.json();
 
 	return data.items.filter( job => job.name !== CIRCLE_JOB );
-}
-
-/**
- * @param {Array.<string>} args
- * @returns {object} result
- * @returns {string} result.task
- * @returns {Array.<string>} result.ignore
- */
-function parseArguments( args ) {
-	const config = {
-		string: [
-			'task',
-			'ignore'
-		],
-
-		default: {
-			task: 'pnpm ckeditor5-dev-ci-notify-circle-status',
-			ignore: []
-		}
-	};
-
-	let { task, ignore } = minimist( args, config );
-
-	if ( typeof ignore === 'string' ) {
-		ignore = [ ignore ];
-	}
-
-	ignore = ignore.flatMap( item => item.split( ',' ) );
-
-	return { task, ignore };
 }

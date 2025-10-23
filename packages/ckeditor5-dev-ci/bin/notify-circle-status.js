@@ -5,6 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { parseArgs } from 'util';
 import slackNotify from 'slack-notify';
 import formatMessage from '../lib/format-message.js';
 
@@ -14,11 +15,6 @@ import formatMessage from '../lib/format-message.js';
 // Described environment variables starting with "CKE5" should be added by the integrator.
 
 const {
-	/**
-	 * Required. Value of Circle's `pipeline.number` variable.
-	 */
-	CKE5_PIPELINE_NUMBER,
-
 	/**
 	 * Required. Token to a Github account with the scope: "repos". It is required for obtaining an author of
 	 * the commit if the build failed. The repository can be private and we can't use the public API.
@@ -35,27 +31,48 @@ const {
 	 */
 	CKE5_SLACK_WEBHOOK_URL,
 
-	/**
-	 * Optional. If both are defined, the script will use the URL as the commit URL.
-	 * Otherwise, URL will be constructed using current repository data.
-	 */
-	CKE5_TRIGGER_REPOSITORY_SLUG,
-	CKE5_TRIGGER_COMMIT_HASH,
-
-	/**
-	 * Optional. If set to "true", commit author will be hidden.
-	 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
-	 */
-	CKE5_SLACK_NOTIFY_HIDE_AUTHOR,
-
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
-	CIRCLE_BUILD_NUM,
 	CIRCLE_PROJECT_REPONAME,
 	CIRCLE_PROJECT_USERNAME,
 	CIRCLE_SHA1,
 	CIRCLE_WORKFLOW_ID
 } = process.env;
+
+const { values: cliArguments } = parseArgs( {
+	options: {
+		/**
+		 * Required. Value of Circle's `pipeline.number` variable.
+		 * Unfortunately, it does not overlap with `CIRCLE_BUILD_NUM`.
+		 */
+		'pipeline-id': {
+			type: 'string',
+			default: process.env.CKE5_PIPELINE_NUMBER
+		},
+
+		/**
+		 * Optional. If both are defined, the script will use the URL as the commit URL.
+		 * Otherwise, URL will be constructed using the current repository data.
+		 */
+		'trigger-repository-slug': {
+			type: 'string',
+			default: process.env.CKE5_TRIGGER_REPOSITORY_SLUG
+		},
+		'trigger-commit-hash': {
+			type: 'string',
+			default: process.env.CKE5_TRIGGER_COMMIT_HASH
+		},
+
+		/**
+		 * Optional. If set to "true" or "1", commit author will be hidden.
+		 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
+		 */
+		'hide-author': {
+			type: 'string',
+			default: process.env.CKE5_SLACK_NOTIFY_HIDE_AUTHOR
+		}
+	}
+} );
 
 notifyCircleStatus();
 
@@ -68,12 +85,16 @@ async function notifyCircleStatus() {
 		throw new Error( 'Missing environment variable: CKE5_SLACK_WEBHOOK_URL' );
 	}
 
+	if ( !CKE5_CIRCLE_TOKEN ) {
+		throw new Error( 'Missing environment variable: CKE5_CIRCLE_TOKEN' );
+	}
+
 	const jobData = await getJobData();
 	const buildUrl = [
 		'https://app.circleci.com/pipelines/github',
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
-		CKE5_PIPELINE_NUMBER,
+		cliArguments[ 'pipeline-id' ],
 		'workflows',
 		CIRCLE_WORKFLOW_ID
 	].join( '/' );
@@ -91,7 +112,7 @@ async function notifyCircleStatus() {
 		triggeringCommitUrl: getTriggeringCommitUrl(),
 		startTime: Math.ceil( ( new Date( jobData.started_at ) ).getTime() / 1000 ),
 		endTime: Math.ceil( ( new Date() ) / 1000 ),
-		shouldHideAuthor: CKE5_SLACK_NOTIFY_HIDE_AUTHOR === 'true'
+		shouldHideAuthor: isTrueLike( cliArguments[ 'hide-author' ] )
 	} );
 
 	return slackNotify( CKE5_SLACK_WEBHOOK_URL )
@@ -105,7 +126,7 @@ async function getJobData() {
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
 		'job',
-		CIRCLE_BUILD_NUM
+		cliArguments[ 'pipeline-id' ]
 	].join( '/' );
 
 	const fetchOptions = {
@@ -120,13 +141,20 @@ async function getJobData() {
 function getTriggeringCommitUrl() {
 	let repoSlug, hash;
 
-	if ( CKE5_TRIGGER_REPOSITORY_SLUG && CKE5_TRIGGER_COMMIT_HASH ) {
-		repoSlug = CKE5_TRIGGER_REPOSITORY_SLUG.trim();
-		hash = CKE5_TRIGGER_COMMIT_HASH.trim();
+	const cliRepoSlug = cliArguments[ 'trigger-repository-slug' ];
+	const cliCommitHash = cliArguments[ 'trigger-commit-hash' ];
+
+	if ( cliRepoSlug && cliCommitHash ) {
+		repoSlug = cliRepoSlug.trim();
+		hash = cliCommitHash.trim();
 	} else {
 		repoSlug = [ CIRCLE_PROJECT_USERNAME, CIRCLE_PROJECT_REPONAME ].join( '/' );
 		hash = CIRCLE_SHA1;
 	}
 
 	return [ 'https://github.com', repoSlug, 'commit', hash ].join( '/' );
+}
+
+function isTrueLike( value ) {
+	return value === true || value === 1 || value === '1' || value === 'true';
 }
