@@ -17,11 +17,11 @@ import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-build
  * In order to integrate the action in your pipeline, you need prepare a few CLI or environment variables:
  *
  *   - `CKE5_CIRCLE_TOKEN` - an authorization token to talk to CircleCI REST API.
- *   - `--organization` - your GitHub organization.
- *   - `--repository` - your GitHub repository.
+ *   - `--organization` - a GitHub organization.
+ *   - `--repository` - a GitHub repository.
  *
  * Example usage:
- * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-circle-disable-auto-cancel-builds
+ * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-circle-disable-auto-cancel-builds --organization ... --repository ...
  */
 
 const { values: cliOptions } = parseArgs( {
