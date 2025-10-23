@@ -130,7 +130,7 @@ jobs:
       - bootstrap_repository_command
       - run:
           name: Check if packages are ready to be released
-          command: qweasdzxcqweasdzxc
+          command: pnpm run release:prepare-packages --verbose --compile-only
 
   trigger_release_process:
     docker:
@@ -239,7 +239,6 @@ workflows:
             branches:
               only:
                 - master
-                - ck/19245-use-cli-arguments-in-ci
 
   release:
     when:
