@@ -14,9 +14,9 @@ import triggerCircleBuild from '../lib/trigger-circle-build.js';
  * In order to integrate the action in your pipeline, you need prepare a few CLI or environment variables:
  *
  *   - `CIRCLE_BRANCH` - provided by default by CircleCI and keeps the git branch of processed build.
- *   - `CKE5_COMMIT_SHA1` - a full commit identifier of the processed the build.
  *   - `CKE5_CIRCLE_TOKEN` - an authorization token to talk to CircleCI REST API.
  *   - `--slug` - a repository slug (org/name) where a new build will be started.
+ *  - `--commit` - a full commit identifier of the processed the build.
  *   - `--branch` - (optional) define a branch that leads the release process.
  *   - `--trigger-repository-slug` - (optional) a repository slug (org/name) that triggers a new build.
  *
@@ -34,6 +34,10 @@ const { values: cliOptions } = parseArgs( {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_REPOSITORY_SLUG
 		},
+		commit: {
+			type: 'string',
+			default: process.env.CKE5_COMMIT_SHA1
+		},
 		'trigger-repository-slug': {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG
@@ -43,7 +47,7 @@ const { values: cliOptions } = parseArgs( {
 
 const options = {
 	circleToken: process.env.CKE5_CIRCLE_TOKEN,
-	commit: process.env.CKE5_COMMIT_SHA1,
+	commit: cliOptions.commit,
 	branch: process.env.CIRCLE_BRANCH,
 	releaseBranch: cliOptions.branch,
 	repositorySlug: cliOptions.slug
