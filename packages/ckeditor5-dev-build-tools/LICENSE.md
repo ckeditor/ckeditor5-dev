@@ -44,7 +44,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * purgecss - Copyright (c) 2020 Full Human.
 * rollup - Copyright (c) 2017 [these people](https://github.com/rollup/rollup/graphs/contributors).
 * rollup-plugin-styles - Copyright (c) 2020 Anton Kudryavtsev <boblobl4@gmail.com>.
-* rollup-plugin-svg-import - Copyright (C) korywka (https://github.com/korywka).
+* rollup-plugin-svg-import - Copyright (c) korywka (https://github.com/korywka).
 * upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
 
 The following libraries are included in CKEditor under the [MIT-0 license](https://opensource.org/licenses/MIT-0):

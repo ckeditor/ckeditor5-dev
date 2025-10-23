@@ -37,7 +37,7 @@ validateLicenseFiles( {
 				name: 'cssnano-preset-lite',
 				copyright: 'Copyright (c) Ben Briggs <beneb.info@gmail.com> (http://beneb.info).'
 			},
-			{ license: 'MIT', name: 'rollup-plugin-svg-import', copyright: 'Copyright (C) korywka (https://github.com/korywka).' }
+			{ license: 'MIT', name: 'rollup-plugin-svg-import', copyright: 'Copyright (c) korywka (https://github.com/korywka).' }
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-ci',

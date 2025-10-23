@@ -119,7 +119,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * raw-loader - Copyright JS Foundation and other contributors.
 * rollup - Copyright (c) 2017 [these people](https://github.com/rollup/rollup/graphs/contributors).
 * rollup-plugin-styles - Copyright (c) 2020 Anton Kudryavtsev <boblobl4@gmail.com>.
-* rollup-plugin-svg-import - Copyright (C) korywka (https://github.com/korywka).
+* rollup-plugin-svg-import - Copyright (c) korywka (https://github.com/korywka).
 * shell-escape - Copyright (c) Martin PANEL (https://github.com/xxorax).
 * simple-git - Copyright (c) 2022 Steve King.
 * slack-notify - Copyright (c) 2014 Andrew Childs.
