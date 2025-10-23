@@ -16,11 +16,6 @@ import formatMessage from '../lib/format-message.js';
 
 const {
 	/**
-	 * Required. Value of Circle's `pipeline.number` variable.
-	 */
-	CKE5_PIPELINE_NUMBER,
-
-	/**
 	 * Required. Token to a Github account with the scope: "repos". It is required for obtaining an author of
 	 * the commit if the build failed. The repository can be private and we can't use the public API.
 	 */
@@ -31,6 +26,11 @@ const {
 	 */
 	CKE5_CIRCLE_TOKEN,
 
+	/**
+	 * Required. Webhook URL of the Slack channel where the notification should be sent.
+	 */
+	CKE5_SLACK_WEBHOOK_URL,
+
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
 	CIRCLE_BUILD_NUM,
@@ -40,21 +40,14 @@ const {
 	CIRCLE_WORKFLOW_ID
 } = process.env;
 
-const {
-	values: {
-		'slack-webhook-url': CKE5_SLACK_WEBHOOK_URL,
-		'trigger-repository-slug': CKE5_TRIGGER_REPOSITORY_SLUG,
-		'trigger-commit-hash': CKE5_TRIGGER_COMMIT_HASH,
-		'slack-notify-hide-author': CKE5_SLACK_NOTIFY_HIDE_AUTHOR
-	}
-} = parseArgs( {
+const { values: cliArguments } = parseArgs( {
 	options: {
 		/**
-		 * Required. Webhook URL of the Slack channel where the notification should be sent.
+		 * Required. Value of Circle's `pipeline.number` variable.
 		 */
-		'slack-webhook-url': {
-			type: 'string',
-			default: process.env.CKE5_SLACK_WEBHOOK_URL
+		'pipeline-id': {
+			type: 'number',
+			default: process.env.CKE5_PIPELINE_NUMBER
 		},
 
 		/**
@@ -75,7 +68,7 @@ const {
 		 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
 		 */
 		'slack-notify-hide-author': {
-			type: 'boolean',
+			type: 'string',
 			default: process.env.CKE5_SLACK_NOTIFY_HIDE_AUTHOR
 		}
 	}
@@ -92,12 +85,16 @@ async function notifyCircleStatus() {
 		throw new Error( 'Missing environment variable: CKE5_SLACK_WEBHOOK_URL' );
 	}
 
+	if ( !CKE5_CIRCLE_TOKEN ) {
+		throw new Error( 'Missing environment variable: CKE5_CIRCLE_TOKEN' );
+	}
+
 	const jobData = await getJobData();
 	const buildUrl = [
 		'https://app.circleci.com/pipelines/github',
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
-		CKE5_PIPELINE_NUMBER,
+		cliArguments[ 'pipeline-id' ],
 		'workflows',
 		CIRCLE_WORKFLOW_ID
 	].join( '/' );
@@ -115,7 +112,7 @@ async function notifyCircleStatus() {
 		triggeringCommitUrl: getTriggeringCommitUrl(),
 		startTime: Math.ceil( ( new Date( jobData.started_at ) ).getTime() / 1000 ),
 		endTime: Math.ceil( ( new Date() ) / 1000 ),
-		shouldHideAuthor: CKE5_SLACK_NOTIFY_HIDE_AUTHOR === 'true'
+		shouldHideAuthor: isTrueLike( cliArguments[ 'slack-notify-hide-author' ] )
 	} );
 
 	return slackNotify( CKE5_SLACK_WEBHOOK_URL )
@@ -144,13 +141,20 @@ async function getJobData() {
 function getTriggeringCommitUrl() {
 	let repoSlug, hash;
 
-	if ( CKE5_TRIGGER_REPOSITORY_SLUG && CKE5_TRIGGER_COMMIT_HASH ) {
-		repoSlug = CKE5_TRIGGER_REPOSITORY_SLUG.trim();
-		hash = CKE5_TRIGGER_COMMIT_HASH.trim();
+	const cliRepoSlug = cliArguments[ 'trigger-repository-slug' ];
+	const cliCommitHash = cliArguments[ 'trigger-commit-hash' ];
+
+	if ( cliRepoSlug && cliCommitHash ) {
+		repoSlug = cliRepoSlug.trim();
+		hash = cliCommitHash.trim();
 	} else {
 		repoSlug = [ CIRCLE_PROJECT_USERNAME, CIRCLE_PROJECT_REPONAME ].join( '/' );
 		hash = CIRCLE_SHA1;
 	}
 
 	return [ 'https://github.com', repoSlug, 'commit', hash ].join( '/' );
+}
+
+function isTrueLike( value ) {
+	return value === true || value === 1 || value === '1' || value === 'true';
 }
