@@ -33,7 +33,6 @@ const {
 
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
-	CIRCLE_BUILD_NUM,
 	CIRCLE_PROJECT_REPONAME,
 	CIRCLE_PROJECT_USERNAME,
 	CIRCLE_SHA1,
@@ -42,6 +41,15 @@ const {
 
 const { values: cliArguments } = parseArgs( {
 	options: {
+		/**
+		 * Required. Value of Circle's `pipeline.number` variable.
+		 * Unfortunately, it does not overlap with `CIRCLE_BUILD_NUM`.
+		 */
+		'pipeline-id': {
+			type: 'string',
+			default: process.env.CKE5_PIPELINE_NUMBER
+		},
+
 		/**
 		 * Optional. If both are defined, the script will use the URL as the commit URL.
 		 * Otherwise, URL will be constructed using the current repository data.
@@ -86,7 +94,7 @@ async function notifyCircleStatus() {
 		'https://app.circleci.com/pipelines/github',
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
-		CIRCLE_BUILD_NUM,
+		cliArguments[ 'pipeline-id' ],
 		'workflows',
 		CIRCLE_WORKFLOW_ID
 	].join( '/' );
@@ -118,7 +126,7 @@ async function getJobData() {
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
 		'job',
-		CIRCLE_BUILD_NUM
+		cliArguments[ 'pipeline-id' ]
 	].join( '/' );
 
 	const fetchOptions = {
