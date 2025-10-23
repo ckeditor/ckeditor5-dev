@@ -239,6 +239,7 @@ workflows:
             branches:
               only:
                 - master
+                - ck/19245-use-cli-arguments-in-ci
 
   release:
     when:
