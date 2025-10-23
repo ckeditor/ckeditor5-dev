@@ -16,7 +16,7 @@ import isJobTriggeredByMember from '../lib/is-job-triggered-by-member.js';
  *   - `CIRCLE_WORKFLOW_ID` - provided by default by CircleCI and keeps a unique id of the CI build.
  *   - `CKE5_CIRCLE_TOKEN` - an authorization token to talk to CircleCI REST API.
  *   - `CKE5_GITHUB_TOKEN` - a GitHub token used for authorization a request.
- *   - `--slug` - a GitHub team slug that defines accounts that could approve the job.
+ *   - `--team` - a GitHub team name (slug) that defines accounts that could approve the job.
  *   - `--organization` - your GitHub organization.
  *  - `--job` - a job name to verify.
  *
@@ -34,7 +34,7 @@ const { values: cliOptions } = parseArgs( {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_ORGANIZATION
 		},
-		slug: {
+		team: {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_TEAM_SLUG
 		}
@@ -46,7 +46,7 @@ const options = {
 	circleWorkflowId: process.env.CIRCLE_WORKFLOW_ID,
 	circleApprovalJobName: cliOptions.job,
 	githubOrganization: cliOptions.organization,
-	githubTeamSlug: cliOptions.slug,
+	githubTeamSlug: cliOptions.team,
 	githubToken: process.env.CKE5_GITHUB_TOKEN
 };
 

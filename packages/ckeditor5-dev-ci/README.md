@@ -70,7 +70,7 @@ These commands accept a mix of environment variables and command line arguments.
   **Parameters:**
   - `--job` &mdash; Name of the approval job to verify.
   - `--organization` &mdash; GitHub organization name.
-  - `--slug` &mdash; GitHub team slug to validate against.
+  - `--team` &mdash; GitHub team name (slug) to validate against.
 
 - ⚙️ **`ckeditor5-dev-ci-is-workflow-restarted`**
 
