@@ -94,17 +94,17 @@ These commands accept a mix of environment variables and command line arguments.
   - `CKE5_SLACK_WEBHOOK_URL` &mdash; Incoming Webhook URL for the Slack channel receiving notifications.
 
   **CircleCI-provided variables:**
-  - `CIRCLE_BRANCH` &mdash; Git branch of the current build.
+  - `CIRCLE_BRANCH` &mdash; The number of the current build. 
+  - `CIRCLE_BUILD_NUM` &mdash; Git branch of the current build.
   - `CIRCLE_PROJECT_REPONAME` &mdash; Repository name.
   - `CIRCLE_PROJECT_USERNAME` &mdash; Organization/user name.
   - `CIRCLE_SHA1` &mdash; Commit SHA of the current build.
   - `CIRCLE_WORKFLOW_ID` &mdash; ID of the current workflow.
 
   **Parameters:**
-  - `--pipeline-id` &mdash; Value of CircleCI’s `pipeline.number`.
   - `--trigger-repository-slug` &mdash; `<org>/<repo>` to construct the commit URL when provided with `--trigger-commit-hash`. Useful when a pipeline was triggered via a different repository.
   - `--trigger-commit-hash` &mdash; Commit SHA to construct the commit URL. Useful when a pipeline was triggered via a different repository.
-  - `--slack-notify-hide-author` &mdash; `"true"`/`"false"` to hide the author in Slack.
+  - `--hide-author` &mdash; `"true"`/`"false"` to hide the author in Slack.
 
 - ⚙️ **`ckeditor5-dev-ci-trigger-circle-build`**
 

@@ -33,6 +33,7 @@ const {
 
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
+	CIRCLE_BUILD_NUM,
 	CIRCLE_PROJECT_REPONAME,
 	CIRCLE_PROJECT_USERNAME,
 	CIRCLE_SHA1,
@@ -42,16 +43,8 @@ const {
 const { values: cliArguments } = parseArgs( {
 	options: {
 		/**
-		 * Required. Value of Circle's `pipeline.number` variable.
-		 */
-		'pipeline-id': {
-			type: 'number',
-			default: process.env.CKE5_PIPELINE_NUMBER
-		},
-
-		/**
 		 * Optional. If both are defined, the script will use the URL as the commit URL.
-		 * Otherwise, URL will be constructed using current repository data.
+		 * Otherwise, URL will be constructed using the current repository data.
 		 */
 		'trigger-repository-slug': {
 			type: 'string',
@@ -63,10 +56,10 @@ const { values: cliArguments } = parseArgs( {
 		},
 
 		/**
-		 * Optional. If set to "true", commit author will be hidden.
+		 * Optional. If set to "true" or "1", commit author will be hidden.
 		 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
 		 */
-		'slack-notify-hide-author': {
+		'hide-author': {
 			type: 'string',
 			default: process.env.CKE5_SLACK_NOTIFY_HIDE_AUTHOR
 		}
@@ -93,7 +86,7 @@ async function notifyCircleStatus() {
 		'https://app.circleci.com/pipelines/github',
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
-		cliArguments[ 'pipeline-id' ],
+		CIRCLE_BUILD_NUM,
 		'workflows',
 		CIRCLE_WORKFLOW_ID
 	].join( '/' );
@@ -111,7 +104,7 @@ async function notifyCircleStatus() {
 		triggeringCommitUrl: getTriggeringCommitUrl(),
 		startTime: Math.ceil( ( new Date( jobData.started_at ) ).getTime() / 1000 ),
 		endTime: Math.ceil( ( new Date() ) / 1000 ),
-		shouldHideAuthor: isTrueLike( cliArguments[ 'slack-notify-hide-author' ] )
+		shouldHideAuthor: isTrueLike( cliArguments[ 'hide-author' ] )
 	} );
 
 	return slackNotify( CKE5_SLACK_WEBHOOK_URL )
@@ -125,7 +118,7 @@ async function getJobData() {
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
 		'job',
-		cliArguments[ 'pipeline-id' ]
+		CIRCLE_BUILD_NUM
 	].join( '/' );
 
 	const fetchOptions = {
