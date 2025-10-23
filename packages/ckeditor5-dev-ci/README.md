@@ -15,7 +15,8 @@ These commands accept a mix of environment variables and command line arguments.
 > [!WARNING]
 > Tokens are passed as environment variables to avoid exposing sensitive credentials in shell history, CI logs, or shared configuration files.
 
-- ⚙️ `ckeditor5-dev-ci-circle-disable-auto-cancel-builds`
+- ⚙️ **`ckeditor5-dev-ci-circle-disable-auto-cancel-builds`**
+
   Disables the _“Auto-cancel redundant workflows”_ option in CircleCI for a given repository.
   Useful during release processes to prevent CircleCI from canceling the workflow triggered by the release commit itself.
 
@@ -26,7 +27,8 @@ These commands accept a mix of environment variables and command line arguments.
   - `--organization` &mdash; GitHub organization name.
   - `--repository` &mdash; GitHub repository name.
 
-- ⚙️ `ckeditor5-dev-ci-circle-enable-auto-cancel-builds`  
+- ⚙️ **`ckeditor5-dev-ci-circle-enable-auto-cancel-builds`**
+
   Enables the _“Auto-cancel redundant workflows”_ option in CircleCI for a given repository.  
   Should be used after a release workflow that temporarily disables this option using the `ckeditor5-dev-ci-circle-disable-auto-cancel-builds` script.
 
@@ -37,7 +39,8 @@ These commands accept a mix of environment variables and command line arguments.
   - `--organization` &mdash; GitHub organization name.
   - `--repository` &mdash; GitHub repository name.
 
-- ⚙️ `ckeditor5-dev-ci-circle-workflow-notifier`  
+- ⚙️ **`ckeditor5-dev-ci-circle-workflow-notifier`**
+
   Waits for all jobs in the **current CircleCI workflow** to finish (success or error) and then runs a final command (the "notifier").  
   Intended to run as a **dedicated job** in your workflow. The script itself handles waiting – you typically don’t add `requires` on this job.
 
@@ -52,7 +55,8 @@ These commands accept a mix of environment variables and command line arguments.
   - `--task` &mdash; Command to execute at the end; default: `pnpm ckeditor5-dev-ci-notify-circle-status`.
   - `--ignore` &mdash; Job name to ignore when waiting (repeatable; can be passed multiple times).
 
-- ⚙️ `ckeditor5-dev-ci-is-job-triggered-by-member`  
+- ⚙️ **`ckeditor5-dev-ci-is-job-triggered-by-member`**
+
   Verifies that a **CircleCI approval job** was approved by a user who belongs to a specified GitHub team.  
   Uses CircleCI and GitHub APIs to check the approver against the team membership.
 
@@ -68,7 +72,8 @@ These commands accept a mix of environment variables and command line arguments.
   - `--organization` &mdash; GitHub organization name.
   - `--slug` &mdash; GitHub team slug to validate against.
 
-- ⚙️ `ckeditor5-dev-ci-is-workflow-restarted`  
+- ⚙️ **`ckeditor5-dev-ci-is-workflow-restarted`**
+
   Checks whether the current CircleCI workflow has been **restarted**.  
   If a restart is detected, the script exits with a zero exit code, allowing the pipeline to continue conditionally.
 
@@ -78,7 +83,8 @@ These commands accept a mix of environment variables and command line arguments.
   **CircleCI-provided variables:**
   - `CIRCLE_WORKFLOW_ID` &mdash; ID of the current workflow (set by CircleCI).
 
-- ⚙️ `ckeditor5-dev-ci-notify-circle-status`  
+- ⚙️ **`ckeditor5-dev-ci-notify-circle-status`**
+
   Sends a Slack notification summarizing the current CircleCI build/workflow status.  
   For failed builds, fetches the commit author via the GitHub API (works with private repositories).
 
