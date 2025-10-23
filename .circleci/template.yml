@@ -86,7 +86,7 @@ jobs:
             fi
       - run:
           name: Waiting for other jobs to finish and sending notification on failure
-          command: pnpm ckeditor5-dev-ci-circle-workflow-notifier --task "pnpm ckeditor5-dev-ci-notify-circle-status --hide-author << parameters.hideAuthor >>"
+          command: pnpm ckeditor5-dev-ci-circle-workflow-notifier --task "pnpm ckeditor5-dev-ci-notify-circle-status --pipeline-id << pipeline.number >> --hide-author << parameters.hideAuthor >>"
           no_output_timeout: 1h
 
   validate_and_tests:
