@@ -59,7 +59,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * karma-firefox-launcher - Copyright (C) 2011-2013 Google, Inc.
 * karma-mocha - Copyright (C) 2011-2013 Google, Inc.
 * karma-mocha-reporter - Copyright (C) 2013-2016 Litixsoft GmbH <info@litixsoft.de>.
-* karma-sinon - TODO: https://github.com/yanoosh/karma-sinon/blob/master/LICENSE
+* karma-sinon - Copyright (c) Janusz J (https://github.com/yanoosh).
 * karma-sinon-chai - Copyright (c) 2013 Kevin Mees and Copyright (c) 2013 Greg Thornton.
 * karma-sourcemap-loader - Copyright (c) 2013 Sergey Todyshev.
 * karma-webpack - Copyright JS Foundation and other contributors.

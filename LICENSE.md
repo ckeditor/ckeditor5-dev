@@ -19,7 +19,7 @@ The following libraries are included in CKEditor under the [Apache-2.0 license](
 
 * @swc/core - Copyright 2024 SWC contributors.
 * puppeteer - Copyright 2017-2025 Google Inc.
-* typedoc - Copyright {yyyy} {name of copyright owner}.
+* typedoc - Copyright (c) TypeStrong contributors.
 * typescript - Copyright (c) Microsoft Corporation. All rights reserved.
 
 The following libraries are included in CKEditor under the [BSD-2-Clause license](https://opensource.org/licenses/BSD-2-Clause):
@@ -94,7 +94,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * karma-firefox-launcher - Copyright (C) 2011-2013 Google, Inc.
 * karma-mocha - Copyright (C) 2011-2013 Google, Inc.
 * karma-mocha-reporter - Copyright (C) 2013-2016 Litixsoft GmbH <info@litixsoft.de>.
-* karma-sinon - TODO: https://github.com/yanoosh/karma-sinon/blob/master/LICENSE
+* karma-sinon - Copyright (c) Janusz J (https://github.com/yanoosh).
 * karma-sinon-chai - Copyright (c) 2013 Kevin Mees and Copyright (c) 2013 Greg Thornton.
 * karma-sourcemap-loader - Copyright (c) 2013 Sergey Todyshev.
 * karma-webpack - Copyright JS Foundation and other contributors.

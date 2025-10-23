@@ -12,7 +12,7 @@ Where not otherwise indicated, all CKEditor content is authored by CKSource engi
 
 The following libraries are included in CKEditor under the [Apache-2.0 license](https://opensource.org/licenses/Apache-2.0):
 
-* typedoc - Copyright {yyyy} {name of copyright owner}.
+* typedoc - Copyright (c) TypeStrong contributors.
 
 The following libraries are included in CKEditor under the [ISC license](https://opensource.org/licenses/ISC):
 

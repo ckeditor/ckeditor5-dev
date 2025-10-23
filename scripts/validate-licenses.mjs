@@ -51,6 +51,11 @@ validateLicenseFiles( {
 			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' }
 		]
 	}, {
+		packageName: '@ckeditor/ckeditor5-dev-docs',
+		dependencies: [
+			{ license: 'Apache-2.0', name: 'typedoc', copyright: 'Copyright (c) TypeStrong contributors.' }
+		]
+	}, {
 		packageName: '@ckeditor/ckeditor5-dev-release-tools',
 		dependencies: [
 			{ license: 'MIT', name: 'shell-escape', copyright: 'Copyright (c) Martin PANEL (https://github.com/xxorax).' },
@@ -64,7 +69,7 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-tests',
 		dependencies: [
-			{ license: 'MIT', name: 'karma-sinon', copyright: 'TODO: https://github.com/yanoosh/karma-sinon/blob/master/LICENSE' },
+			{ license: 'MIT', name: 'karma-sinon', copyright: 'Copyright (c) Janusz J (https://github.com/yanoosh).' },
 			minimistOverride,
 			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' }
 		]
@@ -83,6 +88,3 @@ validateLicenseFiles( {
 } ).then( exitCode => {
 	process.exit( exitCode );
 } );
-
-// TODO:
-// ckeditor5-dev-docs - typedoc
