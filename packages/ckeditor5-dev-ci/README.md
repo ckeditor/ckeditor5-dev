@@ -106,6 +106,24 @@ These commands accept a mix of environment variables and command line arguments.
   - `--trigger-commit-hash` &mdash; Commit SHA to construct the commit URL. Useful when a pipeline was triggered via a different repository.
   - `--slack-notify-hide-author` &mdash; `"true"`/`"false"` to hide the author in Slack.
 
+- ⚙️ **`ckeditor5-dev-ci-trigger-circle-build`**
+
+  Triggers a **new CircleCI pipeline** for a specified repository.  
+  Commonly used to initiate release or follow-up pipelines from an existing workflow.
+
+  **Environment variables:**
+  - `CKE5_CIRCLE_TOKEN` &mdash; CircleCI API token used for authentication.
+
+  **CircleCI-provided variables:**
+  - `CIRCLE_BRANCH` &mdash; Git branch of the currently processed pipeline.
+  - `CIRCLE_SHA1` &mdash; Full commit SHA of the currently processed pipeline.
+
+  **Parameters:**
+  - `--slug` &mdash; Repository slug (`org/name`) where the new pipeline will be started.
+  - `--trigger-repository-slug` &mdash; *(Optional)* Repository slug (`org/name`) that triggered the new pipeline.  
+    Can be omitted if it matches `--slug`.
+  - `--release-branch` &mdash; *(Optional)* Branch that leads the release process.
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-ci/CHANGELOG.md) file.

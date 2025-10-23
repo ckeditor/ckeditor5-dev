@@ -13,12 +13,13 @@ import triggerCircleBuild from '../lib/trigger-circle-build.js';
  *
  * In order to integrate the action in your pipeline, you need prepare a few CLI or environment variables:
  *
- *   - `CIRCLE_BRANCH` - provided by default by CircleCI and keeps the git branch of processed build.
+ *   - `CIRCLE_BRANCH` - provided by default by CircleCI and keeps the git branch of processed pipeline.
+ *   - `CIRCLE_SHA1` - provided by default by CircleCI and keeps a full commit identifier of the processed the pipeline.
  *   - `CKE5_CIRCLE_TOKEN` - an authorization token to talk to CircleCI REST API.
- *   - `--slug` - a repository slug (org/name) where a new build will be started.
- *  - `--commit` - a full commit identifier of the processed the build.
- *   - `--branch` - (optional) define a branch that leads the release process.
- *   - `--trigger-repository-slug` - (optional) a repository slug (org/name) that triggers a new build.
+ *   - `--slug` - a repository slug (org/name) where a new pipeline will be started.
+ *   - `--trigger-repository-slug` - (optional) a repository slug (org/name) that triggers a new pipeline.
+ *     Can be skipped when overlaps with `--slug`.
+ *   - `--release-branch` - (optional) define a branch that leads the release process.
  *
  * Example usage:
  * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-trigger-circle-build
@@ -26,30 +27,26 @@ import triggerCircleBuild from '../lib/trigger-circle-build.js';
 
 const { values: cliOptions } = parseArgs( {
 	options: {
-		branch: {
-			type: 'string',
-			default: process.env.CKE5_GITHUB_RELEASE_BRANCH
-		},
 		slug: {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_REPOSITORY_SLUG
 		},
-		commit: {
-			type: 'string',
-			default: process.env.CKE5_COMMIT_SHA1
-		},
 		'trigger-repository-slug': {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG
+		},
+		'release-branch': {
+			type: 'string',
+			default: process.env.CKE5_GITHUB_RELEASE_BRANCH
 		}
 	}
 } );
 
 const options = {
 	circleToken: process.env.CKE5_CIRCLE_TOKEN,
-	commit: cliOptions.commit,
+	commit: process.env.CIRCLE_SHA1,
 	branch: process.env.CIRCLE_BRANCH,
-	releaseBranch: cliOptions.branch,
+	releaseBranch: cliOptions[ 'release-branch' ],
 	repositorySlug: cliOptions.slug
 };
 
