@@ -86,7 +86,7 @@ describe( 'validateLicenseFiles', () => {
 	describe( 'valid licenses', () => {
 		describe( 'validation mode', () => {
 			it( 'license in private repo', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -102,7 +102,7 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'license in public repo', async () => {
 				options.isPublic = true;
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'long' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -117,7 +117,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -143,7 +143,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an additional dependency from an override', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -178,7 +178,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an overridden dependency', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -212,7 +212,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an overridden dependency which is missing in the source package', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -247,7 +247,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency with multiple copyright messages', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -278,7 +278,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the packages directory', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				const exitCode = await validateLicenseFiles( options );
 
@@ -295,7 +295,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the packages directory with dependencies', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/packages/package-a/package.json' ] = JSON.stringify( {
 					name: 'package-a',
@@ -337,8 +337,8 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the root package and packages directory with dependencies', async () => {
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -394,8 +394,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'main package with aggregated licenses in the root package', async () => {
 				options.mainPackageName = 'project-root-package';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -455,8 +455,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'main package with aggregated licenses in the packages directory', async () => {
 				options.mainPackageName = 'package-a';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -521,7 +521,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license in private repo', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -539,7 +539,7 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'license in public repo', async () => {
 				options.isPublic = true;
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'long' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -556,7 +556,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -584,7 +584,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an additional dependency from an override', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -621,7 +621,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an overridden dependency', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -657,7 +657,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with an overridden dependency which is missing in the source package', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -694,7 +694,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency with multiple copyright messages', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -727,7 +727,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the packages directory', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				const exitCode = await validateLicenseFiles( options );
 
@@ -746,7 +746,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the packages directory with dependencies', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/packages/package-a/package.json' ] = JSON.stringify( {
 					name: 'package-a',
@@ -790,8 +790,8 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'licenses in the root package and packages directory with dependencies', async () => {
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -849,8 +849,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'main package with aggregated licenses in the root package', async () => {
 				options.mainPackageName = 'project-root-package';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -912,8 +912,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'main package with aggregated licenses in the packages directory', async () => {
 				options.mainPackageName = 'package-a';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -984,11 +984,14 @@ describe( 'validateLicenseFiles', () => {
 
 				expect( consoleInfoMock ).toHaveBeenCalledTimes( 0 );
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 1 );
-				expect( consoleErrorMock ).toHaveBeenCalledWith( 'You have to set at least one of: `processRoot` or `processPackages`.' );
+				expect( consoleErrorMock ).toHaveBeenCalledWith( [
+					'No packages to parse detected. Make sure that you provided proper paths,',
+					'as well as set at least one of: `shouldProcessRoot` or `shouldProcessPackages`.'
+				].join( '\n' ) );
 			} );
 
 			it( 'license file is missing', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				delete fileContentMap[ 'root/dir/LICENSE.md' ];
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1004,7 +1007,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'dependency is missing license and no override is provided', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -1032,7 +1035,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'dependency\'s license is missing copyright line and no override is provided', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -1068,7 +1071,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license file is empty', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = '';
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1087,7 +1090,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license file in private repo has the public repo author disclaimer', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'long' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1106,7 +1109,7 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'license file in public repo has the private repo author disclaimer', async () => {
 				options.isPublic = true;
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1124,7 +1127,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license file is missing copyright information', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -1147,7 +1150,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license is missing additional dependency added via overrides', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -1184,7 +1187,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'invalid license in one of the packages directory', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/packages/package-a/package.json' ] = JSON.stringify( {
 					name: 'package-a',
@@ -1224,8 +1227,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'multiple invalid licenses in repository with root main package and packages directory', async () => {
 				options.mainPackageName = 'project-root-package';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -1283,7 +1286,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license file in private repo has the public repo author disclaimer', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'long' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1306,7 +1309,7 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'license file in public repo has the private repo author disclaimer', async () => {
 				options.isPublic = true;
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short' );
 
 				const exitCode = await validateLicenseFiles( options );
@@ -1328,7 +1331,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license file is missing copyright information', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
 					dependencies: {
@@ -1360,7 +1363,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license is missing additional dependency added via overrides', async () => {
-				options.processRoot = true;
+				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {
@@ -1407,7 +1410,7 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'invalid license in one of the packages directory', async () => {
-				options.processPackages = true;
+				options.shouldProcessPackages = true;
 
 				fileContentMap[ 'root/dir/packages/package-a/package.json' ] = JSON.stringify( {
 					name: 'package-a',
@@ -1456,8 +1459,8 @@ describe( 'validateLicenseFiles', () => {
 
 			it( 'multiple invalid licenses in repository with root main package and packages directory', async () => {
 				options.mainPackageName = 'project-root-package';
-				options.processRoot = true;
-				options.processPackages = true;
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
 				options.copyrightOverrides = [ {
 					packageName: 'project-root-package',
 					dependencies: [ {

@@ -38,8 +38,8 @@ const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: '
 /**
  * @param options
  * @param options.fix Whether to fix license files instead of printing errors.
- * @param options.processRoot Whether validation should process the root.
- * @param options.processPackages Whether validation should process `packages/*`.
+ * @param options.shouldProcessRoot Whether validation should process the root.
+ * @param options.shouldProcessPackages Whether validation should process `packages/*`.
  * @param options.isPublic Whether license should use disclaimer meant for open source repositories.
  * @param options.rootDir Base directory.
  * @param options.projectName Project name referred to in the licenses.
@@ -50,8 +50,8 @@ const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: '
  */
 export async function validateLicenseFiles( {
 	fix = false,
-	processRoot = false,
-	processPackages = false,
+	shouldProcessRoot = false,
+	shouldProcessPackages = false,
 	isPublic = false,
 	rootDir,
 	projectName,
@@ -59,8 +59,8 @@ export async function validateLicenseFiles( {
 	copyrightOverrides = []
 }: {
 	fix?: boolean;
-	processRoot?: boolean;
-	processPackages?: boolean;
+	shouldProcessRoot?: boolean;
+	shouldProcessPackages?: boolean;
 	isPublic?: boolean;
 	rootDir: string;
 	projectName: string;
@@ -69,16 +69,19 @@ export async function validateLicenseFiles( {
 } ): Promise<number> {
 	const packagePaths: Array<string> = [];
 
-	if ( processRoot ) {
+	if ( shouldProcessRoot ) {
 		packagePaths.push( rootDir );
 	}
 
-	if ( processPackages ) {
+	if ( shouldProcessPackages ) {
 		packagePaths.push( ...await fromAsync( glob( upath.join( rootDir, 'packages', '*' ) ) ) );
 	}
 
-	if ( !processRoot && !processPackages ) {
-		console.error( 'You have to set at least one of: `processRoot` or `processPackages`.' );
+	if ( !packagePaths.length ) {
+		console.error( [
+			'No packages to parse detected. Make sure that you provided proper paths,',
+			'as well as set at least one of: `shouldProcessRoot` or `shouldProcessPackages`.'
+		].join( '\n' ) );
 
 		return 1;
 	}
@@ -215,7 +218,7 @@ export async function validateLicenseFiles( {
 
 	if ( updatedLicenses.length ) {
 		console.info( '\nUpdated the following license files:' );
-		console.info( makeList( updatedLicenses ) );
+		console.info( makeLicenseFileList( updatedLicenses ) );
 	}
 
 	if ( !licensesToFix.length ) {
@@ -230,7 +233,7 @@ export async function validateLicenseFiles( {
 
 	if ( licensesMissing.length ) {
 		console.error( '\nFollowing license files are missing. Please create them:' );
-		console.error( makeList( licensesMissing ) );
+		console.error( makeLicenseFileList( licensesMissing ) );
 	}
 
 	if ( sectionsMissing.length ) {
@@ -238,12 +241,12 @@ export async function validateLicenseFiles( {
 			'\nFailed to detect license section in following files.',
 			'Please add an `Sources of Intellectual Property Included in ...` section to them:'
 		].join( ' ' ) );
-		console.error( makeList( sectionsMissing ) );
+		console.error( makeLicenseFileList( sectionsMissing ) );
 	}
 
 	if ( updatesNeeded.length ) {
 		console.error( '\nFollowing license files are not up to date. Please run this script with `--fix` option and review the changes.' );
-		console.error( makeList( updatesNeeded ) );
+		console.error( makeLicenseFileList( updatesNeeded ) );
 	}
 
 	return 1;
@@ -274,7 +277,7 @@ function getLicenseTypeHeader( projectName: string, licenseType: string ): strin
 }
 
 function getLicenseList( projectName: string, dependencies: DependencyMapItem['dependencies'] ): Array<string> {
-	const licenseTypes = removeDuplicateStrings( dependencies.flatMap( dependency => dependency.license ) );
+	const licenseTypes = removeDuplicates( dependencies.flatMap( dependency => dependency.license ) );
 
 	return licenseTypes.sort().flatMap( licenseType => [
 		getLicenseTypeHeader( projectName, licenseType ),
@@ -307,11 +310,11 @@ async function getCopyright( dependencyPath: string ): Promise<string | null> {
 	) + '.'; // Add the trailing dot back.
 }
 
-function removeDuplicateStrings<T>( array: Array<T> ): Array<T> {
+function removeDuplicates<T>( array: Array<T> ): Array<T> {
 	return Array.from( new Set( array ) );
 }
 
-function makeList( array: Array<ValidationItem> ): string {
+function makeLicenseFileList( array: Array<ValidationItem> ): string {
 	return array.map( ( { licensePath } ) => ` - ${ licensePath }` ).join( '\n' );
 }
 
@@ -319,10 +322,8 @@ function makeList( array: Array<ValidationItem> ): string {
 async function fromAsync<T>( iterable: AsyncIterable<T> ): Promise<Array<T>> {
 	const result: Array<T> = [];
 
-	if ( iterable[ Symbol.asyncIterator ] ) {
-		for await ( const item of iterable ) {
-			result.push( item );
-		}
+	for await ( const item of iterable ) {
+		result.push( item );
 	}
 
 	return result;

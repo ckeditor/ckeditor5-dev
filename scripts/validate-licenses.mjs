@@ -17,8 +17,8 @@ const simpleGitOverride = { license: 'MIT', name: 'simple-git', copyright: 'Copy
 
 validateLicenseFiles( {
 	fix,
-	processRoot: true,
-	processPackages: true,
+	shouldProcessRoot: true,
+	shouldProcessPackages: true,
 	isPublic: true,
 	mainPackageName: 'ckeditor5-dev',
 	rootDir: upath.resolve( import.meta.dirname, '..' ),
