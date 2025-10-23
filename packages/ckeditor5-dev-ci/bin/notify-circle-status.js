@@ -33,7 +33,6 @@ const {
 
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
-	CIRCLE_BUILD_NUM,
 	CIRCLE_PROJECT_REPONAME,
 	CIRCLE_PROJECT_USERNAME,
 	CIRCLE_SHA1,
@@ -126,7 +125,7 @@ async function getJobData() {
 		CIRCLE_PROJECT_USERNAME,
 		CIRCLE_PROJECT_REPONAME,
 		'job',
-		CIRCLE_BUILD_NUM
+		cliArguments[ 'pipeline-id' ]
 	].join( '/' );
 
 	const fetchOptions = {
