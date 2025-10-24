@@ -20,7 +20,6 @@ validateLicenseFiles( {
 	shouldProcessRoot: true,
 	shouldProcessPackages: true,
 	isPublic: true,
-	mainPackageName: 'ckeditor5-dev',
 	rootDir: upath.resolve( import.meta.dirname, '..' ),
 	projectName: 'CKEditor',
 	copyrightOverrides: [ {
@@ -47,8 +46,8 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-dependency-checker',
 		dependencies: [
-			minimistOverride,
-			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' }
+			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' },
+			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-docs',
@@ -70,14 +69,15 @@ validateLicenseFiles( {
 		packageName: '@ckeditor/ckeditor5-dev-tests',
 		dependencies: [
 			{ license: 'MIT', name: 'karma-sinon', copyright: 'Copyright (c) Janusz J (https://github.com/yanoosh).' },
-			minimistOverride,
-			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' }
+			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' },
+			{ license: 'BSD-2-Clause', name: 'sinon-chai', copyright: 'Copyright © 2012–2017 Domenic Denicola <d@domenic.me>.' },
+			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-utils',
 		dependencies: [
-			simpleGitOverride,
-			{ license: 'MIT', name: 'through2', copyright: 'Copyright (c) Rod Vagg (the "Original Author") and additional contributors.' }
+			{ license: 'MIT', name: 'through2', copyright: 'Copyright (c) Rod Vagg (the "Original Author") and additional contributors.' },
+			simpleGitOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-web-crawler',

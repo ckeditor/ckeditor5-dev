@@ -10,10 +10,6 @@ Sources of Intellectual Property Included in CKEditor
 
 Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
 
-The following libraries are included in CKEditor under the [(BSD-2-Clause OR WTFPL) license](https://opensource.org/licenses/(BSD-2-Clause OR WTFPL)):
-
-* sinon-chai - Copyright © 2012–2017 Domenic Denicola <d@domenic.me>, Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>, and Copyright © 2012–2017, Domenic Denicola <d@domenic.me>.
-
 The following libraries are included in CKEditor under the [Apache-2.0 license](https://opensource.org/licenses/Apache-2.0):
 
 * typescript - Copyright (c) Microsoft Corporation. All rights reserved.
@@ -21,6 +17,7 @@ The following libraries are included in CKEditor under the [Apache-2.0 license](
 The following libraries are included in CKEditor under the [BSD-2-Clause license](https://opensource.org/licenses/BSD-2-Clause):
 
 * commonmark - Copyright (c) 2014, John MacFarlane, Copyright Mathias Bynens <http://mathiasbynens.be/>, Copyright (c) 2014 Vitaly Puzrin, Alex Kocharin, and Copyright (C) 2014-15 John MacFarlane.
+* sinon-chai - Copyright © 2012–2017 Domenic Denicola <d@domenic.me>.
 
 The following libraries are included in CKEditor under the [BSD-3-Clause license](https://opensource.org/licenses/BSD-3-Clause):
 
