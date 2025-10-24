@@ -4,7 +4,6 @@
  */
 
 import { glob, readFile, writeFile } from 'fs/promises';
-import { findPackageJSON } from 'module';
 import upath from 'upath';
 
 type CopyrightOverride = {
@@ -115,13 +114,14 @@ export async function validateLicenseFiles( {
 				continue;
 			}
 
-			const dependencyPkgJsonPath = findPackageJSON( dependencyName, packagePath )!;
+			const dependencyPath = upath.join( packagePath, 'node_modules', dependencyName );
+			const dependencyPkgJsonPath = upath.join( dependencyPath, 'package.json' );
 			const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
 
 			dependencyMapItem.dependencies.push( {
 				name: dependencyName,
 				license: dependencyPkgJsonContent.license,
-				copyright: await getCopyright( upath.dirname( dependencyPkgJsonPath ) )
+				copyright: await getCopyright( dependencyPath )
 			} );
 		}
 

@@ -8,10 +8,8 @@
 import { vi, describe, it, beforeEach, afterEach, expect, type MockInstance } from 'vitest';
 import { validateLicenseFiles } from '../src/validate-license-files.js';
 import { glob, readFile, writeFile } from 'fs/promises';
-import { findPackageJSON } from 'module';
 
 vi.mock( 'fs/promises' );
-vi.mock( 'module' );
 
 describe( 'validateLicenseFiles', () => {
 	let options: Parameters<typeof validateLicenseFiles>[0];
@@ -61,22 +59,22 @@ describe( 'validateLicenseFiles', () => {
 				yield matchingFilePath;
 			}
 		} );
-		vi.mocked( findPackageJSON ).mockImplementation( dependencyName => `root/dir/node_modules/${ dependencyName }/package.json` );
 
 		fileContentMap = {
-			'root/dir/node_modules/helperUtilTool/LICENSE.md': 'Copyright (C) 1970-2070 the Best Dev',
-			'root/dir/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
-			'root/dir/node_modules/helperManagerFactory/license': 'Copyright (c) 2019 Joe Shmo.',
-			'root/dir/node_modules/helperManagerFactory/package.json': JSON.stringify( { license: 'BSD-3-Clause' } ),
-
 			'root/dir/package.json': JSON.stringify( { name: 'project-root-package' } ),
 			'root/dir/LICENSE.md': getLicense( 'short' ),
+			'root/dir/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
+			'root/dir/node_modules/helperUtilTool/LICENSE.md': 'Copyright (C) 1970-2070 the Best Dev',
 
 			'root/dir/packages/package-a/package.json': JSON.stringify( { name: 'package-a' } ),
 			'root/dir/packages/package-a/LICENSE.md': getLicense( 'short' ),
+			'root/dir/packages/package-a/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
+			'root/dir/packages/package-a/node_modules/helperUtilTool/LICENSE.md': 'Copyright (C) 1970-2070 the Best Dev',
 
 			'root/dir/packages/package-b/package.json': JSON.stringify( { name: 'package-b' } ),
-			'root/dir/packages/package-b/LICENSE.md': getLicense( 'short' )
+			'root/dir/packages/package-b/LICENSE.md': getLicense( 'short' ),
+			'root/dir/packages/package-b/node_modules/helperManagerFactory/package.json': JSON.stringify( { license: 'BSD-3-Clause' } ),
+			'root/dir/packages/package-b/node_modules/helperManagerFactory/license': 'Copyright (c) 2019 Joe Shmo.'
 		};
 	} );
 
