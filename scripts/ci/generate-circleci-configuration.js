@@ -64,7 +64,7 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 		}
 	];
 
-	config.jobs.validate_and_tests.steps.splice( 3, 0, ...stepsToAdd );
+	config.jobs.validate_and_tests.steps.splice( -1, 0, ...stepsToAdd );
 
 	await fs.writeFile(
 		upath.join( CIRCLECI_CONFIGURATION_DIRECTORY, 'config-tests.yml' ),

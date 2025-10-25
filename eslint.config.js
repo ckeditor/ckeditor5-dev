@@ -3,10 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
+import upath from 'upath';
+import { readdirSync } from 'fs';
 import globals from 'globals';
 import { defineConfig } from 'eslint/config';
 import ckeditor5Rules from 'eslint-plugin-ckeditor5-rules';
 import ckeditor5Config from 'eslint-config-ckeditor5';
+
+const projectPackages = readdirSync( upath.join( import.meta.dirname, 'packages' ), { withFileTypes: true } )
+	.filter( dirent => dirent.isDirectory() )
+	.map( dirent => dirent.name );
 
 export default defineConfig( [
 	{
@@ -69,6 +75,22 @@ export default defineConfig( [
 				CKEditorInspector: true,
 				io: true
 			}
+		}
+	},
+	{
+		extends: ckeditor5Config,
+
+		files: [ '.changelog/**/*.md' ],
+
+		plugins: {
+			'ckeditor5-rules': ckeditor5Rules
+		},
+
+		rules: {
+			'ckeditor5-rules/validate-changelog-entry': [ 'error', {
+				allowedScopes: projectPackages,
+				repositoryType: 'mono'
+			} ]
 		}
 	}
 ] );
