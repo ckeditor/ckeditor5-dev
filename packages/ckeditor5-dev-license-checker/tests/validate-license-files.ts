@@ -8,8 +8,10 @@
 import { vi, describe, it, beforeEach, afterEach, expect, type MockInstance } from 'vitest';
 import { validateLicenseFiles } from '../src/validate-license-files.js';
 import { glob, readFile, writeFile } from 'fs/promises';
+import { resolve } from 'import-meta-resolve';
 
 vi.mock( 'fs/promises' );
+vi.mock( 'import-meta-resolve' );
 
 describe( 'validateLicenseFiles', () => {
 	let options: Parameters<typeof validateLicenseFiles>[0];
@@ -59,22 +61,23 @@ describe( 'validateLicenseFiles', () => {
 				yield matchingFilePath;
 			}
 		} );
+		vi.mocked( resolve ).mockImplementation( specifier => `file:root/dir/node_modules/${ specifier }` );
 
 		fileContentMap = {
-			'root/dir/package.json': JSON.stringify( { name: 'project-root-package' } ),
-			'root/dir/LICENSE.md': getLicense( 'short' ),
 			'root/dir/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
 			'root/dir/node_modules/helperUtilTool/LICENSE.md': 'Copyright (C) 1970-2070 the Best Dev',
+			'root/dir/node_modules/helperManagerFactory/package.json': JSON.stringify( { license: 'BSD-3-Clause' } ),
+			'root/dir/node_modules/helperManagerFactory/license': 'Copyright (c) 2019 Joe Shmo.',
+
+			'root/dir/package.json': JSON.stringify( { name: 'project-root-package' } ),
+			'root/dir/LICENSE.md': getLicense( 'short' ),
 
 			'root/dir/packages/package-a/package.json': JSON.stringify( { name: 'package-a' } ),
 			'root/dir/packages/package-a/LICENSE.md': getLicense( 'short' ),
-			'root/dir/packages/package-a/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
-			'root/dir/packages/package-a/node_modules/helperUtilTool/LICENSE.md': 'Copyright (C) 1970-2070 the Best Dev',
 
 			'root/dir/packages/package-b/package.json': JSON.stringify( { name: 'package-b' } ),
-			'root/dir/packages/package-b/LICENSE.md': getLicense( 'short' ),
-			'root/dir/packages/package-b/node_modules/helperManagerFactory/package.json': JSON.stringify( { license: 'BSD-3-Clause' } ),
-			'root/dir/packages/package-b/node_modules/helperManagerFactory/license': 'Copyright (c) 2019 Joe Shmo.'
+			'root/dir/packages/package-b/LICENSE.md': getLicense( 'short' )
+
 		};
 	} );
 
@@ -117,6 +120,36 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency', async () => {
+				options.shouldProcessRoot = true;
+				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
+					name: 'project-root-package',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short', [
+					'',
+					'The following libraries are included in TestProject™ under the [MIT license](https://opensource.org/licenses/MIT):',
+					'',
+					'* helperUtilTool - Copyright (C) 1970-2070 the Best Dev.'
+				] );
+
+				const exitCode = await validateLicenseFiles( options );
+
+				expect( exitCode ).toEqual( 0 );
+
+				expect( consoleInfoMock ).toHaveBeenCalledTimes( 3 );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 3, '\nValidation complete.' );
+				expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
+			} );
+
+			it( 'license with a dependency that does not have a `./` export', async () => {
+				vi.mocked( resolve ).mockImplementation( () => {
+					throw new Error( 'Package subpath \'./\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
+				} );
+
 				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
 					name: 'project-root-package',
@@ -583,6 +616,38 @@ describe( 'validateLicenseFiles', () => {
 				expect( writeFile ).toHaveBeenCalledTimes( 0 );
 			} );
 
+			it( 'license with a dependency that does not have a `./` export', async () => {
+				vi.mocked( resolve ).mockImplementation( () => {
+					throw new Error( 'Package subpath \'./\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
+				} );
+
+				options.shouldProcessRoot = true;
+				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
+					name: 'project-root-package',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+				fileContentMap[ 'root/dir/LICENSE.md' ] = getLicense( 'short', [
+					'',
+					'The following libraries are included in TestProject™ under the [MIT license](https://opensource.org/licenses/MIT):',
+					'',
+					'* helperUtilTool - Copyright (C) 1970-2070 the Best Dev.'
+				] );
+
+				const exitCode = await validateLicenseFiles( options );
+
+				expect( exitCode ).toEqual( 0 );
+
+				expect( consoleInfoMock ).toHaveBeenCalledTimes( 3 );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 3, '\nValidation complete.' );
+				expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
+
+				expect( writeFile ).toHaveBeenCalledTimes( 0 );
+			} );
+
 			it( 'license with an additional dependency from an override', async () => {
 				options.shouldProcessRoot = true;
 				options.copyrightOverrides = [ {
@@ -1004,6 +1069,66 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1, '\nFollowing license files are missing. Please create them:' );
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, ' - root/dir/LICENSE.md' );
+			} );
+
+			it( 'dependency has a `./` export but no valid path could be matched', async () => {
+				vi.mocked( resolve ).mockImplementation( () => 'random/entry/point' );
+
+				options.shouldProcessRoot = true;
+				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
+					name: 'project-root-package',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+
+				const exitCode = await validateLicenseFiles( options );
+
+				expect( exitCode ).toEqual( 1 );
+
+				expect( consoleInfoMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
+				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+					'\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
+				);
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+					'project-root-package:',
+					' - helperUtilTool',
+					''
+				].join( '\n' ) );
+			} );
+
+			it( 'dependency could not be resolved due to an unexpected resolution error', async () => {
+				vi.mocked( resolve ).mockImplementation( () => {
+					throw new Error( 'Resolution failed catastrophically.' );
+				} );
+
+				options.shouldProcessRoot = true;
+				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
+					name: 'project-root-package',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+
+				const exitCode = await validateLicenseFiles( options );
+
+				expect( exitCode ).toEqual( 1 );
+
+				expect( consoleInfoMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
+				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+					'\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
+				);
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+					'project-root-package:',
+					' - helperUtilTool',
+					''
+				].join( '\n' ) );
 			} );
 
 			it( 'dependency is missing license and no override is provided', async () => {

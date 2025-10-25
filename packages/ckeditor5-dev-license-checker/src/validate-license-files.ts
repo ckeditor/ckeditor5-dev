@@ -4,6 +4,8 @@
  */
 
 import { glob, readFile, writeFile } from 'fs/promises';
+import { resolve } from 'import-meta-resolve';
+import { pathToFileURL } from 'url';
 import upath from 'upath';
 
 type CopyrightOverride = {
@@ -19,9 +21,9 @@ type DependencyMapItem = {
 	packageName: string;
 	packagePath: string;
 	dependencies: Array<{
-		license: string;
 		name: string;
-		copyright: string | null;
+		license?: string;
+		copyright?: string;
 	}>;
 };
 
@@ -114,15 +116,45 @@ export async function validateLicenseFiles( {
 				continue;
 			}
 
-			const dependencyPath = upath.join( packagePath, 'node_modules', dependencyName );
+			const dependencyData: DependencyMapItem['dependencies'][number] = { name: dependencyName };
+			dependencyMapItem.dependencies.push( dependencyData );
+
+			let dependencyPath: string;
+
+			try {
+				// `import.meta.resolve()` (which `resolve()` implements) will resolve built-in modules over conflicting npm package names,
+				// eg. `node:process` will be resolved over `process` npm package, see: https://github.com/nodejs/node/issues/56652.
+				// To work around this, we append '/'.
+				const dependencyEntryPoint = resolve( dependencyName + '/', pathToFileURL( packagePath ).href );
+
+				// If such import happens to exist, we attempt to look for the last instance of `.../node_modules/dependencyName`.
+				const pathUpToLastNodeModules = dependencyEntryPoint.match(
+					new RegExp( `(?<=file:).+(?:\\bnode_modules\\b)(?!bnode_modules)\\/${ dependencyName }+` )
+				);
+
+				if ( !pathUpToLastNodeModules ) {
+					continue;
+				}
+
+				dependencyPath = pathUpToLastNodeModules[ 0 ];
+			} catch ( err: any ) {
+				// In most cases, `dependencyName/` is not a valid import and throws an error. In such case, the error prints the path to
+				// the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to
+				// packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
+				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?= imported from)/ )?.[ 0 ];
+
+				if ( !dependencyPkgJsonPath ) {
+					continue;
+				}
+
+				dependencyPath = upath.dirname( dependencyPkgJsonPath );
+			}
+
 			const dependencyPkgJsonPath = upath.join( dependencyPath, 'package.json' );
 			const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
 
-			dependencyMapItem.dependencies.push( {
-				name: dependencyName,
-				license: dependencyPkgJsonContent.license,
-				copyright: await getCopyright( dependencyPath )
-			} );
+			dependencyData.license = dependencyPkgJsonContent.license;
+			dependencyData.copyright = await getCopyright( dependencyPath );
 		}
 
 		return dependencyMapItem;
@@ -135,7 +167,7 @@ export async function validateLicenseFiles( {
 	const missingCopyrightLists = dependencyMap
 		.map( ( { packageName, dependencies } ) => {
 			const missingCopyrights = dependencies
-				.filter( ( { copyright } ) => !copyright )
+				.filter( ( { license, copyright } ) => !license || !copyright )
 				.map( ( { name } ) => ` - ${ name }` );
 
 			if ( missingCopyrights.length ) {
@@ -280,7 +312,7 @@ function getLicenseList( projectName: string, dependencies: DependencyMapItem['d
 	const licenseTypes = removeDuplicates( dependencies.flatMap( dependency => dependency.license ) );
 
 	return licenseTypes.sort().flatMap( licenseType => [
-		getLicenseTypeHeader( projectName, licenseType ),
+		getLicenseTypeHeader( projectName, licenseType! ),
 		'',
 		...dependencies
 			.filter( ( { license } ) => license === licenseType )
@@ -290,19 +322,19 @@ function getLicenseList( projectName: string, dependencies: DependencyMapItem['d
 	] );
 }
 
-async function getCopyright( dependencyPath: string ): Promise<string | null> {
+async function getCopyright( dependencyPath: string ): Promise<string | undefined> {
 	const dependencyRootFilePaths = await fromAsync( glob( upath.join( dependencyPath, '*' ) ) );
 	const dependencyLicensePath = dependencyRootFilePaths.find( path => upath.basename( path ).match( /license/i ) );
 
 	if ( !dependencyLicensePath ) {
-		return null;
+		return;
 	}
 
 	const dependencyLicenseContent = await readFile( dependencyLicensePath, 'utf-8' );
 	const matches = dependencyLicenseContent.match( /(?<=^|\n[ \t]*?)Copyright.+/g );
 
 	if ( !matches ) {
-		return null;
+		return;
 	}
 
 	return conjunctionFormatter.format(
