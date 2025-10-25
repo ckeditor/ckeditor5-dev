@@ -111,6 +111,10 @@ export async function validateLicenseFiles( {
 		}
 
 		for ( const dependencyName of dependencyNames ) {
+			if ( dependencyName === '@babel/parser' ) {
+				console.log( { dependencyName } );
+			}
+
 			// If override already exists, skip parsing the dependency.
 			if ( dependencyMapItem.dependencies.some( ( { name } ) => name === dependencyName ) ) {
 				continue;
@@ -127,10 +131,18 @@ export async function validateLicenseFiles( {
 				// To work around this, we append '/foo'.
 				const dependencyEntryPoint = resolve( dependencyName + '/foo', pathToFileURL( packagePath ).href );
 
+				if ( dependencyName === '@babel/parser' ) {
+					console.log( { dependencyEntryPoint } );
+				}
+
 				// If such import happens to exist, we attempt to look for the last instance of `.../node_modules/dependencyName`.
 				const pathUpToLastNodeModules = dependencyEntryPoint.match(
 					new RegExp( `(?<=file:).+(?:\\bnode_modules\\b)(?!bnode_modules)\\/${ dependencyName }+` )
 				);
+
+				if ( dependencyName === '@babel/parser' ) {
+					console.log( { pathUpToLastNodeModules } );
+				}
 
 				if ( !pathUpToLastNodeModules ) {
 					continue;
@@ -138,6 +150,10 @@ export async function validateLicenseFiles( {
 
 				dependencyPath = pathUpToLastNodeModules[ 0 ];
 			} catch ( err: any ) {
+				if ( dependencyName === '@babel/parser' ) {
+					console.log( { err } );
+				}
+
 				// In most cases, `dependencyName/foo` is not a valid import and throws an error. In such case, the error prints the path to
 				// the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to
 				// packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
@@ -148,6 +164,10 @@ export async function validateLicenseFiles( {
 				}
 
 				dependencyPath = upath.dirname( dependencyPkgJsonPath );
+			}
+
+			if ( dependencyName === '@babel/parser' ) {
+				console.log( { dependencyPath } );
 			}
 
 			const dependencyPkgJsonPath = upath.join( dependencyPath, 'package.json' );
