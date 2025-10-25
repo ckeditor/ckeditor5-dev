@@ -145,9 +145,9 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
 			} );
 
-			it( 'license with a dependency that does not have a `./` export', async () => {
+			it( 'license with a dependency that does not have a `./foo` export', async () => {
 				vi.mocked( resolve ).mockImplementation( () => {
-					throw new Error( 'Package subpath \'./\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
+					throw new Error( 'Package subpath \'./foo\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
 				} );
 
 				options.shouldProcessRoot = true;
@@ -616,9 +616,9 @@ describe( 'validateLicenseFiles', () => {
 				expect( writeFile ).toHaveBeenCalledTimes( 0 );
 			} );
 
-			it( 'license with a dependency that does not have a `./` export', async () => {
+			it( 'license with a dependency that does not have a `./foo` export', async () => {
 				vi.mocked( resolve ).mockImplementation( () => {
-					throw new Error( 'Package subpath \'./\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
+					throw new Error( 'Package subpath \'./foo\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
 				} );
 
 				options.shouldProcessRoot = true;
@@ -1071,7 +1071,7 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, ' - root/dir/LICENSE.md' );
 			} );
 
-			it( 'dependency has a `./` export but no valid path could be matched', async () => {
+			it( 'dependency has a `./foo` export but no valid path could be matched', async () => {
 				vi.mocked( resolve ).mockImplementation( () => 'random/entry/point' );
 
 				options.shouldProcessRoot = true;

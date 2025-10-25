@@ -124,8 +124,8 @@ export async function validateLicenseFiles( {
 			try {
 				// `import.meta.resolve()` (which `resolve()` implements) will resolve built-in modules over conflicting npm package names,
 				// eg. `node:process` will be resolved over `process` npm package, see: https://github.com/nodejs/node/issues/56652.
-				// To work around this, we append '/'.
-				const dependencyEntryPoint = resolve( dependencyName + '/', pathToFileURL( packagePath ).href );
+				// To work around this, we append '/foo'.
+				const dependencyEntryPoint = resolve( dependencyName + '/foo', pathToFileURL( packagePath ).href );
 
 				// If such import happens to exist, we attempt to look for the last instance of `.../node_modules/dependencyName`.
 				const pathUpToLastNodeModules = dependencyEntryPoint.match(
@@ -138,7 +138,7 @@ export async function validateLicenseFiles( {
 
 				dependencyPath = pathUpToLastNodeModules[ 0 ];
 			} catch ( err: any ) {
-				// In most cases, `dependencyName/` is not a valid import and throws an error. In such case, the error prints the path to
+				// In most cases, `dependencyName/foo` is not a valid import and throws an error. In such case, the error prints the path to
 				// the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to
 				// packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
 				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?= imported from)/ )?.[ 0 ];
