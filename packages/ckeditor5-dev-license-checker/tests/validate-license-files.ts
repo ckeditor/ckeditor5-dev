@@ -8,16 +8,17 @@
 import { vi, describe, it, beforeEach, afterEach, expect, type MockInstance } from 'vitest';
 import { validateLicenseFiles } from '../src/validate-license-files.js';
 import { glob, readFile, writeFile } from 'fs/promises';
-import { resolve } from 'import-meta-resolve';
+import { createRequire } from 'module';
 
 vi.mock( 'fs/promises' );
-vi.mock( 'import-meta-resolve' );
+vi.mock( 'module' );
 
 describe( 'validateLicenseFiles', () => {
 	let options: Parameters<typeof validateLicenseFiles>[0];
 	let consoleInfoMock: MockInstance<typeof console.error>;
 	let consoleErrorMock: MockInstance<typeof process.exit>;
 	let fileContentMap: Record<string, string>;
+	let requireMock: NodeJS.Require;
 
 	beforeEach( () => {
 		options = {
@@ -27,7 +28,9 @@ describe( 'validateLicenseFiles', () => {
 
 		consoleInfoMock = vi.spyOn( console, 'info' ).mockImplementation( () => {} );
 		consoleErrorMock = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		requireMock = { resolve: createRequireResolve() } as any;
 
+		vi.mocked( createRequire ).mockImplementation( () => requireMock );
 		vi.mocked( readFile ).mockImplementation( async path => {
 			const key = path as string;
 
@@ -61,7 +64,6 @@ describe( 'validateLicenseFiles', () => {
 				yield matchingFilePath;
 			}
 		} );
-		vi.mocked( resolve ).mockImplementation( specifier => `file:root/dir/node_modules/${ specifier }` );
 
 		fileContentMap = {
 			'root/dir/node_modules/helperUtilTool/package.json': JSON.stringify( { license: 'MIT' } ),
@@ -145,10 +147,10 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleErrorMock ).toHaveBeenCalledTimes( 0 );
 			} );
 
-			it( 'license with a dependency that does not have a `./foo` export', async () => {
-				vi.mocked( resolve ).mockImplementation( () => {
-					throw new Error( 'Package subpath \'./foo\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
-				} );
+			it( 'license with a dependency that does not have a `./package.json` export', async () => {
+				requireMock.resolve = ( () => {
+					throw new Error( 'Package subpath \'./package.json\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json' );
+				} ) as any;
 
 				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
@@ -617,9 +619,9 @@ describe( 'validateLicenseFiles', () => {
 			} );
 
 			it( 'license with a dependency that does not have a `./foo` export', async () => {
-				vi.mocked( resolve ).mockImplementation( () => {
-					throw new Error( 'Package subpath \'./foo\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json imported from root/dir/project-root-package' );
-				} );
+				requireMock.resolve = ( () => {
+					throw new Error( 'Package subpath \'./package.json\' is not defined by "exports" in root/dir/node_modules/helperUtilTool/package.json' );
+				} ) as any;
 
 				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
@@ -1071,39 +1073,10 @@ describe( 'validateLicenseFiles', () => {
 				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, ' - root/dir/LICENSE.md' );
 			} );
 
-			it( 'dependency has a `./foo` export but no valid path could be matched', async () => {
-				vi.mocked( resolve ).mockImplementation( () => 'random/entry/point' );
-
-				options.shouldProcessRoot = true;
-				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
-					name: 'project-root-package',
-					dependencies: {
-						helperUtilTool: '^12.34.56'
-					}
-				} );
-
-				const exitCode = await validateLicenseFiles( options );
-
-				expect( exitCode ).toEqual( 1 );
-
-				expect( consoleInfoMock ).toHaveBeenCalledTimes( 2 );
-				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
-				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, ' - project-root-package' );
-				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
-				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
-					'\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n'
-				);
-				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
-					'project-root-package:',
-					' - helperUtilTool',
-					''
-				].join( '\n' ) );
-			} );
-
 			it( 'dependency could not be resolved due to an unexpected resolution error', async () => {
-				vi.mocked( resolve ).mockImplementation( () => {
+				requireMock.resolve = ( () => {
 					throw new Error( 'Resolution failed catastrophically.' );
-				} );
+				} ) as any;
 
 				options.shouldProcessRoot = true;
 				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
@@ -1666,6 +1639,14 @@ describe( 'validateLicenseFiles', () => {
 		} );
 	} );
 } );
+
+function createRequireResolve(): NodeJS.RequireResolve {
+	const resolve = ( pathToResolve: string ): string => `root/dir/node_modules/${ pathToResolve }`;
+
+	resolve.paths = () => [];
+
+	return resolve;
+}
 
 function getLicense( type: 'short' | 'long', licenseLines?: Array<string> ) {
 	const shortAuthorDisclaimer = [

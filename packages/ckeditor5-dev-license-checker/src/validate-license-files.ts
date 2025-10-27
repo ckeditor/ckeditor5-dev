@@ -127,9 +127,9 @@ export async function validateLicenseFiles( {
 
 				dependencyPath = upath.dirname( pkgJsonPath );
 			} catch ( err: any ) {
-				// In cases where `dependencyName/package.json` is not a valid import and throws an error. In such case, the error prints
-				// the path to the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find
-				// paths to packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
+				// If `dependencyName/package.json` is not a valid import and throws an error, the error includes the path to the
+				// `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to packages
+				// which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
 				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?=\s|$)/ )?.[ 0 ];
 
 				if ( !dependencyPkgJsonPath ) {
