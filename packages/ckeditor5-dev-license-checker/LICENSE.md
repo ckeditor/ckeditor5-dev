@@ -12,7 +12,6 @@ Where not otherwise indicated, all CKEditor content is authored by CKSource engi
 
 The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
 
-* import-meta-resolve - Copyright (c) Titus Wormer <mailto:tituswormer@gmail.com>, Copyright Node.js contributors. All rights reserved, and Copyright Joyent, Inc. and other Node contributors. All rights reserved.
 * upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
 
 Trademarks

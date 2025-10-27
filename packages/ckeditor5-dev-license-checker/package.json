@@ -23,7 +23,6 @@
     "dist"
   ],
   "dependencies": {
-    "import-meta-resolve": "^4.2.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {

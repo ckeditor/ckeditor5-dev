@@ -4,8 +4,7 @@
  */
 
 import { glob, readFile, writeFile } from 'fs/promises';
-import { resolve } from 'import-meta-resolve';
-import { pathToFileURL } from 'url';
+import { createRequire } from 'module';
 import upath from 'upath';
 
 type CopyrightOverride = {
@@ -122,26 +121,16 @@ export async function validateLicenseFiles( {
 			let dependencyPath: string;
 
 			try {
-				// `import.meta.resolve()` (which `resolve()` implements) will resolve built-in modules over conflicting npm package names,
-				// eg. `node:process` will be resolved over `process` npm package, see: https://github.com/nodejs/node/issues/56652.
-				// To work around this, we append '/foo'.
-				const dependencyEntryPoint = resolve( dependencyName, pathToFileURL( packagePath ).href );
+				const fakeEntry = upath.join( packagePath, 'fakeEntry.js' );
+				const require = createRequire( fakeEntry );
+				const pkgJsonPath = require.resolve( `${ dependencyName }/package.json` );
 
-				// If such import happens to exist, we attempt to look for the last instance of `.../node_modules/dependencyName`.
-				const pathUpToLastNodeModules = dependencyEntryPoint.match(
-					new RegExp( `(?<=file:).+(?:\\bnode_modules\\b)(?!bnode_modules)\\/${ dependencyName }+` )
-				);
-
-				if ( !pathUpToLastNodeModules ) {
-					continue;
-				}
-
-				dependencyPath = pathUpToLastNodeModules[ 0 ];
+				dependencyPath = upath.dirname( pkgJsonPath );
 			} catch ( err: any ) {
-				// In most cases, `dependencyName/foo` is not a valid import and throws an error. In such case, the error prints the path to
-				// the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to
-				// packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
-				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?= imported from)/ )?.[ 0 ];
+				// In cases where `dependencyName/package.json` is not a valid import and throws an error. In such case, the error prints
+				// the path to the `package.json` that we need, and we can read it. This error catching mechanism is also needed to find
+				// paths to packages which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
+				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?=\s|$)/ )?.[ 0 ];
 
 				if ( !dependencyPkgJsonPath ) {
 					continue;
