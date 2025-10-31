@@ -280,7 +280,7 @@ importers:
         specifier: ^11.0.2
         version: 11.0.3
       typedoc:
-        specifier: 0.28.14
+        specifier: ^0.28.14
         version: 0.28.14(typescript@5.3.3)
       typedoc-plugin-rename-defaults:
         specifier: ^0.7.3
@@ -741,7 +741,7 @@ importers:
         specifier: ^4.9.5
         version: 4.52.4
       typedoc:
-        specifier: 0.28.14
+        specifier: ^0.28.14
         version: 0.28.14(typescript@5.3.3)
       typedoc-plugin-rename-defaults:
         specifier: ^0.7.3
