@@ -4,7 +4,7 @@
  */
 
 import { glob, readFile, writeFile } from 'fs/promises';
-import { createRequire } from 'module';
+import { findPackageJSON } from 'module';
 import upath from 'upath';
 
 type CopyrightOverride = {
@@ -118,32 +118,16 @@ export async function validateLicenseFiles( {
 			const dependencyData: DependencyMapItem['dependencies'][number] = { name: dependencyName };
 			dependencyMapItem.dependencies.push( dependencyData );
 
-			let dependencyPath: string;
-
 			try {
-				const fakeEntry = upath.join( packagePath, 'fakeEntry.js' );
-				const require = createRequire( fakeEntry );
-				const pkgJsonPath = require.resolve( `${ dependencyName }/package.json` );
+				const dependencyPkgJsonPath = findPackageJSON( dependencyName, packagePath )!;
+				const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
 
-				dependencyPath = upath.dirname( pkgJsonPath );
-			} catch ( err: any ) {
-				// If `dependencyName/package.json` is not a valid import and throws an error, the error includes the path to the
-				// `package.json` that we need, and we can read it. This error catching mechanism is also needed to find paths to packages
-				// which do not have a base export, eg. package `empathic` only has exports such as `empathic/find`.
-				const dependencyPkgJsonPath = err?.message.match( /(?<=not defined by "exports" in ).+(?=\s|$)/ )?.[ 0 ];
-
-				if ( !dependencyPkgJsonPath ) {
-					continue;
-				}
-
-				dependencyPath = upath.dirname( dependencyPkgJsonPath );
+				dependencyData.license = dependencyPkgJsonContent.license;
+				dependencyData.copyright = await getCopyright( dependencyPkgJsonPath );
+			} catch {
+				// For packages such as `empathic` there is no export under that namespace, only `empathic/*`.
+				// This causes `findPackageJSON()` to error. We silently fail and later ask the integrator to add an override.
 			}
-
-			const dependencyPkgJsonPath = upath.join( dependencyPath, 'package.json' );
-			const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
-
-			dependencyData.license = dependencyPkgJsonContent.license;
-			dependencyData.copyright = await getCopyright( dependencyPath );
 		}
 
 		return dependencyMapItem;
@@ -311,7 +295,8 @@ function getLicenseList( projectName: string, dependencies: DependencyMapItem['d
 	] );
 }
 
-async function getCopyright( dependencyPath: string ): Promise<string | undefined> {
+async function getCopyright( dependencyPkgJsonPath: string ): Promise<string | undefined> {
+	const dependencyPath = upath.dirname( dependencyPkgJsonPath );
 	const dependencyRootFilePaths = await fromAsync( glob( upath.join( dependencyPath, '*' ) ) );
 	const dependencyLicensePath = dependencyRootFilePaths.find( path => upath.basename( path ).match( /license/i ) );
 
