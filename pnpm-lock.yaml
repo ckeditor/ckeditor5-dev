@@ -280,11 +280,11 @@ importers:
         specifier: ^11.0.2
         version: 11.0.3
       typedoc:
-        specifier: 0.28.9
-        version: 0.28.9(typescript@5.3.3)
+        specifier: ^0.28.14
+        version: 0.28.14(typescript@5.3.3)
       typedoc-plugin-rename-defaults:
         specifier: ^0.7.3
-        version: 0.7.3(typedoc@0.28.9(typescript@5.3.3))
+        version: 0.7.3(typedoc@0.28.14(typescript@5.3.3))
       upath:
         specifier: ^2.0.1
         version: 2.0.1
@@ -741,11 +741,11 @@ importers:
         specifier: ^4.9.5
         version: 4.52.4
       typedoc:
-        specifier: 0.28.9
-        version: 0.28.9(typescript@5.3.3)
+        specifier: ^0.28.14
+        version: 0.28.14(typescript@5.3.3)
       typedoc-plugin-rename-defaults:
         specifier: ^0.7.3
-        version: 0.7.3(typedoc@0.28.9(typescript@5.3.3))
+        version: 0.7.3(typedoc@0.28.14(typescript@5.3.3))
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -5679,8 +5679,8 @@ packages:
     peerDependencies:
       typedoc: '>=0.22.x <0.29.x'
 
-  typedoc@0.28.9:
-    resolution: {integrity: sha512-aw45vwtwOl3QkUAmWCnLV9QW1xY+FSX2zzlit4MAfE99wX+Jij4ycnpbAWgBXsRrxmfs9LaYktg/eX5Bpthd3g==}
+  typedoc@0.28.14:
+    resolution: {integrity: sha512-ftJYPvpVfQvFzpkoSfHLkJybdA/geDJ8BGQt/ZnkkhnBYoYW6lBgPQXu6vqLxO4X75dA55hX8Af847H5KXlEFA==}
     engines: {node: '>= 18', pnpm: '>= 10'}
     hasBin: true
     peerDependencies:
@@ -11473,12 +11473,12 @@ snapshots:
 
   typed-query-selector@2.12.0: {}
 
-  typedoc-plugin-rename-defaults@0.7.3(typedoc@0.28.9(typescript@5.3.3)):
+  typedoc-plugin-rename-defaults@0.7.3(typedoc@0.28.14(typescript@5.3.3)):
     dependencies:
       camelcase: 8.0.0
-      typedoc: 0.28.9(typescript@5.3.3)
+      typedoc: 0.28.14(typescript@5.3.3)
 
-  typedoc@0.28.9(typescript@5.3.3):
+  typedoc@0.28.14(typescript@5.3.3):
     dependencies:
       '@gerrit0/mini-shiki': 3.13.1
       lunr: 2.3.9
