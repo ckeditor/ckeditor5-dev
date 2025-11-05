@@ -32,7 +32,6 @@ The following libraries are included in CKEditor under the [ISC license](https:/
 The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
 
 * @babel/core - Copyright (c) 2014-present Sebastian McKenzie and other contributors.
-* @babel/parser - Copyright (C) 2012-2014 by various contributors.
 * @types/chai - Copyright (c) Microsoft Corporation.
 * @types/karma-sinon-chai - Copyright (c) Microsoft Corporation.
 * @types/mocha - Copyright (c) Microsoft Corporation.
@@ -41,7 +40,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * buffer - Copyright (c) Feross Aboukhadijeh, and other contributors.
 * chai - Copyright (c) 2017 Chai.js Assertion Library.
 * chalk - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com).
-* chokidar - Copyright (c) 2012 Paul Miller (https://paulmillr.com), Elan Shanker.
+* chokidar - Copyright (c) 2012-2019 Paul Miller (https://paulmillr.com), Elan Shanker.
 * del - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com).
 * dom-combiner - Copyright (c) 2014-2015, CKSource - Frederico Knabben.
 * es-toolkit - Copyright (c) 2024 Viva Republica, Inc and Copyright OpenJS Foundation and other contributors.
