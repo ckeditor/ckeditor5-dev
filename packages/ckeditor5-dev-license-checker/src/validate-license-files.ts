@@ -17,7 +17,7 @@ type CopyrightOverride = {
 	}>;
 };
 
-type DependencyMapItem = {
+type DependencyMap = {
 	packageName: string;
 	packagePath: string;
 	dependencies: Array<{
@@ -27,14 +27,12 @@ type DependencyMapItem = {
 	}>;
 };
 
-type ValidationItem = {
-	licensePath: string;
-	licenseMissing?: boolean;
-	sectionMissing?: boolean;
-	updateNeeded?: boolean;
-	updated?: boolean;
-	patch?: string;
-};
+type ProcessingResult =
+	{ licensePath: string } |
+	{ licensePath: string; updated: true } |
+	{ licensePath: string; licenseMissing: true } |
+	{ licensePath: string; sectionMissing: true } |
+	{ licensePath: string; updateNeeded: true; patch: string };
 
 const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: 'conjunction' } );
 
@@ -92,71 +90,14 @@ export async function validateLicenseFiles( {
 		return 1;
 	}
 
-	// Collect versioning and licensing data of all dependencies.
-	const dependencyMap = await Promise.all( packagePaths.map( async packagePath => {
-		const pkgJsonPath = upath.join( packagePath, 'package.json' );
-		const pkgJsonContent = JSON.parse( await readFile( pkgJsonPath, 'utf-8' ) );
-		const dependencyNames = Object.keys( pkgJsonContent.dependencies || {} )
-			.filter( dependency => !dependency.match( /(ckeditor)|(cksource)/i ) );
-
-		const packageName = pkgJsonContent.name;
-
-		const dependencyMapItem: DependencyMapItem = {
-			packageName,
-			packagePath,
-			dependencies: []
-		};
-
-		const copyrightOverridesPackage = copyrightOverrides
-			.find( ( { packageName: overridePackageName } ) => packageName === overridePackageName );
-
-		if ( copyrightOverridesPackage ) {
-			dependencyMapItem.dependencies.push( ...copyrightOverridesPackage.dependencies );
-		}
-
-		for ( const dependencyName of dependencyNames ) {
-			// If override already exists, skip parsing the dependency.
-			if ( dependencyMapItem.dependencies.some( ( { name } ) => name === dependencyName ) ) {
-				continue;
-			}
-
-			const dependencyData: DependencyMapItem['dependencies'][number] = { name: dependencyName };
-			dependencyMapItem.dependencies.push( dependencyData );
-
-			try {
-				const dependencyPkgJsonPath = findPackageJSON( dependencyName, packagePath )!;
-				const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
-
-				dependencyData.license = dependencyPkgJsonContent.license;
-				dependencyData.copyright = await getCopyright( dependencyPkgJsonPath );
-			} catch {
-				// For packages such as `empathic` there is no export under that namespace, only `empathic/*`.
-				// This causes `findPackageJSON()` to error. We silently fail and later ask the integrator to add an override.
-			}
-		}
-
-		return dependencyMapItem;
-	} ) );
+	const dependencyMaps = await Promise.all( packagePaths.map(
+		async packagePath => getPackageDependencyMap( packagePath, copyrightOverrides )
+	) );
 
 	console.info( 'Validating licenses in following packages:' );
-	console.info( dependencyMap.map( ( { packageName } ) => ` - ${ packageName }` ).join( '\n' ) );
+	console.info( dependencyMaps.map( ( { packageName } ) => ` - ${ packageName }` ).join( '\n' ) );
 
-	// Looking for missing copyright messages.
-	const missingCopyrightLists = dependencyMap
-		.map( ( { packageName, dependencies } ) => {
-			const missingCopyrights = dependencies
-				.filter( ( { license, copyright } ) => !license || !copyright )
-				.map( ( { name } ) => ` - ${ name }` );
-
-			if ( missingCopyrights.length ) {
-				return [
-					`${ packageName }:`,
-					...missingCopyrights,
-					''
-				].join( '\n' );
-			}
-		} )
-		.filter( Boolean );
+	const missingCopyrightLists = getMissingCopyrightLists( dependencyMaps );
 
 	if ( missingCopyrightLists.length ) {
 		console.error( '\n❌ Following packages include dependencies where finding copyright message failed. Please add an override:\n' );
@@ -165,83 +106,29 @@ export async function validateLicenseFiles( {
 		return 1;
 	}
 
-	// Copying all dependencies to the main package.
 	if ( mainPackageName ) {
-		const mainPackage = dependencyMap.find( ( { packageName } ) => packageName === mainPackageName )!;
-		mainPackage.dependencies = dependencyMap.reduce<DependencyMapItem['dependencies']>( ( output, item ) => {
-			item.dependencies.forEach( dependency => {
-				const itemAlreadyPresent = output.some( ( { name } ) => name === dependency.name );
-
-				if ( !itemAlreadyPresent ) {
-					output.push( dependency );
-				}
-			} );
-
-			return output;
-		}, [] );
+		copyDependenciesToTheMainPackage( dependencyMaps, mainPackageName );
 	}
 
-	// Validate ckeditor license files.
-	const validationPromises: Array<Promise<ValidationItem | undefined>> = dependencyMap.map( async ( { packagePath, dependencies } ) => {
-		const licenseSectionPattern = /(?<=\n)Sources of Intellectual Property Included in .*?\n[\S\s]*?(?=(\nTrademarks\n)|$)/;
-		const header = `Sources of Intellectual Property Included in ${ projectName }`;
-		const licensePath = upath.join( packagePath, 'LICENSE.md' );
-		let currentLicense;
+	const processingResults = await Promise.all( dependencyMaps.map(
+		dependencyMap => processDependencyMap( { dependencyMap, projectName, isPublic, fix } )
+	) );
 
-		try {
-			currentLicense = await readFile( licensePath, 'utf-8' );
-		} catch {
-			return { licensePath, licenseMissing: true };
-		}
-
-		if ( !currentLicense.match( licenseSectionPattern ) ) {
-			return { licensePath, sectionMissing: true };
-		}
-
-		const newLicense = currentLicense.replace( licenseSectionPattern, [
-			header,
-			'-'.repeat( header.length ),
-			'',
-			getAuthorDisclaimer( projectName, isPublic ),
-			'',
-			...getLicenseList( projectName, dependencies )
-		].filter( item => typeof item === 'string' ).join( '\n' ) );
-
-		if ( currentLicense === newLicense ) {
-			return;
-		}
-
-		if ( fix ) {
-			await writeFile( licensePath, newLicense, 'utf-8' );
-
-			return { licensePath, updated: true };
-		}
-
-		const patch = createPatch( licensePath, currentLicense, newLicense );
-
-		return { licensePath, updateNeeded: true, patch };
-	} );
-
-	const validationReturnValues: Array<ValidationItem> = ( await Promise.all( validationPromises ) )
-		.filter( ( validationValue ): validationValue is ValidationItem => Boolean( validationValue ) );
-
-	const updatedLicenses = validationReturnValues.filter( ( { updated } ) => updated );
-	const licensesToFix = validationReturnValues.filter( ( { updated } ) => !updated );
+	const updatedLicenses = processingResults.filter( processingResult => 'updated' in processingResult );
+	const licensesMissing = processingResults.filter( processingResult => 'licenseMissing' in processingResult );
+	const sectionsMissing = processingResults.filter( processingResult => 'sectionMissing' in processingResult );
+	const updatesNeeded = processingResults.filter( processingResult => 'updateNeeded' in processingResult );
 
 	if ( updatedLicenses.length ) {
 		console.info( '\nUpdated the following license files:' );
 		console.info( makeLicenseFileList( updatedLicenses ) );
 	}
 
-	if ( !licensesToFix.length ) {
+	if ( !licensesMissing.length && !sectionsMissing.length && !updatesNeeded.length ) {
 		console.info( '\nValidation complete.' );
 
 		return 0;
 	}
-
-	const licensesMissing = licensesToFix.filter( ( { licenseMissing } ) => licenseMissing );
-	const sectionsMissing = licensesToFix.filter( ( { sectionMissing } ) => sectionMissing );
-	const updatesNeeded = licensesToFix.filter( ( { updateNeeded } ) => updateNeeded );
 
 	if ( licensesMissing.length ) {
 		console.error( '\nFollowing license files are missing. Please create them:' );
@@ -269,6 +156,135 @@ export async function validateLicenseFiles( {
 	return 1;
 }
 
+async function getPackageDependencyMap( packagePath: string, copyrightOverrides: Array<CopyrightOverride> ): Promise<DependencyMap> {
+	const pkgJsonPath = upath.join( packagePath, 'package.json' );
+	const pkgJsonContent = JSON.parse( await readFile( pkgJsonPath, 'utf-8' ) );
+	const dependencyNames = Object.keys( pkgJsonContent.dependencies || {} )
+		.filter( dependency => !dependency.match( /(ckeditor)|(cksource)/i ) );
+
+	const packageName = pkgJsonContent.name;
+
+	const dependencyMap: DependencyMap = {
+		packageName,
+		packagePath,
+		dependencies: []
+	};
+
+	const copyrightOverridesPackage = copyrightOverrides
+		.find( ( { packageName: overridePackageName } ) => packageName === overridePackageName );
+
+	if ( copyrightOverridesPackage ) {
+		dependencyMap.dependencies.push( ...copyrightOverridesPackage.dependencies );
+	}
+
+	for ( const dependencyName of dependencyNames ) {
+		// If override already exists, skip parsing the dependency.
+		if ( dependencyMap.dependencies.some( ( { name } ) => name === dependencyName ) ) {
+			continue;
+		}
+
+		const dependencyData: DependencyMap['dependencies'][number] = { name: dependencyName };
+		dependencyMap.dependencies.push( dependencyData );
+
+		try {
+			const dependencyPkgJsonPath = findPackageJSON( dependencyName, packagePath )!;
+			const dependencyPkgJsonContent = JSON.parse( await readFile( dependencyPkgJsonPath, 'utf-8' ) );
+
+			dependencyData.license = dependencyPkgJsonContent.license;
+			dependencyData.copyright = await getCopyright( dependencyPkgJsonPath );
+		} catch {
+			// For packages such as `empathic` there is no export under that namespace, only `empathic/*`.
+			// This causes `findPackageJSON()` to error. We silently fail and later ask the integrator to add an override.
+		}
+	}
+
+	return dependencyMap;
+}
+
+function getMissingCopyrightLists( dependencyMaps: Array<DependencyMap> ): Array<string> {
+	return dependencyMaps
+		.map( ( { packageName, dependencies } ) => {
+			const missingCopyrights = dependencies
+				.filter( ( { license, copyright } ) => !license || !copyright )
+				.map( ( { name } ) => ` - ${ name }` );
+
+			if ( missingCopyrights.length ) {
+				return [
+					`${ packageName }:`,
+					...missingCopyrights,
+					''
+				].join( '\n' );
+			}
+		} )
+		.filter( item => typeof item === 'string' );
+}
+
+function copyDependenciesToTheMainPackage( dependencyMaps: Array<DependencyMap>, mainPackageName: string ) {
+	const mainPackage = dependencyMaps.find( ( { packageName } ) => packageName === mainPackageName )!;
+
+	mainPackage.dependencies = dependencyMaps.reduce<DependencyMap['dependencies']>( ( output, item ) => {
+		item.dependencies.forEach( dependency => {
+			const itemAlreadyPresent = output.some( ( { name } ) => name === dependency.name );
+
+			if ( !itemAlreadyPresent ) {
+				output.push( dependency );
+			}
+		} );
+
+		return output;
+	}, [] );
+}
+
+async function processDependencyMap( {
+	dependencyMap,
+	projectName,
+	isPublic,
+	fix
+}: {
+	dependencyMap: DependencyMap;
+	projectName: string;
+	isPublic: boolean;
+	fix: boolean;
+} ): Promise<ProcessingResult> {
+	const licenseSectionPattern = /(?<=\n)Sources of Intellectual Property Included in .*?\n[\S\s]*?(?=(\nTrademarks\n)|$)/;
+	const header = `Sources of Intellectual Property Included in ${ projectName }`;
+	const licensePath = upath.join( dependencyMap.packagePath, 'LICENSE.md' );
+	let currentLicense;
+
+	try {
+		currentLicense = await readFile( licensePath, 'utf-8' );
+	} catch {
+		return { licensePath, licenseMissing: true };
+	}
+
+	if ( !currentLicense.match( licenseSectionPattern ) ) {
+		return { licensePath, sectionMissing: true };
+	}
+
+	const newLicense = currentLicense.replace( licenseSectionPattern, [
+		header,
+		'-'.repeat( header.length ),
+		'',
+		getAuthorDisclaimer( projectName, isPublic ),
+		'',
+		...getLicenseList( projectName, dependencyMap.dependencies )
+	].filter( item => typeof item === 'string' ).join( '\n' ) );
+
+	if ( currentLicense === newLicense ) {
+		return { licensePath };
+	}
+
+	if ( fix ) {
+		await writeFile( licensePath, newLicense, 'utf-8' );
+
+		return { licensePath, updated: true };
+	}
+
+	const patch = createPatch( licensePath, currentLicense, newLicense );
+
+	return { licensePath, updateNeeded: true, patch };
+}
+
 function getAuthorDisclaimer( projectName: string, isPublic: boolean ): string {
 	const authorDisclaimer = [
 		`Where not otherwise indicated, all ${ projectName } content is authored`,
@@ -293,7 +309,7 @@ function getLicenseTypeHeader( projectName: string, licenseType: string ): strin
 	].join( ' ' );
 }
 
-function getLicenseList( projectName: string, dependencies: DependencyMapItem['dependencies'] ): Array<string> {
+function getLicenseList( projectName: string, dependencies: DependencyMap['dependencies'] ): Array<string> {
 	const licenseTypes = removeDuplicates( dependencies.flatMap( dependency => dependency.license ) );
 
 	return licenseTypes.sort().flatMap( licenseType => [
@@ -332,7 +348,7 @@ function removeDuplicates<T>( array: Array<T> ): Array<T> {
 	return Array.from( new Set( array ) );
 }
 
-function makeLicenseFileList( array: Array<ValidationItem> ): string {
+function makeLicenseFileList( array: Array<ProcessingResult> ): string {
 	return array.map( ( { licensePath } ) => ` - ${ licensePath }` ).join( '\n' );
 }
 
