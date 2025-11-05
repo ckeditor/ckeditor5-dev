@@ -14,6 +14,7 @@ const { fix } = parseArgs( { options: {
 
 const minimistOverride = { license: 'MIT', name: 'minimist', copyright: 'Copyright (c) 2013 James Halliday and contributors.' };
 const simpleGitOverride = { license: 'MIT', name: 'simple-git', copyright: 'Copyright (c) 2022 Steve King.' };
+const babelParserOverride = { license: 'MIT', name: '@babel/parser', copyright: 'Copyright (C) 2012-2014 by various contributors.' };
 
 validateLicenseFiles( {
 	fix,
@@ -71,12 +72,13 @@ validateLicenseFiles( {
 			{ license: 'MIT', name: 'karma-sinon', copyright: 'Copyright (c) Janusz J (https://github.com/yanoosh).' },
 			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' },
 			{ license: 'BSD-2-Clause', name: 'sinon-chai', copyright: 'Copyright © 2012–2017 Domenic Denicola <d@domenic.me>.' },
+			babelParserOverride,
 			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-translations',
 		dependencies: [
-			{ license: 'MIT', name: '@babel/parser', copyright: 'Copyright (C) 2012-2014 by various contributors (see AUTHORS).' },
+			babelParserOverride,
 			simpleGitOverride
 		]
 	}, {

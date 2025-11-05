@@ -32,6 +32,7 @@ The following libraries are included in CKEditor under the [ISC license](https:/
 The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
 
 * @babel/core - Copyright (c) 2014-present Sebastian McKenzie and other contributors.
+* @babel/parser - Copyright (C) 2012-2014 by various contributors.
 * @types/chai - Copyright (c) Microsoft Corporation.
 * @types/karma-sinon-chai - Copyright (c) Microsoft Corporation.
 * @types/mocha - Copyright (c) Microsoft Corporation.

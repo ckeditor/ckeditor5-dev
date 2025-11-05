@@ -17,7 +17,7 @@ The following libraries are included in CKEditor under the [ISC license](https:/
 
 The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
 
-* @babel/parser - Copyright (C) 2012-2014 by various contributors (see AUTHORS).
+* @babel/parser - Copyright (C) 2012-2014 by various contributors.
 * @babel/traverse - Copyright (c) 2014-present Sebastian McKenzie and other contributors.
 * chalk - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com).
 * fs-extra - Copyright (c) 2011-2024 JP Richardson.
