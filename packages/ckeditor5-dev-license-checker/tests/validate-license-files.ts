@@ -1312,6 +1312,118 @@ describe( 'validateLicenseFiles', () => {
 					' - root/dir/packages/package-b/LICENSE.md'
 				].join( '\n' ) );
 			} );
+
+			it( 'should print diff in verbose mode', async () => {
+				options.verbose = true;
+				options.mainPackageName = 'project-root-package';
+				options.shouldProcessRoot = true;
+				options.shouldProcessPackages = true;
+				options.copyrightOverrides = [ {
+					packageName: 'project-root-package',
+					dependencies: [ {
+						license: 'MIT',
+						name: 'hidden-helper',
+						copyright: 'Copyright (c) 2025 the Sneaky Dev.'
+					} ]
+				} ];
+
+				fileContentMap[ 'root/dir/package.json' ] = JSON.stringify( {
+					name: 'project-root-package',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+				fileContentMap[ 'root/dir/packages/package-a/package.json' ] = JSON.stringify( {
+					name: 'package-a',
+					dependencies: {
+						helperUtilTool: '^12.34.56'
+					}
+				} );
+				fileContentMap[ 'root/dir/packages/package-b/package.json' ] = JSON.stringify( {
+					name: 'package-b',
+					dependencies: {
+						helperManagerFactory: '^7.8.9'
+					}
+				} );
+
+				const exitCode = await validateLicenseFiles( options );
+
+				expect( exitCode ).toEqual( 1 );
+
+				expect( consoleInfoMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 1, 'Validating licenses in following packages:' );
+				expect( consoleInfoMock ).toHaveBeenNthCalledWith( 2, [
+					' - project-root-package',
+					' - package-a',
+					' - package-b'
+				].join( '\n' ) );
+				expect( consoleErrorMock ).toHaveBeenCalledTimes( 2 );
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 1,
+					'\nFollowing license files are not up to date. Please run this script with `--fix` option and review the changes.'
+				);
+				expect( consoleErrorMock ).toHaveBeenNthCalledWith( 2, [
+					'',
+					'Index: root/dir/LICENSE.md',
+					'===================================================================',
+					'--- root/dir/LICENSE.md',
+					'+++ root/dir/LICENSE.md',
+					'@@ -7,8 +7,17 @@',
+					' ---------------------------------------------------------',
+					' ',
+					' Where not otherwise indicated, all TestProject™ content is authored by CKSource engineers and consists of CKSource-owned intellectual property.',
+					' ',
+					'+The following libraries are included in TestProject™ under the [BSD-3-Clause license](https://opensource.org/licenses/BSD-3-Clause):',
+					'+',
+					'+* helperManagerFactory - Copyright (c) 2019 Joe Shmo.',
+					'+',
+					'+The following libraries are included in TestProject™ under the [MIT license](https://opensource.org/licenses/MIT):',
+					'+',
+					'+* helperUtilTool - Copyright (C) 1970-2070 the Best Dev.',
+					'+* hidden-helper - Copyright (c) 2025 the Sneaky Dev.',
+					'+',
+					' Trademarks',
+					' ----------',
+					' ',
+					' **TestProject** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o.',
+					'',
+					'Index: root/dir/packages/package-a/LICENSE.md',
+					'===================================================================',
+					'--- root/dir/packages/package-a/LICENSE.md',
+					'+++ root/dir/packages/package-a/LICENSE.md',
+					'@@ -7,8 +7,12 @@',
+					' ---------------------------------------------------------',
+					' ',
+					' Where not otherwise indicated, all TestProject™ content is authored by CKSource engineers and consists of CKSource-owned intellectual property.',
+					' ',
+					'+The following libraries are included in TestProject™ under the [MIT license](https://opensource.org/licenses/MIT):',
+					'+',
+					'+* helperUtilTool - Copyright (C) 1970-2070 the Best Dev.',
+					'+',
+					' Trademarks',
+					' ----------',
+					' ',
+					' **TestProject** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o.',
+					'',
+					'Index: root/dir/packages/package-b/LICENSE.md',
+					'===================================================================',
+					'--- root/dir/packages/package-b/LICENSE.md',
+					'+++ root/dir/packages/package-b/LICENSE.md',
+					'@@ -7,8 +7,12 @@',
+					' ---------------------------------------------------------',
+					' ',
+					' Where not otherwise indicated, all TestProject™ content is authored by CKSource engineers and consists of CKSource-owned intellectual property.',
+					' ',
+					'+The following libraries are included in TestProject™ under the [BSD-3-Clause license](https://opensource.org/licenses/BSD-3-Clause):',
+					'+',
+					'+* helperManagerFactory - Copyright (c) 2019 Joe Shmo.',
+					'+',
+					' Trademarks',
+					' ----------',
+					' ',
+					' **TestProject** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o.',
+					''
+				].join( '\n' ) );
+			} );
 		} );
 
 		describe( 'fixing mode', () => {
