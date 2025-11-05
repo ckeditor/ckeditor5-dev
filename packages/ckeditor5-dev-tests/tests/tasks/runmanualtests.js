@@ -3,13 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import path from 'path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import fs from 'fs';
+import { styleText } from 'util';
+import path from 'path';
 import { Server } from 'socket.io';
 import { spawn } from 'child_process';
 import { globSync } from 'glob';
-import chalk from 'chalk';
 import inquirer from 'inquirer';
 import isInteractive from 'is-interactive';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
@@ -59,10 +59,8 @@ vi.mock( 'socket.io' );
 vi.mock( 'child_process' );
 vi.mock( 'inquirer' );
 vi.mock( 'glob' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		bold: vi.fn( input => input )
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( 'path' );
 vi.mock( 'fs' );
@@ -550,7 +548,7 @@ describe( 'runManualTests()', () => {
 			expect( stubs.log.info ).toHaveBeenCalledWith(
 				'You can use the following flags to skip this prompt in the future: --dll / --no-dll.\n'
 			);
-			expect( vi.mocked( chalk ).bold ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( styleText ) ).toHaveBeenCalledTimes( 3 );
 		} );
 
 		it( 'should open the package.json in each repository in proper order (root repository first, then external ones)', async () => {

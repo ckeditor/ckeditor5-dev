@@ -14,6 +14,6 @@ import plus from '../theme/plus.svg';
 import './styles.css';
 
 // Test importing and bundling external dependencies.
-export { colors } from 'chalk';
+export * from 'es-toolkit';
 
 export { settings, plus };

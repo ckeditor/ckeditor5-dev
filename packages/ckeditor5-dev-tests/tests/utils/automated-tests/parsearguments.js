@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import parseArguments from '../../../lib/utils/automated-tests/parsearguments.js';
 
@@ -14,7 +14,7 @@ vi.mock( 'upath', () => ( {
 		dirname: vi.fn()
 	}
 } ) );
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'parseArguments()', () => {
@@ -34,7 +34,7 @@ describe( 'parseArguments()', () => {
 	} );
 
 	it( 'replaces kebab-case strings with camelCase values', () => {
-		vi.mocked( fs ).readJsonSync.mockReturnValue( {} );
+		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		const options = parseArguments( [
 			'--source-map',
@@ -62,7 +62,7 @@ describe( 'parseArguments()', () => {
 	} );
 
 	it( 'deletes all aliases keys from returned object', () => {
-		vi.mocked( fs ).readJsonSync.mockReturnValue( {} );
+		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		const options = parseArguments( [
 			'-b',
@@ -158,7 +158,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'returns an array of packages to tests when `--repositories` is specified (root directory check)', () => {
-			vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( { name: 'ckeditor5' } ) );
 			vi.mocked( fs ).statSync.mockImplementation( input => {
 				if ( input === '/home/project/external' ) {
 					throw new Error( 'ENOENT: no such file or directory' );
@@ -186,7 +186,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'returns an array of packages to tests when `--repositories` is specified (external directory check)', () => {
-			vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'foo' } );
+			vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( { name: 'foo' } ) );
 			vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => true } );
 			vi.mocked( tools ).getDirectories.mockImplementation( input => {
 				if ( input === '/home/project/external/ckeditor5/packages' ) {
@@ -210,7 +210,7 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(external directory check, specified repository does not exist)',
 			() => {
-				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'foo' } );
+				vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( { name: 'foo' } ) );
 				vi.mocked( fs ).statSync.mockImplementation( input => {
 					if ( input === '/home/project/external' ) {
 						return { isDirectory: () => true };
@@ -235,7 +235,7 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages (unique list) to tests when `--repositories` is specified ' +
 			'(root directory check + `--files` specified)',
 			() => {
-				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+				vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( { name: 'ckeditor5' } ) );
 				vi.mocked( fs ).statSync.mockImplementation( input => {
 					if ( input === '/home/project/external' ) {
 						return { isDirectory: () => true };
@@ -268,7 +268,7 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(root and external directories check)',
 			() => {
-				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+				vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( { name: 'ckeditor5' } ) );
 				vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => true } );
 				vi.mocked( tools ).getDirectories.mockImplementation( input => {
 					if ( input === '/home/project/packages' ) {

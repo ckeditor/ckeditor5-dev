@@ -4,24 +4,9 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import chalk from 'chalk';
 import { displayChanges } from '../../src/utils/displaychanges.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import type { SectionsWithEntries } from '../../src/types.js';
-
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: vi.fn( ( text: string ) => text ),
-		green: vi.fn( ( text: string ) => text ),
-		yellow: vi.fn( ( text: string ) => text ),
-		blue: vi.fn( ( text: string ) => text ),
-		red: vi.fn( ( text: string ) => text ),
-		underline: vi.fn( ( text: string ) => text ),
-		bold: vi.fn( ( text: string ) => text ),
-		grey: vi.fn( ( text: string ) => text ),
-		italic: vi.fn( ( text: string ) => text )
-	}
-} ) );
 
 vi.mock( '../../src/utils/loginfo.js' );
 
@@ -44,11 +29,6 @@ describe( 'displayChanges()', () => {
 			sections,
 			isSinglePackage: false
 		} );
-
-		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.cyan ).toHaveBeenCalledWith( 'Listing the changes...' );
-		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Features:' );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 1, '○ Listing the changes...' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
@@ -75,9 +55,6 @@ describe( 'displayChanges()', () => {
 			sections,
 			isSinglePackage: false
 		} );
-
-		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.green ).toHaveBeenCalledWith( '+' );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ (no scope): Added new feature', expect.any( Object ) );
 	} );
@@ -107,9 +84,6 @@ describe( 'displayChanges()', () => {
 			}
 		} );
 
-		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.green ).toHaveBeenCalledWith( '+' );
-
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '+ bar: Added new feature', expect.any( Object ) );
 	} );
 
@@ -136,9 +110,6 @@ describe( 'displayChanges()', () => {
 			sections,
 			isSinglePackage: false
 		} );
-
-		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.green ).toHaveBeenCalledWith( '+' );
 
 		expect( logInfo ).toHaveBeenNthCalledWith(
 			3,
@@ -171,9 +142,6 @@ describe( 'displayChanges()', () => {
 			isSinglePackage: true
 		} );
 
-		expect( chalk.green ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.green ).toHaveBeenCalledWith( '+' );
-
 		expect( logInfo ).toHaveBeenNthCalledWith(
 			3,
 			'+ Added new feature. This is a very long description that should be truncated.Added new feature. This ...',
@@ -203,8 +171,6 @@ describe( 'displayChanges()', () => {
 			isSinglePackage: false
 		} );
 
-		expect( chalk.red ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.red ).toHaveBeenCalledWith( 'Invalid changes:' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Invalid changes:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '» file:///repo/changelog/changeset-1.md', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- Missing type', expect.any( Object ) );
@@ -240,10 +206,6 @@ describe( 'displayChanges()', () => {
 			sections: sections as any,
 			isSinglePackage: false
 		} );
-
-		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.bold ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.blue ).toHaveBeenCalledWith( `${ title }:` );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, `◌ ${ title }:`, expect.any( Object ) );
 	} );
@@ -350,9 +312,6 @@ describe( 'displayChanges()', () => {
 			isSinglePackage: false
 		} );
 
-		expect( chalk.blue ).toHaveBeenCalledTimes( 1 );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Foo. Bar. Bom.:' );
-
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Foo. Bar. Bom.:', expect.any( Object ) );
 	} );
 
@@ -439,10 +398,6 @@ describe( 'displayChanges()', () => {
 			sections,
 			isSinglePackage: false
 		} );
-
-		expect( chalk.blue ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Features:' );
-		expect( chalk.blue ).toHaveBeenCalledWith( 'Bug fixes:' );
 
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Features:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 5, '◌ Bug fixes:', expect.any( Object ) );
@@ -722,8 +677,6 @@ describe( 'displayChanges()', () => {
 			isSinglePackage: false
 		} );
 
-		expect( chalk.yellow ).toHaveBeenCalledTimes( 2 );
-		expect( chalk.yellow ).toHaveBeenCalledWith( 'Warning:' );
 		expect( logInfo ).toHaveBeenNthCalledWith( 2, '◌ Warning:', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 3, '» file:///repo/changelog/changeset-1.md', expect.any( Object ) );
 		expect( logInfo ).toHaveBeenNthCalledWith( 4, '- Invalid scope reference', expect.any( Object ) );

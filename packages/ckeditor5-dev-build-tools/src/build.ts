@@ -5,8 +5,7 @@
 
 import fs from 'fs';
 import url from 'url';
-import util from 'util';
-import chalk from 'chalk';
+import { styleText, parseArgs } from 'util';
 import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption, type LogLevelOption } from 'rollup';
 import { loadSourcemaps } from './plugins/loadSourcemaps.js';
@@ -65,7 +64,7 @@ const CKEDITOR_GLOBALS: GlobalsOption = {
  * Reads CLI arguments and turn the keys into camelcase.
  */
 function getCliArguments(): Partial<BuildOptions> {
-	const { values } = util.parseArgs( {
+	const { values } = parseArgs( {
 		options: {
 			'cwd': { type: 'string' },
 			'input': { type: 'string' },
@@ -245,13 +244,13 @@ export async function build(
 
 		if ( error.name === 'RollupError' ) {
 			message = `
-				${ chalk.red( 'ERROR: Error occurred when processing the file ' + error.id ) }.
+				${ styleText( 'red', 'ERROR: Error occurred when processing the file ' + error.id ) }.
 				${ error.message }
 				${ error.frame ?? '' }
 			`;
 		} else {
 			message = `
-				${ chalk.red( 'ERROR: The build process failed with the following error:' ) }
+				${ styleText( 'red', 'ERROR: The build process failed with the following error:' ) }
 				${ error.message }
 			`;
 		}

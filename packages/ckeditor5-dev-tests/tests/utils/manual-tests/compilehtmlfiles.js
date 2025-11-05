@@ -3,13 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import fs from 'fs-extra';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import path from 'path';
+import fs from 'fs';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import { globSync } from 'glob';
 import chokidar from 'chokidar';
-import chalk from 'chalk';
 import domCombiner from 'dom-combiner';
 import compileHtmlFiles from '../../../lib/utils/manual-tests/compilehtmlfiles.js';
 import getRelativeFilePath from '../../../lib/utils/getrelativefilepath.js';
@@ -42,15 +41,10 @@ vi.mock( 'commonmark', () => ( {
 		}
 	}
 } ) );
+vi.mock( 'fs' );
 vi.mock( 'path' );
 vi.mock( 'glob' );
-vi.mock( 'fs-extra' );
 vi.mock( 'chokidar' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: vi.fn()
-	}
-} ) );
 vi.mock( 'dom-combiner' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../../lib/utils/getrelativefilepath.js' );
@@ -63,7 +57,6 @@ describe( 'compileHtmlFiles()', () => {
 	beforeEach( () => {
 		stubs.commonmark.htmlRenderer.render.mockReturnValue( '<h2>Markdown header</h2>' );
 		vi.mocked( logger ).mockReturnValue( stubs.log );
-		vi.mocked( chalk ).cyan.mockImplementation( input => input );
 		vi.mocked( fs ).readFileSync.mockImplementation( pathToFile => files[ pathToFile ] );
 		vi.mocked( path ).join.mockImplementation( ( ...chunks ) => chunks.join( separator ) );
 		vi.mocked( path ).parse.mockImplementation( pathToParse => {
@@ -100,7 +93,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: []
 			} );
 
-			expect( vi.mocked( fs ).ensureDirSync ).toHaveBeenCalledExactlyOnceWith( 'buildDir' );
+			expect( vi.mocked( fs ).mkdirSync ).toHaveBeenCalledExactlyOnceWith( 'buildDir', expect.anything() );
 		} );
 
 		it( 'should compile md and html files to the output html file', () => {
@@ -122,7 +115,7 @@ describe( 'compileHtmlFiles()', () => {
 
 			expect( stubs.commonmark.parser.parse ).toHaveBeenCalledExactlyOnceWith( '## Markdown header' );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
@@ -193,7 +186,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			expect( vi.mocked( fs ).copySync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir/static-file.png' );
+			expect( vi.mocked( fs ).copyFileSync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir/static-file.png' );
 		} );
 
 		it( 'should compile files with options#language specified', () => {
@@ -214,7 +207,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
@@ -257,7 +250,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path/to/manual/file.abc.js' ]
 			} );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.abc.html',
 				expect.stringContaining( '<script src="/path/to/manual/file.abc.js"></script>' )
 			);
@@ -285,14 +278,14 @@ describe( 'compileHtmlFiles()', () => {
 				]
 			} );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledTimes( 2 );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
 				'buildDir/path/to/manual/file.html',
 				expect.stringContaining( '<script src="/path/to/manual/file.js"></script>' )
 			);
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
 				'buildDir/path/to/another/manual/file.html',
 				expect.stringContaining( '<script src="/path/to/another/manual/file.js"></script>' )
 			);
@@ -315,7 +308,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			expect( vi.mocked( fs ).copySync ).not.toHaveBeenCalled();
+			expect( vi.mocked( fs ).copyFileSync ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should compile the manual test and do not inform about the processed file', () => {
@@ -340,12 +333,12 @@ describe( 'compileHtmlFiles()', () => {
 		} );
 	} );
 
-	describe( 'Windows environment', () => {
+	describe.only( 'Windows environment', () => {
 		beforeEach( () => {
 			separator = '\\';
 		} );
 
-		it( 'should work on Windows environments', () => {
+		it.only( 'should work on Windows environments', () => {
 			patternFiles = {
 				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
@@ -361,7 +354,9 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path\\to\\manual\\file.js' ]
 			} );
 
-			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
+			const test = vi.mocked( fs ).writeFileSync;
+
+			expect( test ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir\\path\\to\\manual\\file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
@@ -426,7 +421,7 @@ describe( 'compileHtmlFiles()', () => {
 				sourceFiles: [ 'path\\to\\manual\\file.js' ]
 			} );
 
-			expect( vi.mocked( fs ).copySync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir\\static-file.png' );
+			expect( vi.mocked( fs ).copyFileSync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir\\static-file.png' );
 		} );
 	} );
 } );

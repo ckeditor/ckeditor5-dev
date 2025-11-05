@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
-import chalk from 'chalk';
+import fs from 'fs';
+import { styleText } from 'util';
 import semver from 'semver';
 import { globSync } from 'glob';
 import { execSync } from 'child_process';
@@ -50,7 +50,7 @@ export default async function checkVersionMatch( {
 	versionExceptions = {},
 	workspacePackages = []
 } ) {
-	console.log( chalk.blue( '🔍 Starting checking dependencies versions...' ) );
+	console.log( styleText( 'blue', '🔍 Starting checking dependencies versions...' ) );
 
 	const versionsCache = {};
 
@@ -95,10 +95,10 @@ function fixDependenciesVersions( { expectedDependencies, packageJsons, pathMapp
 			} );
 		} );
 
-		fs.writeJsonSync( pathMappings[ packageJson.name ], packageJson, { spaces: 2 } );
+		fs.writeFileSync( pathMappings[ packageJson.name ], JSON.stringify( packageJson, null, 2 ) );
 	} );
 
-	console.log( chalk.green( '✅  All dependencies fixed!' ) );
+	console.log( styleText( 'green', '✅  All dependencies fixed!' ) );
 }
 
 /**
@@ -139,11 +139,13 @@ function checkDependenciesMatch( { packageJsons, devDependenciesFilter, expected
 	} ).filter( Boolean );
 
 	if ( errors.length ) {
-		console.error( chalk.red( '❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:' ) );
-		console.error( chalk.red( errors.join( '\n' ) ) );
+		console.error(
+			styleText( 'red', '❌  Errors found. Run this script with an argument: `--fix` to resolve the issues automatically:' )
+		);
+		console.error( styleText( 'red', errors.join( '\n' ) ) );
 		process.exit( 1 );
 	} else {
-		console.log( chalk.green( '✅  All dependencies are correct!' ) );
+		console.log( styleText( 'green', '✅  All dependencies are correct!' ) );
 	}
 }
 
@@ -241,7 +243,7 @@ function getNewestVersion( {
  */
 function getVersionsList( { dependencyName, versionsCache } ) {
 	if ( !versionsCache[ dependencyName ] ) {
-		console.log( chalk.blue( `⬇️ Downloading "${ dependencyName }" versions from npm...` ) );
+		console.log( styleText( 'blue', `⬇️ Downloading "${ dependencyName }" versions from npm...` ) );
 		const versionsJson = execSync( `npm view ${ dependencyName } versions --json`, { encoding: 'utf8' } );
 		versionsCache[ dependencyName ] = JSON.parse( versionsJson );
 	}
@@ -257,9 +259,16 @@ function getVersionsList( { dependencyName, versionsCache } ) {
  */
 function getPackageJsons( { cwd, pkgJsonPatterns } ) {
 	const packageJsonPaths = globSync( pkgJsonPatterns, { absolute: true, cwd } );
-	const packageJsons = packageJsonPaths.map( packageJsonPath => fs.readJsonSync( packageJsonPath ) );
-	const nameToPathMappings = packageJsonPaths
-		.reduce( ( accum, packageJsonPath ) => ( { ...accum, [ fs.readJsonSync( packageJsonPath ).name ]: packageJsonPath } ), {} );
+	const packageJsons = packageJsonPaths
+		.map( packageJsonPath => fs.readFileSync( packageJsonPath, 'utf-8' ) )
+		.map( packageJsonContent => JSON.parse( packageJsonContent ) );
+
+	const nameToPathMappings = packageJsonPaths.reduce( ( accum, packageJsonPath ) => {
+		const file = fs.readFileSync( packageJsonPath, 'utf-8' );
+		const { name } = JSON.parse( file );
+
+		return { ...accum, [ name ]: packageJsonPath };
+	}, {} );
 
 	return [ packageJsons, nameToPathMappings ];
 }

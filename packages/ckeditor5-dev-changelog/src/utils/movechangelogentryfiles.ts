@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
+import { styleText } from 'util';
 import upath from 'upath';
 import { logInfo } from './loginfo.js';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
@@ -21,14 +21,14 @@ export async function moveChangelogEntryFiles(
 	const targetDir = PRE_RELEASE_DIRECTORY;
 	const modifiedEntryPaths: Array<ChangesetPathsWithGithubUrl> = [];
 
-	logInfo( `○ ${ chalk.cyan( `Moving changelog entries to ${ targetDir }/ directory...` ) }` );
+	logInfo( `○ ${ styleText( 'cyan', `Moving changelog entries to ${ targetDir }/ directory...` ) }` );
 
 	for ( const repo of entryPaths ) {
 		const { cwd, filePaths } = repo;
 		const changelogDir = upath.join( cwd, CHANGESET_DIRECTORY );
 		const targetPath = upath.join( changelogDir, targetDir );
 
-		await fs.ensureDir( targetPath );
+		await fs.mkdir( targetPath, { recursive: true } );
 
 		const modifiedFilePaths: Array<string> = [];
 

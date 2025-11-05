@@ -10,13 +10,8 @@ import { validateInputVersion } from '../../src/utils/validateinputversion.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 
 vi.mock( 'inquirer' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		yellow: ( text: string ) => text,
-		bold: ( text: string ) => text,
-		underline: ( text: string ) => text,
-		cyan: ( text: string ) => text
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/utils/validateinputversion.js' );
 vi.mock( '../../src/utils/loginfo.js', () => ( {

@@ -8,16 +8,13 @@ import { modifyChangelog } from '../../src/utils/modifychangelog.js';
 import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '../../src/utils/truncatechangelog.js' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: ( text: string ) => text,
-		yellow: ( text: string ) => text
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/constants.js', () => ( {
 	CHANGELOG_HEADER: '# Changelog\n\n',

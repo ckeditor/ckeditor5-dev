@@ -3,20 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs';
 import path from 'path';
-import fs from 'fs-extra';
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
 
 const require = createRequire( import.meta.url );
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 const assets = [
-	path.join( __dirname, 'togglesidebar.js' ),
-	path.join( __dirname, 'attachinspector.js' ),
-	path.join( __dirname, 'websocket.js' ),
-	path.join( __dirname, 'globallicensekey.js' ),
+	path.join( import.meta.dirname, 'togglesidebar.js' ),
+	path.join( import.meta.dirname, 'attachinspector.js' ),
+	path.join( import.meta.dirname, 'websocket.js' ),
+	path.join( import.meta.dirname, 'globallicensekey.js' ),
 	require.resolve( '@ckeditor/ckeditor5-inspector' )
 ];
 
@@ -32,6 +29,8 @@ const assets = [
 export default function copyAssets( buildDir ) {
 	for ( const assetPath of assets ) {
 		const outputFilePath = path.join( buildDir, 'assets', path.basename( assetPath ) );
-		fs.copySync( assetPath, outputFilePath );
+
+		fs.mkdirSync( path.dirname( outputFilePath ), { recursive: true } );
+		fs.copyFileSync( assetPath, outputFilePath );
 	}
 }

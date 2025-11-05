@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import assertPackages from '../../lib/utils/assertpackages.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 
 describe( 'assertPackages()', () => {
 	const disableMainValidatorOptions = {
@@ -20,18 +20,18 @@ describe( 'assertPackages()', () => {
 	} );
 
 	it( 'should check if `package.json` exists in each package', async () => {
-		vi.mocked( fs ).pathExists.mockResolvedValue( true );
+		vi.mocked( fs ).access.mockResolvedValue( true );
 
 		await assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...disableMainValidatorOptions } );
 
-		expect( vi.mocked( fs ).pathExists ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( fs ).pathExists ).toHaveBeenCalledWith( 'ckeditor5-foo/package.json' );
-		expect( vi.mocked( fs ).pathExists ).toHaveBeenCalledWith( 'ckeditor5-bar/package.json' );
-		expect( vi.mocked( fs ).pathExists ).toHaveBeenCalledWith( 'ckeditor5-baz/package.json' );
+		expect( vi.mocked( fs ).access ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs ).access ).toHaveBeenCalledWith( 'ckeditor5-foo/package.json' );
+		expect( vi.mocked( fs ).access ).toHaveBeenCalledWith( 'ckeditor5-bar/package.json' );
+		expect( vi.mocked( fs ).access ).toHaveBeenCalledWith( 'ckeditor5-baz/package.json' );
 	} );
 
 	it( 'should throw one error for all packages with missing `package.json` file', async () => {
-		vi.mocked( fs ).pathExists.mockImplementation( input => {
+		vi.mocked( fs ).access.mockImplementation( input => {
 			if ( input === 'ckeditor5-bar/package.json' ) {
 				return Promise.resolve( true );
 			}
@@ -56,24 +56,24 @@ describe( 'assertPackages()', () => {
 		};
 
 		it( 'should throw if a package misses its entry point', async () => {
-			vi.mocked( fs ).pathExists.mockResolvedValue( true );
-			vi.mocked( fs ).readJson.mockImplementation( input => {
+			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).readFile.mockImplementation( input => {
 				if ( input === 'ckeditor5-foo/package.json' ) {
-					return Promise.resolve( {
+					return Promise.resolve( JSON.stringify( {
 						name: '@ckeditor/ckeditor5-foo',
 						main: 'src/index.ts'
-					} );
+					} ) );
 				}
 
 				if ( input === 'ckeditor5-bar/package.json' ) {
-					return Promise.resolve( {
+					return Promise.resolve( JSON.stringify( {
 						name: '@ckeditor/ckeditor5-bar'
-					} );
+					} ) );
 				}
 
-				return Promise.resolve( {
+				return Promise.resolve( JSON.stringify( {
 					name: '@ckeditor/ckeditor5-baz'
-				} );
+				} ) );
 			} );
 
 			await expect( assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...enableMainValidatorOptions } ) )
@@ -83,10 +83,10 @@ describe( 'assertPackages()', () => {
 		} );
 
 		it( 'should pass the validator if specified package does not have to define the entry point', async () => {
-			vi.mocked( fs ).pathExists.mockResolvedValue( true );
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				name: '@ckeditor/ckeditor5-bar'
-			} );
+			} ) );
 
 			await assertPackages( [ 'ckeditor5-bar' ], { ...enableMainValidatorOptions } );
 		} );

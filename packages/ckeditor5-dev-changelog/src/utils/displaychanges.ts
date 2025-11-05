@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 import { logInfo } from './loginfo.js';
 import type { Entry, Section, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 
@@ -27,7 +27,7 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 	const { sections, isSinglePackage, transformScope } = options;
 	let numberOfEntries = 0;
 
-	logInfo( `○ ${ chalk.cyan( 'Listing the changes...' ) }` );
+	logInfo( `○ ${ styleText( 'cyan', 'Listing the changes...' ) }` );
 
 	const nonEmptySections = ( Object.entries( sections ) as Array<[ SectionName, Section ]> )
 		.filter( ( [ , section ] ) => section.entries.length );
@@ -35,7 +35,7 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 	for ( const [ sectionName, section ] of nonEmptySections ) {
 		const color = getTitleColor( sectionName );
 
-		logInfo( '◌ ' + color( chalk.underline( `${ section.titleInLogs || section.title }:` ) ), { indent: 1 } );
+		logInfo( '◌ ' + color( styleText( 'underline', `${ section.titleInLogs || section.title }:` ) ), { indent: 1 } );
 
 		const displayCallback = sectionName === 'invalid' || sectionName === 'warning' ?
 			displayWarningEntry :
@@ -50,10 +50,10 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 		logInfo( '' );
 	}
 
-	logInfo( '◌ ' + chalk.underline( 'Legend:' ), { indent: 1 } );
-	logInfo( `- Entries marked with ${ chalk.green( '+' ) } symbol are included in the changelog.`, { indent: 2 } );
+	logInfo( '◌ ' + styleText( 'underline', 'Legend:' ), { indent: 1 } );
+	logInfo( `- Entries marked with ${ styleText( 'green', '+' ) } symbol are included in the changelog.`, { indent: 2 } );
 	logInfo(
-		'- Entries marked with ' + chalk.yellow( 'x' ) + ' symbol include invalid references (see and/or closes) ' +
+		'- Entries marked with ' + styleText( 'yellow', 'x' ) + ' symbol include invalid references (see and/or closes) ' +
 		'or scope definitions. Please ensure that:',
 		{ indent: 2 }
 	);
@@ -69,19 +69,17 @@ export function displayChanges( options: DisplayChangesOptions ): void {
 
 function getTitleColor( sectionName: SectionName ): ( value: string ) => string {
 	if ( sectionName === 'warning' ) {
-		return chalk.yellow;
+		return ( text: string ) => styleText( 'yellow', text );
 	}
 	if ( sectionName === 'invalid' ) {
-		return chalk.red;
+		return ( text: string ) => styleText( 'red', text );
 	}
 
-	let defaultColor: ( value: string ) => string = chalk.blue;
+	let defaultColor: ( value: string ) => string = ( text: string ) => styleText( 'blue', text );
 
 	if ( isBreakingChangeSection( sectionName ) ) {
 		// To avoid tricks in tests, let's simplify the implementation.
-		defaultColor = ( value: string ) => {
-			return chalk.bold( chalk.blue( value ) );
-		};
+		defaultColor = ( value: string ) => styleText( [ 'bold', 'blue' ], value );
 	}
 
 	return defaultColor;
@@ -106,10 +104,10 @@ function displayValidEntry( entry: Entry, sectionName: SectionName, isSinglePack
 		entry.data.scope;
 
 	const scope = entry.data.scope.length ?
-		chalk.grey( scopeFormatted?.join( ', ' ) ) :
-		`${ chalk.italic( chalk.grey( '(no scope)' ) ) }`;
+		styleText( 'grey', scopeFormatted?.join( ', ' ) ) :
+		`${ styleText( [ 'italic', 'gray' ], '(no scope)' ) }`;
 
-	const validationIndicator = isEntryFullyValid ? chalk.green( '+' ) : chalk.yellow( 'x' );
+	const validationIndicator = isEntryFullyValid ? styleText( 'green', '+' ) : styleText( 'yellow', 'x' );
 	const shouldTrimMessage = String( entry.data.mainContent ).length > 100;
 	const trimmedMessageContent = shouldTrimMessage ? entry.data.mainContent?.slice( 0, 100 ) + '...' : entry.data.mainContent;
 

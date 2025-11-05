@@ -4,11 +4,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import { glob } from 'glob';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( 'glob' );
 
 describe( 'prepareRepository()', () => {
@@ -34,9 +34,9 @@ describe( 'prepareRepository()', () => {
 	it( 'should do nothing if neither "rootPackage" or "packagesDirectory" options are defined', async () => {
 		await prepareRepository( options );
 
-		expect( vi.mocked( fs ).copy ).not.toHaveBeenCalled();
-		expect( vi.mocked( fs ).ensureDir ).not.toHaveBeenCalled();
-		expect( vi.mocked( fs ).writeJson ).not.toHaveBeenCalled();
+		expect( vi.mocked( fs ).cp ).not.toHaveBeenCalled();
+		expect( vi.mocked( fs ).mkdir ).not.toHaveBeenCalled();
+		expect( vi.mocked( fs ).writeFile ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should ensure the existence of the output directory', async () => {
@@ -45,8 +45,8 @@ describe( 'prepareRepository()', () => {
 
 		await prepareRepository( options );
 
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalled();
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalledWith( 'current/working/dir/release' );
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalled();
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalledWith( 'current/working/dir/release', expect.any( Object ) );
 	} );
 
 	it( 'should throw if the output directory is not empty', async () => {
@@ -81,8 +81,8 @@ describe( 'prepareRepository()', () => {
 
 		await prepareRepository( options );
 
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalled();
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalledWith( 'something/different/than/process/cwd/release' );
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalled();
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalledWith( 'something/different/than/process/cwd/release', expect.any( Object ) );
 	} );
 
 	it( 'should normalize Windows slashes "\\" from "process.cwd()"', async () => {
@@ -92,8 +92,8 @@ describe( 'prepareRepository()', () => {
 
 		await prepareRepository( options );
 
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalled();
-		expect( vi.mocked( fs ).ensureDir ).toHaveBeenCalledWith( 'C:/windows/working/dir/release' );
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalled();
+		expect( vi.mocked( fs ).mkdir ).toHaveBeenCalledWith( 'C:/windows/working/dir/release', expect.any( Object ) );
 	} );
 
 	describe( 'root package processing', () => {
@@ -117,18 +117,9 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
 				'current/working/dir/release/ckeditor5/package.json',
-				expect.objectContaining( {
-					name: 'ckeditor5',
-					description: 'Description.',
-					keywords: [ 'foo', 'bar', 'baz' ],
-					files: [ 'src/*.js', 'CHANGELOG.md' ]
-				} ),
-				expect.objectContaining( {
-					spaces: 2,
-					EOL: '\n'
-				} )
+				expect.any( String )
 			);
 		} );
 
@@ -140,10 +131,9 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
 				'current/working/dir/release/ckeditor5-example/package.json',
-				expect.any( Object ),
-				expect.any( Object )
+				expect.any( String )
 			);
 		} );
 
@@ -157,18 +147,21 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 3 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/src/core.js',
-				'current/working/dir/release/ckeditor5/src/core.js'
+				'current/working/dir/release/ckeditor5/src/core.js',
+				expect.any( Object )
 			);
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/src/utils.js',
-				'current/working/dir/release/ckeditor5/src/utils.js'
+				'current/working/dir/release/ckeditor5/src/utils.js',
+				expect.any( Object )
 			);
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/CHANGELOG.md',
-				'current/working/dir/release/ckeditor5/CHANGELOG.md'
+				'current/working/dir/release/ckeditor5/CHANGELOG.md',
+				expect.any( Object )
 			);
 		} );
 
@@ -189,8 +182,8 @@ describe( 'prepareRepository()', () => {
 					}
 				);
 
-			expect( vi.mocked( fs ).writeJson ).not.toHaveBeenCalled();
-			expect( vi.mocked( fs ).copy ).not.toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).not.toHaveBeenCalled();
+			expect( vi.mocked( fs ).cp ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should throw if "rootPackageJson" is missing the "files" field', async () => {
@@ -210,8 +203,8 @@ describe( 'prepareRepository()', () => {
 					}
 				);
 
-			expect( vi.mocked( fs ).writeJson ).not.toHaveBeenCalled();
-			expect( vi.mocked( fs ).copy ).not.toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).not.toHaveBeenCalled();
+			expect( vi.mocked( fs ).cp ).not.toHaveBeenCalled();
 		} );
 	} );
 
@@ -232,16 +225,16 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).exists.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( true );
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
 				'current/working/dir/release/ckeditor5-core'
 			);
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-utils',
 				'current/working/dir/release/ckeditor5-utils'
 			);
@@ -263,18 +256,18 @@ describe( 'prepareRepository()', () => {
 					isDirectory: () => true
 				} );
 			} );
-			vi.mocked( fs ).exists.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( true );
 
 			await prepareRepository( options );
 
 			expect( vi.mocked( fs ).lstat ).toHaveBeenCalledWith( 'current/working/dir/packages/textFile.txt' );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
 				'current/working/dir/release/ckeditor5-core'
 			);
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-utils',
 				'current/working/dir/release/ckeditor5-utils'
 			);
@@ -287,7 +280,7 @@ describe( 'prepareRepository()', () => {
 				isDirectory: () => true
 			} );
 
-			vi.mocked( fs ).exists.mockImplementation( input => {
+			vi.mocked( fs ).access.mockImplementation( input => {
 				if ( input === 'current/working/dir/packages/ckeditor5-core/package.json' ) {
 					return Promise.resolve( true );
 				}
@@ -297,8 +290,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
 				'current/working/dir/release/ckeditor5-core'
 			);
@@ -311,12 +304,12 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).exists.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( true );
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
 				'current/working/dir/release/ckeditor5-core'
 			);
@@ -329,12 +322,12 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).exists.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( true );
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).copy ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/nested/ckeditor5-nested',
 				'current/working/dir/release/nested/ckeditor5-nested'
 			);

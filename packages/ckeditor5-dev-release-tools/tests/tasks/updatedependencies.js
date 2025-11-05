@@ -4,11 +4,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import updateDependencies from '../../lib/tasks/updatedependencies.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'updateDependencies()', () => {
@@ -141,46 +141,43 @@ describe( 'updateDependencies()', () => {
 				'/work/project/packages/ckeditor5-bar/package.json'
 			] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+			vi.mocked( fs ).readFile.mockResolvedValue( '{}' );
 
 			await updateDependencies( {
 				packagesDirectory: 'packages'
 			} );
 
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 3 );
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/package.json' );
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json' );
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json' );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( '/work/project/package.json', 'utf-8' );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json', 'utf-8' );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json', 'utf-8' );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 3 );
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/package.json',
-				expect.any( Object ),
-				expect.any( Object )
+				expect.any( String )
 			);
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/packages/ckeditor5-foo/package.json',
-				expect.any( Object ),
-				expect.any( Object )
+				expect.any( String )
 			);
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/packages/ckeditor5-bar/package.json',
-				expect.any( Object ),
-				expect.any( Object )
+				expect.any( String )
 			);
 		} );
 
 		it( 'should update eligible dependencies from the `dependencies` key', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				dependencies: {
 					'@ckeditor/ckeditor5-engine': '^37.0.0',
 					'@ckeditor/ckeditor5-enter': '^37.0.0',
 					'@ckeditor/ckeditor5-essentials': '^37.0.0',
 					'lodash-es': '^4.17.15'
 				}
-			} );
+			} ) );
 
 			await updateDependencies( {
 				version: '^38.0.0',
@@ -193,32 +190,31 @@ describe( 'updateDependencies()', () => {
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( '@ckeditor/ckeditor5-essentials' );
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( 'lodash-es' );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/package.json',
-				{
+				JSON.stringify( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				},
-				expect.any( Object )
+				}, null, 2 )
 			);
 		} );
 
 		it( 'should update eligible dependencies from the `devDependencies` key', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				devDependencies: {
 					'@ckeditor/ckeditor5-engine': '^37.0.0',
 					'@ckeditor/ckeditor5-enter': '^37.0.0',
 					'@ckeditor/ckeditor5-essentials': '^37.0.0',
 					'lodash-es': '^4.17.15'
 				}
-			} );
+			} ) );
 
 			await updateDependencies( {
 				version: '^38.0.0',
@@ -231,32 +227,31 @@ describe( 'updateDependencies()', () => {
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( '@ckeditor/ckeditor5-essentials' );
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( 'lodash-es' );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/package.json',
-				{
+				JSON.stringify( {
 					devDependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				},
-				expect.any( Object )
+				}, null, 2 )
 			);
 		} );
 
 		it( 'should update eligible dependencies from the `peerDependencies` key', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				peerDependencies: {
 					'@ckeditor/ckeditor5-engine': '^37.0.0',
 					'@ckeditor/ckeditor5-enter': '^37.0.0',
 					'@ckeditor/ckeditor5-essentials': '^37.0.0',
 					'lodash-es': '^4.17.15'
 				}
-			} );
+			} ) );
 
 			await updateDependencies( {
 				version: '^38.0.0',
@@ -269,50 +264,48 @@ describe( 'updateDependencies()', () => {
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( '@ckeditor/ckeditor5-essentials' );
 			expect( shouldUpdateVersionCallback ).toHaveBeenCalledWith( 'lodash-es' );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/package.json',
-				{
+				JSON.stringify( {
 					peerDependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				},
-				expect.any( Object )
+				}, null, 2 )
 			);
 		} );
 
 		it( 'should not update any package if `shouldUpdateVersionCallback` callback resolves falsy value', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/package.json' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				dependencies: {
 					'@ckeditor/ckeditor5-engine': '^37.0.0',
 					'@ckeditor/ckeditor5-enter': '^37.0.0',
 					'@ckeditor/ckeditor5-essentials': '^37.0.0',
 					'lodash-es': '^4.17.15'
 				}
-			} );
+			} ) );
 
 			await updateDependencies( {
 				version: '^38.0.0',
 				shouldUpdateVersionCallback: () => false
 			} );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'/work/project/package.json',
-				{
+				JSON.stringify( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
 						'@ckeditor/ckeditor5-essentials': '^37.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				},
-				expect.any( Object )
+				}, null, 2 )
 			);
 		} );
 	} );

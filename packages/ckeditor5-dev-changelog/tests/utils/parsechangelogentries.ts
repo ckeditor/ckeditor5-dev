@@ -4,13 +4,13 @@
  */
 
 import { parseChangelogEntries } from '../../src/utils/parsechangelogentries.js';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import matter, { type GrayMatterFile } from 'gray-matter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { sortEntriesByScopeAndDate } from '../../src/utils/sortentriesbyscopeanddate.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( 'gray-matter' );
 vi.mock( '../../src/utils/sortentriesbyscopeanddate.js' );
 

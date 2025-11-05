@@ -6,16 +6,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { moveChangelogEntryFiles } from '../../src/utils/movechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { PRE_RELEASE_DIRECTORY } from '../../src/utils/constants.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: ( text: string ) => text
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
 describe( 'moveChangelogEntryFiles()', () => {
@@ -41,7 +39,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 	};
 
 	beforeEach( () => {
-		vi.mocked( fs.ensureDir ).mockResolvedValue();
+		vi.mocked( fs.mkdir ).mockResolvedValue();
 		vi.mocked( fs.rename ).mockResolvedValue();
 	} );
 
@@ -54,9 +52,9 @@ describe( 'moveChangelogEntryFiles()', () => {
 	it( 'should create target directory for each repository', async () => {
 		await moveChangelogEntryFiles( mockEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo2/.changelog/${ PRE_RELEASE_DIRECTORY }` );
-		expect( fs.ensureDir ).toHaveBeenCalledTimes( 2 );
+		expect( fs.mkdir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }`, expect.anything() );
+		expect( fs.mkdir ).toHaveBeenCalledWith( `/repo2/.changelog/${ PRE_RELEASE_DIRECTORY }`, expect.anything() );
+		expect( fs.mkdir ).toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'should move all files to the target directory using rename', async () => {
@@ -115,7 +113,7 @@ describe( 'moveChangelogEntryFiles()', () => {
 		];
 		const result = await moveChangelogEntryFiles( singleEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
+		expect( fs.mkdir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }`, expect.anything() );
 		expect( fs.rename ).toHaveBeenCalledWith(
 			'/repo1/.changelog/file1.md',
 			`/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }/file1.md`
@@ -138,15 +136,15 @@ describe( 'moveChangelogEntryFiles()', () => {
 		];
 		const result = await moveChangelogEntryFiles( emptyEntryPaths );
 
-		expect( fs.ensureDir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }` );
+		expect( fs.mkdir ).toHaveBeenCalledWith( `/repo1/.changelog/${ PRE_RELEASE_DIRECTORY }`, expect.anything() );
 		expect( fs.rename ).not.toHaveBeenCalled();
 		expect( mockGit.add ).not.toHaveBeenCalled();
 		expect( result[ 0 ]!.filePaths ).toEqual( [] );
 	} );
 
-	it( 'should handle fs.ensureDir errors', async () => {
+	it( 'should handle fs.mkdir errors', async () => {
 		const error = new Error( 'Directory creation failed' );
-		vi.mocked( fs.ensureDir ).mockRejectedValueOnce( error );
+		vi.mocked( fs.mkdir ).mockRejectedValueOnce( error );
 
 		await expect( moveChangelogEntryFiles( mockEntryPaths ) )
 			.rejects.toThrow( 'Directory creation failed' );

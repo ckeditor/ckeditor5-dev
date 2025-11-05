@@ -4,16 +4,16 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import updateVersions from '../../lib/tasks/updateversions.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 
 describe( 'updateVersions()', () => {
 	beforeEach( () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( { version: '1.0.0' } );
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( { version: '1.0.0' } ) );
 		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/ckeditor5-dev' ] );
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/ckeditor5-dev' );
 	} );
@@ -38,34 +38,22 @@ describe( 'updateVersions()', () => {
 			}
 		);
 
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledTimes( 4 );
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 4 );
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package1/package.json',
-			{
-				version: '1.0.1'
-			},
-			expect.any( Object )
+			JSON.stringify( { version: '1.0.1' }, null, 2 )
 		);
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package2/package.json',
-			{
-				version: '1.0.1'
-			},
-			expect.any( Object )
+			JSON.stringify( { version: '1.0.1' }, null, 2 )
 		);
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package3/package.json',
-			{
-				version: '1.0.1'
-			},
-			expect.any( Object )
+			JSON.stringify( { version: '1.0.1' }, null, 2 )
 		);
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/package.json',
-			{
-				version: '1.0.1'
-			},
-			expect.any( Object )
+			JSON.stringify( { version: '1.0.1' }, null, 2 )
 		);
 	} );
 
@@ -105,17 +93,14 @@ describe( 'updateVersions()', () => {
 			expect.any( Object )
 		);
 
-		expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
 			'/ckeditor5-dev/package.json',
-			{
-				version: '1.0.1'
-			},
-			expect.any( Object )
+			JSON.stringify( { version: '1.0.1' }, null, 2 )
 		);
 	} );
 
 	it( 'should accept `0.0.0-nightly*` version for nightly releases', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( { version: '1.0.0', name: 'stub-package' } );
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( { version: '1.0.0', name: 'stub-package' } ) );
 
 		await expect( updateVersions( { version: '0.0.0-nightly-20230510.0' } ) ).resolves.toBeNil();
 	} );

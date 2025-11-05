@@ -4,4 +4,4 @@
  */
 
 // Test importing and bundling external dependencies.
-export { colors } from 'chalk';
+export * from 'es-toolkit';

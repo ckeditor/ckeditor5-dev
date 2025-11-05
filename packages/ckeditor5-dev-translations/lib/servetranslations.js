@@ -3,15 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import chalk from 'chalk';
+import { styleText } from 'util';
 import { rimraf } from 'rimraf';
 import webpackSources from 'webpack-sources';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 const { RawSource, ConcatSource } = webpackSources;
 
@@ -88,7 +84,8 @@ export default function serveTranslations( compiler, options, translationService
 				}
 
 				// Add all context messages found in the core package.
-				const contexts = fs.readJsonSync( pathToResource );
+				const contextsFile = fs.readFileSync( pathToResource, 'utf-8' );
+				const contexts = JSON.parse( contextsFile );
 
 				for ( const item of Object.keys( contexts ) ) {
 					translationService.addIdMessage( item );
@@ -106,7 +103,7 @@ export default function serveTranslations( compiler, options, translationService
 				// The `TranslateSource` loader must be added as the last one in the loader's chain,
 				// after any potential TypeScript file has already been compiled.
 				module.loaders.unshift( {
-					loader: path.join( __dirname, 'translatesourceloader.js' ),
+					loader: path.join( import.meta.dirname, 'translatesourceloader.js' ),
 					type: 'module',
 					options: { translateSource }
 				} );
@@ -164,10 +161,10 @@ export default function serveTranslations( compiler, options, translationService
 		uniqueMessages.add( error );
 
 		if ( options.strict ) {
-			throw new Error( chalk.red( error ) );
+			throw new Error( styleText( 'red', error ) );
 		}
 
-		console.error( chalk.red( `[CKEditorTranslationsPlugin] Error: ${ error }` ) );
+		console.error( styleText( 'red', `[CKEditorTranslationsPlugin] Error: ${ error }` ) );
 	}
 
 	function emitWarning( warning ) {
@@ -178,7 +175,7 @@ export default function serveTranslations( compiler, options, translationService
 		uniqueMessages.add( warning );
 
 		if ( options.verbose ) {
-			console.warn( chalk.yellow( `[CKEditorTranslationsPlugin] Warning: ${ warning }` ) );
+			console.warn( styleText( 'yellow', `[CKEditorTranslationsPlugin] Warning: ${ warning }` ) );
 		}
 	}
 }

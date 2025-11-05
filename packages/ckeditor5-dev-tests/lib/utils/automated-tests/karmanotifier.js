@@ -5,12 +5,8 @@
 
 import path from 'path';
 import notifier from 'node-notifier';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
-
-const ckeditor5icon = path.join( __dirname, '..', 'icons', 'ckeditor5.png' );
+const ckeditor5icon = path.join( import.meta.dirname, '..', 'icons', 'ckeditor5.png' );
 
 const defaultNotifyOptions = {
 	appID: 'CKEditor 5 Tests',

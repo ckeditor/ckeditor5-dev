@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import matter from 'gray-matter';
 import { isValid, parse } from 'date-fns';
 import { AsyncArray } from './asyncarray.js';

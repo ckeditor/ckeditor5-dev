@@ -4,10 +4,10 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import getPackageContext from '../../lib/utils/getpackagecontext.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 
 describe( 'getPackageContext()', () => {
 	let defaultOptions;
@@ -17,11 +17,11 @@ describe( 'getPackageContext()', () => {
 			packagePath: '/absolute/path/to/packages/ckeditor5-foo'
 		};
 
-		vi.mocked( fs.readJsonSync ).mockImplementation( path => {
+		vi.mocked( fs.readFileSync ).mockImplementation( path => {
 			if ( path === '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json' ) {
-				return {
+				return JSON.stringify( {
 					id1: 'Context for message id1 from "ckeditor5-foo".'
-				};
+				} );
 			}
 
 			return null;
@@ -35,8 +35,8 @@ describe( 'getPackageContext()', () => {
 	it( 'should read context file from package', () => {
 		getPackageContext( defaultOptions );
 
-		expect( fs.readJsonSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.readJsonSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json', { throws: false } );
+		expect( fs.readFileSync ).toHaveBeenCalledTimes( 1 );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json', 'utf-8' );
 	} );
 
 	it( 'should return package contexts', () => {

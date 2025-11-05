@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs';
 import PO from 'pofile';
 import { glob } from 'glob';
 import createMissingPackageTranslations from './createmissingpackagetranslations.js';

@@ -4,17 +4,17 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'publishPackageOnNpmCallback()', () => {
 	beforeEach( () => {
 		vi.mocked( tools.shExec ).mockResolvedValue();
-		vi.mocked( fs.remove ).mockResolvedValue();
+		vi.mocked( fs.rm ).mockResolvedValue();
 	} );
 
 	it( 'should publish package on npm with provided npm tag', () => {
@@ -67,8 +67,8 @@ describe( 'publishPackageOnNpmCallback()', () => {
 
 		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
 			.then( () => {
-				expect( fs.remove ).toHaveBeenCalledTimes( 1 );
-				expect( fs.remove ).toHaveBeenCalledWith( packagePath );
+				expect( fs.rm ).toHaveBeenCalledTimes( 1 );
+				expect( fs.rm ).toHaveBeenCalledWith( packagePath, expect.anything() );
 			} );
 	} );
 
@@ -79,6 +79,6 @@ describe( 'publishPackageOnNpmCallback()', () => {
 
 		await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
 
-		expect( fs.remove ).not.toHaveBeenCalled();
+		expect( fs.rm ).not.toHaveBeenCalled();
 	} );
 } );

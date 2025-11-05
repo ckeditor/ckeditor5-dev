@@ -3,9 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs/promises';
 import upath from 'upath';
-import fs from 'fs-extra';
-import { fileURLToPath } from 'url';
 import { GraphQLClient } from 'graphql-request';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import {
@@ -21,10 +20,7 @@ import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose.js'
 import isPendingIssueToStale from './utils/ispendingissuetostale.js';
 import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel.js';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = upath.dirname( __filename );
-
-const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
+const GRAPHQL_PATH = upath.join( import.meta.dirname, 'graphql' );
 
 /**
  * A GitHub client containing methods used to interact with GitHub using its GraphQL API.

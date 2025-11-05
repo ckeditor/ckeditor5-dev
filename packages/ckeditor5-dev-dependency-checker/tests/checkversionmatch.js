@@ -4,22 +4,17 @@
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import checkVersionMatch from '../lib/checkversionmatch.js';
-
-import fs from 'fs-extra';
+import fs from 'fs';
 import { globSync } from 'glob';
 import { execSync } from 'child_process';
+import checkVersionMatch from '../lib/checkversionmatch.js';
 
 const hoists = vi.hoisted( () => ( {
-	chalk: {
-		blue: vi.fn( input => input ),
-		green: vi.fn( input => input ),
-		red: vi.fn( input => input )
-	}
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
-vi.mock( 'fs-extra' );
-vi.mock( 'chalk', () => ( { default: hoists.chalk } ) );
+vi.mock( 'fs' );
+vi.mock( 'util', () => ( { styleText: hoists.styleText } ) );
 vi.mock( 'glob' );
 vi.mock( 'child_process' );
 
@@ -84,7 +79,7 @@ describe( 'checkVersionMatch()', () => {
 		vi.stubGlobal( 'process', { ...process, exit: processExitMock } );
 		vi.stubGlobal( 'console', { ...console, log: consoleLogMock, error: consoleErrorMock } );
 
-		vi.mocked( fs.readJsonSync ).mockImplementation( path => files[ path ] );
+		vi.mocked( fs.readFileSync ).mockImplementation( path => JSON.stringify( files[ path ] ) );
 		vi.mocked( globSync ).mockReturnValue( Object.keys( files ) );
 		vi.mocked( execSync ).mockImplementation( command => {
 			const [ , dependency ] = command.match( /npm view ([a-z0-9]+) versions --json/i );
@@ -305,11 +300,11 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies fixed!' );
 
-		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 3 );
 
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 1,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 1,
 			'./package.json',
-			{
+			JSON.stringify( {
 				name: 'rootPkg',
 				dependencies: {
 					dep1: '1.0.1'
@@ -317,12 +312,11 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.0'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 2,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 2,
 			'./packages/foo/package.json',
-			{
+			JSON.stringify( {
 				name: 'fooPkg',
 				dependencies: {
 					dep1: '1.0.1'
@@ -330,12 +324,11 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.0'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 3,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 3,
 			'./packages/bar/package.json',
-			{
+			JSON.stringify( {
 				name: 'barPkg',
 				dependencies: {
 					dep1: '1.0.1'
@@ -343,8 +336,7 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.0'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 	} );
 
@@ -363,11 +355,11 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies fixed!' );
 
-		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 3 );
 
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 1,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 1,
 			'./package.json',
-			{
+			JSON.stringify( {
 				name: 'rootPkg',
 				dependencies: {
 					dep1: '1.0.0'
@@ -375,22 +367,20 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.1'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 2,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 2,
 			'./packages/foo/package.json',
-			{
+			JSON.stringify( {
 				name: 'fooPkg',
 				devDependencies: {
 					dep2: '2.0.1'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 3,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 3,
 			'./packages/bar/package.json',
-			{
+			JSON.stringify( {
 				name: 'barPkg',
 				dependencies: {
 					dep1: '1.0.0'
@@ -398,8 +388,7 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.1'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 	} );
 
@@ -500,12 +489,12 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 3, '✅  All dependencies fixed!' );
 
-		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 3 );
 
 		// dep2 should remain unchanged since it's filtered out
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 1,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 1,
 			'./package.json',
-			{
+			JSON.stringify( {
 				name: 'rootPkg',
 				dependencies: {
 					dep1: '1.0.1'
@@ -513,8 +502,7 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: '2.0.1' // Should remain unchanged due to filter
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 	} );
 
@@ -583,11 +571,11 @@ describe( 'checkVersionMatch()', () => {
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 1, '🔍 Starting checking dependencies versions...' );
 		expect( consoleLogMock ).toHaveBeenNthCalledWith( 2, '✅  All dependencies fixed!' );
 
-		expect( fs.writeJSONSync ).toHaveBeenCalledTimes( 3 );
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 3 );
 
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 1,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 1,
 			'./package.json',
-			{
+			JSON.stringify( {
 				name: 'rootPkg',
 				dependencies: {
 					dep1: 'workspace:*'
@@ -595,13 +583,12 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: 'workspace:*'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 2,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 2,
 			'./packages/foo/package.json',
-			{
+			JSON.stringify( {
 				name: 'fooPkg',
 				dependencies: {
 					dep1: 'workspace:*'
@@ -609,13 +596,12 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: 'workspace:*'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 
-		expect( fs.writeJSONSync ).toHaveBeenNthCalledWith( 3,
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith( 3,
 			'./packages/bar/package.json',
-			{
+			JSON.stringify( {
 				name: 'barPkg',
 				dependencies: {
 					dep1: 'workspace:*'
@@ -623,8 +609,7 @@ describe( 'checkVersionMatch()', () => {
 				devDependencies: {
 					dep2: 'workspace:*'
 				}
-			},
-			{ 'spaces': 2 }
+			}, null, 2 )
 		);
 	} );
 } );
