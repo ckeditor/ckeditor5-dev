@@ -74,6 +74,12 @@ validateLicenseFiles( {
 			minimistOverride
 		]
 	}, {
+		packageName: '@ckeditor/ckeditor5-dev-translations',
+		dependencies: [
+			{ license: 'MIT', name: '@babel/parser', copyright: 'Copyright (C) 2012-2014 by various contributors (see AUTHORS).' },
+			simpleGitOverride
+		]
+	}, {
 		packageName: '@ckeditor/ckeditor5-dev-utils',
 		dependencies: [
 			{ license: 'MIT', name: 'through2', copyright: 'Copyright (c) Rod Vagg (the "Original Author") and additional contributors.' },

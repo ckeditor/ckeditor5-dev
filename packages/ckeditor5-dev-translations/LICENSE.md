@@ -23,6 +23,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * fs-extra - Copyright (c) 2011-2024 JP Richardson.
 * plural-forms - Copyright (c) 2020 AlexMost.
 * pofile - Copyright (C) 2013-2017 Ruben Vermeersch and Copyright (C) 2012 Michael Holly.
+* simple-git - Copyright (c) 2022 Steve King.
 * upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
 * webpack-sources - Copyright (c) 2017 JS Foundation and other contributors.
 
