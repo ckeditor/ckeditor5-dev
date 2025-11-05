@@ -13,7 +13,7 @@
     "directory": "packages/ckeditor5-dev-docs"
   },
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=24.11.0",
     "npm": ">=5.7.1"
   },
   "type": "module",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@ckeditor/typedoc-plugins": "workspace:*",
     "glob": "^11.0.2",
-    "typedoc": "0.28.9",
+    "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "upath": "^2.0.1"
   },
