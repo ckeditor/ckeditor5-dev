@@ -7,6 +7,12 @@ onlyBuiltDependencies:
   - esbuild
   - puppeteer
 
+minimumReleaseAge: 4320 # 3 days
+minimumReleaseAgeExclude:
+  - '@ckeditor/*'
+  - '@cksource/*'
+  - '*ckeditor5*'
+
 shellEmulator: true
 shamefullyHoist: true
 preferFrozenLockfile: true
