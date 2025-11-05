@@ -41,6 +41,7 @@ const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: '
 /**
  * @param options
  * @param options.fix Whether to fix license files instead of printing errors.
+ * @param options.verbose Whether to print diff instead of just path to file on failed validation.
  * @param options.shouldProcessRoot Whether validation should process the root.
  * @param options.shouldProcessPackages Whether validation should process `packages/*`.
  * @param options.isPublic Whether license should use disclaimer meant for open source repositories.
