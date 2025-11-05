@@ -8,8 +8,9 @@ import upath from 'upath';
 
 import { validateLicenseFiles } from '@ckeditor/ckeditor5-dev-license-checker';
 
-const { fix } = parseArgs( { options: {
-	'fix': { type: 'boolean', default: false }
+const { fix, verbose } = parseArgs( { options: {
+	'fix': { type: 'boolean', default: false },
+	'verbose': { type: 'boolean', default: false }
 } } ).values;
 
 const minimistOverride = { license: 'MIT', name: 'minimist', copyright: 'Copyright (c) 2013 James Halliday and contributors.' };
@@ -18,6 +19,7 @@ const babelParserOverride = { license: 'MIT', name: '@babel/parser', copyright: 
 
 validateLicenseFiles( {
 	fix,
+	verbose,
 	shouldProcessRoot: true,
 	shouldProcessPackages: true,
 	isPublic: true,

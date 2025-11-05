@@ -5,6 +5,7 @@
 
 import { glob, readFile, writeFile } from 'fs/promises';
 import { findPackageJSON } from 'module';
+import { createPatch } from 'diff';
 import upath from 'upath';
 
 type CopyrightOverride = {
@@ -32,6 +33,7 @@ type ValidationItem = {
 	sectionMissing?: boolean;
 	updateNeeded?: boolean;
 	updated?: boolean;
+	patch?: string;
 };
 
 const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: 'conjunction' } );
@@ -51,6 +53,7 @@ const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: '
  */
 export async function validateLicenseFiles( {
 	fix = false,
+	verbose = false,
 	shouldProcessRoot = false,
 	shouldProcessPackages = false,
 	isPublic = false,
@@ -60,6 +63,7 @@ export async function validateLicenseFiles( {
 	copyrightOverrides = []
 }: {
 	fix?: boolean;
+	verbose?: boolean;
 	shouldProcessRoot?: boolean;
 	shouldProcessPackages?: boolean;
 	isPublic?: boolean;
@@ -212,7 +216,9 @@ export async function validateLicenseFiles( {
 			return { licensePath, updated: true };
 		}
 
-		return { licensePath, updateNeeded: true };
+		const patch = createPatch( licensePath, currentLicense, newLicense );
+
+		return { licensePath, updateNeeded: true, patch };
 	} );
 
 	const validationReturnValues: Array<ValidationItem> = ( await Promise.all( validationPromises ) )
@@ -251,7 +257,12 @@ export async function validateLicenseFiles( {
 
 	if ( updatesNeeded.length ) {
 		console.error( '\nFollowing license files are not up to date. Please run this script with `--fix` option and review the changes.' );
-		console.error( makeLicenseFileList( updatesNeeded ) );
+
+		if ( !verbose ) {
+			console.error( makeLicenseFileList( updatesNeeded ) );
+		} else {
+			console.error( '\n' + updatesNeeded.map( ( { patch } ) => patch ).join( '\n' ) );
+		}
 	}
 
 	return 1;

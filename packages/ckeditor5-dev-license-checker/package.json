@@ -23,6 +23,7 @@
     "dist"
   ],
   "dependencies": {
+    "diff": "^8.0.2",
     "upath": "^2.0.1"
   },
   "devDependencies": {
