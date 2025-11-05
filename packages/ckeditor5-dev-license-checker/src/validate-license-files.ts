@@ -34,6 +34,8 @@ type ProcessingResult =
 	{ licensePath: string; sectionMissing: true } |
 	{ licensePath: string; updateNeeded: true; patch: string };
 
+type UpdateNeeded = Extract<ProcessingResult, { updateNeeded: true }>;
+
 const conjunctionFormatter = new Intl.ListFormat( 'en', { style: 'long', type: 'conjunction' } );
 
 /**
@@ -117,7 +119,9 @@ export async function validateLicenseFiles( {
 	const updatedLicenses = processingResults.filter( processingResult => 'updated' in processingResult );
 	const licensesMissing = processingResults.filter( processingResult => 'licenseMissing' in processingResult );
 	const sectionsMissing = processingResults.filter( processingResult => 'sectionMissing' in processingResult );
-	const updatesNeeded = processingResults.filter( processingResult => 'updateNeeded' in processingResult );
+	const updatesNeeded = processingResults.filter(
+		( processingResult ): processingResult is UpdateNeeded => 'updateNeeded' in processingResult
+	);
 
 	if ( updatedLicenses.length ) {
 		console.info( '\nUpdated the following license files:' );
@@ -216,7 +220,7 @@ function getMissingCopyrightLists( dependencyMaps: Array<DependencyMap> ): Array
 				].join( '\n' );
 			}
 		} )
-		.filter( item => typeof item === 'string' );
+		.filter( ( item ): item is string => typeof item === 'string' );
 }
 
 function copyDependenciesToTheMainPackage( dependencyMaps: Array<DependencyMap>, mainPackageName: string ) {
