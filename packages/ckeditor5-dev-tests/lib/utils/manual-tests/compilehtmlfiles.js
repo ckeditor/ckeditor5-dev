@@ -13,10 +13,6 @@ import combine from 'dom-combiner';
 import chokidar from 'chokidar';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getRelativeFilePath from '../getrelativefilepath.js';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
@@ -34,7 +30,7 @@ const writer = new commonmark.HtmlRenderer();
  */
 export default function compileHtmlFiles( options ) {
 	const buildDir = options.buildDir;
-	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
+	const viewTemplate = fs.readFileSync( path.join( import.meta.dirname, 'template.html' ), 'utf-8' );
 	const silent = options.silent || false;
 
 	const sourceMDFiles = options.sourceFiles.map( jsFile => setExtension( jsFile, 'md' ) );

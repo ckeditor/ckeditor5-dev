@@ -57,7 +57,11 @@ describe( 'compileHtmlFiles()', () => {
 	beforeEach( () => {
 		stubs.commonmark.htmlRenderer.render.mockReturnValue( '<h2>Markdown header</h2>' );
 		vi.mocked( logger ).mockReturnValue( stubs.log );
-		vi.mocked( fs ).readFileSync.mockImplementation( pathToFile => files[ pathToFile ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( pathToFile =>
+			Object
+				.entries( files )
+				.find( ( [ path ] ) => pathToFile.endsWith( path ) )?.[ 1 ]
+		);
 		vi.mocked( path ).join.mockImplementation( ( ...chunks ) => chunks.join( separator ) );
 		vi.mocked( path ).parse.mockImplementation( pathToParse => {
 			const chunks = pathToParse.split( separator );
@@ -333,12 +337,12 @@ describe( 'compileHtmlFiles()', () => {
 		} );
 	} );
 
-	describe.only( 'Windows environment', () => {
+	describe( 'Windows environment', () => {
 		beforeEach( () => {
 			separator = '\\';
 		} );
 
-		it.only( 'should work on Windows environments', () => {
+		it( 'should work on Windows environments', () => {
 			patternFiles = {
 				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};

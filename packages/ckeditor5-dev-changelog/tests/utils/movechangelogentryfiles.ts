@@ -39,8 +39,8 @@ describe( 'moveChangelogEntryFiles()', () => {
 	};
 
 	beforeEach( () => {
-		vi.mocked( fs.mkdir ).mockResolvedValue();
-		vi.mocked( fs.rename ).mockResolvedValue();
+		vi.mocked( fs.mkdir ).mockReset();
+		vi.mocked( fs.rename ).mockReset();
 	} );
 
 	it( 'should log the start of the process', async () => {
