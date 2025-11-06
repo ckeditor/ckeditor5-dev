@@ -27,10 +27,12 @@ const assets = [
  *		...
  */
 export default function copyAssets( buildDir ) {
-	for ( const assetPath of assets ) {
-		const outputFilePath = path.join( buildDir, 'assets', path.basename( assetPath ) );
+	const outputDir = path.join( buildDir, 'assets' );
 
-		fs.mkdirSync( path.dirname( outputFilePath ), { recursive: true } );
+	fs.mkdirSync( outputDir, { recursive: true } );
+
+	for ( const assetPath of assets ) {
+		const outputFilePath = path.join( outputDir, path.basename( assetPath ) );
 		fs.copyFileSync( assetPath, outputFilePath );
 	}
 }
