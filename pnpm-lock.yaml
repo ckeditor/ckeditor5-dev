@@ -6,7 +6,6 @@ settings:
 
 overrides:
   tar@^7.0.0: ^=7.5.2
-  vite@^7.0.0: ^7.1.12
 
 importers:
 
@@ -2172,7 +2171,7 @@ packages:
     resolution: {integrity: sha512-46ryTE9RZO/rfDd7pEqFl7etuyzekzEhUbTW3BvmeO/BcCMEgq59BKhek3dXDWgAj4oMK6OZi+vRr1wPW6qjEQ==}
     peerDependencies:
       msw: ^2.4.9
-      vite: ^7.1.12
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0-0
     peerDependenciesMeta:
       msw:
         optional: true
