@@ -32,11 +32,6 @@
     "semver": "^7.6.3",
     "upath": "^2.0.1"
   },
-  "pnpm": {
-    "overrides": {
-      "tar@^7.0.0": "^=7.5.2"
-    }
-  },
   "scripts": {
     "nice": "ckeditor5-dev-changelog-create-entry",
     "postinstall": "node ./scripts/postinstall.js",
