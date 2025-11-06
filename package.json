@@ -15,7 +15,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-license-checker": "workspace:*",
     "@inquirer/prompts": "^7.5.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^22.0.0",
@@ -45,8 +44,7 @@
     "lint": "eslint",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
-    "check-dependencies": "ckeditor5-dev-dependency-checker",
-    "validate-licenses": "node scripts/validate-licenses.mjs"
+    "check-dependencies": "ckeditor5-dev-dependency-checker"
   },
   "lint-staged": {
     "**/*": [
