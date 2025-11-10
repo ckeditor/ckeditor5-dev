@@ -6,7 +6,7 @@ CKEditor 5 CI utilities
 
 Utils for [CKEditor 5](https://ckeditor.com) CI builds.
 
-Contains tools for sending Slack notifications by Travis or Circle CI.
+Contains tools for sending Slack notifications by Circle CI.
 
 ## Available scripts
 
@@ -29,7 +29,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-circle-enable-auto-cancel-builds`**
 
-  Enables the _“Auto-cancel redundant workflows”_ option in CircleCI for a given repository.  
+  Enables the _“Auto-cancel redundant workflows”_ option in CircleCI for a given repository.
   Should be used after a release workflow that temporarily disables this option using the `ckeditor5-dev-ci-circle-disable-auto-cancel-builds` script.
 
   **Environment variables:**
@@ -41,7 +41,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-circle-workflow-notifier`**
 
-  Waits for all jobs in the **current CircleCI workflow** to finish (success or error) and then runs a final command (the "notifier").  
+  Waits for all jobs in the **current CircleCI workflow** to finish (success or error) and then runs a final command (the "notifier").
   Intended to run as a **dedicated job** in your workflow. The script itself handles waiting – you typically don’t add `requires` on this job.
 
   **Environment variables:**
@@ -57,7 +57,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-is-job-triggered-by-member`**
 
-  Verifies that a **CircleCI approval job** was approved by a user who belongs to a specified GitHub team.  
+  Verifies that a **CircleCI approval job** was approved by a user who belongs to a specified GitHub team.
   Uses CircleCI and GitHub APIs to check the approver against the team membership.
 
   **Environment variables:**
@@ -74,7 +74,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-is-workflow-restarted`**
 
-  Checks whether the current CircleCI workflow has been **restarted**.  
+  Checks whether the current CircleCI workflow has been **restarted**.
   If a restart is detected, the script exits with a zero exit code, allowing the pipeline to continue conditionally.
 
   **Environment variables:**
@@ -85,7 +85,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-notify-circle-status`**
 
-  Sends a Slack notification summarizing the current CircleCI build/workflow status.  
+  Sends a Slack notification summarizing the current CircleCI build/workflow status.
   For failed builds, fetches the commit author via the GitHub API (works with private repositories).
 
   **Environment variables:**
@@ -94,7 +94,7 @@ These commands accept a mix of environment variables and command line arguments.
   - `CKE5_SLACK_WEBHOOK_URL` &mdash; Incoming Webhook URL for the Slack channel receiving notifications.
 
   **CircleCI-provided variables:**
-  - `CIRCLE_BRANCH` &mdash; The number of the current build. 
+  - `CIRCLE_BRANCH` &mdash; The number of the current build.
   - `CIRCLE_PROJECT_REPONAME` &mdash; Repository name.
   - `CIRCLE_PROJECT_USERNAME` &mdash; Organization/user name.
   - `CIRCLE_SHA1` &mdash; Commit SHA of the current build.
@@ -108,7 +108,7 @@ These commands accept a mix of environment variables and command line arguments.
 
 - ⚙️ **`ckeditor5-dev-ci-trigger-circle-build`**
 
-  Triggers a **new CircleCI pipeline** for a specified repository.  
+  Triggers a **new CircleCI pipeline** for a specified repository.
   Commonly used to initiate release or follow-up pipelines from an existing workflow.
 
   **Environment variables:**
@@ -120,7 +120,7 @@ These commands accept a mix of environment variables and command line arguments.
 
   **Parameters:**
   - `--slug` &mdash; Repository slug (`org/name`) where the new pipeline will be started.
-  - `--trigger-repository-slug` &mdash; *(Optional)* Repository slug (`org/name`) that triggered the new pipeline.  
+  - `--trigger-repository-slug` &mdash; *(Optional)* Repository slug (`org/name`) that triggered the new pipeline.
     Can be omitted if it matches `--slug`.
   - `--release-branch` &mdash; *(Optional)* Branch that leads the release process.
 
