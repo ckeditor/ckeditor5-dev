@@ -23,11 +23,8 @@
     "lib"
   ],
   "bin": {
-    "ckeditor5-dev-ci-notify-travis-status": "bin/notify-travis-status.js",
     "ckeditor5-dev-ci-notify-circle-status": "bin/notify-circle-status.js",
     "ckeditor5-dev-ci-circle-workflow-notifier": "bin/circle-workflow-notifier.js",
-    "ckeditor5-dev-ci-allocate-swap-memory": "bin/allocate-swap-memory.sh",
-    "ckeditor5-dev-ci-install-latest-chrome": "bin/install-latest-chrome.sh",
     "ckeditor5-dev-ci-is-job-triggered-by-member": "bin/is-job-triggered-by-member.js",
     "ckeditor5-dev-ci-is-workflow-restarted": "bin/is-workflow-restarted.js",
     "ckeditor5-dev-ci-trigger-circle-build": "bin/trigger-circle-build.js",
