@@ -13,10 +13,6 @@ Changelog
   * `ckeditor5-dev-ci-allocate-swap-memory`,
   * `ckeditor5-dev-ci-install-latest-chrome`.
 
-### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools), [bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year), [changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog), [ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci), [dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker), [docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs), [release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools), [stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot), [tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests), [translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations), [utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils), [web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler), [typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Upgrade to and require at least Node v24.11.
-
 ### Features
 
 * **[license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker)**: Added new package: `@ckeditor/ckeditor5-dev-license-checker`.
