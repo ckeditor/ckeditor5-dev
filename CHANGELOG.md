@@ -12,6 +12,8 @@ Changelog
   * `ckeditor5-dev-ci-notify-travis-status`,
   * `ckeditor5-dev-ci-allocate-swap-memory`,
   * `ckeditor5-dev-ci-install-latest-chrome`.
+  * 
+* Updated the required version of Node.js to **v24.11**.
 
 ### Features
 
