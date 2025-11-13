@@ -8,11 +8,6 @@ import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 
 vi.mock( '../../src/utils/loginfo' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		yellow: vi.fn( ( text: string ) => text )
-	}
-} ) );
 
 describe( 'detectReleaseChannel()', () => {
 	it( 'should detect alpha channel for prerelease', () => {

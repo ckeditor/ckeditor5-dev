@@ -37,7 +37,7 @@ const {
 	};
 } );
 
-vi.mock( 'fs-extra', () => {
+vi.mock( 'fs/promises', () => {
 	return {
 		default: {
 			readFile: fsReadFileMock

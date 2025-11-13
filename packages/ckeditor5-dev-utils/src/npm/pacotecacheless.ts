@@ -6,7 +6,7 @@
 import os from 'os';
 import { randomUUID } from 'crypto';
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import pacote from 'pacote';
 
 export const manifest = cacheLessPacoteFactory( pacote.manifest );
@@ -22,7 +22,7 @@ function cacheLessPacoteFactory<T extends ( ...args: Array<any> ) => any>( callb
 		const uuid = randomUUID();
 		const cacheDir = upath.join( os.tmpdir(), `pacote--${ uuid }` );
 
-		await fs.ensureDir( cacheDir );
+		await fs.mkdir( cacheDir, { recursive: true } );
 
 		try {
 			return await callback( description, {
@@ -32,7 +32,7 @@ function cacheLessPacoteFactory<T extends ( ...args: Array<any> ) => any>( callb
 				preferOnline: true
 			} );
 		} finally {
-			await fs.remove( cacheDir );
+			await fs.rm( cacheDir, { recursive: true, force: true } );
 		}
 	};
 }

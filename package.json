@@ -18,7 +18,7 @@
     "@inquirer/prompts": "^7.5.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
     "@octokit/rest": "^22.0.0",
-    "eslint": "^9.26.0",
+    "eslint": "^9.34.0",
     "eslint-config-ckeditor5": "^12.2.0",
     "eslint-plugin-ckeditor5-rules": "^12.2.0",
     "fs-extra": "^11.0.0",
@@ -41,7 +41,7 @@
     "release:prepare-changelog": "node ./scripts/preparechangelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
-    "lint": "eslint",
+    "lint": "eslint --concurrency=4",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
     "check-dependencies": "ckeditor5-dev-dependency-checker"

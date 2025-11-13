@@ -12,15 +12,11 @@
 // See: https://circleci.com/docs/using-dynamic-configuration/.
 
 import fs from 'fs-extra';
-import { fileURLToPath } from 'url';
 import upath from 'upath';
 import { glob } from 'glob';
 import yaml from 'js-yaml';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = upath.dirname( __filename );
-
-const ROOT_DIRECTORY = upath.join( __dirname, '..', '..' );
+const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..', '..' );
 const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci' );
 
 ( async () => {

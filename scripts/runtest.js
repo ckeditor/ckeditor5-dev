@@ -6,11 +6,11 @@
  */
 
 import path from 'path';
+import { styleText } from 'util';
 import { execSync } from 'child_process';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
 import minimist from 'minimist';
-import chalk from 'chalk';
 
 main();
 
@@ -30,7 +30,7 @@ function main() {
 	const ignoredPackages = packages.filter( item => !testablePackages.find( testable => item.relativePath === testable.relativePath ) );
 
 	for ( const { relativePath, packageJson } of testablePackages ) {
-		console.log( chalk.bold.magenta( `\nRunning tests for "${ chalk.underline( packageJson.name ) }"...` ) );
+		console.log( styleText( [ 'bold', 'magenta' ], `\nRunning tests for "${ styleText( 'underline', packageJson.name ) }"...` ) );
 		const testScript = coverage ? 'coverage' : 'test';
 
 		try {
@@ -51,7 +51,7 @@ function main() {
 	}
 
 	if ( ignoredPackages.length ) {
-		console.log( chalk.yellow( '\nThe following packages do not define tests:' ) );
+		console.log( styleText( 'yellow', '\nThe following packages do not define tests:' ) );
 
 		ignoredPackages.forEach( ( { packageJson } ) => {
 			console.log( `  - ${ packageJson.name }` );

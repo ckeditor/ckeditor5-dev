@@ -4,9 +4,9 @@
  */
 
 import fs from 'fs';
+import { styleText } from 'util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
-import chalk from 'chalk';
 import { globSync } from 'glob';
 import { minimatch } from 'minimatch';
 import { mkdirp } from 'mkdirp';
@@ -30,7 +30,8 @@ const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests', 
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
 		if ( !options.production ) {
-			console.warn( chalk.yellow(
+			console.warn( styleText(
+				'yellow',
 				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
 				'to use strictest verification methods.'
 			) );
@@ -210,7 +211,7 @@ function runKarma( options ) {
 				setTimeout( () => {
 					const log = logger();
 
-					log.info( `Coverage report saved in '${ chalk.cyan( coveragePath ) }'.` );
+					log.info( `Coverage report saved in '${ styleText( 'cyan', coveragePath ) }'.` );
 				} );
 			} );
 		}

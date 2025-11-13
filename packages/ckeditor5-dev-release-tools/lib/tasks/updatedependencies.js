@@ -4,7 +4,7 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 
 const { normalizeTrim } = upath;
@@ -51,13 +51,14 @@ export default async function updateDependencies( options ) {
 	);
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		const pkgJson = await fs.readJson( pkgJsonPath );
+		const pkgJsonFile = await fs.readFile( pkgJsonPath, 'utf-8' );
+		const pkgJson = JSON.parse( pkgJsonFile );
 
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.dependencies );
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.devDependencies );
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.peerDependencies );
 
-		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
+		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) );
 	}
 }
 

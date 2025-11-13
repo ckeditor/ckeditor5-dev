@@ -8,10 +8,6 @@ import webpack from 'webpack';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
 import TreatWarningsAsErrorsWebpackPlugin from './treatwarningsaserrorswebpackplugin.js';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 /**
  * @param {object} options
@@ -83,7 +79,7 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 		resolveLoader: {
 			modules: [
 				'node_modules',
-				path.resolve( __dirname, '..', '..', '..', 'node_modules' )
+				path.resolve( import.meta.dirname, '..', '..', '..', 'node_modules' )
 			]
 		},
 

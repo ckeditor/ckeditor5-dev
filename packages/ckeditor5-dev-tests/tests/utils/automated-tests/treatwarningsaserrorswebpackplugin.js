@@ -6,11 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import webpack from 'webpack';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin.js';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 describe( 'TreatWarningsAsErrorsWebpackPlugin', () => {
 	it( 'should reassign warnings to errors and not emit the code when errors are present', () => {
@@ -58,7 +54,7 @@ describe( 'TreatWarningsAsErrorsWebpackPlugin', () => {
 } );
 
 function runCompiler( options, callback ) {
-	options.context = path.join( __dirname, '..', '..', 'fixtures' );
+	options.context = path.join( import.meta.dirname, '..', '..', 'fixtures' );
 
 	const compiler = webpack( options );
 

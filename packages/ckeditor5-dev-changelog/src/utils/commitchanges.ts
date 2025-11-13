@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import upath from 'upath';
-import chalk from 'chalk';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { logInfo } from './loginfo.js';
 import { CHANGELOG_FILE } from './constants.js';
@@ -15,7 +15,7 @@ type RepositoryData = Pick<ChangesetPathsWithGithubUrl, 'cwd' | 'isRoot' | 'file
 export async function commitChanges( version: string, repositories: Array<RepositoryData> ): Promise<void> {
 	const message = `Changelog for v${ version }. [skip ci]`;
 
-	logInfo( `○ ${ chalk.cyan( 'Committing changes...' ) }` );
+	logInfo( `○ ${ styleText( 'cyan', 'Committing changes...' ) }` );
 
 	for ( const { cwd, isRoot, filePaths } of repositories ) {
 		// Copy to avoid modifying the original array.
@@ -30,7 +30,7 @@ export async function commitChanges( version: string, repositories: Array<Reposi
 		await tools.commit( { cwd, message, files } )
 			.catch( error => {
 				logInfo( 'An error occurred while committing changes.', { indent: 2 } );
-				logInfo( chalk.red( error.message ), { indent: 2 } );
+				logInfo( styleText( 'red', error.message ), { indent: 2 } );
 			} );
 	}
 }

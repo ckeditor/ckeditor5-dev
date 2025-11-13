@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
@@ -14,7 +14,7 @@ import getHeaders from '../../lib/utils/getheaders.js';
 import addTranslation from '../../lib/utils/addtranslation.js';
 import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );

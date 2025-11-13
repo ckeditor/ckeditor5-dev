@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import { fileURLToPath } from 'url';
-import chalk from 'chalk';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ) );
@@ -23,7 +23,7 @@ tests.runAutomatedTests( options )
 		process.exit( 0 );
 	} )
 	.catch( error => {
-		console.log( chalk.red( error ) );
+		console.log( styleText( 'red', error ) );
 
 		process.exit( 1 );
 	} );

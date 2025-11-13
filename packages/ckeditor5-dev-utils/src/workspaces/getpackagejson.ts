@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import upath from 'upath';
-import * as process from 'node:process';
 
 export interface PackageJson {
 	name: string;
@@ -69,8 +69,9 @@ export default function getPackageJson(
 	const path = upath.join( cwd, 'package.json' );
 
 	if ( async ) {
-		return fs.readJson( path );
+		return readFile( path, 'utf-8' ).then( data => JSON.parse( data ) );
 	}
 
-	return fs.readJsonSync( path );
+	const data = readFileSync( path, 'utf-8' );
+	return JSON.parse( data );
 }

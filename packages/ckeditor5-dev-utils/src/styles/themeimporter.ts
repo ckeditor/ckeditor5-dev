@@ -5,9 +5,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import { styleText } from 'util';
 import { default as postcss, type Plugin, type Processor, type Root, type Helpers } from 'postcss';
 import postCssImport from 'postcss-import';
-import chalk from 'chalk';
 import logger from '../logger/index.js';
 import themeLogger from './themelogger.js';
 import getPackageName from './utils/getpackagename.js';
@@ -106,7 +106,7 @@ function importThemeFile( options: Options ): void | Promise<void> {
 
 	if ( themeFilePath ) {
 		if ( options.debug ) {
-			log.info( `[ThemeImporter] Loading for "${ chalk.cyan( inputFilePath ) }".` );
+			log.info( `[ThemeImporter] Loading for "${ styleText( 'cyan', inputFilePath ) }".` );
 		}
 
 		options.fileToImport = themeFilePath;
@@ -132,7 +132,7 @@ function importFile( options: Options ): void | Promise<void> {
 
 	if ( !fs.existsSync( file ) ) {
 		if ( options.debug ) {
-			log.info( `[ThemeImporter] Failed to find "${ chalk.yellow( file ) }".` );
+			log.info( `[ThemeImporter] Failed to find "${ styleText( 'yellow', file ) }".` );
 		}
 
 		return;
@@ -157,7 +157,7 @@ function importFile( options: Options ): void | Promise<void> {
 			} );
 
 			if ( options.debug ) {
-				log.info( `[ThemeImporter] Loaded "${ chalk.green( file ) }".` );
+				log.info( `[ThemeImporter] Loaded "${ styleText( 'green', file ) }".` );
 			}
 		} )
 		.catch( error => {

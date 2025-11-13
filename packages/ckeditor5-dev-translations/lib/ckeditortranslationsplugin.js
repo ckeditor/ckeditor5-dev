@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 import serveTranslations from './servetranslations.js';
 import MultipleLanguageTranslationService from './multiplelanguagetranslationservice.js';
 
@@ -58,7 +58,8 @@ export default class CKEditorTranslationsPlugin {
 
 	apply( compiler ) {
 		if ( !this.options.language ) {
-			console.warn( chalk.yellow(
+			console.warn( styleText(
+				'yellow',
 				'The `language` option is required by the `CKEditorTranslationsPlugin` plugin.' +
 				'If you do not want to localize the CKEditor 5 code do not add this plugin to your webpack configuration.'
 			) );

@@ -7,13 +7,9 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
-import { fileURLToPath } from 'url';
 import { globSync } from 'glob';
 import combine from 'dom-combiner';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 /**
  * Basic HTTP server.
@@ -127,7 +123,7 @@ function getContentType( fileExtension ) {
 // @param {string} sourcePath Base path that will be used to resolve all patterns.
 // @returns {string}
 function generateIndex( sourcePath ) {
-	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
+	const viewTemplate = fs.readFileSync( path.join( import.meta.dirname, 'template.html' ), 'utf-8' );
 	const globPattern = path.join( sourcePath, '**', '*.html' ).replace( /\\/g, '/' );
 	const testFiles = globSync( globPattern ).sort( ( pathA, pathB ) => pathA.localeCompare( pathB ) );
 	const testTree = {};

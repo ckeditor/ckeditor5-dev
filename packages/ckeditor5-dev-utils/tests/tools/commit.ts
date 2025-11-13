@@ -7,12 +7,12 @@ import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import commit from '../../src/tools/commit.js';
 import { simpleGit } from 'simple-git';
 import { glob } from 'glob';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 
 describe( 'commit()', () => {
 	let stubs: {

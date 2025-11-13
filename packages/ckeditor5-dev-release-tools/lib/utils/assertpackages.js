@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 
 /**
@@ -25,12 +25,12 @@ export default async function assertPackages( packagePaths, options ) {
 		const packageName = upath.basename( packagePath );
 		const packageJsonPath = upath.join( packagePath, 'package.json' );
 
-		if ( await fs.pathExists( packageJsonPath ) ) {
+		if ( await fs.access( packageJsonPath ) ) {
 			if ( !requireEntryPoint ) {
 				continue;
 			}
 
-			const { name: packageName, main: entryPoint } = await fs.readJson( packageJsonPath );
+			const { name: packageName, main: entryPoint } = JSON.parse( await fs.readFile( packageJsonPath, 'utf-8' ) );
 
 			if ( optionalEntryPointPackages.includes( packageName ) ) {
 				continue;

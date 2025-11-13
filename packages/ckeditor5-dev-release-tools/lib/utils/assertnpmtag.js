@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 import getNpmTagFromVersion from './getnpmtagfromversion.js';
 
@@ -23,8 +23,9 @@ export default async function assertNpmTag( packagePaths, npmTag ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
-		const packageJsonPath = upath.join( packagePath, 'package.json' );
-		const packageJson = await fs.readJson( packageJsonPath );
+		const path = upath.join( packagePath, 'package.json' );
+		const file = await fs.readFile( path, 'utf-8' );
+		const packageJson = JSON.parse( file );
 		const versionTag = getNpmTagFromVersion( packageJson.version );
 
 		if ( versionTag === npmTag ) {

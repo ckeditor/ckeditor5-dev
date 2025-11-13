@@ -4,10 +4,6 @@
  */
 
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 type DebugLoaderOptions = {
 	loader: string;
@@ -22,7 +18,7 @@ type DebugLoaderOptions = {
  */
 export default function getDebugLoader( debugFlags: Array<string> ): DebugLoaderOptions {
 	return {
-		loader: path.join( __dirname, 'ck-debug-loader.js' ),
+		loader: path.join( import.meta.dirname, 'ck-debug-loader.js' ),
 		options: { debugFlags }
 	};
 }

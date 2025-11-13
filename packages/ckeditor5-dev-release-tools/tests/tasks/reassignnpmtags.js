@@ -4,7 +4,6 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import shellEscape from 'shell-escape';
@@ -19,20 +18,8 @@ const stubs = vi.hoisted( () => {
 			finish: vi.fn()
 		},
 		exec: vi.fn(),
-		chalk: {
-			bold: vi.fn( () => stubs.chalk ),
-			green: vi.fn( input => input ),
-			yellow: vi.fn( input => input ),
-			red: vi.fn( input => input )
-		}
+		styleText: vi.fn( ( _style, text ) => text )
 	};
-
-	// To make `chalk.bold.yellow.red()` working.
-	for ( const rootKey of Object.keys( values.chalk ) ) {
-		for ( const nestedKey of Object.keys( values.chalk ) ) {
-			values.chalk[ rootKey ][ nestedKey ] = values.chalk[ nestedKey ];
-		}
-	}
 
 	return values;
 } );
@@ -49,15 +36,11 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 	}
 } ) );
 vi.mock( 'util', () => ( {
-	default: {
-		promisify: vi.fn( () => stubs.exec )
-	}
+	styleText: stubs.styleText,
+	promisify: vi.fn( () => stubs.exec )
 } ) );
 vi.mock( 'shell-escape' );
 vi.mock( 'cli-columns' );
-vi.mock( 'chalk', () => ( {
-	default: stubs.chalk
-} ) );
 vi.mock( 'shell-escape' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 

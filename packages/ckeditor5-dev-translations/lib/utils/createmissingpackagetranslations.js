@@ -4,18 +4,14 @@
  */
 
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs';
 import PO from 'pofile';
-import { fileURLToPath } from 'url';
 import getLanguages from './getlanguages.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 import getHeaders from './getheaders.js';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = upath.dirname( __filename );
-
-const TRANSLATION_TEMPLATE_PATH = upath.join( __dirname, '../templates/translation.po' );
+const TRANSLATION_TEMPLATE_PATH = upath.join( import.meta.dirname, '../templates/translation.po' );
 
 /**
  * @param {object} options
@@ -35,6 +31,7 @@ export default function createMissingPackageTranslations( { packagePath, skipLic
 		const translations = PO.parse( translationsTemplate );
 		translations.headers = getHeaders( languageCode, localeCode );
 
-		fs.outputFileSync( translationFilePath, cleanTranslationFileContent( translations ).toString(), 'utf-8' );
+		fs.mkdirSync( upath.dirname( translationFilePath ), { recursive: true } );
+		fs.writeFileSync( translationFilePath, cleanTranslationFileContent( translations ).toString(), 'utf-8' );
 	}
 }

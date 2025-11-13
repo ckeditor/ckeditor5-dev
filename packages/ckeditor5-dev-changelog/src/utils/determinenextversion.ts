@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 import { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
@@ -33,7 +33,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 	const { sections, currentVersion, packageName, nextVersion, releaseType } = options;
 
 	if ( nextVersion ) {
-		logInfo( `○ ${ chalk.cyan( `Determined the next version to be ${ nextVersion }.` ) }` );
+		logInfo( `○ ${ styleText( 'cyan', `Determined the next version to be ${ nextVersion }.` ) }` );
 
 		const isNightlyVersion = nextVersion.startsWith( '0.0.0-' );
 
@@ -56,7 +56,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 		return nextVersion;
 	}
 
-	logInfo( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
+	logInfo( `○ ${ styleText( 'cyan', 'Determining the new version...' ) }` );
 
 	let bumpType: ReleaseType = 'patch';
 

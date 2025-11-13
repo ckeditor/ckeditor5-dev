@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
 import assertPackages from '../utils/assertpackages.js';
 import assertNpmTag from '../utils/assertnpmtag.js';
@@ -130,11 +130,12 @@ export default async function publishPackages( options ) {
 
 async function removeAlreadyPublishedPackages( packagePaths ) {
 	for ( const absolutePackagePath of packagePaths ) {
-		const pkgJson = await fs.readJson( upath.join( absolutePackagePath, 'package.json' ) );
+		const pkgJsonFile = await fs.readFile( upath.join( absolutePackagePath, 'package.json' ), 'utf-8' );
+		const pkgJson = JSON.parse( pkgJsonFile );
 		const isAvailable = await npm.checkVersionAvailability( pkgJson.version, pkgJson.name );
 
 		if ( !isAvailable ) {
-			await fs.remove( absolutePackagePath );
+			await fs.rm( absolutePackagePath, { recursive: true, force: true } );
 		}
 	}
 }

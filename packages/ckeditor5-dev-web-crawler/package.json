@@ -28,7 +28,6 @@
     "dev": "rollup -c rollup.config.js --watch"
   },
   "dependencies": {
-    "chalk": "^5.0.0",
     "puppeteer": "^24.6.0",
     "puppeteer-cluster": "^0.24.0"
   },

@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs/promises';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import upath from 'upath';
-import fs from 'fs-extra';
 import semver from 'semver';
 
 const { normalizeTrim } = upath;
@@ -51,10 +51,11 @@ export default async function updateVersions( options ) {
 	checkIfVersionIsValid( version );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		const pkgJson = await fs.readJson( pkgJsonPath );
+		const pkgJsonFile = await fs.readFile( pkgJsonPath, 'utf-8' );
+		const pkgJson = JSON.parse( pkgJsonFile );
 
 		pkgJson.version = version;
-		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
+		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) );
 	}
 }
 

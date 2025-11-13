@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 import sh from 'shelljs';
 import logger, { type Verbosity } from '../logger/index.js';
 
@@ -60,7 +60,7 @@ function execHandler(
 	{ code, stdout, stderr, verbosity, command }: { code: number; stdout: string; stderr: string; verbosity: Verbosity; command: string }
 ): string {
 	const log = logger( verbosity );
-	const grey = chalk.grey;
+	const grey = ( text: string ) => styleText( 'grey', text );
 
 	if ( code ) {
 		if ( stdout ) {

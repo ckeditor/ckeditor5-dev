@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import semver, { type ReleaseType } from 'semver';
-import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { logInfo } from './loginfo.js';
 import { UserAbortError } from './useraborterror.js';
@@ -72,10 +72,10 @@ export async function provideNewVersion( options: Options ): Promise<string> {
  */
 function displayInvalidChangesWarning(): void {
 	logInfo( '' );
-	logInfo( chalk.yellow( chalk.bold( `⚠️  ${ chalk.underline( 'WARNING: Invalid changes detected!' ) }` ) ) );
+	logInfo( styleText( [ 'yellow', 'bold' ], `⚠️  ${ styleText( 'underline', 'WARNING: Invalid changes detected!' ) }` ) );
 	logInfo( '' );
-	logInfo( chalk.yellow( 'You can cancel the process, fix the invalid files, and run the tool again.' ) );
-	logInfo( chalk.yellow( 'Alternatively, you can continue - but invalid values will be lost.' ) );
+	logInfo( styleText( 'yellow', 'You can cancel the process, fix the invalid files, and run the tool again.' ) );
+	logInfo( styleText( 'yellow', 'Alternatively, you can continue - but invalid values will be lost.' ) );
 	logInfo( '' );
 }
 
@@ -88,7 +88,7 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
 		name: 'continue',
 		message: 'Should continue?',
 		default: false,
-		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
+		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' )
 	};
 
 	const answers = await inquirer.prompt<{ continue: boolean }>( question as any );
@@ -112,7 +112,7 @@ function createVersionQuestion( options: Options ): Array<Question> {
 		message,
 		filter: ( newVersion: string ) => newVersion.trim(),
 		validate: ( newVersion: string ) => validateInputVersion( { newVersion, version, releaseType, packageName, suggestedVersion } ),
-		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + chalk.cyan( '?' )
+		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' )
 	} ];
 }
 

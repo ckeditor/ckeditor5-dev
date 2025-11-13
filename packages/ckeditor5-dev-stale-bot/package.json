@@ -26,9 +26,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
-    "chalk": "^5.0.0",
     "date-fns": "^4.0.0",
-    "fs-extra": "^11.0.0",
     "graphql": "^16.8.1",
     "graphql-request": "^7.0.0",
     "minimist": "^1.2.8",

@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 import { glob } from 'glob';
 import mockFs from 'mock-fs';
@@ -20,11 +20,11 @@ describe( 'cleanUpPackages()', () => {
 		vi.doMock( 'glob', () => ( {
 			glob: vi.fn().mockImplementation( glob )
 		} ) );
-		vi.doMock( 'fs-extra', () => ( {
+		vi.doMock( 'fs/promises', () => ( {
 			default: {
-				readJson: vi.fn().mockImplementation( fs.readJson ),
-				writeJson: vi.fn().mockImplementation( fs.writeJson ),
-				remove: vi.fn().mockImplementation( fs.remove ),
+				readFile: vi.fn().mockImplementation( fs.readFile ),
+				writeFile: vi.fn().mockImplementation( fs.writeFile ),
+				rm: vi.fn().mockImplementation( fs.rm ),
 				readdir: vi.fn().mockImplementation( fs.readdir )
 			}
 		} ) );
@@ -36,7 +36,7 @@ describe( 'cleanUpPackages()', () => {
 
 		stubs = {
 			...await import( 'glob' ),
-			...( await import( 'fs-extra' ) ).default,
+			...( await import( 'fs/promises' ) ).default,
 			findPathsToPackages: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).workspaces.findPathsToPackages
 		};
 
@@ -450,28 +450,28 @@ describe( 'cleanUpPackages()', () => {
 			} );
 
 			// Reading `package.json`.
-			expect( stubs.readJson ).toHaveBeenCalledTimes( 2 );
+			expect( stubs.readFile ).toHaveBeenCalledTimes( 2 );
 
-			let input = stubs.readJson.mock.calls[ 0 ];
-			let call = stubs.readJson.mock.results[ 0 ];
+			let input = stubs.readFile.mock.calls[ 0 ];
+			let call = stubs.readFile.mock.results[ 0 ];
 
-			expect( await call.value ).to.have.property( 'name', 'ckeditor5-foo' );
+			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-foo' } ) );
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 
-			input = stubs.readJson.mock.calls[ 1 ];
-			call = stubs.readJson.mock.results[ 1 ];
+			input = stubs.readFile.mock.calls[ 1 ];
+			call = stubs.readFile.mock.results[ 1 ];
 
-			expect( await call.value ).to.have.property( 'name', 'ckeditor5-bar' );
+			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-bar' } ) );
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 
 			// Writing `package.json`.
-			expect( stubs.writeJson ).toHaveBeenCalledTimes( 2 );
+			expect( stubs.writeFile ).toHaveBeenCalledTimes( 2 );
 
-			input = stubs.writeJson.mock.calls[ 0 ];
+			input = stubs.writeFile.mock.calls[ 0 ];
 
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 
-			input = stubs.writeJson.mock.calls[ 1 ];
+			input = stubs.writeFile.mock.calls[ 1 ];
 
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 		} );
@@ -497,12 +497,12 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.writeJson ).toHaveBeenCalledTimes( 1 );
+			expect( stubs.writeFile ).toHaveBeenCalledTimes( 1 );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				name: 'ckeditor5-foo',
 				version: '1.0.0',
 				description: 'Example package.',
@@ -510,7 +510,7 @@ describe( 'cleanUpPackages()', () => {
 					'ckeditor5': '^37.1.0'
 				},
 				main: 'src/index.ts'
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should remove default unnecessary fields from `package.json`', async () => {
@@ -545,12 +545,12 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.writeJson ).toHaveBeenCalledTimes( 1 );
+			expect( stubs.writeFile ).toHaveBeenCalledTimes( 1 );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				name: 'ckeditor5-foo',
 				version: '1.0.0',
 				description: 'Example package.',
@@ -558,7 +558,7 @@ describe( 'cleanUpPackages()', () => {
 					'ckeditor5': '^37.1.0'
 				},
 				main: 'src/index.ts'
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should remove provided unnecessary fields from `package.json`', async () => {
@@ -594,12 +594,12 @@ describe( 'cleanUpPackages()', () => {
 				packageJsonFieldsToRemove: [ 'author' ]
 			} );
 
-			expect( stubs.writeJson ).toHaveBeenCalledTimes( 1 );
+			expect( stubs.writeFile ).toHaveBeenCalledTimes( 1 );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
 			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				name: 'ckeditor5-foo',
 				version: '1.0.0',
 				description: 'Example package.',
@@ -617,7 +617,7 @@ describe( 'cleanUpPackages()', () => {
 					'build': 'tsc -p ./tsconfig.json',
 					'dll:build': 'webpack'
 				}
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
@@ -639,13 +639,13 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release',
 				preservePostInstallHook: true
 			} );
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				scripts: {
 					'postinstall': 'node my-node-script.js'
 				}
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should not remove scripts unless it is explicitly specified in packageJsonFieldsToRemove', async () => {
@@ -672,15 +672,15 @@ describe( 'cleanUpPackages()', () => {
 				]
 			} );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				scripts: {
 					'postinstall': 'node my-node-script.js',
 					'build': 'tsc -p ./tsconfig.json',
 					'dll:build': 'webpack'
 				}
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should accept a callback for packageJsonFieldsToRemove', async () => {
@@ -720,17 +720,17 @@ describe( 'cleanUpPackages()', () => {
 				]
 			} );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
-				description: 'Example package.',
-				main: 'src/index.ts',
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				name: 'ckeditor5-foo',
 				version: '1.0.0',
+				description: 'Example package.',
 				dependencies: {
 					'ckeditor5': '^37.1.0'
-				}
-			} );
+				},
+				main: 'src/index.ts'
+			}, null, 2 ) );
 		} );
 	} );
 } );

@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import ora from 'ora';
-import chalk from 'chalk';
 
 /**
  * Creates the spinner instance with methods to update spinner text.
@@ -27,7 +27,7 @@ export default function createSpinner() {
 
 		return ( { done, total } ) => {
 			const progress = total ? Math.round( ( done / total ) * 100 ) : 0;
-			const text = `${ title } ${ chalk.bold( `${ progress }%` ) }`;
+			const text = `${ title } ${ styleText( 'bold', `${ progress }%` ) }`;
 
 			printStatus( text );
 		};

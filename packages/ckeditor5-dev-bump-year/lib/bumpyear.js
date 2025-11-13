@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
 import fs from 'fs';
+import { styleText } from 'util';
 import { globSync } from 'glob';
 
 /**
@@ -27,7 +27,7 @@ export default function bumpYear( params ) {
 		params.initialYear = '2003';
 	}
 
-	console.log( chalk.cyan( 'Looking for files to update...' ) );
+	console.log( styleText( 'cyan', 'Looking for files to update...' ) );
 
 	const filesToUpdate = params.globPatterns
 		.map( globPattern => {
@@ -44,7 +44,7 @@ export default function bumpYear( params ) {
 		} )
 		.reduce( ( previous, current ) => [ ...previous, ...current ] );
 
-	console.log( chalk.cyan( 'Updating the files...' ) );
+	console.log( styleText( 'cyan', 'Updating the files...' ) );
 
 	const currentYear = new Date().getFullYear();
 	const filesWithoutHeader = [];
@@ -72,8 +72,8 @@ export default function bumpYear( params ) {
 
 		const output = [
 			`[${ updatedFiles }/${ totalFiles }]`,
-			chalk.magenta( `(${ percent }%)` ),
-			`Processing: ${ chalk.underline( trimmedFileName ) }`
+			styleText( 'magenta', `(${ percent }%)` ),
+			`Processing: ${ styleText( 'underline', trimmedFileName ) }`
 		].join( ' ' );
 
 		process.stdout.clearLine( 1 );
@@ -81,10 +81,10 @@ export default function bumpYear( params ) {
 		process.stdout.write( output );
 	} );
 
-	console.log( '\n' + chalk.green( 'Done.' ) );
+	console.log( '\n' + styleText( 'green', 'Done.' ) );
 
 	if ( filesWithoutHeader.length ) {
-		console.warn( chalk.red( 'Following files are missing their license headers:' ) );
+		console.warn( styleText( 'red', 'Following files are missing their license headers:' ) );
 
 		for ( const file of filesWithoutHeader ) {
 			console.log( file );

@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs';
 import upath from 'upath';
-import fs from 'fs-extra';
 import PO from 'pofile';
 import { glob } from 'glob';
 import { TRANSLATION_FILES_PATH } from './constants.js';
@@ -64,11 +64,25 @@ export default function moveTranslationsBetweenPackages( { packageContexts, conf
 			destinationTranslations.items = destinationTranslations.items.filter( item => item.msgid !== messageId );
 			destinationTranslations.items.push( sourceMessage );
 
-			fs.outputFileSync( sourceTranslationFilePath, cleanTranslationFileContent( sourceTranslations ).toString(), 'utf-8' );
-			fs.outputFileSync( destinationTranslationFilePath, cleanTranslationFileContent( destinationTranslations ).toString(), 'utf-8' );
+			fs.mkdirSync( upath.dirname( sourceTranslationFilePath ), { recursive: true } );
+			fs.mkdirSync( upath.dirname( destinationTranslationFilePath ), { recursive: true } );
+			fs.writeFileSync( sourceTranslationFilePath, cleanTranslationFileContent( sourceTranslations ).toString(), 'utf-8' );
+			fs.writeFileSync( destinationTranslationFilePath, cleanTranslationFileContent( destinationTranslations ).toString(), 'utf-8' );
 		}
 
-		fs.outputJsonSync( sourcePackageContext.contextFilePath, sourcePackageContext.contextContent, { spaces: '\t' } );
-		fs.outputJsonSync( destinationPackageContext.contextFilePath, destinationPackageContext.contextContent, { spaces: '\t' } );
+		fs.mkdirSync( upath.dirname( sourcePackageContext.contextFilePath ), { recursive: true } );
+		fs.mkdirSync( upath.dirname( destinationPackageContext.contextFilePath ), { recursive: true } );
+
+		fs.writeFileSync(
+			sourcePackageContext.contextFilePath,
+			JSON.stringify( sourcePackageContext.contextContent, null, '\t' ),
+			'utf-8'
+		);
+
+		fs.writeFileSync(
+			destinationPackageContext.contextFilePath,
+			JSON.stringify( destinationPackageContext.contextContent, null, '\t' ),
+			'utf-8'
+		);
 	}
 }

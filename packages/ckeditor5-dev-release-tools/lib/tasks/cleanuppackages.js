@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 import { glob } from 'glob';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
@@ -34,12 +34,13 @@ export default async function cleanUpPackages( options ) {
 
 	for ( const packageJsonPath of packageJsonPaths ) {
 		const packagePath = upath.dirname( packageJsonPath );
-		const packageJson = await fs.readJson( packageJsonPath );
+		const packageJsonFile = await fs.readFile( packageJsonPath, 'utf-8' );
+		const packageJson = JSON.parse( packageJsonFile );
 
 		await cleanUpPackageDirectory( packageJson, packagePath );
 		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook );
 
-		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
+		await fs.writeFile( packageJsonPath, JSON.stringify( packageJson, null, 2 ) );
 	}
 }
 
@@ -96,7 +97,7 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 		} );
 
 		for ( const file of files ) {
-			await fs.remove( file );
+			await fs.rm( file );
 		}
 	}
 
@@ -114,12 +115,12 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 		const isEmpty = ( await fs.readdir( directory ) ).length === 0;
 
 		if ( isEmpty ) {
-			await fs.remove( directory );
+			await fs.rm( directory, { recursive: true, force: true } );
 		}
 	}
 
 	// Remove `node_modules`.
-	await fs.remove( upath.join( packagePath, 'node_modules' ) );
+	await fs.rm( upath.join( packagePath, 'node_modules' ), { recursive: true, force: true } );
 }
 
 /**

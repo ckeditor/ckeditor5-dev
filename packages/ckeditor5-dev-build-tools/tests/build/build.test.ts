@@ -220,7 +220,9 @@ test( 'Custom output name', async () => {
 		output: 'src/input.js',
 		tsconfig: 'tsconfig.json',
 		browser: true,
-		name: 'custom'
+		name: 'custom',
+		external: [ 'es-toolkit' ],
+		globals: { 'es-toolkit': '_' }
 	} );
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
@@ -253,16 +255,16 @@ test( 'No externals', async () => {
 		external: []
 	} );
 
-	expect( output[ 0 ].code ).not.toContain( 'chalk' );
+	expect( output[ 0 ].code ).not.toContain( 'from \'es-toolkit\'' );
 } );
 
 test( 'Externals', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',
-		external: [ 'chalk' ]
+		external: [ 'es-toolkit' ]
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'chalk' );
+	expect( output[ 0 ].code ).toContain( 'from \'es-toolkit\'' );
 } );
 
 /**
@@ -315,7 +317,7 @@ test( 'Bundle', async () => {
 		external: []
 	} );
 
-	expect( output[ 0 ].code ).not.toContain( 'chalk' );
+	expect( output[ 0 ].code ).not.toContain( 'from \'es-toolkit\'' );
 } );
 
 /**

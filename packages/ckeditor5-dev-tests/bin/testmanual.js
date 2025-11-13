@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import { fileURLToPath } from 'url';
-import chalk from 'chalk';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIdentityFile: true } );
@@ -24,5 +24,5 @@ tests.runManualTests( options )
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
 
-		console.log( chalk.red( error.stack ) );
+		console.log( styleText( 'red', error.stack ) );
 	} );

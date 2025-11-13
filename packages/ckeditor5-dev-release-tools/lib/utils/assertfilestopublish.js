@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import upath from 'upath';
 import { glob } from 'glob';
 
@@ -19,8 +19,9 @@ export default async function assertFilesToPublish( packagePaths, optionalEntrie
 
 	for ( const packagePath of packagePaths ) {
 		const requiredEntries = [];
-		const packageJsonPath = upath.join( packagePath, 'package.json' );
-		const packageJson = await fs.readJson( packageJsonPath );
+		const path = upath.join( packagePath, 'package.json' );
+		const file = await fs.readFile( path, 'utf-8' );
+		const packageJson = JSON.parse( file );
 
 		if ( packageJson.main ) {
 			requiredEntries.push( packageJson.main );

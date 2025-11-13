@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 
 export type Verbosity = 'info' | 'warning' | 'error' | 'silent';
 
@@ -79,11 +79,11 @@ export default function logger( moduleVerbosity: Verbosity = 'info' ): Logger {
 			this._log( 'info', message );
 		},
 		warning( message ) {
-			this._log( 'warning', chalk.yellow( message ) );
+			this._log( 'warning', styleText( 'yellow', message ) );
 		},
 
 		error( message, error ) {
-			this._log( 'error', chalk.red( message ), error );
+			this._log( 'error', styleText( 'red', message ), error );
 		},
 
 		_log( messageVerbosity, message, error ) {

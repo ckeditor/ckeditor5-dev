@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
+import { styleText } from 'util';
 import { logInfo } from './loginfo.js';
 import type { ChangesetPathsWithGithubUrl } from '../types.js';
 
@@ -13,7 +13,7 @@ import type { ChangesetPathsWithGithubUrl } from '../types.js';
  * and removing any resulting empty directories both in the current repository and in any external repositories.
  */
 export async function removeChangelogEntryFiles( entryPaths: Array<ChangesetPathsWithGithubUrl> ): Promise<void> {
-	logInfo( `○ ${ chalk.cyan( 'Removing the changeset files...' ) }` );
+	logInfo( `○ ${ styleText( 'cyan', 'Removing the changeset files...' ) }` );
 
 	await Promise.all(
 		entryPaths

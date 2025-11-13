@@ -4,13 +4,13 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import moveTranslationsBetweenPackages from '../../lib/utils/movetranslationsbetweenpackages.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
@@ -109,8 +109,7 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 			}
 		} );
 
-		expect( fs.outputJsonSync ).not.toHaveBeenCalled();
-		expect( fs.outputFileSync ).not.toHaveBeenCalled();
+		expect( fs.writeFileSync ).not.toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'should move translation context between packages', () => {
@@ -156,20 +155,21 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 	it( 'should save translation contexts on filesystem', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
-		expect( fs.outputJsonSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.outputJsonSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 6 );
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
-			{},
-			{ spaces: '\t' }
+			'{}',
+			'utf-8'
 		);
 
-		expect( fs.outputJsonSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenNthCalledWith(
+			6,
 			'/absolute/path/to/packages/ckeditor5-bar/lang/contexts.json',
-			{
-				id1: 'Context for message id1 from "ckeditor5-foo".',
-				id2: 'Context for message id2 from "ckeditor5-bar".'
-			},
-			{ spaces: '\t' }
+			JSON.stringify( {
+				id2: 'Context for message id2 from "ckeditor5-bar".',
+				id1: 'Context for message id1 from "ckeditor5-foo".'
+			}, null, '\t' ),
+			'utf-8'
 		);
 	} );
 
@@ -307,23 +307,23 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 4 );
 
-		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 4 );
-		expect( fs.outputFileSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 6 );
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
-		expect( fs.outputFileSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/pl.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
-		expect( fs.outputFileSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-bar/lang/translations/en.po',
 			'Clean PO file content.',
 			'utf-8'
 		);
-		expect( fs.outputFileSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-bar/lang/translations/pl.po',
 			'Clean PO file content.',
 			'utf-8'

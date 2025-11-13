@@ -27,7 +27,7 @@ describe( 'getDefinitionsFromFile()', () => {
 
 	it( 'should return definition object if path to identity file is absolute', () => {
 		const definitions = getDefinitionsFromFile(
-			path.join( __dirname, '..', 'fixtures', 'getdefinitionsfromfile', 'secret.cjs' )
+			path.join( import.meta.dirname, '..', 'fixtures', 'getdefinitionsfromfile', 'secret.cjs' )
 		);
 
 		expect( definitions ).to.deep.equal( {

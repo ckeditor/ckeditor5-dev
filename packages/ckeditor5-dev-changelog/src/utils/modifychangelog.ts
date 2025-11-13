@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs/promises';
+import { styleText } from 'util';
 import upath from 'upath';
-import fs from 'fs-extra';
-import chalk from 'chalk';
 import { logInfo } from './loginfo.js';
 import { truncateChangelog } from './truncatechangelog.js';
 import { CHANGELOG_FILE, CHANGELOG_HEADER } from './constants.js';
@@ -22,7 +22,7 @@ export async function modifyChangelog( newChangelog: string, cwd: string ): Prom
 
 	const updatedChangelog = prepareChangelogContent( existingChangelog, newChangelog );
 
-	logInfo( `○ ${ chalk.cyan( 'Appending changes to the existing changelog...' ) }` );
+	logInfo( `○ ${ styleText( 'cyan', 'Appending changes to the existing changelog...' ) }` );
 
 	await fs.writeFile( changelogPath, updatedChangelog, 'utf-8' );
 	await truncateChangelog( 5, cwd );
@@ -35,7 +35,7 @@ async function readExistingChangelog( changelogPath: string ): Promise<string> {
 	try {
 		return await fs.readFile( changelogPath, 'utf-8' );
 	} catch {
-		logInfo( `○ ${ chalk.yellow( 'CHANGELOG.md not found.' ) }` );
+		logInfo( `○ ${ styleText( 'yellow', 'CHANGELOG.md not found.' ) }` );
 
 		return '';
 	}

@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import semver from 'semver';
-import chalk from 'chalk';
 import type { ReleaseChannel } from '../types.js';
 import { logInfo } from './loginfo.js';
 
@@ -29,7 +29,7 @@ export function detectReleaseChannel( version: string, promotePrerelease: boolea
 			return 'rc';
 		}
 
-		logInfo( chalk.yellow( `Warning! Unknown release channel to promote from ${ currentChannel }.` ) );
+		logInfo( styleText( 'yellow', `Warning! Unknown release channel to promote from ${ currentChannel }.` ) );
 
 		return 'alpha';
 	}

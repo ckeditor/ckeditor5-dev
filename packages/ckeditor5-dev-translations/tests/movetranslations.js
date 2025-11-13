@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import getPackageContext from '../lib/utils/getpackagecontext.js';
 import moveTranslationsBetweenPackages from '../lib/utils/movetranslationsbetweenpackages.js';
 import moveTranslations from '../lib/movetranslations.js';
@@ -18,7 +18,7 @@ const stubs = vi.hoisted( () => {
 	};
 } );
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 	logger: vi.fn( () => stubs.logger )
 } ) );

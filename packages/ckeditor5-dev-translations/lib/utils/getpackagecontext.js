@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs';
 import upath from 'upath';
-import fs from 'fs-extra';
 import { CONTEXT_FILE_PATH } from './constants.js';
 
 /**
@@ -14,7 +14,7 @@ import { CONTEXT_FILE_PATH } from './constants.js';
  */
 export default function getPackageContext( { packagePath } ) {
 	const contextFilePath = upath.join( packagePath, CONTEXT_FILE_PATH );
-	const contextContent = fs.readJsonSync( contextFilePath, { throws: false } ) || {};
+	const contextContent = JSON.parse( fs.readFileSync( contextFilePath, 'utf-8' ) ) || {};
 
 	return {
 		contextContent,

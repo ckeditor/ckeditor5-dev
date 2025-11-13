@@ -4,16 +4,13 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import chalk from 'chalk';
+import { styleText } from 'util';
 import inquirer from 'inquirer';
 import confirmNpmTag from '../../lib/utils/confirmnpmtag.js';
 
 vi.mock( 'inquirer' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		magenta: vi.fn( input => input ),
-		red: vi.fn( input => input )
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
 describe( 'confirmNpmTag()', () => {
@@ -35,7 +32,7 @@ describe( 'confirmNpmTag()', () => {
 			] )
 		);
 
-		expect( vi.mocked( chalk ).magenta ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( styleText ) ).toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'should ask user if continue the release process when passing different versions', async () => {
@@ -56,6 +53,6 @@ describe( 'confirmNpmTag()', () => {
 			] )
 		);
 
-		expect( vi.mocked( chalk ).red ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( styleText ) ).toHaveBeenCalledTimes( 2 );
 	} );
 } );

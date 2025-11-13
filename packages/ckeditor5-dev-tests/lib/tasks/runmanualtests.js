@@ -5,8 +5,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import { styleText } from 'util';
 import { spawn } from 'child_process';
-import chalk from 'chalk';
 import { globSync } from 'glob';
 import inquirer from 'inquirer';
 import isInteractive from 'is-interactive';
@@ -140,11 +140,11 @@ export default function runManualTests( options ) {
 			default: false
 		};
 
-		log.warning( chalk.bold( '\n⚠ Some tests require DLL builds.\n' ) );
+		log.warning( styleText( 'bold', '\n⚠ Some tests require DLL builds.\n' ) );
 		log.info( 'You don\'t have to update these builds every time unless you want to check changes in DLL tests.' );
 		log.info(
 			'You can use the following flags to skip this prompt in the future: ' +
-			`${ chalk.bold( '--dll' ) } / ${ chalk.bold( '--no-dll' ) }.\n`
+			`${ styleText( 'bold', '--dll' ) } / ${ styleText( 'bold', '--no-dll' ) }.\n`
 		);
 
 		return inquirer.prompt( [ confirmQuestion ] )
@@ -195,7 +195,7 @@ export default function runManualTests( options ) {
 	function buildDllInRepository( repositoryPath ) {
 		const repositoryName = path.basename( repositoryPath );
 
-		log.info( `\n📍 Building DLLs in ${ chalk.bold( repositoryName ) }...\n` );
+		log.info( `\n📍 Building DLLs in ${ styleText( 'bold', repositoryName ) }...\n` );
 
 		return new Promise( ( resolve, reject ) => {
 			const spawnOptions = {

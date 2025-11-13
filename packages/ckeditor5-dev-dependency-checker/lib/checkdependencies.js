@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import { styleText } from 'util';
+import fs from 'fs';
 import upath from 'upath';
 import { globSync } from 'glob';
 import depCheck from 'depcheck';
-import chalk from 'chalk';
 import { parseAsync } from 'oxc-parser';
 import { walk } from 'oxc-walker';
 
@@ -53,12 +53,13 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	const packageJsonPath = upath.join( packageAbsolutePath, 'package.json' );
 
 	if ( !fs.existsSync( packageJsonPath ) ) {
-		console.log( `⚠️  Missing package.json file in ${ chalk.bold( packagePath ) }, skipping...\n` );
+		console.log( `⚠️  Missing package.json file in ${ styleText( 'bold', packagePath ) }, skipping...\n` );
 
 		return true;
 	}
 
-	const packageJson = await fs.readJson( packageJsonPath );
+	const packageJsonFile = fs.readFileSync( packageJsonPath, 'utf-8' );
+	const packageJson = JSON.parse( packageJsonFile );
 
 	const missingCSSFiles = [];
 	const onMissingCSSFile = file => missingCSSFiles.push( file );
@@ -85,7 +86,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	depCheckOptions.ignoreMatches.push( ...depcheckIgnore );
 
 	if ( !options.quiet ) {
-		console.log( `🔎 Checking dependencies in ${ chalk.bold( packageJson.name ) }...` );
+		console.log( `🔎 Checking dependencies in ${ styleText( 'bold', packageJson.name ) }...` );
 	}
 
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
@@ -151,13 +152,13 @@ async function checkDependenciesInPackage( packagePath, options ) {
 
 	if ( !hasErrors ) {
 		if ( !options.quiet ) {
-			console.log( chalk.green.bold( '✨ All dependencies are defined correctly.\n' ) );
+			console.log( styleText( [ 'green', 'bold' ], '✨ All dependencies are defined correctly.\n' ) );
 		}
 
 		return true;
 	}
 
-	console.log( chalk.red.bold( `🔥 Found some issue with dependencies in ${ chalk.bold( packageJson.name ) }.\n` ) );
+	console.log( styleText( [ 'red', 'bold' ], `🔥 Found some issue with dependencies in ${ styleText( 'bold', packageJson.name ) }.\n` ) );
 
 	showErrors( errors );
 
@@ -171,7 +172,8 @@ async function checkDependenciesInPackage( packagePath, options ) {
  * @returns {Array.<string>}
  */
 function getInvalidItselfImports( repositoryPath ) {
-	const packageJson = fs.readJsonSync( upath.join( repositoryPath, 'package.json' ) );
+	const packageJsonFile = fs.readFileSync( upath.join( repositoryPath, 'package.json' ), 'utf-8' );
+	const packageJson = JSON.parse( packageJsonFile );
 	const globPattern = upath.join( repositoryPath, '@(src|tests)/**/*.js' );
 	const invalidImportsItself = new Set();
 
@@ -457,7 +459,7 @@ function findMisplacedDependencies( options ) {
 		.values( misplacedPackages )
 		.filter( item => item.packageNames.size > 0 )
 		.map( item => ( {
-			description: chalk.gray( item.description ),
+			description: styleText( 'gray', item.description ),
 			packageNames: [ ...item.packageNames ].sort()
 		} ) );
 }
@@ -505,43 +507,43 @@ function isProductionDependency( paths ) {
  */
 function showErrors( data ) {
 	if ( data[ 0 ] ) {
-		console.log( chalk.red( '❌ Invalid itself imports found in:' ) );
+		console.log( styleText( 'red', '❌ Invalid itself imports found in:' ) );
 		console.log( data[ 0 ] + '\n' );
-		console.log( chalk.gray( 'Imports from local package must always use relative path.\n' ) );
+		console.log( styleText( 'gray', 'Imports from local package must always use relative path.\n' ) );
 	}
 
 	if ( data[ 1 ] ) {
-		console.log( chalk.red( '❌ Missing dependencies:' ) );
+		console.log( styleText( 'red', '❌ Missing dependencies:' ) );
 		console.log( data[ 1 ] + '\n' );
 	}
 
 	if ( data[ 2 ] ) {
-		console.log( chalk.red( '❌ Missing devDependencies:' ) );
+		console.log( styleText( 'red', '❌ Missing devDependencies:' ) );
 		console.log( data[ 2 ] + '\n' );
 	}
 
 	if ( data[ 3 ] ) {
-		console.log( chalk.red( '❌ Unused dependencies:' ) );
+		console.log( styleText( 'red', '❌ Unused dependencies:' ) );
 		console.log( data[ 3 ] + '\n' );
 	}
 
 	if ( data[ 4 ] ) {
-		console.log( chalk.red( '❌ Unused devDependencies:' ) );
+		console.log( styleText( 'red', '❌ Unused devDependencies:' ) );
 		console.log( data[ 4 ] + '\n' );
 	}
 
 	if ( data[ 5 ] ) {
-		console.log( chalk.red( '❌ Importing CSS files that do not exist:' ) );
+		console.log( styleText( 'red', '❌ Importing CSS files that do not exist:' ) );
 		console.log( data[ 5 ] + '\n' );
 	}
 
 	if ( data[ 6 ] ) {
-		console.log( chalk.red( '❌ Duplicated `dependencies` and `devDependencies`:' ) );
+		console.log( styleText( 'red', '❌ Duplicated `dependencies` and `devDependencies`:' ) );
 		console.log( data[ 6 ] + '\n' );
 	}
 
 	if ( data[ 7 ] ) {
-		console.log( chalk.red( '❌ Misplaced dependencies (`dependencies` or `devDependencies`):' ) );
+		console.log( styleText( 'red', '❌ Misplaced dependencies (`dependencies` or `devDependencies`):' ) );
 		console.log( data[ 7 ] + '\n' );
 	}
 }

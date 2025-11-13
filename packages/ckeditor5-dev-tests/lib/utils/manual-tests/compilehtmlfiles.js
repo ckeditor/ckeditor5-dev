@@ -3,20 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs';
 import path from 'path';
-import fs from 'fs-extra';
+import { styleText } from 'util';
 import { globSync } from 'glob';
 import { uniq, debounce } from 'es-toolkit/compat';
-import chalk from 'chalk';
 import * as commonmark from 'commonmark';
 import combine from 'dom-combiner';
 import chokidar from 'chokidar';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getRelativeFilePath from '../getrelativefilepath.js';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
@@ -34,7 +30,7 @@ const writer = new commonmark.HtmlRenderer();
  */
 export default function compileHtmlFiles( options ) {
 	const buildDir = options.buildDir;
-	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
+	const viewTemplate = fs.readFileSync( path.join( import.meta.dirname, 'template.html' ), 'utf-8' );
 	const silent = options.silent || false;
 
 	const sourceMDFiles = options.sourceFiles.map( jsFile => setExtension( jsFile, 'md' ) );
@@ -57,7 +53,7 @@ export default function compileHtmlFiles( options ) {
 		languagesToLoad.push( options.language, ...options.additionalLanguages );
 	}
 
-	fs.ensureDirSync( buildDir );
+	fs.mkdirSync( buildDir, { recursive: true } );
 
 	// Copy all files which can be found in the directories with manual tests
 	// to the build dir.
@@ -107,7 +103,7 @@ function compileHtmlFile( buildDir, options ) {
 	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
 
 	if ( !silent ) {
-		log.info( `Processing '${ chalk.cyan( sourceFilePathBase ) }'...` );
+		log.info( `Processing '${ styleText( 'cyan', sourceFilePathBase ) }'...` );
 	}
 
 	// Compile test instruction (Markdown file).
@@ -156,17 +152,20 @@ function compileHtmlFile( buildDir, options ) {
 	// Prepare output path.
 	const outputFilePath = path.join( buildDir, absoluteHtmlFilePath );
 
-	fs.outputFileSync( outputFilePath, preparedHtml );
+	fs.mkdirSync( path.dirname( outputFilePath ), { recursive: true } );
+	fs.writeFileSync( outputFilePath, preparedHtml );
 
 	if ( !silent ) {
-		log.info( `Finished writing '${ chalk.cyan( outputFilePath ) }'` );
+		log.info( `Finished writing '${ styleText( 'cyan', outputFilePath ) }'` );
 	}
 }
 
 // Copies all non JS/HTML/MD files to build dir. Their relative paths to JS/HTML files are maintained.
 function copyStaticFile( buildDir, staticFile ) {
 	const outputFilePath = path.join( buildDir, getRelativeFilePath( staticFile ) );
-	fs.copySync( staticFile, outputFilePath );
+
+	fs.mkdirSync( path.dirname( outputFilePath ), { recursive: true } );
+	fs.copyFileSync( staticFile, outputFilePath );
 }
 
 function setExtension( file, newExt ) {

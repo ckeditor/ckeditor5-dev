@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs';
 import path from 'upath';
 import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
@@ -173,10 +173,11 @@ export default function parseArguments( args, settings = {} ) {
 		const files = new Set( options.files );
 
 		for ( const repositoryName of options.repositories ) {
-			const cwdPackageJson = fs.readJsonSync( path.join( cwd, 'package.json' ) );
+			const cwdPackageJson = fs.readFileSync( path.join( cwd, 'package.json' ) );
+			const { name } = JSON.parse( cwdPackageJson );
 
 			// Check the main repository.
-			if ( repositoryName === cwdPackageJson.name ) {
+			if ( repositoryName === name ) {
 				addPackagesToCollection( files, path.join( cwd, 'packages' ) );
 
 				continue;

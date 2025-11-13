@@ -6,10 +6,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { findPackages } from '../../src/utils/findpackages.js';
-import fs from 'fs-extra';
+import fs from 'fs';
 import type { RepositoryConfig } from '../../src/types.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( 'upath' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
@@ -23,7 +23,7 @@ const externalRepositories: Array<RepositoryConfig> = [
 describe( 'findPackages()', () => {
 	it( 'should return packages from the specified `cwd` directory', async () => {
 		vi.mocked( workspaces.findPathsToPackages ).mockResolvedValueOnce( [ '/local/package.json' ] );
-		vi.mocked( fs.readJson ).mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { name: 'package1', version: '1.0.0' } ) );
 
 		await expect( findPackages( { cwd, packagesDirectory: null, externalRepositories: [] } ) ).resolves.toEqual( new Map( [
 			[ 'package1', '1.0.0' ]
@@ -34,7 +34,7 @@ describe( 'findPackages()', () => {
 			null,
 			{ includeCwd: true, includePackageJson: true }
 		);
-		expect( vi.mocked( fs.readJson ) ).toHaveBeenCalledWith( '/local/package.json' );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledWith( '/local/package.json', 'utf-8' );
 	} );
 
 	it( 'should return an empty array when skipping the root repository package', async () => {
@@ -56,11 +56,11 @@ describe( 'findPackages()', () => {
 			.mockResolvedValueOnce( [ '/external/package3/package.json' ] )
 			.mockResolvedValueOnce( [ '/external/package4/package.json' ] );
 
-		vi.mocked( fs.readJson )
-			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } )
-			.mockResolvedValueOnce( { name: 'package2', version: '1.0.0' } )
-			.mockResolvedValueOnce( { name: 'package3', version: '1.0.0' } )
-			.mockResolvedValueOnce( { name: 'package4', version: '1.0.0' } );
+		vi.mocked( fs.readFileSync )
+			.mockReturnValueOnce( JSON.stringify( { name: 'package1', version: '1.0.0' } ) )
+			.mockReturnValueOnce( JSON.stringify( { name: 'package2', version: '1.0.0' } ) )
+			.mockReturnValueOnce( JSON.stringify( { name: 'package3', version: '1.0.0' } ) )
+			.mockReturnValueOnce( JSON.stringify( { name: 'package4', version: '1.0.0' } ) );
 
 		await expect( findPackages( { cwd, packagesDirectory, externalRepositories } ) ).resolves.toEqual( new Map( [
 			[ 'package1', '1.0.0' ],
@@ -74,7 +74,7 @@ describe( 'findPackages()', () => {
 			packagesDirectory,
 			{ includeCwd: true, includePackageJson: true }
 		);
-		expect( vi.mocked( fs.readJson ) ).toHaveBeenCalledWith( '/local/package1/package.json' );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledWith( '/local/package1/package.json', 'utf-8' );
 	} );
 
 	it( 'should handle errors while reading package.json', async () => {
@@ -82,9 +82,9 @@ describe( 'findPackages()', () => {
 			.mockResolvedValueOnce( [ '/local/package1' ] )
 			.mockResolvedValueOnce( [] );
 
-		vi.mocked( fs.readJson )
-			.mockResolvedValueOnce( { name: 'package1', version: '1.0.0' } )
-			.mockRejectedValueOnce( new Error( 'Error reading package.json' ) );
+		vi.mocked( fs.readFileSync )
+			.mockReturnValueOnce( JSON.stringify( { name: 'package1', version: '1.0.0' } ) )
+			.mockImplementationOnce( () => { throw new Error( 'Error reading package.json' ); } );
 
 		await expect( findPackages( { cwd, packagesDirectory, externalRepositories } ) )
 			.rejects
