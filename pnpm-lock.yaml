@@ -31,7 +31,7 @@ importers:
         version: 11.3.1
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       globals:
         specifier: ^16.1.0
         version: 16.3.0
@@ -97,7 +97,7 @@ importers:
         version: 3.0.3
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       magic-string:
         specifier: ^0.30.6
         version: 0.30.19
@@ -158,7 +158,7 @@ importers:
     dependencies:
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
 
   packages/ckeditor5-dev-changelog:
     dependencies:
@@ -170,7 +170,7 @@ importers:
         version: 4.1.0
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -229,7 +229,7 @@ importers:
         version: 1.4.7
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -254,7 +254,7 @@ importers:
         version: link:../typedoc-plugins
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       typedoc:
         specifier: ^0.28.14
         version: 0.28.14(typescript@5.3.3)
@@ -316,7 +316,7 @@ importers:
         version: 4.0.0
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       inquirer:
         specifier: ^12.5.2
         version: 12.9.6(@types/node@22.17.1)
@@ -429,7 +429,7 @@ importers:
         version: 1.40.0
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       inquirer:
         specifier: ^12.5.2
         version: 12.9.6(@types/node@22.17.1)
@@ -532,7 +532,7 @@ importers:
         version: link:../ckeditor5-dev-utils
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       plural-forms:
         specifier: ^0.5.5
         version: 0.5.5
@@ -584,7 +584,7 @@ importers:
         version: 4.4.0(webpack@5.101.1)
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       is-interactive:
         specifier: ^2.0.0
         version: 2.0.0
@@ -704,7 +704,7 @@ importers:
         version: 12.1.2(rollup@4.52.4)(tslib@2.8.1)(typescript@5.3.3)
       glob:
         specifier: ^11.0.2
-        version: 11.0.3
+        version: 11.1.0
       rollup:
         specifier: ^4.9.5
         version: 4.52.4
@@ -3402,8 +3402,8 @@ packages:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
     hasBin: true
 
-  glob@11.0.3:
-    resolution: {integrity: sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==}
+  glob@11.1.0:
+    resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
     engines: {node: 20 || >=22}
     hasBin: true
 
@@ -3796,16 +3796,8 @@ packages:
   js-tokens@9.0.1:
     resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
 
-  js-yaml@3.14.1:
-    resolution: {integrity: sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==}
-    hasBin: true
-
   js-yaml@3.14.2:
     resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
-    hasBin: true
-
-  js-yaml@4.1.0:
-    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
 
   js-yaml@4.1.1:
@@ -4240,6 +4232,10 @@ packages:
 
   minimatch@10.0.3:
     resolution: {integrity: sha512-IPZ167aShDZZUMdRk66cyQAW3qr0WzbHkPdMYa8bzZhlHhO3jALbKdxcaak7W9FfT2rZNpQuUu4Od7ILEpXSaw==}
+    engines: {node: 20 || >=22}
+
+  minimatch@10.1.1:
+    resolution: {integrity: sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==}
     engines: {node: 20 || >=22}
 
   minimatch@3.1.2:
@@ -6632,7 +6628,7 @@ snapshots:
   '@npmcli/package-json@7.0.1':
     dependencies:
       '@npmcli/git': 7.0.0
-      glob: 11.0.3
+      glob: 11.1.0
       hosted-git-info: 9.0.2
       json-parse-even-better-errors: 4.0.0
       proc-log: 5.0.0
@@ -7783,7 +7779,7 @@ snapshots:
     dependencies:
       '@npmcli/fs': 4.0.0
       fs-minipass: 3.0.3
-      glob: 11.0.3
+      glob: 11.1.0
       lru-cache: 11.2.2
       minipass: 7.1.2
       minipass-collect: 2.0.1
@@ -8255,7 +8251,7 @@ snapshots:
       findup-sync: 5.0.0
       ignore: 5.3.2
       is-core-module: 2.16.1
-      js-yaml: 3.14.1
+      js-yaml: 3.14.2
       json5: 2.2.3
       lodash: 4.17.21
       minimatch: 7.4.6
@@ -8874,11 +8870,11 @@ snapshots:
       package-json-from-dist: 1.0.1
       path-scurry: 1.11.1
 
-  glob@11.0.3:
+  glob@11.1.0:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 4.1.1
-      minimatch: 10.0.3
+      minimatch: 10.1.1
       minipass: 7.1.2
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.0
@@ -8936,7 +8932,7 @@ snapshots:
 
   gray-matter@4.0.3:
     dependencies:
-      js-yaml: 3.14.1
+      js-yaml: 3.14.2
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
@@ -9026,7 +9022,7 @@ snapshots:
 
   ignore-walk@8.0.0:
     dependencies:
-      minimatch: 10.0.3
+      minimatch: 10.1.1
 
   ignore@5.3.2: {}
 
@@ -9246,19 +9242,10 @@ snapshots:
 
   js-tokens@9.0.1: {}
 
-  js-yaml@3.14.1:
-    dependencies:
-      argparse: 1.0.10
-      esprima: 4.0.1
-
   js-yaml@3.14.2:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
-
-  js-yaml@4.1.0:
-    dependencies:
-      argparse: 2.0.1
 
   js-yaml@4.1.1:
     dependencies:
@@ -9936,6 +9923,10 @@ snapshots:
     dependencies:
       '@isaacs/brace-expansion': 5.0.0
 
+  minimatch@10.1.1:
+    dependencies:
+      '@isaacs/brace-expansion': 5.0.0
+
   minimatch@3.1.2:
     dependencies:
       brace-expansion: 1.1.12
@@ -10014,7 +10005,7 @@ snapshots:
       glob: 10.4.5
       he: 1.2.0
       is-path-inside: 3.0.3
-      js-yaml: 4.1.0
+      js-yaml: 4.1.1
       log-symbols: 4.1.0
       minimatch: 9.0.5
       ms: 2.1.3
@@ -10847,7 +10838,7 @@ snapshots:
   purgecss@7.0.2:
     dependencies:
       commander: 12.1.0
-      glob: 11.0.3
+      glob: 11.1.0
       postcss: 8.5.6
       postcss-selector-parser: 6.1.2
 
@@ -10949,7 +10940,7 @@ snapshots:
 
   rimraf@6.0.1:
     dependencies:
-      glob: 11.0.3
+      glob: 11.1.0
       package-json-from-dist: 1.0.1
 
   rollup-plugin-styles@4.0.0(rollup@4.52.4):

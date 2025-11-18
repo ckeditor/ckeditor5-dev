@@ -12,6 +12,7 @@ minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
+  - glob # Added due to bumping to `v11.1.0`. To remove on 2025-11-20 6:02 PM.
 
 shellEmulator: true
 shamefullyHoist: true
