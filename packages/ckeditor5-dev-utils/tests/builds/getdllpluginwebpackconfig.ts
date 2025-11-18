@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import getDllPluginWebpackConfig from '../../src/builds/getdllpluginwebpackconfig.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../../src/loaders/index.js';
 
@@ -36,7 +36,7 @@ const stubs = vi.hoisted( () => ( {
 
 vi.mock( '../../src/loaders/index.js' );
 vi.mock( '../../src/bundler/index.js' );
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( 'path', () => ( {
 	default: {
 		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
@@ -64,20 +64,20 @@ vi.mock( 'terser-webpack-plugin', () => ( {
 
 describe( 'getDllPluginWebpackConfig()', () => {
 	beforeEach( () => {
-		vi.mocked( fs ).readJsonSync.mockImplementation( input => {
+		vi.mocked( fs ).readFileSync.mockImplementation( input => {
 			if ( input === '/manifest/path' ) {
-				return stubs.manifest;
+				return JSON.stringify( stubs.manifest );
 			}
 
 			if ( input === '/package/html-embed/package.json' ) {
-				return {
+				return JSON.stringify( {
 					name: '@ckeditor/ckeditor5-html-embed'
-				};
+				} );
 			}
 
-			return {
+			return JSON.stringify( {
 				name: '@ckeditor/ckeditor5-dev'
-			};
+			} );
 		} );
 	} );
 

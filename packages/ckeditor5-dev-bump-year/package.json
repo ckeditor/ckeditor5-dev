@@ -22,7 +22,6 @@
     "lib"
   ],
   "dependencies": {
-    "chalk": "^5.0.0",
     "glob": "^11.0.2"
   }
 }

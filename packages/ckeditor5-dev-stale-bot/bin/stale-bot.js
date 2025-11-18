@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
-import chalk from 'chalk';
+import fs from 'fs/promises';
+import { styleText } from 'util';
 import createSpinner from './utils/createspinner.js';
 import parseArguments from './utils/parsearguments.js';
 import validateConfig from './utils/validateconfig.js';
@@ -214,8 +214,14 @@ function printWelcomeMessage( dryRun ) {
 	const message = [
 		'',
 		dryRun ?
-			chalk.italic( `The --dry-run flag is ${ chalk.green.bold( 'ON' ) }, so bot does not perform any changes.` ) :
-			chalk.italic( `The --dry-run flag is ${ chalk.red.bold( 'OFF' ) }, so bot makes use of real, live, production data.` ),
+			styleText(
+				'italic',
+				`The --dry-run flag is ${ styleText( [ 'green', 'bold' ], 'ON' ) }, so bot does not perform any changes.`
+			) :
+			styleText(
+				'italic',
+				`The --dry-run flag is ${ styleText( [ 'red', 'bold' ], 'OFF' ) }, so bot makes use of real, live, production data.`
+			),
 		''
 	];
 
@@ -239,7 +245,7 @@ function printStatus( dryRun, searchResult, options ) {
 	} = searchResult;
 
 	if ( !issuesOrPullRequestsToStale.length && !pendingIssuesToStale.length ) {
-		console.log( chalk.green.bold( '💡 No new issues or pull requests found that should be staled.\n' ) );
+		console.log( styleText( [ 'green', 'bold' ], '💡 No new issues or pull requests found that should be staled.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
 			'🔖 The following issues or pull requests should be staled:\n' :
@@ -249,7 +255,7 @@ function printStatus( dryRun, searchResult, options ) {
 	}
 
 	if ( !issuesOrPullRequestsToUnstale.length ) {
-		console.log( chalk.green.bold( '💡 No stale issues or pull requests can be unstaled now.\n' ) );
+		console.log( styleText( [ 'green', 'bold' ], '💡 No stale issues or pull requests can be unstaled now.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
 			'🔖 The following issues or pull requests should be unstaled:\n' :
@@ -259,7 +265,7 @@ function printStatus( dryRun, searchResult, options ) {
 	}
 
 	if ( !issuesOrPullRequestsToClose.length ) {
-		console.log( chalk.green.bold( '💡 No stale issues or pull requests can be closed now.\n' ) );
+		console.log( styleText( [ 'green', 'bold' ], '💡 No stale issues or pull requests can be closed now.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
 			'🔖 The following issues or pull requests should be closed:\n' :
@@ -270,7 +276,7 @@ function printStatus( dryRun, searchResult, options ) {
 
 	if ( options.shouldProcessPendingIssues ) {
 		if ( !pendingIssuesToUnlabel.length ) {
-			console.log( chalk.green.bold( '💡 No pending issues can be unlabeled now.\n' ) );
+			console.log( styleText( [ 'green', 'bold' ], '💡 No pending issues can be unlabeled now.\n' ) );
 		} else {
 			const statusMessage = dryRun ?
 				'🔖 The following pending issues should be unlabeled:\n' :
@@ -288,7 +294,7 @@ function printStatus( dryRun, searchResult, options ) {
  * @param {Array.<IssueOrPullRequestResult>} entries Found issues and pull requests.
  */
 function printStatusSection( statusMessage, entries ) {
-	console.log( chalk.blue.bold( statusMessage ) );
+	console.log( styleText( [ 'blue', 'bold' ], statusMessage ) );
 
 	entries.forEach( entry => console.log( `${ entry.url } - ${ entry.title }` ) );
 

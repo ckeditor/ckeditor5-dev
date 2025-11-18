@@ -5,15 +5,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
-import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import util from 'util';
+import { styleText, promisify } from 'util';
+import columns from 'cli-columns';
 import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
 import { exec } from 'child_process';
 
-const execPromise = util.promisify( exec );
+const execPromise = promisify( exec );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
@@ -71,17 +70,17 @@ export default async function reassignNpmTags( options ) {
 	counter.finish();
 
 	if ( packagesUpdated.length ) {
-		console.log( chalk.bold.green( '✨ Tags updated:' ) );
+		console.log( styleText( [ 'green', 'bold' ], '✨ Tags updated:' ) );
 		console.log( columns( packagesUpdated ) );
 	}
 
 	if ( packagesSkipped.length ) {
-		console.log( chalk.bold.yellow( '⬇️ Packages skipped:' ) );
+		console.log( styleText( [ 'yellow', 'bold' ], '⬇️ Packages skipped:' ) );
 		console.log( columns( packagesSkipped ) );
 	}
 
 	if ( errors.length ) {
-		console.log( chalk.bold.red( '🐛 Errors found:' ) );
+		console.log( styleText( [ 'red', 'bold' ], '🐛 Errors found:' ) );
 		errors.forEach( msg => console.log( `* ${ msg }` ) );
 	}
 }

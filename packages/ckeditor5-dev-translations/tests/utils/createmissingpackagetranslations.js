@@ -4,14 +4,14 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs';
 import PO from 'pofile';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import getLanguages from '../../lib/utils/getlanguages.js';
 import getHeaders from '../../lib/utils/getheaders.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs' );
 vi.mock( 'pofile' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );
@@ -106,8 +106,8 @@ describe( 'createMissingPackageTranslations()', () => {
 
 		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
 
-		expect( fs.outputFileSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.outputFileSync ).toHaveBeenCalledWith(
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po',
 			'Clean PO file content.',
 			'utf-8'

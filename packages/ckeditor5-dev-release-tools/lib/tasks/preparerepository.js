@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import { glob } from 'glob';
 import upath from 'upath';
 
@@ -35,7 +35,7 @@ export default async function prepareRepository( options ) {
 	}
 
 	const outputDirectoryPath = upath.join( cwd, outputDirectory );
-	await fs.ensureDir( outputDirectoryPath );
+	await fs.mkdir( outputDirectoryPath, { recursive: true } );
 	const outputDirContent = await fs.readdir( outputDirectoryPath );
 
 	if ( outputDirContent.length ) {
@@ -97,15 +97,15 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
 	const rootPackageOutputPath = upath.join( outputDirectoryPath, rootPackageDirName );
 	const pkgJsonOutputPath = upath.join( rootPackageOutputPath, 'package.json' );
 
-	await fs.ensureDir( rootPackageOutputPath );
-	await fs.writeJson( pkgJsonOutputPath, rootPackageJson, { spaces: 2, EOL: '\n' } );
+	await fs.mkdir( rootPackageOutputPath, { recursive: true } );
+	await fs.writeFile( pkgJsonOutputPath, JSON.stringify( rootPackageJson, null, 2 ) + '\n' );
 
 	return ( await glob( rootPackageJson.files ) )
 		.map( absoluteFilePath => {
 			const relativeFilePath = upath.relative( cwd, absoluteFilePath );
 			const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
 
-			return fs.copy( absoluteFilePath, absoluteFileOutputPath );
+			return fs.cp( absoluteFilePath, absoluteFileOutputPath, { recursive: true } );
 		} );
 }
 
@@ -130,13 +130,13 @@ async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy
 		}
 
 		const pkgJsonPath = upath.join( packagePath, 'package.json' );
-		const hasPkgJson = await fs.exists( pkgJsonPath );
+		const hasPkgJson = await fs.access( pkgJsonPath );
 
 		if ( !hasPkgJson ) {
 			return;
 		}
 
-		return fs.copy( packagePath, upath.join( outputDirectoryPath, packageDir ) );
+		return fs.cp( packagePath, upath.join( outputDirectoryPath, packageDir ) );
 	} );
 }
 

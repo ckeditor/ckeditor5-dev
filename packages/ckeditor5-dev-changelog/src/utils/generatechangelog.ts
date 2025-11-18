@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
+import { styleText } from 'util';
 import { format } from 'date-fns';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { groupEntriesBySection } from './groupentriesbysection.js';
@@ -91,7 +91,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 	// Exit when no changelog entries exist.
 	if ( !parsedChangesetFiles.length ) {
 		logInfo( '' );
-		logInfo( chalk.bold( 'ℹ️  No changelog entries found, so there is nothing to prepare a changelog from.' ) );
+		logInfo( styleText( 'bold', 'ℹ️  No changelog entries found, so there is nothing to prepare a changelog from.' ) );
 
 		return disableFilesystemOperations ? '' : undefined;
 	}
@@ -150,7 +150,7 @@ const main: GenerateChangelogEntryPoint<GenerateChangelogConfig> = async options
 		pathsToCommit.map( ( { cwd, isRoot, filePaths } ) => ( { cwd, isRoot, filePaths } ) )
 	);
 
-	logInfo( '○ ' + chalk.green( 'Done!' ) );
+	logInfo( '○ ' + styleText( 'green', 'Done!' ) );
 };
 
 /**
@@ -169,7 +169,7 @@ export const generateChangelog: GenerateChangelogEntryPoint<GenerateChangelogCon
 			} else if ( !( error instanceof InternalError ) ) {
 				throw error;
 			} else {
-				console.error( chalk.red( 'Error: ' + error.message ) );
+				console.error( styleText( 'red', 'Error: ' + error.message ) );
 				process.exit( 1 );
 			}
 		} );

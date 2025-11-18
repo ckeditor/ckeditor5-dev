@@ -6,9 +6,9 @@
  */
 
 import path from 'path';
+import { styleText } from 'util';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
-import chalk from 'chalk';
 
 const cwd = process.cwd();
 const coverageFile = path.join( cwd, 'coverage', 'lcov.info' );
@@ -25,4 +25,4 @@ for ( const lcovPath of globSync( './packages/*/coverage/lcov.info' ) ) {
 	fs.writeFileSync( coverageFile, content, { flag: 'as' } );
 }
 
-console.log( chalk.cyan( `Coverage status stored in "${ chalk.underline( coverageFile ) }".` ) );
+console.log( styleText( 'cyan', `Coverage status stored in "${ styleText( 'underline', coverageFile ) }".` ) );

@@ -5,7 +5,7 @@
 
 import { simpleGit, type SimpleGit } from 'simple-git';
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 
 const CHUNK_LENGTH_LIMIT = 4000;
 

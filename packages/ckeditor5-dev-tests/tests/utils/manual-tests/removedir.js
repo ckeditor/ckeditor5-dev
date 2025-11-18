@@ -4,17 +4,15 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { styleText } from 'util';
 import { deleteAsync } from 'del';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import chalk from 'chalk';
 import removeDir from '../../../lib/utils/manual-tests/removedir.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'del' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: vi.fn()
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
 describe( 'removeDir()', () => {
@@ -23,7 +21,6 @@ describe( 'removeDir()', () => {
 		logInfo = vi.fn();
 
 		vi.mocked( deleteAsync ).mockResolvedValue();
-		vi.mocked( chalk ).cyan.mockImplementation( input => input );
 		vi.mocked( logger ).mockReturnValue( {
 			info: logInfo
 		} );
@@ -32,7 +29,7 @@ describe( 'removeDir()', () => {
 	it( 'should remove directory and log it', async () => {
 		await removeDir( 'workspace/directory' );
 
-		expect( vi.mocked( chalk ).cyan ).toHaveBeenCalledOnce();
+		expect( vi.mocked( styleText ) ).toHaveBeenCalledOnce();
 		expect( vi.mocked( deleteAsync ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
 		expect( logInfo ).toHaveBeenCalledExactlyOnceWith( 'Removed directory \'workspace/directory\'' );
 	} );
@@ -42,7 +39,7 @@ describe( 'removeDir()', () => {
 
 		expect( vi.mocked( deleteAsync ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
 
-		expect( vi.mocked( chalk ).cyan ).not.toHaveBeenCalled();
+		expect( vi.mocked( styleText ) ).not.toHaveBeenCalled();
 		expect( logInfo ).not.toHaveBeenCalled();
 	} );
 } );

@@ -4,11 +4,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import assertNpmTag from '../../lib/utils/assertnpmtag.js';
 import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '../../lib/utils/getnpmtagfromversion.js' );
 
 describe( 'assertNpmTag()', () => {
@@ -21,50 +21,50 @@ describe( 'assertNpmTag()', () => {
 	} );
 
 	it( 'should read `package.json` from each package', async () => {
-		vi.mocked( fs ).readJson.mockImplementation( input => {
+		vi.mocked( fs ).readFile.mockImplementation( input => {
 			if ( input === 'ckeditor5-foo/package.json' ) {
-				return Promise.resolve( {
+				return Promise.resolve( JSON.stringify( {
 					name: 'ckeditor5-foo',
 					version: '1.0.0'
-				} );
+				} ) );
 			}
 
-			return Promise.resolve( {
+			return Promise.resolve( JSON.stringify( {
 				name: 'ckeditor5-bar',
 				version: '0.0.1'
-			} );
+			} ) );
 		} );
 
 		await assertNpmTag( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'latest' );
 
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( 'ckeditor5-foo/package.json' );
-		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( 'ckeditor5-bar/package.json' );
+		expect( vi.mocked( fs ).readFile ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( 'ckeditor5-foo/package.json', 'utf-8' );
+		expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( 'ckeditor5-bar/package.json', 'utf-8' );
 	} );
 
 	it( 'should not throw if version tag matches npm tag (both "latest")', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0'
-		} );
+		} ) );
 
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'latest' );
 	} );
 
 	it( 'should not throw if version tag (latest) matches npm tag (staging)', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0'
-		} );
+		} ) );
 
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'staging' );
 	} );
 
 	it( 'should not throw if version tag (latest) matches npm tag (next)', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0'
-		} );
+		} ) );
 
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'next' );
 	} );
@@ -72,10 +72,10 @@ describe( 'assertNpmTag()', () => {
 	it( 'should not throw if version tag matches npm tag (both "alpha")', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0-alpha.0'
-		} );
+		} ) );
 
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' );
 	} );
@@ -83,29 +83,29 @@ describe( 'assertNpmTag()', () => {
 	it( 'should not throw if version tag matches npm tag (both "nightly")', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'nightly' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '0.0.0-nightly-20230517.0'
-		} );
+		} ) );
 
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' );
 	} );
 
 	it( 'should throw if version tag (latest) does not match npm tag (alpha)', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' ) )
 			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "alpha".' );
 	} );
 
 	it( 'should throw if version (latest) tag does not match npm tag (nightly)', async () => {
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' ) )
 			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "nightly".' );
@@ -114,10 +114,10 @@ describe( 'assertNpmTag()', () => {
 	it( 'should throw if version tag (alpha) does not match npm tag (staging)', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0-alpha.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging' ) )
 			.rejects.toThrow( 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "staging".' );
@@ -126,10 +126,10 @@ describe( 'assertNpmTag()', () => {
 	it( 'should throw if version tag (nightly) does not match npm tag (staging)', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'nightly' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '0.0.0-nightly-20230517.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging' ) )
 			.rejects.toThrow( 'The version tag "nightly" from "ckeditor5-foo" package does not match the npm tag "staging".' );
@@ -138,10 +138,10 @@ describe( 'assertNpmTag()', () => {
 	it( 'should throw if version tag (alpha) does not match npm tag (next)', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '1.0.0-alpha.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'next' ) )
 			.rejects.toThrow( 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "next".' );
@@ -150,10 +150,10 @@ describe( 'assertNpmTag()', () => {
 	it( 'should throw if version tag (nightly) does not match npm tag (next)', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'nightly' );
 
-		vi.mocked( fs ).readJson.mockResolvedValue( {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
 			version: '0.0.0-nightly-20230517.0'
-		} );
+		} ) );
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'next' ) )
 			.rejects.toThrow( 'The version tag "nightly" from "ckeditor5-foo" package does not match the npm tag "next".' );
@@ -172,25 +172,25 @@ describe( 'assertNpmTag()', () => {
 			}
 		} );
 
-		vi.mocked( fs ).readJson.mockImplementation( input => {
+		vi.mocked( fs ).readFile.mockImplementation( input => {
 			if ( input === 'ckeditor5-foo/package.json' ) {
-				return Promise.resolve( {
+				return Promise.resolve( JSON.stringify( {
 					name: 'ckeditor5-foo',
 					version: '1.0.0-alpha'
-				} );
+				} ) );
 			}
 
 			if ( input === 'ckeditor5-bar/package.json' ) {
-				return Promise.resolve( {
+				return Promise.resolve( JSON.stringify( {
 					name: 'ckeditor5-bar',
 					version: '0.0.0-nightly-20230517.0'
-				} );
+				} ) );
 			}
 
-			return Promise.resolve( {
+			return Promise.resolve( JSON.stringify( {
 				name: 'ckeditor5-baz',
 				version: '0.0.1-rc.5'
-			} );
+			} ) );
 		} );
 
 		const errorMessage = 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "latest".\n' +

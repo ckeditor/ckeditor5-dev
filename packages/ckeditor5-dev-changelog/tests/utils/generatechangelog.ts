@@ -43,13 +43,8 @@ vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/displaychanges.js' );
 vi.mock( '../../src/utils/composechangelog.js' );
 vi.mock( '../../src/utils/commitchanges.js' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		green: ( text: string ) => text,
-		red: ( text: string ) => text,
-		bold: ( text: string ) => text,
-		cyan: ( text: string ) => text
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
 describe( 'generateChangelog()', () => {

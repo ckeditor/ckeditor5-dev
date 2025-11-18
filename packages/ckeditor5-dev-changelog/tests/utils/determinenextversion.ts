@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import { determineNextVersion, type DetermineNextVersionOptions } from '../../src/utils/determinenextversion.js';
 import { provideNewVersion } from '../../src/utils/providenewversion.js';
 import { logInfo } from '../../src/utils/loginfo.js';
@@ -10,7 +11,6 @@ import { detectReleaseChannel } from '../../src/utils/detectreleasechannel.js';
 import { validateInputVersion } from '../../src/utils/validateinputversion.js';
 import { InternalError } from '../../src/utils/internalerror.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import chalk from 'chalk';
 import type { Entry, SectionsWithEntries } from '../../src/types.js';
 
 vi.mock( '../../src/utils/providenewversion.js' );
@@ -70,7 +70,7 @@ describe( 'determineNextVersion()', () => {
 
 		await determineNextVersion( options );
 
-		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determining the new version...' ) }` );
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ styleText( 'cyan', 'Determining the new version...' ) }` );
 	} );
 
 	it( 'should return a patch bump version when there are no breaking changes or feature entries', async () => {
@@ -95,7 +95,7 @@ describe( 'determineNextVersion()', () => {
 
 		await determineNextVersion( options );
 
-		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ chalk.cyan( 'Determined the next version to be 50.0.0.' ) }` );
+		expect( mockedLogInfo ).toHaveBeenCalledWith( `○ ${ styleText( 'cyan', 'Determined the next version to be 50.0.0.' ) }` );
 		expect( mockedValidateInputVersion ).toHaveBeenCalledWith( expect.objectContaining( {
 			newVersion: '50.0.0',
 			suggestedVersion: '50.0.0'

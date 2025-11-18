@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import inquirer from 'inquirer';
-import chalk from 'chalk';
 
 /**
  * Asks a user for a confirmation for updating and tagging versions of the packages.
@@ -15,7 +15,7 @@ import chalk from 'chalk';
  */
 export default function confirmNpmTag( versionTag, npmTag ) {
 	const areVersionsEqual = versionTag === npmTag;
-	const color = areVersionsEqual ? chalk.magenta : chalk.red;
+	const color = text => areVersionsEqual ? styleText( 'magenta', text ) : styleText( 'red', text );
 
 	// eslint-disable-next-line @stylistic/max-len
 	const message = `The next release bumps the "${ color( versionTag ) }" version. Should it be published to npm as "${ color( npmTag ) }"?`;

@@ -6,14 +6,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
-vi.mock( 'fs-extra' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: ( text: string ) => text
-	}
+vi.mock( 'fs/promises' );
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/utils/loginfo.js' );
 

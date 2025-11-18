@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'fs';
 import path from 'path';
-import fs from 'fs-extra';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { getLicenseBanner } from '../bundler/index.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';
@@ -95,7 +95,7 @@ export default async function getDllPluginWebpackConfig(
 	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
 	const TerserPlugin = ( await import( 'terser-webpack-plugin' ) ).default;
 
-	const { name: packageName } = fs.readJsonSync( path.join( options.packagePath, 'package.json' ) );
+	const { name: packageName } = JSON.parse( fs.readFileSync( path.join( options.packagePath, 'package.json' ), 'utf-8' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
 
@@ -125,7 +125,7 @@ export default async function getDllPluginWebpackConfig(
 				raw: true
 			} ),
 			new webpack.DllReferencePlugin( {
-				manifest: fs.readJsonSync( options.manifestPath ),
+				manifest: JSON.parse( fs.readFileSync( options.manifestPath, 'utf-8' ) ),
 				scope: 'ckeditor5/src',
 				name: 'CKEditor5.dll'
 			} )

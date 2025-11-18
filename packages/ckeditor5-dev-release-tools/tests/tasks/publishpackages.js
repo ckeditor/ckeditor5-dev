@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
 import { differenceInMilliseconds } from 'date-fns';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
@@ -15,7 +15,7 @@ import executeInParallel from '../../lib/utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 import publishPackages from '../../lib/tasks/publishpackages.js';
 
-vi.mock( 'fs-extra' );
+vi.mock( 'fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/assertpackages.js' );
@@ -46,7 +46,7 @@ describe( 'publishPackages()', () => {
 		vi.mocked( executeInParallel ).mockResolvedValue();
 		vi.mocked( publishPackageOnNpmCallback ).mockResolvedValue();
 
-		vi.mocked( fs ).readJson.mockResolvedValue( { name: '', version: '' } );
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( { name: '', version: '' } ) );
 		vi.mocked( npm.checkVersionAvailability ).mockResolvedValue( true );
 
 		vi.useFakeTimers();
@@ -433,9 +433,9 @@ describe( 'publishPackages()', () => {
 				] )
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson
-				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
-				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
+			vi.mocked( fs ).readFile
+				.mockResolvedValueOnce( JSON.stringify( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } ) )
+				.mockResolvedValueOnce( JSON.stringify( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } ) );
 
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
@@ -446,9 +446,9 @@ describe( 'publishPackages()', () => {
 			await vi.advanceTimersToNextTimerAsync();
 			await promise;
 
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json' );
-			expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json' );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo/package.json', 'utf-8' );
+			expect( vi.mocked( fs ).readFile ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-bar/package.json', 'utf-8' );
 
 			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( npm.checkVersionAvailability ) ).toHaveBeenCalledWith( '1.0.0', '@ckeditor/ckeditor5-foo' );
@@ -464,9 +464,9 @@ describe( 'publishPackages()', () => {
 				] )
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson
-				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } )
-				.mockResolvedValueOnce( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } );
+			vi.mocked( fs ).readFile
+				.mockResolvedValueOnce( JSON.stringify( { name: '@ckeditor/ckeditor5-foo', version: '1.0.0' } ) )
+				.mockResolvedValueOnce( JSON.stringify( { name: '@ckeditor/ckeditor5-bar', version: '1.0.0' } ) );
 
 			vi.mocked( npm.checkVersionAvailability )
 				.mockResolvedValueOnce( false )
@@ -478,8 +478,8 @@ describe( 'publishPackages()', () => {
 				listrTask: {}
 			} );
 
-			expect( vi.mocked( fs ).remove ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
+			expect( vi.mocked( fs ).rm ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).rm ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo', expect.any( Object ) );
 		} );
 	} );
 
@@ -505,7 +505,7 @@ describe( 'publishPackages()', () => {
 				// Check for failed packages.
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+			vi.mocked( fs ).readFile.mockResolvedValue( '{}' );
 
 			const confirmationCallback = vi.fn().mockReturnValue( true );
 			const promise = publishPackages( {
@@ -538,7 +538,7 @@ describe( 'publishPackages()', () => {
 				// Check for failed packages.
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+			vi.mocked( fs ).readFile.mockResolvedValue( '{}' );
 
 			const dateBefore = new Date();
 
@@ -573,7 +573,7 @@ describe( 'publishPackages()', () => {
 				// Check for failed packages.
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+			vi.mocked( fs ).readFile.mockResolvedValue( '{}' );
 
 			const messages = [];
 			const listrTask = {
@@ -611,7 +611,7 @@ describe( 'publishPackages()', () => {
 				.mockResolvedValueOnce( [ '/work/project/packages/ckeditor5-bar' ] )
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {} );
+			vi.mocked( fs ).readFile.mockResolvedValue( '{}' );
 
 			const listrTask = {
 				output: ''
@@ -658,11 +658,11 @@ describe( 'publishPackages()', () => {
 				// Repeat execution: look for packages to release.
 				.mockResolvedValue( [] );
 
-			vi.mocked( fs ).readJson.mockImplementation( input => {
-				return Promise.resolve( {
+			vi.mocked( fs ).readFile.mockImplementation( input => {
+				return Promise.resolve( JSON.stringify( {
 					name: '@ckeditor/' + input.split( '/' ).at( -1 ),
 					version: '1.0.0'
-				} );
+				} ) );
 			} );
 
 			vi.mocked( npm.checkVersionAvailability )
@@ -686,8 +686,8 @@ describe( 'publishPackages()', () => {
 			await vi.advanceTimersToNextTimerAsync();
 			await promise;
 
-			expect( vi.mocked( fs ).remove ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fs ).remove ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo' );
+			expect( vi.mocked( fs ).rm ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs ).rm ).toHaveBeenCalledWith( '/work/project/packages/ckeditor5-foo', expect.any( Object ) );
 
 			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledTimes( 6 );
@@ -696,10 +696,10 @@ describe( 'publishPackages()', () => {
 		it( 'should reject a promise if cannot publish packages and there are no more attempts', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				name: '@ckeditor/ckeditor5-bar',
 				version: '1.0.0'
-			} );
+			} ) );
 
 			const promise = safeReject( publishPackages( {
 				packagesDirectory: 'packages',
@@ -718,10 +718,10 @@ describe( 'publishPackages()', () => {
 		it( 'should reject a promise if cannot publish packages and there is no more attempting (a negative attempts value)', async () => {
 			vi.mocked( workspaces.findPathsToPackages ).mockResolvedValue( [ '/work/project/packages/ckeditor5-bar' ] );
 
-			vi.mocked( fs ).readJson.mockResolvedValue( {
+			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				name: '@ckeditor/ckeditor5-bar',
 				version: '1.0.0'
-			} );
+			} ) );
 
 			await expect( publishPackages( {
 				packagesDirectory: 'packages',

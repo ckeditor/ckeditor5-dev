@@ -5,8 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import util from 'util';
-import chalk from 'chalk';
+import { styleText, stripVTControlCharacters } from 'util';
 import { Cluster } from 'puppeteer-cluster';
 import { getAllLinks } from './getlinks.js';
 import { getBaseUrl, toArray } from './utils.js';
@@ -116,7 +115,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		silent = false
 	} = options;
 
-	console.log( chalk.bold( '\n🔎 Starting the Crawler…\n' ) );
+	console.log( styleText( 'bold', '\n🔎 Starting the Crawler…\n' ) );
 
 	const puppeteerOptions = {
 		args: [
@@ -228,13 +227,13 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			const host = new URL( url ).host;
 			const isNavigation = isNavigationRequest( request );
 			const message = isNavigation ?
-				`Failed to open link ${ chalk.bold( url ) }` :
-				`Failed to load resource from ${ chalk.bold( host ) }`;
+				`Failed to open link ${ styleText( 'bold', url ) }` :
+				`Failed to load resource from ${ styleText( 'bold', host ) }`;
 
 			pageErrors.push( {
 				pageUrl: isNavigation ? data.parentUrl : data.url,
 				type: ERROR_TYPES.REQUEST_FAILURE,
-				message: `${ message } (failure message: ${ chalk.bold( errorText ) })`,
+				message: `${ message } (failure message: ${ styleText( 'bold', errorText!.toString() ) })`,
 				failedResourceUrl: url
 			} );
 		} );
@@ -247,13 +246,13 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 				const host = new URL( url ).host;
 				const isNavigation = isNavigationRequest( response.request() );
 				const message = isNavigation ?
-					`Failed to open link ${ chalk.bold( url ) }` :
-					`Failed to load resource from ${ chalk.bold( host ) }`;
+					`Failed to open link ${ styleText( 'bold', url ) }` :
+					`Failed to load resource from ${ styleText( 'bold', host ) }`;
 
 				pageErrors.push( {
 					pageUrl: isNavigation ? data.parentUrl : data.url,
 					type: ERROR_TYPES.RESPONSE_FAILURE,
-					message: `${ message } (HTTP response status code: ${ chalk.bold( responseStatus ) })`,
+					message: `${ message } (HTTP response status code: ${ styleText( 'bold', responseStatus.toString() ) })`,
 					failedResourceUrl: url
 				} );
 			}
@@ -470,7 +469,7 @@ function markErrorsAsIgnored( errors: Array<CrawlerError>, errorIgnorePatterns: 
 		const isIgnored = Array
 			.from( errorIgnorePatterns.get( error.type )! )
 			.some( pattern => {
-				const message = util.stripVTControlCharacters( error.message );
+				const message = stripVTControlCharacters( error.message );
 				return pattern === IGNORE_ALL_ERRORS_WILDCARD ||
 					message.includes( pattern ) ||
 					error.failedResourceUrl?.includes( pattern );
@@ -495,17 +494,20 @@ function isNavigationRequest( request: any ): boolean {
  */
 function logErrors( errors: Map<ErrorType, Map<string, ErrorCollection>> ): void {
 	if ( !errors.size ) {
-		console.log( chalk.green.bold( '\n✨ No errors have been found.\n' ) );
+		console.log( styleText( [ 'green', 'bold' ], '\n✨ No errors have been found.\n' ) );
 		return;
 	}
 
-	console.log( chalk.red.bold( '\n🔥 The following errors have been found:' ) );
+	console.log( styleText( [ 'red', 'bold' ], '\n🔥 The following errors have been found:' ) );
 
 	errors.forEach( ( errorCollection, errorType ) => {
 		const numberOfErrors = errorCollection.size;
-		const separator = chalk.gray( ' ➜ ' );
-		const errorName = chalk.bgRed.white.bold( ` ${ errorType.description.toUpperCase() } ` );
-		const errorSummary = chalk.red( `${ chalk.bold( numberOfErrors ) } ${ numberOfErrors > 1 ? 'errors' : 'error' }` );
+		const separator = styleText( 'gray', ' ➜ ' );
+		const errorName = styleText( [ 'bgRed', 'white', 'bold' ], ` ${ errorType.description.toUpperCase() } ` );
+		const errorSummary = styleText(
+			'red',
+			`${ styleText( 'bold', numberOfErrors.toString() ) } ${ numberOfErrors > 1 ? 'errors' : 'error' }`
+		);
 
 		console.group( `\n${ errorName } ${ separator } ${ errorSummary }` );
 
@@ -516,9 +518,9 @@ function logErrors( errors: Map<ErrorType, Map<string, ErrorCollection>> ): void
 				console.log( error.details );
 			}
 
-			console.log( chalk.red( `\n…found on the following ${ error.pages.size > 1 ? 'pages' : 'page' }:` ) );
+			console.log( styleText( 'red', `\n…found on the following ${ error.pages.size > 1 ? 'pages' : 'page' }:` ) );
 
-			error.pages.forEach( pageUrl => console.log( chalk.gray( `➥  ${ pageUrl }` ) ) );
+			error.pages.forEach( pageUrl => console.log( styleText( 'gray', `➥  ${ pageUrl }` ) ) );
 
 			console.groupEnd();
 		} );

@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import fs from 'fs-extra';
+import fs from 'fs';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getPackageContext from './utils/getpackagecontext.js';
 import moveTranslationsBetweenPackages from './utils/movetranslationsbetweenpackages.js';

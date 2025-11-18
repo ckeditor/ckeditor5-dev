@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs-extra';
+import fs from 'fs';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { AsyncArray } from './asyncarray.js';
 import type { RepositoryConfig } from '../types.js';
@@ -41,7 +41,8 @@ export async function findPackages( options: FindPackagesOptions ): Promise<Map<
 
 	return AsyncArray.from( promise )
 		.flat()
-		.map<workspaces.PackageJson>( packagePath => fs.readJson( packagePath ) )
+		.map<string>( packagePath => fs.readFileSync( packagePath, 'utf-8' ) )
+		.map<workspaces.PackageJson>( packageJson => JSON.parse( packageJson ) )
 		.map<[ string, string ]>( ( { name, version } ) => [ name, version ] )
 		.then( entries => new Map( entries.sort( ( [ a ], [ b ] ) => a.localeCompare( b ) ) ) );
 }

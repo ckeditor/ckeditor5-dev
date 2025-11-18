@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import { deleteAsync } from 'del';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import chalk from 'chalk';
 
 /**
  * Removes the specified directory.
@@ -20,7 +20,7 @@ import chalk from 'chalk';
 export default function removeDir( dir, options = {} ) {
 	return deleteAsync( dir ).then( () => {
 		if ( !options.silent ) {
-			logger().info( `Removed directory '${ chalk.cyan( dir ) }'` );
+			logger().info( `Removed directory '${ styleText( 'cyan', dir ) }'` );
 		}
 
 		return Promise.resolve();

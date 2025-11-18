@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import fs from 'fs';
+import { styleText } from 'util';
 import { globSync } from 'glob';
 import { mkdirp } from 'mkdirp';
-import chalk from 'chalk';
 import karma from 'karma';
 import karmaLogger from 'karma/lib/logger.js';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
@@ -50,10 +50,8 @@ vi.mock( 'karma', () => ( {
 	}
 } ) );
 
-vi.mock( 'chalk', () => ( {
-	default: {
-		yellow: vi.fn()
-	}
+vi.mock( 'util', () => ( {
+	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
 vi.mock( 'fs' );
@@ -206,7 +204,7 @@ describe( 'runAutomatedTests()', () => {
 
 		const consoleWarnStub = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
 
-		vi.mocked( chalk ).yellow.mockReturnValue( 'chalk.yellow: warn' );
+		vi.mocked( styleText ).mockReturnValue( 'chalk.yellow: warn' );
 		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
 
 		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
@@ -235,7 +233,8 @@ describe( 'runAutomatedTests()', () => {
 		await promise;
 
 		expect( consoleWarnStub ).toHaveBeenCalledExactlyOnceWith( 'chalk.yellow: warn' );
-		expect( vi.mocked( chalk ).yellow ).toHaveBeenCalledExactlyOnceWith(
+		expect( vi.mocked( styleText ) ).toHaveBeenCalledExactlyOnceWith(
+			'yellow',
 			'⚠ You\'re running tests in dev mode - some error protections are loose. ' +
 			'Use the `--production` flag to use strictest verification methods.'
 		);
@@ -349,7 +348,7 @@ describe( 'runAutomatedTests()', () => {
 				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 			] );
 
-		const assertionsDir = upath.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
+		const assertionsDir = upath.join( import.meta.dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
 
 		const expectedEntryPointContent = [
 			`import assertionAFactory from "${ assertionsDir }/assertionA.js";`,
@@ -400,7 +399,7 @@ describe( 'runAutomatedTests()', () => {
 				'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 			] );
 
-		const assertionsDir = upath.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
+		const assertionsDir = upath.join( import.meta.dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' );
 
 		const expectedEntryPointContent = [
 			`import assertionAFactory from "${ assertionsDir }/assertion-a.js";`,

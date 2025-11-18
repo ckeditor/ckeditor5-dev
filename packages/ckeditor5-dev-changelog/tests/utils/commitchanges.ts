@@ -3,19 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { logInfo } from '../../src/utils/loginfo.js';
 import { commitChanges } from '../../src/utils/commitchanges.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( 'chalk', () => ( {
-	default: {
-		cyan: vi.fn( ( text: string ) => text ),
-		red: vi.fn( ( text: string ) => text )
-	}
-} ) );
 vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/constants.js', () => ( {
 	CHANGELOG_FILE: 'CHANGES.md'
@@ -31,7 +24,6 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] }
 		] );
 
-		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
 		expect( logInfo ).toHaveBeenCalledWith( '○ Committing changes...' );
 		expect( logInfo ).toHaveBeenCalledWith( '◌ Processing "/home/ckeditor/ckeditor5".', { indent: 1 } );
 	} );
@@ -42,7 +34,6 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5/external/ckeditor5-dev', isRoot: false, filePaths: [] }
 		] );
 
-		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
 		expect( logInfo ).toHaveBeenCalledWith( '○ Committing changes...' );
 		expect( logInfo ).toHaveBeenCalledWith( '◌ Processing "/home/ckeditor/ckeditor5".', { indent: 1 } );
 		expect( logInfo ).toHaveBeenCalledWith( '◌ Processing "/home/ckeditor/ckeditor5/external/ckeditor5-dev".', { indent: 1 } );
@@ -182,7 +173,6 @@ describe( 'commitChanges()', () => {
 			{ cwd: '/home/ckeditor/ckeditor5', isRoot: true, filePaths: [] }
 		] );
 
-		expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
 		expect( logInfo ).toHaveBeenCalledWith( 'An error occurred while committing changes.', { indent: 2 } );
 		expect( logInfo ).toHaveBeenCalledWith( 'Commit failed', { indent: 2 } );
 	} );
