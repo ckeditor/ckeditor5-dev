@@ -640,13 +640,13 @@ describe( 'cleanUpPackages()', () => {
 				packageJsonFieldsToRemove: [ 'engines.pnpm', 'engines.yarn' ]
 			} );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				engines: {
 					node: '>=24.11.0'
 				}
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should keep nested field if it does not exist or it targets non-object field', async () => {
@@ -669,15 +669,15 @@ describe( 'cleanUpPackages()', () => {
 				packageJsonFieldsToRemove: [ 'field.nestedField.length', 'field.invalid' ]
 			} );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				field: {
 					nestedField: [
 						'bar'
 					]
 				}
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
@@ -759,11 +759,11 @@ describe( 'cleanUpPackages()', () => {
 				preservePostInstallHook: true
 			} );
 
-			const input = stubs.writeJson.mock.calls[ 0 ];
+			const input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( input[ 1 ] ).to.deep.equal( {
+			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				author: 'author'
-			} );
+			}, null, 2 ) );
 		} );
 
 		it( 'should accept a callback for packageJsonFieldsToRemove', async () => {
