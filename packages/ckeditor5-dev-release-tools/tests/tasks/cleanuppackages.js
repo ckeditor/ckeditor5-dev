@@ -620,6 +620,66 @@ describe( 'cleanUpPackages()', () => {
 			}, null, 2 ) );
 		} );
 
+		it( 'should remove deeply nested unnecessary fields from `package.json`', async () => {
+			mockFs( {
+				'release': {
+					'ckeditor5-foo': {
+						'package.json': JSON.stringify( {
+							engines: {
+								node: '>=24.11.0',
+								pnpm: '>=10.14.0',
+								yarn: 'Hey, we use pnpm now!'
+							}
+						} )
+					}
+				}
+			} );
+
+			await cleanUpPackages( {
+				packagesDirectory: 'release',
+				packageJsonFieldsToRemove: [ 'engines.pnpm', 'engines.yarn' ]
+			} );
+
+			const input = stubs.writeJson.mock.calls[ 0 ];
+
+			expect( input[ 1 ] ).to.deep.equal( {
+				engines: {
+					node: '>=24.11.0'
+				}
+			} );
+		} );
+
+		it( 'should keep nested field if it does not exist or it targets non-object field', async () => {
+			mockFs( {
+				'release': {
+					'ckeditor5-foo': {
+						'package.json': JSON.stringify( {
+							field: {
+								nestedField: [
+									'bar'
+								]
+							}
+						} )
+					}
+				}
+			} );
+
+			await cleanUpPackages( {
+				packagesDirectory: 'release',
+				packageJsonFieldsToRemove: [ 'field.nestedField.length', 'field.invalid' ]
+			} );
+
+			const input = stubs.writeJson.mock.calls[ 0 ];
+
+			expect( input[ 1 ] ).to.deep.equal( {
+				field: {
+					nestedField: [
+						'bar'
+					]
+				}
+			} );
+		} );
+
 		it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
 			mockFs( {
 				'release': {
@@ -681,6 +741,29 @@ describe( 'cleanUpPackages()', () => {
 					'dll:build': 'webpack'
 				}
 			}, null, 2 ) );
+		} );
+
+		it( 'should not crash when scripts are not set but preservePostInstallHook is set to true', async () => {
+			mockFs( {
+				'release': {
+					'ckeditor5-foo': {
+						'package.json': JSON.stringify( {
+							author: 'author'
+						} )
+					}
+				}
+			} );
+
+			await cleanUpPackages( {
+				packagesDirectory: 'release',
+				preservePostInstallHook: true
+			} );
+
+			const input = stubs.writeJson.mock.calls[ 0 ];
+
+			expect( input[ 1 ] ).to.deep.equal( {
+				author: 'author'
+			} );
 		} );
 
 		it( 'should accept a callback for packageJsonFieldsToRemove', async () => {

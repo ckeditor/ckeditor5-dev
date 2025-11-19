@@ -18,7 +18,7 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
  *   - `README.md`
  *   - file pointed by the `main` field from `package.json`
  *   - file pointed by the `types` field from `package.json`
- * - Removes unnecessary fields from the `package.json` file.
+ * - Removes unnecessary fields from the `package.json` file. Supports nested field paths, e.g. `engines.pnpm`.
  *
  * @param {object} options
  * @param {string} options.packagesDirectory Relative path to a location of packages to be cleaned up.
@@ -157,16 +157,14 @@ function getIgnoredFilePatterns( packageJson ) {
  * @param {boolean} preservePostInstallHook
  */
 function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook ) {
-	for ( const key of Object.keys( packageJson ) ) {
-		if ( !packageJsonFieldsToRemove.includes( key ) ) {
+	for ( const field of packageJsonFieldsToRemove ) {
+		if ( field === 'scripts' && preservePostInstallHook && packageJson.scripts?.postinstall ) {
+			packageJson.scripts = { postinstall: packageJson.scripts.postinstall };
+
 			continue;
 		}
 
-		if ( key === 'scripts' && preservePostInstallHook && packageJson.scripts.postinstall ) {
-			packageJson.scripts = { 'postinstall': packageJson.scripts.postinstall };
-		} else {
-			delete packageJson[ key ];
-		}
+		removeField( packageJson, field );
 	}
 }
 
@@ -182,6 +180,39 @@ function sortPathsFromDeepestFirst( firstPath, secondPath ) {
 	const secondPathSegments = secondPath.split( '/' ).length;
 
 	return secondPathSegments - firstPathSegments;
+}
+
+/**
+ * Removes provided field from an object. Supports nested field paths, e.g. "a.b.c". It modifies the source `obj` argument.
+ *
+ * @param {object} obj Source object containing a field to remove.
+ * @param {string} path Path to the field to be removed.
+ */
+function removeField( obj, path ) {
+	const parts = path.split( '.' );
+	const lastPart = parts.pop();
+
+	let current = obj;
+
+	for ( const part of parts ) {
+		current = current[ part ];
+
+		if ( !isObject( current ) ) {
+			return;
+		}
+	}
+
+	delete current[ lastPart ];
+}
+
+/**
+ * Checks if provided value is an object literal.
+ *
+ * @param {*} value Value to check.
+ * @returns {boolean}
+ */
+function isObject( value ) {
+	return value !== null && typeof value === 'object' && !Array.isArray( value );
 }
 
 /**
