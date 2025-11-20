@@ -130,13 +130,13 @@ async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy
 		}
 
 		const pkgJsonPath = upath.join( packagePath, 'package.json' );
-		const hasPkgJson = await fs.access( pkgJsonPath );
+		const hasPkgJson = await fs.access( pkgJsonPath ).then( () => true, () => false );
 
 		if ( !hasPkgJson ) {
 			return;
 		}
 
-		return fs.cp( packagePath, upath.join( outputDirectoryPath, packageDir ) );
+		return fs.cp( packagePath, upath.join( outputDirectoryPath, packageDir ), { recursive: true } );
 	} );
 }
 
