@@ -225,18 +225,24 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 
 			await prepareRepository( options );
 
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
-				'current/working/dir/release/ckeditor5-core'
+				'current/working/dir/release/ckeditor5-core',
+				expect.objectContaining( {
+					recursive: true
+				} )
 			);
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-utils',
-				'current/working/dir/release/ckeditor5-utils'
+				'current/working/dir/release/ckeditor5-utils',
+				expect.objectContaining( {
+					recursive: true
+				} )
 			);
 		} );
 
@@ -256,7 +262,7 @@ describe( 'prepareRepository()', () => {
 					isDirectory: () => true
 				} );
 			} );
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 
 			await prepareRepository( options );
 
@@ -265,11 +271,13 @@ describe( 'prepareRepository()', () => {
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 2 );
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
-				'current/working/dir/release/ckeditor5-core'
+				'current/working/dir/release/ckeditor5-core',
+				expect.any( Object )
 			);
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-utils',
-				'current/working/dir/release/ckeditor5-utils'
+				'current/working/dir/release/ckeditor5-utils',
+				expect.any( Object )
 			);
 		} );
 
@@ -282,10 +290,16 @@ describe( 'prepareRepository()', () => {
 
 			vi.mocked( fs ).access.mockImplementation( input => {
 				if ( input === 'current/working/dir/packages/ckeditor5-core/package.json' ) {
-					return Promise.resolve( true );
+					return Promise.resolve( undefined );
 				}
 
-				return Promise.resolve( false );
+				const error = new Error( 'No such file or directory' );
+				error.code = 'ENOENT';
+				error.errno = -2;
+				error.syscall = 'access';
+				error.path = input;
+
+				return Promise.reject( error );
 			} );
 
 			await prepareRepository( options );
@@ -293,7 +307,8 @@ describe( 'prepareRepository()', () => {
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
-				'current/working/dir/release/ckeditor5-core'
+				'current/working/dir/release/ckeditor5-core',
+				expect.any( Object )
 			);
 		} );
 
@@ -304,14 +319,15 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 
 			await prepareRepository( options );
 
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/ckeditor5-core',
-				'current/working/dir/release/ckeditor5-core'
+				'current/working/dir/release/ckeditor5-core',
+				expect.any( Object )
 			);
 		} );
 
@@ -322,14 +338,15 @@ describe( 'prepareRepository()', () => {
 			vi.mocked( fs ).lstat.mockResolvedValue( {
 				isDirectory: () => true
 			} );
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 
 			await prepareRepository( options );
 
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fs ).cp ).toHaveBeenCalledWith(
 				'current/working/dir/packages/nested/ckeditor5-nested',
-				'current/working/dir/release/nested/ckeditor5-nested'
+				'current/working/dir/release/nested/ckeditor5-nested',
+				expect.any( Object )
 			);
 		} );
 	} );
