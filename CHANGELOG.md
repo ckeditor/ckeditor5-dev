@@ -3,6 +3,9 @@ Changelog
 
 ## [54.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v54.0.1...v54.0.2) (November 19, 2025)
 
+> [!CAUTION]
+> Due to a tooling issue, this release was generated incorrectly. None of the packages from it were published to npm, and it should be considered invalid. Please skip this version and use **v54.1.0**, the first valid release after this issue.
+
 ### Other changes
 
 * Internal changes only.
@@ -34,6 +37,9 @@ Other releases:
 
 
 ## [54.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v54.0.0...v54.0.1) (November 19, 2025)
+
+> [!CAUTION]
+> Due to a tooling issue, this release was generated incorrectly. None of the packages from it were published to npm, and it should be considered invalid. Please skip this version and use **v54.1.0**, the first valid release after this issue.
 
 ### Other changes
 
