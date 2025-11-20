@@ -20,7 +20,7 @@ describe( 'assertPackages()', () => {
 	} );
 
 	it( 'should check if `package.json` exists in each package', async () => {
-		vi.mocked( fs ).access.mockResolvedValue( true );
+		vi.mocked( fs ).access.mockResolvedValue( undefined );
 
 		await assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...disableMainValidatorOptions } );
 
@@ -36,7 +36,13 @@ describe( 'assertPackages()', () => {
 				return Promise.resolve( true );
 			}
 
-			return Promise.resolve( false );
+			const error = new Error( 'No such file or directory' );
+			error.code = 'ENOENT';
+			error.errno = -2;
+			error.syscall = 'access';
+			error.path = input;
+
+			return Promise.reject( error );
 		} );
 
 		await expect( assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...disableMainValidatorOptions } ) )
@@ -56,7 +62,7 @@ describe( 'assertPackages()', () => {
 		};
 
 		it( 'should throw if a package misses its entry point', async () => {
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 			vi.mocked( fs ).readFile.mockImplementation( input => {
 				if ( input === 'ckeditor5-foo/package.json' ) {
 					return Promise.resolve( JSON.stringify( {
@@ -83,7 +89,7 @@ describe( 'assertPackages()', () => {
 		} );
 
 		it( 'should pass the validator if specified package does not have to define the entry point', async () => {
-			vi.mocked( fs ).access.mockResolvedValue( true );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
 			vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 				name: '@ckeditor/ckeditor5-bar'
 			} ) );

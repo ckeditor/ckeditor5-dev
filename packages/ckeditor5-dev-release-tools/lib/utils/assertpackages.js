@@ -24,8 +24,9 @@ export default async function assertPackages( packagePaths, options ) {
 	for ( const packagePath of packagePaths ) {
 		const packageName = upath.basename( packagePath );
 		const packageJsonPath = upath.join( packagePath, 'package.json' );
+		const hasPkgJson = await fs.access( packageJsonPath ).then( () => true, () => false );
 
-		if ( await fs.access( packageJsonPath ) ) {
+		if ( hasPkgJson ) {
 			if ( !requireEntryPoint ) {
 				continue;
 			}
