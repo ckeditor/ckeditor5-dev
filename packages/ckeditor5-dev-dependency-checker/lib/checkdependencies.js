@@ -6,7 +6,7 @@
 import { styleText } from 'util';
 import fs from 'fs';
 import upath from 'upath';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import depCheck from 'depcheck';
 import { parseAsync } from 'oxc-parser';
 import { walk } from 'oxc-walker';

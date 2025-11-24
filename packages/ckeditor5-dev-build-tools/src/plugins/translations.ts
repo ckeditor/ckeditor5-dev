@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import path from 'upath';
 import PO from 'pofile';
 import { groupBy, merge } from 'es-toolkit/compat';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import type { Plugin } from 'rollup';
 import { removeWhitespace } from '../utils.js';
 

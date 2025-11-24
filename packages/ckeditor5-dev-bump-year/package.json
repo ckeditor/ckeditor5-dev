@@ -22,6 +22,6 @@
     "lib"
   ],
   "dependencies": {
-    "glob": "^11.0.2"
+    "tinyglobby": "^0.2.15"
   }
 }

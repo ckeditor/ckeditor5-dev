@@ -8,7 +8,7 @@
 import path from 'path';
 import { styleText } from 'util';
 import fs from 'fs-extra';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 
 const cwd = process.cwd();
 const coverageFile = path.join( cwd, 'coverage', 'lcov.info' );

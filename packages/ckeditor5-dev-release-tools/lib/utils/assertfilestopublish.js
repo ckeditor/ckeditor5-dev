@@ -5,7 +5,7 @@
 
 import fs from 'fs/promises';
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 
 /**
  * Checks if all files expected to be released actually exist in the package directory. Verification takes place for all packages.
@@ -41,8 +41,7 @@ export default async function assertFilesToPublish( packagePaths, optionalEntrie
 			// To match a directory or a file using a single `requiredEntry` pattern.
 			const foundFiles = await glob( [ requiredEntry, requiredEntry + '/**' ], {
 				cwd: packagePath,
-				dot: true,
-				nodir: true
+				dot: true
 			} );
 
 			if ( foundFiles.length === 0 ) {

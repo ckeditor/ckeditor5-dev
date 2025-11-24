@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import { execSync } from 'child_process';
 import checkVersionMatch from '../lib/checkversionmatch.js';
 
@@ -15,7 +15,7 @@ const hoists = vi.hoisted( () => ( {
 
 vi.mock( 'fs' );
 vi.mock( 'util', () => ( { styleText: hoists.styleText } ) );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'child_process' );
 
 describe( 'checkVersionMatch()', () => {

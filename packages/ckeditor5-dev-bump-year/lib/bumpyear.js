@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import { styleText } from 'util';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 
 /**
  * Updates year in all licenses in the provided directory, based on provided glob patterns.
@@ -37,7 +37,6 @@ export default function bumpYear( params ) {
 				'**/node_modules/**'
 			];
 
-			options.nodir = true;
 			options.ignore = options.ignore ? [ ...options.ignore, ...defaultIgnore ] : defaultIgnore;
 
 			return globSync( globPattern.pattern, options );

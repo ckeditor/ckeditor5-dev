@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { glob, type GlobOptionsWithFileTypesFalse } from 'glob';
+import { glob, type GlobOptions } from 'tinyglobby';
 
 type Options = {
 	includePackageJson?: boolean;
@@ -50,16 +50,17 @@ async function getPackages( cwd: string, packagesDirectory: string | null, inclu
 		return Promise.resolve( [] );
 	}
 
-	const globOptions: GlobOptionsWithFileTypesFalse = {
+	const globOptions: GlobOptions = {
 		cwd: upath.join( cwd, packagesDirectory ),
-		absolute: true
+		absolute: true,
+		onlyDirectories: true
 	};
 
 	let pattern = '*/';
 
 	if ( includePackageJson ) {
 		pattern += 'package.json';
-		globOptions.nodir = true;
+		globOptions.onlyDirectories = false;
 	}
 
 	const paths = await glob( pattern, globOptions );

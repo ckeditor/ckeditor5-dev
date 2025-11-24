@@ -7,10 +7,10 @@ import path from 'path';
 import fs from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 
 vi.mock( 'fs' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 
 describe( 'transformFileOptionToTestGlob()', () => {
 	beforeEach( () => {

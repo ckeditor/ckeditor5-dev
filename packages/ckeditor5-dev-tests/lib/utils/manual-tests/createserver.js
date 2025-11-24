@@ -7,7 +7,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import combine from 'dom-combiner';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 

@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs';
 import { styleText } from 'util';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import { mkdirp } from 'mkdirp';
 import karma from 'karma';
 import karmaLogger from 'karma/lib/logger.js';
@@ -56,7 +56,7 @@ vi.mock( 'util', () => ( {
 
 vi.mock( 'fs' );
 vi.mock( 'mkdirp' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'karma/lib/logger.js' );
 vi.mock( '../../lib/utils/automated-tests/getkarmaconfig.js' );
 vi.mock( '../../lib/utils/transformfileoptiontotestglob.js' );

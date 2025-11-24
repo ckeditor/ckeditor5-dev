@@ -4,7 +4,7 @@
  */
 
 import { describe, beforeEach, expect, it, vi } from 'vitest';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import { Application, OptionDefaults } from 'typedoc';
 import {
 	typeDocModuleFixer,
@@ -26,7 +26,7 @@ vi.stubGlobal( 'console', {
 	log: vi.fn()
 } );
 
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'typedoc' );
 vi.mock( '@ckeditor/typedoc-plugins' );
 

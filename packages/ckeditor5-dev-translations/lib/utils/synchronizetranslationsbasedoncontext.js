@@ -6,7 +6,7 @@
 import upath from 'upath';
 import fs from 'fs';
 import PO from 'pofile';
-import { glob } from 'glob';
+import { globSync } from 'tinyglobby';
 import createMissingPackageTranslations from './createmissingpackagetranslations.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
@@ -41,7 +41,7 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 			.filter( Boolean );
 
 		// (4) Find all translation files ("*.po" files).
-		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
+		const translationFilePaths = globSync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
 
 		// Then, for each translation file in a package:
 		for ( const translationFilePath of translationFilePaths ) {

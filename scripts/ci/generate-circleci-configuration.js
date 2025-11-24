@@ -13,7 +13,7 @@
 
 import fs from 'fs-extra';
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import yaml from 'js-yaml';
 
 const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..', '..' );

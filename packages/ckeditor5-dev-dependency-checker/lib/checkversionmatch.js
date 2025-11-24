@@ -8,7 +8,7 @@
 import fs from 'fs';
 import { styleText } from 'util';
 import semver from 'semver';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import { execSync } from 'child_process';
 
 const PNPM_WORKSPACE_VERSION = 'workspace:*';

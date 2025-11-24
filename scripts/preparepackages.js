@@ -10,7 +10,7 @@ import fs from 'fs-extra';
 import { Listr } from 'listr2';
 import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { confirm } from '@inquirer/prompts';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';

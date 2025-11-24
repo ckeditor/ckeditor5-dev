@@ -4,7 +4,7 @@
  */
 
 import { beforeAll, describe, it, vi } from 'vitest';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 import { Application, Converter, type Context } from 'typedoc';
 

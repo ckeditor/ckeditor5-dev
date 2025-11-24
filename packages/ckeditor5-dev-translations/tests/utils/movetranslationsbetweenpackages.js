@@ -6,13 +6,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs';
 import PO from 'pofile';
-import { glob } from 'glob';
+import { globSync } from 'tinyglobby';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import moveTranslationsBetweenPackages from '../../lib/utils/movetranslationsbetweenpackages.js';
 
 vi.mock( 'fs' );
 vi.mock( 'pofile' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 
 describe( 'moveTranslationsBetweenPackages()', () => {
@@ -70,7 +70,7 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 
 		vi.mocked( PO.parse ).mockImplementation( data => JSON.parse( data ) );
 
-		vi.mocked( glob.sync ).mockImplementation( pattern => [
+		vi.mocked( globSync ).mockImplementation( pattern => [
 			pattern.replace( '*', 'en' ),
 			pattern.replace( '*', 'pl' )
 		] );
@@ -176,8 +176,8 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 	it( 'should search for source translation files', () => {
 		moveTranslationsBetweenPackages( defaultOptions );
 
-		expect( glob.sync ).toHaveBeenCalledTimes( 1 );
-		expect( glob.sync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
+		expect( globSync ).toHaveBeenCalledTimes( 1 );
+		expect( globSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
 	} );
 
 	it( 'should parse each translation file', () => {

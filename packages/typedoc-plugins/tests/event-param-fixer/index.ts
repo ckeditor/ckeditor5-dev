@@ -4,7 +4,7 @@
  */
 
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 import {
 	Application,

@@ -5,11 +5,11 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs/promises';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
 
 vi.mock( 'fs/promises' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 
 describe( 'prepareRepository()', () => {
 	const packages = [

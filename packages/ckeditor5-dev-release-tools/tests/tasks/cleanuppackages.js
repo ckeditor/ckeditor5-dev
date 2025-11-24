@@ -6,7 +6,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs/promises';
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import mockFs from 'mock-fs';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
@@ -17,7 +17,7 @@ describe( 'cleanUpPackages()', () => {
 		// Calls to `fs` and `glob` are stubbed, but they are passed through to the real implementation because we want to test the
 		// real behavior of the script. The whole filesystem is mocked by the `mock-fs` util for testing purposes. A virtual project is
 		// prepared in tests on this mocked filesystem.
-		vi.doMock( 'glob', () => ( {
+		vi.doMock( 'tinyglobby', () => ( {
 			glob: vi.fn().mockImplementation( glob )
 		} ) );
 		vi.doMock( 'fs/promises', () => ( {
@@ -35,7 +35,7 @@ describe( 'cleanUpPackages()', () => {
 		} ) );
 
 		stubs = {
-			...await import( 'glob' ),
+			...await import( 'tinyglobby' ),
 			...( await import( 'fs/promises' ) ).default,
 			findPathsToPackages: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).workspaces.findPathsToPackages
 		};
@@ -102,9 +102,8 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' )
 			] );
@@ -137,9 +136,8 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' )
 			] );
@@ -164,9 +162,8 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' )
 			] );
@@ -201,13 +198,12 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/README.md' ),
 				getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
-				getPathTo( 'release/ckeditor5-foo/src' ),
+				getPathTo( 'release/ckeditor5-foo/src/' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.js' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.d.ts' )
 			] );
@@ -246,14 +242,13 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/.IMPORTANT.md' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/README.md' ),
 				getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
-				getPathTo( 'release/ckeditor5-foo/src' ),
+				getPathTo( 'release/ckeditor5-foo/src/' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.js' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.d.ts' )
 			] );
@@ -320,21 +315,20 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/package.json' ),
 				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' ),
 				getPathTo( 'release/ckeditor5-foo/README.md' ),
 				getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
-				getPathTo( 'release/ckeditor5-foo/src' ),
-				getPathTo( 'release/ckeditor5-foo/src/ui' ),
+				getPathTo( 'release/ckeditor5-foo/src/' ),
+				getPathTo( 'release/ckeditor5-foo/src/ui/' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.js' ),
-				getPathTo( 'release/ckeditor5-foo/src/commands' ),
-				getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' ),
+				getPathTo( 'release/ckeditor5-foo/src/commands/' ),
 				getPathTo( 'release/ckeditor5-foo/src/ui/view-bar.js' ),
 				getPathTo( 'release/ckeditor5-foo/src/commands/command-foo.js' ),
-				getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' )
+				getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' ),
+				getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' )
 			] );
 		} );
 
@@ -409,21 +403,20 @@ describe( 'cleanUpPackages()', () => {
 			const actualPaths = await getAllPaths();
 
 			expect( actualPaths ).to.have.members( [
-				getPathTo( '.' ),
-				getPathTo( 'release' ),
-				getPathTo( 'release/ckeditor5-foo' ),
-				getPathTo( 'release/ckeditor5-foo/package.json' ),
-				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' ),
-				getPathTo( 'release/ckeditor5-foo/README.md' ),
+				getPathTo( 'release/' ),
+				getPathTo( 'release/ckeditor5-foo/' ),
 				getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
-				getPathTo( 'release/ckeditor5-foo/src' ),
-				getPathTo( 'release/ckeditor5-foo/src/ui' ),
+				getPathTo( 'release/ckeditor5-foo/README.md' ),
+				getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' ),
+				getPathTo( 'release/ckeditor5-foo/package.json' ),
+				getPathTo( 'release/ckeditor5-foo/src/' ),
+				getPathTo( 'release/ckeditor5-foo/src/commands/' ),
 				getPathTo( 'release/ckeditor5-foo/src/index.js' ),
-				getPathTo( 'release/ckeditor5-foo/src/commands' ),
-				getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' ),
-				getPathTo( 'release/ckeditor5-foo/src/ui/view-bar.js' ),
+				getPathTo( 'release/ckeditor5-foo/src/ui/' ),
+				getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' ),
 				getPathTo( 'release/ckeditor5-foo/src/commands/command-foo.js' ),
-				getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' )
+				getPathTo( 'release/ckeditor5-foo/src/ui/view-bar.js' ),
+				getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' )
 			] );
 		} );
 	} );
@@ -455,25 +448,25 @@ describe( 'cleanUpPackages()', () => {
 			let input = stubs.readFile.mock.calls[ 0 ];
 			let call = stubs.readFile.mock.results[ 0 ];
 
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-foo' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
+			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-bar' } ) );
+			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 
 			input = stubs.readFile.mock.calls[ 1 ];
 			call = stubs.readFile.mock.results[ 1 ];
 
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-bar' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-foo' } ) );
+			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 
 			// Writing `package.json`.
 			expect( stubs.writeFile ).toHaveBeenCalledTimes( 2 );
 
 			input = stubs.writeFile.mock.calls[ 0 ];
 
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
+			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 
 			input = stubs.writeFile.mock.calls[ 1 ];
 
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 		} );
 
 		it( 'should not remove any field from `package.json` if all of them are mandatory', async () => {
@@ -825,6 +818,7 @@ function getPathTo( path ) {
 async function getAllPaths() {
 	return ( await glob( '**', {
 		absolute: true,
-		dot: true
+		dot: true,
+		onlyFiles: false
 	} ) ).map( upath.normalize );
 }

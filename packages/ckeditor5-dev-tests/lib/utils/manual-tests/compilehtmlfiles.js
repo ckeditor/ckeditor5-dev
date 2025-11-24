@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { styleText } from 'util';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import { uniq, debounce } from 'es-toolkit/compat';
 import * as commonmark from 'commonmark';
 import combine from 'dom-combiner';

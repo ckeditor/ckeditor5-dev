@@ -6,7 +6,7 @@
 import http from 'http';
 import readline from 'readline';
 import fs from 'fs';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import combine from 'dom-combiner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
@@ -15,7 +15,7 @@ import createManualTestServer from '../../../lib/utils/manual-tests/createserver
 vi.mock( 'readline' );
 vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'dom-combiner' );
 
 describe( 'createManualTestServer()', () => {

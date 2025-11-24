@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import path from 'path';
 import fs from 'fs';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import chokidar from 'chokidar';
 import domCombiner from 'dom-combiner';
 import compileHtmlFiles from '../../../lib/utils/manual-tests/compilehtmlfiles.js';
@@ -43,7 +43,7 @@ vi.mock( 'commonmark', () => ( {
 } ) );
 vi.mock( 'fs' );
 vi.mock( 'path' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'chokidar' );
 vi.mock( 'dom-combiner' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );

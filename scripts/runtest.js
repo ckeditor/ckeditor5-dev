@@ -9,7 +9,7 @@ import path from 'path';
 import { styleText } from 'util';
 import { execSync } from 'child_process';
 import fs from 'fs-extra';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import minimist from 'minimist';
 
 main();

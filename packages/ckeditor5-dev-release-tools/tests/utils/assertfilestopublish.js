@@ -5,11 +5,11 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import fs from 'fs/promises';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import assertFilesToPublish from '../../lib/utils/assertfilestopublish.js';
 
 vi.mock( 'fs/promises' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 
 describe( 'assertFilesToPublish()', () => {
 	it( 'should do nothing if list of packages is empty', async () => {
@@ -63,16 +63,14 @@ describe( 'assertFilesToPublish()', () => {
 			[ 'src', 'src/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
 			[ 'README.md', 'README.md/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 	} );
@@ -106,8 +104,7 @@ describe( 'assertFilesToPublish()', () => {
 			[ 'src', 'src/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 	} );
@@ -141,8 +138,7 @@ describe( 'assertFilesToPublish()', () => {
 			[ 'src', 'src/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 	} );
@@ -179,16 +175,14 @@ describe( 'assertFilesToPublish()', () => {
 			[ 'src', 'src/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
 			[ 'README.md', 'README.md/**' ],
 			expect.objectContaining( {
 				cwd: 'ckeditor5-foo',
-				dot: true,
-				nodir: true
+				dot: true
 			} )
 		);
 	} );

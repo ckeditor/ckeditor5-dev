@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import fs from 'fs-extra';
 import { checkVersionMatch } from '../../packages/ckeditor5-dev-dependency-checker/lib/index.js';
 
@@ -16,7 +16,6 @@ const PACKAGES_DIRECTORY = upath.join( ROOT_DIRECTORY, 'packages' );
 
 const allPathsToPackageJson = await glob( PACKAGES_DIRECTORY + '/*/package.json', {
 	cwd: ROOT_DIRECTORY,
-	nodir: true,
 	absolute: true
 } );
 

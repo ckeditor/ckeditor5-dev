@@ -7,7 +7,7 @@ import fs from 'fs';
 import { styleText } from 'util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import { minimatch } from 'minimatch';
 import { mkdirp } from 'mkdirp';
 import karmaLogger from 'karma/lib/logger.js';

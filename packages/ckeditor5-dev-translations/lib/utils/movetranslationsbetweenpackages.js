@@ -6,7 +6,7 @@
 import fs from 'fs';
 import upath from 'upath';
 import PO from 'pofile';
-import { glob } from 'glob';
+import { globSync } from 'tinyglobby';
 import { TRANSLATION_FILES_PATH } from './constants.js';
 import cleanTranslationFileContent from './cleantranslationfilecontent.js';
 
@@ -33,7 +33,7 @@ export default function moveTranslationsBetweenPackages( { packageContexts, conf
 		// (3) Prepare the list of paths to translation files ("*.po" files) in source and destination packages.
 		// The source package defines the list of files for both packages.
 		const translationFilesPattern = upath.join( source, TRANSLATION_FILES_PATH, '*.po' );
-		const translationFilePaths = glob.sync( translationFilesPattern )
+		const translationFilePaths = globSync( translationFilesPattern )
 			.map( filePath => upath.basename( filePath ) )
 			.map( fileName => ( {
 				sourceTranslationFilePath: upath.join( source, TRANSLATION_FILES_PATH, fileName ),

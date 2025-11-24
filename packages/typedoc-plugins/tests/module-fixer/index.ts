@@ -4,7 +4,7 @@
  */
 
 import { describe, it, beforeAll, expect } from 'vitest';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 import { Application, type ProjectReflection } from 'typedoc';
 

@@ -9,7 +9,7 @@ import { styleText } from 'util';
 import path from 'path';
 import { Server } from 'socket.io';
 import { spawn } from 'child_process';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 import inquirer from 'inquirer';
 import isInteractive from 'is-interactive';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
@@ -58,7 +58,7 @@ const stubs = vi.hoisted( () => ( {
 vi.mock( 'socket.io' );
 vi.mock( 'child_process' );
 vi.mock( 'inquirer' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( 'util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );

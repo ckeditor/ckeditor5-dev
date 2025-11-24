@@ -5,10 +5,10 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import findPathsToPackages from '../../src/workspaces/findpathstopackages.js';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 
 describe( 'findPathsToPackages()', () => {
 	const mockCwd = '/test/cwd';
@@ -27,7 +27,8 @@ describe( 'findPathsToPackages()', () => {
 
 		expect( glob ).toHaveBeenCalledWith( '*/', {
 			cwd: upath.join( mockCwd, mockPackagesDir ),
-			absolute: true
+			absolute: true,
+			onlyDirectories: true
 		} );
 		expect( result ).toEqual( getMockGlobResults().map( path => upath.normalize( path ) ) );
 	} );
@@ -44,7 +45,7 @@ describe( 'findPathsToPackages()', () => {
 		expect( glob ).toHaveBeenCalledWith( '*/package.json', {
 			cwd: upath.join( mockCwd, mockPackagesDir ),
 			absolute: true,
-			nodir: true
+			onlyDirectories: false
 		} );
 		expect( result ).toEqual( mockPackageJsonResults.map( path => upath.normalize( path ) ) );
 	} );

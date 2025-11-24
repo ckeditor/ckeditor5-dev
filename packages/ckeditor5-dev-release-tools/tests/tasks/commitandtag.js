@@ -4,13 +4,13 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import { simpleGit } from 'simple-git';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import commitAndTag from '../../lib/tasks/commitandtag.js';
 
 vi.mock( 'simple-git' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'commitAndTag()', () => {
@@ -91,8 +91,7 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ] } );
 
 		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.anything(), expect.objectContaining( {
-			absolute: true,
-			nodir: true
+			absolute: true
 		} ) );
 
 		expect( tools.commit ).toHaveBeenCalledExactlyOnceWith( {
@@ -111,8 +110,7 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages', files: [ '**/package.json' ], skipCi: false } );
 
 		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.anything(), expect.objectContaining( {
-			absolute: true,
-			nodir: true
+			absolute: true
 		} ) );
 
 		expect( tools.commit ).toHaveBeenCalledExactlyOnceWith( {

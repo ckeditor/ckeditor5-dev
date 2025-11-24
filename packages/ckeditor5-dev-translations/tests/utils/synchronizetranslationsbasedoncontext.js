@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs';
 import PO from 'pofile';
-import { glob } from 'glob';
+import { globSync } from 'tinyglobby';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 import getLanguages from '../../lib/utils/getlanguages.js';
@@ -16,7 +16,7 @@ import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetr
 
 vi.mock( 'fs' );
 vi.mock( 'pofile' );
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );
@@ -96,7 +96,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			}
 		}() );
 
-		vi.mocked( glob.sync ).mockImplementation( pattern => [ pattern.replace( '*', 'en' ) ] );
+		vi.mocked( globSync ).mockImplementation( pattern => [ pattern.replace( '*', 'en' ) ] );
 
 		vi.mocked( fs.readFileSync ).mockReturnValue( 'Raw PO file content.' );
 
@@ -148,12 +148,12 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	it( 'should search for translation files', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( glob.sync ).toHaveBeenCalledTimes( 1 );
-		expect( glob.sync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
+		expect( globSync ).toHaveBeenCalledTimes( 1 );
+		expect( globSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/*.po' );
 	} );
 
 	it( 'should parse each translation file', () => {
-		vi.mocked( glob.sync ).mockImplementation( pattern => {
+		vi.mocked( globSync ).mockImplementation( pattern => {
 			return [ 'en', 'zh-tw' ].map( language => pattern.replace( '*', language ) );
 		} );
 

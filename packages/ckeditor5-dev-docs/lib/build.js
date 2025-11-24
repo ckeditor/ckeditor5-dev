@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 import { Application, OptionDefaults } from 'typedoc';
 import * as plugins from '@ckeditor/typedoc-plugins';

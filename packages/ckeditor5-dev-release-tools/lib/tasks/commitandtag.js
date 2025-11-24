@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import { simpleGit } from 'simple-git';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
@@ -28,7 +28,7 @@ export default async function commitAndTag( {
 	dryRun = false
 } ) {
 	const normalizedCwd = upath.toUnix( cwd );
-	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true } );
 
 	if ( !filePathsToAdd.length ) {
 		return;

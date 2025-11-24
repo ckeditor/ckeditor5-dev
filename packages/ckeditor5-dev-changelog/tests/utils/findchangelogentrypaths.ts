@@ -4,12 +4,12 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { findChangelogEntryPaths } from '../../src/utils/findchangelogentrypaths.js';
 import type { RepositoryConfig } from '../../src/types.js';
 
-vi.mock( 'glob' );
+vi.mock( 'tinyglobby' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'findChangelogEntryPaths()', () => {

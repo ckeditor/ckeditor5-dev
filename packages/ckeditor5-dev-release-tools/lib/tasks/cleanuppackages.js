@@ -5,7 +5,7 @@
 
 import fs from 'fs/promises';
 import upath from 'upath';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
@@ -86,7 +86,6 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 		const files = await glob( '**', {
 			cwd: packagePath,
 			absolute: true,
-			nodir: true,
 			dot: true,
 			ignore: [
 				'README.md',
@@ -102,11 +101,13 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 	}
 
 	// Find and remove empty directories in the package directory.
-	const globResults = await glob( '**/', {
+	const globResults = await glob( '**', {
 		cwd: packagePath,
 		absolute: true,
+		onlyDirectories: true,
 		dot: true
 	} );
+
 	const directories = globResults
 		.map( path => upath.normalize( path ) )
 		.sort( sortPathsFromDeepestFirst );

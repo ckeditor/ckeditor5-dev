@@ -4,7 +4,7 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 import { CHANGESET_DIRECTORY } from './constants.js';
 import { AsyncArray } from './asyncarray.js';

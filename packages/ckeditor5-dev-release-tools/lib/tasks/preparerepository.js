@@ -4,7 +4,7 @@
  */
 
 import fs from 'fs/promises';
-import { glob } from 'glob';
+import { glob } from 'tinyglobby';
 import upath from 'upath';
 
 /**

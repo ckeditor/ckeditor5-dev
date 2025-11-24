@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import upath from 'upath';
-import { globSync } from 'glob';
+import { globSync } from 'tinyglobby';
 
 /**
  * Converts package names from '--files' argument to glob patterns for test files. Handles both JS and TS files.
