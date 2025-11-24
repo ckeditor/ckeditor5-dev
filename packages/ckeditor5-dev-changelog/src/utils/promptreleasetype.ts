@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { styleText } from 'util';
 import inquirer from 'inquirer';
 import type { ChangelogReleaseType } from '../types.js';
 import semver from 'semver';
@@ -20,7 +21,7 @@ export async function promptReleaseType( currentVersion: string ): Promise<Chang
 		{
 			type: 'list',
 			name: 'releaseType',
-			message: `Select the release type. Current version: ${ currentVersion }.`,
+			message: `Select the release type. Current version: ${ styleText( 'cyan', currentVersion ) }.`,
 			choices: getChoices( currentVersion )
 		}
 	] );
