@@ -101,10 +101,10 @@ function createVersionQuestion( options: Options ) {
 		type: 'input',
 		name: 'customVersion',
 		message: 'Enter your custom version:',
+		when: ( { version }: { version: string } ) => version === 'custom',
 		filter: ( newVersion: string ) => newVersion.trim(),
 		validate: ( newVersion: string ) => validateInputVersion( { newVersion, version, releaseType, packageName, suggestedVersion } ),
-		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' ),
-		when: ( { version }: { version: string } ) => version === 'custom'
+		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' )
 	} ];
 }
 
