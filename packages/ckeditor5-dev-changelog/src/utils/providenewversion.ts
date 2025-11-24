@@ -93,8 +93,8 @@ function createVersionQuestion( options: Options ) {
 	return [ {
 		type: 'list',
 		name: 'version',
-		message,
 		default: suggestedVersion,
+		message,
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' ),
 		choices: getChoices( { version, bumpType, releaseChannel, releaseType } )
 	}, {
