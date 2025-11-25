@@ -24,10 +24,10 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 1.0.0.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0 -> 2.0.0)', value: 'latest' },
-					{ name: 'Pre-release (e.g. 1.0.0 -> 2.0.0-alpha.0)', value: 'prerelease' }
+					{ name: 'Latest (stable) release (2.0.0 | 1.1.0 | 1.0.1)', value: 'latest' },
+					{ name: 'Pre-release (2.0.0-alpha.0 | 1.1.0-alpha.0 | 1.0.1-alpha.0)', value: 'prerelease' }
 				]
 			} ] );
 		} );
@@ -51,10 +51,10 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 1.0.0-rc.1.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0-beta.2 -> 1.0.0)', value: 'latest' },
-					{ name: 'Pre-release continuation (e.g. 1.0.0-alpha.0 -> 1.0.0-alpha.1)', value: 'prerelease' }
+					{ name: 'Latest (stable) release (1.0.0)', value: 'latest' },
+					{ name: 'Pre-release continuation (1.0.0-rc.2)', value: 'prerelease' }
 				]
 			} ] );
 		} );
@@ -78,11 +78,11 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 1.0.0-alpha.1.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0-beta.2 -> 1.0.0)', value: 'latest' },
-					{ name: 'Pre-release continuation (e.g. 1.0.0-alpha.0 -> 1.0.0-alpha.1)', value: 'prerelease' },
-					{ name: 'Pre-release promotion (e.g. 1.0.0-alpha.1 -> 1.0.0-beta.0)', value: 'prerelease-promote' }
+					{ name: 'Latest (stable) release (1.0.0)', value: 'latest' },
+					{ name: 'Pre-release continuation (1.0.0-alpha.2)', value: 'prerelease' },
+					{ name: 'Pre-release promotion (1.0.0-beta.0 | 1.0.0-rc.0)', value: 'prerelease-promote' }
 				]
 			} ] );
 		} );
@@ -113,10 +113,10 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 2.5.3.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0 -> 2.0.0)', value: 'latest' },
-					{ name: 'Pre-release (e.g. 1.0.0 -> 2.0.0-alpha.0)', value: 'prerelease' }
+					{ name: 'Latest (stable) release (3.0.0 | 2.6.0 | 2.5.4)', value: 'latest' },
+					{ name: 'Pre-release (3.0.0-alpha.0 | 2.6.0-alpha.0 | 2.5.4-alpha.0)', value: 'prerelease' }
 				]
 			} ] );
 		} );
@@ -129,10 +129,10 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 3.0.0-rc.5.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0-beta.2 -> 1.0.0)', value: 'latest' },
-					{ name: 'Pre-release continuation (e.g. 1.0.0-alpha.0 -> 1.0.0-alpha.1)', value: 'prerelease' }
+					{ name: 'Latest (stable) release (3.0.0)', value: 'latest' },
+					{ name: 'Pre-release continuation (3.0.0-rc.6)', value: 'prerelease' }
 				]
 			} ] );
 		} );
@@ -145,11 +145,11 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 4.1.0-alpha.3.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0-beta.2 -> 1.0.0)', value: 'latest' },
-					{ name: 'Pre-release continuation (e.g. 1.0.0-alpha.0 -> 1.0.0-alpha.1)', value: 'prerelease' },
-					{ name: 'Pre-release promotion (e.g. 1.0.0-alpha.1 -> 1.0.0-beta.0)', value: 'prerelease-promote' }
+					{ name: 'Latest (stable) release (4.1.0)', value: 'latest' },
+					{ name: 'Pre-release continuation (4.1.0-alpha.4)', value: 'prerelease' },
+					{ name: 'Pre-release promotion (4.1.0-beta.0 | 4.1.0-rc.0)', value: 'prerelease-promote' }
 				]
 			} ] );
 		} );
@@ -162,11 +162,11 @@ describe( 'promptReleaseType()', () => {
 			expect( inquirer.prompt ).toHaveBeenCalledWith( [ {
 				type: 'list',
 				name: 'releaseType',
-				message: 'Please select the release type.',
+				message: 'Select the release type. Current version: 5.2.1-beta.7.',
 				choices: [
-					{ name: 'Latest (stable) release (e.g. 1.0.0-beta.2 -> 1.0.0)', value: 'latest' },
-					{ name: 'Pre-release continuation (e.g. 1.0.0-alpha.0 -> 1.0.0-alpha.1)', value: 'prerelease' },
-					{ name: 'Pre-release promotion (e.g. 1.0.0-alpha.1 -> 1.0.0-beta.0)', value: 'prerelease-promote' }
+					{ name: 'Latest (stable) release (5.2.1)', value: 'latest' },
+					{ name: 'Pre-release continuation (5.2.1-beta.8)', value: 'prerelease' },
+					{ name: 'Pre-release promotion (5.2.1-rc.0)', value: 'prerelease-promote' }
 				]
 			} ] );
 		} );

@@ -23,24 +23,6 @@ type Options = {
 	releaseType: ChangelogReleaseType;
 };
 
-type Question = {
-	type: 'input';
-	name: 'version';
-	default: string;
-	message: string;
-	filter: ( input: string ) => string;
-	validate: ( input: string ) => Promise<string | true>;
-	prefix: string;
-};
-
-type ConfirmationQuestion = {
-	type: 'confirm';
-	name: 'continue';
-	message: string;
-	default: boolean;
-	prefix: string;
-};
-
 /**
  * Prompts the user to provide a new version for a package.
  *
@@ -62,9 +44,9 @@ export async function provideNewVersion( options: Options ): Promise<string> {
 	}
 
 	const question = createVersionQuestion( options );
-	const answers = await inquirer.prompt<{ version: string }>( question as any );
+	const { customVersion, version } = await inquirer.prompt( question as any );
 
-	return answers.version;
+	return customVersion || version;
 }
 
 /**
@@ -83,7 +65,7 @@ function displayInvalidChangesWarning(): void {
  * Asks the user if they want to continue with the version bump process.
  */
 async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boolean> {
-	const question: ConfirmationQuestion = {
+	const question = {
 		type: 'confirm',
 		name: 'continue',
 		message: 'Should continue?',
@@ -99,17 +81,27 @@ async function askContinueConfirmation( indentLevel: number = 0 ): Promise<boole
 /**
  * Creates a prompt question for version input with validation.
  */
-function createVersionQuestion( options: Options ): Array<Question> {
+function createVersionQuestion( options: Options ) {
 	const { version, packageName, bumpType, releaseChannel, releaseType, indentLevel = 0 } = options;
 	const suggestedVersion = getSuggestedVersion( bumpType, version, releaseChannel ) || version;
-	const message = 'Type the new version ' +
-		`(current: "${ version }", suggested: "${ suggestedVersion }":`;
+	const message = [
+		'Select the new version.',
+		`Current version: ${ styleText( 'cyan', version ) }.`,
+		`Suggested version: ${ styleText( 'cyan', suggestedVersion ) }.`
+	].join( ' ' );
 
 	return [ {
-		type: 'input',
+		type: 'list',
 		name: 'version',
 		default: suggestedVersion,
 		message,
+		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' ),
+		choices: getChoices( { version, bumpType, releaseChannel, releaseType } )
+	}, {
+		type: 'input',
+		name: 'customVersion',
+		message: 'Enter your custom version:',
+		when: ( { version }: { version: string } ) => version === 'custom',
 		filter: ( newVersion: string ) => newVersion.trim(),
 		validate: ( newVersion: string ) => validateInputVersion( { newVersion, version, releaseType, packageName, suggestedVersion } ),
 		prefix: ' '.repeat( indentLevel * CLI_INDENT_SIZE ) + styleText( 'cyan', '?' )
@@ -127,4 +119,64 @@ function getSuggestedVersion( bumpType: ReleaseType, version: string, releaseCha
 	} else {
 		return semver.inc( version, bumpType );
 	}
+}
+
+function getChoices( {
+	version,
+	bumpType,
+	releaseChannel,
+	releaseType
+}: {
+	version: string;
+	bumpType: ReleaseType;
+	releaseChannel: ReleaseChannel;
+	releaseType: ChangelogReleaseType;
+} ) {
+	const proposedVersions: Array<string> = [];
+	const preReleaseChannels = [ 'alpha', 'beta', 'rc' ];
+	const validPromotionChannels = preReleaseChannels.filter( ( value, index, array ) => index >= array.indexOf( releaseChannel ) );
+
+	// 6.0.0 => Latest (stable) release (7.0.0 | 6.1.0 | 6.0.1)
+	if ( bumpType !== 'prerelease' && releaseType === 'latest' && releaseChannel === 'latest' ) {
+		proposedVersions.push(
+			semver.inc( version, 'major' )!,
+			semver.inc( version, 'minor' )!,
+			semver.inc( version, 'patch' )!
+		);
+	}
+
+	// 6.0.0 => Pre-release (7.0.0-alpha.0 | 6.1.0-alpha.0 | 6.0.1-alpha.0)
+	if ( bumpType === 'prerelease' && releaseType === 'prerelease' && releaseChannel === 'latest' ) {
+		proposedVersions.push(
+			semver.inc( version, 'premajor', 'alpha' )!,
+			semver.inc( version, 'preminor', 'alpha' )!,
+			semver.inc( version, 'prepatch', 'alpha' )!
+		);
+	}
+
+	// 6.0.0-alpha.0 => Latest (stable) release (6.0.0)
+	if ( bumpType !== 'prerelease' && releaseType === 'latest' && preReleaseChannels.includes( releaseChannel ) ) {
+		proposedVersions.push(
+			semver.inc( version, 'release' )!
+		);
+	}
+
+	// 6.0.0-alpha.0 => Pre-release continuation (6.0.0-alpha.1)
+	if ( bumpType === 'prerelease' && releaseType === 'prerelease' && preReleaseChannels.includes( releaseChannel ) ) {
+		proposedVersions.push(
+			semver.inc( version, 'prerelease', releaseChannel )!
+		);
+	}
+
+	// 6.0.0-alpha.0 => Pre-release promotion (6.0.0-beta.0 | 6.0.0-rc.0)
+	if ( bumpType === 'prerelease' && releaseType === 'prerelease-promote' && preReleaseChannels.includes( releaseChannel ) ) {
+		proposedVersions.push(
+			...validPromotionChannels.map( channel => semver.inc( version, 'prerelease', channel )! )
+		);
+	}
+
+	return [
+		...proposedVersions.map( proposedVersion => ( { name: proposedVersion, value: proposedVersion } ) ),
+		{ name: 'Custom...', value: 'custom' }
+	];
 }

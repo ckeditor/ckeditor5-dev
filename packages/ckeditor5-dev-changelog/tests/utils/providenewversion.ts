@@ -34,18 +34,50 @@ describe( 'provideNewVersion()', () => {
 	} );
 
 	describe( 'basic functionality', () => {
-		it( 'should prompt user for new version and return the result', async () => {
+		it( 'should prompt user for new version and return the picked version', async () => {
 			const result = await provideNewVersion( defaultOptions );
 
 			expect( inquirer.prompt ).toHaveBeenCalledWith( expect.arrayContaining( [
 				expect.objectContaining( {
-					type: 'input',
+					type: 'list',
 					name: 'version',
 					default: '1.0.1',
-					message: expect.stringContaining( 'Type the new version' )
+					message: 'Select the new version. Current version: 1.0.0. Suggested version: 1.0.1.'
 				} )
 			] ) );
 			expect( result ).toBe( '1.0.1' );
+		} );
+
+		it( 'should not prompt the user to type when a version is picked from the list', async () => {
+			await provideNewVersion( defaultOptions );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( typeof promptCall[ 1 ].when ).toBe( 'function' );
+			expect( promptCall[ 1 ].when( { version: '1.0.0' } ) ).toEqual( false );
+		} );
+
+		it( 'should prompt the user to type when "custom" is picked from the list', async () => {
+			await provideNewVersion( defaultOptions );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( typeof promptCall[ 1 ].when ).toBe( 'function' );
+			expect( promptCall[ 1 ].when( { version: 'custom' } ) ).toEqual( true );
+		} );
+
+		it( 'should prompt user for new version and return the custom typed version', async () => {
+			vi.mocked( inquirer.prompt ).mockResolvedValue( { customVersion: '1.2.3' } as any );
+
+			const result = await provideNewVersion( defaultOptions );
+
+			expect( inquirer.prompt ).toHaveBeenCalledWith( expect.arrayContaining( [
+				expect.objectContaining( {
+					type: 'list',
+					name: 'version',
+					default: '1.0.1',
+					message: 'Select the new version. Current version: 1.0.0. Suggested version: 1.0.1.'
+				} )
+			] ) );
+			expect( result ).toBe( '1.2.3' );
 		} );
 
 		it( 'should use suggested version as default', async () => {
@@ -54,14 +86,6 @@ describe( 'provideNewVersion()', () => {
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '1.0.1' );
 		} );
-
-		it( 'should trim whitespace from user input', async () => {
-			vi.mocked( inquirer.prompt ).mockResolvedValue( { version: '  1.0.1  ' } as any );
-
-			const result = await provideNewVersion( defaultOptions );
-
-			expect( result ).toBe( '  1.0.1  ' );
-		} );
 	} );
 
 	describe( 'version suggestion logic', () => {
@@ -69,57 +93,213 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( {
 				...defaultOptions,
 				bumpType: 'patch',
+				releaseType: 'latest',
+				releaseChannel: 'latest',
 				version: '1.0.0'
 			} );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '1.0.1' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0', value: '2.0.0' },
+				{ name: '1.1.0', value: '1.1.0' },
+				{ name: '1.0.1', value: '1.0.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
 		} );
 
 		it( 'should suggest minor version for minor bump type', async () => {
 			await provideNewVersion( {
 				...defaultOptions,
 				bumpType: 'minor',
+				releaseType: 'latest',
+				releaseChannel: 'latest',
 				version: '1.0.0'
 			} );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '1.1.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0', value: '2.0.0' },
+				{ name: '1.1.0', value: '1.1.0' },
+				{ name: '1.0.1', value: '1.0.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
 		} );
 
 		it( 'should suggest major version for major bump type', async () => {
 			await provideNewVersion( {
 				...defaultOptions,
 				bumpType: 'major',
+				releaseType: 'latest',
+				releaseChannel: 'latest',
 				version: '1.0.0'
 			} );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '2.0.0' );
-		} );
-
-		it( 'should suggest prerelease version for prerelease bump type with channel', async () => {
-			await provideNewVersion( {
-				...defaultOptions,
-				bumpType: 'prerelease',
-				releaseChannel: 'alpha',
-				version: '1.0.0'
-			} );
-
-			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( promptCall[ 0 ].default ).toBe( '1.0.1-alpha.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0', value: '2.0.0' },
+				{ name: '1.1.0', value: '1.1.0' },
+				{ name: '1.0.1', value: '1.0.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
 		} );
 
 		it( 'should suggest premajor alpha for prerelease bump type on latest channel', async () => {
 			await provideNewVersion( {
 				...defaultOptions,
 				bumpType: 'prerelease',
+				releaseType: 'prerelease',
 				releaseChannel: 'latest',
 				version: '1.0.0'
 			} );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '2.0.0-alpha.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0-alpha.0', value: '2.0.0-alpha.0' },
+				{ name: '1.1.0-alpha.0', value: '1.1.0-alpha.0' },
+				{ name: '1.0.1-alpha.0', value: '1.0.1-alpha.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest stable version when bumping patch from alpha to latest', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'patch',
+				releaseType: 'latest',
+				releaseChannel: 'alpha',
+				version: '1.0.0-alpha.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0', value: '1.0.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest stable version when bumping minor from alpha to latest', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'minor',
+				releaseType: 'latest',
+				releaseChannel: 'alpha',
+				version: '1.0.0-alpha.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0', value: '1.0.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest stable version when bumping major from alpha to latest', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'major',
+				releaseType: 'latest',
+				releaseChannel: 'alpha',
+				version: '1.0.0-alpha.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0', value: '1.0.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest next version when continuing alpha channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prerelease',
+				releaseType: 'prerelease',
+				releaseChannel: 'alpha',
+				version: '1.0.0-alpha.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0-alpha.1' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0-alpha.1', value: '1.0.0-alpha.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest next version when continuing beta channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prerelease',
+				releaseType: 'prerelease',
+				releaseChannel: 'beta',
+				version: '1.0.0-beta.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0-beta.1' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0-beta.1', value: '1.0.0-beta.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest next version when continuing rc channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prerelease',
+				releaseType: 'prerelease',
+				releaseChannel: 'rc',
+				version: '1.0.0-rc.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0-rc.1' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0-rc.1', value: '1.0.0-rc.1' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest promotion to beta and rc channels from alpha channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prerelease',
+				releaseType: 'prerelease-promote',
+				releaseChannel: 'beta',
+				version: '1.0.0-alpha.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0-beta.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0-beta.0', value: '1.0.0-beta.0' },
+				{ name: '1.0.0-rc.0', value: '1.0.0-rc.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest promotion to rc channel from beta channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prerelease',
+				releaseType: 'prerelease-promote',
+				releaseChannel: 'rc',
+				version: '1.0.0-beta.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.0-rc.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '1.0.0-rc.0', value: '1.0.0-rc.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
 		} );
 	} );
 
@@ -128,14 +308,14 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( defaultOptions );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( typeof promptCall[ 0 ].validate ).toBe( 'function' );
+			expect( typeof promptCall[ 1 ].validate ).toBe( 'function' );
 		} );
 
 		it( 'should pass correct parameters to validateInputVersion through prompt', async () => {
 			await provideNewVersion( defaultOptions );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			const validateFunction = promptCall[ 0 ].validate;
+			const validateFunction = promptCall[ 1 ].validate;
 
 			// Call the validate function directly to test the parameters
 			await validateFunction( '1.0.1' );
@@ -194,6 +374,7 @@ describe( 'provideNewVersion()', () => {
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].prefix ).toBe( '      ?' );
+			expect( promptCall[ 1 ].prefix ).toBe( '      ?' );
 		} );
 
 		it( 'should apply indent level to confirmation prompt prefix', async () => {
@@ -221,14 +402,14 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( defaultOptions );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( promptCall[ 0 ].message ).toContain( 'current: "1.0.0"' );
+			expect( promptCall[ 0 ].message ).toContain( 'Current version: 1.0.0.' );
 		} );
 
 		it( 'should include suggested version in prompt message', async () => {
 			await provideNewVersion( defaultOptions );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( promptCall[ 0 ].message ).toContain( 'suggested: "1.0.1"' );
+			expect( promptCall[ 0 ].message ).toContain( 'Suggested version: 1.0.1.' );
 		} );
 	} );
 
@@ -256,7 +437,7 @@ describe( 'provideNewVersion()', () => {
 			await provideNewVersion( defaultOptions );
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
-			expect( promptCall[ 0 ].filter( ' abc ' ) ).toBe( 'abc' );
+			expect( promptCall[ 1 ].filter( ' abc ' ) ).toBe( 'abc' );
 		} );
 	} );
 } );
