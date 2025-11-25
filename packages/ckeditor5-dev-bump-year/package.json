@@ -22,6 +22,6 @@
     "lib"
   ],
   "dependencies": {
-    "glob": "^11.0.2"
+    "glob": "^13.0.0"
   }
 }

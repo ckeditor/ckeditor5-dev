@@ -30,7 +30,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "date-fns": "^4.0.0",
-    "glob": "^11.0.2",
+    "glob": "^13.0.0",
     "gray-matter": "^4.0.3",
     "inquirer": "^12.5.2",
     "semver": "^7.6.3",

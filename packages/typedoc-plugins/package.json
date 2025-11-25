@@ -29,7 +29,7 @@
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
-    "glob": "^11.0.2",
+    "glob": "^13.0.0",
     "rollup": "^4.9.5",
     "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
