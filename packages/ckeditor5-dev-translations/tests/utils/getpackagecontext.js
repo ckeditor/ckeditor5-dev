@@ -9,22 +9,23 @@ import getPackageContext from '../../lib/utils/getpackagecontext.js';
 
 vi.mock( 'fs' );
 
-describe( 'getPackageContext()', () => {
-	let defaultOptions;
+const PACKAGE_PATH = '/absolute/path/to/packages/ckeditor5-foo';
+const CONTEXTS_PATH = `${ PACKAGE_PATH }/lang/contexts.json`;
 
+describe( 'getPackageContext()', () => {
 	beforeEach( () => {
-		defaultOptions = {
-			packagePath: '/absolute/path/to/packages/ckeditor5-foo'
-		};
+		vi.mocked( fs.existsSync ).mockImplementation( path => {
+			return path === CONTEXTS_PATH;
+		} );
 
 		vi.mocked( fs.readFileSync ).mockImplementation( path => {
-			if ( path === '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json' ) {
+			if ( path === CONTEXTS_PATH ) {
 				return JSON.stringify( {
 					id1: 'Context for message id1 from "ckeditor5-foo".'
 				} );
 			}
 
-			return null;
+			throw new Error( 'File does not exist' );
 		} );
 	} );
 
@@ -33,28 +34,32 @@ describe( 'getPackageContext()', () => {
 	} );
 
 	it( 'should read context file from package', () => {
-		getPackageContext( defaultOptions );
+		getPackageContext( {
+			packagePath: PACKAGE_PATH
+		} );
 
 		expect( fs.readFileSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json', 'utf-8' );
+		expect( fs.readFileSync ).toHaveBeenCalledWith( CONTEXTS_PATH, 'utf-8' );
 	} );
 
 	it( 'should return package contexts', () => {
-		const result = getPackageContext( defaultOptions );
+		const result = getPackageContext( {
+			packagePath: PACKAGE_PATH
+		} );
 
 		expect( result ).toEqual( expect.objectContaining( {
 			contextContent: {
 				id1: 'Context for message id1 from "ckeditor5-foo".'
 			},
-			contextFilePath: '/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json',
-			packagePath: '/absolute/path/to/packages/ckeditor5-foo'
+			contextFilePath: CONTEXTS_PATH,
+			packagePath: PACKAGE_PATH
 		} ) );
 	} );
 
 	it( 'should return empty context if package does not have context file', () => {
-		defaultOptions.packagePath = '/absolute/path/to/packages/ckeditor5-bar';
-
-		const result = getPackageContext( defaultOptions );
+		const result = getPackageContext( {
+			packagePath: '/absolute/path/to/packages/ckeditor5-bar'
+		} );
 
 		expect( result ).toEqual( expect.objectContaining( {
 			contextContent: {},
