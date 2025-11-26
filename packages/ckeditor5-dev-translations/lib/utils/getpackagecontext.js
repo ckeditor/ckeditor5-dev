@@ -14,7 +14,9 @@ import { CONTEXT_FILE_PATH } from './constants.js';
  */
 export default function getPackageContext( { packagePath } ) {
 	const contextFilePath = upath.join( packagePath, CONTEXT_FILE_PATH );
-	const contextContent = JSON.parse( fs.readFileSync( contextFilePath, 'utf-8' ) ) || {};
+	const contextContent = fs.existsSync( contextFilePath ) ?
+		JSON.parse( fs.readFileSync( contextFilePath, 'utf-8' ) ) :
+		{};
 
 	return {
 		contextContent,
