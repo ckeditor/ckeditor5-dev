@@ -216,11 +216,11 @@ function getTypeScriptLoader(options = {}) {
                     tsconfig: configFile,
                     jsc: {
                         parser: {
-                            syntax: 'typescript',
+                            syntax: 'typescript'
                         }
                     }
                 },
-                type: 'javascript/auto',
+                type: 'javascript/auto'
             },
             includeDebugLoader ? getDebugLoader(debugFlags) : null
         ].filter(Boolean)

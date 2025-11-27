@@ -95,13 +95,6 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 		//
 		// See https://github.com/ckeditor/ckeditor5/issues/11006.
 		config.devtool = 'inline-source-map';
-
-		// Since webpack v5 it looks like splitting out the source code into the commons and runtime chunks broke the source map support.
-		config.optimization = {
-			...config.optimization,
-			runtimeChunk: false,
-			splitChunks: false
-		};
 	}
 
 	if ( options.cache ) {
