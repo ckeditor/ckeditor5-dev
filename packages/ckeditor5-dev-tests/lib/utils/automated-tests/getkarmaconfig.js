@@ -32,7 +32,7 @@ export default function getKarmaConfig( options ) {
 	);
 
 	const preprocessorMap = {
-		[ options.entryFile ]: [ 'webpack' ]
+		[ options.entryFile ]: [ 'rspack' ]
 	};
 
 	if ( options.sourceMap ) {
@@ -44,7 +44,7 @@ export default function getKarmaConfig( options ) {
 		basePath,
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: [ 'mocha', 'sinon-chai', 'webpack' ],
+		frameworks: [ 'mocha', 'sinon-chai', 'rspack' ],
 
 		// For unknown reasons, sometimes Karma does not fill the list automatically. So, all available plugins must be specified manually.
 		plugins: [
@@ -57,7 +57,7 @@ export default function getKarmaConfig( options ) {
 			require.resolve( 'karma-sinon' ),
 			require.resolve( 'karma-sinon-chai' ),
 			require.resolve( 'karma-sourcemap-loader' ),
-			require.resolve( 'karma-webpack' )
+			require.resolve( 'karma-rspack-2' )
 		],
 
 		// Files saved in directory `ckeditor5-utils/tests/_assets/` package are available under: http://0.0.0.0:{port}/assets/
@@ -85,7 +85,7 @@ export default function getKarmaConfig( options ) {
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: preprocessorMap,
 
-		webpack: getWebpackConfigForAutomatedTests( {
+		rspack: getWebpackConfigForAutomatedTests( {
 			...options,
 			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] )
 		} ),
@@ -151,10 +151,10 @@ export default function getKarmaConfig( options ) {
 		karmaConfig.singleRun = false;
 	}
 
-	if ( options.verbose ) {
-		karmaConfig.webpackMiddleware.noInfo = false;
-		delete karmaConfig.webpackMiddleware.stats;
-	}
+	// if ( options.verbose ) {
+	// 	karmaConfig.webpackMiddleware.noInfo = false;
+	// 	delete karmaConfig.webpackMiddleware.stats;
+	// }
 
 	if ( options.coverage ) {
 		karmaConfig.reporters.push( 'coverage' );
@@ -199,21 +199,16 @@ export default function getKarmaConfig( options ) {
 		const overrides = require( options.karmaConfigOverrides );
 		overrides( karmaConfig );
 
-		// Watch for source files when running in Intellij IDE, for instance, WebStorm.
-		// Otherwise, Karma compiles sources once, and the test bundle uses old code.
-		// For the future reference: https://youtrack.jetbrains.com/issue/WEB-12496.
-		karmaConfig.webpack.watch = true;
-
 		// Remove "instrumenter" if coverage reporter was removed by overrides
 		// (especially when debugging in Intellij IDE).
-		if ( !karmaConfig.reporters.includes( 'coverage' ) && karmaConfig.webpack.module ) {
-			const moduleRules = karmaConfig.webpack.module.rules;
-			const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'babel-loader' );
+		// if ( !karmaConfig.reporters.includes( 'coverage' ) && karmaConfig.webpack.module ) {
+		// 	const moduleRules = karmaConfig.webpack.module.rules;
+		// 	const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'babel-loader' );
 
-			if ( ruleIdx != -1 ) {
-				moduleRules.splice( ruleIdx, 1 );
-			}
-		}
+		// 	if ( ruleIdx != -1 ) {
+		// 		moduleRules.splice( ruleIdx, 1 );
+		// 	}
+		// }
 	}
 
 	return karmaConfig;

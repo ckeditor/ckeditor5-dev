@@ -24,6 +24,7 @@
   ],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-translations": "workspace:*",
+    "@rspack/core": "^1.6.4",
     "@types/postcss-import": "^14.0.3",
     "@types/through2": "^2.0.41",
     "babel-loader": "^10.0.0",

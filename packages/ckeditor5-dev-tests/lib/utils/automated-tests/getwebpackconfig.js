@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import webpack from 'webpack';
+import rspack from '@rspack/core';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
 import TreatWarningsAsErrorsWebpackPlugin from './treatwarningsaserrorswebpackplugin.js';
@@ -24,8 +24,8 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 		},
 
 		plugins: [
-			new webpack.DefinePlugin( definitions ),
-			new webpack.ProvidePlugin( {
+			new rspack.DefinePlugin( definitions ),
+			new rspack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
 				process: 'process/browser.js'
 			} ),

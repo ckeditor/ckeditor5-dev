@@ -7,9 +7,9 @@ import fs from 'fs';
 import path from 'path';
 import { styleText } from 'util';
 import { rimraf } from 'rimraf';
-import webpackSources from 'webpack-sources';
+import { sources } from '@rspack/core';
 
-const { RawSource, ConcatSource } = webpackSources;
+const { RawSource, ConcatSource } = sources;
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -97,21 +97,17 @@ export default function serveTranslations( compiler, options, translationService
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
 		getCompilationHooks( compiler, compilation ).tap( 'CKEditor5Plugin', ( context, module ) => {
-			const relativePathToResource = path.relative( cwd, module.resource );
+			// The `TranslateSource` loader must be added as the last one in the loader's chain,
+			// after any potential TypeScript file has already been compiled.
+			module.loaders.unshift( {
+				loader: path.join( import.meta.dirname, 'translatesourceloader.js' ),
+				type: 'module',
+				options: { translateSource }
+			} );
 
-			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
-				// The `TranslateSource` loader must be added as the last one in the loader's chain,
-				// after any potential TypeScript file has already been compiled.
-				module.loaders.unshift( {
-					loader: path.join( import.meta.dirname, 'translatesourceloader.js' ),
-					type: 'module',
-					options: { translateSource }
-				} );
+			const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
 
-				const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
-
-				translationService.loadPackage( pathToPackage );
-			}
+			translationService.loadPackage( pathToPackage );
 		} );
 
 		// At the end of the compilation add assets generated from the PO files.

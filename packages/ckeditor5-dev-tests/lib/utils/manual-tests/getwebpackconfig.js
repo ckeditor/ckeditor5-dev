@@ -5,7 +5,7 @@
 
 import path from 'path';
 import { createRequire } from 'module';
-import webpack from 'webpack';
+import rspack from '@rspack/core';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import WebpackNotifierPlugin from './webpacknotifierplugin.js';
@@ -55,8 +55,8 @@ export default function getWebpackConfigForManualTests( options ) {
 				addMainLanguageTranslationsToAllAssets: true,
 				packageNamesPattern: /packages[/\\]ckeditor5-[^/\\]+[/\\]/
 			} ),
-			new webpack.DefinePlugin( definitions ),
-			new webpack.ProvidePlugin( {
+			new rspack.DefinePlugin( definitions ),
+			new rspack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
 				process: 'process/browser.js'
 			} )
@@ -121,7 +121,7 @@ export default function getWebpackConfigForManualTests( options ) {
 			// set to `false` are equivalent to the use of `webpackConfig.devtool = 'cheap-source-map'`.
 			//
 			// See https://github.com/webpack/karma-webpack/pull/76.
-			new webpack.SourceMapDevToolPlugin( {
+			new rspack.SourceMapDevToolPlugin( {
 				columns: false,
 				module: true,
 				filename: '[file].map',
@@ -141,7 +141,7 @@ export default function getWebpackConfigForManualTests( options ) {
 		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
 		const coreDllManifest = require.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' );
 
-		const dllReferencePlugin = new webpack.DllReferencePlugin( {
+		const dllReferencePlugin = new rspack.DllReferencePlugin( {
 			manifest: require( coreDllManifest ),
 			scope: 'ckeditor5/src',
 			name: 'CKEditor5.dll'

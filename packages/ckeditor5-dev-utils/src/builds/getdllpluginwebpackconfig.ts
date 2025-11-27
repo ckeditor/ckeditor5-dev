@@ -5,6 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { rspack } from '@rspack/core';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { getLicenseBanner } from '../bundler/index.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';
@@ -90,11 +91,6 @@ export default async function getDllPluginWebpackConfig(
 	webpack: WebpackOptions,
 	options: GetDllPluginWebpackConfigOptions
 ): Promise<DllWebpackConfig> {
-	// Terser requires webpack. However, it's needed in runtime. To avoid the "Cannot find module 'webpack'" error,
-	// let's load the Terser dependency when `getDllPluginWebpackConfig()` is executed.
-	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
-	const TerserPlugin = ( await import( 'terser-webpack-plugin' ) ).default;
-
 	const { name: packageName } = JSON.parse( fs.readFileSync( path.join( options.packagePath, 'package.json' ), 'utf-8' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
@@ -177,13 +173,7 @@ export default async function getDllPluginWebpackConfig(
 		webpackConfig.optimization.minimize = true;
 
 		webpackConfig.optimization.minimizer = [
-			new TerserPlugin( {
-				terserOptions: {
-					output: {
-						// Preserve CKEditor 5 license comments.
-						comments: /^!/
-					}
-				},
+			new rspack.SwcJsMinimizerRspackPlugin( {
 				extractComments: false
 			} )
 		];

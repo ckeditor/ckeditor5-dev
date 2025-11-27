@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import webpack from 'webpack';
+import rspack from '@rspack/core';
 import getWebpackConfigForManualTests from './getwebpackconfig.js';
 import getRelativeFilePath from '../getrelativefilepath.js';
 import requireDll from '../requiredll.js';
@@ -76,7 +76,7 @@ export default function compileManualTestScripts( options ) {
  */
 function runWebpack( webpackConfig ) {
 	return new Promise( ( resolve, reject ) => {
-		webpack( webpackConfig, err => {
+		rspack( webpackConfig, err => {
 			if ( err ) {
 				reject( err );
 			} else {
