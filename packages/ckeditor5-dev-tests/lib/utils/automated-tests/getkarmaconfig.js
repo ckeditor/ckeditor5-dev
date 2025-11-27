@@ -151,10 +151,10 @@ export default function getKarmaConfig( options ) {
 		karmaConfig.singleRun = false;
 	}
 
-	// if ( options.verbose ) {
-	// 	karmaConfig.webpackMiddleware.noInfo = false;
-	// 	delete karmaConfig.webpackMiddleware.stats;
-	// }
+	if ( options.verbose ) {
+		karmaConfig.rspackMiddleware.noInfo = false;
+		delete karmaConfig.rspackMiddleware.stats;
+	}
 
 	if ( options.coverage ) {
 		karmaConfig.reporters.push( 'coverage' );
@@ -199,16 +199,21 @@ export default function getKarmaConfig( options ) {
 		const overrides = require( options.karmaConfigOverrides );
 		overrides( karmaConfig );
 
+		// Watch for source files when running in Intellij IDE, for instance, WebStorm.
+		// Otherwise, Karma compiles sources once, and the test bundle uses old code.
+		// For the future reference: https://youtrack.jetbrains.com/issue/WEB-12496.
+		karmaConfig.rspack.watch = true;
+
 		// Remove "instrumenter" if coverage reporter was removed by overrides
 		// (especially when debugging in Intellij IDE).
-		// if ( !karmaConfig.reporters.includes( 'coverage' ) && karmaConfig.webpack.module ) {
-		// 	const moduleRules = karmaConfig.webpack.module.rules;
-		// 	const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'babel-loader' );
+		if ( !karmaConfig.reporters.includes( 'coverage' ) && karmaConfig.rspack.module ) {
+			const moduleRules = karmaConfig.rspack.module.rules;
+			const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'babel-loader' );
 
-		// 	if ( ruleIdx != -1 ) {
-		// 		moduleRules.splice( ruleIdx, 1 );
-		// 	}
-		// }
+			if ( ruleIdx != -1 ) {
+				moduleRules.splice( ruleIdx, 1 );
+			}
+		}
 	}
 
 	return karmaConfig;

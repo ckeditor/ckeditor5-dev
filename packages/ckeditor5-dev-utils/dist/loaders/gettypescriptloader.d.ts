@@ -13,10 +13,7 @@ type TypeScriptLoader = {
 };
 type LoaderToUse = {
     loader: string;
-    options: {
-        target: string;
-        tsconfig: string;
-    };
+    options: any;
 };
 export default function getTypeScriptLoader(options?: TypeScriptLoaderOptions): TypeScriptLoader;
 export {};

@@ -205,19 +205,19 @@ function getDebugLoader(debugFlags) {
  * For licensing, see LICENSE.md.
  */
 function getTypeScriptLoader(options = {}) {
-    const { configFile = 'tsconfig.json', debugFlags = [], includeDebugLoader = false } = options;
+    const { debugFlags = [], includeDebugLoader = false } = options;
     return {
         test: /\.ts$/,
         use: [
             {
                 loader: 'builtin:swc-loader',
                 options: {
-                    target: 'es2022',
-                    tsconfig: configFile,
                     jsc: {
+                        target: 'es2022',
                         parser: {
                             syntax: 'typescript'
-                        }
+                        },
+                        preserveAllComments: true
                     }
                 },
                 type: 'javascript/auto'
