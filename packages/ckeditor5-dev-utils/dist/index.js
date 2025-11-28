@@ -567,6 +567,7 @@ async function getDllPluginWebpackConfig(webpack, options) {
     const indexJsExists = fs.existsSync(path.join(options.packagePath, 'src', 'index.js'));
     const webpackConfig = {
         mode: options.isDevelopmentMode ? 'development' : 'production',
+        devtool: false,
         performance: { hints: false },
         // Use the `index.js` file to prepare the build to avoid potential issues if a source code differs from the published one.
         entry: path.join(options.packagePath, 'src', indexJsExists ? 'index.js' : 'index.ts'),
@@ -622,6 +623,7 @@ async function getDllPluginWebpackConfig(webpack, options) {
             skipPluralFormFunction: true
         }));
     }
+    console.log({ isDevelopmentMode: options.isDevelopmentMode });
     if (options.isDevelopmentMode) {
         webpackConfig.devtool = 'source-map';
     }

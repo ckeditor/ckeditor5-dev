@@ -61,7 +61,7 @@ type DllWebpackConfig = {
     module: {
         rules: Array<object>;
     };
-    devtool?: string;
+    devtool?: boolean | string;
 };
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported

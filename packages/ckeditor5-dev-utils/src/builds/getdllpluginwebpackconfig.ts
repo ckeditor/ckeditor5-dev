@@ -79,7 +79,7 @@ type DllWebpackConfig = {
 	module: {
 		rules: Array<object>;
 	};
-	devtool?: string;
+	devtool?: boolean | string;
 };
 
 /**
@@ -97,6 +97,8 @@ export default async function getDllPluginWebpackConfig(
 
 	const webpackConfig: DllWebpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
+
+		devtool: false,
 
 		performance: { hints: false },
 
@@ -166,6 +168,8 @@ export default async function getDllPluginWebpackConfig(
 			skipPluralFormFunction: true
 		} ) );
 	}
+
+	console.log( { isDevelopmentMode: options.isDevelopmentMode } );
 
 	if ( options.isDevelopmentMode ) {
 		webpackConfig.devtool = 'source-map';
