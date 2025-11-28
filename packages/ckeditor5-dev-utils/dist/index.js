@@ -4,7 +4,6 @@ import path from 'path';
 import { rspack } from '@rspack/core';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { createRequire } from 'module';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import postCssImport from 'postcss-import';
 import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
@@ -515,7 +514,7 @@ function getStylesLoader(options) {
         }
     });
     const getExtractedLoader = () => {
-        return MiniCssExtractPlugin.loader;
+        return rspack.CssExtractRspackPlugin.loader;
     };
     return {
         test: /\.css$/,
@@ -561,7 +560,7 @@ var index$5 = /*#__PURE__*/Object.freeze({
  * by the package can be added to DLL builds.
  * @returns {object}
  */
-async function getDllPluginWebpackConfig(webpack, options) {
+async function getDllPluginWebpackConfig(options) {
     const { name: packageName } = JSON.parse(fs.readFileSync(path.join(options.packagePath, 'package.json'), 'utf-8'));
     const langDirExists = fs.existsSync(path.join(options.packagePath, 'lang'));
     const indexJsExists = fs.existsSync(path.join(options.packagePath, 'src', 'index.js'));
@@ -581,13 +580,13 @@ async function getDllPluginWebpackConfig(webpack, options) {
             minimize: false
         },
         plugins: [
-            new webpack.BannerPlugin({
+            new rspack.BannerPlugin({
                 banner: getLicenseBanner(),
                 raw: true
             }),
-            new webpack.DllReferencePlugin({
+            new rspack.DllReferencePlugin({
                 manifest: JSON.parse(fs.readFileSync(options.manifestPath, 'utf-8')),
-                scope: 'ckeditor5/src',
+                scope: 'ckeditor5',
                 name: 'CKEditor5.dll'
             })
         ],
@@ -623,7 +622,6 @@ async function getDllPluginWebpackConfig(webpack, options) {
             skipPluralFormFunction: true
         }));
     }
-    console.log({ isDevelopmentMode: options.isDevelopmentMode });
     if (options.isDevelopmentMode) {
         webpackConfig.devtool = 'source-map';
     }

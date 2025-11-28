@@ -23,7 +23,7 @@ tests.runAutomatedTests( options )
 		process.exit( 0 );
 	} )
 	.catch( error => {
-		console.log( styleText( 'red', error ) );
+		console.log( styleText( 'red', error.stack ) );
 
 		process.exit( 1 );
 	} );

@@ -143,7 +143,7 @@ export default function getWebpackConfigForManualTests( options ) {
 
 		const dllReferencePlugin = new rspack.DllReferencePlugin( {
 			manifest: require( coreDllManifest ),
-			scope: 'ckeditor5/src',
+			scope: 'ckeditor5',
 			name: 'CKEditor5.dll'
 		} );
 

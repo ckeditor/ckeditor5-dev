@@ -10,23 +10,6 @@ import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations
 import { getLicenseBanner } from '../bundler/index.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';
 
-type WebpackPluginConstructor = {
-	new( ...args: Array<unknown> ): object;
-};
-
-type WebpackOptions = {
-
-	/**
-	 * Plugin used to add text to the top of the file.
-	 */
-	BannerPlugin: WebpackPluginConstructor;
-
-	/**
-	 * Plugin used to import DLLs with webpack.
-	 */
-	DllReferencePlugin: WebpackPluginConstructor;
-};
-
 type GetDllPluginWebpackConfigOptions = {
 
 	/**
@@ -87,10 +70,7 @@ type DllWebpackConfig = {
  * by the package can be added to DLL builds.
  * @returns {object}
  */
-export default async function getDllPluginWebpackConfig(
-	webpack: WebpackOptions,
-	options: GetDllPluginWebpackConfigOptions
-): Promise<DllWebpackConfig> {
+export default async function getDllPluginWebpackConfig( options: GetDllPluginWebpackConfigOptions ): Promise<DllWebpackConfig> {
 	const { name: packageName } = JSON.parse( fs.readFileSync( path.join( options.packagePath, 'package.json' ), 'utf-8' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
@@ -118,13 +98,13 @@ export default async function getDllPluginWebpackConfig(
 		},
 
 		plugins: [
-			new webpack.BannerPlugin( {
+			new rspack.BannerPlugin( {
 				banner: getLicenseBanner(),
 				raw: true
 			} ),
-			new webpack.DllReferencePlugin( {
+			new rspack.DllReferencePlugin( {
 				manifest: JSON.parse( fs.readFileSync( options.manifestPath, 'utf-8' ) ),
-				scope: 'ckeditor5/src',
+				scope: 'ckeditor5',
 				name: 'CKEditor5.dll'
 			} )
 		],
@@ -168,8 +148,6 @@ export default async function getDllPluginWebpackConfig(
 			skipPluralFormFunction: true
 		} ) );
 	}
-
-	console.log( { isDevelopmentMode: options.isDevelopmentMode } );
 
 	if ( options.isDevelopmentMode ) {
 		webpackConfig.devtool = 'source-map';

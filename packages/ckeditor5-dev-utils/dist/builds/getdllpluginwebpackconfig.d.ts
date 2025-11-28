@@ -2,19 +2,6 @@
  * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
-type WebpackPluginConstructor = {
-    new (...args: Array<unknown>): object;
-};
-type WebpackOptions = {
-    /**
-     * Plugin used to add text to the top of the file.
-     */
-    BannerPlugin: WebpackPluginConstructor;
-    /**
-     * Plugin used to import DLLs with webpack.
-     */
-    DllReferencePlugin: WebpackPluginConstructor;
-};
 type GetDllPluginWebpackConfigOptions = {
     /**
      * An absolute path to the root directory of the package.
@@ -68,5 +55,5 @@ type DllWebpackConfig = {
  * by the package can be added to DLL builds.
  * @returns {object}
  */
-export default function getDllPluginWebpackConfig(webpack: WebpackOptions, options: GetDllPluginWebpackConfigOptions): Promise<DllWebpackConfig>;
+export default function getDllPluginWebpackConfig(options: GetDllPluginWebpackConfigOptions): Promise<DllWebpackConfig>;
 export {};

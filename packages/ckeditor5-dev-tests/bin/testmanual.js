@@ -20,9 +20,11 @@ options.disableWatch = process.argv.includes( '--disable-watch' );
 options.themePath = fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-theme-lark' ) );
 
 tests.runManualTests( options )
+	.then( () => {
+		process.exit( 0 );
+	} )
 	.catch( error => {
-		// Mark result of this task as invalid.
-		process.exitCode = 1;
-
 		console.log( styleText( 'red', error.stack ) );
+
+		process.exit( 1 );
 	} );

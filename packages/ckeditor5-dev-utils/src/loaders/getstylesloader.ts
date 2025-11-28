@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { rspack } from '@rspack/core';
 import { resolveLoader } from './resolve-loader.js';
 import { getPostCssConfig } from '../styles/index.js';
 
@@ -51,7 +51,7 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 	} );
 
 	const getExtractedLoader = () => {
-		return MiniCssExtractPlugin.loader;
+		return rspack.CssExtractRspackPlugin.loader;
 	};
 
 	return {
