@@ -28,7 +28,9 @@ main().catch( error => {
 async function main() {
 	const { configPath, dryRun } = parseArguments( process.argv.slice( 2 ) );
 
-	if ( !configPath || !await fs.exists( configPath ) ) {
+	try {
+		await fs.readFile( configPath );
+	} catch {
 		throw new Error( 'Missing or invalid CLI argument: --config-path' );
 	}
 
