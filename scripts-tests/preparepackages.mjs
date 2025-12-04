@@ -17,7 +17,7 @@ vi.mock( 'listr2', () => ( {
 	} )
 } ) );
 
-describe( 'scripts/release/preparepackages', () => {
+describe( 'scripts/preparepackages', () => {
 	let listrTasks;
 
 	beforeEach( async () => {
