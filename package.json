@@ -36,6 +36,7 @@
     "nice": "ckeditor5-dev-changelog-create-entry",
     "postinstall": "node ./scripts/postinstall.js",
     "test": "node ./scripts/runtest.js",
+    "test:scripts": "vitest --config ./scripts-tests/vitest.config.mjs --run",
     "coverage": "node ./scripts/runtest.js --coverage",
     "check-versions-match": "node scripts/ci/check-dependencies-versions-match.mjs",
     "release:prepare-changelog": "node ./scripts/preparechangelog.js",

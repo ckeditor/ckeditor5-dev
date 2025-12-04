@@ -102,6 +102,9 @@ jobs:
       - run:
           name: Validate versions of dependencies
           command: pnpm run check-versions-match
+      - run:
+          name: Execute tests for internal scripts
+          command: pnpm run test:scripts
       - unless:
           # Upload the code coverage results for non-nightly builds only.
           condition: << pipeline.parameters.isNightly >>
