@@ -54,11 +54,11 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
     "@types/pacote": "^11.1.8",
-    "@vitest/coverage-v8": "^3.1.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "jest-extended": "^5.0.3",
     "rollup": "^4.9.5",
     "typescript": "5.3.3",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit",
