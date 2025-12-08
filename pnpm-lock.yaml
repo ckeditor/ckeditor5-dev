@@ -17,6 +17,9 @@ importers:
       '@octokit/rest':
         specifier: ^22.0.0
         version: 22.0.0
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1))
       eslint:
         specifier: ^9.34.0
         version: 9.39.1(jiti@2.6.1)
@@ -56,6 +59,9 @@ importers:
       upath:
         specifier: ^2.0.1
         version: 2.0.1
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-build-tools:
     dependencies:
@@ -142,7 +148,7 @@ importers:
         specifier: ^9.0.5
         version: 9.0.6
       '@vitest/coverage-v8':
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1))
       type-fest:
         specifier: ^4.10.2
@@ -151,7 +157,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-bump-year:
@@ -194,7 +200,7 @@ importers:
         specifier: ^7.7.0
         version: 7.7.1
       '@vitest/coverage-v8':
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1))
       rollup:
         specifier: ^4.9.5
@@ -203,7 +209,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-ci:
@@ -216,7 +222,7 @@ importers:
         version: 2.0.7
     devDependencies:
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-dependency-checker:
@@ -244,7 +250,7 @@ importers:
         version: 2.0.1
     devDependencies:
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-docs:
@@ -272,7 +278,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-license-checker:
@@ -291,7 +297,7 @@ importers:
         specifier: 12.1.2
         version: 12.1.2(rollup@4.52.4)(tslib@2.8.1)(typescript@5.3.3)
       '@vitest/coverage-v8':
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1))
       rollup:
         specifier: ^4.9.5
@@ -300,7 +306,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-release-tools:
@@ -343,7 +349,7 @@ importers:
         specifier: ^5.2.0
         version: 5.5.0
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-stale-bot:
@@ -371,7 +377,7 @@ importers:
         version: 2.0.1
     devDependencies:
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-tests:
@@ -516,7 +522,7 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-translations:
@@ -550,7 +556,7 @@ importers:
         version: 3.3.3
     devDependencies:
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-utils:
@@ -644,7 +650,7 @@ importers:
         specifier: ^11.1.8
         version: 11.1.8
       '@vitest/coverage-v8':
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1))
       jest-extended:
         specifier: ^5.0.3
@@ -656,7 +662,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
   packages/ckeditor5-dev-web-crawler:
@@ -718,7 +724,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^3.1.1
+        specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
 packages:
