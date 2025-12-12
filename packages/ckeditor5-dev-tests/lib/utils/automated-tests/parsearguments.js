@@ -36,7 +36,6 @@ export default function parseArguments( args, settings = {} ) {
 		boolean: [
 			'cache',
 			'coverage',
-			'dll',
 			'notify',
 			'production',
 			'resolve-js-first',
@@ -66,7 +65,6 @@ export default function parseArguments( args, settings = {} ) {
 			cache: false,
 			coverage: false,
 			cwd: process.cwd(),
-			dll: null,
 			files: [],
 			'identity-file': null,
 			language: 'en',

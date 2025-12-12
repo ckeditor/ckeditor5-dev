@@ -532,8 +532,7 @@ describe( 'cleanUpPackages()', () => {
 								'eslint-plugin-ckeditor5-rules'
 							],
 							scripts: {
-								'build': 'tsc -p ./tsconfig.json',
-								'dll:build': 'webpack'
+								'build': 'tsc -p ./tsconfig.json'
 							},
 							private: true
 						} )
@@ -581,8 +580,7 @@ describe( 'cleanUpPackages()', () => {
 								'eslint-plugin-ckeditor5-rules'
 							],
 							scripts: {
-								'build': 'tsc -p ./tsconfig.json',
-								'dll:build': 'webpack'
+								'build': 'tsc -p ./tsconfig.json'
 							}
 						} )
 					}
@@ -614,8 +612,7 @@ describe( 'cleanUpPackages()', () => {
 					'eslint-plugin-ckeditor5-rules'
 				],
 				scripts: {
-					'build': 'tsc -p ./tsconfig.json',
-					'dll:build': 'webpack'
+					'build': 'tsc -p ./tsconfig.json'
 				}
 			}, null, 2 ) );
 		} );
@@ -687,8 +684,7 @@ describe( 'cleanUpPackages()', () => {
 						'package.json': JSON.stringify( {
 							scripts: {
 								'postinstall': 'node my-node-script.js',
-								'build': 'tsc -p ./tsconfig.json',
-								'dll:build': 'webpack'
+								'build': 'tsc -p ./tsconfig.json'
 							}
 						} )
 					}
@@ -716,8 +712,7 @@ describe( 'cleanUpPackages()', () => {
 							author: 'author',
 							scripts: {
 								'postinstall': 'node my-node-script.js',
-								'build': 'tsc -p ./tsconfig.json',
-								'dll:build': 'webpack'
+								'build': 'tsc -p ./tsconfig.json'
 							}
 						} )
 					}
@@ -737,8 +732,7 @@ describe( 'cleanUpPackages()', () => {
 			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				scripts: {
 					'postinstall': 'node my-node-script.js',
-					'build': 'tsc -p ./tsconfig.json',
-					'dll:build': 'webpack'
+					'build': 'tsc -p ./tsconfig.json'
 				}
 			}, null, 2 ) );
 		} );
@@ -787,8 +781,7 @@ describe( 'cleanUpPackages()', () => {
 							],
 							scripts: {
 								'postinstall': 'node my-node-script.js',
-								'build': 'tsc -p ./tsconfig.json',
-								'dll:build': 'webpack'
+								'build': 'tsc -p ./tsconfig.json'
 							}
 						} )
 					}
