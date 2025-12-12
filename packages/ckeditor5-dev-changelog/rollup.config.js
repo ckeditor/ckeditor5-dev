@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import typescript from '@rollup/plugin-typescript';

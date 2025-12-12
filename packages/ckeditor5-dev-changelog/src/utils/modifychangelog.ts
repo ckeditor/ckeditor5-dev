@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs/promises';
-import { styleText } from 'util';
+import fs from 'node:fs/promises';
+import { styleText } from 'node:util';
 import upath from 'upath';
 import { logInfo } from './loginfo.js';
 import { truncateChangelog } from './truncatechangelog.js';

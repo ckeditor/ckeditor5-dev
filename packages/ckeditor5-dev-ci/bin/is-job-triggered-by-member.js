@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { parseArgs } from 'util';
+import { parseArgs } from 'node:util';
 import isJobTriggeredByMember from '../lib/is-job-triggered-by-member.js';
 
 /**

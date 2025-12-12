@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import fs from 'fs';
+import fs from 'node:fs';
 import PO from 'pofile';
 import getLanguages from './getlanguages.js';
 import { TRANSLATION_FILES_PATH } from './constants.js';

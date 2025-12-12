@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { readdirSync } from 'fs';
+import { readdirSync } from 'node:fs';
 import globals from 'globals';
 import { defineConfig } from 'eslint/config';
 import ckeditor5Rules from 'eslint-plugin-ckeditor5-rules';

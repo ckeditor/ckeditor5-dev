@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 
 type DebugLoaderOptions = {
 	loader: string;

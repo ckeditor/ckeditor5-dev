@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import upath from 'upath';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { logInfo } from './loginfo.js';

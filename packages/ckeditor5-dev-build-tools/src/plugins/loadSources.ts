@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { accessSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { accessSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
 import type { Plugin } from 'rollup';
 
 export function loadTypeScriptSources(): Plugin {

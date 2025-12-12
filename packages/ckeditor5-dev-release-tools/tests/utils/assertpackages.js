@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import assertPackages from '../../lib/utils/assertpackages.js';
 
 vi.mock( 'fs/promises' );

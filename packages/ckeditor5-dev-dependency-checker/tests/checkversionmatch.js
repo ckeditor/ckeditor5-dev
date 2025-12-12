@@ -4,9 +4,9 @@
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import { globSync } from 'glob';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import checkVersionMatch from '../lib/checkversionmatch.js';
 
 const hoists = vi.hoisted( () => ( {

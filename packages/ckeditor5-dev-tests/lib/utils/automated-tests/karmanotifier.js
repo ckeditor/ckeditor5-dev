@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import notifier from 'node-notifier';
 
 const ckeditor5icon = path.join( import.meta.dirname, '..', 'icons', 'ckeditor5.png' );

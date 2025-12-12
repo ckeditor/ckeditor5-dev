@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { moveChangelogEntryFiles } from '../../src/utils/movechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { PRE_RELEASE_DIRECTORY } from '../../src/utils/constants.js';
 

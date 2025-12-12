@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { test, expect } from 'vitest';
 import styles from 'rollup-plugin-styles';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';

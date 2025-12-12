@@ -5,11 +5,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import { styleText } from 'util';
+import fs from 'node:fs';
+import { styleText } from 'node:util';
 import semver from 'semver';
 import { globSync } from 'glob';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 
 const PNPM_WORKSPACE_VERSION = 'workspace:*';
 

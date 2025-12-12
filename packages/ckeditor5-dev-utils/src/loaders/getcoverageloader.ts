@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import { resolveLoader } from './resolve-loader.js';
 
 type CoverageLoaderConfig = {

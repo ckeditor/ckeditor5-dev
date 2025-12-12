@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import upath from 'upath';
 import { glob } from 'glob';
 import mockFs from 'mock-fs';
@@ -36,7 +36,7 @@ describe( 'cleanUpPackages()', () => {
 
 		stubs = {
 			...await import( 'glob' ),
-			...( await import( 'fs/promises' ) ).default,
+			...( await import( 'node:fs/promises' ) ).default,
 			findPathsToPackages: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).workspaces.findPathsToPackages
 		};
 

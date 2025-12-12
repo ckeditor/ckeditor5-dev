@@ -7,8 +7,8 @@
 
 import { vi, describe, it, beforeEach, afterEach, expect, type MockInstance } from 'vitest';
 import { validateLicenseFiles } from '../src/validate-license-files.js';
-import { glob, readFile, writeFile } from 'fs/promises';
-import { findPackageJSON } from 'module';
+import { glob, readFile, writeFile } from 'node:fs/promises';
+import { findPackageJSON } from 'node:module';
 
 vi.mock( 'fs/promises' );
 vi.mock( 'module' );

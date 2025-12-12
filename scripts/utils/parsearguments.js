@@ -4,7 +4,7 @@
  */
 
 import minimist from 'minimist';
-import os from 'os';
+import os from 'node:os';
 
 /**
  * @param {Array.<string>} cliArguments

@@ -87,7 +87,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( firstPath ).to.equal( 'node_modules' );
 
 		expect( secondPath ).to.match( /node_modules$/ );
-		expect( require( 'fs' ).existsSync( secondPath ) ).to.equal( true );
+		expect( require( 'node:fs' ).existsSync( secondPath ) ).to.equal( true );
 	} );
 
 	it( 'should return webpack configuration with loaded identity file', () => {

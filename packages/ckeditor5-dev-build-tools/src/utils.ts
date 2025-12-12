@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 import type { CamelCase, CamelCasedProperties } from 'type-fest';
 import type { InputPluginOption } from 'rollup';
 

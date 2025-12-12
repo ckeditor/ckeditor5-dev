@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { styleText } from 'util';
-import { spawn } from 'child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { styleText } from 'node:util';
+import { spawn } from 'node:child_process';
 import { globSync } from 'glob';
 import inquirer from 'inquirer';
 import isInteractive from 'is-interactive';

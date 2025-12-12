@@ -7,7 +7,7 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
-import fs from 'fs';
+import fs from 'node:fs';
 
 vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );

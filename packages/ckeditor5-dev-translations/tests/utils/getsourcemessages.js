@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import findMessages from '../../lib/findmessages.js';
 import isFileInDirectory from '../../lib/utils/isfileindirectory.js';
 import getSourceMessages from '../../lib/utils/getsourcemessages.js';

@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import getPackageContext from '../../lib/utils/getpackagecontext.js';
 
 vi.mock( 'fs' );

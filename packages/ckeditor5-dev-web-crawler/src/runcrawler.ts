@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText, stripVTControlCharacters } from 'util';
+import { styleText, stripVTControlCharacters } from 'node:util';
 import { Cluster } from 'puppeteer-cluster';
 import { getAllLinks } from './getlinks.js';
 import { getBaseUrl, toArray } from './utils.js';

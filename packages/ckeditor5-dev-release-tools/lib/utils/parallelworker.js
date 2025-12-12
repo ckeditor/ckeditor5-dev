@@ -5,7 +5,7 @@
 
 // This file is covered by the "executeInParallel() - integration" test cases.
 
-import { parentPort, workerData } from 'worker_threads';
+import { parentPort, workerData } from 'node:worker_threads';
 
 // Required due to top-level await.
 ( async () => {

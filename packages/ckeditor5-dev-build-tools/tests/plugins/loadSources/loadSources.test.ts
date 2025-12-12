@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { test } from 'vitest';
 import { rollup, type RollupOutput } from 'rollup';
 import { swcPlugin, verifyChunk } from '../../_utils/utils.js';

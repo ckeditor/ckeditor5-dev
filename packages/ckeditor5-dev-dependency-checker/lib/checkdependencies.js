@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
-import fs from 'fs';
+import { styleText } from 'node:util';
+import fs from 'node:fs';
 import upath from 'upath';
 import { globSync } from 'glob';
 import depCheck from 'depcheck';

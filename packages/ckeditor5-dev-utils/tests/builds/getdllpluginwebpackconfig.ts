@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import getDllPluginWebpackConfig from '../../src/builds/getdllpluginwebpackconfig.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../../src/loaders/index.js';
 

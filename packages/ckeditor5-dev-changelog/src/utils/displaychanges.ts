@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { logInfo } from './loginfo.js';
 import type { Entry, Section, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 

@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import findMessages from './findmessages.js';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import PO from 'pofile';
 
 /**

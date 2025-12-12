@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 
 /**
  * Wrapper around `require.resolve()` to allow mocking it in tests.

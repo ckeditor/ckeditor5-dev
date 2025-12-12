@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';

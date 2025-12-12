@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import os from 'os';
-import fs from 'fs/promises';
+import os from 'node:os';
+import fs from 'node:fs/promises';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { registerAbortController, deregisterAbortController } from '../../lib/utils/abortcontroller.js';

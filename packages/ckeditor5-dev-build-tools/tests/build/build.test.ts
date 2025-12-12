@@ -6,7 +6,7 @@
 import { test, expect, vi, beforeEach } from 'vitest';
 import upath from 'upath';
 import * as Rollup from 'rollup';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { build } from '../../src/build.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
 

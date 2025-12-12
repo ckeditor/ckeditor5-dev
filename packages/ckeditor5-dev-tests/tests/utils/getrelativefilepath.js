@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import getRelativeFilePath from '../../lib/utils/getrelativefilepath.js';
 

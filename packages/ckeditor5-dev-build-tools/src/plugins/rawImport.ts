@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import { resolve, dirname } from 'path';
+import fs from 'node:fs';
+import { resolve, dirname } from 'node:path';
 import type { Plugin } from 'rollup';
 
 /**

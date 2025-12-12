@@ -7,7 +7,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import cliCursor from 'cli-cursor';
 import isInteractive from 'is-interactive';
 import createSpinner from '../../src/tools/createspinner.js';
-import readline from 'readline';
+import readline from 'node:readline';
 
 vi.mock( 'is-interactive' );
 vi.mock( 'cli-spinners', () => ( {

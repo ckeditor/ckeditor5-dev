@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { format } from 'date-fns';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { groupEntriesBySection } from './groupentriesbysection.js';

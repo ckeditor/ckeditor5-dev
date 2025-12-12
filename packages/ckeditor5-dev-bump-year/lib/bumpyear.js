@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import { styleText } from 'util';
+import fs from 'node:fs';
+import { styleText } from 'node:util';
 import { globSync } from 'glob';
 
 /**

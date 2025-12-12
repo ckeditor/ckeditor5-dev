@@ -4,9 +4,9 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import os from 'os';
-import { randomUUID } from 'crypto';
-import fs from 'fs/promises';
+import os from 'node:os';
+import { randomUUID } from 'node:crypto';
+import fs from 'node:fs/promises';
 import pacote from 'pacote';
 import { manifest, packument } from '../../src/npm/pacotecacheless.js';
 

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import sh from 'shelljs';
 import logger, { type Verbosity } from '../logger/index.js';
 

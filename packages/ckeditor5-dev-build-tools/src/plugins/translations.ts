@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { parse } from 'path';
-import { readFileSync } from 'fs';
+import { parse } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 import path from 'upath';
 import PO from 'pofile';

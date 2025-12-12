@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import updateVersions from '../../lib/tasks/updateversions.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 

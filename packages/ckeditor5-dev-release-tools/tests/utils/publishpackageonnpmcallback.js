@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 

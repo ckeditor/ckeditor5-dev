@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { stripVTControlCharacters } from 'util';
+import { stripVTControlCharacters } from 'node:util';
 import { join } from 'upath';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as template from '../src/template.js';

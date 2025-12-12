@@ -4,8 +4,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
-import { styleText } from 'util';
+import fs from 'node:fs';
+import { styleText } from 'node:util';
 import { globSync } from 'glob';
 import { mkdirp } from 'mkdirp';
 import karma from 'karma';

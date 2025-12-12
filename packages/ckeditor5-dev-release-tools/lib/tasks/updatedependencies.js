@@ -4,7 +4,7 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import upath from 'upath';
 
 const { normalizeTrim } = upath;

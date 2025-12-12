@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
 import { globSync } from 'glob';

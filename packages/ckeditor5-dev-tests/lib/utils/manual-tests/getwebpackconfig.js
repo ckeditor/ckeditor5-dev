@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import { createRequire } from 'module';
+import path from 'node:path';
+import { createRequire } from 'node:module';
 import webpack from 'webpack';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
