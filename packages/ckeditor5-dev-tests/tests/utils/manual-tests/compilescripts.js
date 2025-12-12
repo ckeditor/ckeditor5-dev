@@ -6,13 +6,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import webpack from 'webpack';
 import getRelativeFilePath from '../../../lib/utils/getrelativefilepath.js';
-import requireDll from '../../../lib/utils/requiredll.js';
 import getWebpackConfigForManualTests from '../../../lib/utils/manual-tests/getwebpackconfig.js';
 import compileManualTestScripts from '../../../lib/utils/manual-tests/compilescripts.js';
 
 vi.mock( 'webpack' );
 vi.mock( '../../../lib/utils/getrelativefilepath.js' );
-vi.mock( '../../../lib/utils/requiredll.js' );
 vi.mock( '../../../lib/utils/manual-tests/getwebpackconfig.js' );
 
 describe( 'compileManualTestScripts()', () => {
@@ -33,55 +31,7 @@ describe( 'compileManualTestScripts()', () => {
 		vi.mocked( getRelativeFilePath ).mockImplementation( input => input );
 	} );
 
-	it( 'should compile manual test scripts (DLL only)', async () => {
-		vi.mocked( requireDll ).mockReturnValue( true );
-		const onTestCompilationStatus = vi.fn();
-
-		await compileManualTestScripts( {
-			cwd: 'workspace',
-			buildDir: 'buildDir',
-			sourceFiles: [
-				'ckeditor5-foo/manual/file1-dll.js',
-				'ckeditor5-foo/manual/file2-dll.js'
-			],
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus,
-			additionalLanguages: [ 'pl', 'ar' ],
-			debug: [ 'CK_DEBUG' ],
-			disableWatch: false
-		} );
-
-		expect( vi.mocked( getWebpackConfigForManualTests ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
-			cwd: 'workspace',
-			requireDll: true,
-			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus,
-			additionalLanguages: [ 'pl', 'ar' ],
-			entries: {
-				'ckeditor5-foo/manual/file1-dll': 'ckeditor5-foo/manual/file1-dll.js',
-				'ckeditor5-foo/manual/file2-dll': 'ckeditor5-foo/manual/file2-dll.js'
-			},
-			debug: [ 'CK_DEBUG' ],
-			disableWatch: false
-		} ) );
-
-		expect( vi.mocked( webpack ) ).toHaveBeenCalledExactlyOnceWith(
-			{
-				buildDir: 'buildDir',
-				entries: {
-					'ckeditor5-foo/manual/file1-dll': 'ckeditor5-foo/manual/file1-dll.js',
-					'ckeditor5-foo/manual/file2-dll': 'ckeditor5-foo/manual/file2-dll.js'
-				}
-			},
-			expect.any( Function )
-		);
-	} );
-
-	it( 'should compile manual test scripts (non-DLL only)', async () => {
-		vi.mocked( requireDll ).mockReturnValue( false );
+	it( 'should compile manual test scripts', async () => {
 		const onTestCompilationStatus = vi.fn();
 
 		await compileManualTestScripts( {
@@ -101,7 +51,6 @@ describe( 'compileManualTestScripts()', () => {
 
 		expect( vi.mocked( getWebpackConfigForManualTests ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
 			cwd: 'workspace',
-			requireDll: false,
 			buildDir: 'buildDir',
 			themePath: 'path/to/theme',
 			language: 'en',
@@ -127,31 +76,7 @@ describe( 'compileManualTestScripts()', () => {
 		);
 	} );
 
-	it( 'should compile manual test scripts (DLL and non-DLL)', async () => {
-		vi.mocked( requireDll ).mockImplementation( input => input.includes( 'dll' ) );
-
-		await compileManualTestScripts( {
-			cwd: 'workspace',
-			buildDir: 'buildDir',
-			sourceFiles: [
-				'ckeditor5-foo/manual/file1.js',
-				'ckeditor5-foo/manual/file2-dll.js'
-			],
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus: vi.fn(),
-			additionalLanguages: [ 'pl', 'ar' ],
-			debug: [ 'CK_DEBUG' ],
-			disableWatch: false
-		} );
-
-		expect( vi.mocked( getWebpackConfigForManualTests ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( webpack ) ).toHaveBeenCalledTimes( 2 );
-	} );
-
 	it( 'should compile multiple manual test scripts', async () => {
-		vi.mocked( requireDll ).mockReturnValue( false );
-
 		await compileManualTestScripts( {
 			cwd: 'workspace',
 			buildDir: 'buildDir',
@@ -178,7 +103,6 @@ describe( 'compileManualTestScripts()', () => {
 		vi.mocked( webpack ).mockImplementation( () => {
 			throw new Error( 'Unexpected error' );
 		} );
-		vi.mocked( requireDll ).mockReturnValue( false );
 
 		await expect( compileManualTestScripts( {
 			buildDir: 'buildDir',

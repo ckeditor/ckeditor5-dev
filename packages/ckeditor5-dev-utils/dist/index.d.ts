@@ -2,7 +2,6 @@
  * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
-
 export { default as logger } from './logger/index.js';
 export * as bundler from './bundler/index.js';
 export * as loaders from './loaders/index.js';
