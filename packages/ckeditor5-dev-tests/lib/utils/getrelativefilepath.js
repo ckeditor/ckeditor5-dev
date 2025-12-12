@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 
 /**
  * Get a path to a source file which will uniquely identify this file in

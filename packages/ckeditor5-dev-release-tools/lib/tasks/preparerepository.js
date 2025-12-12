@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import upath from 'upath';
 

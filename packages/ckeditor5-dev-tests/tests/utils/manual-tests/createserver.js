@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import http from 'http';
-import readline from 'readline';
-import fs from 'fs';
+import http from 'node:http';
+import readline from 'node:readline';
+import fs from 'node:fs';
 import { globSync } from 'glob';
 import combine from 'dom-combiner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

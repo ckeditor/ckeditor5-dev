@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import { styleText } from 'util';
+import path from 'node:path';
+import { styleText } from 'node:util';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
 

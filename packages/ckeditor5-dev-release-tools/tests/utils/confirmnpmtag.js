@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import inquirer from 'inquirer';
 import confirmNpmTag from '../../lib/utils/confirmnpmtag.js';
 

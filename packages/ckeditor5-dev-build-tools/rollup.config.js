@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';

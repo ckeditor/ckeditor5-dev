@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
 

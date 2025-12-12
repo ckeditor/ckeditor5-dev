@@ -6,8 +6,8 @@
  */
 
 import isWsl from 'is-wsl';
-import { execSync } from 'child_process';
-import { createRequire } from 'module';
+import { execSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 
 const require = createRequire( import.meta.url );
 

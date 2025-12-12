@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import getPackageContext from '../lib/utils/getpackagecontext.js';
 import moveTranslationsBetweenPackages from '../lib/utils/movetranslationsbetweenpackages.js';
 import moveTranslations from '../lib/movetranslations.js';

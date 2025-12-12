@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { findPackages } from '../../src/utils/findpackages.js';
-import fs from 'fs';
+import fs from 'node:fs';
 import type { RepositoryConfig } from '../../src/types.js';
 
 vi.mock( 'fs' );

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { resolveLoader } from '../../src/loaders/resolve-loader.js';
 

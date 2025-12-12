@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { mkdir, copyFile, constants } from 'fs/promises';
-import { promisify, styleText, parseArgs } from 'util';
-import { exec } from 'child_process';
+import { mkdir, copyFile, constants } from 'node:fs/promises';
+import { promisify, styleText, parseArgs } from 'node:util';
+import { exec } from 'node:child_process';
 import path from 'upath';
 import { format } from 'date-fns';
 import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './utils/constants.js';

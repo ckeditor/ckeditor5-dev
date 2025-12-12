@@ -11,7 +11,7 @@ import {
 	type Application,
 	type DeclarationReflection
 } from 'typedoc';
-import fs from 'fs';
+import fs from 'node:fs';
 import upath from 'upath';
 import { getPluginPriority } from '../utils/getpluginpriority.js';
 

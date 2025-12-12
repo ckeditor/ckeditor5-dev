@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { test, expect } from 'vitest';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';

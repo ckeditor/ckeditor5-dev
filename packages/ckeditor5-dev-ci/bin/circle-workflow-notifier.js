@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { parseArgs } from 'util';
-import { execSync } from 'child_process';
+import { parseArgs } from 'node:util';
+import { execSync } from 'node:child_process';
 import processJobStatuses from '../lib/process-job-statuses.js';
 import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
 

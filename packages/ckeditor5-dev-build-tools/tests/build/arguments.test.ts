@@ -5,7 +5,7 @@
 
 import { test, expect, vi } from 'vitest';
 import upath from 'upath';
-import fs from 'fs';
+import fs from 'node:fs';
 import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 

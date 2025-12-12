@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import path from 'upath';
 import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';

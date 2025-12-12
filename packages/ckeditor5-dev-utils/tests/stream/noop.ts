@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import stream from 'stream';
+import stream from 'node:stream';
 import noop from '../../src/stream/noop.js';
 
 describe( 'noop()', () => {

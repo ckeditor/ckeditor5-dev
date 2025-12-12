@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { parseArgs } from 'util';
+import { parseArgs } from 'node:util';
 import slackNotify from 'slack-notify';
 import formatMessage from '../lib/format-message.js';
 

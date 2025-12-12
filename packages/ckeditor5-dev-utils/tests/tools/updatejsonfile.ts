@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import updateJSONFile from '../../src/tools/updatejsonfile.js';
 

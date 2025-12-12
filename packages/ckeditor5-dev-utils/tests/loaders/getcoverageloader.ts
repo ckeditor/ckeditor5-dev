@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import getCoverageLoader from '../../src/loaders/getcoverageloader.js';
 

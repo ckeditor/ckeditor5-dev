@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { getLicenseBanner } from '../bundler/index.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';

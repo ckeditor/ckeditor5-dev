@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { PassThrough, type Transform } from 'stream';
+import { PassThrough, type Transform } from 'node:stream';
 import through from 'through2';
 
 export default function noop( callback?: ( ( chunk: unknown ) => unknown | Promise<unknown> ) ): Transform {

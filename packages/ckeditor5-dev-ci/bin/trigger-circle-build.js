@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { parseArgs } from 'util';
+import { parseArgs } from 'node:util';
 import triggerCircleBuild from '../lib/trigger-circle-build.js';
 
 /**

@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import { styleText } from 'util';
+import fs from 'node:fs';
+import { styleText } from 'node:util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
 import { globSync } from 'glob';

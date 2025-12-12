@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { expect, test } from 'vitest';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyChunk } from '../../_utils/utils.js';
@@ -17,7 +17,7 @@ async function generateBundle(
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.js' ),
 		external: [
-			'fs'
+			'node:fs'
 		],
 		plugins: [
 			replaceImports( options )
@@ -42,7 +42,7 @@ test( 'Doesnt replace anything by default', async () => {
 test( 'Accepts string', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ 'fs', 'another-dependency' ]
+			[ 'node:fs', 'another-dependency' ]
 		]
 	} );
 
@@ -52,7 +52,7 @@ test( 'Accepts string', async () => {
 test( 'Accepts RegExp', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ /fs/, 'another-dependency' ]
+			[ /node:fs/, 'another-dependency' ]
 		]
 	} );
 
@@ -76,7 +76,7 @@ test( 'Updates the source map', async () => {
 
 	const output = await generateBundle( {
 		replace: [
-			[ 'fs', 'another-dependency' ]
+			[ 'node:fs', 'another-dependency' ]
 		]
 	}, true );
 
@@ -102,7 +102,7 @@ test( 'Updates the source map when 3rd parameter is set to true', async () => {
 test( 'Replacing happens after the code is parsed and tree-shaken', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ './dependency.js', 'fs' ]
+			[ './dependency.js', 'node:fs' ]
 		]
 	} );
 

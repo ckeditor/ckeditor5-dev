@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import assertNpmTag from '../../lib/utils/assertnpmtag.js';
 import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
 

@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { removeChangelogEntryFiles } from '../../src/utils/removechangelogentryfiles.js';
 import { logInfo } from '../../src/utils/loginfo.js';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
 vi.mock( 'fs/promises' );

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import upath from 'upath';
 import semver from 'semver';

@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';

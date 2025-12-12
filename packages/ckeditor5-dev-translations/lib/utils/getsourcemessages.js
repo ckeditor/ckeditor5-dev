@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import findMessages from '../findmessages.js';
 import isFileInDirectory from './isfileindirectory.js';
 

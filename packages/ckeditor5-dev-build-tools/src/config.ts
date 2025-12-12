@@ -4,7 +4,7 @@
  */
 
 import path from 'upath';
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 import { getOptionalPlugin, getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
 import { defineConfig, type Plugin, type RollupOptions } from 'rollup';

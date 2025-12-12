@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { cpus } from 'os';
+import { cpus } from 'node:os';
 
 export interface ErrorType {
 

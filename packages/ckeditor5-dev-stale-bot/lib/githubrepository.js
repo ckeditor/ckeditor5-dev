@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import upath from 'upath';
 import { GraphQLClient } from 'graphql-request';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';

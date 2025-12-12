@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { deleteAsync } from 'del';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import removeDir from '../../../lib/utils/manual-tests/removedir.js';

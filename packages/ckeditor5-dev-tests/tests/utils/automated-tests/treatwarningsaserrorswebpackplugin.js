@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import webpack from 'webpack';
-import path from 'path';
+import path from 'node:path';
 import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin.js';
 
 describe( 'TreatWarningsAsErrorsWebpackPlugin', () => {

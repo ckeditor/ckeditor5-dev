@@ -13,7 +13,7 @@
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
 	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
-	const { rm } = await import( 'fs/promises' );
+	const { rm } = await import( 'node:fs/promises' );
 
 	try {
 		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {

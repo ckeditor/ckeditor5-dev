@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
 import { differenceInMilliseconds } from 'date-fns';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';

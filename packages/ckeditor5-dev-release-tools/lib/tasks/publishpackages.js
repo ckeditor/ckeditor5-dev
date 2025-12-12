@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
 import assertPackages from '../utils/assertpackages.js';
 import assertNpmTag from '../utils/assertnpmtag.js';

@@ -5,8 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
-import { fileURLToPath } from 'url';
+import { styleText } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIdentityFile: true } );

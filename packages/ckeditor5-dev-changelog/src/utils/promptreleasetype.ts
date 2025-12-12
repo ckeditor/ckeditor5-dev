@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import inquirer from 'inquirer';
 import type { ChangelogReleaseType } from '../types.js';
 import semver from 'semver';

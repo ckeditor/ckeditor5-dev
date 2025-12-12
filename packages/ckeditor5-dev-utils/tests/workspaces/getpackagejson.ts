@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import fs from 'fs';
-import fsPromise from 'fs/promises';
+import fs from 'node:fs';
+import fsPromise from 'node:fs/promises';
 import getPackageJson, { type PackageJson } from '../../src/workspaces/getpackagejson.js';
 
 vi.mock( 'fs' );

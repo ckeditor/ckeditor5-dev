@@ -6,8 +6,8 @@
 /* eslint-disable no-eval */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import MultipleLanguageTranslationService from '../lib/multiplelanguagetranslationservice.js';
 
 vi.mock( 'fs', () => ( {

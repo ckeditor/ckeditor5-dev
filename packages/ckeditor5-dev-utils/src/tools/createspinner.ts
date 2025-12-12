@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import readline from 'readline';
+import readline from 'node:readline';
 import isInteractive from 'is-interactive';
 import cliSpinners from 'cli-spinners';
 import cliCursor from 'cli-cursor';
