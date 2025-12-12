@@ -6,7 +6,6 @@
 import webpack from 'webpack';
 import getWebpackConfigForManualTests from './getwebpackconfig.js';
 import getRelativeFilePath from '../getrelativefilepath.js';
-import requireDll from '../requiredll.js';
 
 /**
  * @param {object} options
@@ -25,9 +24,6 @@ import requireDll from '../requiredll.js';
  */
 export default function compileManualTestScripts( options ) {
 	const entryFiles = options.sourceFiles;
-	const entryFilesDLL = entryFiles.filter( entryFile => requireDll( entryFile ) );
-	const entryFilesNonDll = entryFiles.filter( entryFile => !requireDll( entryFile ) );
-
 	const webpackConfigCommon = {
 		cwd: options.cwd,
 		buildDir: options.buildDir,
@@ -43,27 +39,13 @@ export default function compileManualTestScripts( options ) {
 
 	const webpackConfigs = [];
 
-	// DLL and non-DLL manual tests needs to be compiled separately, because DLL tests require `DllReferencePlugin` and non-DLL ones
-	// must not have it. Because of that, one or two separate webpack configs are produced and one or two separate webpack processes
-	// are executed.
-	if ( entryFilesDLL.length ) {
-		const webpackConfigDll = getWebpackConfigForManualTests( {
+	if ( entryFiles.length ) {
+		const webpackConfig = getWebpackConfigForManualTests( {
 			...webpackConfigCommon,
-			requireDll: true,
-			entries: getWebpackEntryPoints( entryFilesDLL )
+			entries: getWebpackEntryPoints( entryFiles )
 		} );
 
-		webpackConfigs.push( webpackConfigDll );
-	}
-
-	if ( entryFilesNonDll.length ) {
-		const webpackConfigNonDll = getWebpackConfigForManualTests( {
-			...webpackConfigCommon,
-			requireDll: false,
-			entries: getWebpackEntryPoints( entryFilesNonDll )
-		} );
-
-		webpackConfigs.push( webpackConfigNonDll );
+		webpackConfigs.push( webpackConfig );
 	}
 
 	const webpackPromises = webpackConfigs.map( config => runWebpack( config ) );
