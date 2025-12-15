@@ -4,12 +4,25 @@
  */
 
 import { join } from 'path';
-import { test, expect } from 'vitest';
+import { test, expect, vi } from 'vitest';
 import styles from 'rollup-plugin-styles';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { swcPlugin, verifyAsset, verifyChunk } from '../../_utils/utils.js';
-
 import { addBanner, type RollupBannerOptions } from '../../../src/index.js';
+
+const createFilterSpy = vi.hoisted( vi.fn );
+
+vi.mock( '@rollup/pluginutils', async importOriginal => {
+	const original = await importOriginal() as any;
+
+	return {
+		...original,
+		createFilter: ( ...args: any ) => {
+			createFilterSpy( ...args );
+			return original.createFilter( ...args );
+		}
+	};
+} );
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
@@ -80,4 +93,18 @@ test( 'Allows overriding "exclude" option', async () => {
 
 	expect( output[ 0 ].code ).not.includes( banner );
 	verifyAsset( output, 'styles.css', banner );
+} );
+
+test( 'Should have proper default values', async () => {
+	const banner = '/* CUSTOM BANNER */';
+	await generateBundle( { banner } );
+
+	expect( createFilterSpy ).toHaveBeenCalledExactlyOnceWith(
+		[
+			'**/*.js',
+			'**/*.css',
+			'**/translations/**/*.d.ts'
+		],
+		null
+	);
 } );
