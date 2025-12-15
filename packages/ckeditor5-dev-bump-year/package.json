@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bump-year",
-  "version": "54.2.1",
+  "version": "54.2.2",
   "description": "Used to bump year in the licence text specified at the top of the file.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
