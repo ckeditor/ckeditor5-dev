@@ -19,4 +19,3 @@ releaseTools.isVersionPublishableForTag( '@ckeditor/ckeditor5-dev-release-tools'
 			console.log( 'The project is ready to release.' );
 		}
 	} );
-
