@@ -4,7 +4,6 @@
  */
 
 export { default as logger } from './logger/index.js';
-export * as bundler from './bundler/index.js';
 export * as loaders from './loaders/index.js';
 export * as stream from './stream/index.js';
 export * as styles from './styles/index.js';

@@ -6,7 +6,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import path from 'path';
 import { Server } from 'socket.io';
-import { spawn } from 'child_process';
 import { globSync } from 'glob';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import createManualTestServer from '../../lib/utils/manual-tests/createserver.js';
@@ -22,44 +21,16 @@ const stubs = vi.hoisted( () => ( {
 		error: vi.fn(),
 		warning: vi.fn(),
 		info: vi.fn()
-	},
-	spawn: {
-		spawnReturnValue: {
-			on: ( event, callback ) => {
-				if ( !stubs.spawn.spawnEvents[ event ] ) {
-					stubs.spawn.spawnEvents[ event ] = [];
-				}
-
-				stubs.spawn.spawnEvents[ event ].push( callback );
-
-				// Return the same object containing the `on()` method to allow method chaining: `.on( ... ).on( ... )`.
-				return stubs.spawn.spawnReturnValue;
-			}
-		},
-		spawnExitCode: 0,
-		spawnEvents: {},
-		spawnTriggerEvent: ( event, data ) => {
-			if ( stubs.spawn.spawnEvents[ event ] ) {
-				for ( const callback of stubs.spawn.spawnEvents[ event ] ) {
-					callback( data );
-				}
-
-				delete stubs.spawn.spawnEvents[ event ];
-			}
-		}
 	}
 } ) );
 
 vi.mock( 'socket.io' );
-vi.mock( 'child_process' );
-vi.mock( 'inquirer' );
 vi.mock( 'glob' );
 vi.mock( 'util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( 'path' );
 vi.mock( 'fs' );
-vi.mock( 'is-interactive' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/manual-tests/createserver.js' );
 vi.mock( '../../lib/utils/manual-tests/compilehtmlfiles.js' );
@@ -70,18 +41,6 @@ vi.mock( '../../lib/utils/transformfileoptiontotestglob.js' );
 
 describe( 'runManualTests()', () => {
 	beforeEach( () => {
-		stubs.spawn.spawnExitCode = 0;
-
-		vi.mocked( spawn ).mockImplementation( () => {
-			// Simulate closing a new process. It does not matter that this simulation ends the child process immediately.
-			// All that matters is that the `close` event is emitted with specified exit code.
-			process.nextTick( () => {
-				stubs.spawn.spawnTriggerEvent( 'close', stubs.spawn.spawnExitCode );
-			} );
-
-			return stubs.spawn.spawnReturnValue;
-		} );
-
 		vi.mocked( globSync ).mockImplementation( pattern => {
 			const patterns = {
 				// Valid pattern for manual tests.

@@ -436,12 +436,6 @@ importers:
       glob:
         specifier: ^13.0.0
         version: 13.0.0
-      inquirer:
-        specifier: ^12.5.2
-        version: 12.9.6(@types/node@22.17.1)
-      is-interactive:
-        specifier: ^2.0.0
-        version: 2.0.0
       is-wsl:
         specifier: ^3.0.0
         version: 3.1.0
@@ -561,9 +555,6 @@ importers:
 
   packages/ckeditor5-dev-utils:
     dependencies:
-      '@ckeditor/ckeditor5-dev-translations':
-        specifier: workspace:*
-        version: link:../ckeditor5-dev-translations
       '@types/postcss-import':
         specifier: ^14.0.3
         version: 14.0.3
@@ -630,9 +621,6 @@ importers:
       style-loader:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.101.1)
-      terser-webpack-plugin:
-        specifier: ^5.0.0
-        version: 5.3.14(webpack@5.101.1)
       through2:
         specifier: ^4.0.0
         version: 4.0.2

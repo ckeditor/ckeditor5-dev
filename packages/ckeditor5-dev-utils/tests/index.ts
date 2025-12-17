@@ -6,7 +6,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import logger from '../src/logger/index.js';
 import * as packageUtils from '../src/index.js';
-import * as bundler from '../src/bundler/index.js';
 import * as loaders from '../src/loaders/index.js';
 import * as stream from '../src/stream/index.js';
 import * as styles from '../src/styles/index.js';
@@ -22,12 +21,6 @@ vi.mock( '../src/tools/index.js' );
 vi.mock( '../src/git/index.js' );
 
 describe( 'index.js', () => {
-	describe( '#bundler', () => {
-		it( 'should be a function', () => {
-			expect( packageUtils.bundler ).to.equal( bundler );
-		} );
-	} );
-
 	describe( '#loaders', () => {
 		it( 'should be a function', () => {
 			expect( packageUtils.loaders ).to.equal( loaders );
