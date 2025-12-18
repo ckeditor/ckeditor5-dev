@@ -4,19 +4,15 @@
  */
 
 import path from 'path';
-import { createRequire } from 'module';
 import webpack from 'webpack';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import WebpackNotifierPlugin from './webpacknotifierplugin.js';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
 
-const require = createRequire( import.meta.url );
-
 /**
  * @param {object} options
  * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
- * @param {boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
  * @param {object} options.entries
  * @param {string} options.buildDir
  * @param {string} options.themePath
@@ -45,8 +41,7 @@ export default function getWebpackConfigForManualTests( options ) {
 
 		plugins: [
 			new WebpackNotifierPlugin( {
-				onTestCompilationStatus: options.onTestCompilationStatus,
-				processName: options.requireDll ? 'DLL' : 'non-DLL'
+				onTestCompilationStatus: options.onTestCompilationStatus
 			} ),
 			new CKEditorTranslationsPlugin( {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
@@ -129,25 +124,6 @@ export default function getWebpackConfigForManualTests( options ) {
 			} )
 		);
 		webpackConfig.watch = true;
-	}
-
-	if ( options.requireDll ) {
-		// When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin
-		// to the configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags.
-		//
-		// Otherwise, webpack tries to import a file from a file system instead of the DLL build.
-		// It leads to the CKEditor 5 duplicated modules error.
-		//
-		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
-		const coreDllManifest = require.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' );
-
-		const dllReferencePlugin = new webpack.DllReferencePlugin( {
-			manifest: require( coreDllManifest ),
-			scope: 'ckeditor5/src',
-			name: 'CKEditor5.dll'
-		} );
-
-		webpackConfig.plugins.push( dllReferencePlugin );
 	}
 
 	return webpackConfig;
