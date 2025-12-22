@@ -107,6 +107,35 @@ describe( 'prepareRepository()', () => {
 			] );
 		} );
 
+		it( 'should use the specified `cwd` to resolve the files', async () => {
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+
+			await prepareRepository( {
+				...options,
+				cwd: '/home/ckeditor/workspace'
+			} );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.any( Array ), expect.objectContaining( {
+				cwd: '/home/ckeditor/workspace'
+			} ) );
+		} );
+
+		it( 'should resolve to the absolute paths when processing the files', async () => {
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+
+			await prepareRepository( options );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.any( Array ), expect.objectContaining( {
+				absolute: true
+			} ) );
+		} );
+
 		it( 'should create "package.json" file in the root package with provided values', async () => {
 			options.rootPackageJson = {
 				name: 'ckeditor5',
@@ -205,6 +234,34 @@ describe( 'prepareRepository()', () => {
 
 			expect( vi.mocked( fs ).writeFile ).not.toHaveBeenCalled();
 			expect( vi.mocked( fs ).cp ).not.toHaveBeenCalled();
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/19550.
+		it( 'must not use `Array#map()` to iterate over files to copy to avoid the "EEXIST" error', async () => {
+			let concurrent = 0;
+
+			// This mock aims to disable calling `Array.map( async () => fs.cp() )`.
+			vi.mocked( fs ).cp.mockImplementation( async () => {
+				if ( concurrent > 1 ) {
+					throw new Error( 'Concurrency is disallowed.' );
+				}
+
+				concurrent += 1;
+
+				// Simulates the `fs.cp()` action.
+				await new Promise( resolve => {
+					setTimeout( resolve, 0 );
+				} );
+
+				concurrent -= 1;
+			} );
+
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: [ 'src/*.js', 'CHANGELOG.md' ]
+			};
+
+			await prepareRepository( options );
 		} );
 	} );
 
@@ -348,6 +405,36 @@ describe( 'prepareRepository()', () => {
 				'current/working/dir/release/nested/ckeditor5-nested',
 				expect.any( Object )
 			);
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/19550.
+		it( 'must not use `Array#map()` to iterate over packages to avoid the "EEXIST" error', async () => {
+			let concurrent = 0;
+
+			// This mock aims to disable calling `Array.map( async () => fs.lstat() )`.
+			vi.mocked( fs ).lstat.mockImplementation( async () => {
+				if ( concurrent > 1 ) {
+					throw new Error( 'Concurrency is disallowed.' );
+				}
+
+				concurrent += 1;
+
+				// Simulates the `fs.lstat()` action.
+				await new Promise( resolve => {
+					setTimeout( resolve, 0 );
+				} );
+
+				concurrent -= 1;
+
+				return {
+					isDirectory: () => true
+				};
+			} );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
+
+			options.packagesDirectory = 'packages';
+
+			await prepareRepository( options );
 		} );
 	} );
 } );

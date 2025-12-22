@@ -42,32 +42,26 @@ export default async function prepareRepository( options ) {
 		throw new Error( `Output directory is not empty: "${ outputDirectoryPath }".` );
 	}
 
-	const copyPromises = [];
-
 	if ( rootPackageJson ) {
 		validateRootPackage( rootPackageJson );
 
-		const copyRootItemsPromises = await processRootPackage( {
+		await processRootPackage( {
 			cwd,
 			rootPackageJson,
 			outputDirectoryPath
 		} );
-
-		copyPromises.push( ...copyRootItemsPromises );
 	}
 
 	if ( packagesDirectory ) {
-		const copyPackagesPromises = await processMonorepoPackages( {
+		await processMonorepoPackages( {
 			cwd,
 			packagesDirectory,
 			packagesToCopy,
 			outputDirectoryPath
 		} );
-
-		copyPromises.push( ...copyPackagesPromises );
 	}
 
-	return Promise.all( copyPromises );
+	return Promise.resolve();
 }
 
 /**
@@ -90,7 +84,7 @@ function validateRootPackage( packageJson ) {
  * @param {string} options.cwd
  * @param {RootPackageJson} options.rootPackageJson
  * @param {string} options.outputDirectoryPath
- * @returns {Promise}
+ * @returns {Promise.<void>}
  */
 async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath } ) {
 	const rootPackageDirName = rootPackageJson.name.replace( /^@.*\//, '' );
@@ -100,13 +94,16 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
 	await fs.mkdir( rootPackageOutputPath, { recursive: true } );
 	await fs.writeFile( pkgJsonOutputPath, JSON.stringify( rootPackageJson, null, 2 ) + '\n' );
 
-	return ( await glob( rootPackageJson.files ) )
-		.map( absoluteFilePath => {
-			const relativeFilePath = upath.relative( cwd, absoluteFilePath );
-			const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
+	const filesToCopy = await glob( rootPackageJson.files, { cwd, absolute: true } );
 
-			return fs.cp( absoluteFilePath, absoluteFileOutputPath, { recursive: true } );
-		} );
+	for ( const absoluteFilePath of filesToCopy ) {
+		const relativeFilePath = upath.relative( cwd, absoluteFilePath );
+		const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
+
+		await fs.cp( absoluteFilePath, absoluteFileOutputPath, { recursive: true } );
+	}
+
+	return Promise.resolve();
 }
 
 /**
@@ -115,29 +112,31 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
  * @param {string} options.packagesDirectory
  * @param {string} options.outputDirectoryPath
  * @param {Array.<string>} [options.packagesToCopy]
- * @returns {Promise}
+ * @returns {Promise.<void>}
  */
 async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy, outputDirectoryPath } ) {
 	const packagesDirectoryPath = upath.join( cwd, packagesDirectory );
 	const packageDirs = packagesToCopy || await fs.readdir( packagesDirectoryPath );
 
-	return packageDirs.map( async packageDir => {
+	for ( const packageDir of packageDirs ) {
 		const packagePath = upath.join( packagesDirectoryPath, packageDir );
 		const isDir = ( await fs.lstat( packagePath ) ).isDirectory();
 
 		if ( !isDir ) {
-			return;
+			continue;
 		}
 
 		const pkgJsonPath = upath.join( packagePath, 'package.json' );
 		const hasPkgJson = await fs.access( pkgJsonPath ).then( () => true, () => false );
 
 		if ( !hasPkgJson ) {
-			return;
+			continue;
 		}
 
-		return fs.cp( packagePath, upath.join( outputDirectoryPath, packageDir ), { recursive: true } );
-	} );
+		await fs.cp( packagePath, upath.join( outputDirectoryPath, packageDir ), { recursive: true } );
+	}
+
+	return Promise.resolve();
 }
 
 /**
