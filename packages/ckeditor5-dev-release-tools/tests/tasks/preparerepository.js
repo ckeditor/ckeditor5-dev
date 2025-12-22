@@ -419,7 +419,7 @@ describe( 'prepareRepository()', () => {
 
 				concurrent += 1;
 
-				// Simulates the `fs.cp()` action.
+				// Simulates the `fs.lstat()` action.
 				await new Promise( resolve => {
 					setTimeout( resolve, 0 );
 				} );
