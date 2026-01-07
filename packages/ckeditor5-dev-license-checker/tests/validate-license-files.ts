@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -1705,7 +1705,7 @@ function getLicense( type: 'short' | 'long', licenseLines?: Array<string> ) {
 		'Software License Agreement',
 		'==========================',
 		'',
-		'Copyright (c) 2003-2025, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.',
+		'Copyright (c) 2003-2026, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.',
 		'',
 		'Sources of Intellectual Property Included in TestProject™',
 		'---------------------------------------------------------',
