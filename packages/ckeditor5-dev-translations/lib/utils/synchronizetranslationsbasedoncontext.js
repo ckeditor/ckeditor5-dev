@@ -43,22 +43,30 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 		// (4) Find all translation files ("*.po" files).
 		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.po' ) );
 
+		// (5) Prepare English translations needed to check whether their wording have been changed in the source messages.
+		const englishTranslationFilePath = translationFilePaths.find( filePath => filePath.endsWith( 'en.po' ) );
+		const { translations: englishTranslations } = parseTranslationFile( englishTranslationFilePath );
+
+		const changedEnglishTranslations = getChangedEnglishTranslations( englishTranslations, sourceMessagesForPackage );
+
 		// Then, for each translation file in a package:
 		for ( const translationFilePath of translationFilePaths ) {
-			const translationFile = fs.readFileSync( translationFilePath, 'utf-8' );
-			const translations = PO.parse( translationFile );
+			const { translations, translationFile } = parseTranslationFile( translationFilePath );
 
-			// (4.1) Update file headers.
+			// (5.1) Update file headers.
 			const { languageCode, localeCode } = languages.find( language => language.localeCode === translations.headers.Language );
 
 			translations.headers = getHeaders( languageCode, localeCode );
 
 			const numberOfPluralForms = parseInt( PO.parsePluralForms( translations.headers[ 'Plural-Forms' ] ).nplurals );
 
-			// (4.2) Remove unused translations.
+			// (5.2) Remove unused translations.
 			translations.items = translations.items.filter( item => contextContent[ item.msgid ] );
 
-			// (4.3) Add missing translations.
+			// (5.3) Remove translations that have changed the English wording. They will be treated as new messages to translate.
+			translations.items = translations.items.filter( item => !changedEnglishTranslations.includes( item.msgid ) );
+
+			// (5.4) Add missing translations.
 			translations.items.push(
 				...sourceMessagesForPackage
 					.filter( message => !translations.items.find( item => item.msgid === message.id ) )
@@ -78,7 +86,7 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 					} )
 			);
 
-			// (4.4) Align the number of plural forms to plural forms defined by a language.
+			// (5.5) Align the number of plural forms to plural forms defined by a language.
 			translations.items = translations.items.map( item => {
 				if ( item.msgid_plural ) {
 					item.msgstr = [ ...Array( numberOfPluralForms ) ]
@@ -90,7 +98,7 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 
 			const translationFileUpdated = cleanTranslationFileContent( translations ).toString();
 
-			// (4.5) Save translation file only if it has been updated.
+			// (5.6) Save translation file only if it has been updated.
 			if ( translationFile === translationFileUpdated ) {
 				continue;
 			}
@@ -98,4 +106,27 @@ export default function synchronizeTranslationsBasedOnContext( { packageContexts
 			fs.writeFileSync( translationFilePath, translationFileUpdated, 'utf-8' );
 		}
 	}
+}
+
+function parseTranslationFile( filePath ) {
+	const file = fs.readFileSync( filePath, 'utf-8' );
+
+	return {
+		translationFile: file,
+		translations: PO.parse( file )
+	};
+}
+
+function getChangedEnglishTranslations( englishTranslations, sourceMessagesForPackage ) {
+	return sourceMessagesForPackage
+		.filter( message => {
+			const englishTranslation = englishTranslations.items.find( item => item.msgid === message.id );
+
+			if ( !englishTranslation ) {
+				return false;
+			}
+
+			return englishTranslation.msgstr[ 0 ] !== message.string;
+		} )
+		.map( message => message.id );
 }
