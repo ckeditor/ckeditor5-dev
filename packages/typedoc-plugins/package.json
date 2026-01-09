@@ -33,7 +33,7 @@
     "rollup": "^4.9.5",
     "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
-    "typescript": "5.4.4",
+    "typescript": "5.5.4",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

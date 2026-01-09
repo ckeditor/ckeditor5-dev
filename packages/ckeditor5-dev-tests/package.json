@@ -67,7 +67,7 @@
     "sinon": "^9.2.4",
     "sinon-chai": "^3.5.0",
     "socket.io": "^4.0.0",
-    "typescript": "5.4.4",
+    "typescript": "5.5.4",
     "upath": "^2.0.1",
     "webpack": "^5.94.0"
   },
