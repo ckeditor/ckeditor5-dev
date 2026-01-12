@@ -6,6 +6,7 @@
 import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import upath from 'upath';
+import resolvePublishOverrides from '../utils/resolvepublishoverrides.js';
 
 /**
  * The goal is to prepare the release directory containing the packages we want to publish.
@@ -59,6 +60,16 @@ export default async function prepareRepository( options ) {
 			packagesToCopy,
 			outputDirectoryPath
 		} );
+	}
+
+	const packageJsonPaths = await glob( '*/package.json', {
+		cwd: outputDirectoryPath,
+		absolute: true,
+		nodir: true
+	} );
+
+	for ( const packageJsonPath of packageJsonPaths ) {
+		await resolvePublishOverrides( packageJsonPath );
 	}
 
 	return Promise.resolve();

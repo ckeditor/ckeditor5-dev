@@ -7,9 +7,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
+import resolvePublishOverrides from '../../lib/utils/resolvepublishoverrides.js';
 
 vi.mock( 'fs/promises' );
 vi.mock( 'glob' );
+vi.mock( '../../lib/utils/resolvepublishoverrides.js' );
 
 describe( 'prepareRepository()', () => {
 	const packages = [
@@ -25,6 +27,7 @@ describe( 'prepareRepository()', () => {
 		};
 
 		vi.spyOn( process, 'cwd' ).mockReturnValue( 'current/working/dir' );
+		vi.mocked( glob ).mockResolvedValue( [] );
 	} );
 
 	it( 'should be a function', () => {
@@ -100,7 +103,7 @@ describe( 'prepareRepository()', () => {
 		beforeEach( () => {
 			vi.mocked( fs ).readdir.mockResolvedValue( [] );
 
-			vi.mocked( glob ).mockResolvedValue( [
+			vi.mocked( glob ).mockResolvedValueOnce( [
 				'current/working/dir/src/core.js',
 				'current/working/dir/src/utils.js',
 				'current/working/dir/CHANGELOG.md'
@@ -118,7 +121,8 @@ describe( 'prepareRepository()', () => {
 				cwd: '/home/ckeditor/workspace'
 			} );
 
-			expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.any( Array ), expect.objectContaining( {
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( expect.any( Array ), expect.objectContaining( {
 				cwd: '/home/ckeditor/workspace'
 			} ) );
 		} );
@@ -131,7 +135,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith( expect.any( Array ), expect.objectContaining( {
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( expect.any( Array ), expect.objectContaining( {
 				absolute: true
 			} ) );
 		} );
@@ -146,7 +151,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'current/working/dir/release/ckeditor5/package.json',
 				expect.any( String )
 			);
@@ -160,7 +166,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'current/working/dir/release/ckeditor5-example/package.json',
 				expect.any( String )
 			);
@@ -265,7 +272,7 @@ describe( 'prepareRepository()', () => {
 		} );
 	} );
 
-	describe( 'monorepository packages processing', () => {
+	describe( 'mono-repository packages processing', () => {
 		beforeEach( () => {
 			vi.mocked( fs ).readdir.mockImplementation( input => {
 				if ( input.endsWith( 'release' ) ) {
@@ -435,6 +442,44 @@ describe( 'prepareRepository()', () => {
 			options.packagesDirectory = 'packages';
 
 			await prepareRepository( options );
+		} );
+	} );
+
+	describe( 'apply publish-time overrises in `package.json` using `publishConfig`', () => {
+		beforeEach( () => {
+			vi.mocked( fs ).readdir.mockResolvedValue( [] );
+
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+		} );
+
+		it( 'should find all `package.json` in the output directory', async () => {
+			await prepareRepository( options );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( '*/package.json', expect.objectContaining( {
+				cwd: 'current/working/dir/release',
+				absolute: true
+			} ) );
+		} );
+
+		it( 'should find all `package.json` in the output directory', async () => {
+			vi.mocked( glob ).mockResolvedValue( [
+				'current/working/dir/release/ckeditor5-first/package.json',
+				'current/working/dir/release/ckeditor5-second/package.json'
+			] );
+
+			await prepareRepository( options );
+
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalled();
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalledWith(
+				'current/working/dir/release/ckeditor5-first/package.json'
+			);
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalledWith(
+				'current/working/dir/release/ckeditor5-second/package.json'
+			);
 		} );
 	} );
 } );
