@@ -243,7 +243,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		] );
 	} );
 
-	it( 'should remove translations when the English source changed', () => {
+	it( 'should remove translations when the English source changed the singular form', () => {
 		defaultOptions.sourceMessages.find( msg => msg.id === 'id1' ).string = 'Changed example message 1';
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
@@ -261,6 +261,28 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			expect.objectContaining( {
 				msgid: 'id1',
 				msgstr: []
+			} )
+		] );
+	} );
+
+	it( 'should remove translations when the English source changed the plural form', () => {
+		defaultOptions.sourceMessages.find( msg => msg.id === 'id2' ).plural = 'Changed plural form for example message 2';
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( {
+				msgid: 'id1',
+				msgstr: [ 'Example message 1 in zh_TW' ]
+			} ),
+			expect.objectContaining( {
+				msgid: 'id2',
+				msgstr: [
+					'',
+					'',
+					'',
+					''
+				]
 			} )
 		] );
 	} );

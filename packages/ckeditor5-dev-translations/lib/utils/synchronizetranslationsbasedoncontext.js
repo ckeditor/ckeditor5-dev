@@ -126,7 +126,12 @@ function getChangedEnglishTranslations( englishTranslations, sourceMessagesForPa
 				return false;
 			}
 
-			return englishTranslation.msgstr[ 0 ] !== message.string;
+			const [ singularForm, pluralForm ] = englishTranslation.msgstr;
+
+			const isSingularFormChanged = singularForm !== message.string;
+			const isPluralFormChanged = message.plural ? pluralForm !== message.plural : false;
+
+			return isSingularFormChanged || isPluralFormChanged;
 		} )
 		.map( message => message.id );
 }
