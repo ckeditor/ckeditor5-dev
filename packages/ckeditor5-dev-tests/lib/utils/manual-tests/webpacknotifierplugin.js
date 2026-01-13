@@ -12,12 +12,10 @@ export default class WebpackNotifierPlugin {
 	/**
 	 * @param {object} options
 	 * @param {function} options.onTestCompilationStatus
-	 * @param {string} options.processName
 	 */
 	constructor( options ) {
 		this.log = logger();
 		this.onTestCompilationStatus = options.onTestCompilationStatus;
-		this.processName = options.processName;
 	}
 
 	/**
@@ -28,7 +26,7 @@ export default class WebpackNotifierPlugin {
 	 */
 	apply( compiler ) {
 		compiler.hooks.compile.tap( this.constructor.name, () => {
-			this.log.info( `[Webpack] Starting scripts compilation (${ this.processName })...` );
+			this.log.info( '[Webpack] Starting scripts compilation...' );
 			this.onTestCompilationStatus( `start:${ this.processName }` );
 		} );
 
@@ -45,10 +43,10 @@ export default class WebpackNotifierPlugin {
 				}
 			}
 
-			this.log.info( `[Webpack] Finished the compilation (${ this.processName }).` );
+			this.log.info( '[Webpack] Finished the compilation.' );
 
 			if ( !stats.compilation.options.watch ) {
-				this.log.info( `[Webpack] File watcher is disabled (${ this.processName }).` );
+				this.log.info( '[Webpack] File watcher is disabled.' );
 			}
 
 			this.onTestCompilationStatus( `finished:${ this.processName }` );
