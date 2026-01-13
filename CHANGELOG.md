@@ -1,6 +1,50 @@
 Changelog
 =========
 
+## [54.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v54.2.3...v54.3.0) (January 13, 2026)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `prepareRepository()` task now applies `publishConfig` overrides directly to copied `package.json` files. Closes [ckeditor/ckeditor5#19608](https://github.com/ckeditor/ckeditor5/issues/19608).
+
+  Fields defined in `publishConfig` replace their top-level counterparts in the final manifest, and the `publishConfig` field itself is removed from the published file.
+
+### Other changes
+
+* **[changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)**: Automatically normalize the `see` and `closes` fields from changelog entry into arrays when they are literal values. Closes [ckeditor/ckeditor5#19470](https://github.com/ckeditor/ckeditor5/issues/19470).
+* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Treat updated English translations in the `t()` calls as new messages to translate in other languages.
+
+  In the past, the translation tooling assumed that English translation passed to the `t( { id: '...', string: '...' } )` function in the `string` key would not be changed. In reality, this assumption is not true and leads to outdated translations in all `*.po` files. Now, when synchronizing the translations, the tooling detects updated English translations in the source code and treats them as new messages to translate.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/54.3.0): v54.2.3 => v54.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.3.0): v54.2.3 => v54.3.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.3.0): v54.2.3 => v54.3.0
+</details>
+
+
 ## [54.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/v54.2.2...v54.2.3) (December 22, 2025)
 
 ### Bug fixes
@@ -141,40 +185,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.2.0): v54.1.0 => v54.2.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.2.0): v54.1.0 => v54.2.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.2.0): v54.1.0 => v54.2.0
-</details>
-
-
-## [54.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v54.0.0...v54.1.0) (November 20, 2025)
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added support in the `cleanUpPackages()` util for defining a nested field to remove from `package.json` file.
-* Remove `chalk` from `dependencies`.
-* Remove `fs-extra` from `dependencies`.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.1.0): v54.0.0 => v54.1.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.1.0): v54.0.0 => v54.1.0
 </details>
 
 ---
