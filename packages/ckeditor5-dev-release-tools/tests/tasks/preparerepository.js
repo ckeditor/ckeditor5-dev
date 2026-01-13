@@ -445,7 +445,7 @@ describe( 'prepareRepository()', () => {
 		} );
 	} );
 
-	describe( 'apply publish-time overrises in `package.json` using `publishConfig`', () => {
+	describe( 'apply publish-time overrides in `package.json` using `publishConfig`', () => {
 		beforeEach( () => {
 			vi.mocked( fs ).readdir.mockResolvedValue( [] );
 

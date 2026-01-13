@@ -3,11 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/**
- * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
- * For licensing, see LICENSE.md.
- */
-
 import fs from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
 import resolvePublishOverrides from '../../lib/utils/resolvepublishoverrides.js';
@@ -50,7 +45,7 @@ describe( 'resolvePublishOverrides()', () => {
 		expect( writtenContent.endsWith( '\n' ) ).toBe( true );
 	} );
 
-	it( 'should not modify `package.json when `publishConfig` is `null`', async () => {
+	it( 'should not modify `package.json` when `publishConfig` is `null`', async () => {
 		const packageJsonPath = '/repo/release/ckeditor5-foo/package.json';
 
 		fs.readFile.mockResolvedValue( JSON.stringify( {
@@ -64,7 +59,7 @@ describe( 'resolvePublishOverrides()', () => {
 		expect( fs.writeFile ).toHaveBeenCalledTimes( 0 );
 	} );
 
-	it( 'should not modify `package.json when `publishConfig` is missing', async () => {
+	it( 'should not modify `package.json` when `publishConfig` is missing', async () => {
 		const packageJsonPath = '/repo/release/ckeditor5-foo/package.json';
 
 		fs.readFile.mockResolvedValue( JSON.stringify( {
