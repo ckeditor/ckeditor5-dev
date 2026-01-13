@@ -15,12 +15,10 @@ import fs from 'node:fs/promises';
  */
 export default async function resolvePublishOverrides( packageJsonPath ) {
 	const raw = await fs.readFile( packageJsonPath, 'utf8' );
-	const pkg = JSON.parse( raw );
+	const { publishConfig, ...pkg } = JSON.parse( raw );
 
-	const { publishConfig } = pkg;
-	const isNullOrUndefined = publishConfig === null || typeof publishConfig === 'undefined';
-
-	if ( isNullOrUndefined ) {
+	// Covers `undefined` and `null`.
+	if ( publishConfig == null ) {
 		return;
 	}
 
@@ -28,12 +26,9 @@ export default async function resolvePublishOverrides( packageJsonPath ) {
 		throw new Error( `"publishConfig" in "${ packageJsonPath }" must be a plain object.` );
 	}
 
-	for ( const [ key, value ] of Object.entries( publishConfig ) ) {
-		pkg[ key ] = value;
-	}
+	const publishPkg = { ...pkg, ...publishConfig };
 
-	delete pkg.publishConfig;
-	await fs.writeFile( packageJsonPath, JSON.stringify( pkg, null, 2 ) + '\n' );
+	await fs.writeFile( packageJsonPath, JSON.stringify( publishPkg, null, 2 ) + '\n' );
 }
 
 function isPlainObject( value ) {
