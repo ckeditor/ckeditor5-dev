@@ -1,9 +1,9 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import getRelativeFilePath from '../../lib/utils/getrelativefilepath.js';
 

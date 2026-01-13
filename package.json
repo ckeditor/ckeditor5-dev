@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "54.2.1",
+  "version": "54.3.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -17,11 +17,10 @@
   "devDependencies": {
     "@inquirer/prompts": "^7.5.0",
     "@listr2/prompt-adapter-inquirer": "^2.0.21",
-    "@octokit/rest": "^22.0.0",
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.34.0",
-    "eslint-config-ckeditor5": "^12.2.0",
-    "eslint-plugin-ckeditor5-rules": "^12.2.0",
+    "eslint-config-ckeditor5": "^13.0.0",
+    "eslint-plugin-ckeditor5-rules": "^13.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^13.0.0",
     "globals": "^16.1.0",

@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import upath from 'upath';
-import { readdirSync } from 'fs';
+import { readdirSync } from 'node:fs';
 import globals from 'globals';
 import { defineConfig } from 'eslint/config';
 import ckeditor5Rules from 'eslint-plugin-ckeditor5-rules';
@@ -51,7 +51,7 @@ export default defineConfig( [
 			'ckeditor5-rules/license-header': [ 'error', {
 				headerLines: [
 					'/**',
-					' * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.',
+					' * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.',
 					' * For licensing, see LICENSE.md.',
 					' */'
 				]

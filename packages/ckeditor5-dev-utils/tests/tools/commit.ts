@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import commit from '../../src/tools/commit.js';
 import { simpleGit } from 'simple-git';
 import { glob } from 'glob';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import upath from 'upath';
 
 vi.mock( 'simple-git' );

@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import path from 'path';
+import path from 'node:path';
 import { Server } from 'socket.io';
 import { globSync } from 'glob';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';

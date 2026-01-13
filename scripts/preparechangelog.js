@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import { parseArgs } from 'util';
+import { parseArgs } from 'node:util';
 import { generateChangelogForMonoRepository } from '@ckeditor/ckeditor5-dev-changelog';
 import { CKEDITOR5_DEV_ROOT, PACKAGES_DIRECTORY } from './utils/constants.js';
 

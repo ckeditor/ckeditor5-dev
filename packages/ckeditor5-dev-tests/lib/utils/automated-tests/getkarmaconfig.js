@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import { createRequire } from 'module';
+import path from 'node:path';
+import { createRequire } from 'node:module';
 import getWebpackConfigForAutomatedTests from './getwebpackconfig.js';
 import { resolvePath } from '../resolve-path.js';
 

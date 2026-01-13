@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import path from 'upath';
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 import { getOptionalPlugin, getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
 import { defineConfig, type Plugin, type RollupOptions } from 'rollup';

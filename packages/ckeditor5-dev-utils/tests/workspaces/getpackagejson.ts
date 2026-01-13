@@ -1,11 +1,11 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import fs from 'fs';
-import fsPromise from 'fs/promises';
+import fs from 'node:fs';
+import fsPromise from 'node:fs/promises';
 import getPackageJson, { type PackageJson } from '../../src/workspaces/getpackagejson.js';
 
 vi.mock( 'fs' );

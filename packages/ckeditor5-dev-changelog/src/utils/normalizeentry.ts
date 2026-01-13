@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -67,14 +67,10 @@ function deduplicate( packageNames: Array<string> | undefined ): Array<string> {
 	return [ ...new Set( packageNames ) ];
 }
 
-function toArray( input: string | Array<string> | undefined ): Array<string> {
+function toArray( input: unknown ): Array<unknown> {
 	if ( !input ) {
 		return [];
 	}
 
-	if ( typeof input === 'string' ) {
-		return [ input ];
-	}
-
-	return input;
+	return Array.isArray( input ) ? input : [ input ];
 }

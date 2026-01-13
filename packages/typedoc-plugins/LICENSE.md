@@ -2,7 +2,7 @@ Software License Agreement
 ==========================
 
 @ckeditor/typedoc-plugins – Various TypeDoc plugins developed by the CKEditor 5 team.
-Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
 
 Licensed under the terms of the MIT License (see Appendix A):
 
@@ -18,7 +18,7 @@ Appendix A: The MIT License
 
 The MIT License (MIT)
 
-Copyright (c) 2003-2025, CKSource Holding sp. z o.o.
+Copyright (c) 2003-2026, CKSource Holding sp. z o.o.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

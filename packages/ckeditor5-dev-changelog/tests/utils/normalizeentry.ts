@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -86,6 +86,12 @@ describe( 'normalizeEntry', () => {
 			expect( result.data.see ).toEqual( [ 'as-string' ] );
 		} );
 
+		it( 'should replace a number value with an array when normalizing "see"', () => {
+			const input = wrapInput( { see: 123 as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.see ).toEqual( [ '123' ] );
+		} );
+
 		it( 'deduplicates see entries', () => {
 			const input = wrapInput( { see: [ 'ref1', 'ref1', 'ref2' ] } );
 			const result = normalizeEntry( input, false );
@@ -104,6 +110,12 @@ describe( 'normalizeEntry', () => {
 			const input = wrapInput( { closes: 'as-string' as any } );
 			const result = normalizeEntry( input, false );
 			expect( result.data.closes ).toEqual( [ 'as-string' ] );
+		} );
+
+		it( 'should replace a number value with an array when normalizing "closes"', () => {
+			const input = wrapInput( { closes: 123 as any } );
+			const result = normalizeEntry( input, false );
+			expect( result.data.closes ).toEqual( [ '123' ] );
 		} );
 
 		it( 'deduplicates closes entries', () => {

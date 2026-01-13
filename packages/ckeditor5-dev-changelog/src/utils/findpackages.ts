@@ -1,9 +1,9 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { AsyncArray } from './asyncarray.js';
 import type { RepositoryConfig } from '../types.js';

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
-import { fileURLToPath } from 'url';
+import { styleText } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), { allowDefaultIdentityFile: true } );

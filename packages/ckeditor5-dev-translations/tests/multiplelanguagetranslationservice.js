@@ -1,13 +1,13 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 /* eslint-disable no-eval */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import MultipleLanguageTranslationService from '../lib/multiplelanguagetranslationservice.js';
 
 vi.mock( 'fs', () => ( {
