@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-license-checker",
-  "version": "54.3.0",
+  "version": "55.0.0-alpha.0",
   "description": "Contains tools for validating licenses.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
