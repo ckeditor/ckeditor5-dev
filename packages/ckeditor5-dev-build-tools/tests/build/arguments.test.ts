@@ -1,11 +1,11 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { test, expect, vi } from 'vitest';
 import upath from 'upath';
-import fs from 'fs';
+import fs from 'node:fs';
 import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 

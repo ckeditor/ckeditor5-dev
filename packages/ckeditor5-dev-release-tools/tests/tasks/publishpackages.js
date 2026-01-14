@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
 import { differenceInMilliseconds } from 'date-fns';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';

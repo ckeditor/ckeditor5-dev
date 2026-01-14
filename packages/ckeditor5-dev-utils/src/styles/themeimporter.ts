@@ -1,11 +1,11 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { styleText } from 'util';
+import fs from 'node:fs';
+import path from 'node:path';
+import { styleText } from 'node:util';
 import { default as postcss, type Plugin, type Processor, type Root, type Helpers } from 'postcss';
 import postCssImport from 'postcss-import';
 import logger from '../logger/index.js';

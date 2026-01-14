@@ -1,11 +1,11 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
-import url from 'url';
-import { styleText, parseArgs } from 'util';
+import fs from 'node:fs';
+import url from 'node:url';
+import { styleText, parseArgs } from 'node:util';
 import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption, type LogLevelOption } from 'rollup';
 import { loadSourcemaps } from './plugins/loadSourcemaps.js';

@@ -1,9 +1,9 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { format } from 'date-fns';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { groupEntriesBySection } from './groupentriesbysection.js';

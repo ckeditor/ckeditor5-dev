@@ -1,9 +1,9 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
+import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
 import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';

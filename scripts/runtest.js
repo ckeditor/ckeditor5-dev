@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import path from 'path';
-import { styleText } from 'util';
-import { execSync } from 'child_process';
+import path from 'node:path';
+import { styleText } from 'node:util';
+import { execSync } from 'node:child_process';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
 import minimist from 'minimist';

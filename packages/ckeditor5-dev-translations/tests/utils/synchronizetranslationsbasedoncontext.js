@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs';
+import fs from 'node:fs';
 import PO from 'pofile';
 import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
@@ -24,9 +24,14 @@ vi.mock( '../../lib/utils/getheaders.js' );
 vi.mock( '../../lib/utils/addtranslation.js' );
 
 describe( 'synchronizeTranslationsBasedOnContext()', () => {
-	let defaultOptions, translations, stubs;
+	let languages, defaultOptions, enTranslations, zhTranslations, stubs;
 
 	beforeEach( () => {
+		languages = [
+			{ localeCode: 'en', languageCode: 'en', languageFileName: 'en' },
+			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
+		];
+
 		defaultOptions = {
 			packageContexts: [
 				{
@@ -51,25 +56,51 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			skipLicenseHeader: false
 		};
 
-		translations = {
+		enTranslations = {
 			headers: {
 				Language: 'en'
 			},
 			items: [
-				{ msgid: 'id1' },
-				{ msgid: 'id2' }
+				{
+					msgid: 'id1',
+					msgctxt: 'Context for example message 1',
+					msgstr: [ 'Example message 1' ]
+				},
+				{
+					msgid: 'id2',
+					msgctxt: 'Context for example message 2',
+					msgstr: [ 'Example message 2', 'Example message 2 - plural form' ],
+					msgid_plural: 'Example message 2 - plural form'
+				}
 			],
-			toString: () => 'Raw PO file content.'
+			toString: () => 'Raw PO file content in en.'
+		};
+
+		zhTranslations = {
+			headers: {
+				Language: 'zh_TW'
+			},
+			items: [
+				{
+					msgid: 'id1',
+					msgctxt: 'Context for example message 1',
+					msgstr: [ 'Example message 1 in zh_TW' ]
+				},
+				{
+					msgid: 'id2',
+					msgctxt: 'Context for example message 2',
+					msgstr: [ 'Example message 2 in zh_TW', 'Example message 2 - plural form in zh_TW' ],
+					msgid_plural: 'Example message 2 - plural form in zh_TW'
+				}
+			],
+			toString: () => 'Raw PO file content in zh_TW.'
 		};
 
 		stubs = {
 			poItemConstructor: vi.fn()
 		};
 
-		vi.mocked( getLanguages ).mockReturnValue( [
-			{ localeCode: 'en', languageCode: 'en', languageFileName: 'en' },
-			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
-		] );
+		vi.mocked( getLanguages ).mockReturnValue( languages );
 
 		vi.mocked( getHeaders ).mockImplementation( ( languageCode, localeCode ) => {
 			return {
@@ -81,7 +112,17 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		vi.mocked( addTranslation ).mockReturnValue( [] );
 
-		vi.mocked( PO.parse ).mockReturnValue( translations );
+		vi.mocked( PO.parse ).mockImplementation( file => {
+			if ( file === enTranslations.toString() ) {
+				return enTranslations;
+			}
+
+			if ( file === zhTranslations.toString() ) {
+				return zhTranslations;
+			}
+
+			return null;
+		} );
 
 		vi.mocked( PO.parsePluralForms ).mockReturnValue( { nplurals: 4 } );
 
@@ -96,9 +137,21 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			}
 		}() );
 
-		vi.mocked( glob.sync ).mockImplementation( pattern => [ pattern.replace( '*', 'en' ) ] );
+		vi.mocked( glob.sync ).mockImplementation( pattern => {
+			return languages.map( language => pattern.replace( '*', language.languageFileName ) );
+		} );
 
-		vi.mocked( fs.readFileSync ).mockReturnValue( 'Raw PO file content.' );
+		vi.mocked( fs.readFileSync ).mockImplementation( filePath => {
+			if ( filePath.endsWith( 'en.po' ) ) {
+				return enTranslations.toString();
+			}
+
+			if ( filePath.endsWith( 'zh-tw.po' ) ) {
+				return zhTranslations.toString();
+			}
+
+			return null;
+		} );
 
 		vi.mocked( cleanTranslationFileContent ).mockReturnValue( {
 			toString: () => 'Clean PO file content.'
@@ -153,13 +206,9 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	} );
 
 	it( 'should parse each translation file', () => {
-		vi.mocked( glob.sync ).mockImplementation( pattern => {
-			return [ 'en', 'zh-tw' ].map( language => pattern.replace( '*', language ) );
-		} );
-
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( fs.readFileSync ).toHaveBeenCalledTimes( 2 );
+		expect( fs.readFileSync ).toHaveBeenCalledTimes( 3 );
 		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po', 'utf-8' );
 		expect( fs.readFileSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po', 'utf-8' );
 	} );
@@ -167,37 +216,131 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	it( 'should update file header', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( translations.headers ).toEqual( {
+		expect( enTranslations.headers ).toEqual( {
 			Language: 'en',
+			'Plural-Forms': 'nplurals=4; plural=example plural formula;',
+			'Content-Type': 'text/plain; charset=UTF-8'
+		} );
+
+		expect( zhTranslations.headers ).toEqual( {
+			Language: 'zh_TW',
 			'Plural-Forms': 'nplurals=4; plural=example plural formula;',
 			'Content-Type': 'text/plain; charset=UTF-8'
 		} );
 	} );
 
 	it( 'should remove unused translations', () => {
-		translations.items.push(
+		zhTranslations.items.push(
 			{ msgid: 'id3' },
 			{ msgid: 'id4' }
 		);
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( translations.items ).toEqual( [
-			{ msgid: 'id1' },
-			{ msgid: 'id2' }
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( { msgid: 'id1' } ),
+			expect.objectContaining( { msgid: 'id2' } )
+		] );
+	} );
+
+	it( 'should remove translations when the English source changed the singular form', () => {
+		defaultOptions.sourceMessages.find( msg => msg.id === 'id1' ).string = 'Changed example message 1';
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( {
+				msgid: 'id2',
+				msgstr: [
+					'Example message 2 in zh_TW',
+					'Example message 2 - plural form in zh_TW',
+					'',
+					''
+				]
+			} ),
+			expect.objectContaining( {
+				msgid: 'id1',
+				msgstr: []
+			} )
+		] );
+	} );
+
+	it( 'should remove translations when the English source changed the plural form', () => {
+		defaultOptions.sourceMessages.find( msg => msg.id === 'id2' ).plural = 'Changed plural form for example message 2';
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( {
+				msgid: 'id1',
+				msgstr: [ 'Example message 1 in zh_TW' ]
+			} ),
+			expect.objectContaining( {
+				msgid: 'id2',
+				msgstr: [
+					'',
+					'',
+					'',
+					''
+				]
+			} )
+		] );
+	} );
+
+	it( 'should not remove translations when there is no related source message', () => {
+		defaultOptions.sourceMessages = [];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( {
+				msgid: 'id1',
+				msgstr: [ 'Example message 1 in zh_TW' ]
+			} ),
+			expect.objectContaining( {
+				msgid: 'id2',
+				msgstr: [
+					'Example message 2 in zh_TW',
+					'Example message 2 - plural form in zh_TW',
+					'',
+					''
+				]
+			} )
+		] );
+	} );
+
+	it( 'should not remove translations when there is no related English translation', () => {
+		enTranslations.items = [];
+
+		synchronizeTranslationsBasedOnContext( defaultOptions );
+
+		expect( zhTranslations.items ).toEqual( [
+			expect.objectContaining( {
+				msgid: 'id1',
+				msgstr: [ 'Example message 1 in zh_TW' ]
+			} ),
+			expect.objectContaining( {
+				msgid: 'id2',
+				msgstr: [
+					'Example message 2 in zh_TW',
+					'Example message 2 - plural form in zh_TW',
+					'',
+					''
+				]
+			} )
 		] );
 	} );
 
 	it( 'should add missing translations', () => {
 		vi.mocked( addTranslation ).mockReturnValue( [ 'added missing translation' ] );
-		translations.items = [];
+		zhTranslations.items = [];
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
 		expect( addTranslation ).toHaveBeenCalledTimes( 2 );
 
 		expect( addTranslation ).toHaveBeenCalledWith( {
-			languageCode: 'en',
+			languageCode: 'zh',
 			message: {
 				id: 'id1',
 				string: 'Example message 1'
@@ -206,7 +349,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		} );
 
 		expect( addTranslation ).toHaveBeenCalledWith( {
-			languageCode: 'en',
+			languageCode: 'zh',
 			message: {
 				id: 'id2',
 				plural: 'Example message 2 - plural form',
@@ -215,7 +358,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			numberOfPluralForms: 4
 		} );
 
-		expect( translations.items ).toEqual( [
+		expect( zhTranslations.items ).toEqual( [
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
@@ -232,71 +375,71 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	} );
 
 	it( 'should remove existing plural forms if a source file contains more than a language defines', () => {
-		translations.items = [
+		zhTranslations.items = [
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
-				msgstr: [ '' ]
+				msgstr: [ 'Example message 1' ]
 			},
 			{
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
-				msgstr: [ '1', '2', '3', '4', '5', '6' ]
+				msgstr: [ 'Example message 2', '2', '3', '4', '5', '6' ]
 			}
 		];
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( translations.items ).toEqual( [
+		expect( zhTranslations.items ).toEqual( [
 			// `id1` is not updated as it does not offer plural forms.
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
-				msgstr: [ '' ]
+				msgstr: [ 'Example message 1' ]
 			},
 			{
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
-				msgstr: [ '1', '2', '3', '4' ]
+				msgstr: [ 'Example message 2', '2', '3', '4' ]
 			}
 		] );
 	} );
 
 	it( 'should add empty plural forms if a source file contains less than a language defines', () => {
-		translations.items = [
+		zhTranslations.items = [
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
-				msgstr: [ '' ]
+				msgstr: [ 'Example message 1' ]
 			},
 			{
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
-				msgstr: [ '1', '2' ]
+				msgstr: [ 'Example message 2', '2' ]
 			}
 		];
 
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( translations.items ).toEqual( [
+		expect( zhTranslations.items ).toEqual( [
 			// `id1` is not updated as it does not offer plural forms.
 			{
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
-				msgstr: [ '' ]
+				msgstr: [ 'Example message 1' ]
 			},
 			{
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
-				msgstr: [ '1', '2', '', '' ]
+				msgstr: [ 'Example message 2', '2', '', '' ]
 			}
 		] );
 	} );
@@ -304,11 +447,16 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	it( 'should save updated translation files on filesystem after cleaning the content', () => {
 		synchronizeTranslationsBasedOnContext( defaultOptions );
 
-		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
+		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 2 );
 
-		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
+		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 2 );
 		expect( fs.writeFileSync ).toHaveBeenCalledWith(
 			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po',
+			'Clean PO file content.',
+			'utf-8'
+		);
+		expect( fs.writeFileSync ).toHaveBeenCalledWith(
+			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po',
 			'Clean PO file content.',
 			'utf-8'
 		);

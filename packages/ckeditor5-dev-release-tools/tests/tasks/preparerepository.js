@@ -1,15 +1,17 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
+import resolvePublishOverrides from '../../lib/utils/resolvepublishoverrides.js';
 
 vi.mock( 'fs/promises' );
 vi.mock( 'glob' );
+vi.mock( '../../lib/utils/resolvepublishoverrides.js' );
 
 describe( 'prepareRepository()', () => {
 	const packages = [
@@ -25,6 +27,7 @@ describe( 'prepareRepository()', () => {
 		};
 
 		vi.spyOn( process, 'cwd' ).mockReturnValue( 'current/working/dir' );
+		vi.mocked( glob ).mockResolvedValue( [] );
 	} );
 
 	it( 'should be a function', () => {
@@ -100,11 +103,42 @@ describe( 'prepareRepository()', () => {
 		beforeEach( () => {
 			vi.mocked( fs ).readdir.mockResolvedValue( [] );
 
-			vi.mocked( glob ).mockResolvedValue( [
+			vi.mocked( glob ).mockResolvedValueOnce( [
 				'current/working/dir/src/core.js',
 				'current/working/dir/src/utils.js',
 				'current/working/dir/CHANGELOG.md'
 			] );
+		} );
+
+		it( 'should use the specified `cwd` to resolve the files', async () => {
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+
+			await prepareRepository( {
+				...options,
+				cwd: '/home/ckeditor/workspace'
+			} );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( expect.any( Array ), expect.objectContaining( {
+				cwd: '/home/ckeditor/workspace'
+			} ) );
+		} );
+
+		it( 'should resolve to the absolute paths when processing the files', async () => {
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+
+			await prepareRepository( options );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( expect.any( Array ), expect.objectContaining( {
+				absolute: true
+			} ) );
 		} );
 
 		it( 'should create "package.json" file in the root package with provided values', async () => {
@@ -117,7 +151,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'current/working/dir/release/ckeditor5/package.json',
 				expect.any( String )
 			);
@@ -131,7 +166,8 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalled();
+			expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 				'current/working/dir/release/ckeditor5-example/package.json',
 				expect.any( String )
 			);
@@ -206,9 +242,37 @@ describe( 'prepareRepository()', () => {
 			expect( vi.mocked( fs ).writeFile ).not.toHaveBeenCalled();
 			expect( vi.mocked( fs ).cp ).not.toHaveBeenCalled();
 		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/19550.
+		it( 'must not use `Array#map()` to iterate over files to copy to avoid the "EEXIST" error', async () => {
+			let concurrent = 0;
+
+			// This mock aims to disable calling `Array.map( async () => fs.cp() )`.
+			vi.mocked( fs ).cp.mockImplementation( async () => {
+				if ( concurrent > 1 ) {
+					throw new Error( 'Concurrency is disallowed.' );
+				}
+
+				concurrent += 1;
+
+				// Simulates the `fs.cp()` action.
+				await new Promise( resolve => {
+					setTimeout( resolve, 0 );
+				} );
+
+				concurrent -= 1;
+			} );
+
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: [ 'src/*.js', 'CHANGELOG.md' ]
+			};
+
+			await prepareRepository( options );
+		} );
 	} );
 
-	describe( 'monorepository packages processing', () => {
+	describe( 'mono-repository packages processing', () => {
 		beforeEach( () => {
 			vi.mocked( fs ).readdir.mockImplementation( input => {
 				if ( input.endsWith( 'release' ) ) {
@@ -347,6 +411,74 @@ describe( 'prepareRepository()', () => {
 				'current/working/dir/packages/nested/ckeditor5-nested',
 				'current/working/dir/release/nested/ckeditor5-nested',
 				expect.any( Object )
+			);
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/19550.
+		it( 'must not use `Array#map()` to iterate over packages to avoid the "EEXIST" error', async () => {
+			let concurrent = 0;
+
+			// This mock aims to disable calling `Array.map( async () => fs.lstat() )`.
+			vi.mocked( fs ).lstat.mockImplementation( async () => {
+				if ( concurrent > 1 ) {
+					throw new Error( 'Concurrency is disallowed.' );
+				}
+
+				concurrent += 1;
+
+				// Simulates the `fs.lstat()` action.
+				await new Promise( resolve => {
+					setTimeout( resolve, 0 );
+				} );
+
+				concurrent -= 1;
+
+				return {
+					isDirectory: () => true
+				};
+			} );
+			vi.mocked( fs ).access.mockResolvedValue( undefined );
+
+			options.packagesDirectory = 'packages';
+
+			await prepareRepository( options );
+		} );
+	} );
+
+	describe( 'apply publish-time overrides in `package.json` using `publishConfig`', () => {
+		beforeEach( () => {
+			vi.mocked( fs ).readdir.mockResolvedValue( [] );
+
+			options.rootPackageJson = {
+				name: 'ckeditor5',
+				files: []
+			};
+		} );
+
+		it( 'should find all `package.json` in the output directory', async () => {
+			await prepareRepository( options );
+
+			expect( vi.mocked( glob ) ).toHaveBeenCalled();
+			expect( vi.mocked( glob ) ).toHaveBeenCalledWith( '*/package.json', expect.objectContaining( {
+				cwd: 'current/working/dir/release',
+				absolute: true
+			} ) );
+		} );
+
+		it( 'should find all `package.json` in the output directory', async () => {
+			vi.mocked( glob ).mockResolvedValue( [
+				'current/working/dir/release/ckeditor5-first/package.json',
+				'current/working/dir/release/ckeditor5-second/package.json'
+			] );
+
+			await prepareRepository( options );
+
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalled();
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalledWith(
+				'current/working/dir/release/ckeditor5-first/package.json'
+			);
+			expect( vi.mocked( resolvePublishOverrides ) ).toHaveBeenCalledWith(
+				'current/working/dir/release/ckeditor5-second/package.json'
 			);
 		} );
 	} );

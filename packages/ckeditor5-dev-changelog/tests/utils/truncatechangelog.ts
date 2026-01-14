@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -7,7 +7,7 @@ import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
-import fs from 'fs';
+import fs from 'node:fs';
 
 vi.mock( 'fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );

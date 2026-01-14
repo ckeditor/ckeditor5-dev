@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { Listr } from 'listr2';
 import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { confirm } from '@inquirer/prompts';
-import { Octokit } from '@octokit/rest';
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 import parseArguments from './utils/parsearguments.js';
 import getListrOptions from './utils/getlistroptions.js';
@@ -66,22 +65,6 @@ const tasks = new Listr( [
 		},
 		options: {
 			persistentOutput: true
-		}
-	},
-	{
-		title: 'Mark v43 as "latest" (GitHub)',
-		task: async () => {
-			const github = new Octokit( {
-				version: '3.0.0',
-				auth: `token ${ githubToken }`
-			} );
-
-			return github.request( 'PATCH /repos/{owner}/{repo}/releases/{release_id}', {
-				owner: 'ckeditor',
-				repo: 'ckeditor5-dev',
-				release_id: 227938481, // v43.1.0
-				make_latest: true
-			} );
 		}
 	}
 ], getListrOptions( cliArguments ) );

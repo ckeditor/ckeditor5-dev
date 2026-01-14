@@ -1,10 +1,10 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import inquirer from 'inquirer';
 import confirmNpmTag from '../../lib/utils/confirmnpmtag.js';
 

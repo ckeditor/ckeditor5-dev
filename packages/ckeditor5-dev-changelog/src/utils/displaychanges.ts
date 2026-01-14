@@ -1,9 +1,9 @@
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-import { styleText } from 'util';
+import { styleText } from 'node:util';
 import { logInfo } from './loginfo.js';
 import type { Entry, Section, SectionName, SectionsWithEntries, TransformScope } from '../types.js';
 

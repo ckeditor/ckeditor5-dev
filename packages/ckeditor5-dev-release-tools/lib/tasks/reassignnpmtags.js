@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2025, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { styleText, promisify } from 'util';
+import { styleText, promisify } from 'node:util';
 import columns from 'cli-columns';
 import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 
 const execPromise = promisify( exec );
 
