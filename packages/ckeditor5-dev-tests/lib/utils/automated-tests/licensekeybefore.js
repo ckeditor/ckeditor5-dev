@@ -4,5 +4,5 @@
  */
 
 before( function() {
-	window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';
+	window.CKEDITOR_GLOBAL_LICENSE_KEY = process.env.CKEDITOR_LICENSE_KEY || 'GPL';
 } );

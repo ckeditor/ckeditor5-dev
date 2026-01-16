@@ -4,6 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { DefinePlugin, EnvironmentPlugin } from 'webpack';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin.js';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
@@ -97,10 +98,20 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			identityFile: 'path/to/secrets.js'
 		} );
 
-		const plugin = webpackConfig.plugins[ 0 ];
+		const plugin = webpackConfig.plugins.find( plugin => plugin instanceof DefinePlugin );
 
 		expect( vi.mocked( getDefinitionsFromFile ) ).toHaveBeenCalledExactlyOnceWith( 'path/to/secrets.js' );
 		expect( plugin.definitions.LICENSE_KEY ).to.equal( 'secret' );
+	} );
+
+	it( 'should return webpack configuration with environment definition', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+		const plugin = webpackConfig.plugins.find( plugin => plugin instanceof EnvironmentPlugin );
+
+		expect( plugin.keys ).toEqual( expect.arrayContaining( [ 'CKEDITOR_LICENSE_KEY' ] ) );
+		expect( plugin.defaultValues ).toEqual( expect.objectContaining( {
+			CKEDITOR_LICENSE_KEY: ''
+		} ) );
 	} );
 
 	it( 'should return webpack configuration with correct extension resolve order', () => {

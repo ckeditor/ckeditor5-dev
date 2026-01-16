@@ -136,7 +136,7 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/assets/websocket.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
-					'<script src="/assets/globallicensekey.js"></script>' +
+					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -145,6 +145,30 @@ describe( 'compileHtmlFiles()', () => {
 			expect( stubs.log.info ).toHaveBeenCalledTimes( 2 );
 			expect( stubs.log.info ).toHaveBeenCalledWith( expect.stringMatching( /^Processing/ ) );
 			expect( stubs.log.info ).toHaveBeenCalledWith( expect.stringMatching( /^Finished writing/ ) );
+		} );
+
+		it( 'should inject license key from environment variable', () => {
+			vi.stubEnv( 'CKEDITOR_LICENSE_KEY', 'secret' );
+
+			files = {
+				'/template.html': '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
+			};
+
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
+			};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				sourceFiles: [ 'path/to/manual/file.js' ]
+			} );
+
+			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+				'buildDir/path/to/manual/file.html',
+				expect.stringContaining( '<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "secret";</script>' )
+			);
 		} );
 
 		it( 'should listen to changes in source files', () => {
@@ -228,10 +252,10 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/assets/websocket.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
-					'<script src="/assets/globallicensekey.js"></script>' +
 					'<script src="/translations/en.js"></script>' +
 					'<script src="/translations/pl.js"></script>' +
 					'<script src="/translations/ar.js"></script>' +
+					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -377,7 +401,7 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/assets/websocket.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
-					'<script src="/assets/globallicensekey.js"></script>' +
+					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
