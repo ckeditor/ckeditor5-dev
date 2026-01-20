@@ -12,18 +12,23 @@ parameters:
     default: false
 
 orbs:
-  node: circleci/node@7.1.1
   codecov: codecov/codecov@5.4.3
 
 commands:
   bootstrap_repository_command:
-    description: "Bootstrap the repository"
+    description: "Disable Corepack, install pnpm and project dependencies"
     steps:
-      - install_ssh_keys_command
-      - node/install-pnpm:
-          version: "10"
-      - node/install-packages:
-          pkg-manager: pnpm
+      - run:
+          name: Disable Corepack
+          command: sudo corepack disable
+      - run:
+          name: Install pnpm
+          command: |
+            sudo npm i -g pnpm@^10
+            pnpm --version
+      - run:
+          name: Install dependencies
+          command: pnpm install --frozen-lockfile
 
   install_ssh_keys_command:
     description: "Install SSH keys"

@@ -58,7 +58,7 @@ export default async function updateDependencies( options ) {
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.devDependencies );
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.peerDependencies );
 
-		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) );
+		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) + '\n' );
 	}
 }
 

@@ -200,7 +200,7 @@ describe( 'updateDependencies()', () => {
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				}, null, 2 )
+				}, null, 2 ) + '\n'
 			);
 		} );
 
@@ -237,7 +237,7 @@ describe( 'updateDependencies()', () => {
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				}, null, 2 )
+				}, null, 2 ) + '\n'
 			);
 		} );
 
@@ -274,7 +274,7 @@ describe( 'updateDependencies()', () => {
 						'@ckeditor/ckeditor5-essentials': '^38.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				}, null, 2 )
+				}, null, 2 ) + '\n'
 			);
 		} );
 
@@ -305,7 +305,7 @@ describe( 'updateDependencies()', () => {
 						'@ckeditor/ckeditor5-essentials': '^37.0.0',
 						'lodash-es': '^4.17.15'
 					}
-				}, null, 2 )
+				}, null, 2 ) + '\n'
 			);
 		} );
 	} );

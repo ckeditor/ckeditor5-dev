@@ -16,8 +16,7 @@ describe( 'copyAssets()', () => {
 	const ASSETS = [
 		'togglesidebar.js',
 		'attachinspector.js',
-		'websocket.js',
-		'globallicensekey.js'
+		'websocket.js'
 	];
 
 	beforeEach( () => {
