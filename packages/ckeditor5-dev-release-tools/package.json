@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "54.3.0",
+  "version": "54.3.1",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",

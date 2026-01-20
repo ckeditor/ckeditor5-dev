@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-web-crawler",
-  "version": "54.3.0",
+  "version": "54.3.1",
   "description": "Used to run a web crawler that checks for errors on specified pages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
