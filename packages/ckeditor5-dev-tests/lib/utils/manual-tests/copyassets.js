@@ -13,7 +13,6 @@ const assets = [
 	path.join( import.meta.dirname, 'togglesidebar.js' ),
 	path.join( import.meta.dirname, 'attachinspector.js' ),
 	path.join( import.meta.dirname, 'websocket.js' ),
-	path.join( import.meta.dirname, 'globallicensekey.js' ),
 	require.resolve( '@ckeditor/ckeditor5-inspector' )
 ];
 

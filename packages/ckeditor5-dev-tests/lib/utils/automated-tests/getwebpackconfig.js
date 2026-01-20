@@ -24,6 +24,9 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 		},
 
 		plugins: [
+			new webpack.EnvironmentPlugin( {
+				CKEDITOR_LICENSE_KEY: ''
+			} ),
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
