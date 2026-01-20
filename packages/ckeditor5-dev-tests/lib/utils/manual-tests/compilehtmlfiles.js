@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { styleText } from 'node:util';
+import crypto from 'node:crypto';
 import { globSync } from 'glob';
 import { uniq, debounce } from 'es-toolkit/compat';
 import * as commonmark from 'commonmark';
@@ -124,6 +125,10 @@ function compileHtmlFile( buildDir, options ) {
 	// Load test view (HTML file).
 	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
 
+	// Get the last chunk from the generated UUID hex string.
+	const nonceForCsp = crypto.randomUUID().split( '-' ).at( -1 );
+	const cspMetaTag = `<head>${ getCspMetaTag( nonceForCsp ) }</head>`;
+
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container manual-test-container_no-transitions">' +
@@ -135,13 +140,14 @@ function compileHtmlFile( buildDir, options ) {
 		`${ languagesToLoad.map( language => {
 			return `<script src="/translations/${ language }.js"></script>`;
 		} ).join( '' ) }` +
-		`<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "${ process.env.CKEDITOR_LICENSE_KEY || 'GPL' }";</script>` +
+		`<script nonce="${ nonceForCsp }">window.CKEDITOR_GLOBAL_LICENSE_KEY = "${ process.env.CKEDITOR_LICENSE_KEY || 'GPL' }";</script>` +
 		`<script src="/${ absoluteJSFilePath.replace( /[\\/]/g, '/' ) }"></script>` +
 		'</body>';
 
 	// Concat the all HTML parts to single one.
 	const preparedHtml = combine(
 		viewTemplate,
+		cspMetaTag,
 		manualTestInstruction,
 		manualTestSidebarToggleButton,
 		manualTestSidebarBackButton,
@@ -192,4 +198,19 @@ function watchFiles( filePaths, onChange, onTestCompilationStatus ) {
 			debouncedOnChange();
 		} );
 	}
+}
+
+function getCspMetaTag( nonce ) {
+	return [
+		'<meta ',
+		'http-equiv="Content-Security-Policy" ',
+		'content="',
+		'default-src \'none\'; ',
+		'connect-src \'self\' https://cksource.com http://*.cke-cs.com; ',
+		`script-src 'self' https://cksource.com 'nonce-${ nonce }'; `,
+		'img-src * data:; ',
+		'style-src \'self\' \'unsafe-inline\'; ',
+		'frame-src *;',
+		'">'
+	].join( '' );
 }
