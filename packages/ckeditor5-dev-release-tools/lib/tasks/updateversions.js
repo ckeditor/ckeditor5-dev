@@ -55,7 +55,7 @@ export default async function updateVersions( options ) {
 		const pkgJson = JSON.parse( pkgJsonFile );
 
 		pkgJson.version = version;
-		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) );
+		await fs.writeFile( pkgJsonPath, JSON.stringify( pkgJson, null, 2 ) + '\n' );
 	}
 }
 

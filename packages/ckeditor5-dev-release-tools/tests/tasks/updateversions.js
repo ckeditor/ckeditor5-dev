@@ -41,19 +41,19 @@ describe( 'updateVersions()', () => {
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledTimes( 4 );
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package1/package.json',
-			JSON.stringify( { version: '1.0.1' }, null, 2 )
+			JSON.stringify( { version: '1.0.1' }, null, 2 ) + '\n'
 		);
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package2/package.json',
-			JSON.stringify( { version: '1.0.1' }, null, 2 )
+			JSON.stringify( { version: '1.0.1' }, null, 2 ) + '\n'
 		);
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/packages/package3/package.json',
-			JSON.stringify( { version: '1.0.1' }, null, 2 )
+			JSON.stringify( { version: '1.0.1' }, null, 2 ) + '\n'
 		);
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledWith(
 			'/ckeditor5-dev/package.json',
-			JSON.stringify( { version: '1.0.1' }, null, 2 )
+			JSON.stringify( { version: '1.0.1' }, null, 2 ) + '\n'
 		);
 	} );
 
@@ -95,7 +95,7 @@ describe( 'updateVersions()', () => {
 
 		expect( vi.mocked( fs ).writeFile ).toHaveBeenCalledExactlyOnceWith(
 			'/ckeditor5-dev/package.json',
-			JSON.stringify( { version: '1.0.1' }, null, 2 )
+			JSON.stringify( { version: '1.0.1' }, null, 2 ) + '\n'
 		);
 	} );
 

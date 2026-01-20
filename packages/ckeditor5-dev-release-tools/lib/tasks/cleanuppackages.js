@@ -40,7 +40,7 @@ export default async function cleanUpPackages( options ) {
 		await cleanUpPackageDirectory( packageJson, packagePath );
 		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook );
 
-		await fs.writeFile( packageJsonPath, JSON.stringify( packageJson, null, 2 ) );
+		await fs.writeFile( packageJsonPath, JSON.stringify( packageJson, null, 2 ) + '\n' );
 	}
 }
 

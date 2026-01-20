@@ -510,7 +510,7 @@ describe( 'cleanUpPackages()', () => {
 					'ckeditor5': '^37.1.0'
 				},
 				main: 'src/index.ts'
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should remove default unnecessary fields from `package.json`', async () => {
@@ -558,7 +558,7 @@ describe( 'cleanUpPackages()', () => {
 					'ckeditor5': '^37.1.0'
 				},
 				main: 'src/index.ts'
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should remove provided unnecessary fields from `package.json`', async () => {
@@ -617,7 +617,7 @@ describe( 'cleanUpPackages()', () => {
 					'build': 'tsc -p ./tsconfig.json',
 					'dll:build': 'webpack'
 				}
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should remove deeply nested unnecessary fields from `package.json`', async () => {
@@ -646,7 +646,7 @@ describe( 'cleanUpPackages()', () => {
 				engines: {
 					node: '>=24.11.0'
 				}
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should keep nested field if it does not exist or it targets non-object field', async () => {
@@ -677,7 +677,7 @@ describe( 'cleanUpPackages()', () => {
 						'bar'
 					]
 				}
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
@@ -705,7 +705,7 @@ describe( 'cleanUpPackages()', () => {
 				scripts: {
 					'postinstall': 'node my-node-script.js'
 				}
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should not remove scripts unless it is explicitly specified in packageJsonFieldsToRemove', async () => {
@@ -740,7 +740,7 @@ describe( 'cleanUpPackages()', () => {
 					'build': 'tsc -p ./tsconfig.json',
 					'dll:build': 'webpack'
 				}
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should not crash when scripts are not set but preservePostInstallHook is set to true', async () => {
@@ -763,7 +763,7 @@ describe( 'cleanUpPackages()', () => {
 
 			expect( input[ 1 ] ).to.equal( JSON.stringify( {
 				author: 'author'
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 
 		it( 'should accept a callback for packageJsonFieldsToRemove', async () => {
@@ -813,7 +813,7 @@ describe( 'cleanUpPackages()', () => {
 					'ckeditor5': '^37.1.0'
 				},
 				main: 'src/index.ts'
-			}, null, 2 ) );
+			}, null, 2 ) + '\n' );
 		} );
 	} );
 } );
