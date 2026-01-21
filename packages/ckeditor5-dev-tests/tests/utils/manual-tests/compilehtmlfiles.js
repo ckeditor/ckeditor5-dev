@@ -41,6 +41,11 @@ vi.mock( 'commonmark', () => ( {
 		}
 	}
 } ) );
+vi.mock( 'crypto', () => ( {
+	default: {
+		randomUUID: vi.fn( () => 'uuid1-uuid2-uuid3-uuid4-uuid5' )
+	}
+} ) );
 vi.mock( 'fs' );
 vi.mock( 'path' );
 vi.mock( 'glob' );
@@ -50,6 +55,21 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../../lib/utils/getrelativefilepath.js' );
 
 describe( 'compileHtmlFiles()', () => {
+	const cspMetaTag = [
+		'<head>',
+		'<meta ',
+		'http-equiv="Content-Security-Policy" ',
+		'content="',
+		'default-src \'none\'; ',
+		'connect-src \'self\' https://cksource.com http://*.cke-cs.com; ',
+		'script-src \'self\' https://cksource.com \'nonce-uuid5\'; ',
+		'img-src * data:; ',
+		'style-src \'self\' \'unsafe-inline\'; ',
+		'frame-src *;',
+		'">',
+		'</head>'
+	].join( '' );
+
 	let files;
 	let patternFiles = {};
 	let separator = '/';
@@ -122,6 +142,7 @@ describe( 'compileHtmlFiles()', () => {
 			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
+					cspMetaTag,
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
@@ -136,7 +157,7 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/assets/websocket.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
-					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
+					'<script nonce="uuid5">window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -167,7 +188,7 @@ describe( 'compileHtmlFiles()', () => {
 
 			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html',
-				expect.stringContaining( '<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "secret";</script>' )
+				expect.stringContaining( '<script nonce="uuid5">window.CKEDITOR_GLOBAL_LICENSE_KEY = "secret";</script>' )
 			);
 		} );
 
@@ -238,6 +259,7 @@ describe( 'compileHtmlFiles()', () => {
 			expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
+					cspMetaTag,
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
@@ -255,7 +277,7 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/translations/en.js"></script>' +
 					'<script src="/translations/pl.js"></script>' +
 					'<script src="/translations/ar.js"></script>' +
-					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
+					'<script nonce="uuid5">window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -387,6 +409,7 @@ describe( 'compileHtmlFiles()', () => {
 			expect( test ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir\\path\\to\\manual\\file.html', [
 					'<div>template html content</div>',
+					cspMetaTag,
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
@@ -401,7 +424,7 @@ describe( 'compileHtmlFiles()', () => {
 					'<script src="/assets/websocket.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
-					'<script>window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
+					'<script nonce="uuid5">window.CKEDITOR_GLOBAL_LICENSE_KEY = "GPL";</script>' +
 					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
