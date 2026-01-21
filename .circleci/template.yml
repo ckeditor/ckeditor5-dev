@@ -162,8 +162,15 @@ jobs:
               circleci-agent step halt
             fi
       - run:
+          name: Disable the redundant workflows option
+          command: pnpm ckeditor5-dev-ci-circle-disable-auto-cancel-builds --organization ckeditor --repository ckeditor5-dev
+      - run:
           name: Trigger the release pipeline
           command: pnpm ckeditor5-dev-ci-trigger-circle-build --slug ckeditor/ckeditor5-dev --release-branch epic/ci/4168-drop-oim
+      - run:
+          name: Enable the redundant workflows option
+          command: pnpm ckeditor5-dev-ci-circle-enable-auto-cancel-builds --organization ckeditor --repository ckeditor5-dev
+          when: always
 
   release_project:
     docker:
