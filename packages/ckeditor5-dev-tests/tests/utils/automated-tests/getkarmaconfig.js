@@ -330,7 +330,7 @@ describe( 'getKarmaConfig()', () => {
 		} ) );
 	} );
 
-	it( 'should inherits Chrome flags from the headed mode when using the headless version', () => {
+	it( 'should inherit Chrome flags from the headed mode when using the headless version', () => {
 		const options = {
 			reporter: 'mocha',
 			files: [ '*' ],
