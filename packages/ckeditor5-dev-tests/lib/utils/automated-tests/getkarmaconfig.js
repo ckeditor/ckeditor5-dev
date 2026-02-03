@@ -121,6 +121,10 @@ export default function getKarmaConfig( options ) {
 			CHROME_LOCAL: {
 				base: 'Chrome',
 				flags: getFlagsForBrowser( 'CHROME_LOCAL' )
+			},
+			ChromeHeadlessCustom: {
+				base: 'ChromeHeadless',
+				flags: getFlagsForBrowser( 'CHROME_HEADLESS' )
 			}
 		},
 
@@ -227,6 +231,10 @@ function getBrowsers( options ) {
 	}
 
 	return options.browsers.map( browser => {
+		if ( browser === 'ChromeHeadless' ) {
+			return 'ChromeHeadlessCustom';
+		}
+
 		if ( browser !== 'Chrome' ) {
 			return browser;
 		}
@@ -245,7 +253,8 @@ function getFlagsForBrowser( browser ) {
 		'--js-flags="--expose-gc"',
 		'--disable-renderer-backgrounding',
 		'--disable-backgrounding-occluded-windows',
-		'--disable-search-engine-choice-screen'
+		'--disable-search-engine-choice-screen',
+		'--window-size=1920,1080'
 	];
 
 	if ( browser === 'CHROME_CI' ) {
