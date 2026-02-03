@@ -27,8 +27,9 @@ if ( fs.existsSync( '.env' ) ) {
 
 tests.runManualTests( options )
 	.catch( error => {
-		// Mark result of this task as invalid.
-		process.exitCode = 1;
+		const message = error instanceof Error ? error.stack : error.toString();
+		console.log( styleText( 'red', message ) );
 
-		console.log( styleText( 'red', error.stack ) );
+		// Mark result of this task as invalid.
+		process.exit( 1 );
 	} );
