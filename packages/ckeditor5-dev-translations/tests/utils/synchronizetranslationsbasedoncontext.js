@@ -126,7 +126,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		vi.mocked( PO.parsePluralForms ).mockReturnValue( { nplurals: 4 } );
 
-		vi.mocked( PO.Item ).mockImplementation( () => new class {
+		vi.mocked( PO.Item ).mockImplementation( class {
 			constructor( ...args ) {
 				stubs.poItemConstructor( ...args );
 
@@ -135,7 +135,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 				this.msgstr = [];
 				this.msgid_plural = '';
 			}
-		}() );
+		} );
 
 		vi.mocked( glob.sync ).mockImplementation( pattern => {
 			return languages.map( language => pattern.replace( '*', language.languageFileName ) );
@@ -359,18 +359,18 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		} );
 
 		expect( zhTranslations.items ).toEqual( [
-			{
+			expect.objectContaining( {
 				msgid: 'id1',
 				msgctxt: 'Context for example message 1',
 				msgid_plural: '',
 				msgstr: expect.arrayContaining( [ 'added missing translation' ] )
-			},
-			{
+			} ),
+			expect.objectContaining( {
 				msgid: 'id2',
 				msgctxt: 'Context for example message 2',
 				msgid_plural: 'Example message 2 - plural form',
 				msgstr: expect.arrayContaining( [ 'added missing translation' ] )
-			}
+			} )
 		] );
 	} );
 

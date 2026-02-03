@@ -9,6 +9,8 @@ export default defineConfig( {
 	test: {
 		testTimeout: 10000,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
 		coverage: {
 			provider: 'v8',
 			include: [
