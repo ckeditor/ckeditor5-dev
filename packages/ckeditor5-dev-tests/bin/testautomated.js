@@ -29,7 +29,9 @@ tests.runAutomatedTests( options )
 		process.exit( 0 );
 	} )
 	.catch( error => {
-		console.log( styleText( 'red', error ) );
+		const message = error instanceof Error ? error.stack : error.toString();
+		console.log( styleText( 'red', message ) );
 
+		// Mark result of this task as invalid.
 		process.exit( 1 );
 	} );

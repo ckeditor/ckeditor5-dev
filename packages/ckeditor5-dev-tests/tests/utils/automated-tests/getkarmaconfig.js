@@ -166,7 +166,7 @@ describe( 'getKarmaConfig()', () => {
 	} );
 
 	it( 'should configure coverage reporter', () => {
-		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( {} );
 
 		const karmaConfig = getKarmaConfig( {
 			files: [ '*' ],
@@ -188,7 +188,7 @@ describe( 'getKarmaConfig()', () => {
 	} );
 
 	it( 'should use `text-summary` reporter for local development', () => {
-		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( {} );
 
 		const karmaConfig = getKarmaConfig( {
 			files: [ '*' ],
@@ -210,7 +210,7 @@ describe( 'getKarmaConfig()', () => {
 	} );
 
 	it( 'should use `text` reporter on CI', () => {
-		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( {} );
 		vi.stubEnv( 'CI', true );
 
 		const karmaConfig = getKarmaConfig( {
@@ -268,7 +268,7 @@ describe( 'getKarmaConfig()', () => {
 		expect( loaders ).toEqual( expect.arrayContaining( [ 'other-loader' ] ) );
 	} );
 
-	it( 'should return custom browser launchers with flags', () => {
+	it( 'should return custom browser launchers with flags (`CHROME_CI`)', () => {
 		const options = {
 			reporter: 'mocha',
 			files: [ '*' ],
@@ -286,29 +286,66 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.customLaunchers ).toEqual( expect.objectContaining( {
 			CHROME_CI: expect.objectContaining( {
 				base: 'Chrome',
-				flags: [
+				flags: expect.arrayContaining( [
 					'--disable-background-timer-throttling',
 					'--js-flags="--expose-gc"',
 					'--disable-renderer-backgrounding',
 					'--disable-backgrounding-occluded-windows',
 					'--disable-search-engine-choice-screen',
-					'--no-sandbox'
-				]
+					'--no-sandbox',
+					'--window-size=1920,1080'
+				] )
 			} )
+		} ) );
+	} );
+
+	it( 'should return custom browser launchers with flags (`CHROME_LOCAL`)', () => {
+		const options = {
+			reporter: 'mocha',
+			files: [ '*' ],
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		};
+
+		const karmaConfig = getKarmaConfig( options );
+
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			customLaunchers: expect.any( Object )
 		} ) );
 
 		expect( karmaConfig.customLaunchers ).toEqual( expect.objectContaining( {
 			CHROME_LOCAL: expect.objectContaining( {
 				base: 'Chrome',
-				flags: [
+				flags: expect.arrayContaining( [
 					'--disable-background-timer-throttling',
 					'--js-flags="--expose-gc"',
 					'--disable-renderer-backgrounding',
 					'--disable-backgrounding-occluded-windows',
 					'--disable-search-engine-choice-screen',
-					'--remote-debugging-port=9222'
-				]
+					'--remote-debugging-port=9222',
+					'--window-size=1920,1080'
+				] )
 			} )
 		} ) );
+	} );
+
+	it( 'should inherit Chrome flags from the headed mode when using the headless version', () => {
+		const options = {
+			reporter: 'mocha',
+			files: [ '*' ],
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		};
+
+		const karmaConfig = getKarmaConfig( options );
+
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			customLaunchers: expect.any( Object )
+		} ) );
+
+		expect( karmaConfig.customLaunchers.ChromeHeadlessCustom.base ).toEqual( 'ChromeHeadless' );
+		expect( karmaConfig.customLaunchers.ChromeHeadlessCustom.flags ).toStrictEqual( karmaConfig.customLaunchers.CHROME_LOCAL.flags );
 	} );
 } );
