@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-dependency-checker",
-  "version": "55.0.0-alpha.2",
+  "version": "55.0.0-alpha.3",
   "description": "Contains tools for validating dependencies specified in package.json.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
