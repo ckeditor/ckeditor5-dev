@@ -9,7 +9,10 @@ export default defineConfig( {
 	test: {
 		testTimeout: 10000,
 		restoreMocks: true,
+		clearMocks: true,
 		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: true,
 		include: [
 			'tests/**/*.js'
 		],
@@ -17,6 +20,9 @@ export default defineConfig( {
 			provider: 'v8',
 			include: [
 				'lib/**'
+			],
+			exclude: [
+				'*.graphql'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

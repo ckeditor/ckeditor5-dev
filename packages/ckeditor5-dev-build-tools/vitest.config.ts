@@ -11,6 +11,8 @@ export default defineConfig( {
 		restoreMocks: true,
 		clearMocks: true,
 		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: true,
 		coverage: {
 			provider: 'v8',
 			include: [

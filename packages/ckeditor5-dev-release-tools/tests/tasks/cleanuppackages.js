@@ -45,7 +45,7 @@ describe( 'cleanUpPackages()', () => {
 
 	afterEach( () => {
 		vi.resetModules();
-		mockFs.restore();
+		// mockFs.restore();
 	} );
 
 	describe( 'preparing options', () => {
