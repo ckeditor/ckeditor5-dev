@@ -58,6 +58,20 @@ test( '--tsconfig', async () => {
 	expect( declarationsFalse.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
 } );
 
+test( '--tsconfig should do typechecking regardless of declarations', async () => {
+	const withDeclarations = await getConfig( {
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+		declarations: true
+	} );
+	const withoutDeclarations = await getConfig( {
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+		declarations: false
+	} );
+
+	expect( withDeclarations.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( withoutDeclarations.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+} );
+
 test( '--external', async () => {
 	const config = await getConfig( {
 		external: [
