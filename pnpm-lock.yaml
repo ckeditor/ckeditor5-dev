@@ -254,6 +254,30 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
 
+  packages/ckeditor5-dev-dependency-updater:
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^28.0.3
+        version: 28.0.6(rollup@4.52.4)
+      '@rollup/plugin-node-resolve':
+        specifier: ^16.0.1
+        version: 16.0.3(rollup@4.52.4)
+      '@rollup/plugin-typescript':
+        specifier: 12.1.2
+        version: 12.1.2(rollup@4.52.4)(tslib@2.8.1)(typescript@5.3.3)
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.17.1
+      rollup:
+        specifier: ^4.9.5
+        version: 4.52.4
+      upath:
+        specifier: ^2.0.1
+        version: 2.0.1
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.1)
+
   packages/ckeditor5-dev-docs:
     dependencies:
       '@ckeditor/typedoc-plugins':
