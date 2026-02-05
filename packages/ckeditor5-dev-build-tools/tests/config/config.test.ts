@@ -58,7 +58,7 @@ test( '--tsconfig', async () => {
 	expect( declarationsFalse.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
 } );
 
-test( '--tsconfig should do typechecking regardless of declarations', async () => {
+test( '--tsconfig should do typechecking regardless of --declarations', async () => {
 	const withDeclarations = await getConfig( {
 		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
 		declarations: true
