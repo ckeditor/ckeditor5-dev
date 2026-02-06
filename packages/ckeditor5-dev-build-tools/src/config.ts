@@ -215,10 +215,7 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			/**
 			 * Does type checking and generates `.d.ts` files.
 			 */
-			getOptionalPlugin(
-				declarations,
-				getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } )
-			),
+			getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } ),
 
 			/**
 			 * Replaces parts of the source code with the provided values.
@@ -316,13 +313,13 @@ function getTypeScriptPlugin( {
 		noForceEmit: true,
 		tsconfig,
 		sourceMap,
-		noEmitOnError: true,
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
 		typescript: getUserDependency( 'typescript' ),
 		declaration: declarations,
 		declarationDir: declarations ? path.parse( output ).dir : undefined,
 		compilerOptions: {
-			emitDeclarationOnly: true
+			noEmitOnError: true,
+			...( declarations ? { emitDeclarationOnly: true } : { noEmit: true } )
 		}
 	} );
 }
