@@ -52,7 +52,9 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
 
 export const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
 
-export const DEFAULT_REMAINING_ATTEMPTS = 3;
+export const DEFAULT_RETRIES = 3;
+
+export const DEFAULT_RETRY_DELAY = 1000;
 
 export const ERROR_TYPES = {
 	PAGE_CRASH: {
