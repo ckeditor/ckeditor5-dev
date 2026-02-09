@@ -36,7 +36,7 @@
     "slack-notify": "^2.0.6"
   },
   "devDependencies": {
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

@@ -12,6 +12,10 @@ export default defineConfig( {
 		],
 		testTimeout: 10000,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: false,
 		include: [
 			'tests/**/*.ts'
 		],
