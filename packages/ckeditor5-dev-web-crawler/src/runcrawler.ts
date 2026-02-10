@@ -338,6 +338,10 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			const links = await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
 
 			links.forEach( link => {
+				if ( foundLinks.has( link ) ) {
+					return;
+				}
+
 				foundLinks.add( link );
 
 				cluster.queue( {
