@@ -41,6 +41,10 @@ export async function processPage( { page, data, cluster, baseUrl, discoveredLin
 			const links = await getLinksFromPage( { page, baseUrl, discoveredLinks, exclusions } );
 
 			links.forEach( link => {
+				if ( discoveredLinks.has( link ) ) {
+					return;
+				}
+
 				discoveredLinks.add( link );
 
 				cluster.queue( {
