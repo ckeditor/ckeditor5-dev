@@ -9,7 +9,7 @@ import {
 	DEFAULT_TIMEOUT
 } from '../constants.js';
 import { logErrors } from '../errors/reporter.js';
-import { createErrorCollector, createErrorStore, type ErrorStore } from '../errors/error-store.js';
+import { createErrorCollector, createErrorStore } from '../errors/error-store.js';
 import { getBaseUrl } from '../utils.js';
 import type { CrawlerOptions } from '../types.js';
 import { createCrawlerCluster } from './create-cluster.js';
@@ -18,7 +18,7 @@ import { processPage } from './process-page.js';
 /**
  * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.
  */
-export async function runCrawler( options: CrawlerOptions ): Promise<ErrorStore> {
+export async function runCrawler( options: CrawlerOptions ): Promise<void> {
 	console.log( styleText( 'bold', '\n🔎 Starting the Crawler…\n' ) );
 
 	const {
