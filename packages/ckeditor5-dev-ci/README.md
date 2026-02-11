@@ -55,6 +55,11 @@ These commands accept a mix of environment variables and command line arguments.
   - `--task` &mdash; Command to execute at the end; default: `pnpm ckeditor5-dev-ci-notify-circle-status`.
   - `--ignore` &mdash; Job name to ignore when waiting (repeatable; can be passed multiple times).
 
+  **Behavior:**
+  - Retries transient CircleCI API errors up to **5 attempts** with a **10s delay** between attempts.
+  - Fails immediately for non-retryable API errors (for example: invalid token or wrong workflow ID).
+  - If transient errors persist, it exits with an explicit message asking to verify workflow results manually.
+
 - ⚙️ **`ckeditor5-dev-ci-is-job-triggered-by-member`**
 
   Verifies that a **CircleCI approval job** was approved by a user who belongs to a specified GitHub team.
