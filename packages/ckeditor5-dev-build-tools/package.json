@@ -56,10 +56,10 @@
     "@types/css": "^0.0.38",
     "@types/node": "^22.14.1",
     "@types/postcss-mixins": "^9.0.5",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "type-fest": "^4.10.2",
     "typescript": "5.5.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit",

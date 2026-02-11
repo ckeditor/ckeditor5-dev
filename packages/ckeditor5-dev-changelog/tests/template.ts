@@ -70,8 +70,6 @@ describe( 'generateTemplate', () => {
 
 	afterEach( () => {
 		vi.useRealTimers();
-		vi.resetAllMocks();
-		vi.unstubAllGlobals();
 	} );
 
 	it( 'creates a directory if necessary', async () => {

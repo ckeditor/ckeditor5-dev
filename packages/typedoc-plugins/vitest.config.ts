@@ -9,8 +9,11 @@ export default defineConfig( {
 	test: {
 		testTimeout: 1000 * 60,
 		hookTimeout: 1000 * 60,
+		restoreMocks: true,
+		clearMocks: false,
 		mockReset: false,
-		restoreMocks: false,
+		unstubEnvs: true,
+		unstubGlobals: true,
 		include: [
 			'tests/**/*.ts'
 		],

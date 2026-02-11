@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util';
 import { execSync } from 'node:child_process';
 import processJobStatuses from '../lib/process-job-statuses.js';
 import isWorkflowFinished from '../lib/utils/is-workflow-finished.js';
+import getOtherWorkflowJobs from '../lib/utils/get-other-workflow-jobs.js';
 
 // This script allows the creation of a new job within a workflow that will be executed
 // in the end, when all other jobs will be finished or errored.
@@ -81,6 +82,9 @@ const { values: { task, ignore } } = parseArgs( {
 	}
 } );
 
+const CIRCLE_API_MAX_ATTEMPTS = 5;
+const CIRCLE_API_RETRY_DELAY_MS = 10 * 1000;
+
 waitForOtherJobsAndSendNotification()
 	.catch( err => {
 		console.error( err );
@@ -89,7 +93,17 @@ waitForOtherJobsAndSendNotification()
 	} );
 
 async function waitForOtherJobsAndSendNotification() {
-	const jobs = processJobStatuses( await getOtherJobsData() )
+	assertRequiredEnvironmentVariables();
+
+	const allJobs = await getOtherWorkflowJobs( {
+		circleToken: CKE5_CIRCLE_TOKEN,
+		workflowId: CIRCLE_WORKFLOW_ID,
+		currentJobName: CIRCLE_JOB,
+		maxAttempts: CIRCLE_API_MAX_ATTEMPTS,
+		retryDelayMs: CIRCLE_API_RETRY_DELAY_MS
+	} );
+
+	const jobs = processJobStatuses( allJobs )
 		.filter( job => !ignore.includes( job.name ) );
 
 	if ( !isWorkflowFinished( jobs ) ) {
@@ -108,20 +122,16 @@ async function waitForOtherJobsAndSendNotification() {
 	console.log( 'All jobs were successful.' );
 }
 
-/**
- * Fetches and returns data of all jobs except the one where this script runs.
- */
-async function getOtherJobsData() {
-	const url = `https://circleci.com/api/v2/workflow/${ CIRCLE_WORKFLOW_ID }/job`;
-	const options = {
-		method: 'GET',
-		headers: {
-			'Circle-Token': CKE5_CIRCLE_TOKEN
-		}
-	};
+function assertRequiredEnvironmentVariables() {
+	if ( !CKE5_CIRCLE_TOKEN ) {
+		throw new Error( 'Missing environment variable: CKE5_CIRCLE_TOKEN' );
+	}
 
-	const response = await fetch( url, options );
-	const data = await response.json();
+	if ( !CIRCLE_WORKFLOW_ID ) {
+		throw new Error( 'Missing environment variable: CIRCLE_WORKFLOW_ID' );
+	}
 
-	return data.items.filter( job => job.name !== CIRCLE_JOB );
+	if ( !CIRCLE_JOB ) {
+		throw new Error( 'Missing environment variable: CIRCLE_JOB' );
+	}
 }

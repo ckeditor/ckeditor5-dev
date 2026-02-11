@@ -14,8 +14,11 @@ export default defineConfig( {
 			'./tests/_utils/testsetup.js'
 		],
 		testTimeout: 10000,
-		mockReset: true,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: false,
 		include: [
 			'tests/**/*.js'
 		],

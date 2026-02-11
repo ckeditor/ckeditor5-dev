@@ -9,6 +9,10 @@ export default defineConfig( {
 	test: {
 		testTimeout: 10000,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: true,
 		include: [
 			'tests/**/*.ts'
 		],
@@ -22,8 +26,7 @@ export default defineConfig( {
 				'src/types.ts',
 				'src/index.ts'
 			],
-			reporter: [ 'text', 'json', 'html', 'lcov' ],
-			all: true
+			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}
 	}
 } );

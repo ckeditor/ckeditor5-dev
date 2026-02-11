@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import { globSync } from 'glob';
 import { execSync } from 'node:child_process';
@@ -86,10 +86,6 @@ describe( 'checkVersionMatch()', () => {
 
 			return JSON.stringify( packageVersions[ dependency ] );
 		} );
-	} );
-
-	afterEach( () => {
-		vi.unstubAllGlobals();
 	} );
 
 	it( 'should be a function', () => {
