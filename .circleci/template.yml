@@ -254,6 +254,7 @@ workflows:
             branches:
               only:
                 - master
+                - ck/19763-ci-notifier
 
   release:
     when:
