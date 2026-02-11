@@ -134,4 +134,27 @@ describe( 'lib/utils/getOtherWorkflowJobs', () => {
 
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
 	} );
+
+	it( 'fails immediately for non-retryable statuses with non-JSON body', async () => {
+		const fetchMock = vi.fn()
+			.mockResolvedValue( {
+				ok: false,
+				status: 404,
+				json: () => Promise.reject( new Error( 'Unexpected token < in JSON at position 0' ) )
+			} );
+		const warnSpy = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
+
+		vi.stubGlobal( 'fetch', fetchMock );
+
+		await expect( getOtherWorkflowJobs( {
+			circleToken: 'circle-token',
+			workflowId: 'abc-123',
+			currentJobName: 'notifier',
+			retryDelayMs: 0,
+			maxAttempts: 5
+		} ) ).rejects.toThrow( 'CircleCI API request failed with a non-retryable status (404).' );
+
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( warnSpy ).not.toHaveBeenCalled();
+	} );
 } );

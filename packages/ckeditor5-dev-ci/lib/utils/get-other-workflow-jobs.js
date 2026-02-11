@@ -49,9 +49,9 @@ export default async function getOtherWorkflowJobs( options ) {
 				.catch( error => {
 					throw createTransientError( `CircleCI API request failed due to a network error: ${ error.message }`, error );
 				} );
-			const responseData = await parseResponseData( response );
 
 			if ( !response.ok ) {
+				const responseData = await parseResponseDataSafely( response );
 				const details = getResponseMessage( responseData );
 				const statusMessage = details ? `${ response.status }: ${ details }` : String( response.status );
 
@@ -64,6 +64,8 @@ export default async function getOtherWorkflowJobs( options ) {
 					'Verify CircleCI token and workflow configuration.'
 				);
 			}
+
+			const responseData = await parseResponseData( response );
 
 			if ( !responseData || !Array.isArray( responseData.items ) ) {
 				throw createTransientError( 'CircleCI API response does not contain the "items" array.' );
@@ -101,6 +103,18 @@ async function parseResponseData( response ) {
 		return await response.json();
 	} catch ( error ) {
 		throw createTransientError( 'CircleCI API returned an invalid JSON response.', error );
+	}
+}
+
+/**
+ * @param {Response} response
+ * @returns {Promise<object|null>}
+ */
+async function parseResponseDataSafely( response ) {
+	try {
+		return await response.json();
+	} catch {
+		return null;
 	}
 }
 
