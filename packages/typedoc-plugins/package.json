@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/typedoc-plugins",
-  "version": "55.0.0-alpha.3",
+  "version": "55.0.0-alpha.4",
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
