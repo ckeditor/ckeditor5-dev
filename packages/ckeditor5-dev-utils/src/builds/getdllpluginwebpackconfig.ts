@@ -39,11 +39,6 @@ type GetDllPluginWebpackConfigOptions = {
 	manifestPath: string;
 
 	/**
-	 * An absolute path to the theme package.
-	 */
-	themePath: string;
-
-	/**
 	 * An absolute path to the TypeScript configuration file.
 	 */
 	tsconfigPath?: string;
@@ -142,7 +137,6 @@ export default async function getDllPluginWebpackConfig(
 			rules: [
 				getIconsLoader( { matchExtensionOnly: true } ),
 				getStylesLoader( {
-					themePath: options.themePath,
 					minify: true
 				} ),
 				getTypeScriptLoader( {

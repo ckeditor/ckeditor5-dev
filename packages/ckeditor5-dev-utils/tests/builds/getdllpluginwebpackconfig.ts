@@ -84,7 +84,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 	it( 'returns the webpack configuration in production mode by default', async () => {
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -109,7 +108,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 	it( 'transforms package with many dashes in its name', async () => {
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/html-embed',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -121,7 +119,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 	it( 'does not minify the destination file when in dev mode', async () => {
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path',
 			isDevelopmentMode: true
 		} );
@@ -134,7 +131,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 	it( 'should not export any library by default', async () => {
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -146,7 +142,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -158,7 +153,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -170,7 +164,6 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
-			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
 		} );
 
@@ -181,7 +174,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 		it( 'loads the webpack.DllReferencePlugin plugin', async () => {
 			const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
-				themePath: '/theme/path',
+
 				manifestPath: '/manifest/path'
 			} );
 
@@ -200,7 +193,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 			const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
-				themePath: '/theme/path',
+
 				manifestPath: '/manifest/path'
 			} );
 
@@ -230,7 +223,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 
 			const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
-				themePath: '/theme/path',
+
 				manifestPath: '/manifest/path'
 			} );
 
@@ -247,7 +240,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			it( 'it should use the default tsconfig.json if the "options.tsconfigPath" option is not specified', async () => {
 				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
-					themePath: '/theme/path',
+
 					manifestPath: '/manifest/path'
 				} );
 
@@ -259,7 +252,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			it( 'it should the specified "options.tsconfigPath" value', async () => {
 				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
-					themePath: '/theme/path',
+
 					manifestPath: '/manifest/path',
 					tsconfigPath: '/config/tsconfig.json'
 				} );
@@ -274,7 +267,7 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			it( 'it should get the loader', async () => {
 				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
-					themePath: '/theme/path',
+
 					manifestPath: '/manifest/path'
 				} );
 
@@ -288,13 +281,12 @@ describe( 'getDllPluginWebpackConfig()', () => {
 			it( 'it should get the loader', async () => {
 				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
-					themePath: '/theme/path',
+
 					manifestPath: '/manifest/path'
 				} );
 
 				expect( vi.mocked( getStylesLoader ) ).toHaveBeenCalledExactlyOnceWith( {
-					minify: true,
-					themePath: '/theme/path'
+					minify: true
 				} );
 			} );
 		} );
