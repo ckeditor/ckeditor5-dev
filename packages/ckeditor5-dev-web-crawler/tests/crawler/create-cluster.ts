@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { Cluster } from 'puppeteer-cluster';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, ERROR_TYPES } from '../../src/constants.js';
@@ -31,10 +31,6 @@ function createClusterMock(): MockCluster {
 }
 
 describe( 'createCrawlerCluster()', () => {
-	beforeEach( () => {
-		vi.mocked( Cluster.launch ).mockReset();
-	} );
-
 	test( 'launches cluster with configured options', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
