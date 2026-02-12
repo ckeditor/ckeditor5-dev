@@ -44,7 +44,7 @@ export async function createCrawlerCluster( {
 	} );
 
 	cluster.on( 'taskerror', ( err, data, willRetry = false ) => {
-		if ( willRetry ) {
+		if ( willRetry && !silent ) {
 			console.log( `Retrying ${ getUrlPathname( data.url ) }...` );
 			return;
 		}
