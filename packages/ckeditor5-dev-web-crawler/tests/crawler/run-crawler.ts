@@ -6,38 +6,15 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Cluster } from 'puppeteer-cluster';
 import { runCrawler } from '../../src/crawler/run-crawler.js';
+import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
+import { processPage } from '../../src/crawler/process-page.js';
+import { logErrors } from '../../src/errors/reporter.js';
 import { DEFAULT_CONCURRENCY, DEFAULT_TIMEOUT, ERROR_TYPES } from '../../src/constants.js';
 import type { QueueData } from '../../src/types.js';
 
-const {
-	createCrawlerClusterMock,
-	processPageMock,
-	logErrorsMock
-} = vi.hoisted( () => {
-	return {
-		createCrawlerClusterMock: vi.fn(),
-		processPageMock: vi.fn(),
-		logErrorsMock: vi.fn()
-	};
-} );
-
-vi.mock( '../../src/crawler/create-cluster.js', () => {
-	return {
-		createCrawlerCluster: createCrawlerClusterMock
-	};
-} );
-
-vi.mock( '../../src/crawler/process-page.js', () => {
-	return {
-		processPage: processPageMock
-	};
-} );
-
-vi.mock( '../../src/errors/reporter.js', () => {
-	return {
-		logErrors: logErrorsMock
-	};
-} );
+vi.mock( '../../src/crawler/create-cluster.js' );
+vi.mock( '../../src/crawler/process-page.js' );
+vi.mock( '../../src/errors/reporter.js' );
 
 interface MockCluster {
 	task: ReturnType<typeof vi.fn>;
@@ -75,13 +52,13 @@ describe( 'runCrawler()', () => {
 	test( 'uses default options and exits with code 0 when no errors are collected', async () => {
 		const cluster = createClusterMock();
 
-		createCrawlerClusterMock.mockResolvedValue( cluster as unknown as Cluster<QueueData, void> );
+		vi.mocked( createCrawlerCluster ).mockResolvedValue( cluster as unknown as Cluster<QueueData, void> );
 
 		await runCrawler( {
 			url: 'https://ckeditor.com/docs/start'
 		} );
 
-		expect( createCrawlerClusterMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( vi.mocked( createCrawlerCluster ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			timeout: DEFAULT_TIMEOUT,
 			concurrency: DEFAULT_CONCURRENCY,
 			disableBrowserSandbox: false,
@@ -90,7 +67,7 @@ describe( 'runCrawler()', () => {
 			onError: expect.any( Function )
 		} ) );
 
-		expect( processPageMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( vi.mocked( processPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			baseUrl: 'https://ckeditor.com/docs/start',
 			exclusions: []
 		} ) );
@@ -102,14 +79,14 @@ describe( 'runCrawler()', () => {
 		} );
 		expect( cluster.idle ).toHaveBeenCalledTimes( 1 );
 		expect( cluster.close ).toHaveBeenCalledTimes( 1 );
-		expect( logErrorsMock ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( logErrors ) ).toHaveBeenCalledTimes( 1 );
 		expect( process.exit ).toHaveBeenCalledWith( 0 );
 	} );
 
 	test( 'passes provided options and exits with code 1 when errors were collected', async () => {
 		const cluster = createClusterMock();
 
-		createCrawlerClusterMock.mockImplementation( async options => {
+		vi.mocked( createCrawlerCluster ).mockImplementation( async options => {
 			options.onError( {
 				pageUrl: 'https://ckeditor.com/docs/start',
 				type: ERROR_TYPES.PAGE_CRASH,
@@ -130,7 +107,7 @@ describe( 'runCrawler()', () => {
 			silent: true
 		} );
 
-		expect( createCrawlerClusterMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( vi.mocked( createCrawlerCluster ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			timeout: 5000,
 			concurrency: 3,
 			disableBrowserSandbox: true,

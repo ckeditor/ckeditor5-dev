@@ -6,20 +6,10 @@
 import type { ConsoleMessage, Dialog, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ERROR_TYPES } from '../../src/constants.js';
+import { REQUEST_ABORT_REASON, shouldAbortRequest } from '../../src/page/request-policy.js';
 import type { CrawlerError, QueueData } from '../../src/types.js';
 
-const { shouldAbortRequestMock } = vi.hoisted( () => {
-	return {
-		shouldAbortRequestMock: vi.fn()
-	};
-} );
-
-vi.mock( '../../src/page/request-policy.js', () => {
-	return {
-		REQUEST_ABORT_REASON: 'blockedbyclient',
-		shouldAbortRequest: shouldAbortRequestMock
-	};
-} );
+vi.mock( '../../src/page/request-policy.js' );
 
 import { attachPageEventHandlers } from '../../src/page/page-events.js';
 
@@ -81,7 +71,7 @@ describe( 'attachPageEventHandlers()', () => {
 
 	beforeEach( () => {
 		vi.clearAllMocks();
-		shouldAbortRequestMock.mockReturnValue( false );
+		vi.mocked( shouldAbortRequest ).mockReturnValue( false );
 	} );
 
 	test( 'handles request and dialog events and detaches listeners', async () => {
@@ -101,14 +91,14 @@ describe( 'attachPageEventHandlers()', () => {
 			continue: vi.fn().mockResolvedValue( undefined )
 		} );
 
-		shouldAbortRequestMock
+		vi.mocked( shouldAbortRequest )
 			.mockReturnValueOnce( true )
 			.mockReturnValueOnce( false );
 
 		await page.emitEvent( 'request', blockedRequest );
 		await page.emitEvent( 'request', allowedRequest );
 
-		expect( blockedRequest.abort ).toHaveBeenCalledWith( 'blockedbyclient' );
+		expect( blockedRequest.abort ).toHaveBeenCalledWith( REQUEST_ABORT_REASON );
 		expect( blockedRequest.continue ).not.toHaveBeenCalled();
 		expect( allowedRequest.continue ).toHaveBeenCalledTimes( 1 );
 

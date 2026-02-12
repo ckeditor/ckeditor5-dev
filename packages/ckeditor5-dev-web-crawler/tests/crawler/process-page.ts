@@ -7,41 +7,15 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Page } from 'puppeteer';
 import type { Cluster } from 'puppeteer-cluster';
 import { processPage } from '../../src/crawler/process-page.js';
+import { attachPageEventHandlers } from '../../src/page/page-events.js';
+import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../../src/errors/ignore-patterns.js';
+import { getLinksFromPage } from '../../src/crawler/get-links-from-page.js';
 import { ERROR_TYPES } from '../../src/constants.js';
 import type { CrawlerError, QueueData, RetryableCrawlerError } from '../../src/types.js';
 
-const {
-	attachPageEventHandlersMock,
-	getErrorIgnorePatternsFromPageMock,
-	markErrorsAsIgnoredMock,
-	getLinksFromPageMock
-} = vi.hoisted( () => {
-	return {
-		attachPageEventHandlersMock: vi.fn(),
-		getErrorIgnorePatternsFromPageMock: vi.fn(),
-		markErrorsAsIgnoredMock: vi.fn(),
-		getLinksFromPageMock: vi.fn()
-	};
-} );
-
-vi.mock( '../../src/page/page-events.js', () => {
-	return {
-		attachPageEventHandlers: attachPageEventHandlersMock
-	};
-} );
-
-vi.mock( '../../src/errors/ignore-patterns.js', () => {
-	return {
-		getErrorIgnorePatternsFromPage: getErrorIgnorePatternsFromPageMock,
-		markErrorsAsIgnored: markErrorsAsIgnoredMock
-	};
-} );
-
-vi.mock( '../../src/crawler/get-links-from-page.js', () => {
-	return {
-		getLinksFromPage: getLinksFromPageMock
-	};
-} );
+vi.mock( '../../src/page/page-events.js' );
+vi.mock( '../../src/errors/ignore-patterns.js' );
+vi.mock( '../../src/crawler/get-links-from-page.js' );
 
 function createPageMock( gotoImpl?: () => Promise<void> ): Page {
 	return {
@@ -78,10 +52,10 @@ describe( 'processPage()', () => {
 	beforeEach( () => {
 		vi.clearAllMocks();
 
-		attachPageEventHandlersMock.mockReturnValue( vi.fn() );
-		getErrorIgnorePatternsFromPageMock.mockResolvedValue( new Map() );
-		markErrorsAsIgnoredMock.mockImplementation( () => {} );
-		getLinksFromPageMock.mockResolvedValue( [] );
+		vi.mocked( attachPageEventHandlers ).mockReturnValue( vi.fn() );
+		vi.mocked( getErrorIgnorePatternsFromPage ).mockResolvedValue( new Map() );
+		vi.mocked( markErrorsAsIgnored ).mockImplementation( () => {} );
+		vi.mocked( getLinksFromPage ).mockResolvedValue( [] );
 	} );
 
 	test( 'queues newly discovered links when depth is greater than 0', async () => {
@@ -89,7 +63,7 @@ describe( 'processPage()', () => {
 		const cluster = createClusterMock();
 		const discoveredLinks = new Set( [ 'https://ckeditor.com/docs/start' ] );
 
-		getLinksFromPageMock.mockResolvedValue( [
+		vi.mocked( getLinksFromPage ).mockResolvedValue( [
 			'https://ckeditor.com/docs/next',
 			'https://ckeditor.com/docs/more'
 		] );
@@ -105,7 +79,7 @@ describe( 'processPage()', () => {
 
 		expect( page.setRequestInterception ).toHaveBeenCalledWith( true );
 		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/start', { waitUntil: 'networkidle0' } );
-		expect( getLinksFromPageMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( vi.mocked( getLinksFromPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			page,
 			baseUrl: 'https://ckeditor.com/docs/',
 			exclusions: [ '/api/' ]
@@ -126,7 +100,7 @@ describe( 'processPage()', () => {
 			'https://ckeditor.com/docs/next',
 			'https://ckeditor.com/docs/more'
 		] ) );
-		expect( getErrorIgnorePatternsFromPageMock ).not.toHaveBeenCalled();
+		expect( vi.mocked( getErrorIgnorePatternsFromPage ) ).not.toHaveBeenCalled();
 	} );
 
 	test( 'does not collect links when depth limit is reached', async () => {
@@ -142,7 +116,7 @@ describe( 'processPage()', () => {
 			exclusions: []
 		} );
 
-		expect( getLinksFromPageMock ).not.toHaveBeenCalled();
+		expect( vi.mocked( getLinksFromPage ) ).not.toHaveBeenCalled();
 		expect( cluster.queue ).not.toHaveBeenCalled();
 	} );
 
@@ -165,7 +139,7 @@ describe( 'processPage()', () => {
 		const detach = vi.fn();
 		const page = createPageMock();
 
-		attachPageEventHandlersMock.mockImplementation( ( { data, pageErrors }: {
+		vi.mocked( attachPageEventHandlers ).mockImplementation( ( { data, pageErrors }: {
 			data: QueueData;
 			pageErrors: Array<CrawlerError>;
 		} ) => {
@@ -194,15 +168,15 @@ describe( 'processPage()', () => {
 				message: 'Something went wrong'
 			} )
 		] );
-		expect( getErrorIgnorePatternsFromPageMock ).toHaveBeenCalledWith( page );
-		expect( markErrorsAsIgnoredMock ).toHaveBeenCalled();
+		expect( vi.mocked( getErrorIgnorePatternsFromPage ) ).toHaveBeenCalledWith( page );
+		expect( vi.mocked( markErrorsAsIgnored ) ).toHaveBeenCalled();
 		expect( detach ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'does not add navigation error when matching request failure already exists', async () => {
 		const page = createPageMock( () => Promise.reject( new Error( 'Navigation failed' ) ) );
 
-		attachPageEventHandlersMock.mockImplementation( ( { data, pageErrors }: {
+		vi.mocked( attachPageEventHandlers ).mockImplementation( ( { data, pageErrors }: {
 			data: QueueData;
 			pageErrors: Array<CrawlerError>;
 		} ) => {
@@ -230,7 +204,7 @@ describe( 'processPage()', () => {
 	} );
 
 	test( 'resolves when all discovered errors are marked as ignored', async () => {
-		attachPageEventHandlersMock.mockImplementation( ( { data, pageErrors }: {
+		vi.mocked( attachPageEventHandlers ).mockImplementation( ( { data, pageErrors }: {
 			data: QueueData;
 			pageErrors: Array<CrawlerError>;
 		} ) => {
@@ -243,7 +217,7 @@ describe( 'processPage()', () => {
 			return vi.fn();
 		} );
 
-		markErrorsAsIgnoredMock.mockImplementation( ( errors: Array<CrawlerError> ) => {
+		vi.mocked( markErrorsAsIgnored ).mockImplementation( ( errors: Array<CrawlerError> ) => {
 			errors.forEach( error => {
 				error.ignored = true;
 			} );

@@ -4,23 +4,11 @@
  */
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { Cluster } from 'puppeteer-cluster';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, ERROR_TYPES } from '../../src/constants.js';
 
-const { launchMock } = vi.hoisted( () => {
-	return {
-		launchMock: vi.fn()
-	};
-} );
-
-vi.mock( 'puppeteer-cluster', () => {
-	return {
-		Cluster: {
-			CONCURRENCY_PAGE: 'CONCURRENCY_PAGE',
-			launch: launchMock
-		}
-	};
-} );
+vi.mock( 'puppeteer-cluster' );
 
 interface MockCluster {
 	on: ReturnType<typeof vi.fn>;
@@ -44,14 +32,14 @@ function createClusterMock(): MockCluster {
 
 describe( 'createCrawlerCluster()', () => {
 	beforeEach( () => {
-		launchMock.mockReset();
+		vi.mocked( Cluster.launch ).mockReset();
 	} );
 
 	test( 'launches cluster with configured options', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 
-		launchMock.mockResolvedValue( cluster );
+		vi.mocked( Cluster.launch ).mockResolvedValue( cluster as any );
 
 		await createCrawlerCluster( {
 			timeout: 2000,
@@ -62,8 +50,8 @@ describe( 'createCrawlerCluster()', () => {
 			onError
 		} );
 
-		expect( launchMock ).toHaveBeenCalledWith( expect.objectContaining( {
-			concurrency: 'CONCURRENCY_PAGE',
+		expect( vi.mocked( Cluster.launch ) ).toHaveBeenCalledWith( expect.objectContaining( {
+			concurrency: Cluster.CONCURRENCY_PAGE,
 			timeout: 2000,
 			retryLimit: DEFAULT_RETRIES,
 			retryDelay: DEFAULT_RETRY_DELAY,
@@ -72,7 +60,7 @@ describe( 'createCrawlerCluster()', () => {
 			monitor: false
 		} ) );
 
-		const options = launchMock.mock.calls[ 0 ]![ 0 ];
+		const options = vi.mocked( Cluster.launch ).mock.calls[ 0 ]![ 0 ];
 
 		expect( options.puppeteerOptions.headless ).toBe( true );
 		expect( options.puppeteerOptions.acceptInsecureCerts ).toBe( true );
@@ -85,7 +73,7 @@ describe( 'createCrawlerCluster()', () => {
 		const onError = vi.fn();
 		const consoleLogSpy = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 
-		launchMock.mockResolvedValue( cluster );
+		vi.mocked( Cluster.launch ).mockResolvedValue( cluster as any );
 
 		await createCrawlerCluster( {
 			timeout: 2000,
@@ -106,7 +94,7 @@ describe( 'createCrawlerCluster()', () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 
-		launchMock.mockResolvedValue( cluster );
+		vi.mocked( Cluster.launch ).mockResolvedValue( cluster as any );
 
 		await createCrawlerCluster( {
 			timeout: 2000,
@@ -133,7 +121,7 @@ describe( 'createCrawlerCluster()', () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 
-		launchMock.mockResolvedValue( cluster );
+		vi.mocked( Cluster.launch ).mockResolvedValue( cluster as any );
 
 		await createCrawlerCluster( {
 			timeout: 2000,
