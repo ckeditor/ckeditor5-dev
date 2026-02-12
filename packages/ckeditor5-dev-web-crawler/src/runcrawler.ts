@@ -469,21 +469,12 @@ async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorTy
 	}
 
 	Object.entries( content ).forEach( ( [ type, pattern ] ) => {
-		const patternCollection = new Set<string>();
-
-		for ( const rawPattern of toArray( pattern ) as Array<unknown> ) {
+		const patternCollection = new Set( toArray( pattern )
 			// Only string patterns are supported, as the error message produced by the crawler is always a string.
-			if ( typeof rawPattern !== 'string' ) {
-				continue;
-			}
-
+			.filter( pattern => typeof pattern === 'string' )
 			// Only non-empty patterns are supported, because an empty pattern would cause all errors in a given type to be ignored.
-			if ( rawPattern.length === 0 ) {
-				continue;
-			}
-
-			patternCollection.add( rawPattern );
-		}
+			.filter( pattern => pattern.length > 0 )
+		);
 
 		if ( !patternCollection.size ) {
 			return;
