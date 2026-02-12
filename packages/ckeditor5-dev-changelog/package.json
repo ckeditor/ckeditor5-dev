@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-changelog",
-  "version": "54.3.3",
+  "version": "54.3.4",
   "description": "A CKEditor 5 development tool for handling changelogs.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -40,10 +40,10 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
     "@types/semver": "^7.7.0",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "rollup": "^4.9.5",
     "typescript": "5.3.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit",

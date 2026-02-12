@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "54.3.3",
+  "version": "54.3.4",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -36,7 +36,7 @@
     "date-fns": "^4.0.0",
     "jest-extended": "^5.0.3",
     "mock-fs": "^5.2.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

@@ -16,7 +16,13 @@ const stubs = vi.hoisted( () => ( {
 	}
 } ) );
 
-vi.mock( 'webpack' );
+vi.mock( 'webpack', () => ( {
+	default: {
+		DefinePlugin: class {},
+		ProvidePlugin: class {},
+		SourceMapDevToolPlugin: class {}
+	}
+} ) );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
 	CKEditorTranslationsPlugin: class CKEditorTranslationsPlugin {

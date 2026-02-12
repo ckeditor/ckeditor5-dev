@@ -11,9 +11,11 @@ export default defineConfig( {
 			'./tests/_utils/testsetup.js'
 		],
 		testTimeout: 10000,
-		mockReset: true,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
 		unstubEnvs: true,
+		unstubGlobals: true,
 		include: [
 			'tests/**/*.js'
 		],
@@ -25,6 +27,9 @@ export default defineConfig( {
 			provider: 'v8',
 			include: [
 				'lib/**'
+			],
+			exclude: [
+				'*.html'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

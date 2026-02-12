@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/typedoc-plugins",
-  "version": "54.3.3",
+  "version": "54.3.4",
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -34,7 +34,7 @@
     "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "5.3.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "typedoc": "^0.28.14"

@@ -60,7 +60,14 @@ export function verifyDividedStyleSheet(
  * Helper function for mocking `getUserDependency` function.
  */
 export async function mockGetUserDependency( path: string, cb: () => any ): Promise<void> {
-	const actualImport = utils.getUserDependency;
+	// In some tests, `mockGetUserDependency()` is executed twice.
+	// Because of this, we need to check whether the import is already mocked.
+	let actualImport = ( utils as any ).getUserDependency?.getMockImplementation?.();
+
+	// If its not mocked yet, we take the original.
+	if ( !actualImport ) {
+		actualImport = ( await vi.importActual( '../../src/utils.js' ) ).getUserDependency;
+	}
 
 	vi
 		.spyOn( utils, 'getUserDependency' )

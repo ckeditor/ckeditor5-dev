@@ -13,6 +13,10 @@ export default defineConfig( {
 		testTimeout: 20000,
 		hookTimeout: 20000,
 		restoreMocks: true,
+		clearMocks: true,
+		mockReset: true,
+		unstubEnvs: true,
+		unstubGlobals: false,
 		include: [
 			'tests/**/*.js'
 		],
