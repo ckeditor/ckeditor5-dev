@@ -4,7 +4,7 @@
  */
 
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import { generateChangelog } from '../../src/utils/generatechangelog.js';
 import { findPackages } from '../../src/utils/findpackages.js';
 import { findChangelogEntryPaths } from '../../src/utils/findchangelogentrypaths.js';
@@ -703,11 +703,6 @@ describe( 'generateChangelog()', () => {
 		beforeEach( () => {
 			processMock = vi.spyOn( process, 'exit' ).mockImplementation( ( () => {} ) as any );
 			consoleMock = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
-		} );
-
-		afterEach( () => {
-			processMock.mockRestore();
-			consoleMock.mockRestore();
 		} );
 
 		it( 'handles `InternalError` properly', async () => {

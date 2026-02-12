@@ -5,7 +5,7 @@
 
 /* eslint-disable @stylistic/max-len */
 
-import { vi, describe, it, beforeEach, afterEach, expect, type MockInstance } from 'vitest';
+import { vi, describe, it, beforeEach, expect, type MockInstance } from 'vitest';
 import { validateLicenseFiles } from '../src/validate-license-files.js';
 import { glob, readFile, writeFile } from 'node:fs/promises';
 import { findPackageJSON } from 'node:module';
@@ -79,11 +79,6 @@ describe( 'validateLicenseFiles', () => {
 			'root/dir/packages/package-b/LICENSE.md': getLicense( 'short' )
 
 		};
-	} );
-
-	afterEach( () => {
-		consoleInfoMock.mockRestore();
-		consoleErrorMock.mockRestore();
 	} );
 
 	describe( 'valid licenses', () => {

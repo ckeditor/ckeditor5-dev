@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
-  "version": "54.3.3",
+  "version": "54.3.4",
   "description": "Utils used on various Continuous Integration services.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -36,7 +36,7 @@
     "slack-notify": "^2.0.6"
   },
   "devDependencies": {
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",
