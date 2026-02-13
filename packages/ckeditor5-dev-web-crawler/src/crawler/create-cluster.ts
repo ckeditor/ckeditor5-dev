@@ -60,7 +60,7 @@ export async function createCrawlerCluster( {
 		onError( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: err.message ? `Error crawling ${ getUrlPathname( data.url ) }: ${ err.message }` : '(empty message)'
+			message: err?.message ? `Error crawling ${ getUrlPathname( data.url ) }: ${ err.message }` : '(empty message)'
 		} );
 	} );
 

@@ -73,8 +73,8 @@ async function getNavigationError( page: Page, pageUrl: string ): Promise<Crawle
 		await page.goto( pageUrl, { waitUntil } );
 
 		return null;
-	} catch ( error ) {
-		const message = ( error as Error ).message || '(empty message)';
+	} catch ( error: any ) {
+		const message = error?.message || '(empty message)';
 
 		return {
 			pageUrl,

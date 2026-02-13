@@ -36,7 +36,7 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 		pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: error.message || '(empty message)'
+			message: error?.message || '(empty message)'
 		} );
 	};
 
@@ -44,7 +44,7 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 		pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
-			message: error.message || '(empty message)'
+			message: error?.message || '(empty message)'
 		} );
 	};
 
