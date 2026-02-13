@@ -14,7 +14,8 @@ import type { LaunchOptions, Page } from 'puppeteer';
 import {
 	DEFAULT_CONCURRENCY,
 	DEFAULT_TIMEOUT,
-	DEFAULT_REMAINING_ATTEMPTS,
+	DEFAULT_RETRIES,
+	DEFAULT_RETRY_DELAY,
 	ERROR_TYPES,
 	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
 	IGNORE_ALL_ERRORS_WILDCARD,
@@ -100,6 +101,10 @@ interface ErrorCollection {
 	details?: string;
 }
 
+interface RetryableCrawlerError extends Error {
+	crawlerErrors: Array<CrawlerError>;
+}
+
 /**
  * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.
  */
@@ -141,7 +146,7 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		puppeteerOptions.args.push( '--disable-setuid-sandbox' );
 	}
 
-	const foundLinks: Array<string> = [ url ];
+	const foundLinks = new Set( [ url ] );
 	const errors: Map<ErrorType, Map<string, ErrorCollection>> = new Map();
 	const baseUrl = getBaseUrl( url );
 	const onError = getErrorHandler( errors );
@@ -149,14 +154,27 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 	const cluster: Cluster<QueueData, void> = await Cluster.launch( {
 		concurrency: Cluster.CONCURRENCY_PAGE,
 		timeout,
-		retryLimit: DEFAULT_REMAINING_ATTEMPTS,
+		retryLimit: DEFAULT_RETRIES,
+		retryDelay: DEFAULT_RETRY_DELAY,
 		maxConcurrency: concurrency,
 		puppeteerOptions,
-		skipDuplicateUrls: true,
+		skipDuplicateUrls: false,
 		monitor: !silent
 	} );
 
-	cluster.on( 'taskerror', ( err, data ) => {
+	cluster.on( 'taskerror', ( err, data, willRetry = false ) => {
+		// Don't log the error if the page will be retried.
+		if ( willRetry ) {
+			return;
+		}
+
+		// If page has errors from previous attempt, log them instead of the generic cluster error.
+		if ( err?.crawlerErrors ) {
+			err.crawlerErrors.forEach( ( error: CrawlerError ) => onError( error ) );
+			return;
+		}
+
+		// Log generic cluster error if there is no page errors available.
 		onError( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
@@ -316,36 +334,40 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			}
 		}
 
-		if ( pageErrors.length ) {
-			// If page contains errors, check if there are any meta tags that define patterns to ignore errors.
+		if ( data.remainingNestedLevels !== 0 ) {
+			const links = await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
 
-			// Create patterns from meta tags to ignore errors.
-			const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
+			links.forEach( link => {
+				if ( foundLinks.has( link ) ) {
+					return;
+				}
 
-			// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
-			markErrorsAsIgnored( pageErrors, errorIgnorePatterns );
+				foundLinks.add( link );
 
-			pageErrors
-				.filter( error => !error.ignored )
-				.forEach( error => onError( error ) );
+				cluster.queue( {
+					url: link,
+					parentUrl: data.parentUrl,
+					remainingNestedLevels: data.remainingNestedLevels - 1
+				} );
+			} );
 		}
 
-		if ( data.remainingNestedLevels === 0 ) {
-			// Skip crawling deeper, if the bottom has been reached
+		if ( !pageErrors.length ) {
+			// Exit if there are no errors to avoid doing extra work.
 			return;
 		}
 
-		const links = await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
+		// Create patterns from meta tags to ignore errors.
+		const errorIgnorePatterns = await getErrorIgnorePatternsFromPage( page );
 
-		links.forEach( link => {
-			foundLinks.push( link );
+		// Iterates over recently found errors to mark them as ignored ones, if they match the patterns.
+		markErrorsAsIgnored( pageErrors, errorIgnorePatterns );
 
-			cluster.queue( {
-				url: link,
-				parentUrl: data.parentUrl,
-				remainingNestedLevels: data.remainingNestedLevels - 1
-			} );
-		} );
+		const nonIgnoredPageErrors: Array<CrawlerError> = pageErrors.filter( error => !error.ignored );
+
+		if ( nonIgnoredPageErrors.length ) {
+			throw createRetryableCrawlerError( data.url, nonIgnoredPageErrors );
+		}
 	} );
 
 	// Queue the first link to be crawled.
@@ -361,6 +383,17 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 	logErrors( errors );
 
 	process.exit( errors.size ? 1 : 0 );
+}
+
+/**
+ * Creates an error used to trigger a cluster-level retry when the page reported errors.
+ */
+function createRetryableCrawlerError( pageUrl: string, crawlerErrors: Array<CrawlerError> ): RetryableCrawlerError {
+	const error = new Error( `Error crawling ${ pageUrl }: found ${ crawlerErrors.length } error(s)` ) as RetryableCrawlerError;
+
+	error.crawlerErrors = crawlerErrors;
+
+	return error;
 }
 
 /**
@@ -399,13 +432,13 @@ function getErrorHandler( errors: Map<ErrorType, Map<string, ErrorCollection>> )
  */
 async function getLinksFromPage(
 	page: Page,
-	{ baseUrl, foundLinks, exclusions }: { baseUrl: string; foundLinks: Array<string>; exclusions: Array<string> }
+	{ baseUrl, foundLinks, exclusions }: { baseUrl: string; foundLinks: Set<string>; exclusions: Array<string> }
 ): Promise<Array<string>> {
 	const links = await page.evaluate( getAllLinks, DATA_ATTRIBUTE_NAME );
 
 	return links.filter( link => {
 		return link.startsWith( baseUrl ) && // Skip external link.
-			!foundLinks.includes( link ) && // Skip already discovered link.
+			!foundLinks.has( link ) && // Skip already discovered link.
 			!exclusions.some( exclusion => link.includes( exclusion ) ); // Skip explicitly excluded link.
 	} );
 }
@@ -425,7 +458,7 @@ async function getErrorIgnorePatternsFromPage( page: Page ): Promise<Map<ErrorTy
 
 	const contentString = await metaTag.evaluate( metaTag => metaTag.getAttribute( 'content' ) );
 
-	let content;
+	let content: Record<string, unknown>;
 
 	try {
 		// Try to parse value from meta tag...
