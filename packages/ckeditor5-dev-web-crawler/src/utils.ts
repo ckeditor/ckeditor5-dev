@@ -6,6 +6,13 @@
  */
 
 /**
+ * Transforms any value to an array. If the provided value is already an array, it is returned unchanged.
+ */
+export function toArray<T>( data: T | Array<T> ): Array<T> {
+	return Array.isArray( data ) ? data : [ data ];
+}
+
+/**
  * Extracts base URL from the provided page URL. Base URL consists of a protocol, a host, a port, and a path.
  * A hash and search parts are omitted, because they would have navigated to the same page if they were set.
  */
@@ -27,8 +34,12 @@ export function isUrlValid( url: string ): boolean {
 }
 
 /**
- * Transforms any value to an array. If the provided value is already an array, it is returned unchanged.
+ * Checks if URLs are equal after normalization.
  */
-export function toArray( data: any ): Array<any> {
-	return Array.isArray( data ) ? data : [ data ];
+export function areSameUrl( firstUrl: string, secondUrl: string ): boolean {
+	try {
+		return new URL( firstUrl ).href === new URL( secondUrl ).href;
+	} catch {
+		return firstUrl === secondUrl;
+	}
 }
