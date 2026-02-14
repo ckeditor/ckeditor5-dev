@@ -55,7 +55,6 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			entries,
 			buildDir,
 			debug,
-			themePath: '/theme/path',
 			tsconfig: '/tsconfig/path'
 		} );
 
@@ -63,7 +62,6 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			matchExtensionOnly: true
 		} );
 		expect( vi.mocked( loaders ).getStylesLoader ).toHaveBeenCalledExactlyOnceWith( {
-			themePath: '/theme/path',
 			sourceMap: true
 		} );
 
@@ -152,7 +150,6 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			entries,
 			buildDir,
 			debug,
-			themePath: '/theme/path',
 			tsconfig: '/tsconfig/path'
 		} );
 
