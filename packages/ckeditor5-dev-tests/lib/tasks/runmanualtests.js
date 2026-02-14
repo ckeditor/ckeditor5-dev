@@ -25,7 +25,6 @@ import requireDll from '../utils/requiredll.js';
  *
  * @param {object} options
  * @param {Array.<string>} options.files Glob patterns specifying which tests to run.
- * @param {string} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
  * @param {string} [options.language] A language passed to `CKEditorTranslationsPlugin`.
@@ -58,7 +57,6 @@ export default function runManualTests( options ) {
 			];
 		}, [] );
 
-	const themePath = options.themePath || null;
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
 	const silent = options.silent || false;
@@ -78,7 +76,6 @@ export default function runManualTests( options ) {
 				cwd,
 				buildDir,
 				sourceFiles,
-				themePath,
 				language,
 				additionalLanguages,
 				debug: options.debug,

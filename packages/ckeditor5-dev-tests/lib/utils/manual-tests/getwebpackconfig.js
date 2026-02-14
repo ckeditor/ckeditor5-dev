@@ -19,7 +19,6 @@ const require = createRequire( import.meta.url );
  * @param {boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
  * @param {object} options.entries
  * @param {string} options.buildDir
- * @param {string} options.themePath
  * @param {boolean} options.disableWatch
  * @param {string} [options.tsconfig]
  * @param {string} [options.language]
@@ -77,7 +76,6 @@ export default function getWebpackConfigForManualTests( options ) {
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {
-					themePath: options.themePath,
 					sourceMap: true
 				} ),
 
