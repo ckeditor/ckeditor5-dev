@@ -4,4 +4,3 @@
  */
 
 export { default as getPostCssConfig } from './getpostcssconfig.js';
-export { default as themeImporter } from './themeimporter.js';

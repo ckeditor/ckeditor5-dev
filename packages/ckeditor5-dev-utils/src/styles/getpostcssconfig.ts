@@ -8,7 +8,6 @@ import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
 import themeLogger from './themelogger.js';
-import themeImporter from './themeimporter.js';
 import type { Plugin, Processor } from 'postcss';
 
 type GetPostCssConfigOptions = {
@@ -22,15 +21,6 @@ type GetPostCssConfigOptions = {
 	 * When true, the output CSS will be minified.
 	 */
 	minify?: boolean;
-
-	/**
-	 * Configuration of the theme-importer PostCSS plugin.
-	 * See the plugin to learn more.
-	 */
-	themeImporter?: {
-		themePath?: string;
-		debug?: boolean;
-	};
 };
 
 type PostCssConfig = {
@@ -53,7 +43,6 @@ export default function getPostCssConfig( options: GetPostCssConfigOptions = {} 
 	const config: PostCssConfig = {
 		plugins: [
 			postCssImport(),
-			themeImporter( options.themeImporter ),
 			postCssMixins(),
 			postCssNesting( {
 				// https://github.com/ckeditor/ckeditor5/issues/11730

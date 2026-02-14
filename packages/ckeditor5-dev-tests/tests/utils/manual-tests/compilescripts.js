@@ -44,7 +44,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo/manual/file1-dll.js',
 				'ckeditor5-foo/manual/file2-dll.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -56,7 +55,6 @@ describe( 'compileManualTestScripts()', () => {
 			cwd: 'workspace',
 			requireDll: true,
 			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -91,7 +89,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo/manual/file1.js',
 				'ckeditor5-foo/manual/file2.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -103,7 +100,6 @@ describe( 'compileManualTestScripts()', () => {
 			cwd: 'workspace',
 			requireDll: false,
 			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -137,7 +133,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo/manual/file1.js',
 				'ckeditor5-foo/manual/file2-dll.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -160,7 +155,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-editor-inline/tests/manual/ckeditor.compcat.js',
 				'ckeditor5-editor-classic/tests/manual/classic.js'
 			],
-			themePath: 'path/to/theme',
 			language: null,
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: null,
@@ -186,7 +180,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo/manual/file1.js',
 				'ckeditor5-foo/manual/file2.js'
 			],
-			themePath: 'path/to/theme',
 			language: null,
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: null
@@ -199,7 +192,6 @@ describe( 'compileManualTestScripts()', () => {
 			sourceFiles: [
 				'ckeditor5-editor-inline\\tests\\manual\\ckeditor.js'
 			],
-			themePath: 'path/to/theme',
 			language: null,
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: null
@@ -218,7 +210,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo/manual/file1.js',
 				'ckeditor5-foo/manual/file2.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -239,7 +230,6 @@ describe( 'compileManualTestScripts()', () => {
 			sourceFiles: [
 				'ckeditor5-foo/manual/file1.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: [ 'pl', 'ar' ],
@@ -260,7 +250,6 @@ describe( 'compileManualTestScripts()', () => {
 				'ckeditor5-foo\\manual\\file1.js',
 				'ckeditor5-foo\\manual\\file2.ts'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
@@ -288,7 +277,6 @@ describe( 'compileManualTestScripts()', () => {
 			sourceFiles: [
 				'ckeditor5-foo/manual/file1.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'en',
 			onTestCompilationStatus: vi.fn(),
 			additionalLanguages: [ 'pl', 'ar' ],

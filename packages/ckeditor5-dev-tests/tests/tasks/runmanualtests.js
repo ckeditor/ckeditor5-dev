@@ -196,7 +196,6 @@ describe( 'runManualTests()', () => {
 				'workspace/packages/ckeditor-foo/tests/manual/feature-c.js',
 				'workspace/packages/ckeditor-bar/tests/manual/feature-d.js'
 			],
-			themePath: null,
 			onTestCompilationStatus: expect.any( Function )
 		} ) );
 	} );
@@ -211,7 +210,6 @@ describe( 'runManualTests()', () => {
 				'ckeditor5-classic',
 				'ckeditor-classic/manual/classic.js'
 			],
-			themePath: 'path/to/theme',
 			debug: [ 'CK_DEBUG' ]
 		};
 
@@ -245,7 +243,6 @@ describe( 'runManualTests()', () => {
 				'ckeditor5-classic',
 				'ckeditor-classic/manual/classic.js'
 			],
-			themePath: 'path/to/theme',
 			language: 'pl',
 			additionalLanguages: [
 				'ar',

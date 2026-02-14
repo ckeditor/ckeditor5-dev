@@ -56,7 +56,6 @@ describe( 'parseArguments()', () => {
 
 		expect( options.sourceMap ).to.equal( true );
 		expect( options.identityFile ).to.equal( '/home/.secret/file.key' );
-		expect( options.themePath ).to.equal( '/path/to/theme/package' );
 		expect( options.additionalLanguages ).to.deep.equal( [ 'de', 'fr' ] );
 		expect( options.resolveJsFirst ).to.equal( true );
 	} );

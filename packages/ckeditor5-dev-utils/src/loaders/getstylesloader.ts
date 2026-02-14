@@ -8,7 +8,6 @@ import { resolveLoader } from './resolve-loader.js';
 import { getPostCssConfig } from '../styles/index.js';
 
 type GetStylesLoaderOptions = {
-	themePath: string;
 	minify?: boolean;
 	sourceMap?: boolean;
 	extractToSeparateFile?: boolean;
@@ -33,7 +32,6 @@ type LoaderToUse = string | {
 
 export default function getStylesLoader( options: GetStylesLoaderOptions ): StylesLoader {
 	const {
-		themePath,
 		minify = false,
 		sourceMap = false,
 		extractToSeparateFile = false,
@@ -63,7 +61,6 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 				loader: resolveLoader( 'postcss-loader' ),
 				options: {
 					postcssOptions: getPostCssConfig( {
-						themeImporter: { themePath },
 						minify,
 						sourceMap
 					} )

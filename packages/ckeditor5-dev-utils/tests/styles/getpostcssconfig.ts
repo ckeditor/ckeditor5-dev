@@ -9,7 +9,6 @@ import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
 import themeLogger from '../../src/styles/themelogger.js';
-import themeImporter from '../../src/styles/themeimporter.js';
 import getPostCssConfig from '../../src/styles/getpostcssconfig.js';
 
 vi.mock( 'postcss-import' );
@@ -17,11 +16,9 @@ vi.mock( 'postcss-mixins' );
 vi.mock( 'postcss-nesting' );
 vi.mock( 'cssnano' );
 vi.mock( '../../src/styles/themelogger.js' );
-vi.mock( '../../src/styles/themeimporter.js' );
 
 describe( 'getPostCssConfig()', () => {
 	beforeEach( () => {
-		vi.mocked( themeImporter ).mockReturnValue( 'postcss-ckeditor5-theme-importer' as any );
 		vi.mocked( themeLogger ).mockReturnValue( 'postcss-ckeditor5-theme-logger' as any );
 		vi.mocked( postCssImport ).mockReturnValue( 'postcss-import' as any );
 		vi.mocked( postCssMixins ).mockReturnValue( 'postcss-mixins' as any );
@@ -32,25 +29,10 @@ describe( 'getPostCssConfig()', () => {
 	it( 'returns PostCSS plugins', () => {
 		expect( getPostCssConfig().plugins ).to.have.members( [
 			'postcss-import',
-			'postcss-ckeditor5-theme-importer',
 			'postcss-mixins',
 			'postcss-nesting',
 			'postcss-ckeditor5-theme-logger'
 		] );
-	} );
-
-	it( 'passes options to the theme importer', () => {
-		getPostCssConfig( {
-			themeImporter: {
-				themePath: 'abc',
-				debug: true
-			}
-		} );
-
-		expect( vi.mocked( themeImporter ) ).toHaveBeenCalledExactlyOnceWith( {
-			themePath: 'abc',
-			debug: true
-		} );
 	} );
 
 	// https://github.com/ckeditor/ckeditor5/issues/11730
