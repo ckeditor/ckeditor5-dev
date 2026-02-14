@@ -5,6 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as runCrawler } from './runcrawler.js';
+export { runCrawler } from './crawler/run-crawler.js';
 export { getBaseUrl, isUrlValid, toArray } from './utils.js';
 export { DEFAULT_CONCURRENCY, DEFAULT_TIMEOUT } from './constants.js';
+export type { CrawlerOptions, CrawlerError } from './types.js';
