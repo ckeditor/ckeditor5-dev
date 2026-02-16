@@ -23,8 +23,7 @@ describe( 'getStylesLoader()', () => {
 
 	it( 'should return a definition that allow saving the produced CSS into a file using `mini-css-extract-plugin#loader`', () => {
 		const loader = getStylesLoader( {
-			extractToSeparateFile: true,
-			themePath: 'path/to/theme'
+			extractToSeparateFile: true
 		} );
 
 		expect( loader ).to.be.an( 'object' );
@@ -35,9 +34,7 @@ describe( 'getStylesLoader()', () => {
 	} );
 
 	it( 'should return a definition that allow attaching the produced CSS on a site using `style-loader`', () => {
-		const loader = getStylesLoader( {
-			themePath: 'path/to/theme'
-		} );
+		const loader = getStylesLoader( {} );
 
 		expect( loader ).to.be.an( 'object' );
 
@@ -57,9 +54,7 @@ describe( 'getStylesLoader()', () => {
 	it( 'should return a definition containing the correct setup of the `postcss-loader`', () => {
 		vi.mocked( getPostCssConfig ).mockReturnValue( 'styles.getPostCssConfig()' as any );
 
-		const loader = getStylesLoader( {
-			themePath: 'path/to/theme'
-		} );
+		const loader = getStylesLoader( {} );
 
 		expect( loader ).to.be.an( 'object' );
 
@@ -76,10 +71,7 @@ describe( 'getStylesLoader()', () => {
 
 		expect( vi.mocked( getPostCssConfig ) ).toHaveBeenCalledExactlyOnceWith( {
 			minify: false,
-			sourceMap: false,
-			themeImporter: {
-				themePath: 'path/to/theme'
-			}
+			sourceMap: false
 		} );
 	} );
 

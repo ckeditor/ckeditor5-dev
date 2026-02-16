@@ -39,20 +39,6 @@ describe( 'getPostCssConfig()', () => {
 		] );
 	} );
 
-	it( 'passes options to the theme importer', () => {
-		getPostCssConfig( {
-			themeImporter: {
-				themePath: 'abc',
-				debug: true
-			}
-		} );
-
-		expect( vi.mocked( themeImporter ) ).toHaveBeenCalledExactlyOnceWith( {
-			themePath: 'abc',
-			debug: true
-		} );
-	} );
-
 	// https://github.com/ckeditor/ckeditor5/issues/11730
 	it( 'passes options to postcss-nesting', () => {
 		getPostCssConfig();

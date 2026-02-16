@@ -22,15 +22,6 @@ type GetPostCssConfigOptions = {
 	 * When true, the output CSS will be minified.
 	 */
 	minify?: boolean;
-
-	/**
-	 * Configuration of the theme-importer PostCSS plugin.
-	 * See the plugin to learn more.
-	 */
-	themeImporter?: {
-		themePath?: string;
-		debug?: boolean;
-	};
 };
 
 type PostCssConfig = {
@@ -53,7 +44,7 @@ export default function getPostCssConfig( options: GetPostCssConfigOptions = {} 
 	const config: PostCssConfig = {
 		plugins: [
 			postCssImport(),
-			themeImporter( options.themeImporter ),
+			themeImporter(),
 			postCssMixins(),
 			postCssNesting( {
 				// https://github.com/ckeditor/ckeditor5/issues/11730

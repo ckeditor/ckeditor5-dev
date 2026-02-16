@@ -11,21 +11,10 @@ import postCssImport from 'postcss-import';
 import logger from '../logger/index.js';
 import themeLogger from './themelogger.js';
 import getPackageName from './utils/getpackagename.js';
+import { fileURLToPath } from 'node:url';
+import upath from 'upath';
 
 type ThemeImporterOptions = {
-
-	/**
-	 * The path to any file belonging to the theme as resolved by `require.resolve()`.
-	 * E.g.
-	 *
-	 *	{
-	 *		...
-	 *		themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' ),
-	 *		...
-	 *	}
-	 */
-
-	themePath?: string;
 
 	/**
 	 * When `true` it enables debug logs in the console.
@@ -102,7 +91,7 @@ function importThemeFile( options: Options ): void | Promise<void> {
 	const inputFilePath = options.root.source!.input.file!;
 
 	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
-	const themeFilePath = getThemeFilePath( options.themePath!, inputFilePath );
+	const themeFilePath = getThemeFilePath( inputFilePath );
 
 	if ( themeFilePath ) {
 		if ( options.debug ) {
@@ -178,12 +167,10 @@ function importFile( options: Options ): void | Promise<void> {
  * this helper will return:
  * `/foo/bar/ckeditor5-theme-foo/ckeditor5-qux/theme/components/button.css`
  *
- * @param themePath Path to the theme.
  * @param inputFilePath Path to the CSS file which is to be themed.
  */
-function getThemeFilePath( themePath: string, inputFilePath: string ): undefined | string {
-	// ckeditor5-theme-foo/theme/theme.css -> ckeditor5-theme-foo/theme
-	themePath = path.dirname( themePath );
+function getThemeFilePath( inputFilePath: string ): undefined | string {
+	const themePath = upath.join( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-ui' ) ), '..', '..', 'theme', 'preload'	);
 
 	// "ckeditor5-qux"
 	const packageName = getPackageName( inputFilePath );
