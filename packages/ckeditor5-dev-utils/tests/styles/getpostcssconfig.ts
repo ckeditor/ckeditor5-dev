@@ -8,18 +8,15 @@ import postCssImport from 'postcss-import';
 import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
-import themeLogger from '../../src/styles/themelogger.js';
 import getPostCssConfig from '../../src/styles/getpostcssconfig.js';
 
 vi.mock( 'postcss-import' );
 vi.mock( 'postcss-mixins' );
 vi.mock( 'postcss-nesting' );
 vi.mock( 'cssnano' );
-vi.mock( '../../src/styles/themelogger.js' );
 
 describe( 'getPostCssConfig()', () => {
 	beforeEach( () => {
-		vi.mocked( themeLogger ).mockReturnValue( 'postcss-ckeditor5-theme-logger' as any );
 		vi.mocked( postCssImport ).mockReturnValue( 'postcss-import' as any );
 		vi.mocked( postCssMixins ).mockReturnValue( 'postcss-mixins' as any );
 		vi.mocked( postCssNesting ).mockReturnValue( 'postcss-nesting' as any );
@@ -30,8 +27,7 @@ describe( 'getPostCssConfig()', () => {
 		expect( getPostCssConfig().plugins ).to.have.members( [
 			'postcss-import',
 			'postcss-mixins',
-			'postcss-nesting',
-			'postcss-ckeditor5-theme-logger'
+			'postcss-nesting'
 		] );
 	} );
 

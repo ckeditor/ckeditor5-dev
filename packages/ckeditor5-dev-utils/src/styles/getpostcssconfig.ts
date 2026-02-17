@@ -7,7 +7,6 @@ import postCssImport from 'postcss-import';
 import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
-import themeLogger from './themelogger.js';
 import type { Plugin, Processor } from 'postcss';
 
 type GetPostCssConfigOptions = {
@@ -48,8 +47,7 @@ export default function getPostCssConfig( options: GetPostCssConfigOptions = {} 
 				// https://github.com/ckeditor/ckeditor5/issues/11730
 				noIsPseudoSelector: true,
 				edition: '2021'
-			} ),
-			themeLogger()
+			} )
 		]
 	};
 

@@ -41,8 +41,6 @@ describe( 'parseArguments()', () => {
 			'true',
 			'--identity-file',
 			'/home/.secret/file.key',
-			'--theme-path',
-			'/path/to/theme/package',
 			'--additional-languages',
 			'de,fr',
 			'--resolve-js-first'
@@ -50,7 +48,6 @@ describe( 'parseArguments()', () => {
 
 		expect( options[ 'source-map' ] ).to.be.undefined;
 		expect( options[ 'identity-file' ] ).to.be.undefined;
-		expect( options[ 'theme-path' ] ).to.be.undefined;
 		expect( options[ 'additional-languages' ] ).to.be.undefined;
 		expect( options[ 'resolve-js-first' ] ).to.be.undefined;
 

@@ -29,7 +29,6 @@ export default function parseArguments( args, settings = {} ) {
 			'language',
 			'reporter',
 			'repositories',
-			'theme-path',
 			'tsconfig'
 		],
 
@@ -76,7 +75,6 @@ export default function parseArguments( args, settings = {} ) {
 			server: false,
 			silent: false,
 			'source-map': true,
-			'theme-path': null,
 			tsconfig: null,
 			verbose: false,
 			watch: false
@@ -94,7 +92,6 @@ export default function parseArguments( args, settings = {} ) {
 	replaceKebabCaseWithCamelCase( options, [
 		'source-map',
 		'identity-file',
-		'theme-path',
 		'karma-config-overrides',
 		'additional-languages',
 		'resolve-js-first'
