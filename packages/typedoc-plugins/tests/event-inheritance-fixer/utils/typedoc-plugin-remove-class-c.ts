@@ -22,9 +22,6 @@ import {
  * "typedoc-plugin-purge-private-api-docs".
  */
 export default function( app: Application ): void {
-	// TODO: To resolve types.
-	// @ts-expect-error TS2339
-	// Property 'on' does not exist on type 'Converter'.
 	app.converter.on( Converter.EVENT_END, onEventEnd );
 }
 

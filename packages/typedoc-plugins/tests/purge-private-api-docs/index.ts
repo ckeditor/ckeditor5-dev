@@ -20,9 +20,6 @@ import { ROOT_TEST_DIRECTORY } from '../utils.js';
 import { typeDocPurgePrivateApiDocs, typeDocTagEvent, typeDocRestoreProgramAfterConversion } from '../../src/index.js';
 
 function storeAugmentedInterface( app: Application ) {
-	// TODO: To resolve types.
-	// @ts-expect-error TS2339
-	// Property 'on' does not exist on type 'Converter'.
 	app.converter.on( Converter.EVENT_END, ( context: Context ) => {
 		context.project.ckeditor5AugmentedInterfaces = [
 			createInterface( 'AugmentedInterfacePublic' ),
@@ -62,10 +59,6 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			],
-			// TODO: To resolve types.
-			// @ts-expect-error TS2322
-			// Type 'boolean' is not assignable to type 'string'.
-			// For unknown reasons `excludePrivate` type is resolved as `string`.
 			excludePrivate: false
 		} );
 
@@ -334,8 +327,8 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 		it( 'should remove source URLs only from private reflections', () => {
 			const [ augmentedInterfacePublic, augmentedInterfacePrivate ] = conversionResult.ckeditor5AugmentedInterfaces!;
 
-			expect( augmentedInterfacePublic.sources![ 0 ].url ).not.to.be.undefined;
-			expect( augmentedInterfacePrivate.sources![ 0 ].url ).to.be.undefined;
+			expect( augmentedInterfacePublic!.sources![ 0 ]!.url ).not.to.be.undefined;
+			expect( augmentedInterfacePrivate!.sources![ 0 ]!.url ).to.be.undefined;
 		} );
 	} );
 

@@ -97,7 +97,7 @@ describe( 'typedoc-plugins/reference-fixer', () => {
 		expect( iconRedoDeclaration ).to.have.property( 'flags' );
 		expect( iconRedoDeclaration.flags.isConst ).to.equal( true );
 		expect( iconRedoDeclaration ).to.have.property( 'sources' );
-		expect( iconRedoDeclaration.sources![ 0 ].fileName ).to.equal( 'typings/types.d.ts' );
+		expect( iconRedoDeclaration.sources![ 0 ]!.fileName ).to.equal( 'typings/types.d.ts' );
 
 		expect( iconUndoDeclaration ).to.not.be.undefined;
 		expect( iconUndoDeclaration ).to.have.property( 'variant', 'declaration' );
@@ -107,6 +107,6 @@ describe( 'typedoc-plugins/reference-fixer', () => {
 		expect( iconUndoDeclaration ).to.have.property( 'flags' );
 		expect( iconUndoDeclaration.flags.isConst ).to.equal( true );
 		expect( iconUndoDeclaration ).to.have.property( 'sources' );
-		expect( iconUndoDeclaration.sources![ 0 ].fileName ).to.equal( 'packages/icons/index.ts' );
+		expect( iconUndoDeclaration.sources![ 0 ]!.fileName ).to.equal( 'packages/icons/index.ts' );
 	} );
 } );

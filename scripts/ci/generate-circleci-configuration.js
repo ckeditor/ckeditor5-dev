@@ -33,10 +33,6 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 		} )
 	);
 
-	const packagesWithTypes = packagesScriptsMap
-		.filter( ( { scripts } ) => scripts.includes( 'types' ) )
-		.map( ( { packageName } ) => packageName )
-		.sort();
 	const packagesWithTests = packagesScriptsMap
 		.filter( ( { scripts } ) => scripts.includes( 'coverage' ) )
 		.map( ( { packageName } ) => packageName )
@@ -50,7 +46,6 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 	);
 
 	const stepsToAdd = [
-		...generateSteps( packagesWithTypes, 'pnpm run types', 'Check types for "$1"' ),
 		...generateSteps( packagesWithTests, 'pnpm run coverage', 'Execute tests for "$1"' ),
 		{
 			run: {
