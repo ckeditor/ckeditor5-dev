@@ -222,7 +222,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 		expect( baseEventClassA.sources ).to.be.an( 'array' );
 		expect( baseEventClassA.sources ).to.lengthOf( 1 );
 
-		const eventSource = baseEventClassA.sources![ 0 ];
+		const eventSource = baseEventClassA.sources![ 0 ]!;
 
 		expect( eventSource ).to.have.property( 'fileName' );
 		expect( eventSource ).to.have.property( 'fullFileName' );
@@ -270,8 +270,8 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 			expect( event.parameters ).to.be.an( 'array' );
 			expect( event.parameters ).to.lengthOf( 3 );
 
-			const firstParam = event.parameters[ 0 ];
-			const firstParamComment = firstParam.comment;
+			const firstParam = event.parameters[ 0 ]!;
+			const firstParamComment = firstParam.comment!;
 			const firstParamType = firstParam.type as NamedTupleMember;
 
 			expect( firstParam ).to.have.property( 'name', 'p1' );
@@ -286,8 +286,8 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 			expect( firstParamType.element ).to.have.property( 'type', 'intrinsic' );
 			expect( firstParamType.element ).to.have.property( 'name', 'string' );
 
-			const secondParam = event.parameters[ 1 ];
-			const secondParamComment = secondParam.comment;
+			const secondParam = event.parameters[ 1 ]!;
+			const secondParamComment = secondParam.comment!;
 			const secondParamType = secondParam.type as NamedTupleMember;
 
 			expect( secondParam ).to.have.property( 'name', 'p2' );
@@ -302,8 +302,8 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 			expect( secondParamType.element ).to.have.property( 'type', 'intrinsic' );
 			expect( secondParamType.element ).to.have.property( 'name', 'number' );
 
-			const thirdParam = event.parameters[ 2 ];
-			const thirdParamComment = thirdParam.comment;
+			const thirdParam = event.parameters[ 2 ]!;
+			const thirdParamComment = thirdParam.comment!;
 			const thirdParamType = thirdParam.type as NamedTupleMember;
 
 			expect( thirdParam ).to.have.property( 'name', 'p3' );

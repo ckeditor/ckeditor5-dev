@@ -23,9 +23,8 @@
     "dist"
   ],
   "scripts": {
-    "types": "tsc --noEmit --rootDir ./",
-    "build": "rollup -c rollup.config.js --forceExit",
-    "dev": "rollup -c rollup.config.js --watch",
+    "build": "rolldown -c rolldown.config.js",
+    "dev": "rolldown -c rolldown.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"
@@ -35,13 +34,7 @@
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.9",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-typescript": "12.3.0",
-    "@vitest/coverage-v8": "^4.1.2",
-    "rollup": "^4.60.1",
-    "typescript": "5.5.4",
-    "upath": "^2.0.1",
-    "vitest": "^4.1.2"
+    "rolldown": "^1.0.0",
+    "upath": "^2.0.1"
   }
 }

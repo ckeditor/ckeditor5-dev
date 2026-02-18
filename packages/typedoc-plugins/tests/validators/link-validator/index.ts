@@ -54,9 +54,6 @@ describe( 'typedoc-plugins/validators/link-validator', () => {
 		typeDocPurgePrivateApiDocs( app );
 		typeDocRestoreProgramAfterConversion( app );
 
-		// TODO: To resolve types.
-		// @ts-expect-error TS2339
-		// Property 'on' does not exist on type 'Converter'.
 		app.converter.on( Converter.EVENT_END, ( context: Context ) => {
 			linkValidator( context, onError );
 		}, getPluginPriority( 'validators' ) );
