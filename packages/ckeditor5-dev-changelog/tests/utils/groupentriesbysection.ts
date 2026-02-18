@@ -107,6 +107,19 @@ describe( 'groupEntriesBySection()', () => {
 		expect( result.invalid.entries ).toHaveLength( 0 );
 	} );
 
+	it( 'should classify non-breaking types in single package by their type', () => {
+		const files = [
+			createParsedFile( { data: { type: 'Feature' } } ),
+			createParsedFile( { data: { type: 'Fix' } } )
+		];
+
+		const result = groupEntriesBySection( { files, packagesMetadata, transformScope, isSinglePackage: true } );
+
+		expect( result.feature.entries ).toHaveLength( 1 );
+		expect( result.fix.entries ).toHaveLength( 1 );
+		expect( result.breaking.entries ).toHaveLength( 0 );
+	} );
+
 	it( 'should classify generic breaking changes in monorepo as invalid', () => {
 		const files = [
 			createParsedFile( { data: { type: 'Breaking change' } } )
