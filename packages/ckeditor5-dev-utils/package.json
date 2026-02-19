@@ -60,8 +60,7 @@
     "dev": "rolldown -c rolldown.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev",
-    "types": "tsc --noEmit --rootDir ./"
+    "test:dev": "vitest dev"
   },
   "depcheckIgnore": [
     "css-loader",
