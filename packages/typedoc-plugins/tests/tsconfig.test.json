@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "strict": true,
+    "module": "es6",
+    "target": "es2020",
+    "sourceMap": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}

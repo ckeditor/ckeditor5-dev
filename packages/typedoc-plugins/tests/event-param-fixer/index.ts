@@ -52,7 +52,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Warn',
 			entryPoints,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
@@ -88,7 +88,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			logLevel: 'Warn',
 			// Do not process the "EventInfo" class.
 			entryPoints: entryPoints.filter( file => !file.endsWith( 'eventinfo.ts' ) ),
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]

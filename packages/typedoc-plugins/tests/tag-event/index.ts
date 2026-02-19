@@ -42,7 +42,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
