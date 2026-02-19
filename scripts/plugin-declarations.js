@@ -12,7 +12,7 @@ const declarationExtensions = new Set( [ '.mts', '.cts' ] );
 function getTypeScriptSourceFiles( directoryPath ) {
 	const sourceFileNames = globSync( '**/*.{ts,tsx,mts,cts}', {
 		cwd: directoryPath,
-		ignore: [ '**/*.d.ts', '**/*.d.mts', '**/*.d.cts' ]
+		exclude: [ '**/*.d.ts', '**/*.d.mts', '**/*.d.cts' ]
 	} );
 
 	return sourceFileNames.map( file => path.join( directoryPath, file ) );
