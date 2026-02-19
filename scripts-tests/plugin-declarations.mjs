@@ -44,7 +44,7 @@ describe( 'scripts/plugin-declarations', () => {
 
 		expect( globSync ).toHaveBeenCalledWith( '**/*.{ts,tsx,mts,cts}', {
 			cwd: '/workspace/package/src',
-			ignore: [ '**/*.d.ts', '**/*.d.mts', '**/*.d.cts' ]
+			exclude: [ '**/*.d.ts', '**/*.d.mts', '**/*.d.cts' ]
 		} );
 
 		expect( readFileSync ).toHaveBeenNthCalledWith( 1, '/workspace/package/src/foo.ts', 'utf8' );
