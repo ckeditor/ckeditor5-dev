@@ -30,7 +30,7 @@ describe( 'typedoc-plugins/reference-fixer', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]

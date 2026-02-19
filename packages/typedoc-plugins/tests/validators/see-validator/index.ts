@@ -37,7 +37,7 @@ describe( 'typedoc-plugins/validators/see-validator', () => {
 		const app = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: upath.join( fixturesPath, 'tsconfig.json' )
+			tsconfig: upath.join( fixturesPath, 'tsconfig.test.json' )
 		} );
 
 		onError = vi.fn();

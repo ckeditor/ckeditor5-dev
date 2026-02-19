@@ -30,7 +30,7 @@ describe( 'typedoc-plugins/restore-program-after-conversion', () => {
 		const app = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints,
-			tsconfig: upath.join( fixturesPath, 'tsconfig.json' ),
+			tsconfig: upath.join( fixturesPath, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
