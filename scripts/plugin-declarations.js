@@ -7,6 +7,8 @@ import { readFileSync, globSync } from 'node:fs';
 import { isolatedDeclaration } from 'oxc-transform';
 import path from 'upath';
 
+const declarationExtensions = new Set( [ '.mts', '.cts' ] );
+
 function getTypeScriptSourceFiles( directoryPath ) {
 	const sourceFileNames = globSync( '**/*.{ts,tsx,mts,cts}', {
 		cwd: directoryPath,
@@ -18,8 +20,9 @@ function getTypeScriptSourceFiles( directoryPath ) {
 
 function getDeclarationFileName( sourceFileName ) {
 	const { dir, name, ext } = path.parse( sourceFileName );
+	const declarationExtension = declarationExtensions.has( ext ) ? ext : '.ts';
 
-	return path.join( dir, `${ name }.d${ ext }` );
+	return path.join( dir, `${ name }.d${ declarationExtension }` );
 }
 
 export function declarationFilesPlugin() {
