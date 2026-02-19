@@ -57,7 +57,6 @@ describe( 'getKarmaConfig()', () => {
 			browsers: [ 'Chrome' ],
 			watch: false,
 			verbose: false,
-			themePath: 'workspace/path/to/theme.css',
 			entryFile: 'workspace/entry-file.js',
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
@@ -100,7 +99,6 @@ describe( 'getKarmaConfig()', () => {
 			browsers: [ 'Chrome' ],
 			watch: false,
 			verbose: false,
-			themePath: 'workspace/path/to/theme.css',
 			entryFile: 'workspace/entry-file.js',
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
@@ -135,7 +133,6 @@ describe( 'getKarmaConfig()', () => {
 			browsers: [ 'Chrome' ],
 			watch: false,
 			verbose: false,
-			themePath: 'workspace/path/to/theme.css',
 			entryFile: 'workspace/entry-file.js',
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
