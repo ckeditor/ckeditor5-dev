@@ -16,6 +16,7 @@ export default defineConfig( {
 	input: 'src/index.ts',
 	platform: 'node',
 	output: {
+		cleanDir: true,
 		format: 'esm',
 		dir: 'dist',
 		assetFileNames: '[name][extname]'
