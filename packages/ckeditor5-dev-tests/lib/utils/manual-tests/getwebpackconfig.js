@@ -15,7 +15,6 @@ import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
  * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
  * @param {object} options.entries
  * @param {string} options.buildDir
- * @param {string} options.themePath
  * @param {boolean} options.disableWatch
  * @param {string} [options.tsconfig]
  * @param {string} [options.language]
@@ -72,7 +71,6 @@ export default function getWebpackConfigForManualTests( options ) {
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {
-					themePath: options.themePath,
 					sourceMap: true
 				} ),
 

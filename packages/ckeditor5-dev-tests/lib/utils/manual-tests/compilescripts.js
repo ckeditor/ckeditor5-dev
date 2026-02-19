@@ -12,7 +12,6 @@ import getRelativeFilePath from '../getrelativefilepath.js';
  * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
  * @param {string} options.buildDir A path where compiled files will be saved.
  * @param {Array.<string>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
- * @param {string} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {string} options.language A language passed to `CKEditorTranslationsPlugin`.
  * @param {boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
@@ -27,7 +26,6 @@ export default function compileManualTestScripts( options ) {
 	const webpackConfigCommon = {
 		cwd: options.cwd,
 		buildDir: options.buildDir,
-		themePath: options.themePath,
 		language: options.language,
 		additionalLanguages: options.additionalLanguages,
 		debug: options.debug,
