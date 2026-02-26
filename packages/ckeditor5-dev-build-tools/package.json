@@ -43,7 +43,6 @@
     "magic-string": "^0.30.6",
     "pofile": "^1.1.4",
     "postcss": "^8.4.12",
-    "postcss-mixins": "^11.0.0",
     "postcss-nesting": "^13.0.0",
     "purgecss": "^7.0.2",
     "rollup": "^4.9.5",
@@ -55,7 +54,6 @@
   "devDependencies": {
     "@types/css": "^0.0.38",
     "@types/node": "^22.14.1",
-    "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^4.0.18",
     "type-fest": "^4.10.2",
     "typescript": "5.5.4",
