@@ -39,7 +39,6 @@
     "postcss": "^8.4.12",
     "postcss-import": "^16.0.0",
     "postcss-loader": "^8.0.0",
-    "postcss-mixins": "^11.0.0",
     "postcss-nesting": "^13.0.0",
     "raw-loader": "^4.0.1",
     "shelljs": "^0.10.0",

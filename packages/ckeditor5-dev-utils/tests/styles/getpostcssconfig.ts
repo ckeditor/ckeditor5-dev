@@ -5,20 +5,17 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import postCssImport from 'postcss-import';
-import postCssMixins from 'postcss-mixins';
 import postCssNesting from 'postcss-nesting';
 import cssnano from 'cssnano';
 import getPostCssConfig from '../../src/styles/getpostcssconfig.js';
 
 vi.mock( 'postcss-import' );
-vi.mock( 'postcss-mixins' );
 vi.mock( 'postcss-nesting' );
 vi.mock( 'cssnano' );
 
 describe( 'getPostCssConfig()', () => {
 	beforeEach( () => {
 		vi.mocked( postCssImport ).mockReturnValue( 'postcss-import' as any );
-		vi.mocked( postCssMixins ).mockReturnValue( 'postcss-mixins' as any );
 		vi.mocked( postCssNesting ).mockReturnValue( 'postcss-nesting' as any );
 		vi.mocked( cssnano ).mockReturnValue( 'cssnano' as any );
 	} );
@@ -26,7 +23,6 @@ describe( 'getPostCssConfig()', () => {
 	it( 'returns PostCSS plugins', () => {
 		expect( getPostCssConfig().plugins ).to.have.members( [
 			'postcss-import',
-			'postcss-mixins',
 			'postcss-nesting'
 		] );
 	} );
