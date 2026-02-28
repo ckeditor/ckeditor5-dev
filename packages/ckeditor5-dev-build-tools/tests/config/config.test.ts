@@ -6,6 +6,7 @@
 import { test, expect } from 'vitest';
 import { getRollupConfig } from '../../src/config.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
+import type { Plugin } from 'rollup';
 
 type Options = Parameters<typeof getRollupConfig>[0];
 
@@ -28,7 +29,7 @@ const defaults: Options = {
 	cwd: ''
 };
 
-function getConfig( config: Partial<Options> = {} ) {
+function getConfig( config: Partial<Options> = {} ): ReturnType<typeof getRollupConfig> {
 	return getRollupConfig( Object.assign( {}, defaults, config ) );
 }
 
@@ -53,9 +54,9 @@ test( '--tsconfig', async () => {
 		declarations: false
 	} );
 
-	expect( fileExists.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
-	expect( fileDoesntExist.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
-	expect( declarationsFalse.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( ( fileExists.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( ( fileDoesntExist.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
+	expect( ( declarationsFalse.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
 } );
 
 test( '--tsconfig should do typechecking regardless of --declarations', async () => {
@@ -68,8 +69,8 @@ test( '--tsconfig should do typechecking regardless of --declarations', async ()
 		declarations: false
 	} );
 
-	expect( withDeclarations.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
-	expect( withoutDeclarations.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( ( withDeclarations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( ( withoutDeclarations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
 } );
 
 test( '--external', async () => {
@@ -81,22 +82,22 @@ test( '--external', async () => {
 	} );
 
 	// Exclude simple package names.
-	expect( config.external( 'foo' ) ).toBe( true );
+	expect( ( config.external as Function )( 'foo' ) ).toBe( true );
 
 	// Exclude package names that contain a dot (which might be treated as a file extension).
-	expect( config.external( 'socket.io-client' ) ).toBe( true );
+	expect( ( config.external as Function )( 'socket.io-client' ) ).toBe( true );
 
 	// Exclude packages with a code file extension (.ts, .js, .json, etc.).
-	expect( config.external( 'socket.io-client/src/index.js' ) ).toBe( true );
+	expect( ( config.external as Function )( 'socket.io-client/src/index.js' ) ).toBe( true );
 
 	// Don't exclude CSS files.
-	expect( config.external( 'socket.io-client/src/index.css' ) ).toBe( false );
+	expect( ( config.external as Function )( 'socket.io-client/src/index.css' ) ).toBe( false );
 
 	// Don't exclude SVG files.
-	expect( config.external( 'socket.io-client/theme/icon.svg' ) ).toBe( false );
+	expect( ( config.external as Function )( 'socket.io-client/theme/icon.svg' ) ).toBe( false );
 
 	// Don't exclude packages not listed in the "external" option.
-	expect( config.external( 'bar' ) ).toBe( false );
+	expect( ( config.external as Function )( 'bar' ) ).toBe( false );
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5"', async () => {
@@ -115,10 +116,10 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 		external: [ 'ckeditor5' ]
 	} );
 
-	expect( config.external( 'ckeditor5' ) ).toBe( true );
-	expect( config.external( 'ckeditor5/src/ui.js' ) ).toBe( true );
-	expect( config.external( '@ckeditor/ckeditor5-core' ) ).toBe( true );
-	expect( config.external( '@ckeditor/ckeditor5-code-block/theme/codeblock.css' ) ).toBe( false );
+	expect( ( config.external as Function )( 'ckeditor5' ) ).toBe( true );
+	expect( ( config.external as Function )( 'ckeditor5/src/ui.js' ) ).toBe( true );
+	expect( ( config.external as Function )( '@ckeditor/ckeditor5-core' ) ).toBe( true );
+	expect( ( config.external as Function )( '@ckeditor/ckeditor5-code-block/theme/codeblock.css' ) ).toBe( false );
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
@@ -138,10 +139,10 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 		external: [ 'ckeditor5-premium-features' ]
 	} );
 
-	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
-	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
-	expect( config.external( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
+	expect( ( config.external as Function )( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( ( config.external as Function )( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
+	expect( ( config.external as Function )( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
+	expect( ( config.external as Function )( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
 } );
 
 test( '--external doesn\'t fail when "ckeditor5-premium-features" is not installed', async () => {
@@ -156,7 +157,7 @@ test( '--external doesn\'t fail when "ckeditor5-premium-features" is not install
 		external: [ 'ckeditor5-premium-features' ]
 	} );
 
-	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( ( config.external as Function )( 'ckeditor5-premium-features' ) ).toBe( true );
 } );
 
 test( '--translations', async () => {
@@ -165,8 +166,8 @@ test( '--translations', async () => {
 		translations: '**/*.po'
 	} );
 
-	expect( withoutTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );
-	expect( withTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( true );
+	expect( ( withoutTranslations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );
+	expect( ( withTranslations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( true );
 } );
 
 test( '--minify', async () => {
@@ -175,6 +176,6 @@ test( '--minify', async () => {
 		minify: true
 	} );
 
-	expect( withoutMinification.plugins.some( plugin => plugin?.name === 'terser' ) ).toBe( false );
-	expect( withMinification.plugins.some( plugin => plugin?.name === 'terser' ) ).toBe( true );
+	expect( ( withoutMinification.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'terser' ) ).toBe( false );
+	expect( ( withMinification.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'terser' ) ).toBe( true );
 } );

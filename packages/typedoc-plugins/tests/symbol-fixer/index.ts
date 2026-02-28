@@ -28,7 +28,7 @@ describe( 'typedoc-plugins/symbol-fixer', () => {
 		typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' )
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' )
 		} );
 
 		warnSpy = vi.spyOn( typeDoc.logger, 'warn' );

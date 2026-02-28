@@ -26,22 +26,18 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "12.3.0",
     "glob": "^13.0.0",
-    "rollup": "^4.9.5",
+    "rolldown": "^1.0.0-rc.4",
     "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
-    "typescript": "5.5.4",
     "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "typedoc": "^0.28.14"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.js --forceExit",
-    "dev": "rollup -c rollup.config.js --watch",
+    "build": "rolldown -c rolldown.config.js",
+    "dev": "rolldown -c rolldown.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"

@@ -42,7 +42,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
@@ -248,7 +248,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 			expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 			expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'comment' );
 
-			const firstParamComment = eventDefinition.parameters[ 0 ].comment!;
+			const firstParamComment = eventDefinition.parameters[ 0 ]!.comment!;
 
 			expect( firstParamComment ).to.have.property( 'summary' );
 			expect( firstParamComment.summary ).to.be.an( 'array' );
@@ -258,7 +258,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 			expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 			expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'comment' );
 
-			const secondParamComment = eventDefinition.parameters[ 1 ].comment!;
+			const secondParamComment = eventDefinition.parameters[ 1 ]!.comment!;
 
 			expect( secondParamComment ).to.have.property( 'summary' );
 			expect( secondParamComment.summary ).to.be.an( 'array' );
@@ -268,7 +268,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 			expect( eventDefinition.parameters[ 2 ] ).to.have.property( 'name', 'p3' );
 			expect( eventDefinition.parameters[ 2 ] ).to.have.property( 'comment' );
 
-			const thirdParamComment = eventDefinition.parameters[ 2 ].comment!;
+			const thirdParamComment = eventDefinition.parameters[ 2 ]!.comment!;
 
 			expect( thirdParamComment ).to.have.property( 'summary' );
 			expect( thirdParamComment.summary ).to.be.an( 'array' );
@@ -309,7 +309,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as NamedTupleMember;
 
 				expect( firstParam ).to.have.property( 'type', 'namedTupleMember' );
 				expect( firstParam ).to.have.property( 'element' );
@@ -319,7 +319,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as NamedTupleMember;
 
 				expect( secondParam ).to.have.property( 'type', 'namedTupleMember' );
 				expect( secondParam ).to.have.property( 'element' );
@@ -329,7 +329,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters[ 2 ] ).to.have.property( 'name', 'p3' );
 				expect( eventDefinition.parameters[ 2 ] ).to.have.property( 'type' );
 
-				const thirdParam = eventDefinition.parameters[ 2 ].type as NamedTupleMember;
+				const thirdParam = eventDefinition.parameters[ 2 ]!.type as NamedTupleMember;
 
 				expect( thirdParam ).to.have.property( 'type', 'namedTupleMember' );
 				expect( thirdParam ).to.have.property( 'element' );
@@ -365,10 +365,10 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'flags' );
-				expect( eventDefinition.parameters[ 0 ].flags ).to.have.property( 'isOptional', false );
+				expect( eventDefinition.parameters[ 0 ]!.flags ).to.have.property( 'isOptional', false );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as NamedTupleMember;
 
 				expect( firstParam ).to.have.property( 'type', 'namedTupleMember' );
 				expect( firstParam ).to.have.property( 'element' );
@@ -377,10 +377,10 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'flags' );
-				expect( eventDefinition.parameters[ 1 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.parameters[ 1 ]!.flags ).to.have.property( 'isOptional', true );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as NamedTupleMember;
 
 				expect( secondParam ).to.have.property( 'type', 'namedTupleMember' );
 				expect( secondParam ).to.have.property( 'element' );
@@ -399,7 +399,7 @@ describe( 'typedoc-plugins/tag-event', () => {
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as ReflectionType;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as ReflectionType;
 
 				expect( firstParam ).to.have.property( 'type', 'reflection' );
 				expect( firstParam ).to.have.property( 'declaration' );
@@ -416,13 +416,13 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'name', 'number' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'name', 'number' );
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', '<anonymous>' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as ReflectionType;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as ReflectionType;
 
 				expect( secondParam ).to.have.property( 'type', 'reflection' );
 				expect( secondParam ).to.have.property( 'declaration' );
@@ -439,24 +439,24 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'flags' );
-				expect( eventDefinition.parameters[ 0 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.parameters[ 0 ]!.flags ).to.have.property( 'isOptional', true );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'optional' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'elementType' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'optional' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'elementType' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as OptionalType;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as OptionalType;
 
 				expect( firstParam.elementType ).to.have.property( 'type', 'intrinsic' );
 				expect( firstParam.elementType ).to.have.property( 'name', 'number' );
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', '<anonymous>' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'flags' );
-				expect( eventDefinition.parameters[ 1 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.parameters[ 1 ]!.flags ).to.have.property( 'isOptional', true );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'optional' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'elementType' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'type', 'optional' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'elementType' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as OptionalType;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as OptionalType;
 
 				expect( secondParam.elementType ).to.have.property( 'type', 'reflection' );
 				expect( secondParam.elementType ).to.have.property( 'declaration' );
@@ -473,20 +473,20 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'element' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as NamedTupleMember;
 
 				expect( firstParam.element ).to.have.property( 'type', 'intrinsic' );
 				expect( firstParam.element ).to.have.property( 'name', 'string' );
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'element' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as NamedTupleMember;
 
 				expect( secondParam.element ).to.have.property( 'type', 'reference' );
 				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
@@ -502,20 +502,20 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'element' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as NamedTupleMember;
 
 				expect( firstParam.element ).to.have.property( 'type', 'intrinsic' );
 				expect( firstParam.element ).to.have.property( 'name', 'string' );
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'element' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as NamedTupleMember;
 
 				expect( secondParam.element ).to.have.property( 'type', 'reference' );
 				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
@@ -531,20 +531,20 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', 'p1' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'element' );
 
-				const firstParam = eventDefinition.parameters[ 0 ].type as NamedTupleMember;
+				const firstParam = eventDefinition.parameters[ 0 ]!.type as NamedTupleMember;
 
 				expect( firstParam.element ).to.have.property( 'type', 'intrinsic' );
 				expect( firstParam.element ).to.have.property( 'name', 'string' );
 
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'name', 'p2' );
 				expect( eventDefinition.parameters[ 1 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'type', 'namedTupleMember' );
-				expect( eventDefinition.parameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'type', 'namedTupleMember' );
+				expect( eventDefinition.parameters[ 1 ]!.type ).to.have.property( 'element' );
 
-				const secondParam = eventDefinition.parameters[ 1 ].type as NamedTupleMember;
+				const secondParam = eventDefinition.parameters[ 1 ]!.type as NamedTupleMember;
 				expect( secondParam.element ).to.have.property( 'type', 'reference' );
 				expect( secondParam.element ).to.have.property( 'name', 'ExampleType' );
 			} );
@@ -559,8 +559,8 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
 				expect( eventDefinition.parameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
-				expect( eventDefinition.parameters[ 0 ].type ).to.have.property( 'name', 'any' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.parameters[ 0 ]!.type ).to.have.property( 'name', 'any' );
 			} );
 		} );
 	} );

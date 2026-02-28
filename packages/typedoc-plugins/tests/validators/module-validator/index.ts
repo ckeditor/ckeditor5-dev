@@ -37,7 +37,7 @@ describe( 'typedoc-plugins/validators/module-validator', () => {
 		const app = await Application.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
-			tsconfig: upath.join( fixturesPath, 'tsconfig.json' )
+			tsconfig: upath.join( fixturesPath, 'tsconfig.test.json' )
 		} );
 
 		onError = vi.fn();
@@ -53,9 +53,6 @@ describe( 'typedoc-plugins/validators/module-validator', () => {
 		typeDocPurgePrivateApiDocs( app );
 		typeDocRestoreProgramAfterConversion( app );
 
-		// TODO: To resolve types.
-		// @ts-expect-error TS2339
-		// Property 'on' does not exist on type 'Converter'.
 		app.converter.on( Converter.EVENT_END, ( context: Context ) => {
 			moduleValidator( context, onError );
 		}, getPluginPriority( 'validators' ) );
