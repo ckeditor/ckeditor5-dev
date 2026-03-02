@@ -8,8 +8,9 @@ onlyBuiltDependencies:
   - puppeteer
 
 overrides:
-  'qs@^6.0.0': '^6.14.1'
-  diff@^7.0.0: ^8.0.3
+  'diff@^7': '^8.0.3'
+  'minimatch@^9': '^9.0.6'
+  'qs@^6': '^6.14.2'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
