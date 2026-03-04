@@ -64,17 +64,28 @@ export default function runAutomatedTests( options ) {
 		}
 
 		let runnerSequence = Promise.resolve();
+		let hasExecutionErrors = false;
 
 		if ( karmaFiles.length ) {
-			runnerSequence = runnerSequence.then( () => prepareAndRunKarma( options, globPatterns, karmaFiles ) );
+			runnerSequence = runnerSequence
+				.then( () => prepareAndRunKarma( options, globPatterns, karmaFiles ) )
+				.catch( () => {
+					hasExecutionErrors = true;
+				} );
 		}
 
 		if ( vitestFiles.length ) {
-			runnerSequence = runnerSequence.then( () => prepareAndRunVitest( options, vitestFiles ) );
+			runnerSequence = runnerSequence
+				.then( () => prepareAndRunVitest( options, vitestFiles ) )
+				.catch( () => {
+					hasExecutionErrors = true;
+				} );
 		}
 
-		return runnerSequence.catch( () => {
-			throw new Error( 'Test execution failed.' );
+		return runnerSequence.then( () => {
+			if ( hasExecutionErrors ) {
+				throw new Error( 'Test execution failed.' );
+			}
 		} );
 	} );
 }
