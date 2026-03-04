@@ -174,22 +174,18 @@ function splitFilesByTestRunner( allFiles ) {
 function isVitestTestFile( filePath ) {
 	const fileContent = fs.readFileSync( filePath, 'utf8' );
 
-	return /import\s+[\s\S]*?\s+from\s+'vitest'/.test( fileContent );
+	return /^import.+from 'vitest';$/m.test( fileContent );
 }
 
-function createKarmaEntryFile( allFiles, production ) {
-	if ( !allFiles.length ) {
-		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
-	}
-
+function createKarmaEntryFile( files, production ) {
 	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
+	files.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
-	allFiles.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
+	files.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
+	files.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
 
-	const entryFileContent = allFiles
+	const entryFileContent = files
 		.map( file => 'import "' + file + '";' );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
