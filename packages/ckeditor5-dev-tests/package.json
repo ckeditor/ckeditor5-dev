@@ -27,6 +27,7 @@
     "ckeditor5-dev-tests-run-manual": "bin/testmanual.js"
   },
   "dependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
     "@babel/core": "^7.10.5",
     "@ckeditor/ckeditor5-dev-translations": "workspace:*",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
@@ -69,11 +70,11 @@
     "socket.io": "^4.0.0",
     "typescript": "5.5.4",
     "upath": "^2.0.1",
+    "vitest": "^4.0.18",
     "webpack": "^5.94.0"
   },
   "devDependencies": {
-    "jest-extended": "^5.0.3",
-    "vitest": "^4.0.18"
+    "jest-extended": "^5.0.3"
   },
   "scripts": {
     "postinstall": "node bin/postinstall.js",
