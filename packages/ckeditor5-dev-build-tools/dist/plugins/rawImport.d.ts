@@ -1,0 +1,9 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+import type { Plugin } from 'rollup';
+/**
+ * Allows importing raw file content using the `?raw` query parameter.
+ */
+export declare function rawImport(): Plugin;
