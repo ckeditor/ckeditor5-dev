@@ -5,7 +5,6 @@
 
 import { createFilter } from '@rollup/pluginutils';
 import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
-import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
 import litePreset from 'cssnano-preset-lite';
 import { PurgeCSS, type UserDefinedOptions } from 'purgecss';
@@ -166,7 +165,7 @@ async function cleanContent( content: string ): Promise<string> {
  * Returns minified stylesheet content.
  */
 async function minifyContent( stylesheetContent: string = '' ): Promise<string> {
-	const minifier = cssnano() as Processor;
+	const minifier = cssnano();
 	const minifiedResult = await minifier.process( stylesheetContent, { from: undefined } );
 
 	return minifiedResult.css;

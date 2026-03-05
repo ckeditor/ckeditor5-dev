@@ -32,19 +32,19 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 		await dialog.dismiss();
 	};
 
-	const onPageCrash = ( error: Error ): void => {
+	const onPageCrash = ( error: unknown ): void => {
 		pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: error?.message || '(empty message)'
+			message: getErrorMessage( error )
 		} );
 	};
 
-	const onUncaughtException = ( error: Error ): void => {
+	const onUncaughtException = ( error: unknown ): void => {
 		pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
-			message: error?.message || '(empty message)'
+			message: getErrorMessage( error )
 		} );
 	};
 
@@ -89,6 +89,15 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 		page.off( ERROR_TYPES.RESPONSE_FAILURE.event!, onResponseFailure );
 		page.off( ERROR_TYPES.CONSOLE_ERROR.event!, onConsoleError );
 	};
+}
+
+function getErrorMessage( error: unknown ): string {
+	// @ts-ignore
+	if ( Error.isError( error ) ) {
+		return ( error as Error).message || '(empty message)';
+	}
+
+	return '(empty message)';
 }
 
 function getRequestFailureError( request: HTTPRequest, data: QueueData ): CrawlerError | null {

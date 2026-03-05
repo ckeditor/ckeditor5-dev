@@ -5,6 +5,7 @@
 
 export { build } from './build.js';
 export { addBanner, type RollupBannerOptions } from './plugins/banner.js';
+export { bundleCss, type RollupBundleCssOptions } from './plugins/bundleCss.js';
 export { emitCss, type RollupEmitCssOptions } from './plugins/emitCss.js';
 export { loadSourcemaps } from './plugins/loadSourcemaps.js';
 export { loadTypeScriptSources } from './plugins/loadSources.js';
