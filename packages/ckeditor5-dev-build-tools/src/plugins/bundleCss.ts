@@ -7,7 +7,7 @@ import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { createFilter } from '@rollup/pluginutils';
-import { bundleAsync, Features } from 'lightningcss';
+import { bundleAsync, Features, type Warning as LightningCssWarning } from 'lightningcss';
 import type { OutputBundle, OutputChunk, Plugin, PluginContext, NormalizedOutputOptions } from 'rollup';
 
 export interface RollupBundleCssOptions {
@@ -83,6 +83,23 @@ function isCssModule( id: string ): boolean {
  */
 function isExternalImport( specifier: string ): boolean {
 	return URL_PROTOCOL_REGEXP.test( specifier ) || PROTOCOL_RELATIVE_URL_REGEXP.test( specifier );
+}
+
+/**
+ * Emits warning diagnostics returned by Lightning CSS.
+ */
+function emitLightningCssWarnings( context: PluginContext, warnings: Array<LightningCssWarning>, outputFileName: string ): void {
+	for ( const warning of warnings ) {
+		const warningFileName = warning.loc.filename === VIRTUAL_ENTRY_ID ?
+			outputFileName :
+			normalizeId( warning.loc.filename );
+		const warningLocation = `${ warningFileName }:${ warning.loc.line }:${ warning.loc.column + 1 }`;
+		const warningType = warning.type ? ` (${ warning.type })` : '';
+
+		context.warn(
+			`Lightning CSS warning in ${ warningLocation }${ warningType }: ${ warning.message }`
+		);
+	}
 }
 
 /**
@@ -268,6 +285,8 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 					}
 				}
 			} );
+
+			emitLightningCssWarnings( this, result.warnings, options.fileName );
 
 			const sourceMapFileName = `${ options.fileName }.map`;
 			let css = Buffer.from( result.code ).toString();
