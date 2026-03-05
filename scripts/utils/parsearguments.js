@@ -35,7 +35,7 @@ export default function parseArguments( cliArguments ) {
 			ci: false,
 			verbose: false,
 			'compile-only': false,
-			branch: 'epic/ci/4168-drop-oim',
+			branch: 'master',
 			'npm-tag': null
 		}
 	};
@@ -70,7 +70,7 @@ export default function parseArguments( cliArguments ) {
  *
  * @property {string} [from]
  *
- * @property {string} [branch='epic/ci/4168-drop-oim']
+ * @property {string} [branch='master']
  *
  * @property {boolean} [compileOnly=false]
  *
