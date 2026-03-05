@@ -132,7 +132,8 @@ test( 'Resolves package CSS imports via Rollup resolution', async () => {
 		fileName: 'styles.css'
 	}, './fixtures/input-package-import.ts', [
 		nodeResolve( {
-			extensions: [ '.ts', '.js', '.css' ]
+			extensions: [ '.ts', '.js', '.css' ],
+			modulePaths: [ join( import.meta.dirname, './fixtures/packages' ) ]
 		} )
 	] );
 
@@ -140,6 +141,33 @@ test( 'Resolves package CSS imports via Rollup resolution', async () => {
 
 	expect( stylesheet ).toContain( '.from-package' );
 	expect( stylesheet ).toContain( '.package-import-local' );
+} );
+
+test( 'Emits Lightning CSS warnings through Rollup warnings', async () => {
+	const warnings: Array<string> = [];
+
+	const bundle = await rollup( {
+		input: join( import.meta.dirname, './fixtures/input-warning.ts' ),
+		onwarn( warning ) {
+			warnings.push( warning.message );
+		},
+		plugins: [
+			swcPlugin,
+			bundleCss( {
+				fileName: 'styles.css'
+			} )
+		]
+	} );
+
+	await bundle.generate( {
+		format: 'esm',
+		assetFileNames: '[name][extname]',
+		file: 'input.js'
+	} );
+
+	expect( warnings.some( warning => warning.includes( 'Lightning CSS warning in' ) ) ).toBe( true );
+	expect( warnings.some( warning => warning.includes( 'Unknown at rule: @unknown' ) ) ).toBe( true );
+	expect( warnings.some( warning => warning.includes( 'warning.css' ) ) ).toBe( true );
 } );
 
 test( 'Throws when encountering external CSS imports', async () => {
