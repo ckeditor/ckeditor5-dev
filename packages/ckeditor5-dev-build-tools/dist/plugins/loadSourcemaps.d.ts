@@ -2,5 +2,5 @@
  * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
-
-export { default as getLightningCssConfig } from './getlightningcssconfig.js';
+import type { Plugin } from 'rollup';
+export declare function loadSourcemaps(): Plugin;
