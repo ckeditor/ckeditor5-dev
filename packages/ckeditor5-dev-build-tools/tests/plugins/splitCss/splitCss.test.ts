@@ -272,6 +272,65 @@ test( 'should preserve all selectors', async () => {
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 } );
 
+test( 'should preserve content selectors emitted with `:is()`', async () => {
+	const output = await generateBundle(
+		'./fixtures/is-selector-content/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+			--editor-color:blue;
+		}
+		.ck-editor-only{
+			color:var(--editor-color);
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+		}
+		:is(.ck-content .ck-widget.table > figcaption, .ck-content .ck-widget.table > table > caption).ck-suggestion-marker-deletion{
+			background-color:var(--content-color);
+			border:none;
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
+
+test( 'should not leak editor selectors when matching `:is()` content selectors', async () => {
+	const output = await generateBundle(
+		'./fixtures/is-selector-content-no-editor-leak/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+			--editor-color:blue;
+		}
+		.ck-editor__editable .table.layout-table > table{
+			color:var(--editor-color);
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+		}
+		.ck-content:not(.ck-editor__editable) .table.layout-table > table{
+			color:var(--content-color);
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
+
 test( 'should preserve all `@media` queries and split it correctly', async () => {
 	const output = await generateBundle(
 		'./fixtures/media-query/input.ts',
