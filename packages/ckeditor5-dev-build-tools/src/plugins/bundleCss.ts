@@ -276,7 +276,7 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 							return specifier;
 						}
 
-						if ( specifier.startsWith( '.' ) || specifier.startsWith( '/' ) ) {
+						if ( specifier.startsWith( '.' ) ) {
 							// Keep backward compatibility with relative path resolution.
 							return resolve( dirname( normalizedOrigin ), specifier );
 						}
