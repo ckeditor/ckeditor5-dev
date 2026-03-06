@@ -3,4 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getLightningCssConfig } from './getlightningcssconfig.js';
+import './first.css';
+import './nested.ts';

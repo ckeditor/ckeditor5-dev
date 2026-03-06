@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import getStylesLoader from '../../src/loaders/getstylesloader.js';
-import { getPostCssConfig } from '../../src/styles/index.js';
+import { getLightningCssConfig } from '../../src/styles/index.js';
 
 vi.mock( 'mini-css-extract-plugin', () => ( {
 	default: class {
@@ -50,47 +50,42 @@ describe( 'getStylesLoader()', () => {
 		expect( options ).to.have.property( 'attributes' );
 	} );
 
-	it( 'should return a definition containing the correct setup of the `postcss-loader`', () => {
-		vi.mocked( getPostCssConfig ).mockReturnValue( 'styles.getPostCssConfig()' as any );
+	it( 'should return a definition containing the correct setup of the `ck-lightningcss-loader`', () => {
+		vi.mocked( getLightningCssConfig ).mockReturnValue( 'styles.getLightningCssConfig()' as any );
 
 		const loader = getStylesLoader( {} );
 
 		expect( loader ).to.be.an( 'object' );
 
-		const postCssLoader = loader.use.at( -1 );
+		const lightningCssLoader = loader.use.at( -1 );
 
-		expect( postCssLoader ).to.be.an( 'object' );
-		expect( ( postCssLoader as any ).loader ).to.include( 'postcss-loader' );
-		expect( postCssLoader ).to.have.property( 'options' );
+		expect( lightningCssLoader ).to.be.an( 'object' );
+		expect( ( lightningCssLoader as any ).loader ).to.match( /ck-lightningcss-loader\.js$/ );
+		expect( lightningCssLoader ).to.have.property( 'options' );
 
-		const options = typeof postCssLoader === 'object' && postCssLoader.options;
+		const options = typeof lightningCssLoader === 'object' && lightningCssLoader.options;
 
 		expect( options ).to.be.an( 'object' );
-		expect( options ).to.have.property( 'postcssOptions', 'styles.getPostCssConfig()' );
+		expect( options ).to.have.property( 'lightningCssOptions', 'styles.getLightningCssConfig()' );
 
-		expect( vi.mocked( getPostCssConfig ) ).toHaveBeenCalledExactlyOnceWith( {
+		expect( vi.mocked( getLightningCssConfig ) ).toHaveBeenCalledExactlyOnceWith( {
 			minify: false,
 			sourceMap: false
 		} );
 	} );
 
 	it( 'should return a definition containing the correct setup of the `css-loader`', () => {
-		const loader = getStylesLoader( {
-			skipPostCssLoader: true
-		} as any );
+		const loader = getStylesLoader( {} );
 
-		for ( const definition of loader.use ) {
-			expect( typeof definition === 'object' ? definition.loader : definition ).to.not.include( 'postcss-loader' );
-		}
-	} );
+		const cssLoader = loader.use[ 1 ];
 
-	it( 'should allow skipping adding the postcss-loader', () => {
-		const loader = getStylesLoader( {
-			skipPostCssLoader: true
-		} as any );
+		expect( cssLoader ).to.be.an( 'object' );
+		expect( ( cssLoader as any ).loader ).to.include( 'css-loader' );
+		expect( cssLoader ).to.have.property( 'options' );
 
-		const cssLoader = loader.use.at( -1 );
+		const options = typeof cssLoader === 'object' && cssLoader.options;
 
-		expect( cssLoader ).to.include( 'css-loader' );
+		expect( options ).to.be.an( 'object' );
+		expect( options ).to.have.property( 'sourceMap', false );
 	} );
 } );
