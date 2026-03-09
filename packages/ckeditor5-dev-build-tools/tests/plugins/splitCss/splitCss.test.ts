@@ -4,8 +4,8 @@
  */
 
 import { join } from 'node:path';
-import { test } from 'vitest';
-import { rollup, type RollupOutput } from 'rollup';
+import { test, expect } from 'vitest';
+import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyDividedStyleSheet } from '../../_utils/utils.js';
 import { splitCss, bundleCss, type RollupSplitCssOptions } from '../../../src/index.js';
 import { removeWhitespace } from '../../../src/utils.js';
@@ -33,6 +33,33 @@ async function generateBundle(
 		file: 'input.js',
 		assetFileNames: '[name][extname]',
 		banner
+	} );
+
+	return output;
+}
+
+function getStylesheetSource( output: RollupOutput['output'], outputFileName: string ): string {
+	const styles = output.find( output => output.fileName === outputFileName );
+
+	expect( styles ).toBeDefined();
+	expect( styles!.type ).toBe( 'asset' );
+
+	return ( styles as OutputAsset ).source as string;
+}
+
+async function generateBundleWithoutBundledCss(
+	input: string,
+	options: RollupSplitCssOptions
+): Promise<RollupOutput['output']> {
+	const bundle = await rollup( {
+		input: join( import.meta.dirname, input ),
+		plugins: [ splitCss( options ) ]
+	} );
+
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		file: 'input.js',
+		assetFileNames: '[name][extname]'
 	} );
 
 	return output;
@@ -201,6 +228,16 @@ test( 'should prepare empty `CSS` files when no styles imported', async () => {
 	verifyDividedStyleSheet( output, 'styles-content.css', '\n' );
 } );
 
+test( 'should prepare empty `CSS` files when bundle contains no stylesheet asset', async () => {
+	const output = await generateBundleWithoutBundledCss(
+		'./fixtures/no-styles/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', '' );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
+
 test( 'should minify the content output', async () => {
 	const output = await generateBundle(
 		'./fixtures/single-import/input.ts',
@@ -300,6 +337,25 @@ test( 'should preserve content selectors emitted with `:is()`', async () => {
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
 	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
+
+test( 'should preserve functional content selectors with ids, attributes and pseudo arguments', async () => {
+	const output = await generateBundle(
+		'./fixtures/functional-selector-tokens/input.ts',
+		{ baseFileName: 'styles' }
+	);
+	const editorStyles = getStylesheetSource( output, 'styles-editor.css' );
+	const contentStyles = getStylesheetSource( output, 'styles-content.css' );
+
+	expect( removeWhitespace( editorStyles ) ).toContain( '.ck-editor-only:not(:is( .other)){' );
+	expect( removeWhitespace( editorStyles ) ).toContain( ':is( .other)#feature[data-role="main"]:dir(rtl):lang(pl){' );
+	expect( editorStyles ).not.toContain( '.ck-content' );
+
+	expect( removeWhitespace( contentStyles ) ).toContain( '#feature[data-role="main"]:dir(rtl):lang(pl){' );
+	expect( removeWhitespace( contentStyles ) ).toContain( ':is(.ck-content)[data-state]{' );
+	expect( contentStyles ).toContain( '.ck-content' );
+	expect( contentStyles ).not.toContain( 'foo.bar' );
+	expect( contentStyles ).not.toContain( '.ck-editor-only' );
 } );
 
 test( 'should not leak editor selectors when matching `:is()` content selectors', async () => {

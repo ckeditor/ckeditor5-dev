@@ -116,7 +116,6 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			const contentStyles = await getStyles( normalizedCss, {
 				...CONTENT_PURGE_OPTIONS,
 				content: [
-					...CONTENT_PURGE_OPTIONS.content,
 					...createSyntheticContentSelectors( normalizedCss, 'ck-content' )
 				]
 			} );
@@ -211,10 +210,7 @@ function collectSyntheticContentSelectorTokens(
 			const selectorTokens = new Set<string>();
 
 			collectSelectorTokens( expandedSelector, selectorTokens );
-
-			if ( selectorTokens.size ) {
-				syntheticContentSnippets.add( Array.from( selectorTokens ).join( ' ' ) );
-			}
+			syntheticContentSnippets.add( Array.from( selectorTokens ).join( ' ' ) );
 		}
 	}
 }
@@ -322,11 +318,7 @@ function expandFunctionalSelectorComponent( component: SelectorComponent ): Arra
 /**
  * Returns nested selectors from pseudo-classes that accept selector lists.
  */
-function getNestedSelectors( component: SelectorComponent ): Array<Selector> | null {
-	if ( component.type !== 'pseudo-class' ) {
-		return null;
-	}
-
+function getNestedSelectors( component: Extract<SelectorComponent, { type: 'pseudo-class' }> ): Array<Selector> | null {
 	if (
 		component.kind === 'is' ||
 		component.kind === 'where' ||
@@ -355,7 +347,7 @@ async function cleanContent( content: string ): Promise<string> {
 		preset: litePreset( {
 			normalizeWhitespace: false
 		} )
-	} ).process( content!, { from: undefined } );
+	} ).process( content, { from: undefined } );
 
 	return normalizeContent.css;
 }
