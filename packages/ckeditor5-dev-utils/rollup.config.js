@@ -26,7 +26,8 @@ const externals = [
 export default defineConfig( {
 	input: {
 		main: 'src/index.ts',
-		debug: 'src/loaders/ck-debug-loader.ts'
+		debug: 'src/loaders/ck-debug-loader.ts',
+		lightningCss: 'src/loaders/ck-lightningcss-loader.ts'
 	},
 	output: {
 		dir: path.join( cwd, 'dist' ),
@@ -39,6 +40,11 @@ export default defineConfig( {
 			// Webpack debug loader.
 			if ( chunk.name === 'debug' ) {
 				return 'ck-debug-loader.js';
+			}
+
+			// Webpack Lightning CSS loader.
+			if ( chunk.name === 'lightningCss' ) {
+				return 'ck-lightningcss-loader.js';
 			}
 
 			return '[name].js';
