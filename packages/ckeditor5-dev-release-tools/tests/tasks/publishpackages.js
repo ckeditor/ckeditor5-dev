@@ -15,7 +15,7 @@ import executeInParallel from '../../lib/utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 import publishPackages from '../../lib/tasks/publishpackages.js';
 
-vi.mock( 'node:fs/promises' );
+vi.mock( 'fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/assertpackages.js' );
@@ -278,6 +278,26 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-bar'
 				],
 				'nightly'
+			);
+		} );
+
+		it( 'should assert that version tag matches the npm tag (custom latest-v{X} npm tag)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				npmTag: 'latest-v47'
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				'latest-v47'
 			);
 		} );
 
