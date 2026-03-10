@@ -9,7 +9,7 @@ import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-test
 import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';
 
 vi.mock( 'node:path', async () => {
-	const originalModule = await vi.importActual( 'path' );
+	const originalModule = await vi.importActual( 'node:path' );
 
 	return {
 		default: {
