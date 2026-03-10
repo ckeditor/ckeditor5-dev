@@ -54,7 +54,7 @@ export default async function assertNpmTag( packagePaths, npmTag ) {
 }
 
 function isValidLatestMajorTag( version, npmTag ) {
-	const match = npmTag.match( /^latest-v(0|[1-9]\d*)$/ );
+	const match = npmTag.match( /^latest-v(\d+)$/ );
 
 	if ( !match ) {
 		return false;

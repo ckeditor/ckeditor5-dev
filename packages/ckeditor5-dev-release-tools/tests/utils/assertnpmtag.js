@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import assertNpmTag from '../../lib/utils/assertnpmtag.js';
 import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '../../lib/utils/getnpmtagfromversion.js' );
 
 describe( 'assertNpmTag()', () => {
