@@ -15,7 +15,7 @@ import executeInParallel from '../../lib/utils/executeinparallel.js';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 import publishPackages from '../../lib/tasks/publishpackages.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/assertpackages.js' );

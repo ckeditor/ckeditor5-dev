@@ -14,7 +14,7 @@ const taskOptions = vi.hoisted( () => ( {
 } ) );
 
 vi.mock( 'virtual:parallelworker-integration-module' );
-vi.mock( 'worker_threads', () => ( {
+vi.mock( 'node:worker_threads', () => ( {
 	parentPort: {
 		postMessage: vi.fn()
 	},

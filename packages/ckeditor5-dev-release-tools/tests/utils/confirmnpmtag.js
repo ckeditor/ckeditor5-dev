@@ -9,7 +9,7 @@ import inquirer from 'inquirer';
 import confirmNpmTag from '../../lib/utils/confirmnpmtag.js';
 
 vi.mock( 'inquirer' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 

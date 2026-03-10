@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import updateJSONFile from '../../src/tools/updatejsonfile.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 
 describe( 'updateJSONFile()', () => {
 	it( 'should read, update and save JSON file', () => {

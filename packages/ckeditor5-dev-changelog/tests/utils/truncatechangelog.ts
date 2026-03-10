@@ -9,7 +9,7 @@ import { truncateChangelog } from '../../src/utils/truncatechangelog.js';
 import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
 import fs from 'node:fs';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'truncateChangelog()', () => {

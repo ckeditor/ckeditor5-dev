@@ -13,10 +13,10 @@ const hoists = vi.hoisted( () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
-vi.mock( 'fs' );
-vi.mock( 'util', () => ( { styleText: hoists.styleText } ) );
+vi.mock( 'node:fs' );
+vi.mock( 'node:util', () => ( { styleText: hoists.styleText } ) );
 vi.mock( 'glob' );
-vi.mock( 'child_process' );
+vi.mock( 'node:child_process' );
 
 describe( 'checkVersionMatch()', () => {
 	let options, files, packageVersions, processExitMock, consoleLogMock, consoleErrorMock;

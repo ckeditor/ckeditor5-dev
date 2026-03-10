@@ -27,7 +27,6 @@ const stubs = vi.hoisted( () => ( {
 	}
 } ) );
 
-vi.mock( 'path' );
 vi.mock( 'commonmark', () => ( {
 	Parser: class Parser {
 		parse( ...args ) {
@@ -41,13 +40,13 @@ vi.mock( 'commonmark', () => ( {
 		}
 	}
 } ) );
-vi.mock( 'crypto', () => ( {
+vi.mock( 'node:crypto', () => ( {
 	default: {
 		randomUUID: vi.fn( () => 'uuid1-uuid2-uuid3-uuid4-uuid5' )
 	}
 } ) );
-vi.mock( 'fs' );
-vi.mock( 'path' );
+vi.mock( 'node:fs' );
+vi.mock( 'node:path' );
 vi.mock( 'glob' );
 vi.mock( 'chokidar' );
 vi.mock( 'dom-combiner' );

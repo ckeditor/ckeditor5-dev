@@ -35,7 +35,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 		createSpinner: vi.fn( () => stubs.spinner )
 	}
 } ) );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: stubs.styleText,
 	promisify: vi.fn( () => stubs.exec )
 } ) );

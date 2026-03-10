@@ -10,9 +10,9 @@ import fs from 'node:fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { PRE_RELEASE_DIRECTORY } from '../../src/utils/constants.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 

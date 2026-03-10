@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import updateDependencies from '../../lib/tasks/updatedependencies.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'updateDependencies()', () => {

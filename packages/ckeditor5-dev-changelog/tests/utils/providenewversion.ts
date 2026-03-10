@@ -10,7 +10,7 @@ import { validateInputVersion } from '../../src/utils/validateinputversion.js';
 import { UserAbortError } from '../../src/utils/useraborterror.js';
 
 vi.mock( 'inquirer' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/utils/validateinputversion.js' );

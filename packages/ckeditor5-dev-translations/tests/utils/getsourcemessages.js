@@ -9,7 +9,7 @@ import findMessages from '../../lib/findmessages.js';
 import isFileInDirectory from '../../lib/utils/isfileindirectory.js';
 import getSourceMessages from '../../lib/utils/getsourcemessages.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( '../../lib/utils/isfileindirectory.js' );
 vi.mock( '../../lib/findmessages.js' );
 

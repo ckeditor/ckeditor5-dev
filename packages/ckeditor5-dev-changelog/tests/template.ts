@@ -28,8 +28,8 @@ const mocks = vi.hoisted( () => ( {
 	)
 } ) );
 
-vi.mock( 'fs/promises', async () => {
-	const fs = await vi.importActual( 'fs/promises' );
+vi.mock( 'node:fs/promises', async () => {
+	const fs = await vi.importActual( 'node:fs/promises' );
 
 	return {
 		mkdir: mocks.mkdir,
@@ -38,8 +38,8 @@ vi.mock( 'fs/promises', async () => {
 	};
 } );
 
-vi.mock( 'util', async () => {
-	const util = await vi.importActual( 'util' );
+vi.mock( 'node:util', async () => {
+	const util = await vi.importActual( 'node:util' );
 
 	return {
 		...util,

@@ -9,7 +9,7 @@ import updateVersions from '../../lib/tasks/updateversions.js';
 import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 
 describe( 'updateVersions()', () => {
 	beforeEach( () => {

@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import getPackageContext from '../../lib/utils/getpackagecontext.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 
 const PACKAGE_PATH = '/absolute/path/to/packages/ckeditor5-foo';
 const CONTEXTS_PATH = `${ PACKAGE_PATH }/lang/contexts.json`;
