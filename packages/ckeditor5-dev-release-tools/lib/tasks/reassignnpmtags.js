@@ -15,7 +15,8 @@ import { exec } from 'node:child_process';
 const execPromise = promisify( exec );
 
 /**
- * Used to switch the tags from `staging` to `latest` for specified array of packages.
+ * Used to assign a dist-tag to a specified version for all packages from the release set.
+ * It supports built-in tags (e.g. `latest`, `staging`, `next`) and custom tags (e.g. `latest-v{X}`).
  * Each operation will be retried up to 3 times in case of failure.
  *
  * @param {object} options

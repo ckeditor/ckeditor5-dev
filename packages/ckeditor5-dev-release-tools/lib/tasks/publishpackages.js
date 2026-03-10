@@ -23,7 +23,7 @@ import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
  * - A package directory must contain `package.json` file.
  * - All files defined in the `optionalEntryPointPackages` option must exist in a package directory.
  * - An npm tag (dist-tag) must match the tag calculated from the package version.
- *   A stable release can be also published as `next` or `staging.
+ *   A stable release can be also published as `next`, `staging`, or `latest-v{major}`.
  *
  * When the validation for each package passes, packages are published on npm. Optional callback is called for confirmation whether to
  * continue.

@@ -281,6 +281,26 @@ describe( 'publishPackages()', () => {
 			);
 		} );
 
+		it( 'should assert that version tag matches the npm tag (custom latest-v{X} npm tag)', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				npmTag: 'latest-v47'
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				'latest-v47'
+			);
+		} );
+
 		it( 'should throw if version tag does not match the npm tag', async () => {
 			vi.mocked( assertNpmTag ).mockRejectedValue(
 				new Error( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' )
