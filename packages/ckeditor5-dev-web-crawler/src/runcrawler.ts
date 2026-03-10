@@ -9,7 +9,7 @@ import { styleText, stripVTControlCharacters } from 'node:util';
 import { Cluster } from 'puppeteer-cluster';
 import { getAllLinks } from './getlinks.js';
 import { getBaseUrl, toArray } from './utils.js';
-import type { LaunchOptions, Page } from 'puppeteer';
+import type { ConsoleMessage, HTTPRequest, HTTPResponse, JSHandle, LaunchOptions, Page } from 'puppeteer';
 
 import {
 	DEFAULT_CONCURRENCY,
@@ -200,16 +200,17 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 		page.on( ERROR_TYPES.PAGE_CRASH.event, error => pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.PAGE_CRASH,
-			message: ( error as Error ).message || '(empty message)'
+			message: getErrorMessage( error )
 		} ) );
 
 		page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => pageErrors.push( {
 			pageUrl: data.url,
 			type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
-			message: error.message || '(empty message)'
+			message: getErrorMessage( error )
 		} ) );
 
-		page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
+		page.on( ERROR_TYPES.REQUEST_FAILURE.event, unknownRequest => {
+			const request = unknownRequest as HTTPRequest;
 			const errorText = request.failure()?.errorText;
 
 			if ( request.response()?.ok() && request.method() === 'POST' ) {
@@ -238,7 +239,8 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			} );
 		} );
 
-		page.on( ERROR_TYPES.RESPONSE_FAILURE.event, response => {
+		page.on( ERROR_TYPES.RESPONSE_FAILURE.event, unknownResponse => {
+			const response = unknownResponse as HTTPResponse;
 			const responseStatus = response.status();
 
 			if ( responseStatus > 399 ) {
@@ -258,12 +260,14 @@ export default async function runCrawler( options: CrawlerOptions ): Promise<voi
 			}
 		} );
 
-		page.on( ERROR_TYPES.CONSOLE_ERROR.event, async message => {
+		page.on( ERROR_TYPES.CONSOLE_ERROR.event, async unknownMessage => {
+			const message = unknownMessage as ConsoleMessage;
+
 			if ( message.type() !== 'error' ) {
 				return;
 			}
 
-			const serializedMessage = await Promise.all( message.args().map( arg => {
+			const serializedMessage = await Promise.all( message.args().map( ( arg: JSHandle ) => {
 				const remoteObject = arg.remoteObject();
 
 				if ( remoteObject.type === 'string' ) {
@@ -487,6 +491,21 @@ function markErrorsAsIgnored( errors: Array<CrawlerError>, errorIgnorePatterns: 
  */
 function isNavigationRequest( request: any ): boolean {
 	return request.isNavigationRequest() && request.frame().parentFrame() === null;
+}
+
+/**
+ * Returns an error message extracted from unknown value.
+ */
+function getErrorMessage( error: unknown ): string {
+	if ( error instanceof Error ) {
+		return error.message || '(empty message)';
+	}
+
+	if ( typeof error === 'string' ) {
+		return error || '(empty message)';
+	}
+
+	return '(empty message)';
 }
 
 /**

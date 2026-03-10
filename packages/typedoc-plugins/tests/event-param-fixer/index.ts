@@ -52,7 +52,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Warn',
 			entryPoints,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
@@ -88,7 +88,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			logLevel: 'Warn',
 			// Do not process the "EventInfo" class.
 			entryPoints: entryPoints.filter( file => !file.endsWith( 'eventinfo.ts' ) ),
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
 				'typedoc-plugin-rename-defaults'
 			]
@@ -144,7 +144,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			expect( eventFooNoText.parameters ).to.be.an( 'array' );
 			expect( eventFooNoText.parameters ).to.lengthOf( 1 );
 
-			const eventInfoParameter = eventFooNoText.parameters[ 0 ];
+			const eventInfoParameter = eventFooNoText.parameters[ 0 ]!;
 
 			assertEventInfoParameter( eventInfoParameter, eventInfoClass );
 		} );
@@ -154,7 +154,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			expect( eventFoo.parameters ).to.be.an( 'array' );
 			expect( eventFoo.parameters ).to.lengthOf( 1 );
 
-			const eventInfoParameter = eventFooNoText.parameters[ 0 ];
+			const eventInfoParameter = eventFooNoText.parameters[ 0 ]!;
 
 			assertEventInfoParameter( eventInfoParameter, eventInfoClass );
 		} );
@@ -164,7 +164,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			expect( eventFooWithParams.parameters ).to.be.an( 'array' );
 			expect( eventFooWithParams.parameters ).to.lengthOf( 4 );
 
-			const eventInfoParameter = eventFooNoText.parameters[ 0 ];
+			const eventInfoParameter = eventFooNoText.parameters[ 0 ]!;
 
 			assertEventInfoParameter( eventInfoParameter, eventInfoClass );
 		} );
@@ -174,7 +174,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			expect( eventObservableChange.parameters ).to.be.an( 'array' );
 			expect( eventObservableChange.parameters ).to.lengthOf( 4 );
 
-			const eventInfoParameter = eventFooNoText.parameters[ 0 ];
+			const eventInfoParameter = eventFooNoText.parameters[ 0 ]!;
 
 			assertEventInfoParameter( eventInfoParameter, eventInfoClass );
 		} );
@@ -184,7 +184,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			expect( eventObservableSet.parameters ).to.be.an( 'array' );
 			expect( eventObservableSet.parameters ).to.lengthOf( 4 );
 
-			const eventInfoParameter = eventFooNoText.parameters[ 0 ];
+			const eventInfoParameter = eventFooNoText.parameters[ 0 ]!;
 
 			assertEventInfoParameter( eventInfoParameter, eventInfoClass );
 		} );

@@ -20,10 +20,23 @@ export interface ErrorType {
 	description: string;
 }
 
+interface EventErrorType extends ErrorType {
+	event: string;
+}
+
+interface ErrorTypes {
+	PAGE_CRASH: EventErrorType;
+	UNCAUGHT_EXCEPTION: EventErrorType;
+	REQUEST_FAILURE: EventErrorType;
+	RESPONSE_FAILURE: EventErrorType;
+	CONSOLE_ERROR: EventErrorType;
+	NAVIGATION_ERROR: ErrorType;
+}
+
 /**
  * Errors from the following hosts will be ignored.
  */
-export const IGNORED_HOSTS = [
+export const IGNORED_HOSTS: Array<string> = [
 	'visualwebsiteoptimizer.com',
 	'fury.io',
 	'shields.io',
@@ -46,15 +59,15 @@ export const IGNORED_HOSTS = [
 	'if-cdn.com'
 ];
 
-export const DEFAULT_CONCURRENCY = Math.min( cpus().length, 16 );
+export const DEFAULT_CONCURRENCY: number = Math.min( cpus().length, 16 );
 
-export const DEFAULT_TIMEOUT = 30 * 1000;
+export const DEFAULT_TIMEOUT: number = 30 * 1000;
 
 export const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
 
 export const DEFAULT_REMAINING_ATTEMPTS = 3;
 
-export const ERROR_TYPES = {
+export const ERROR_TYPES: ErrorTypes = {
 	PAGE_CRASH: {
 		event: 'error',
 		description: 'Page crash'
@@ -80,16 +93,16 @@ export const ERROR_TYPES = {
 		// event, but it is thrown as exception from page.goto() method.
 		description: 'Navigation error'
 	}
-} as const satisfies Record<string, ErrorType>;
+};
 
-export const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
+export const PATTERN_TYPE_TO_ERROR_TYPE_MAP: Record<string, ErrorType> = {
 	'page-crash': ERROR_TYPES.PAGE_CRASH,
 	'uncaught-exception': ERROR_TYPES.UNCAUGHT_EXCEPTION,
 	'request-failure': ERROR_TYPES.REQUEST_FAILURE,
 	'response-failure': ERROR_TYPES.RESPONSE_FAILURE,
 	'console-error': ERROR_TYPES.CONSOLE_ERROR,
 	'navigation-error': ERROR_TYPES.NAVIGATION_ERROR
-} as const satisfies Record<string, ErrorType>;
+};
 
 export const IGNORE_ALL_ERRORS_WILDCARD = '*';
 

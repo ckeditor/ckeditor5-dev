@@ -55,13 +55,13 @@
     "@types/css": "^0.0.38",
     "@types/node": "^22.14.1",
     "@vitest/coverage-v8": "^4.0.18",
+    "rolldown": "^1.0.0-rc.4",
     "type-fest": "^4.10.2",
-    "typescript": "5.5.4",
     "vitest": "^4.0.18"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.js --forceExit",
-    "dev": "rollup -c rollup.config.js --watch",
+    "build": "rolldown -c rolldown.config.js",
+    "dev": "rolldown -c rolldown.config.js --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"

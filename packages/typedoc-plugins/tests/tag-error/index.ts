@@ -34,7 +34,7 @@ describe( 'typedoc-plugins/tag-error', () => {
 		const typeDoc = await Application.bootstrapWithPlugins( {
 			logLevel: 'Warn',
 			entryPoints: files,
-			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
+			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			blockTags: [
 				...OptionDefaults.blockTags,
 				'@eventName',

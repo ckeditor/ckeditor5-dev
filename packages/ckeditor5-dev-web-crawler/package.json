@@ -23,20 +23,15 @@
     "dist"
   ],
   "scripts": {
-    "types": "tsc --noEmit",
-    "build": "rollup -c rollup.config.js --forceExit",
-    "dev": "rollup -c rollup.config.js --watch"
+    "build": "rolldown -c rolldown.config.js",
+    "dev": "rolldown -c rolldown.config.js --watch"
   },
   "dependencies": {
     "puppeteer": "^24.6.0",
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "12.3.0",
-    "rollup": "^4.9.5",
-    "typescript": "5.5.4",
+    "rolldown": "^1.0.0-rc.4",
     "upath": "^2.0.1"
   }
 }

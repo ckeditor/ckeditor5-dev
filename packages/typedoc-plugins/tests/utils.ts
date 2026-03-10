@@ -8,7 +8,7 @@ import { expect } from 'vitest';
 import type { TypeScript } from 'typedoc';
 import type { ValidatorErrorCallbackArg } from '../src/validators/index.js';
 
-export const ROOT_TEST_DIRECTORY = upath.join( import.meta.dirname, '..', 'tests' );
+export const ROOT_TEST_DIRECTORY: string = upath.join( import.meta.dirname, '..', 'tests' );
 
 export type ExpectedError = {
 	message: string;
@@ -47,6 +47,6 @@ export function assertCalls( errorCalls: Array<ValidatorErrorCallbackArg>, expec
 
 				return true;
 			} );
-		}, `Unexpected "${ message }" error received.` );
+		} );
 	}
 }

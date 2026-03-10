@@ -17,15 +17,15 @@ export const CHANGESET_DIRECTORY = '.changelog';
 
 export const PRE_RELEASE_DIRECTORY = 'pre-release';
 
-export const TEMPLATE_FILE = path.join( import.meta.dirname, '../template/template.md' );
+export const TEMPLATE_FILE: string = path.join( import.meta.dirname, '../template/template.md' );
 
 export const SECTIONS = {
 	major: {
-		title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		title: `MAJOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` as string,
 		titleInLogs: 'MAJOR BREAKING CHANGES'
 	},
 	minor: {
-		title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`,
+		title: `MINOR BREAKING CHANGES [ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)` as string,
 		titleInLogs: 'MINOR BREAKING CHANGES'
 	},
 	breaking: { title: 'BREAKING CHANGES' },
@@ -42,12 +42,12 @@ export const SECTIONS = {
 	}
 } as const;
 
-export const ISSUE_SLUG_PATTERN = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
-export const ISSUE_PATTERN = /^\d+$/;
-export const ISSUE_URL_PATTERN =
+export const ISSUE_SLUG_PATTERN: RegExp = /^(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)#(?<number>\d+)$/;
+export const ISSUE_PATTERN: RegExp = /^\d+$/;
+export const ISSUE_URL_PATTERN: RegExp =
 	/^(?<base>https:\/\/github\.com)\/(?<owner>[a-z0-9.-]+)\/(?<repository>[a-z0-9.-]+)\/issues\/(?<number>\d+)$/;
 
-export const NICK_NAME_PATTERN = /^@[a-z0-9-_]+$/i;
+export const NICK_NAME_PATTERN: RegExp = /^@[a-z0-9-_]+$/i;
 
 export const TYPES = [
 	{ name: 'Feature' },
