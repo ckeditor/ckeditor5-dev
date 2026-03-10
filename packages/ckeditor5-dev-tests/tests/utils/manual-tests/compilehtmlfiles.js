@@ -27,7 +27,6 @@ const stubs = vi.hoisted( () => ( {
 	}
 } ) );
 
-vi.mock( 'node:path' );
 vi.mock( 'commonmark', () => ( {
 	Parser: class Parser {
 		parse( ...args ) {
