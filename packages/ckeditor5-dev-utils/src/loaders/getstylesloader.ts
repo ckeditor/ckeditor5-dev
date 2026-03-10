@@ -4,9 +4,9 @@
  */
 
 import path from 'node:path';
+import { Features } from 'lightningcss';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { resolveLoader } from './resolve-loader.js';
-import { getLightningCssConfig } from '../styles/index.js';
 
 type GetStylesLoaderOptions = {
 	minify?: boolean;
@@ -62,10 +62,11 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 	const getLightningCssLoader = () => ( {
 		loader: path.join( import.meta.dirname, 'ck-lightningcss-loader.js' ),
 		options: {
-			lightningCssOptions: getLightningCssConfig( {
+			lightningCssOptions: {
 				minify,
-				sourceMap
-			} )
+				sourceMap,
+				include: Features.Nesting
+			}
 		}
 	} );
 

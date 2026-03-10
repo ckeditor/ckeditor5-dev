@@ -4,8 +4,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { Features } from 'lightningcss';
 import getStylesLoader from '../../src/loaders/getstylesloader.js';
-import { getLightningCssConfig } from '../../src/styles/index.js';
 
 vi.mock( 'mini-css-extract-plugin', () => ( {
 	default: class {
@@ -14,7 +14,6 @@ vi.mock( 'mini-css-extract-plugin', () => ( {
 		}
 	}
 } ) );
-vi.mock( '../../src/styles/index.js' );
 
 describe( 'getStylesLoader()', () => {
 	it( 'should be a function', () => {
@@ -51,8 +50,6 @@ describe( 'getStylesLoader()', () => {
 	} );
 
 	it( 'should return a definition containing the correct setup of the `ck-lightningcss-loader`', () => {
-		vi.mocked( getLightningCssConfig ).mockReturnValue( 'styles.getLightningCssConfig()' as any );
-
 		const loader = getStylesLoader( {} );
 
 		expect( loader ).to.be.an( 'object' );
@@ -66,11 +63,10 @@ describe( 'getStylesLoader()', () => {
 		const options = typeof lightningCssLoader === 'object' && lightningCssLoader.options;
 
 		expect( options ).to.be.an( 'object' );
-		expect( options ).to.have.property( 'lightningCssOptions', 'styles.getLightningCssConfig()' );
-
-		expect( vi.mocked( getLightningCssConfig ) ).toHaveBeenCalledExactlyOnceWith( {
+		expect( options ).to.have.property( 'lightningCssOptions' ).that.deep.equals( {
 			minify: false,
-			sourceMap: false
+			sourceMap: false,
+			include: Features.Nesting
 		} );
 	} );
 
