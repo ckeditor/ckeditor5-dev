@@ -81,6 +81,30 @@ describe( 'createGithubRelease()', () => {
 		} ) );
 	} );
 
+	it( 'marks the release as latest by default', async () => {
+		await createGithubRelease( options );
+
+		expect( stubs.createRelease ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+			make_latest: 'true'
+		} ) );
+	} );
+
+	it( 'marks the release as latest when `isLatest` is set to `true`', async () => {
+		await createGithubRelease( { ...options, isLatest: true } );
+
+		expect( stubs.createRelease ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+			make_latest: 'true'
+		} ) );
+	} );
+
+	it( 'does not mark the release as latest when `isLatest` is set to `false`', async () => {
+		await createGithubRelease( { ...options, isLatest: false } );
+
+		expect( stubs.createRelease ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+			make_latest: 'false'
+		} ) );
+	} );
+
 	it( 'creates a prerelease page when passing a major.minor.patch-prerelease version', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
