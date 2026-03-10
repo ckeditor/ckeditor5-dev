@@ -9,7 +9,6 @@ import semver from 'semver';
 import getNpmTagFromVersion from './getnpmtagfromversion.js';
 
 const ALLOWED_NPM_LATEST_TAGS = [
-	'latest',
 	'staging',
 	'next'
 ];
