@@ -8,7 +8,7 @@ import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import getDirectories from '../../src/tools/getdirectories.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 
 describe( 'getDirectories()', () => {
 	it( 'should get directories in specified path', () => {

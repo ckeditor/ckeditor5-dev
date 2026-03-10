@@ -12,8 +12,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import createManualTestServer from '../../../lib/utils/manual-tests/createserver.js';
 
-vi.mock( 'readline' );
-vi.mock( 'fs' );
+vi.mock( 'node:readline' );
+vi.mock( 'node:fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'glob' );
 vi.mock( 'dom-combiner' );

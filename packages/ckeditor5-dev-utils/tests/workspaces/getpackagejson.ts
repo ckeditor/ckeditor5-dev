@@ -8,8 +8,8 @@ import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import getPackageJson, { type PackageJson } from '../../src/workspaces/getpackagejson.js';
 
-vi.mock( 'fs' );
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs' );
+vi.mock( 'node:fs/promises' );
 
 describe( 'getPackageJson()', () => {
 	describe( 'async=false', () => {

@@ -50,11 +50,11 @@ vi.mock( 'karma', () => ( {
 	}
 } ) );
 
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'mkdirp' );
 vi.mock( 'glob' );
 vi.mock( 'karma/lib/logger.js' );

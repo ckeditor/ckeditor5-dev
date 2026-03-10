@@ -11,7 +11,7 @@ import getLanguages from '../../lib/utils/getlanguages.js';
 import getHeaders from '../../lib/utils/getheaders.js';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'pofile' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
 vi.mock( '../../lib/utils/getlanguages.js' );

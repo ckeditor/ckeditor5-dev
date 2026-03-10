@@ -29,24 +29,24 @@ const stubs = vi.hoisted( () => ( {
 	}
 } ) );
 
-vi.mock( 'worker_threads', () => ( {
+vi.mock( 'node:worker_threads', () => ( {
 	Worker: stubs.WorkerMock
 } ) );
 
-vi.mock( 'os', () => ( {
+vi.mock( 'node:os', () => ( {
 	default: {
 		cpus: vi.fn( () => new Array( 4 ) )
 	}
 } ) );
 
-vi.mock( 'crypto', () => ( {
+vi.mock( 'node:crypto', () => ( {
 	default: {
 		randomUUID: vi.fn( () => 'uuid-4' )
 	}
 } ) );
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '../../lib/utils/abortcontroller.js' );
 
 describe( 'executeInParallel()', () => {

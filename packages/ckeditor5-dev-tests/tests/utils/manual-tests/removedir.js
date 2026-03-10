@@ -11,7 +11,7 @@ import removeDir from '../../../lib/utils/manual-tests/removedir.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'del' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 

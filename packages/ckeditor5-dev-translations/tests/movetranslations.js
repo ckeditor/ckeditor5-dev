@@ -18,7 +18,7 @@ const stubs = vi.hoisted( () => {
 	};
 } );
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 	logger: vi.fn( () => stubs.logger )
 } ) );

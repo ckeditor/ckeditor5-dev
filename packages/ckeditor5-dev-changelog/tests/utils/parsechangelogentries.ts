@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 import { sortEntriesByScopeAndDate } from '../../src/utils/sortentriesbyscopeanddate.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( 'gray-matter' );
 vi.mock( '../../src/utils/sortentriesbyscopeanddate.js' );
 

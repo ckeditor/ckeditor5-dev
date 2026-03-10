@@ -10,10 +10,10 @@ import { CHANGELOG_HEADER } from '../../src/utils/constants.js';
 import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'node:fs/promises';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '../../src/utils/truncatechangelog.js' );
 vi.mock( '../../src/utils/loginfo.js' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/constants.js', () => ( {

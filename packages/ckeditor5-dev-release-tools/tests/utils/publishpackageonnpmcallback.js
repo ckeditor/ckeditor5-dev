@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'publishPackageOnNpmCallback()', () => {

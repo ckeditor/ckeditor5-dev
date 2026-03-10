@@ -14,7 +14,7 @@ import getHeaders from '../../lib/utils/getheaders.js';
 import addTranslation from '../../lib/utils/addtranslation.js';
 import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/createmissingpackagetranslations.js' );

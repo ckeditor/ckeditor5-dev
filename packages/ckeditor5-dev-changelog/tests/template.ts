@@ -28,7 +28,7 @@ const mocks = vi.hoisted( () => ( {
 	)
 } ) );
 
-vi.mock( 'fs/promises', async () => {
+vi.mock( 'node:fs/promises', async () => {
 	const fs = await vi.importActual( 'fs/promises' );
 
 	return {
@@ -38,7 +38,7 @@ vi.mock( 'fs/promises', async () => {
 	};
 } );
 
-vi.mock( 'util', async () => {
+vi.mock( 'node:util', async () => {
 	const util = await vi.importActual( 'util' );
 
 	return {

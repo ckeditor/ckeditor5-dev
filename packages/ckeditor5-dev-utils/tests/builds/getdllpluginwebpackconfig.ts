@@ -36,8 +36,8 @@ const stubs = vi.hoisted( () => ( {
 
 vi.mock( '../../src/loaders/index.js' );
 vi.mock( '../../src/bundler/index.js' );
-vi.mock( 'fs' );
-vi.mock( 'path', () => ( {
+vi.mock( 'node:fs' );
+vi.mock( 'node:path', () => ( {
 	default: {
 		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
 		dirname: vi.fn()

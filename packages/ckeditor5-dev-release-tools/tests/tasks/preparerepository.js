@@ -9,7 +9,7 @@ import { glob } from 'glob';
 import prepareRepository from '../../lib/tasks/preparerepository.js';
 import resolvePublishOverrides from '../../lib/utils/resolvepublishoverrides.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/resolvepublishoverrides.js' );
 

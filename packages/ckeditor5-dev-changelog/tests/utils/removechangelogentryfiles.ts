@@ -9,8 +9,8 @@ import { logInfo } from '../../src/utils/loginfo.js';
 import fs from 'node:fs/promises';
 import type { ChangesetPathsWithGithubUrl } from '../../src/types.js';
 
-vi.mock( 'fs/promises' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:fs/promises' );
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 vi.mock( '../../src/utils/loginfo.js' );

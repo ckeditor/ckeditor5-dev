@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import copyAssets from '../../../lib/utils/manual-tests/copyassets.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 
 describe( 'copyAssets()', () => {
 	let mkdirSync, copyFileSync;

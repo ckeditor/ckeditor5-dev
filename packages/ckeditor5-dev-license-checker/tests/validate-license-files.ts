@@ -10,8 +10,8 @@ import { validateLicenseFiles } from '../src/validate-license-files.js';
 import { glob, readFile, writeFile } from 'node:fs/promises';
 import { findPackageJSON } from 'node:module';
 
-vi.mock( 'fs/promises' );
-vi.mock( 'module' );
+vi.mock( 'node:fs/promises' );
+vi.mock( 'node:module' );
 
 describe( 'validateLicenseFiles', () => {
 	let options: Parameters<typeof validateLicenseFiles>[0];

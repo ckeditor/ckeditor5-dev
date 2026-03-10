@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
 import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';
 
-vi.mock( 'path', async () => {
+vi.mock( 'node:path', async () => {
 	const originalModule = await vi.importActual( 'path' );
 
 	return {
