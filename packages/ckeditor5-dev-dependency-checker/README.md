@@ -2,7 +2,7 @@ CKEditor 5 dependency checker
 =============================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-dependency-checker.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 
 Contains tools for validating dependencies specified in package.json.
 

@@ -1,7 +1,7 @@
 # TypeDoc plugins overview
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Ftypedoc-plugins.svg)](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 
 ## Overview
 
@@ -42,7 +42,7 @@ const conversionResult = await typeDoc.convert();
 
   ```ts
   import type { TypeDefinition } from '...';
-  
+
   /**
    * @module package/file
    */
@@ -74,11 +74,11 @@ const conversionResult = await typeDoc.convert();
 - **Purge private API** &mdash; `typeDocPurgePrivateApiDocs()`
 
   The plugin removes reflections collected from private packages (marked as `"private": true` in their `package.json`). To disable the mechanism, add the `@publicApi` annotation at the beginning of a file.
-    
+
 - **Tag `@error`** &mdash; `typeDocTagError()`
 
   The plugin collects error definitions from the `@error` annotation.
-    
+
 - **Tag `@eventName`** &mdash; `typeDocTagEvent()`
 
   The plugin collects event definitions from the `@eventName` annotation and assigns them as the children of the class or the `Observable` interface.

@@ -167,7 +167,7 @@ jobs:
           command: pnpm ckeditor5-dev-ci-circle-disable-auto-cancel-builds --organization ckeditor --repository ckeditor5-dev
       - run:
           name: Trigger the release pipeline
-          command: pnpm ckeditor5-dev-ci-trigger-circle-build --slug ckeditor/ckeditor5-dev --release-branch master
+          command: pnpm ckeditor5-dev-ci-trigger-circle-build --slug ckeditor/ckeditor5-dev --release-branch master-v54
       - run:
           name: Enable the redundant workflows option
           command: pnpm ckeditor5-dev-ci-circle-enable-auto-cancel-builds --organization ckeditor --repository ckeditor5-dev
@@ -185,11 +185,11 @@ jobs:
           command: |
             #!/bin/bash
 
-            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
+            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master-v54 )
             CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
 
             if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
-              echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
+              echo "There is a newer commit in the repository on the \`#master-v54\` branch. Use its build to start the release."
               circleci-agent step halt
             fi
       - npm_login_command
@@ -218,7 +218,7 @@ jobs:
           command: npm run release:prepare-packages -- --verbose
       - run:
           name: Publish the packages
-          command: npm run release:publish-packages -- --verbose
+          command: npm run release:publish-packages -- --verbose --npm-tag latest-v54
       - run:
           name: Enable the redundant workflows option
           command: pnpm ckeditor5-dev-ci-circle-enable-auto-cancel-builds --organization ckeditor --repository ckeditor5-dev
@@ -249,12 +249,12 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - master-v54
       - notify_ci_failure:
           filters:
             branches:
               only:
-                - master
+                - master-v54
 
   release:
     when:
@@ -280,4 +280,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - master-v54

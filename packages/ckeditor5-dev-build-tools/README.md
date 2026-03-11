@@ -2,7 +2,7 @@ CKEditor 5 Build Tools
 ====================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-build-tools.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 
 This package can be used to build CKEditor 5 plugins compatible with the [new installation methods](https://github.com/ckeditor/ckeditor5/issues/15502), while the source code is still written for the old methods. It overrides the imports during the build process to make the plugin compatible with the new installation methods.
 

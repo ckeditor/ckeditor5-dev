@@ -2,7 +2,7 @@ CKEditor 5 Stale bot
 ====================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-stale-bot.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 
 A stale bot is used to mark issues and pull requests that have not recently been updated.
 
