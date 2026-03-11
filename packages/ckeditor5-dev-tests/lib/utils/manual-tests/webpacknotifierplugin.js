@@ -27,7 +27,7 @@ export default class WebpackNotifierPlugin {
 	apply( compiler ) {
 		compiler.hooks.compile.tap( this.constructor.name, () => {
 			this.log.info( '[Webpack] Starting scripts compilation...' );
-			this.onTestCompilationStatus( `start:${ this.processName }` );
+			this.onTestCompilationStatus( 'start' );
 		} );
 
 		compiler.hooks.done.tap( this.constructor.name, stats => {
@@ -49,7 +49,7 @@ export default class WebpackNotifierPlugin {
 				this.log.info( '[Webpack] File watcher is disabled.' );
 			}
 
-			this.onTestCompilationStatus( `finished:${ this.processName }` );
+			this.onTestCompilationStatus( 'finished' );
 		} );
 	}
 }
