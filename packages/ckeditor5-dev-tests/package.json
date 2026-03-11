@@ -61,7 +61,7 @@
     "minimatch": "^10.0.1",
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.0",
-    "mocha": "^11.1.0",
+    "mocha": "^11.7.5",
     "node-notifier": "^10.0.1",
     "process": "^0.11.10",
     "sinon": "^9.2.4",

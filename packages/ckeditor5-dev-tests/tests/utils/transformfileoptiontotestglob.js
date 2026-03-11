@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
 import { globSync } from 'glob';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'glob' );
 
 describe( 'transformFileOptionToTestGlob()', () => {

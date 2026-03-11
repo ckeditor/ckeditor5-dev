@@ -43,7 +43,7 @@ vi.mock( '../../src/utils/loginfo.js' );
 vi.mock( '../../src/utils/displaychanges.js' );
 vi.mock( '../../src/utils/composechangelog.js' );
 vi.mock( '../../src/utils/commitchanges.js' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
 

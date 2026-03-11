@@ -10,7 +10,7 @@ import { glob } from 'glob';
 import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
 import moveTranslationsBetweenPackages from '../../lib/utils/movetranslationsbetweenpackages.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'pofile' );
 vi.mock( 'glob' );
 vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );

@@ -14,7 +14,7 @@ vi.mock( 'upath', () => ( {
 		dirname: vi.fn()
 	}
 } ) );
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'parseArguments()', () => {

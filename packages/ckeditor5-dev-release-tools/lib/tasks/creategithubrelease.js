@@ -14,6 +14,7 @@ import getNpmTagFromVersion from '../utils/getnpmtagfromversion.js';
  * @param {string} options.token Token used to authenticate with GitHub.
  * @param {string} options.version Name of tag connected with the release.
  * @param {string} options.description Description of the release.
+ * @param {boolean} [options.isLatest=true] Whether the release should be marked as the latest.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise.<string>}
  */
@@ -22,6 +23,7 @@ export default async function createGithubRelease( options ) {
 		token,
 		version,
 		description,
+		isLatest = true,
 		cwd = process.cwd()
 	} = options;
 
@@ -39,7 +41,8 @@ export default async function createGithubRelease( options ) {
 			owner: repositoryOwner,
 			repo: repositoryName,
 			body: description,
-			prerelease: getNpmTagFromVersion( version ) !== 'latest'
+			prerelease: getNpmTagFromVersion( version ) !== 'latest',
+			make_latest: String( isLatest )
 		} );
 	}
 

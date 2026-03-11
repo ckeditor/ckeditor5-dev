@@ -19,7 +19,7 @@ vi.mock( 'cli-spinners', () => ( {
 	}
 } ) );
 vi.mock( 'cli-cursor' );
-vi.mock( 'readline' );
+vi.mock( 'node:readline' );
 
 vi.stubGlobal( 'console', {
 	log: vi.fn(),

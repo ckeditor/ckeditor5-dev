@@ -12,7 +12,7 @@ import upath from 'upath';
 
 vi.mock( 'simple-git' );
 vi.mock( 'glob' );
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 
 describe( 'commit()', () => {
 	let stubs: {

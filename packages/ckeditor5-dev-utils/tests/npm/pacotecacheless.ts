@@ -10,9 +10,9 @@ import fs from 'node:fs/promises';
 import pacote from 'pacote';
 import { manifest, packument } from '../../src/npm/pacotecacheless.js';
 
-vi.mock( 'os' );
-vi.mock( 'crypto' );
-vi.mock( 'fs/promises' );
+vi.mock( 'node:os' );
+vi.mock( 'node:crypto' );
+vi.mock( 'node:fs/promises' );
 vi.mock( 'pacote' );
 
 describe( 'pacote (no cache)', () => {

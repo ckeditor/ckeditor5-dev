@@ -25,12 +25,15 @@ const stubs = vi.hoisted( () => ( {
 } ) );
 
 vi.mock( 'socket.io' );
+vi.mock( 'node:child_process' );
+vi.mock( 'inquirer' );
 vi.mock( 'glob' );
-vi.mock( 'util', () => ( {
+vi.mock( 'node:util', () => ( {
 	styleText: vi.fn( ( _style, text ) => text )
 } ) );
-vi.mock( 'path' );
-vi.mock( 'fs' );
+vi.mock( 'node:path' );
+vi.mock( 'node:fs' );
+vi.mock( 'is-interactive' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../lib/utils/manual-tests/createserver.js' );
 vi.mock( '../../lib/utils/manual-tests/compilehtmlfiles.js' );

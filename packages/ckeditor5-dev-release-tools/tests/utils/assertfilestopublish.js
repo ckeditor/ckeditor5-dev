@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import { glob } from 'glob';
 import assertFilesToPublish from '../../lib/utils/assertfilestopublish.js';
 
-vi.mock( 'fs/promises' );
+vi.mock( 'node:fs/promises' );
 vi.mock( 'glob' );
 
 describe( 'assertFilesToPublish()', () => {

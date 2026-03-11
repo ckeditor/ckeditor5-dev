@@ -47,7 +47,9 @@ export default defineConfig( {
 	},
 	external: id => externals.some( name => id.startsWith( name ) ),
 	plugins: [
-		typescript(),
+		typescript( {
+			noEmitOnError: true
+		} ),
 		nodeResolve( {
 			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true

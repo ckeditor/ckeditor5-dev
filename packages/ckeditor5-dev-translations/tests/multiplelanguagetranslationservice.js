@@ -10,7 +10,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import MultipleLanguageTranslationService from '../lib/multiplelanguagetranslationservice.js';
 
-vi.mock( 'fs', () => ( {
+vi.mock( 'node:fs', () => ( {
 	default: {
 		existsSync: vi.fn(),
 		readFileSync: vi.fn(),

@@ -9,7 +9,7 @@ import { findPackages } from '../../src/utils/findpackages.js';
 import fs from 'node:fs';
 import type { RepositoryConfig } from '../../src/types.js';
 
-vi.mock( 'fs' );
+vi.mock( 'node:fs' );
 vi.mock( 'upath' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
