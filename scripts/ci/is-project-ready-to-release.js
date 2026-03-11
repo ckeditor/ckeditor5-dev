@@ -8,7 +8,7 @@
 import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 
 const changelogVersion = releaseTools.getLastFromChangelog();
-const npmTag = releaseTools.getNpmTagFromVersion( changelogVersion );
+const npmTag = 'latest-v54';
 
 releaseTools.isVersionPublishableForTag( '@ckeditor/ckeditor5-dev-release-tools', changelogVersion, npmTag )
 	.then( result => {
