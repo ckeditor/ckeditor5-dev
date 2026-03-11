@@ -44,10 +44,10 @@ export default function ckLightningCssLoader(
 		}
 
 		const result = transform( {
+			...lightningCssOptions,
 			filename: this.resourcePath,
 			code: Buffer.from( source ),
-			inputSourceMap,
-			...lightningCssOptions
+			inputSourceMap
 		} );
 
 		const sourceMap = result.map ? JSON.parse( Buffer.from( result.map ).toString() ) : undefined;
