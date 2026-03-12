@@ -11,8 +11,6 @@ import * as stream from '../src/stream/index.js';
 import * as styles from '../src/styles/index.js';
 import * as tools from '../src/tools/index.js';
 
-vi.mock( '../src/builds/index.js' );
-vi.mock( '../src/bundler/index.js' );
 vi.mock( '../src/loaders/index.js' );
 vi.mock( '../src/logger/index.js' );
 vi.mock( '../src/stream/index.js' );
