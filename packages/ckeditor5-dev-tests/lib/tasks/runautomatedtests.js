@@ -30,15 +30,6 @@ const AUTOMATED_TESTS_BUILD_PATH = upath.join( process.cwd(), 'build', '.automat
 // An absolute path to the entry file that will be passed to Karma.
 const KARMA_ENTRY_FILE_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'entry-point.js' );
 
-// An absolute path to the static Vitest config loader that is copied into the build directory.
-const VITEST_CONFIG_TEMPLATE_PATH = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'templates', 'vitest.config.mjs' );
-
-// An absolute path to the target location where Vitest config loader is copied.
-const VITEST_CONFIG_LOADER_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'vitest.config.mjs' );
-
-// An absolute path to the generated runtime Vitest config serialized as JSON.
-const VITEST_CONFIG_RUNTIME_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'runtimeconfig.json' );
-
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
 		if ( !options.production ) {
@@ -51,66 +42,71 @@ export default function runAutomatedTests( options ) {
 
 		const globPatterns = transformFilesToTestGlob( options.files );
 		const allFiles = collectFilesToTests( globPatterns );
-		const { karmaFiles, vitestFiles } = splitFilesByTestRunner( allFiles );
+		const packageRoots = [ ...new Set( allFiles.map( getPackageRootFromTestFile ) ) ];
+		const packageInfoByRoot = getPackageInfoByRoot( packageRoots );
+		const vitestPackageRoots = getVitestPackageRoots( packageInfoByRoot );
+		const { karmaFiles, vitestFiles } = splitFilesByTestRunner( allFiles, vitestPackageRoots );
 
 		if ( !karmaFiles.length && !vitestFiles.length ) {
-			throw new Error( 'Files to test not found.' );
+			throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 		}
 
-		if ( karmaFiles.length && vitestFiles.length ) {
-			if ( options.watch || options.coverage ) {
-				throw new Error( 'Watch mode and coverage are not supported yet when mixed Karma + Vitest files are selected.' );
-			}
+		if ( karmaFiles.length && vitestFiles.length && options.coverage ) {
+			throw new Error(
+				'Coverage cannot be collected in a mixed Karma + Vitest run. ' +
+				'Run coverage separately for Karma and Vitest packages.'
+			);
 		}
 
+		if ( karmaFiles.length && vitestFiles.length && options.watch ) {
+			throw new Error(
+				'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
+				'Run watch mode separately for Karma and Vitest packages.'
+			);
+		}
+
+		const errors = [];
 		let runnerSequence = Promise.resolve();
-		let hasExecutionErrors = false;
 
 		if ( karmaFiles.length ) {
 			runnerSequence = runnerSequence
-				.then( () => prepareAndRunKarma( options, globPatterns, karmaFiles ) )
-				.catch( () => {
-					hasExecutionErrors = true;
+				.then( () => prepareAndRunKarma( options, karmaFiles, globPatterns, vitestFiles.length > 0 ) )
+				.catch( error => {
+					errors.push( error );
 				} );
 		}
 
 		if ( vitestFiles.length ) {
+			const vitestExecutionPlan = getVitestExecutionPlan( vitestFiles, packageInfoByRoot );
+
 			runnerSequence = runnerSequence
-				.then( () => prepareAndRunVitest( options, vitestFiles ) )
-				.catch( () => {
-					hasExecutionErrors = true;
+				.then( () => prepareAndRunVitest( options, vitestExecutionPlan ) )
+				.catch( error => {
+					errors.push( error );
 				} );
 		}
 
 		return runnerSequence.then( () => {
-			if ( hasExecutionErrors ) {
-				throw new Error( 'Test execution failed.' );
+			if ( errors.length ) {
+				throw aggregateExecutionErrors( errors );
 			}
 		} );
 	} );
 }
 
-function prepareAndRunKarma( options, globPatterns, karmaFiles ) {
-	return Promise.resolve()
-		.then( () => {
-			createKarmaEntryFile( karmaFiles, options.production );
+function prepareAndRunKarma( options, karmaFiles, allGlobPatterns, hasMixedRunners ) {
+	createKarmaEntryFile( [ ...karmaFiles ], options.production );
 
-			const optionsForKarma = Object.assign( {}, options, {
-				entryFile: KARMA_ENTRY_FILE_PATH,
-				globPatterns
-			} );
+	const optionsForKarma = Object.assign( {}, options, {
+		entryFile: KARMA_ENTRY_FILE_PATH,
+		globPatterns: hasMixedRunners ? { karma: [ ...karmaFiles ] } : allGlobPatterns
+	} );
 
-			return runKarma( optionsForKarma );
-		} );
+	return runKarma( optionsForKarma );
 }
 
-function prepareAndRunVitest( options, vitestFiles ) {
-	return Promise.resolve()
-		.then( () => {
-			createVitestConfigFile( vitestFiles, options );
-
-			return runVitest( options );
-		} );
+function prepareAndRunVitest( options, vitestExecutionPlan ) {
+	return runVitest( options, vitestExecutionPlan );
 }
 
 function transformFilesToTestGlob( files ) {
@@ -156,12 +152,14 @@ function collectFilesToTests( globPatterns ) {
 	return allFiles;
 }
 
-function splitFilesByTestRunner( allFiles ) {
+function splitFilesByTestRunner( allFiles, vitestPackageRoots ) {
 	const karmaFiles = [];
 	const vitestFiles = [];
 
 	for ( const file of allFiles ) {
-		if ( isVitestTestFile( file ) ) {
+		const packageRoot = getPackageRootFromTestFile( file );
+
+		if ( vitestPackageRoots.has( packageRoot ) ) {
 			vitestFiles.push( file );
 		} else {
 			karmaFiles.push( file );
@@ -171,10 +169,77 @@ function splitFilesByTestRunner( allFiles ) {
 	return { karmaFiles, vitestFiles };
 }
 
-function isVitestTestFile( filePath ) {
-	const fileContent = fs.readFileSync( filePath, 'utf8' );
+function getVitestPackageRoots( packageInfoByRoot ) {
+	return new Set( [ ...packageInfoByRoot.values() ]
+		.filter( packageInfo => packageInfo.runner === 'vitest' )
+		.map( packageInfo => packageInfo.packageRoot ) );
+}
 
-	return /^import.+from 'vitest';$/m.test( fileContent );
+function getPackageInfoByRoot( packageRoots ) {
+	const packageInfoByRoot = new Map();
+
+	for ( const packageRoot of packageRoots ) {
+		const packageInfo = getPackageInfo( packageRoot );
+
+		packageInfoByRoot.set( packageRoot, packageInfo );
+	}
+
+	return packageInfoByRoot;
+}
+
+function getPackageInfo( packageRoot ) {
+	let packageJson = null;
+
+	try {
+		const packageJsonPath = upath.join( packageRoot, 'package.json' );
+		packageJson = JSON.parse( fs.readFileSync( packageJsonPath, 'utf8' ) );
+	} catch {
+		packageJson = null;
+	}
+
+	const packageName = packageJson?.name || upath.basename( packageRoot );
+	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
+	const repositoryRoot = getRepositoryRootFromPackageRoot( packageRoot );
+
+	return {
+		packageRoot,
+		packageName,
+		projectName,
+		repositoryRoot,
+		runner: packageJson ? getTestRunnerForPackageJson( packageJson ) : 'karma'
+	};
+}
+
+function getPackageRootFromTestFile( filePath ) {
+	const normalizedPath = upath.normalize( filePath );
+	const testsDirectoryIndex = normalizedPath.lastIndexOf( '/tests/' );
+
+	if ( testsDirectoryIndex === -1 ) {
+		throw new Error( `Cannot determine package root for "${ filePath }".` );
+	}
+
+	return normalizedPath.slice( 0, testsDirectoryIndex );
+}
+
+function getTestRunnerForPackageJson( packageJson ) {
+	const testScript = packageJson?.scripts?.test;
+
+	if ( typeof testScript === 'string' && /\bvitest\b/.test( testScript ) ) {
+		return 'vitest';
+	}
+
+	return 'karma';
+}
+
+function getRepositoryRootFromPackageRoot( packageRoot ) {
+	const normalizedPath = upath.normalize( packageRoot );
+	const packagesDirectoryIndex = normalizedPath.lastIndexOf( '/packages/' );
+
+	if ( packagesDirectoryIndex === -1 ) {
+		throw new Error( `Cannot determine repository root for "${ packageRoot }".` );
+	}
+
+	return normalizedPath.slice( 0, packagesDirectoryIndex );
 }
 
 function createKarmaEntryFile( files, production ) {
@@ -221,23 +286,45 @@ function createKarmaEntryFile( files, production ) {
 	fs.utimesSync( KARMA_ENTRY_FILE_PATH, then, then );
 }
 
-function createVitestConfigFile( files, options ) {
-	const runtimeConfig = {
-		test: {
-			include: files
-		}
-	};
+function getVitestExecutionPlan( files, packageInfoByRoot ) {
+	const repositoryPlans = new Map();
 
-	if ( options.coverage ) {
-		runtimeConfig.test.coverage = {
-			provider: 'v8',
-			reportsDirectory: upath.join( process.cwd(), 'coverage', 'vitest' )
-		};
+	for ( const file of files ) {
+		const packageRoot = getPackageRootFromTestFile( file );
+		const packageInfo = packageInfoByRoot.get( packageRoot );
+
+		if ( !packageInfo ) {
+			throw new Error( `Missing package metadata for "${ packageRoot }".` );
+		}
+
+		if ( !repositoryPlans.has( packageInfo.repositoryRoot ) ) {
+			repositoryPlans.set( packageInfo.repositoryRoot, {
+				repositoryRoot: packageInfo.repositoryRoot,
+				projects: new Set()
+			} );
+		}
+
+		const repositoryPlan = repositoryPlans.get( packageInfo.repositoryRoot );
+
+		repositoryPlan.projects.add( packageInfo.projectName );
 	}
 
-	mkdirp.sync( upath.dirname( VITEST_CONFIG_LOADER_PATH ) );
-	fs.writeFileSync( VITEST_CONFIG_RUNTIME_PATH, JSON.stringify( runtimeConfig, null, '\t' ) + '\n' );
-	fs.copyFileSync( VITEST_CONFIG_TEMPLATE_PATH, VITEST_CONFIG_LOADER_PATH );
+	return [ ...repositoryPlans.values() ].map( repositoryPlan => ( {
+		repositoryRoot: repositoryPlan.repositoryRoot,
+		projects: [ ...repositoryPlan.projects ]
+	} ) );
+}
+
+function aggregateExecutionErrors( errors ) {
+	if ( errors.length === 1 ) {
+		return errors[ 0 ];
+	}
+
+	const details = errors
+		.map( error => `- ${ error.message }` )
+		.join( '\n' );
+
+	return new Error( `Test execution failed in multiple runners:\n${ details }` );
 }
 
 function assertConsoleUsageToThrowErrors() {
@@ -323,9 +410,19 @@ function runKarma( options ) {
 	} );
 }
 
-function runVitest( options ) {
+function runVitest( options, vitestExecutionPlan ) {
+	let sequence = Promise.resolve();
+
+	for ( const repositoryPlan of vitestExecutionPlan ) {
+		sequence = sequence.then( () => runVitestForRepository( options, repositoryPlan ) );
+	}
+
+	return sequence;
+}
+
+function runVitestForRepository( options, repositoryPlan ) {
 	return new Promise( ( resolve, reject ) => {
-		const args = [ 'vitest', '--config', VITEST_CONFIG_LOADER_PATH ];
+		const args = [ 'vitest' ];
 
 		if ( options.watch ) {
 			args.push( '--watch' );
@@ -337,8 +434,13 @@ function runVitest( options ) {
 			args.push( '--coverage' );
 		}
 
+		for ( const projectName of repositoryPlan.projects ) {
+			args.push( '--project', projectName );
+		}
+
 		const subprocess = spawn( 'pnpm', args, {
 			stdio: 'inherit',
+			cwd: repositoryPlan.repositoryRoot,
 			shell: process.platform === 'win32'
 		} );
 
