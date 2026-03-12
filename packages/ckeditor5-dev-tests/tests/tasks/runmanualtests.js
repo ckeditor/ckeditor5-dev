@@ -391,4 +391,22 @@ describe( 'runManualTests()', () => {
 			]
 		} ) );
 	} );
+
+	it( 'allows specifying tsconfig file', async () => {
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [ 'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js' ] )
+			.mockReturnValueOnce( [ 'workspace/packages/ckeditor-*/tests/**/manual/**/*.js' ] );
+
+		await runManualTests( {
+			files: [
+				'ckeditor5-classic',
+				'ckeditor-classic/manual/classic.js'
+			],
+			tsconfig: '/absolute/path/to/tsconfig.json'
+		} );
+
+		expect( vi.mocked( compileManualTestScripts ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+			tsconfig: '/absolute/path/to/tsconfig.json'
+		} ) );
+	} );
 } );
