@@ -26,6 +26,7 @@ type LoaderToUse = string | {
 		attributes?: {
 			'data-cke': boolean;
 		};
+		importLoaders?: number;
 		sourceMap?: boolean;
 		lightningCssOptions?: object;
 	};
@@ -55,6 +56,7 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 	const getCssLoader = () => ( {
 		loader: resolveLoader( 'css-loader' ),
 		options: {
+			importLoaders: 1,
 			sourceMap
 		}
 	} );

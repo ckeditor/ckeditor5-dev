@@ -82,6 +82,7 @@ describe( 'getStylesLoader()', () => {
 		const options = typeof cssLoader === 'object' && cssLoader.options;
 
 		expect( options ).to.be.an( 'object' );
+		expect( options ).to.have.property( 'importLoaders', 1 );
 		expect( options ).to.have.property( 'sourceMap', false );
 	} );
 } );
