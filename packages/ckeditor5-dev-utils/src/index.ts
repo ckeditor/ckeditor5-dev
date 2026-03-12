@@ -6,7 +6,6 @@
 export { default as logger } from './logger/index.js';
 export * as loaders from './loaders/index.js';
 export * as stream from './stream/index.js';
-export * as styles from './styles/index.js';
 export * as tools from './tools/index.js';
 export * as npm from './npm/index.js';
 export * as workspaces from './workspaces/index.js';

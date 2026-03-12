@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getPostCssConfig } from './getpostcssconfig.js';
+import './package-import.css';

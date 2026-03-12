@@ -4,14 +4,10 @@
  */
 
 import { join } from 'node:path';
-import { test } from 'vitest';
-import { rollup, type RollupOutput } from 'rollup';
-
-import styles from 'rollup-plugin-styles';
-import postcssNesting from 'postcss-nesting';
-
+import { test, expect } from 'vitest';
+import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyDividedStyleSheet } from '../../_utils/utils.js';
-import { splitCss, type RollupSplitCssOptions } from '../../../src/index.js';
+import { splitCss, bundleCss, type RollupSplitCssOptions } from '../../../src/index.js';
 import { removeWhitespace } from '../../../src/utils.js';
 
 /**
@@ -25,11 +21,8 @@ async function generateBundle(
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, input ),
 		plugins: [
-			styles( {
-				mode: [ 'extract', 'styles.css' ],
-				plugins: [
-					postcssNesting
-				]
+			bundleCss( {
+				fileName: 'styles.css'
 			} ),
 			splitCss( options )
 		]
@@ -45,6 +38,33 @@ async function generateBundle(
 	return output;
 }
 
+function getStylesheetSource( output: RollupOutput['output'], outputFileName: string ): string {
+	const styles = output.find( output => output.fileName === outputFileName );
+
+	expect( styles ).toBeDefined();
+	expect( styles!.type ).toBe( 'asset' );
+
+	return ( styles as OutputAsset ).source as string;
+}
+
+async function generateBundleWithoutBundledCss(
+	input: string,
+	options: RollupSplitCssOptions
+): Promise<RollupOutput['output']> {
+	const bundle = await rollup( {
+		input: join( import.meta.dirname, input ),
+		plugins: [ splitCss( options ) ]
+	} );
+
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		file: 'input.js',
+		assetFileNames: '[name][extname]'
+	} );
+
+	return output;
+}
+
 test( 'should import a single `CSS` file', async () => {
 	const output = await generateBundle(
 		'./fixtures/single-import/input.ts',
@@ -53,7 +73,7 @@ test( 'should import a single `CSS` file', async () => {
 
 	const expectedResult = removeWhitespace(
 		`body{
-			color:'#000';
+			color:"#000";
 		}
 	` );
 
@@ -69,7 +89,7 @@ test( 'should import multiple `CSS` files', async () => {
 
 	const expectedResult = removeWhitespace(
 		`body{
-			color:'#000';
+			color:"#000";
 		}
 		div{
 			display:grid;
@@ -110,7 +130,7 @@ test( 'should ignore `CSS` comments', async () => {
 
 	const expectedResult = removeWhitespace(
 		`body{
-			color:'#000';
+			color:"#000";
 		}
 	` );
 
@@ -161,14 +181,14 @@ test( 'should omit `:root` declaration when it\'s empty', async () => {
 	const expectedEditorResult = removeWhitespace(
 		`.ck-feature{
 			color:red;
-			background-color:blue;
+			background-color:#00f;
 		}
 	` );
 
 	const expectedContentResult = removeWhitespace(
-		`.ck-content.ck-feature{
+		` .ck-content.ck-feature{
 			color:red;
-			background-color:blue;
+			background-color:#00f;
 		}
 	` );
 
@@ -200,6 +220,16 @@ test( 'should divide classes into files based on its purpose', async () => {
 
 test( 'should prepare empty `CSS` files when no styles imported', async () => {
 	const output = await generateBundle(
+		'./fixtures/no-styles/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', '\n' );
+	verifyDividedStyleSheet( output, 'styles-content.css', '\n' );
+} );
+
+test( 'should prepare empty `CSS` files when bundle contains no stylesheet asset', async () => {
+	const output = await generateBundleWithoutBundledCss(
 		'./fixtures/no-styles/input.ts',
 		{ baseFileName: 'styles' }
 	);
@@ -250,16 +280,14 @@ test( 'should keep CSS variables used by other CSS variables', async () => {
 			--ck-spacing-unit:var(--ck-variable-1);
 			--ck-variable-1:var(--ck-variable-2);
 			--ck-variable-2:var(--ck-nonexistent-variable, var(--ck-variable-3));
-			--ck-variable-3:0.6em;
+			--ck-variable-3:.6em;
 			--ck-variable-4:1px;
 			--ck-variable-5:1em;
-			--ck-calc-variables:calc( var(--ck-variable-4) + var(--ck-variable-5));
+			--ck-calc-variables:calc(var(--ck-variable-4) + var(--ck-variable-5));
 		}
 		.ck{
 			margin:var(--ck-spacing-unit);
-		}
-		.ck{
-			transform:translateX( var(--ck-calc-variables));
+			transform:translateX(var(--ck-calc-variables));
 		}
 	` );
 
@@ -273,14 +301,90 @@ test( 'should preserve all selectors', async () => {
 	);
 
 	const expectedResult = removeWhitespace(
-		`.ck,
-		.second-selector,
-		.third-selector p{
+		`.ck, .second-selector, .third-selector p{
 			color:red;
 		}
 	` );
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+} );
+
+test( 'should preserve content selectors emitted with `:is()`', async () => {
+	const output = await generateBundle(
+		'./fixtures/is-selector-content/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+			--editor-color:blue;
+		}
+		.ck-editor-only{
+			color:var(--editor-color);
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+		}
+		:is(.ck-content .ck-widget.table > figcaption, .ck-content .ck-widget.table > table > caption).ck-suggestion-marker-deletion{
+			background-color:var(--content-color);
+			border:none;
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
+
+test( 'should preserve functional content selectors with ids, attributes and pseudo arguments', async () => {
+	const output = await generateBundle(
+		'./fixtures/functional-selector-tokens/input.ts',
+		{ baseFileName: 'styles' }
+	);
+	const editorStyles = getStylesheetSource( output, 'styles-editor.css' );
+	const contentStyles = getStylesheetSource( output, 'styles-content.css' );
+
+	expect( removeWhitespace( editorStyles ) ).toContain( '.ck-editor-only:not(:is( .other)){' );
+	expect( removeWhitespace( editorStyles ) ).toContain( ':is( .other)#feature[data-role="main"]:dir(rtl):lang(pl){' );
+	expect( editorStyles ).not.toContain( '.ck-content' );
+
+	expect( removeWhitespace( contentStyles ) ).toContain( '#feature[data-role="main"]:dir(rtl):lang(pl){' );
+	expect( removeWhitespace( contentStyles ) ).toContain( ':is(.ck-content)[data-state]{' );
+	expect( contentStyles ).toContain( '.ck-content' );
+	expect( contentStyles ).not.toContain( 'foo.bar' );
+	expect( contentStyles ).not.toContain( '.ck-editor-only' );
+} );
+
+test( 'should not leak editor selectors when matching `:is()` content selectors', async () => {
+	const output = await generateBundle(
+		'./fixtures/is-selector-content-no-editor-leak/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+			--editor-color:blue;
+		}
+		.ck-editor__editable .table.layout-table > table{
+			color:var(--editor-color);
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`:root{
+			--content-color:red;
+		}
+		.ck-content:not(.ck-editor__editable) .table.layout-table > table{
+			color:var(--content-color);
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
 } );
 
 test( 'should preserve all `@media` queries and split it correctly', async () => {
@@ -292,7 +396,7 @@ test( 'should preserve all `@media` queries and split it correctly', async () =>
 	const expectedEditorResult = removeWhitespace(
 		`@media (prefers-reduced-motion: reduce){
 			.ck-image-upload-complete-icon{
-				animation-duration:0ms;
+				animation-duration:0s;
 			}
 		}
 	` );
@@ -303,7 +407,7 @@ test( 'should preserve all `@media` queries and split it correctly', async () =>
 				padding:0;
 			}
 		}
-		@media screen and (max-width: 600px){
+		@media screen and (width <= 600px){
 			.ck-content{
 				width:100%;
 			}
@@ -322,20 +426,22 @@ test( 'should filter `@keyframes` queries based on class names usage only for `c
 
 	const expectedEditorResult = removeWhitespace(
 		`.animation{
-			animation:fadeIn 1s;
+			animation:1s fadeIn;
 		}
 		@keyframes fadeIn{
 			from{
 				opacity:0;
 			}
-			to{ opacity:1; }
+			to{
+				opacity:1;
+			}
 		}
 		@keyframes ck-animation{
 			0%{
-				background-color:white;
+				background-color:#fff;
 			}
 			100%{
-				background-color:black;
+				background-color:#000;
 			}
 		}
 	` );
@@ -343,15 +449,15 @@ test( 'should filter `@keyframes` queries based on class names usage only for `c
 	const expectedContentResult = removeWhitespace(
 		`@media (forced-colors: none){
 			.ck-content.animation-in-media-query{
-				animation:ck-animation 1s ease-out;
+				animation:1s ease-out ck-animation;
 			}
 		}
 		@keyframes ck-animation{
 			0%{
-				background-color:white;
+				background-color:#fff;
 			}
 			100%{
-				background-color:black;
+				background-color:#000;
 			}
 		}
 	` );

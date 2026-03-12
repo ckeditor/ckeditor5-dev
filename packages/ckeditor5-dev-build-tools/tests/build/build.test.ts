@@ -301,8 +301,8 @@ test( 'Source map', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.js.map',
-		'index.css',
 		'index.css.map',
+		'index.css',
 		'index-editor.css',
 		'index-content.css'
 	] );

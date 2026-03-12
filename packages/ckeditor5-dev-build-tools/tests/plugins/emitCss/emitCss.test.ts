@@ -5,11 +5,10 @@
 
 import { join } from 'node:path';
 import { test } from 'vitest';
-import styles from 'rollup-plugin-styles';
 import { rollup, type RollupOutput } from 'rollup';
 import { swcPlugin, verifyAsset } from '../../_utils/utils.js';
 
-import { emitCss } from '../../../src/index.js';
+import { emitCss, bundleCss } from '../../../src/index.js';
 
 async function generateBundle( input: string ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
@@ -17,13 +16,8 @@ async function generateBundle( input: string ): Promise<RollupOutput['output']> 
 		plugins: [
 			swcPlugin,
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			styles( {
-				mode: [
-					'extract',
-					'styles.css'
-				]
+			bundleCss( {
+				fileName: 'styles.css'
 			} ),
 
 			emitCss( {

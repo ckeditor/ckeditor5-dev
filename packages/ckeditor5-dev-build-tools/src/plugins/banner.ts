@@ -78,8 +78,13 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 					await new SourceMapConsumer( newSourceMap )
 				);
 
+				const originalMapConsumer = await new SourceMapConsumer(
+					JSON.parse( originalSourceMap.source.toString() )
+				);
+
 				generator.applySourceMap(
-					await new SourceMapConsumer( JSON.parse( originalSourceMap.source.toString() ) )
+					originalMapConsumer,
+					fileName
 				);
 
 				delete bundle[ sourceMapName ];
