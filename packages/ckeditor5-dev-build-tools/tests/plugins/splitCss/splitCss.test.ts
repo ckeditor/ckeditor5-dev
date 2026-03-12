@@ -9,7 +9,6 @@ import { rollup, type RollupOutput } from 'rollup';
 
 import styles from 'rollup-plugin-styles';
 import postcssNesting from 'postcss-nesting';
-import postcssMixins from 'postcss-mixins';
 
 import { verifyDividedStyleSheet } from '../../_utils/utils.js';
 import { splitCss, type RollupSplitCssOptions } from '../../../src/index.js';
@@ -29,8 +28,7 @@ async function generateBundle(
 			styles( {
 				mode: [ 'extract', 'styles.css' ],
 				plugins: [
-					postcssNesting,
-					postcssMixins
+					postcssNesting
 				]
 			} ),
 			splitCss( options )

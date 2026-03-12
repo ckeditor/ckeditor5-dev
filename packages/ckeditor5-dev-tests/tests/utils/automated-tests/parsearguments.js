@@ -41,8 +41,6 @@ describe( 'parseArguments()', () => {
 			'true',
 			'--identity-file',
 			'/home/.secret/file.key',
-			'--theme-path',
-			'/path/to/theme/package',
 			'--additional-languages',
 			'de,fr',
 			'--resolve-js-first'
@@ -50,13 +48,11 @@ describe( 'parseArguments()', () => {
 
 		expect( options[ 'source-map' ] ).to.be.undefined;
 		expect( options[ 'identity-file' ] ).to.be.undefined;
-		expect( options[ 'theme-path' ] ).to.be.undefined;
 		expect( options[ 'additional-languages' ] ).to.be.undefined;
 		expect( options[ 'resolve-js-first' ] ).to.be.undefined;
 
 		expect( options.sourceMap ).to.equal( true );
 		expect( options.identityFile ).to.equal( '/home/.secret/file.key' );
-		expect( options.themePath ).to.equal( '/path/to/theme/package' );
 		expect( options.additionalLanguages ).to.deep.equal( [ 'de', 'fr' ] );
 		expect( options.resolveJsFirst ).to.equal( true );
 	} );
@@ -299,26 +295,6 @@ describe( 'parseArguments()', () => {
 				expect( options.files ).to.deep.equal( [ 'core', 'engine', 'foo-1', 'foo-2', 'bar-1', 'bar-2' ] );
 			}
 		);
-	} );
-
-	describe( 'DLLs', () => {
-		it( 'should set default value if no `--dll` flag is set', () => {
-			const options = parseArguments( [] );
-
-			expect( options.dll ).to.equal( null );
-		} );
-
-		it( 'should detect if `--dll` is set', () => {
-			const options = parseArguments( [ '--dll' ] );
-
-			expect( options.dll ).to.be.true;
-		} );
-
-		it( 'should detect if negation of the `--dll` is set (`--no-dll`)', () => {
-			const options = parseArguments( [ '--no-dll' ] );
-
-			expect( options.dll ).to.be.false;
-		} );
 	} );
 
 	describe( 'tsconfig', () => {

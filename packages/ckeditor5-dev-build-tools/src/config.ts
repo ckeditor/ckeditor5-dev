@@ -32,7 +32,6 @@ import { translations as translationsPlugin } from './plugins/translations.js';
 /**
  * PostCSS plugins
  */
-import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
 
 /**
@@ -158,12 +157,11 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			} ),
 
 			/**
-			 * Allows using imports, mixins and nesting in CSS and extracts output CSS to a separate file.
+			 * Allows using imports and nesting in CSS and extracts output CSS to a separate file.
 			 */
 			styles( {
 				mode: [ 'extract', cssFileName ],
 				plugins: [
-					postcssMixins,
 					postcssNesting( {
 						noIsPseudoSelector: true,
 						edition: '2021'
