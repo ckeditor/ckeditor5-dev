@@ -23,6 +23,10 @@ if ( !cliArguments.npmTag ) {
 	cliArguments.npmTag = releaseTools.getNpmTagFromVersion( latestVersion );
 }
 
+if ( cliArguments.npmTag === 'latest' ) {
+	cliArguments.npmTag = 'latest-v54';
+}
+
 const tasks = new Listr( [
 	{
 		title: 'Publishing packages.',
