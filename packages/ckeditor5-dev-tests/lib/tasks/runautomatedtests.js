@@ -4,6 +4,7 @@
  */
 
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { styleText } from 'node:util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
@@ -24,8 +25,19 @@ const IGNORE_GLOBS = [
 	upath.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
+const AUTOMATED_TESTS_BUILD_PATH = upath.join( process.cwd(), 'build', '.automated-tests' );
+
 // An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const KARMA_ENTRY_FILE_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'entry-point.js' );
+
+// An absolute path to the static Vitest config loader that is copied into the build directory.
+const VITEST_CONFIG_TEMPLATE_PATH = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'templates', 'vitest.config.mjs' );
+
+// An absolute path to the target location where Vitest config loader is copied.
+const VITEST_CONFIG_LOADER_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'vitest.config.mjs' );
+
+// An absolute path to the generated runtime Vitest config serialized as JSON.
+const VITEST_CONFIG_RUNTIME_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'runtimeconfig.json' );
 
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
@@ -38,16 +50,67 @@ export default function runAutomatedTests( options ) {
 		}
 
 		const globPatterns = transformFilesToTestGlob( options.files );
+		const allFiles = collectFilesToTests( globPatterns );
+		const { karmaFiles, vitestFiles } = splitFilesByTestRunner( allFiles );
 
-		createEntryFile( globPatterns, options.production );
+		if ( !karmaFiles.length && !vitestFiles.length ) {
+			throw new Error( 'Files to test not found.' );
+		}
 
-		const optionsForKarma = Object.assign( {}, options, {
-			entryFile: ENTRY_FILE_PATH,
-			globPatterns
+		if ( karmaFiles.length && vitestFiles.length ) {
+			if ( options.watch || options.coverage ) {
+				throw new Error( 'Watch mode and coverage are not supported yet when mixed Karma + Vitest files are selected.' );
+			}
+		}
+
+		let runnerSequence = Promise.resolve();
+		let hasExecutionErrors = false;
+
+		if ( karmaFiles.length ) {
+			runnerSequence = runnerSequence
+				.then( () => prepareAndRunKarma( options, globPatterns, karmaFiles ) )
+				.catch( () => {
+					hasExecutionErrors = true;
+				} );
+		}
+
+		if ( vitestFiles.length ) {
+			runnerSequence = runnerSequence
+				.then( () => prepareAndRunVitest( options, vitestFiles ) )
+				.catch( () => {
+					hasExecutionErrors = true;
+				} );
+		}
+
+		return runnerSequence.then( () => {
+			if ( hasExecutionErrors ) {
+				throw new Error( 'Test execution failed.' );
+			}
 		} );
-
-		return runKarma( optionsForKarma );
 	} );
+}
+
+function prepareAndRunKarma( options, globPatterns, karmaFiles ) {
+	return Promise.resolve()
+		.then( () => {
+			createKarmaEntryFile( karmaFiles, options.production );
+
+			const optionsForKarma = Object.assign( {}, options, {
+				entryFile: KARMA_ENTRY_FILE_PATH,
+				globPatterns
+			} );
+
+			return runKarma( optionsForKarma );
+		} );
+}
+
+function prepareAndRunVitest( options, vitestFiles ) {
+	return Promise.resolve()
+		.then( () => {
+			createVitestConfigFile( vitestFiles, options );
+
+			return runVitest( options );
+		} );
 }
 
 function transformFilesToTestGlob( files ) {
@@ -64,8 +127,7 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns, production ) {
-	mkdirp.sync( upath.dirname( ENTRY_FILE_PATH ) );
+function collectFilesToTests( globPatterns ) {
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
 	const log = karmaLogger.create( 'config' );
@@ -91,18 +153,39 @@ function createEntryFile( globPatterns, production ) {
 		}
 	}
 
-	if ( !allFiles.length ) {
-		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
+	return allFiles;
+}
+
+function splitFilesByTestRunner( allFiles ) {
+	const karmaFiles = [];
+	const vitestFiles = [];
+
+	for ( const file of allFiles ) {
+		if ( isVitestTestFile( file ) ) {
+			vitestFiles.push( file );
+		} else {
+			karmaFiles.push( file );
+		}
 	}
 
+	return { karmaFiles, vitestFiles };
+}
+
+function isVitestTestFile( filePath ) {
+	const fileContent = fs.readFileSync( filePath, 'utf8' );
+
+	return /^import.+from 'vitest';$/m.test( fileContent );
+}
+
+function createKarmaEntryFile( files, production ) {
 	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
+	files.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
-	allFiles.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
+	files.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
+	files.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
 
-	const entryFileContent = allFiles
+	const entryFileContent = files
 		.map( file => 'import "' + file + '";' );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
@@ -126,7 +209,8 @@ function createEntryFile( globPatterns, production ) {
 		entryFileContent.unshift( assertConsoleUsageToThrowErrors() );
 	}
 
-	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
+	mkdirp.sync( upath.dirname( KARMA_ENTRY_FILE_PATH ) );
+	fs.writeFileSync( KARMA_ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
 
 	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
 	// A ugly hack blocks the loop and tests are executed once.
@@ -134,7 +218,26 @@ function createEntryFile( globPatterns, production ) {
 	const now = Date.now() / 1000;
 	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
 	const then = now - 10;
-	fs.utimesSync( ENTRY_FILE_PATH, then, then );
+	fs.utimesSync( KARMA_ENTRY_FILE_PATH, then, then );
+}
+
+function createVitestConfigFile( files, options ) {
+	const runtimeConfig = {
+		test: {
+			include: files
+		}
+	};
+
+	if ( options.coverage ) {
+		runtimeConfig.test.coverage = {
+			provider: 'v8',
+			reportsDirectory: upath.join( process.cwd(), 'coverage', 'vitest' )
+		};
+	}
+
+	mkdirp.sync( upath.dirname( VITEST_CONFIG_LOADER_PATH ) );
+	fs.writeFileSync( VITEST_CONFIG_RUNTIME_PATH, JSON.stringify( runtimeConfig, null, '\t' ) + '\n' );
+	fs.copyFileSync( VITEST_CONFIG_TEMPLATE_PATH, VITEST_CONFIG_LOADER_PATH );
 }
 
 function assertConsoleUsageToThrowErrors() {
@@ -217,5 +320,38 @@ function runKarma( options ) {
 		}
 
 		server.start();
+	} );
+}
+
+function runVitest( options ) {
+	return new Promise( ( resolve, reject ) => {
+		const args = [ 'vitest', '--config', VITEST_CONFIG_LOADER_PATH ];
+
+		if ( options.watch ) {
+			args.push( '--watch' );
+		} else {
+			args.push( '--run' );
+		}
+
+		if ( options.coverage ) {
+			args.push( '--coverage' );
+		}
+
+		const subprocess = spawn( 'pnpm', args, {
+			stdio: 'inherit',
+			shell: process.platform === 'win32'
+		} );
+
+		subprocess.on( 'error', error => {
+			reject( error );
+		} );
+
+		subprocess.on( 'close', exitCode => {
+			if ( exitCode === 0 ) {
+				resolve();
+			} else {
+				reject( new Error( `Vitest finished with "${ exitCode }" code.` ) );
+			}
+		} );
 	} );
 }
