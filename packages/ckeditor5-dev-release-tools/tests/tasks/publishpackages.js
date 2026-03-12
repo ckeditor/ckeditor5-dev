@@ -257,7 +257,10 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				],
-				'staging'
+				'staging',
+				{
+					disallowLatestNpmTag: false
+				}
 			);
 		} );
 
@@ -277,7 +280,10 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				],
-				'nightly'
+				'nightly',
+				{
+					disallowLatestNpmTag: false
+				}
 			);
 		} );
 
@@ -297,7 +303,34 @@ describe( 'publishPackages()', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				],
-				'latest-v47'
+				'latest-v47',
+				{
+					disallowLatestNpmTag: false
+				}
+			);
+		} );
+
+		it( 'should assert that latest npm tag publishing can be disallowed', async () => {
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				listrTask: {},
+				npmTag: 'latest',
+				disallowLatestNpmTag: true
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
+				[
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				],
+				'latest',
+				{
+					disallowLatestNpmTag: true
+				}
 			);
 		} );
 
