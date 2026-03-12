@@ -78,6 +78,15 @@ describe( 'assertNpmTag()', () => {
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'latest-v1' );
 	} );
 
+	it( 'should not throw if publishing as latest is disallowed but npm tag is not latest', async () => {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
+		} ) );
+
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'staging', { disallowLatestNpmTag: true } );
+	} );
+
 	it( 'should not throw if version tag matches npm tag (both "alpha")', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
@@ -108,6 +117,11 @@ describe( 'assertNpmTag()', () => {
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' ) )
 			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "alpha".' );
+	} );
+
+	it( 'should throw if publishing as latest is disallowed and npm tag is latest', async () => {
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'latest', { disallowLatestNpmTag: true } ) )
+			.rejects.toThrow( 'Publishing with the npm tag "latest" is disallowed.' );
 	} );
 
 	it( 'should throw if version tag (latest) does not match npm tag (latest-v{Y})', async () => {
