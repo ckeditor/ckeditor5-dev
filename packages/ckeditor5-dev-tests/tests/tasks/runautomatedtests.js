@@ -90,6 +90,7 @@ describe( 'runAutomatedTests()', () => {
 	beforeEach( async () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/workspace' );
 		stubs.spawn.call.mockReset();
+		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		vi.mocked( karmaLogger ).create.mockImplementation( name => {
 			expect( name ).to.equal( 'config' );

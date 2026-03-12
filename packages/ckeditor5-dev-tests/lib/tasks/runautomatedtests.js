@@ -42,23 +42,21 @@ export default function runAutomatedTests( options ) {
 
 		const globPatterns = transformFilesToTestGlob( options.files );
 		const allFiles = collectFilesToTests( globPatterns );
-		const packageRoots = [ ...new Set( allFiles.map( getPackageRootFromTestFile ) ) ];
-		const packageInfoByRoot = getPackageInfoByRoot( packageRoots );
-		const vitestPackageRoots = getVitestPackageRoots( packageInfoByRoot );
-		const { karmaFiles, vitestFiles } = splitFilesByTestRunner( allFiles, vitestPackageRoots );
+		const { karmaFiles, vitestExecutionPlan } = partitionFilesByRunner( allFiles );
+		const hasVitestSelection = vitestExecutionPlan.length > 0;
 
-		if ( !karmaFiles.length && !vitestFiles.length ) {
+		if ( !karmaFiles.length && !hasVitestSelection ) {
 			throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 		}
 
-		if ( karmaFiles.length && vitestFiles.length && options.coverage ) {
+		if ( karmaFiles.length && hasVitestSelection && options.coverage ) {
 			throw new Error(
 				'Coverage cannot be collected in a mixed Karma + Vitest run. ' +
 				'Run coverage separately for Karma and Vitest packages.'
 			);
 		}
 
-		if ( karmaFiles.length && vitestFiles.length && options.watch ) {
+		if ( karmaFiles.length && hasVitestSelection && options.watch ) {
 			throw new Error(
 				'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
 				'Run watch mode separately for Karma and Vitest packages.'
@@ -70,17 +68,15 @@ export default function runAutomatedTests( options ) {
 
 		if ( karmaFiles.length ) {
 			runnerSequence = runnerSequence
-				.then( () => prepareAndRunKarma( options, karmaFiles, globPatterns, vitestFiles.length > 0 ) )
+				.then( () => prepareAndRunKarma( options, karmaFiles, globPatterns, hasVitestSelection ) )
 				.catch( error => {
 					errors.push( error );
 				} );
 		}
 
-		if ( vitestFiles.length ) {
-			const vitestExecutionPlan = getVitestExecutionPlan( vitestFiles, packageInfoByRoot );
-
+		if ( hasVitestSelection ) {
 			runnerSequence = runnerSequence
-				.then( () => prepareAndRunVitest( options, vitestExecutionPlan ) )
+				.then( () => runVitest( options, vitestExecutionPlan ) )
 				.catch( error => {
 					errors.push( error );
 				} );
@@ -103,10 +99,6 @@ function prepareAndRunKarma( options, karmaFiles, allGlobPatterns, hasMixedRunne
 	} );
 
 	return runKarma( optionsForKarma );
-}
-
-function prepareAndRunVitest( options, vitestExecutionPlan ) {
-	return runVitest( options, vitestExecutionPlan );
 }
 
 function transformFilesToTestGlob( files ) {
@@ -152,62 +144,38 @@ function collectFilesToTests( globPatterns ) {
 	return allFiles;
 }
 
-function splitFilesByTestRunner( allFiles, vitestPackageRoots ) {
+function partitionFilesByRunner( allFiles ) {
 	const karmaFiles = [];
-	const vitestFiles = [];
+	const packageRuntimeInfoByRoot = new Map();
+	const vitestProjectsByRepositoryRoot = new Map();
 
-	for ( const file of allFiles ) {
-		const packageRoot = getPackageRootFromTestFile( file );
+	for ( const filePath of allFiles ) {
+		const packageRoot = getPackageRootFromTestFile( filePath );
+		let packageRuntimeInfo = packageRuntimeInfoByRoot.get( packageRoot );
 
-		if ( vitestPackageRoots.has( packageRoot ) ) {
-			vitestFiles.push( file );
+		if ( !packageRuntimeInfo ) {
+			packageRuntimeInfo = getPackageRuntimeInfo( packageRoot );
+			packageRuntimeInfoByRoot.set( packageRoot, packageRuntimeInfo );
+		}
+
+		if ( packageRuntimeInfo.runner === 'vitest' ) {
+			if ( !vitestProjectsByRepositoryRoot.has( packageRuntimeInfo.repositoryRoot ) ) {
+				vitestProjectsByRepositoryRoot.set( packageRuntimeInfo.repositoryRoot, new Set() );
+			}
+
+			vitestProjectsByRepositoryRoot.get( packageRuntimeInfo.repositoryRoot ).add( packageRuntimeInfo.projectName );
 		} else {
-			karmaFiles.push( file );
+			karmaFiles.push( filePath );
 		}
 	}
 
-	return { karmaFiles, vitestFiles };
-}
+	const vitestExecutionPlan = [ ...vitestProjectsByRepositoryRoot.entries() ]
+		.map( ( [ repositoryRoot, projects ] ) => ( {
+			repositoryRoot,
+			projects: [ ...projects ]
+		} ) );
 
-function getVitestPackageRoots( packageInfoByRoot ) {
-	return new Set( [ ...packageInfoByRoot.values() ]
-		.filter( packageInfo => packageInfo.runner === 'vitest' )
-		.map( packageInfo => packageInfo.packageRoot ) );
-}
-
-function getPackageInfoByRoot( packageRoots ) {
-	const packageInfoByRoot = new Map();
-
-	for ( const packageRoot of packageRoots ) {
-		const packageInfo = getPackageInfo( packageRoot );
-
-		packageInfoByRoot.set( packageRoot, packageInfo );
-	}
-
-	return packageInfoByRoot;
-}
-
-function getPackageInfo( packageRoot ) {
-	let packageJson = null;
-
-	try {
-		const packageJsonPath = upath.join( packageRoot, 'package.json' );
-		packageJson = JSON.parse( fs.readFileSync( packageJsonPath, 'utf8' ) );
-	} catch {
-		packageJson = null;
-	}
-
-	const packageName = packageJson?.name || upath.basename( packageRoot );
-	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
-	const repositoryRoot = getRepositoryRootFromPackageRoot( packageRoot );
-
-	return {
-		packageRoot,
-		packageName,
-		projectName,
-		repositoryRoot,
-		runner: packageJson ? getTestRunnerForPackageJson( packageJson ) : 'karma'
-	};
+	return { karmaFiles, vitestExecutionPlan };
 }
 
 function getPackageRootFromTestFile( filePath ) {
@@ -240,6 +208,20 @@ function getRepositoryRootFromPackageRoot( packageRoot ) {
 	}
 
 	return normalizedPath.slice( 0, packagesDirectoryIndex );
+}
+
+function getPackageRuntimeInfo( packageRoot ) {
+	const repositoryRoot = getRepositoryRootFromPackageRoot( packageRoot );
+	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
+
+	const packageJsonPath = upath.join( packageRoot, 'package.json' );
+	const packageJson = JSON.parse( fs.readFileSync( packageJsonPath, 'utf8' ) );
+
+	return {
+		repositoryRoot,
+		projectName,
+		runner: getTestRunnerForPackageJson( packageJson )
+	};
 }
 
 function createKarmaEntryFile( files, production ) {
@@ -284,35 +266,6 @@ function createKarmaEntryFile( files, production ) {
 	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
 	const then = now - 10;
 	fs.utimesSync( KARMA_ENTRY_FILE_PATH, then, then );
-}
-
-function getVitestExecutionPlan( files, packageInfoByRoot ) {
-	const repositoryPlans = new Map();
-
-	for ( const file of files ) {
-		const packageRoot = getPackageRootFromTestFile( file );
-		const packageInfo = packageInfoByRoot.get( packageRoot );
-
-		if ( !packageInfo ) {
-			throw new Error( `Missing package metadata for "${ packageRoot }".` );
-		}
-
-		if ( !repositoryPlans.has( packageInfo.repositoryRoot ) ) {
-			repositoryPlans.set( packageInfo.repositoryRoot, {
-				repositoryRoot: packageInfo.repositoryRoot,
-				projects: new Set()
-			} );
-		}
-
-		const repositoryPlan = repositoryPlans.get( packageInfo.repositoryRoot );
-
-		repositoryPlan.projects.add( packageInfo.projectName );
-	}
-
-	return [ ...repositoryPlans.values() ].map( repositoryPlan => ( {
-		repositoryRoot: repositoryPlan.repositoryRoot,
-		projects: [ ...repositoryPlan.projects ]
-	} ) );
 }
 
 function aggregateExecutionErrors( errors ) {
