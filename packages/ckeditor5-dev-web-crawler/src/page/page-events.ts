@@ -92,9 +92,9 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 }
 
 function getErrorMessage( error: unknown ): string {
-	// @ts-ignore
+	// @ts-expect-error Error.isError is available in Node 24.3, but only available in newer TypeScript versions / target environments.
 	if ( Error.isError( error ) ) {
-		return ( error as Error).message || '(empty message)';
+		return ( error as Error ).message || '(empty message)';
 	}
 
 	return '(empty message)';
