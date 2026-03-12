@@ -37,6 +37,7 @@ import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
  * @param {ListrTaskObject} [options.listrTask] An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process.
  * @param {string} [options.npmTag='staging'] The npm distribution tag.
+ * @param {boolean} [options.disallowLatestNpmTag=false] Whether to disallow publishing packages using the `latest` npm distribution tag.
  * @param {Object.<string, Array.<string>>|null} [options.optionalEntries=null] Specifies which entries from the `files` field in the
  * `package.json` are optional. The key is a package name, and its value is an array of optional entries from the `files` field, for which
  * it is allowed not to match any file. The `options.optionalEntries` object may also contain the `default` key, which is used for all
@@ -59,6 +60,7 @@ export default async function publishPackages( options ) {
 		listrTask,
 		signal = null,
 		npmTag = 'staging',
+		disallowLatestNpmTag = false,
 		optionalEntries = null,
 		confirmationCallback = null,
 		requireEntryPoint = false,
@@ -94,7 +96,7 @@ export default async function publishPackages( options ) {
 
 	await assertPackages( packagesToProcess, { requireEntryPoint, optionalEntryPointPackages } );
 	await assertFilesToPublish( packagesToProcess, optionalEntries );
-	await assertNpmTag( packagesToProcess, npmTag );
+	await assertNpmTag( packagesToProcess, npmTag, { disallowLatestNpmTag } );
 
 	const shouldPublishPackages = confirmationCallback ? await confirmationCallback() : true;
 
