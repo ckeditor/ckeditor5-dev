@@ -23,6 +23,10 @@ if ( !cliArguments.npmTag ) {
 	cliArguments.npmTag = releaseTools.getNpmTagFromVersion( latestVersion );
 }
 
+if ( cliArguments.npmTag === 'latest' ) {
+	cliArguments.npmTag = 'latest-v54';
+}
+
 const tasks = new Listr( [
 	{
 		title: 'Publishing packages.',
@@ -59,7 +63,8 @@ const tasks = new Listr( [
 			const releaseUrl = await releaseTools.createGithubRelease( {
 				token: githubToken,
 				version: latestVersion,
-				description: versionChangelog
+				description: versionChangelog,
+				isLatest: false
 			} );
 
 			task.output = `Release page: ${ releaseUrl }`;

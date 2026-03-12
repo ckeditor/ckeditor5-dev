@@ -1,7 +1,7 @@
 CKEditor 5 development tools packages
 =====================================
 
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 [![Coverage Status](https://codecov.io/github/ckeditor/ckeditor5-dev/graph/badge.svg)](https://codecov.io/github/ckeditor/ckeditor5-dev)
 
 ## Packages
@@ -53,10 +53,10 @@ CircleCI automates the release process and can release both channels: stable (`X
 
 Before you start, you need to prepare the changelog entries.
 
-1. Make sure the `#master` branch is up-to-date: `git fetch && git checkout master && git pull`.
+1. Make sure the `#master-v54` branch is up-to-date: `git fetch && git checkout master-v54 && git pull`.
 1. Prepare a release branch: `git checkout -b release-[YYYYMMDD]` where `YYYYMMDD` is the current day.
 1. Generate the changelog entries: `pnpm run release:prepare-changelog`.
-1. Commit all changes and prepare a new pull request targeting the `#master` branch.
+1. Commit all changes and prepare a new pull request targeting the `#master-v54` branch.
 1. Ping the `@ckeditor/ckeditor-5-platform` team to review the pull request and trigger the release process.
 
 ## License

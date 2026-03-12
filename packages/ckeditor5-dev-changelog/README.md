@@ -2,7 +2,7 @@ CKEditor 5 Changelog
 ====================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-changelog.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v54)
 
 A development tool for handling the changelog preparation in CKEditor 5.
 
