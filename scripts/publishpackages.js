@@ -31,6 +31,7 @@ const tasks = new Listr( [
 				packagesDirectory: RELEASE_DIRECTORY,
 				npmOwner: 'ckeditor',
 				npmTag: cliArguments.npmTag,
+				disallowLatestNpmTag: true,
 				listrTask: task,
 				confirmationCallback: () => {
 					if ( cliArguments.ci ) {

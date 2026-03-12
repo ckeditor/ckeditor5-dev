@@ -19,10 +19,17 @@ const ALLOWED_NPM_LATEST_TAGS = [
  *
  * @param {Array.<string>} packagePaths
  * @param {string} npmTag
+ * @param {object} [options={}]
+ * @param {boolean} [options.disallowLatestNpmTag=false] Whether to disallow publishing packages using the `latest` npm distribution tag.
  * @returns {Promise}
  */
-export default async function assertNpmTag( packagePaths, npmTag ) {
+export default async function assertNpmTag( packagePaths, npmTag, options = {} ) {
+	const { disallowLatestNpmTag = false } = options;
 	const errors = [];
+
+	if ( disallowLatestNpmTag && npmTag === 'latest' ) {
+		throw new Error( 'Publishing with the npm tag "latest" is disallowed.' );
+	}
 
 	for ( const packagePath of packagePaths ) {
 		const path = upath.join( packagePath, 'package.json' );
