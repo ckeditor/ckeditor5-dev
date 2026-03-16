@@ -15,25 +15,19 @@ import type { BuildOptions } from './build.js';
  */
 import swc from '@rollup/plugin-swc';
 import json from '@rollup/plugin-json';
-import styles from 'rollup-plugin-styles';
 import terser from '@rollup/plugin-terser';
 import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { addBanner } from './plugins/banner.js';
+import { bundleCss } from './plugins/bundleCss.js';
 import { emitCss } from './plugins/emitCss.js';
 import { rawImport } from './plugins/rawImport.js';
 import { replaceImports } from './plugins/replace.js';
 import { splitCss } from './plugins/splitCss.js';
 import { loadTypeScriptSources } from './plugins/loadSources.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
-
-/**
- * PostCSS plugins
- */
-import postcssMixins from 'postcss-mixins';
-import postcssNesting from 'postcss-nesting';
 
 /**
  * Generates Rollup configurations.
@@ -158,18 +152,11 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			} ),
 
 			/**
-			 * Allows using imports, mixins and nesting in CSS and extracts output CSS to a separate file.
+			 * Allows using imports and nesting in CSS and extracts output CSS to a separate file.
 			 */
-			styles( {
-				mode: [ 'extract', cssFileName ],
-				plugins: [
-					postcssMixins,
-					postcssNesting( {
-						noIsPseudoSelector: true,
-						edition: '2021'
-					} )
-				],
-				minimize: minify,
+			bundleCss( {
+				fileName: cssFileName,
+				minify,
 				sourceMap
 			} ),
 

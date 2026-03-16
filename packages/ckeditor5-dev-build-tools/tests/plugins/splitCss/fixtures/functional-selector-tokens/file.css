@@ -1,0 +1,20 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+:is(.ck-content, .other)#feature[data-role="main"]:dir(rtl):lang(pl) {
+	color: red;
+}
+
+:is(.ck-content, .other)[data-state] {
+	border: 1px solid blue;
+}
+
+:is(.ck-content, .other)[data-state="foo.bar"] {
+	padding: 1px;
+}
+
+.ck-editor-only:not(:is(.ck-content, .other)) {
+	display: flex;
+}

@@ -1,0 +1,12 @@
+:root {
+	--content-color: red;
+	--editor-color: blue;
+}
+
+:is(.ck-content):not(.ck-editor__editable) .table.layout-table > table {
+	color: var(--content-color);
+}
+
+.ck-editor__editable .table.layout-table > table {
+	color: var(--editor-color);
+}

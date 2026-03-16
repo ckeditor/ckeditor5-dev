@@ -4,12 +4,24 @@
  */
 
 import { join } from 'node:path';
-import { test, expect } from 'vitest';
-import styles from 'rollup-plugin-styles';
-import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
+import { test, expect, vi } from 'vitest';
+import { rollup, type RollupOutput, type OutputAsset, type Plugin } from 'rollup';
 import { swcPlugin, verifyAsset, verifyChunk } from '../../_utils/utils.js';
+import { addBanner, bundleCss, type RollupBannerOptions } from '../../../src/index.js';
 
-import { addBanner, type RollupBannerOptions } from '../../../src/index.js';
+const createFilterSpy = vi.hoisted( vi.fn );
+
+vi.mock( '@rollup/pluginutils', async importOriginal => {
+	const original = await importOriginal() as any;
+
+	return {
+		...original,
+		createFilter: ( ...args: any ) => {
+			createFilterSpy( ...args );
+			return original.createFilter( ...args );
+		}
+	};
+} );
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
@@ -20,11 +32,8 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 		plugins: [
 			swcPlugin,
 
-			styles( {
-				mode: [
-					'extract',
-					'styles.css'
-				]
+			bundleCss( {
+				fileName: 'styles.css'
 			} ),
 
 			addBanner( options )
@@ -39,6 +48,32 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 	} );
 
 	return output;
+}
+
+function emitMapWithoutFileProperty(): Plugin {
+	return {
+		name: 'emit-map-without-file-property',
+
+		generateBundle() {
+			this.emitFile( {
+				type: 'asset',
+				fileName: 'custom.css',
+				source: '.x { color: red; }'
+			} );
+
+			this.emitFile( {
+				type: 'asset',
+				fileName: 'custom.css.map',
+				source: JSON.stringify( {
+					version: 3,
+					sources: [ 'custom.css' ],
+					sourcesContent: [ '.x { color: red; }' ],
+					names: [],
+					mappings: 'AAAA'
+				} )
+			} );
+		}
+	};
 }
 
 test( 'Adds banner to .js and .css files by default', async () => {
@@ -80,4 +115,44 @@ test( 'Allows overriding "exclude" option', async () => {
 
 	expect( output[ 0 ].code ).not.includes( banner );
 	verifyAsset( output, 'styles.css', banner );
+} );
+
+test( 'Should have proper default values', async () => {
+	const banner = '/* CUSTOM BANNER */';
+	await generateBundle( { banner } );
+
+	expect( createFilterSpy ).toHaveBeenCalledExactlyOnceWith(
+		[
+			'**/*.js',
+			'**/*.css',
+			'**/translations/**/*.d.ts'
+		],
+		null
+	);
+} );
+
+test( 'Handles source maps without the "file" property', async () => {
+	const banner = '/* CUSTOM BANNER */\n';
+
+	const bundle = await rollup( {
+		input: join( import.meta.dirname, './fixtures/input.ts' ),
+		plugins: [
+			swcPlugin,
+			emitMapWithoutFileProperty(),
+			bundleCss( {
+				fileName: 'styles.css'
+			} ),
+			addBanner( { banner } )
+		]
+	} );
+
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		file: 'input.js',
+		assetFileNames: '[name][extname]',
+		sourcemap: true
+	} );
+
+	verifyAsset( output, 'custom.css', banner );
+	verifyAsset( output, 'custom.css.map', '"version":3' );
 } );

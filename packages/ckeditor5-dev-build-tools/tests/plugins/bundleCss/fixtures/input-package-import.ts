@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getDllPluginWebpackConfig } from './getdllpluginwebpackconfig.js';
+import './package-import.css';

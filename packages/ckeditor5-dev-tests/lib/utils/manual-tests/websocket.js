@@ -9,13 +9,7 @@
 	let wasDisconnected = false;
 
 	socket.on( 'testCompilationStatus', status => {
-		const isOnDll = window.location.href.toString().includes( '-dll.html' );
-		const [ eventName, processName ] = status.split( ':' );
-		const isDllStatus = processName === 'DLL';
-
-		if ( isOnDll !== isDllStatus ) {
-			return;
-		}
+		const [ eventName ] = status.split( ':' );
 
 		if ( eventName === 'start' ) {
 			showToast( 'info', toastElement => {

@@ -3,16 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
+import path from 'node:path';
+import { Features } from 'lightningcss';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { resolveLoader } from './resolve-loader.js';
-import { getPostCssConfig } from '../styles/index.js';
 
 type GetStylesLoaderOptions = {
-	themePath: string;
 	minify?: boolean;
 	sourceMap?: boolean;
 	extractToSeparateFile?: boolean;
-	skipPostCssLoader?: boolean;
 };
 
 type StylesLoader = {
@@ -27,17 +26,17 @@ type LoaderToUse = string | {
 		attributes?: {
 			'data-cke': boolean;
 		};
-		postcssOptions?: object;
+		importLoaders?: number;
+		sourceMap?: boolean;
+		lightningCssOptions?: object;
 	};
 };
 
 export default function getStylesLoader( options: GetStylesLoaderOptions ): StylesLoader {
 	const {
-		themePath,
 		minify = false,
 		sourceMap = false,
-		extractToSeparateFile = false,
-		skipPostCssLoader = false
+		extractToSeparateFile = false
 	} = options;
 
 	const getBundledLoader = () => ( {
@@ -54,21 +53,31 @@ export default function getStylesLoader( options: GetStylesLoaderOptions ): Styl
 		return MiniCssExtractPlugin.loader;
 	};
 
+	const getCssLoader = () => ( {
+		loader: resolveLoader( 'css-loader' ),
+		options: {
+			importLoaders: 1,
+			sourceMap
+		}
+	} );
+
+	const getLightningCssLoader = () => ( {
+		loader: path.join( import.meta.dirname, 'ck-lightningcss-loader.js' ),
+		options: {
+			lightningCssOptions: {
+				minify,
+				sourceMap,
+				include: Features.Nesting
+			}
+		}
+	} );
+
 	return {
 		test: /\.css$/,
 		use: [
 			extractToSeparateFile ? getExtractedLoader() : getBundledLoader(),
-			resolveLoader( 'css-loader' ),
-			skipPostCssLoader ? null : {
-				loader: resolveLoader( 'postcss-loader' ),
-				options: {
-					postcssOptions: getPostCssConfig( {
-						themeImporter: { themePath },
-						minify,
-						sourceMap
-					} )
-				}
-			}
+			getCssLoader(),
+			getLightningCssLoader()
 		].filter( Boolean ) as Array<LoaderToUse>
 	};
 }

@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getLicenseBanner } from './getlicensebanner.js';
+import './external-import.css';

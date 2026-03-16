@@ -67,7 +67,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	const depCheckOptions = {
 		// We need to add all values manually because if we modify it, the rest is being lost.
 		parsers: {
-			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
+			'**/*.css': filePath => parseCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
 			'**/*.mjs': filePath => parseModule( filePath, packageJson ),
 			'**/*.js': filePath => parseModule( filePath, packageJson ),
@@ -233,7 +233,7 @@ function groupMissingPackages( missingPackages, currentPackage ) {
  * @param {function} onMissingCSSFile Error handler called when a CSS file is not found.
  * @returns {Array.<string>|undefined}
  */
-function parsePostCSS( filePath, onMissingCSSFile ) {
+function parseCSS( filePath, onMissingCSSFile ) {
 	const fileContent = fs.readFileSync( filePath, 'utf-8' );
 	const matchedImports = fileContent.match( /^@import "[^"]+";/mg );
 
