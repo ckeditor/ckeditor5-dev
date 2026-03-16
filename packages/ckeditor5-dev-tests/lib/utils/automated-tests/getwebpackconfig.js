@@ -69,6 +69,7 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 				loaders.getIconsLoader(),
 
 				loaders.getStylesLoader( {
+					themePath: options.themePath,
 					minify: true
 				} ),
 
