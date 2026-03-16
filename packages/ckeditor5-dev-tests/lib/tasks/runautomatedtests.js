@@ -434,11 +434,11 @@ function mergeCoverageReports( { hasKarmaSelection, vitestExecutionPlan } ) {
 			continue;
 		}
 
-		const repositoryRoot = upath.normalize( repositoryPlan.repositoryRoot );
+		const repositoryRootPrefix = getRepositoryRootPrefixForLcov( repositoryPlan.repositoryRoot );
 		const content = fs.readFileSync( vitestCoverageFilePath, 'utf8' );
 
 		contentChunks.push(
-			replaceRelativeSourceFilePathsWithAbsolute( content, repositoryRoot )
+			replaceRelativeSourceFilePathsWithRepositoryPrefix( content, repositoryRootPrefix )
 		);
 	}
 
@@ -458,8 +458,14 @@ function getKarmaCoverageFilePaths( mergedCoverageFilePath ) {
 		.filter( filePath => filePath !== upath.normalize( mergedCoverageFilePath ) );
 }
 
-function replaceRelativeSourceFilePathsWithAbsolute( content, repositoryRoot ) {
-	return content.replaceAll( /^(SF:)(?!\/|[A-Za-z]:\\)/gm, `$1${ repositoryRoot }/` );
+function replaceRelativeSourceFilePathsWithRepositoryPrefix( content, repositoryRootPrefix ) {
+	return content.replaceAll( /^(SF:)(?!\/|[A-Za-z]:\\)/gm, `$1${ repositoryRootPrefix }` );
+}
+
+function getRepositoryRootPrefixForLcov( repositoryRoot ) {
+	const relativeRepositoryRootPath = upath.relative( process.cwd(), upath.normalize( repositoryRoot ) );
+
+	return relativeRepositoryRootPath ? `${ relativeRepositoryRootPath }/` : '';
 }
 
 function getVitestCoverageDirectoryPath( repositoryRoot ) {

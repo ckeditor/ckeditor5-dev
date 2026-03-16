@@ -624,7 +624,7 @@ describe( 'runAutomatedTests()', () => {
 		);
 		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
 			'/workspace/coverage/lcov.info',
-			expect.stringContaining( 'SF:/workspace/packages/ckeditor5-engine/src/index.js' )
+			expect.stringContaining( 'SF:packages/ckeditor5-engine/src/index.js' )
 		);
 	} );
 
