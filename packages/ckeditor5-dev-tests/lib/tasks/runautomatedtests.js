@@ -29,6 +29,7 @@ const AUTOMATED_TESTS_BUILD_PATH = upath.join( process.cwd(), 'build', '.automat
 
 // An absolute path to the entry file that will be passed to Karma.
 const KARMA_ENTRY_FILE_PATH = upath.join( AUTOMATED_TESTS_BUILD_PATH, 'entry-point.js' );
+const VITEST_COVERAGE_DIRECTORY_NAME = 'coverage-vitest';
 
 export default function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
@@ -47,13 +48,6 @@ export default function runAutomatedTests( options ) {
 
 		if ( !karmaFiles.length && !hasVitestSelection ) {
 			throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
-		}
-
-		if ( karmaFiles.length && hasVitestSelection && options.coverage ) {
-			throw new Error(
-				'Coverage cannot be collected in a mixed Karma + Vitest run. ' +
-				'Run coverage separately for Karma and Vitest packages.'
-			);
 		}
 
 		if ( karmaFiles.length && hasVitestSelection && options.watch ) {
@@ -85,6 +79,13 @@ export default function runAutomatedTests( options ) {
 		return runnerSequence.then( () => {
 			if ( errors.length ) {
 				throw aggregateExecutionErrors( errors );
+			}
+
+			if ( options.coverage ) {
+				mergeCoverageReports( {
+					hasKarmaSelection: karmaFiles.length > 0,
+					vitestExecutionPlan
+				} );
 			}
 		} );
 	} );
@@ -385,6 +386,7 @@ function runVitestForRepository( options, repositoryPlan ) {
 
 		if ( options.coverage ) {
 			args.push( '--coverage' );
+			args.push( '--coverage.reportsDirectory', getVitestCoverageDirectoryPath( repositoryPlan.repositoryRoot ) );
 		}
 
 		for ( const projectName of repositoryPlan.projects ) {
@@ -409,4 +411,57 @@ function runVitestForRepository( options, repositoryPlan ) {
 			}
 		} );
 	} );
+}
+
+function mergeCoverageReports( { hasKarmaSelection, vitestExecutionPlan } ) {
+	const coverageDirectoryPath = upath.join( process.cwd(), 'coverage' );
+	const mergedCoverageFilePath = upath.join( coverageDirectoryPath, 'lcov.info' );
+	const contentChunks = [];
+
+	if ( hasKarmaSelection ) {
+		for ( const karmaCoverageFilePath of getKarmaCoverageFilePaths( mergedCoverageFilePath ) ) {
+			contentChunks.push( fs.readFileSync( karmaCoverageFilePath, 'utf8' ) );
+		}
+	}
+
+	for ( const repositoryPlan of vitestExecutionPlan ) {
+		const vitestCoverageFilePath = upath.join(
+			getVitestCoverageDirectoryPath( repositoryPlan.repositoryRoot ),
+			'lcov.info'
+		);
+
+		if ( !fs.existsSync( vitestCoverageFilePath ) ) {
+			continue;
+		}
+
+		const repositoryRoot = upath.normalize( repositoryPlan.repositoryRoot );
+		const content = fs.readFileSync( vitestCoverageFilePath, 'utf8' );
+
+		contentChunks.push(
+			replaceRelativeSourceFilePathsWithAbsolute( content, repositoryRoot )
+		);
+	}
+
+	if ( !contentChunks.length ) {
+		return;
+	}
+
+	mkdirp.sync( coverageDirectoryPath );
+	fs.writeFileSync( mergedCoverageFilePath, contentChunks.join( '\n' ) );
+}
+
+function getKarmaCoverageFilePaths( mergedCoverageFilePath ) {
+	const karmaCoveragePattern = upath.join( process.cwd(), 'coverage', '**', 'lcov.info' );
+
+	return globSync( karmaCoveragePattern )
+		.map( filePath => upath.normalize( filePath ) )
+		.filter( filePath => filePath !== upath.normalize( mergedCoverageFilePath ) );
+}
+
+function replaceRelativeSourceFilePathsWithAbsolute( content, repositoryRoot ) {
+	return content.replaceAll( /^(SF:)(?!\/|[A-Za-z]:\\)/gm, `$1${ repositoryRoot }/` );
+}
+
+function getVitestCoverageDirectoryPath( repositoryRoot ) {
+	return upath.join( repositoryRoot, VITEST_COVERAGE_DIRECTORY_NAME );
 }

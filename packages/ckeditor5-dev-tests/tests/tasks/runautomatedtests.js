@@ -543,7 +543,7 @@ describe( 'runAutomatedTests()', () => {
 		);
 	} );
 
-	it( 'should throw for mixed Karma + Vitest run with coverage', async () => {
+	it( 'should merge coverage for mixed Karma + Vitest run', async () => {
 		const options = {
 			files: [ '*' ],
 			production: true,
@@ -555,24 +555,77 @@ describe( 'runAutomatedTests()', () => {
 			'/workspace/packages/ckeditor5-engine/tests/**/*.js',
 			'/workspace/packages/ckeditor5-utils/tests/**/*.js'
 		] );
-		vi.mocked( globSync ).mockReturnValue( [
-			'/workspace/packages/ckeditor5-engine/tests/model/model.js',
-			'/workspace/packages/ckeditor5-utils/tests/first.js'
-		] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-utils/tests/first.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/coverage/ChromeHeadless 146.0.0.0 (Mac OS 10.15.7)/lcov.info'
+			] );
 		vi.mocked( fs ).readFileSync.mockImplementation( path => {
 			if ( path.includes( 'ckeditor5-engine/package.json' ) ) {
 				return JSON.stringify( { scripts: { test: 'vitest run' } } );
 			}
 
-			return JSON.stringify( { scripts: { test: 'karma start' } } );
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'karma start' } } );
+			}
+
+			if ( path === '/workspace/coverage/ChromeHeadless 146.0.0.0 (Mac OS 10.15.7)/lcov.info' ) {
+				return 'TN:karma\nSF:/workspace/packages/ckeditor5-utils/src/index.js\nend_of_record\n';
+			}
+
+			if ( path === '/workspace/coverage-vitest/lcov.info' ) {
+				return 'TN:vitest\nSF:packages/ckeditor5-engine/src/index.js\nend_of_record\n';
+			}
+
+			return '{}';
+		} );
+		vi.mocked( fs ).existsSync.mockImplementation( path => path === '/workspace/coverage-vitest/lcov.info' );
+
+		const promise = runAutomatedTests( options );
+
+		setTimeout( () => {
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
+
+			setTimeout( () => {
+				const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+
+				subprocess.emit( 'close', 0 );
+			} );
 		} );
 
-		await expect( runAutomatedTests( options ) ).rejects.toThrow(
-			'Coverage cannot be collected in a mixed Karma + Vitest run.'
-		);
+		await promise;
 
-		expect( stubs.karma.server.constructor ).not.toHaveBeenCalled();
-		expect( stubs.spawn.call ).not.toHaveBeenCalled();
+		expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[
+				'vitest',
+				'--run',
+				'--coverage',
+				'--coverage.reportsDirectory',
+				'/workspace/coverage-vitest',
+				'--project',
+				'engine'
+			],
+			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+		);
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
+			'/workspace/coverage/lcov.info',
+			expect.stringContaining( 'TN:karma' )
+		);
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
+			'/workspace/coverage/lcov.info',
+			expect.stringContaining( 'SF:/workspace/packages/ckeditor5-engine/src/index.js' )
+		);
 	} );
 
 	it( 'should route mixed package selection to Karma and Vitest', async () => {
