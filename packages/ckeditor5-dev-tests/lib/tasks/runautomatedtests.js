@@ -25,8 +25,6 @@ const IGNORE_GLOBS = [
 	upath.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
-const VITEST_COVERAGE_DIRECTORY = 'coverage-vitest';
-
 export default async function runAutomatedTests( options ) {
 	if ( !options.production ) {
 		console.warn( styleText(
@@ -71,10 +69,6 @@ export default async function runAutomatedTests( options ) {
 
 	if ( errors.length ) {
 		throw aggregateErrors( errors );
-	}
-
-	if ( options.coverage ) {
-		mergeCoverageReports( karmaFiles.length > 0, vitestProjects.length > 0 );
 	}
 }
 
@@ -273,7 +267,7 @@ function spawnVitest( options, vitestProjects ) {
 		args.push( options.watch ? '--watch' : '--run' );
 
 		if ( options.coverage ) {
-			const coverageDir = upath.join( process.cwd(), VITEST_COVERAGE_DIRECTORY );
+			const coverageDir = upath.join( process.cwd(), 'coverage-vitest' );
 			args.push( '--coverage', '--coverage.reportsDirectory', coverageDir );
 		}
 
@@ -297,44 +291,6 @@ function spawnVitest( options, vitestProjects ) {
 			}
 		} );
 	} );
-}
-
-// -- Coverage merging -----------------------------------------------------------------------------
-
-function mergeCoverageReports( hasKarmaResults, hasVitestResults ) {
-	const coverageDir = upath.join( process.cwd(), 'coverage' );
-	const mergedFilePath = upath.join( coverageDir, 'lcov.info' );
-	const chunks = [];
-
-	if ( hasKarmaResults ) {
-		const karmaCoverageFiles = globSync( upath.join( coverageDir, '**', 'lcov.info' ) )
-			.map( f => upath.normalize( f ) )
-			.filter( f => f !== upath.normalize( mergedFilePath ) );
-
-		for ( const file of karmaCoverageFiles ) {
-			chunks.push( fs.readFileSync( file, 'utf8' ) );
-		}
-	}
-
-	if ( hasVitestResults ) {
-		const vitestCoverageFile = upath.join( process.cwd(), VITEST_COVERAGE_DIRECTORY, 'lcov.info' );
-
-		if ( fs.existsSync( vitestCoverageFile ) ) {
-			const content = fs.readFileSync( vitestCoverageFile, 'utf8' );
-			const cwdPrefix = upath.normalize( process.cwd() ) + '/';
-
-			// Vitest reports absolute SF: paths — strip the cwd prefix to make them
-			// relative, matching Karma's output format.
-			chunks.push( content.replaceAll( `SF:${ cwdPrefix }`, 'SF:' ) );
-		}
-	}
-
-	if ( !chunks.length ) {
-		return;
-	}
-
-	mkdirp.sync( coverageDir );
-	fs.writeFileSync( mergedFilePath, chunks.join( '\n' ) );
 }
 
 // -- Error handling -------------------------------------------------------------------------------
