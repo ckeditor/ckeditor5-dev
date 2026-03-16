@@ -4,6 +4,7 @@
  */
 
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { styleText } from 'node:util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
@@ -24,89 +25,198 @@ const IGNORE_GLOBS = [
 	upath.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
-// An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const VITEST_COVERAGE_DIRECTORY = 'coverage-vitest';
 
-export default function runAutomatedTests( options ) {
-	return Promise.resolve().then( () => {
-		if ( !options.production ) {
-			console.warn( styleText(
-				'yellow',
-				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
-				'to use strictest verification methods.'
-			) );
+export default async function runAutomatedTests( options ) {
+	if ( !options.production ) {
+		console.warn( styleText(
+			'yellow',
+			'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
+			'to use strictest verification methods.'
+		) );
+	}
+
+	const globPatterns = resolveTestGlobs( options.files );
+	const testFiles = collectTestFiles( globPatterns );
+	const { karmaFiles, vitestPlans } = partitionByRunner( testFiles );
+
+	if ( !karmaFiles.length && !vitestPlans.length ) {
+		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
+	}
+
+	if ( karmaFiles.length && vitestPlans.length && options.watch ) {
+		throw new Error(
+			'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
+			'Run watch mode separately for Karma and Vitest packages.'
+		);
+	}
+
+	const errors = [];
+
+	if ( karmaFiles.length ) {
+		try {
+			await runKarmaTests( options, karmaFiles, globPatterns );
+		} catch ( error ) {
+			errors.push( error );
 		}
+	}
 
-		const globPatterns = transformFilesToTestGlob( options.files );
+	if ( vitestPlans.length ) {
+		try {
+			await runVitestTests( options, vitestPlans );
+		} catch ( error ) {
+			errors.push( error );
+		}
+	}
 
-		createEntryFile( globPatterns, options.production );
+	if ( errors.length ) {
+		throw aggregateErrors( errors );
+	}
 
-		const optionsForKarma = Object.assign( {}, options, {
-			entryFile: ENTRY_FILE_PATH,
-			globPatterns
-		} );
-
-		return runKarma( optionsForKarma );
-	} );
+	if ( options.coverage ) {
+		mergeCoverageReports( karmaFiles.length > 0, vitestPlans );
+	}
 }
 
-function transformFilesToTestGlob( files ) {
+// -- Glob resolution & file collection -----------------------------------------------------------
+
+function resolveTestGlobs( files ) {
 	if ( !Array.isArray( files ) || files.length === 0 ) {
 		throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 	}
 
 	const globMap = {};
 
-	for ( const singleFile of files ) {
-		globMap[ singleFile ] = transformFileOptionToTestGlob( singleFile );
+	for ( const file of files ) {
+		globMap[ file ] = transformFileOptionToTestGlob( file );
 	}
 
 	return globMap;
 }
 
-function createEntryFile( globPatterns, production ) {
-	mkdirp.sync( upath.dirname( ENTRY_FILE_PATH ) );
+function collectTestFiles( globPatterns ) {
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
 	const log = karmaLogger.create( 'config' );
 	const allFiles = [];
 
-	for ( const singlePattern of Object.keys( globPatterns ) ) {
+	for ( const [ pattern, resolvedGlobs ] of Object.entries( globPatterns ) ) {
 		let hasFiles = false;
 
-		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
-			const files = globSync( resolvedPattern ).map( filePath => upath.normalize( filePath ) );
+		for ( const glob of resolvedGlobs ) {
+			const files = globSync( glob ).map( f => upath.normalize( f ) );
 
 			if ( files.length ) {
 				hasFiles = true;
 			}
 
 			allFiles.push(
-				...files.filter( file => !IGNORE_GLOBS.some( globPattern => minimatch( file, globPattern ) ) )
+				...files.filter( file => !IGNORE_GLOBS.some( ignore => minimatch( file, ignore ) ) )
 			);
 		}
 
 		if ( !hasFiles ) {
-			log.warn( 'Pattern "%s" does not match any file.', singlePattern );
+			log.warn( 'Pattern "%s" does not match any file.', pattern );
 		}
 	}
 
-	if ( !allFiles.length ) {
-		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
+	return allFiles;
+}
+
+// -- Runner partitioning --------------------------------------------------------------------------
+
+function partitionByRunner( testFiles ) {
+	const karmaFiles = [];
+	const runnerCache = new Map();
+	const vitestProjectsByRepo = new Map();
+
+	for ( const filePath of testFiles ) {
+		const packageRoot = getPackageRoot( filePath );
+
+		if ( !runnerCache.has( packageRoot ) ) {
+			runnerCache.set( packageRoot, detectPackageRunner( packageRoot ) );
+		}
+
+		const { runner, repositoryRoot, projectName } = runnerCache.get( packageRoot );
+
+		if ( runner === 'vitest' ) {
+			if ( !vitestProjectsByRepo.has( repositoryRoot ) ) {
+				vitestProjectsByRepo.set( repositoryRoot, new Set() );
+			}
+
+			vitestProjectsByRepo.get( repositoryRoot ).add( projectName );
+		} else {
+			karmaFiles.push( filePath );
+		}
 	}
 
+	const vitestPlans = [ ...vitestProjectsByRepo.entries() ].map(
+		( [ repositoryRoot, projects ] ) => ( { repositoryRoot, projects: [ ...projects ] } )
+	);
+
+	return { karmaFiles, vitestPlans };
+}
+
+function getPackageRoot( filePath ) {
+	const normalized = upath.normalize( filePath );
+	const testsIndex = normalized.lastIndexOf( '/tests/' );
+
+	if ( testsIndex === -1 ) {
+		throw new Error( `Cannot determine package root for "${ filePath }".` );
+	}
+
+	return normalized.slice( 0, testsIndex );
+}
+
+function getRepositoryRoot( packageRoot ) {
+	const normalized = upath.normalize( packageRoot );
+	const packagesIndex = normalized.lastIndexOf( '/packages/' );
+
+	if ( packagesIndex === -1 ) {
+		throw new Error( `Cannot determine repository root for "${ packageRoot }".` );
+	}
+
+	return normalized.slice( 0, packagesIndex );
+}
+
+function detectPackageRunner( packageRoot ) {
+	const repositoryRoot = getRepositoryRoot( packageRoot );
+	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
+	const packageJson = JSON.parse( fs.readFileSync( upath.join( packageRoot, 'package.json' ), 'utf8' ) );
+	const runner = /\bvitest\b/.test( packageJson?.scripts?.test || '' ) ? 'vitest' : 'karma';
+
+	return { repositoryRoot, projectName, runner };
+}
+
+// -- Karma runner ---------------------------------------------------------------------------------
+
+async function runKarmaTests( options, karmaFiles, globPatterns ) {
+	const entryFilePath = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+
+	createKarmaEntryFile( entryFilePath, karmaFiles, options.production );
+
+	return startKarmaServer( {
+		...options,
+		entryFile: entryFilePath,
+		globPatterns
+	} );
+}
+
+function createKarmaEntryFile( entryFilePath, files, production ) {
+	const utilsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests' );
+	const testImports = [ ...files ];
+
 	// Set global license key in the `before` hook.
-	allFiles.unshift( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'licensekeybefore.js' ) );
+	testImports.unshift( upath.join( utilsDir, 'licensekeybefore.js' ) );
 
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	allFiles.splice( 0, 0, upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ) );
-	allFiles.push( upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ) );
+	testImports.splice( 0, 0, upath.join( utilsDir, 'leaksdetectorbefore.js' ) );
+	testImports.push( upath.join( utilsDir, 'leaksdetectorafter.js' ) );
 
-	const entryFileContent = allFiles
-		.map( file => 'import "' + file + '";' );
+	const entryLines = testImports.map( file => `import "${ file }";` );
 
 	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests', 'assertions' );
+	const assertionsDir = upath.join( utilsDir, 'assertions' );
 	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
 		return [
 			assertionFileName,
@@ -116,17 +226,18 @@ function createEntryFile( globPatterns, production ) {
 
 	// Two loops are needed to achieve correct order in `ckeditor5/build/.automated-tests/entry-point.js`.
 	for ( const [ fileName, functionName ] of customAssertions ) {
-		entryFileContent.push( `import ${ functionName }Factory from "${ assertionsDir }/${ fileName }";` );
+		entryLines.push( `import ${ functionName }Factory from "${ assertionsDir }/${ fileName }";` );
 	}
 	for ( const [ , functionName ] of customAssertions ) {
-		entryFileContent.push( `${ functionName }Factory( chai );` );
+		entryLines.push( `${ functionName }Factory( chai );` );
 	}
 
 	if ( production ) {
-		entryFileContent.unshift( assertConsoleUsageToThrowErrors() );
+		entryLines.unshift( assertConsoleUsageToThrowErrors() );
 	}
 
-	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
+	mkdirp.sync( upath.dirname( entryFilePath ) );
+	fs.writeFileSync( entryFilePath, entryLines.join( '\n' ) + '\n' );
 
 	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
 	// A ugly hack blocks the loop and tests are executed once.
@@ -134,8 +245,134 @@ function createEntryFile( globPatterns, production ) {
 	const now = Date.now() / 1000;
 	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
 	const then = now - 10;
-	fs.utimesSync( ENTRY_FILE_PATH, then, then );
+	fs.utimesSync( entryFilePath, then, then );
 }
+
+function startKarmaServer( options ) {
+	return new Promise( ( resolve, reject ) => {
+		const KarmaServer = karma.Server;
+		const parseConfig = karma.config.parseConfig;
+
+		const config = getKarmaConfig( options );
+		const parsedConfig = parseConfig( null, config, { throwErrors: true } );
+
+		const server = new KarmaServer( parsedConfig, exitCode => {
+			if ( exitCode === 0 ) {
+				resolve();
+			} else {
+				reject( new Error( `Karma finished with "${ exitCode }" code.` ) );
+			}
+		} );
+
+		if ( options.coverage ) {
+			const coveragePath = upath.join( process.cwd(), 'coverage' );
+
+			server.on( 'run_complete', () => {
+				// Use timeout to not write to the console in the middle of Karma's status.
+				setTimeout( () => {
+					const log = logger();
+
+					log.info( `Coverage report saved in '${ styleText( 'cyan', coveragePath ) }'.` );
+				} );
+			} );
+		}
+
+		server.start();
+	} );
+}
+
+// -- Vitest runner --------------------------------------------------------------------------------
+
+async function runVitestTests( options, vitestPlans ) {
+	for ( const plan of vitestPlans ) {
+		await spawnVitest( options, plan );
+	}
+}
+
+function spawnVitest( options, plan ) {
+	return new Promise( ( resolve, reject ) => {
+		const args = [ 'vitest' ];
+
+		args.push( options.watch ? '--watch' : '--run' );
+
+		if ( options.coverage ) {
+			const coverageDir = upath.join( plan.repositoryRoot, VITEST_COVERAGE_DIRECTORY );
+			args.push( '--coverage', '--coverage.reportsDirectory', coverageDir );
+		}
+
+		for ( const project of plan.projects ) {
+			args.push( '--project', project );
+		}
+
+		const child = spawn( 'pnpm', args, {
+			stdio: 'inherit',
+			cwd: plan.repositoryRoot,
+			shell: process.platform === 'win32'
+		} );
+
+		child.on( 'error', reject );
+
+		child.on( 'close', exitCode => {
+			if ( exitCode === 0 ) {
+				resolve();
+			} else {
+				reject( new Error( `Vitest finished with "${ exitCode }" code.` ) );
+			}
+		} );
+	} );
+}
+
+// -- Coverage merging -----------------------------------------------------------------------------
+
+function mergeCoverageReports( hasKarmaResults, vitestPlans ) {
+	const coverageDir = upath.join( process.cwd(), 'coverage' );
+	const mergedFilePath = upath.join( coverageDir, 'lcov.info' );
+	const chunks = [];
+
+	if ( hasKarmaResults ) {
+		const karmaCoverageFiles = globSync( upath.join( coverageDir, '**', 'lcov.info' ) )
+			.map( f => upath.normalize( f ) )
+			.filter( f => f !== upath.normalize( mergedFilePath ) );
+
+		for ( const file of karmaCoverageFiles ) {
+			chunks.push( fs.readFileSync( file, 'utf8' ) );
+		}
+	}
+
+	for ( const plan of vitestPlans ) {
+		const vitestCoverageFile = upath.join( plan.repositoryRoot, VITEST_COVERAGE_DIRECTORY, 'lcov.info' );
+
+		if ( !fs.existsSync( vitestCoverageFile ) ) {
+			continue;
+		}
+
+		const content = fs.readFileSync( vitestCoverageFile, 'utf8' );
+		const repoRoot = upath.normalize( plan.repositoryRoot );
+
+		// Vitest reports relative SF: paths — convert to absolute for consistent merged output.
+		chunks.push( content.replaceAll( /^(SF:)(?!\/|[A-Za-z]:\\)/gm, `$1${ repoRoot }/` ) );
+	}
+
+	if ( !chunks.length ) {
+		return;
+	}
+
+	mkdirp.sync( coverageDir );
+	fs.writeFileSync( mergedFilePath, chunks.join( '\n' ) );
+}
+
+// -- Error handling -------------------------------------------------------------------------------
+
+function aggregateErrors( errors ) {
+	if ( errors.length === 1 ) {
+		return errors[ 0 ];
+	}
+
+	const details = errors.map( e => `- ${ e.message }` ).join( '\n' );
+	return new Error( `Test execution failed in multiple runners:\n${ details }` );
+}
+
+// -- Console assertion (production mode) ----------------------------------------------------------
 
 function assertConsoleUsageToThrowErrors() {
 	const functionString = makeConsoleUsageToThrowErrors.toString();
@@ -184,38 +421,5 @@ function makeConsoleUsageToThrowErrors() {
 					__karma__.error( 'Detected `console.' + method + '()`: ' + data[ 0 ] );
 				};
 			} );
-	} );
-}
-
-function runKarma( options ) {
-	return new Promise( ( resolve, reject ) => {
-		const KarmaServer = karma.Server;
-		const parseConfig = karma.config.parseConfig;
-
-		const config = getKarmaConfig( options );
-		const parsedConfig = parseConfig( null, config, { throwErrors: true } );
-
-		const server = new KarmaServer( parsedConfig, exitCode => {
-			if ( exitCode === 0 ) {
-				resolve();
-			} else {
-				reject( new Error( `Karma finished with "${ exitCode }" code.` ) );
-			}
-		} );
-
-		if ( options.coverage ) {
-			const coveragePath = upath.join( process.cwd(), 'coverage' );
-
-			server.on( 'run_complete', () => {
-				// Use timeout to not write to the console in the middle of Karma's status.
-				setTimeout( () => {
-					const log = logger();
-
-					log.info( `Coverage report saved in '${ styleText( 'cyan', coveragePath ) }'.` );
-				} );
-			} );
-		}
-
-		server.start();
 	} );
 }

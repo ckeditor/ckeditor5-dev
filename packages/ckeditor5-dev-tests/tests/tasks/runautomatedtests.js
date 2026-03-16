@@ -5,6 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import { styleText } from 'node:util';
 import { globSync } from 'glob';
 import { mkdirp } from 'mkdirp';
@@ -26,7 +27,29 @@ const stubs = vi.hoisted( () => ( {
 			on: vi.fn(),
 			start: vi.fn()
 		}
+	},
+	spawn: {
+		call: vi.fn()
 	}
+} ) );
+
+vi.mock( 'node:child_process', () => ( {
+	spawn: vi.fn( ( ...args ) => {
+		stubs.spawn.call( ...args );
+
+		const callbacks = {};
+
+		return {
+			on: ( eventName, callback ) => {
+				callbacks[ eventName ] = callback;
+			},
+			emit: ( eventName, ...eventArgs ) => {
+				if ( callbacks[ eventName ] ) {
+					callbacks[ eventName ]( ...eventArgs );
+				}
+			}
+		};
+	} )
 } ) );
 
 vi.mock( 'karma', () => ( {
@@ -66,6 +89,10 @@ describe( 'runAutomatedTests()', () => {
 
 	beforeEach( async () => {
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/workspace' );
+		stubs.spawn.call.mockReset();
+
+		// Default: return empty JSON for package.json reads (no scripts → Karma runner).
+		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		vi.mocked( karmaLogger ).create.mockImplementation( name => {
 			expect( name ).to.equal( 'config' );
@@ -75,6 +102,8 @@ describe( 'runAutomatedTests()', () => {
 
 		runAutomatedTests = ( await import( '../../lib/tasks/runautomatedtests.js' ) ).default;
 	} );
+
+	// -- Karma-only tests -------------------------------------------------------------------------
 
 	it( 'should create an entry file before tests execution', async () => {
 		const options = {
@@ -471,6 +500,411 @@ describe( 'runAutomatedTests()', () => {
 				'import "/workspace/packages/ckeditor5-basic-styles/tests/bold.js";',
 				'import "/workspace/packages/ckeditor5-basic-styles/tests/italic.js";'
 			].join( '\n' ) )
+		);
+	} );
+
+	// -- Vitest-only tests ------------------------------------------------------------------------
+
+	it( 'should run only Vitest when all selected packages use Vitest', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 0 );
+
+		await promise;
+
+		expect( stubs.karma.server.constructor ).not.toHaveBeenCalled();
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[ 'vitest', '--run', '--project', 'engine' ],
+			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+		);
+		expect( vi.mocked( fs ).writeFileSync ).not.toHaveBeenCalledWith(
+			'/workspace/build/.automated-tests/entry-point.js',
+			expect.any( String )
+		);
+	} );
+
+	it( 'should pass --watch flag to Vitest when watch mode is enabled', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: true,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 0 );
+
+		await promise;
+
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[ 'vitest', '--watch', '--project', 'engine' ],
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should pass coverage flags to Vitest when coverage is enabled', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+			] )
+			// For mergeCoverageReports — no Karma coverage files.
+			.mockReturnValue( [] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 0 );
+
+		await promise;
+
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[ 'vitest', '--run', '--coverage', '--coverage.reportsDirectory', '/workspace/coverage-vitest', '--project', 'engine' ],
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should reject when Vitest process exits with non-zero code', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 1 );
+
+		await expect( promise ).rejects.toThrow( 'Vitest finished with "1" code.' );
+	} );
+
+	// -- Mixed Karma + Vitest tests ---------------------------------------------------------------
+
+	it( 'should route mixed package selection to Karma and Vitest', async () => {
+		const options = {
+			files: [ 'utils', 'emoji' ],
+			production: true,
+			coverage: false,
+			watch: false
+		};
+
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/**/*.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/**/*.js' ] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/emoji.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-emoji/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'karma start' } } );
+			}
+
+			return '{}';
+		} );
+
+		const promise = runAutomatedTests( options );
+
+		setTimeout( () => {
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
+
+			setTimeout( () => {
+				const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+
+				subprocess.emit( 'close', 0 );
+			} );
+		} );
+
+		await promise;
+
+		expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[ 'vitest', '--run', '--project', 'utils' ],
+			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+		);
+	} );
+
+	it( 'should throw when watch mode is used with mixed Karma + Vitest packages', async () => {
+		const options = {
+			files: [ 'utils', 'emoji' ],
+			production: true,
+			coverage: false,
+			watch: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/**/*.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/**/*.js' ] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/emoji.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-emoji/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'karma start' } } );
+			}
+
+			return '{}';
+		} );
+
+		await expect( runAutomatedTests( options ) ).rejects.toThrow(
+			'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
+			'Run watch mode separately for Karma and Vitest packages.'
+		);
+	} );
+
+	it( 'should aggregate errors when both runners fail', async () => {
+		const options = {
+			files: [ 'utils', 'emoji' ],
+			production: true,
+			coverage: false,
+			watch: false
+		};
+
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/**/*.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/**/*.js' ] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/emoji.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-emoji/package.json' ) ) {
+				return JSON.stringify( { scripts: {} } );
+			}
+
+			return '{}';
+		} );
+
+		vi.mocked( karma ).config.parseConfig.mockImplementation( () => {
+			throw new Error( 'Karma finished with "1" code.' );
+		} );
+
+		const promise = runAutomatedTests( options );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 2 );
+
+		await expect( promise ).rejects.toThrow( /Test execution failed in multiple runners/ );
+	} );
+
+	// -- Coverage merging tests -------------------------------------------------------------------
+
+	it( 'should merge coverage for mixed Karma + Vitest run', async () => {
+		const options = {
+			files: [ '*' ],
+			production: true,
+			coverage: true,
+			watch: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js',
+			'/workspace/packages/ckeditor5-utils/tests/**/*.js'
+		] );
+		vi.mocked( fs ).readdirSync.mockReturnValue( [] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-utils/tests/first.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/coverage/ChromeHeadless 146.0.0.0 (Mac OS 10.15.7)/lcov.info'
+			] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-engine/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'karma start' } } );
+			}
+
+			if ( path === '/workspace/coverage/ChromeHeadless 146.0.0.0 (Mac OS 10.15.7)/lcov.info' ) {
+				return 'TN:karma\nSF:/workspace/packages/ckeditor5-utils/src/index.js\nend_of_record\n';
+			}
+
+			if ( path === '/workspace/coverage-vitest/lcov.info' ) {
+				return 'TN:vitest\nSF:packages/ckeditor5-engine/src/index.js\nend_of_record\n';
+			}
+
+			return '{}';
+		} );
+		vi.mocked( fs ).existsSync.mockImplementation( path => path === '/workspace/coverage-vitest/lcov.info' );
+
+		const promise = runAutomatedTests( options );
+
+		setTimeout( () => {
+			const [ firstCall ] = stubs.karma.server.constructor.mock.calls;
+			const [ , exitCallback ] = firstCall;
+
+			exitCallback( 0 );
+
+			setTimeout( () => {
+				const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+
+				subprocess.emit( 'close', 0 );
+			} );
+		} );
+
+		await promise;
+
+		expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[
+				'vitest',
+				'--run',
+				'--coverage',
+				'--coverage.reportsDirectory',
+				'/workspace/coverage-vitest',
+				'--project',
+				'engine'
+			],
+			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+		);
+
+		// Verify merged coverage output contains both Karma and Vitest data.
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
+			'/workspace/coverage/lcov.info',
+			expect.stringContaining( 'TN:karma' )
+		);
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
+			'/workspace/coverage/lcov.info',
+			expect.stringContaining( 'SF:/workspace/packages/ckeditor5-engine/src/index.js' )
+		);
+	} );
+
+	// -- Multi-repository tests -------------------------------------------------------------------
+
+	it( 'should group Vitest projects by repository root', async () => {
+		const options = {
+			files: [ 'utils', 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-utils/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/**/*.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/**/*.js'
+			] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/model.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-engine/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			return '{}';
+		} );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 0 );
+
+		await promise;
+
+		// Both projects should be grouped under the same repository root.
+		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+			'pnpm',
+			[ 'vitest', '--run', '--project', 'utils', '--project', 'engine' ],
+			{ stdio: 'inherit', cwd: '/workspace/external/ckeditor5', shell: false }
 		);
 	} );
 } );

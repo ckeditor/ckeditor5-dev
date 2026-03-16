@@ -31,7 +31,6 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( vi.mocked( loaders.getFormattedTextLoader ) ).toHaveBeenCalledOnce();
 		expect( vi.mocked( loaders.getCoverageLoader ) ).not.toHaveBeenCalledOnce();
 		expect( vi.mocked( loaders.getStylesLoader ) ).toHaveBeenCalledExactlyOnceWith( {
-			themePath: '/theme/path',
 			minify: true
 		} );
 		expect( vi.mocked( loaders.getTypeScriptLoader ) ).toHaveBeenCalledExactlyOnceWith( {
