@@ -806,7 +806,7 @@ describe( 'runAutomatedTests()', () => {
 			}
 
 			if ( path === '/workspace/coverage-vitest/lcov.info' ) {
-				return 'TN:vitest\nSF:packages/ckeditor5-engine/src/index.js\nend_of_record\n';
+				return 'TN:vitest\nSF:/workspace/packages/ckeditor5-engine/src/index.js\nend_of_record\n';
 			}
 
 			return '{}';
@@ -845,20 +845,20 @@ describe( 'runAutomatedTests()', () => {
 			{ stdio: 'inherit', cwd: '/workspace', shell: false }
 		);
 
-		// Verify merged coverage output contains both Karma and Vitest data.
+		// Verify merged coverage: Vitest absolute paths are converted to relative.
 		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
 			'/workspace/coverage/lcov.info',
 			expect.stringContaining( 'TN:karma' )
 		);
 		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledWith(
 			'/workspace/coverage/lcov.info',
-			expect.stringContaining( 'SF:/workspace/packages/ckeditor5-engine/src/index.js' )
+			expect.stringContaining( 'SF:packages/ckeditor5-engine/src/index.js' )
 		);
 	} );
 
-	// -- Multi-repository tests -------------------------------------------------------------------
+	// -- Multiple Vitest projects test ------------------------------------------------------------
 
-	it( 'should group Vitest projects by repository root', async () => {
+	it( 'should run all Vitest projects in a single process from cwd', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
 			production: true,
@@ -900,11 +900,11 @@ describe( 'runAutomatedTests()', () => {
 
 		await promise;
 
-		// Both projects should be grouped under the same repository root.
+		// All Vitest projects should be passed to a single process spawned from cwd.
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
 			[ 'vitest', '--run', '--project', 'utils', '--project', 'engine' ],
-			{ stdio: 'inherit', cwd: '/workspace/external/ckeditor5', shell: false }
+			{ stdio: 'inherit', cwd: '/workspace', shell: false }
 		);
 	} );
 } );
