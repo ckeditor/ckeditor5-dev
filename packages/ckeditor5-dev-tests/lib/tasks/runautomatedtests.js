@@ -69,12 +69,12 @@ export default async function runAutomatedTests( options ) {
 		}
 	}
 
-	if ( errors.length ) {
-		throw aggregateErrors( errors );
-	}
-
 	if ( options.coverage ) {
 		mergeCoverageReports( karmaFiles.length > 0, vitestProjects.length > 0 );
+	}
+
+	if ( errors.length ) {
+		throw aggregateErrors( errors );
 	}
 }
 
