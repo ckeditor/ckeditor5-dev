@@ -15,7 +15,7 @@ import runSnykCommand from '../lib/run-snyk-command.js';
 
 describe( 'bin/trigger-snyk-scan', () => {
 	beforeEach( () => {
-		process.argv = [ 'node', 'trigger-snyk-scan.js', '--org=org-id' ];
+		process.argv = [ 'node', 'trigger-snyk-scan.js', '--organization=org-id' ];
 		process.exitCode = undefined;
 
 		vi.stubEnv( 'SNYK_TOKEN', 'snyk-token' );
@@ -147,7 +147,7 @@ describe( 'bin/trigger-snyk-scan', () => {
 
 		expect( consoleErrorSpy ).toHaveBeenCalledOnce();
 		expect( consoleErrorSpy.mock.calls[ 0 ][ 0 ] ).toMatchObject( {
-			message: 'Missing required argument: --org'
+			message: 'Missing required argument: --organization'
 		} );
 		expect( process.exitCode ).toBe( 1 );
 		expect( vi.mocked( spawn ) ).not.toHaveBeenCalled();

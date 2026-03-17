@@ -15,15 +15,15 @@ try {
 
 	const { values } = parseArgs( {
 		options: {
-			org: {
+			organization: {
 				type: 'string'
 			}
 		},
 		strict: true
 	} );
 
-	if ( !values.org ) {
-		throw new Error( 'Missing required argument: --org' );
+	if ( !values.organization ) {
+		throw new Error( 'Missing required argument: --organization' );
 	}
 
 	if ( !SNYK_TOKEN ) {
@@ -35,7 +35,7 @@ try {
 	}
 
 	await runSnykCommand( [ 'config', 'set', `endpoint=${ SNYK_ENDPOINT }` ] );
-	await runSnykCommand( [ 'config', 'set', `org=${ values.org }` ] );
+	await runSnykCommand( [ 'config', 'set', `org=${ values.organization }` ] );
 
 	await runSnykCommand(
 		[
