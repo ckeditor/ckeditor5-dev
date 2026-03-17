@@ -39,7 +39,7 @@ export default async function runAutomatedTests( options ) {
 	const { karmaFiles, vitestProjects } = partitionByRunner( testFiles );
 
 	if ( !karmaFiles.length && !vitestProjects.length ) {
-		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
+		throw new Error( 'No test files found. Specified patterns are invalid.' );
 	}
 
 	if ( karmaFiles.length && vitestProjects.length && options.watch ) {

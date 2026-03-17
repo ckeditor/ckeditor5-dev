@@ -181,7 +181,7 @@ describe( 'runAutomatedTests()', () => {
 		vi.mocked( globSync ).mockReturnValue( [] );
 
 		await expect( runAutomatedTests( options ) )
-			.rejects.toThrow( 'Not found files to tests. Specified patterns are invalid.' );
+			.rejects.toThrow( 'No test files found. Specified patterns are invalid.' );
 
 		expect( stubs.log.warn ).toHaveBeenCalledTimes( 2 );
 		expect( stubs.log.warn ).toHaveBeenCalledWith( 'Pattern "%s" does not match any file.', 'basic-foo' );
