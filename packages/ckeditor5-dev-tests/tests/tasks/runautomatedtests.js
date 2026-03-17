@@ -535,7 +535,7 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
 			[ 'vitest', '--run', '--project', 'engine' ],
-			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 		expect( vi.mocked( fs ).writeFileSync ).not.toHaveBeenCalledWith(
 			'/workspace/build/.automated-tests/entry-point.js',
@@ -690,7 +690,7 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
 			[ 'vitest', '--run', '--project', 'utils' ],
-			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 	} );
 
@@ -815,7 +815,7 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
 			[ 'vitest', '--run', '--project', 'utils', '--project', 'engine' ],
-			{ stdio: 'inherit', cwd: '/workspace', shell: false }
+			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 	} );
 } );
