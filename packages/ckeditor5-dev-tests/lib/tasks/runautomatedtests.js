@@ -36,13 +36,13 @@ export default async function runAutomatedTests( options ) {
 
 	const globPatterns = resolveTestGlobs( options.files );
 	const testFiles = collectTestFiles( globPatterns );
-	const { karmaFiles, vitestProjects } = partitionByRunner( testFiles );
+	const { karmaFiles, vitestSelection } = partitionByRunner( testFiles );
 
-	if ( !karmaFiles.length && !vitestProjects.length ) {
+	if ( !karmaFiles.length && !vitestSelection.length ) {
 		throw new Error( 'No test files found. Specified patterns are invalid.' );
 	}
 
-	if ( karmaFiles.length && vitestProjects.length && options.watch ) {
+	if ( karmaFiles.length && vitestSelection.length && options.watch ) {
 		throw new Error(
 			'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
 			'Run watch mode separately for Karma and Vitest packages.'
@@ -59,9 +59,9 @@ export default async function runAutomatedTests( options ) {
 		}
 	}
 
-	if ( vitestProjects.length ) {
+	if ( vitestSelection.length ) {
 		try {
-			await spawnVitest( options, vitestProjects );
+			await spawnVitest( options, vitestSelection );
 		} catch ( error ) {
 			errors.push( error );
 		}
@@ -121,7 +121,7 @@ function collectTestFiles( globPatterns ) {
 
 function partitionByRunner( testFiles ) {
 	const karmaFiles = [];
-	const vitestProjects = new Set();
+	const vitestSelection = new Map();
 	const runnerCache = new Map();
 
 	for ( const filePath of testFiles ) {
@@ -134,13 +134,15 @@ function partitionByRunner( testFiles ) {
 		const { runner, projectName } = runnerCache.get( packageRoot );
 
 		if ( runner === 'vitest' ) {
-			vitestProjects.add( projectName );
+			const files = vitestSelection.get( projectName ) || [];
+			files.push( filePath );
+			vitestSelection.set( projectName, files );
 		} else {
 			karmaFiles.push( filePath );
 		}
 	}
 
-	return { karmaFiles, vitestProjects: [ ...vitestProjects ] };
+	return { karmaFiles, vitestSelection: [ ...vitestSelection.entries() ] };
 }
 
 function getPackageRoot( filePath ) {
@@ -260,7 +262,13 @@ function startKarmaServer( options ) {
 
 // -- Vitest runner --------------------------------------------------------------------------------
 
-function spawnVitest( options, vitestProjects ) {
+async function spawnVitest( options, vitestSelection ) {
+	for ( const [ project, selectedFiles ] of vitestSelection ) {
+		await spawnVitestProject( options, project, selectedFiles );
+	}
+}
+
+function spawnVitestProject( options, project, selectedFiles ) {
 	return new Promise( ( resolve, reject ) => {
 		const args = [ 'vitest' ];
 
@@ -271,8 +279,10 @@ function spawnVitest( options, vitestProjects ) {
 			args.push( '--coverage', '--coverage.reportsDirectory', coverageDir );
 		}
 
-		for ( const project of vitestProjects ) {
-			args.push( '--project', project );
+		args.push( '--project', project );
+
+		for ( const filePath of selectedFiles ) {
+			args.push( upath.relative( process.cwd(), filePath ) );
 		}
 
 		const child = spawn( 'pnpm', args, {
