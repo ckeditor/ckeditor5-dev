@@ -76,7 +76,7 @@ export default async function runAutomatedTests( options ) {
 
 function resolveTestGlobs( files ) {
 	if ( !Array.isArray( files ) || files.length === 0 ) {
-		throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
+		throw new Error( 'Test runner requires files to test. `options.files` has to be a non-empty array.' );
 	}
 
 	const globMap = {};

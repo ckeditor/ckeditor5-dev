@@ -154,7 +154,7 @@ describe( 'runAutomatedTests()', () => {
 
 	it( 'throws when files are not specified', async () => {
 		await expect( runAutomatedTests( { production: true } ) )
-			.rejects.toThrow( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
+			.rejects.toThrow( 'Test runner requires files to test. `options.files` has to be a non-empty array.' );
 	} );
 
 	it( 'throws when specified files are invalid', async () => {
