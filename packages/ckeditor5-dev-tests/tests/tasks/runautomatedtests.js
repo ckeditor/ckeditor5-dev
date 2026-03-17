@@ -534,7 +534,13 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.karma.server.constructor ).not.toHaveBeenCalled();
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
-			[ 'vitest', '--run', '--project', 'engine' ],
+			[
+				'vitest',
+				'--run',
+				'--project',
+				'engine',
+				'packages/ckeditor5-engine/tests/model/model.js'
+			],
 			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 		expect( vi.mocked( fs ).writeFileSync ).not.toHaveBeenCalledWith(
@@ -571,7 +577,13 @@ describe( 'runAutomatedTests()', () => {
 
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
-			[ 'vitest', '--watch', '--project', 'engine' ],
+			[
+				'vitest',
+				'--watch',
+				'--project',
+				'engine',
+				'packages/ckeditor5-engine/tests/model/model.js'
+			],
 			expect.any( Object )
 		);
 	} );
@@ -604,7 +616,16 @@ describe( 'runAutomatedTests()', () => {
 
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
-			[ 'vitest', '--run', '--coverage', '--coverage.reportsDirectory', '/workspace/coverage-vitest', '--project', 'engine' ],
+			[
+				'vitest',
+				'--run',
+				'--coverage',
+				'--coverage.reportsDirectory',
+				'/workspace/coverage-vitest',
+				'--project',
+				'engine',
+				'packages/ckeditor5-engine/tests/model/model.js'
+			],
 			expect.any( Object )
 		);
 	} );
@@ -685,7 +706,7 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
-			[ 'vitest', '--run', '--project', 'utils' ],
+			[ 'vitest', '--run', '--project', 'utils', 'packages/ckeditor5-utils/tests/first.js' ],
 			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 	} );
@@ -765,7 +786,7 @@ describe( 'runAutomatedTests()', () => {
 
 	// -- Multiple Vitest projects test ------------------------------------------------------------
 
-	it( 'should run all Vitest projects in a single process from cwd', async () => {
+	it( 'should run each Vitest project in a separate process with selected files', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
 			production: true,
@@ -802,15 +823,37 @@ describe( 'runAutomatedTests()', () => {
 		const promise = runAutomatedTests( options );
 		await new Promise( resolve => setTimeout( resolve ) );
 
-		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
-		subprocess.emit( 'close', 0 );
+		const [ firstSubprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		firstSubprocess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+		const [ , secondSubprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		secondSubprocess.emit( 'close', 0 );
 
 		await promise;
 
-		// All Vitest projects should be passed to a single process spawned from cwd.
-		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
+			1,
 			'pnpm',
-			[ 'vitest', '--run', '--project', 'utils', '--project', 'engine' ],
+			[
+				'vitest',
+				'--run',
+				'--project',
+				'utils',
+				'external/ckeditor5/packages/ckeditor5-utils/tests/first.js'
+			],
+			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+		);
+		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
+			2,
+			'pnpm',
+			[
+				'vitest',
+				'--run',
+				'--project',
+				'engine',
+				'external/ckeditor5/packages/ckeditor5-engine/tests/model.js'
+			],
 			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
 		);
 	} );
