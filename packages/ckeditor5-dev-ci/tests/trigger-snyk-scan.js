@@ -28,12 +28,11 @@ describe( 'bin/trigger-snyk-scan', () => {
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) );
 
 		await importTriggerSnykScanScript();
 
-		expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 5 );
+		expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 4 );
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			1,
@@ -76,22 +75,6 @@ describe( 'bin/trigger-snyk-scan', () => {
 				'--silent',
 				'exec',
 				'snyk',
-				'auth',
-				'snyk-token'
-			],
-			{
-				cwd: process.cwd(),
-				stdio: 'inherit'
-			}
-		);
-
-		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
-			4,
-			'pnpm',
-			[
-				'--silent',
-				'exec',
-				'snyk',
 				'code',
 				'test',
 				'--report',
@@ -105,7 +88,7 @@ describe( 'bin/trigger-snyk-scan', () => {
 		);
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
-			5,
+			4,
 			'pnpm',
 			[
 				'--silent',
@@ -126,12 +109,11 @@ describe( 'bin/trigger-snyk-scan', () => {
 		vi.mocked( spawn )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 1 ) )
 			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) );
 
 		await importTriggerSnykScanScript();
-		expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 5 );
+		expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 4 );
 	} );
 
 	it( 'should pass the branch name to Snyk as the target reference', async () => {
@@ -142,14 +124,14 @@ describe( 'bin/trigger-snyk-scan', () => {
 		await importTriggerSnykScanScript();
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
-			4,
+			3,
 			'pnpm',
 			expect.arrayContaining( [ `--target-reference=${ branchName }` ] ),
 			expect.any( Object )
 		);
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
-			5,
+			4,
 			'pnpm',
 			expect.arrayContaining( [ `--target-reference=${ branchName }` ] ),
 			expect.any( Object )

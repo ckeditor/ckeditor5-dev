@@ -19,7 +19,6 @@ minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
-  - pacote # Remove on or after 2026/03/13
 
 shellEmulator: true
 shamefullyHoist: true

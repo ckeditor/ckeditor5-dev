@@ -36,7 +36,6 @@ try {
 
 	await runSnykCommand( [ 'config', 'set', `endpoint=${ SNYK_ENDPOINT }` ] );
 	await runSnykCommand( [ 'config', 'set', `org=${ values.org }` ] );
-	await runSnykCommand( [ 'auth', SNYK_TOKEN ] );
 
 	await runSnykCommand(
 		[
