@@ -587,16 +587,12 @@ describe( 'runAutomatedTests()', () => {
 		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
 			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
 		] );
-		vi.mocked( globSync )
-			.mockReturnValueOnce( [
-				'/workspace/packages/ckeditor5-engine/tests/model/model.js'
-			] )
-			// For mergeCoverageReports — no Karma coverage files.
-			.mockReturnValue( [] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
 		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
 			scripts: { test: 'vitest --run' }
 		} ) );
-		vi.mocked( fs ).existsSync.mockReturnValue( false );
 
 		const promise = runAutomatedTests( options );
 		await new Promise( resolve => setTimeout( resolve ) );
