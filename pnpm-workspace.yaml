@@ -6,6 +6,7 @@ onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
   - puppeteer
+  - snyk
 
 overrides:
   'diff@^7': '^8.0.3'
@@ -18,7 +19,6 @@ minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
-  - pacote # Remove on or after 2026/03/13
 
 shellEmulator: true
 shamefullyHoist: true
