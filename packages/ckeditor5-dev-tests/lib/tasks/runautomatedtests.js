@@ -159,7 +159,7 @@ function getPackageRoot( filePath ) {
 function detectPackageRunner( packageRoot ) {
 	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
 	const packageJson = JSON.parse( fs.readFileSync( upath.join( packageRoot, 'package.json' ), 'utf8' ) );
-	const runner = /\bvitest\b/.test( packageJson?.scripts?.test || '' ) ? 'vitest' : 'karma';
+	const runner = packageJson.scripts?.test?.includes( 'vitest' ) ? 'vitest' : 'karma';
 
 	return { projectName, runner };
 }
@@ -294,7 +294,7 @@ function spawnVitestProject( options, project, selectedFiles ) {
 		child.on( 'error', reject );
 
 		child.on( 'close', exitCode => {
-			if ( exitCode === 0 ) {
+			if ( exitCode === 0 || exitCode === 130 ) {
 				resolve();
 			} else {
 				reject( new Error( `Vitest finished with "${ exitCode }" code.` ) );
