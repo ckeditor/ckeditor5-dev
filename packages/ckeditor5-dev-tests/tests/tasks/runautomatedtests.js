@@ -30,6 +30,11 @@ const stubs = vi.hoisted( () => ( {
 	},
 	spawn: {
 		call: vi.fn()
+	},
+	devUtilsLogger: {
+		info: vi.fn(),
+		warning: vi.fn(),
+		error: vi.fn()
 	}
 } ) );
 
@@ -81,6 +86,9 @@ vi.mock( 'node:fs' );
 vi.mock( 'mkdirp' );
 vi.mock( 'glob' );
 vi.mock( 'karma/lib/logger.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
+	logger: vi.fn( () => stubs.devUtilsLogger )
+} ) );
 vi.mock( '../../lib/utils/automated-tests/getkarmaconfig.js' );
 vi.mock( '../../lib/utils/transformfileoptiontotestglob.js' );
 
@@ -588,7 +596,7 @@ describe( 'runAutomatedTests()', () => {
 		);
 	} );
 
-	it( 'should pass coverage flags to Vitest when coverage is enabled', async () => {
+	it( 'should pass coverage flags to Vitest and merge coverage with nyc', async () => {
 		const options = {
 			files: [ 'engine' ],
 			production: true,
@@ -605,29 +613,67 @@ describe( 'runAutomatedTests()', () => {
 		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
 			scripts: { test: 'vitest --run' }
 		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( true );
 
 		const promise = runAutomatedTests( options );
 		await new Promise( resolve => setTimeout( resolve ) );
 
-		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
-		subprocess.emit( 'close', 0 );
+		// First spawn: vitest project run.
+		const [ vitestProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		vitestProcess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		// Second spawn: nyc report merge.
+		const [ , nycProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		nycProcess.emit( 'close', 0 );
 
 		await promise;
 
-		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
+		// Vitest was called with per-project coverage directory.
+		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
+			1,
 			'pnpm',
 			[
 				'vitest',
 				'--run',
 				'--coverage',
 				'--coverage.reportsDirectory',
-				'/workspace/coverage-vitest',
+				'/workspace/coverage-vitest/engine',
 				'--project',
 				'engine',
 				'packages/ckeditor5-engine/tests/model/model.js'
 			],
 			expect.any( Object )
 		);
+
+		// coverage-final.json was copied into .nyc_output.
+		expect( vi.mocked( fs ).existsSync ).toHaveBeenCalledWith(
+			'/workspace/coverage-vitest/engine/coverage-final.json'
+		);
+		expect( vi.mocked( fs ).copyFileSync ).toHaveBeenCalledWith(
+			'/workspace/coverage-vitest/engine/coverage-final.json',
+			'/workspace/coverage-vitest/.nyc_output/engine.json'
+		);
+
+		// nyc report was called with correct reporters.
+		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
+			2,
+			'pnpx',
+			[
+				'nyc', 'report',
+				'--temp-dir', '/workspace/coverage-vitest/.nyc_output',
+				'--report-dir', '/workspace/coverage-vitest',
+				'--reporter', 'html',
+				'--reporter', 'json',
+				'--reporter', 'lcovonly',
+				'--reporter', 'text-summary'
+			],
+			expect.objectContaining( { stdio: 'inherit', cwd: '/workspace' } )
+		);
+
+		// Log message was printed.
+		expect( stubs.devUtilsLogger.info ).toHaveBeenCalled();
 	} );
 
 	it( 'should reject when Vitest process exits with non-zero code', async () => {
@@ -855,6 +901,183 @@ describe( 'runAutomatedTests()', () => {
 				'external/ckeditor5/packages/ckeditor5-engine/tests/model.js'
 			],
 			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+		);
+	} );
+
+	// -- Edge cases -------------------------------------------------------------------------------
+
+	it( 'should resolve when Vitest exits with code 130 (SIGINT)', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 130 );
+
+		await promise;
+	} );
+
+	it( 'should reject when spawn emits an error event', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'error', new Error( 'spawn ENOENT' ) );
+
+		await expect( promise ).rejects.toThrow( 'spawn ENOENT' );
+	} );
+
+	it( 'should skip copying coverage-final.json when the file does not exist', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ vitestProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		vitestProcess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ , nycProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		nycProcess.emit( 'close', 0 );
+
+		await promise;
+
+		expect( vi.mocked( fs ).copyFileSync ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should reject when nyc report fails', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ vitestProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		vitestProcess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ , nycProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		nycProcess.emit( 'close', 1 );
+
+		await expect( promise ).rejects.toThrow( 'nyc report finished with "1" code.' );
+	} );
+
+	it( 'should reject when nyc spawn emits an error', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ vitestProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		vitestProcess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ , nycProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		nycProcess.emit( 'error', new Error( 'nyc ENOENT' ) );
+
+		await expect( promise ).rejects.toThrow( 'nyc ENOENT' );
+	} );
+
+	it( 'should throw when a test file path does not contain /tests/ segment', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/src/model.js'
+		] );
+
+		await expect( runAutomatedTests( options ) ).rejects.toThrow(
+			'Cannot determine package root for "/workspace/packages/ckeditor5-engine/src/model.js".'
 		);
 	} );
 } );

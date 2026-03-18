@@ -266,6 +266,10 @@ async function spawnVitest( options, vitestSelection ) {
 	for ( const [ project, selectedFiles ] of vitestSelection ) {
 		await spawnVitestProject( options, project, selectedFiles );
 	}
+
+	if ( options.coverage ) {
+		await mergeVitestCoverage( vitestSelection );
+	}
 }
 
 function spawnVitestProject( options, project, selectedFiles ) {
@@ -275,7 +279,7 @@ function spawnVitestProject( options, project, selectedFiles ) {
 		args.push( options.watch ? '--watch' : '--run' );
 
 		if ( options.coverage ) {
-			const coverageDir = upath.join( process.cwd(), 'coverage-vitest' );
+			const coverageDir = upath.join( process.cwd(), 'coverage-vitest', project );
 			args.push( '--coverage', '--coverage.reportsDirectory', coverageDir );
 		}
 
@@ -298,6 +302,52 @@ function spawnVitestProject( options, project, selectedFiles ) {
 				resolve();
 			} else {
 				reject( new Error( `Vitest finished with "${ exitCode }" code.` ) );
+			}
+		} );
+	} );
+}
+
+function mergeVitestCoverage( vitestSelection ) {
+	const cwd = process.cwd();
+	const coverageBaseDir = upath.join( cwd, 'coverage-vitest' );
+	const nycOutputDir = upath.join( coverageBaseDir, '.nyc_output' );
+
+	mkdirp.sync( nycOutputDir );
+
+	// Copy each project's coverage-final.json into .nyc_output/ so nyc can merge them.
+	for ( const [ project ] of vitestSelection ) {
+		const sourceFile = upath.join( coverageBaseDir, project, 'coverage-final.json' );
+
+		if ( fs.existsSync( sourceFile ) ) {
+			fs.copyFileSync( sourceFile, upath.join( nycOutputDir, `${ project }.json` ) );
+		}
+	}
+
+	const log = logger();
+
+	return new Promise( ( resolve, reject ) => {
+		const child = spawn( 'pnpx', [
+			'nyc', 'report',
+			'--temp-dir', nycOutputDir,
+			'--report-dir', coverageBaseDir,
+			'--reporter', 'html',
+			'--reporter', 'json',
+			'--reporter', 'lcovonly',
+			'--reporter', 'text-summary'
+		], {
+			stdio: 'inherit',
+			cwd,
+			shell: process.platform === 'win32'
+		} );
+
+		child.on( 'error', reject );
+
+		child.on( 'close', exitCode => {
+			if ( exitCode === 0 ) {
+				log.info( `Combined Vitest coverage report saved in '${ styleText( 'cyan', coverageBaseDir ) }'.` );
+				resolve();
+			} else {
+				reject( new Error( `nyc report finished with "${ exitCode }" code.` ) );
 			}
 		} );
 	} );
