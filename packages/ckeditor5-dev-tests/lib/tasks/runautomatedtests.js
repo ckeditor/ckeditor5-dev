@@ -302,7 +302,7 @@ function spawnVitestProject( options, project, selectedFiles ) {
 
 		if ( options.coverage ) {
 			const coverageDir = upath.join( process.cwd(), 'coverage-vitest', project );
-			args.push( '--coverage', '--coverage.reportsDirectory', coverageDir );
+			args.push( '--coverage.enabled', '--coverage.reportsDirectory', coverageDir );
 		}
 
 		args.push( '--project', project );

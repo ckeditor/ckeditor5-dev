@@ -637,7 +637,7 @@ describe( 'runAutomatedTests()', () => {
 			[
 				'vitest',
 				'--run',
-				'--coverage',
+				'--coverage.enabled',
 				'--coverage.reportsDirectory',
 				'/workspace/coverage-vitest/engine',
 				'--project',
