@@ -253,8 +253,6 @@ workflows:
       - validate_and_tests
       - release_prepare
       - upload_snyk_snapshots:
-          requires:
-            - validate_and_tests
           filters:
             branches:
               only:

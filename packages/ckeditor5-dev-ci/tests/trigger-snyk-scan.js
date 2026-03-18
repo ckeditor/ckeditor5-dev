@@ -10,29 +10,30 @@ vi.mock( 'node:child_process', () => ( {
 	spawn: vi.fn()
 } ) );
 
+vi.mock( 'node:util', () => ( {
+	parseArgs: vi.fn()
+} ) );
+
 import { spawn } from 'node:child_process';
+import { parseArgs } from 'node:util';
 import runSnykCommand from '../lib/run-snyk-command.js';
 
 describe( 'bin/trigger-snyk-scan', () => {
 	beforeEach( () => {
-		process.argv = [ 'node', 'trigger-snyk-scan.js', '--organization=org-id' ];
 		process.exitCode = undefined;
 
 		vi.stubEnv( 'SNYK_TOKEN', 'snyk-token' );
 		vi.stubEnv( 'CIRCLE_BRANCH', 'master-v54' );
 		vi.mocked( spawn ).mockImplementation( () => createChildProcessThatClosesWith( 0 ) );
+		vi.mocked( parseArgs ).mockReturnValue( {
+			values: {
+				organization: 'org-id'
+			}
+		} );
 	} );
 
-	it( 'should run Snyk code and monitor commands with the provided organization', async () => {
-		vi.mocked( spawn )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) );
-
+	it( 'should configure the Snyk endpoint', async () => {
 		await importTriggerSnykScanScript();
-
-		expect( vi.mocked( spawn ) ).toHaveBeenCalledTimes( 4 );
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			1,
@@ -50,6 +51,10 @@ describe( 'bin/trigger-snyk-scan', () => {
 				stdio: 'inherit'
 			}
 		);
+	} );
+
+	it( 'should configure the Snyk organization', async () => {
+		await importTriggerSnykScanScript();
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			2,
@@ -67,6 +72,10 @@ describe( 'bin/trigger-snyk-scan', () => {
 				stdio: 'inherit'
 			}
 		);
+	} );
+
+	it( 'should run the Snyk code scan for the current branch', async () => {
+		await importTriggerSnykScanScript();
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			3,
@@ -86,6 +95,16 @@ describe( 'bin/trigger-snyk-scan', () => {
 				stdio: 'inherit'
 			}
 		);
+	} );
+
+	it( 'should upload the Snyk dependency snapshot for the current branch', async () => {
+		vi.mocked( spawn )
+			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
+			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
+			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
+			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) );
+
+		await importTriggerSnykScanScript();
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			4,
@@ -139,7 +158,9 @@ describe( 'bin/trigger-snyk-scan', () => {
 	} );
 
 	it( 'should set exit code when the organization argument is missing', async () => {
-		process.argv = [ 'node', 'trigger-snyk-scan.js' ];
+		vi.mocked( parseArgs ).mockReturnValue( {
+			values: {}
+		} );
 
 		const consoleErrorSpy = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
 
