@@ -904,6 +904,48 @@ describe( 'runAutomatedTests()', () => {
 		);
 	} );
 
+	it( 'should throw when watch mode is used with multiple Vitest projects', async () => {
+		const options = {
+			files: [ 'utils', 'engine' ],
+			production: true,
+			watch: true,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-utils/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/**/*.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/**/*.js'
+			] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/model.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-engine/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			return '{}';
+		} );
+
+		await expect( runAutomatedTests( options ) ).rejects.toThrow(
+			'Watch mode cannot be used for multiple Vitest projects in one run. ' +
+			'Run watch mode separately for each Vitest project.'
+		);
+
+		expect( stubs.spawn.call ).not.toHaveBeenCalled();
+	} );
+
 	// -- Edge cases -------------------------------------------------------------------------------
 
 	it( 'should resolve when Vitest exits with code 130 (SIGINT)', async () => {

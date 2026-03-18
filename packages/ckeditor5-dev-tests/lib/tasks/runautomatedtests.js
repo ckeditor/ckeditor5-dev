@@ -49,6 +49,13 @@ export default async function runAutomatedTests( options ) {
 		);
 	}
 
+	if ( options.watch && vitestSelection.length > 1 ) {
+		throw new Error(
+			'Watch mode cannot be used for multiple Vitest projects in one run. ' +
+			'Run watch mode separately for each Vitest project.'
+		);
+	}
+
 	const errors = [];
 
 	if ( karmaFiles.length ) {
