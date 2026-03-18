@@ -132,7 +132,7 @@ These commands accept a mix of environment variables and command line arguments.
 - ⚙️ **`ckeditor5-dev-ci-trigger-snyk-scan`**
 
   Publishes Snyk code and dependency snapshots for the current branch.
-  It configures the Snyk CLI to use the EU endpoint and the provided organization, then runs `snyk code test --report` and `snyk monitor --all-projects`.
+  It configures the Snyk CLI to use the EU endpoint and the provided organization, then runs `snyk code test --report` and `snyk monitor --all-projects --detection-depth=2`.
 
   **Environment variables:**
   - `SNYK_TOKEN` &mdash; Snyk token used for authentication.
@@ -144,6 +144,7 @@ These commands accept a mix of environment variables and command line arguments.
   - `--organization` &mdash; Snyk organization ID or slug.
 
   **Behavior:**
+  - Limits dependency snapshot detection to the repository root and `packages/*`, so test fixtures and deeper nested manifests are ignored.
   - Accepts exit code `1` from `snyk code test --report`, so code snapshots are still published when vulnerabilities are found.
   - Requires exit code `0` from `snyk monitor --all-projects`, because any other code means the dependency snapshot was not created.
 
