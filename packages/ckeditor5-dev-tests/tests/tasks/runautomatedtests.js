@@ -946,6 +946,54 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.spawn.call ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should continue running remaining Vitest projects after a project failure', async () => {
+		const options = {
+			files: [ 'utils', 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-utils/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/**/*.js'
+			] )
+			.mockReturnValueOnce( [
+				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
+				'/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/**/*.js'
+			] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [] )
+			.mockReturnValueOnce( [ '/workspace/external/ckeditor5/packages/ckeditor5-engine/tests/model.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-engine/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			return '{}';
+		} );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ firstSubprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		firstSubprocess.emit( 'close', 1 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+		const [ , secondSubprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		secondSubprocess.emit( 'close', 0 );
+
+		await expect( promise ).rejects.toThrow( 'Vitest finished with "1" code.' );
+		expect( stubs.spawn.call ).toHaveBeenCalledTimes( 2 );
+	} );
+
 	// -- Edge cases -------------------------------------------------------------------------------
 
 	it( 'should resolve when Vitest exits with code 130 (SIGINT)', async () => {

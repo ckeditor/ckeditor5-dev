@@ -270,8 +270,23 @@ function startKarmaServer( options ) {
 // -- Vitest runner --------------------------------------------------------------------------------
 
 async function spawnVitest( options, vitestSelection ) {
+	const errors = [];
+
 	for ( const [ project, selectedFiles ] of vitestSelection ) {
-		await spawnVitestProject( options, project, selectedFiles );
+		try {
+			await spawnVitestProject( options, project, selectedFiles );
+		} catch ( error ) {
+			errors.push( error );
+		}
+	}
+
+	if ( errors.length ) {
+		if ( errors.length === 1 ) {
+			throw errors[ 0 ];
+		}
+
+		const details = errors.map( e => `- ${ e.message }` ).join( '\n' );
+		throw new Error( `Vitest execution failed in multiple projects:\n${ details }` );
 	}
 
 	if ( options.coverage ) {
