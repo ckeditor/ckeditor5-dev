@@ -6,6 +6,7 @@ onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
   - puppeteer
+  - snyk
 
 overrides:
   'diff@^7': '^8.0.3'
