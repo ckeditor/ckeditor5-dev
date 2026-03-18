@@ -42,10 +42,10 @@ export default async function runAutomatedTests( options ) {
 		throw new Error( 'No test files found. Specified patterns are invalid.' );
 	}
 
-	if ( karmaFiles.length && vitestSelection.length && options.watch ) {
+	if ( karmaFiles.length && vitestSelection.length && ( options.watch || options.server ) ) {
 		throw new Error(
-			'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
-			'Run watch mode separately for Karma and Vitest packages.'
+			'Watch/server mode cannot be used in a mixed Karma + Vitest run. ' +
+			'Run watch/server mode separately for Karma and Vitest packages.'
 		);
 	}
 

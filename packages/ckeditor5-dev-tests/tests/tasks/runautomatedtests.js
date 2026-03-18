@@ -784,8 +784,40 @@ describe( 'runAutomatedTests()', () => {
 		} );
 
 		await expect( runAutomatedTests( options ) ).rejects.toThrow(
-			'Watch mode cannot be used in a mixed Karma + Vitest run. ' +
-			'Run watch mode separately for Karma and Vitest packages.'
+			'Watch/server mode cannot be used in a mixed Karma + Vitest run. ' +
+			'Run watch/server mode separately for Karma and Vitest packages.'
+		);
+	} );
+
+	it( 'should throw when server mode is used with mixed Karma + Vitest packages', async () => {
+		const options = {
+			files: [ 'utils', 'emoji' ],
+			production: true,
+			coverage: false,
+			server: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/**/*.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/**/*.js' ] );
+		vi.mocked( globSync )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-utils/tests/first.js' ] )
+			.mockReturnValueOnce( [ '/workspace/packages/ckeditor5-emoji/tests/emoji.js' ] );
+		vi.mocked( fs ).readFileSync.mockImplementation( path => {
+			if ( path.includes( 'ckeditor5-utils/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'vitest run' } } );
+			}
+
+			if ( path.includes( 'ckeditor5-emoji/package.json' ) ) {
+				return JSON.stringify( { scripts: { test: 'karma start' } } );
+			}
+
+			return '{}';
+		} );
+
+		await expect( runAutomatedTests( options ) ).rejects.toThrow(
+			'Watch/server mode cannot be used in a mixed Karma + Vitest run. ' +
+			'Run watch/server mode separately for Karma and Vitest packages.'
 		);
 	} );
 
