@@ -129,6 +129,24 @@ These commands accept a mix of environment variables and command line arguments.
     Can be omitted if it matches `--slug`.
   - `--release-branch` &mdash; *(Optional)* Branch that leads the release process.
 
+- ⚙️ **`ckeditor5-dev-ci-trigger-snyk-scan`**
+
+  Publishes Snyk code and dependency snapshots for the current branch.
+  It configures the Snyk CLI to use the EU endpoint and the provided organization, then runs `snyk code test --report` and `snyk monitor --all-projects`.
+
+  **Environment variables:**
+  - `SNYK_TOKEN` &mdash; Snyk token used for authentication.
+
+  **CircleCI-provided variables:**
+  - `CIRCLE_BRANCH` &mdash; Git branch used as Snyk's `target-reference`.
+
+  **Parameters:**
+  - `--organization` &mdash; Snyk organization ID or slug.
+
+  **Behavior:**
+  - Accepts exit code `1` from `snyk code test --report`, so code snapshots are still published when vulnerabilities are found.
+  - Requires exit code `0` from `snyk monitor --all-projects`, because any other code means the dependency snapshot was not created.
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-ci/CHANGELOG.md) file.
