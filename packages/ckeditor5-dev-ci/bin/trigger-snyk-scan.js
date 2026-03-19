@@ -57,7 +57,7 @@ try {
 		[
 			'monitor',
 			'--all-projects',
-			'--detection-depth=2',
+			'--exclude=external,tests',
 			`--target-reference=${ CIRCLE_BRANCH }`
 		],
 

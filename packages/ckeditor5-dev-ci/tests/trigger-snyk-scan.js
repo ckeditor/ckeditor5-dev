@@ -115,7 +115,7 @@ describe( 'bin/trigger-snyk-scan', () => {
 				'snyk',
 				'monitor',
 				'--all-projects',
-				'--detection-depth=2',
+				'--exclude=external,tests',
 				'--target-reference=master-v54'
 			],
 			{
