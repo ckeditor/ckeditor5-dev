@@ -112,8 +112,9 @@ async function waitForOtherJobsAndSendNotification() {
 		return waitForOtherJobsAndSendNotification();
 	}
 
-	// If any ignored job failed, all of its children will be marked as 'failed_parent', and thus will not trigger this check.
-	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
+	// If any ignored job failed or was canceled, all of its children will be marked as
+	// 'failed_parent', and thus will not trigger this check.
+	const anyJobsFailed = jobs.some( job => job.status === 'failed' || job.status === 'canceled' );
 
 	if ( anyJobsFailed ) {
 		return execSync( task, { stdio: 'inherit' } );
