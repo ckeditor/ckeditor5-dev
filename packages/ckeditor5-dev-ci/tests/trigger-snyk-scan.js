@@ -27,6 +27,7 @@ describe( 'bin/trigger-snyk-scan', () => {
 		vi.mocked( spawn ).mockImplementation( () => createChildProcessThatClosesWith( 0 ) );
 		vi.mocked( parseArgs ).mockReturnValue( {
 			values: {
+				exclude: [ 'external', 'tests' ],
 				organization: 'org-id'
 			}
 		} );
@@ -98,12 +99,6 @@ describe( 'bin/trigger-snyk-scan', () => {
 	} );
 
 	it( 'should upload the Snyk dependency snapshot for the current branch', async () => {
-		vi.mocked( spawn )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) )
-			.mockImplementationOnce( () => createChildProcessThatClosesWith( 0 ) );
-
 		await importTriggerSnykScanScript();
 
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
@@ -115,13 +110,31 @@ describe( 'bin/trigger-snyk-scan', () => {
 				'snyk',
 				'monitor',
 				'--all-projects',
-				'--detection-depth=2',
+				'--exclude=external,tests',
 				'--target-reference=master-v54'
 			],
 			{
 				cwd: process.cwd(),
 				stdio: 'inherit'
 			}
+		);
+	} );
+
+	it( 'should allow overriding the default excluded paths', async () => {
+		vi.mocked( parseArgs ).mockReturnValue( {
+			values: {
+				exclude: [ 'external', 'fixtures' ],
+				organization: 'org-id'
+			}
+		} );
+
+		await importTriggerSnykScanScript();
+
+		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
+			4,
+			'pnpm',
+			expect.arrayContaining( [ '--exclude=external,fixtures' ] ),
+			expect.any( Object )
 		);
 	} );
 
