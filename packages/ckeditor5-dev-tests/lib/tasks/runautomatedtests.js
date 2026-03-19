@@ -280,6 +280,14 @@ async function spawnVitest( options, vitestSelection ) {
 		}
 	}
 
+	if ( options.coverage ) {
+		try {
+			await mergeVitestCoverage( vitestSelection );
+		} catch ( error ) {
+			errors.push( error );
+		}
+	}
+
 	if ( errors.length ) {
 		if ( errors.length === 1 ) {
 			throw errors[ 0 ];
@@ -287,10 +295,6 @@ async function spawnVitest( options, vitestSelection ) {
 
 		const details = errors.map( e => `- ${ e.message }` ).join( '\n' );
 		throw new Error( `Vitest execution failed in multiple projects:\n${ details }` );
-	}
-
-	if ( options.coverage ) {
-		await mergeVitestCoverage( vitestSelection );
 	}
 }
 
