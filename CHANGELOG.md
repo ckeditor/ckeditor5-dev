@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [55.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v55.1.0...v55.1.1) (March 19, 2026)
+
+### Bug fixes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Added support for excluding `tests` and `external` folders from `ckeditor5-dev-ci-trigger-snyk-scan` dependency monitoring, with overrides available via `--exclude`.
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Fixed `ckeditor5-dev-ci-circle-workflow-notifier` to treat canceled CircleCI jobs as finished workflow states and errors. Closes [ckeditor/ckeditor5#19978](https://github.com/ckeditor/ckeditor5/issues/19978).
+
+  This prevents the notifier from hanging when a job is canceled and propagates canceled parent jobs to their dependents.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/55.1.1): v55.1.0 => v55.1.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/55.1.1): v55.1.0 => v55.1.1
+</details>
+
+
 ## [55.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v55.0.0...v55.1.0) (March 18, 2026)
 
 ### Features
@@ -184,38 +219,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/55.0.0-alpha.5): v55.0.0-alpha.4 => v55.0.0-alpha.5
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/55.0.0-alpha.5): v55.0.0-alpha.4 => v55.0.0-alpha.5
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/55.0.0-alpha.5): v55.0.0-alpha.4 => v55.0.0-alpha.5
-</details>
-
-
-## [55.0.0-alpha.4](https://github.com/ckeditor/ckeditor5-dev/compare/v55.0.0-alpha.3...v55.0.0-alpha.4) (February 11, 2026)
-
-### Other changes
-
-* This is a sync release that brings changes from [v54.3.4](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v54.3.4) to the `@alpha` channel (`v55.0.0-alpha.4`).
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/55.0.0-alpha.4): v55.0.0-alpha.3 => v55.0.0-alpha.4
 </details>
 
 ---
