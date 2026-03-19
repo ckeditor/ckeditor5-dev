@@ -141,10 +141,11 @@ These commands accept a mix of environment variables and command line arguments.
   - `CIRCLE_BRANCH` &mdash; Git branch used as Snyk's `target-reference`.
 
   **Parameters:**
+  - `--exclude` &mdash; *(Optional, repeatable)* Directory or file name passed to Snyk's `--exclude`. Use multiple times, for example `--exclude=external --exclude=tests`. Defaults to `external` and `tests`.
   - `--organization` &mdash; Snyk organization ID or slug.
 
   **Behavior:**
-  - Excludes directories and files named `external` and `tests` from dependency snapshot detection, so fixture manifests in those locations are ignored.
+  - Excludes directories and files named `external` and `tests` from dependency snapshot detection by default, and allows overriding that list with repeated `--exclude` flags.
   - Accepts exit code `1` from `snyk code test --report`, so code snapshots are still published when vulnerabilities are found.
   - Requires exit code `0` from `snyk monitor --all-projects`, because any other code means the dependency snapshot was not created.
 

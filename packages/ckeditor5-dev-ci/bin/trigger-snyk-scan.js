@@ -15,6 +15,11 @@ try {
 
 	const { values } = parseArgs( {
 		options: {
+			exclude: {
+				default: [ 'external', 'tests' ],
+				multiple: true,
+				type: 'string'
+			},
 			organization: {
 				type: 'string'
 			}
@@ -57,7 +62,7 @@ try {
 		[
 			'monitor',
 			'--all-projects',
-			'--exclude=external,tests',
+			`--exclude=${ values.exclude.join( ',' ) }`,
 			`--target-reference=${ CIRCLE_BRANCH }`
 		],
 
