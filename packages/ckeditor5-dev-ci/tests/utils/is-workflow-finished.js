@@ -21,6 +21,13 @@ describe( 'lib/utils/isWorkflowFinished', () => {
 		expect( isWorkflowFinished( jobs ) ).toEqual( true );
 	} );
 
+	it( 'returns `true` for a finished job (status=canceled)', async () => {
+		const jobs = [
+			{ status: 'canceled' }
+		];
+		expect( isWorkflowFinished( jobs ) ).toEqual( true );
+	} );
+
 	// See: https://github.com/ckeditor/ckeditor5/issues/18359.
 	it( 'returns `true` for a finished job (status=skipped)', async () => {
 		const jobs = [
@@ -41,6 +48,14 @@ describe( 'lib/utils/isWorkflowFinished', () => {
 		const jobs = [
 			{ name: '1', status: 'success' },
 			{ name: '2', status: 'failed', dependencies: [ '1' ] }
+		];
+		expect( isWorkflowFinished( jobs ) ).toEqual( true );
+	} );
+
+	it( 'returns `true` for jobs with dependencies (a child is canceled)', async () => {
+		const jobs = [
+			{ name: '1', status: 'success' },
+			{ name: '2', status: 'canceled', dependencies: [ '1' ] }
 		];
 		expect( isWorkflowFinished( jobs ) ).toEqual( true );
 	} );

@@ -64,6 +64,11 @@ function isJobFailed( job ) {
 		return true;
 	}
 
+	// See: https://github.com/ckeditor/ckeditor5/issues/19978.
+	if ( job.status === 'canceled' ) {
+		return true;
+	}
+
 	if ( job.status === 'failed_parent' ) {
 		return true;
 	}
@@ -85,7 +90,7 @@ function clone( obj ) {
  *
  * @property {string} id
  *
- * @property {'blocked'|'running'|'failed'|'failed_parent'|'success'} status
+ * @property {'blocked'|'running'|'failed'|'canceled'|'failed_parent'|'success'|'skipped'} status
  *
  * @property {Array.<string>} dependencies
  */

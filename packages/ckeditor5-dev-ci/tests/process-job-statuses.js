@@ -419,6 +419,60 @@ describe( 'lib/process-job-statuses', () => {
 			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
+		describe( 'status=canceled', () => {
+			// Workflow:
+			// ┌─────┐
+			// │Job A│
+			// └─────┘
+			it( 'should not modify status of a single canceled job', () => {
+				const jobs = [
+					{
+						id: 'id1',
+						status: 'canceled',
+						dependencies: []
+					}
+				];
+
+				const expectedOutput = [
+					{
+						id: 'id1',
+						status: 'canceled',
+						dependencies: []
+					}
+				];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+
+			// Workflow:
+			// ┌────┐     ┌────┐
+			// │Id 1├────►│Id 2│
+			// └────┘     └────┘
+			it( 'should set status to "failed_parent" for a job whose parent has status "canceled"', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'canceled',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'blocked',
+					dependencies: [ 'id1' ]
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'canceled',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'failed_parent',
+					dependencies: [ 'id1' ]
+				} ];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+		} );
+
 		describe( 'status=skipped', () => {
 			// Workflow:
 			// ┌─────┐
