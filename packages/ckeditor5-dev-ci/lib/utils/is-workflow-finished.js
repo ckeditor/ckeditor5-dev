@@ -6,6 +6,8 @@
 const FINISHED_STATUSES = [
 	'success',
 	'failed',
+	// See: https://github.com/ckeditor/ckeditor5/issues/19978.
+	'canceled',
 	'failed_parent',
 	// See: https://github.com/ckeditor/ckeditor5/issues/18359.
 	'skipped'
