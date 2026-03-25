@@ -342,7 +342,7 @@ describe( 'parseArguments()', () => {
 		}
 
 		it( 'should print help and exit when --help is passed (automated mode)', () => {
-			parseArguments( [ '--help' ], { mode: 'automated', commandName: 'ckeditor5-dev-tests-run-automated' } );
+			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
@@ -361,7 +361,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should print help and exit when --help is passed (manual mode)', () => {
-			parseArguments( [ '--help' ], { mode: 'manual', commandName: 'ckeditor5-dev-tests-run-manual' } );
+			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
@@ -378,7 +378,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should print help and exit when -h alias is passed', () => {
-			parseArguments( [ '-h' ], { mode: 'automated', commandName: 'ckeditor5-dev-tests-run-automated' } );
+			parseArguments( [ '-h' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();

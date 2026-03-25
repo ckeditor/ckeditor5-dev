@@ -11,7 +11,6 @@ import { loadEnvFile } from 'node:process';
 import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), {
-	mode: 'automated',
 	commandName: 'ckeditor5-dev-tests-run-automated'
 } );
 

@@ -13,8 +13,8 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
  * @param {Array.<string>} args
  * @param {object} settings
  * @param {boolean} [settings.allowDefaultIdentityFile]
- * @param {string} [settings.mode] Either 'automated' or 'manual'. Controls which options are shown in `--help`.
  * @param {string} [settings.commandName] CLI command name displayed in the `--help` usage line.
+ * If the name contains 'manual', manual-specific help is shown.
  * @returns {object}
  */
 export default function parseArguments( args, settings = {} ) {
@@ -281,7 +281,7 @@ export default function parseArguments( args, settings = {} ) {
 	 */
 	function printHelp( settings ) {
 		const commandName = settings.commandName || 'ckeditor5-dev-tests';
-		const isManual = settings.mode === 'manual';
+		const isManual = commandName.includes( 'manual' );
 
 		const description = isManual ?
 			'Compiles and serves manual tests with a live-reloading dev server.' :

@@ -12,7 +12,6 @@ import * as tests from '../lib/index.js';
 
 const options = tests.parseArguments( process.argv.slice( 2 ), {
 	allowDefaultIdentityFile: true,
-	mode: 'manual',
 	commandName: 'ckeditor5-dev-tests-run-manual'
 } );
 
