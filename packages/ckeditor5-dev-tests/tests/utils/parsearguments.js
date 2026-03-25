@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
-import parseArguments from '../../../lib/utils/automated-tests/parsearguments.js';
+import parseArguments from '../../lib/utils/parsearguments.js';
 
 vi.mock( 'upath', () => ( {
 	default: {
