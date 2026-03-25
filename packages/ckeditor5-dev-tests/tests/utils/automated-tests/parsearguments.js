@@ -335,19 +335,29 @@ describe( 'parseArguments()', () => {
 			consoleLogStub = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 		} );
 
+		// Strips ANSI escape codes so assertions match visible text.
+		function stripAnsi( str ) {
+			// eslint-disable-next-line no-control-regex
+			return str.replace( /\u001b\[[0-9;]*m/g, '' );
+		}
+
 		it( 'should print help and exit when --help is passed (automated mode)', () => {
 			parseArguments( [ '--help' ], { mode: 'automated', commandName: 'ckeditor5-dev-tests-run-automated' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
 
-			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
 
-			expect( output ).toContain( 'Usage: ckeditor5-dev-tests-run-automated [options]' );
+			expect( output ).toContain( 'ckeditor5-dev-tests-run-automated [options]' );
 			expect( output ).toContain( 'Runs automated tests using Karma and Vitest.' );
 			expect( output ).toContain( '--coverage' );
 			expect( output ).toContain( '--watch' );
 			expect( output ).toContain( '--browsers' );
+			expect( output ).toContain( 'Test selection' );
+			expect( output ).toContain( 'Test execution' );
+			expect( output ).toContain( 'Build configuration' );
+			expect( output ).toContain( 'Examples' );
 		} );
 
 		it( 'should print help and exit when --help is passed (manual mode)', () => {
@@ -356,14 +366,15 @@ describe( 'parseArguments()', () => {
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
 
-			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
 
-			expect( output ).toContain( 'Usage: ckeditor5-dev-tests-run-manual [options]' );
+			expect( output ).toContain( 'ckeditor5-dev-tests-run-manual [options]' );
 			expect( output ).toContain( 'Compiles and serves manual tests with a live-reloading dev server.' );
 			expect( output ).toContain( '--disable-watch' );
 			expect( output ).toContain( '--port' );
+			expect( output ).toContain( 'Server' );
 			expect( output ).not.toContain( '--coverage' );
-			expect( output ).not.toContain( '--watch' );
+			expect( output ).not.toContain( 'Test execution' );
 		} );
 
 		it( 'should print help and exit when -h alias is passed', () => {
@@ -379,9 +390,9 @@ describe( 'parseArguments()', () => {
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
 
-			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
 
-			expect( output ).toContain( 'Usage: ckeditor5-dev-tests [options]' );
+			expect( output ).toContain( 'ckeditor5-dev-tests [options]' );
 		} );
 	} );
 

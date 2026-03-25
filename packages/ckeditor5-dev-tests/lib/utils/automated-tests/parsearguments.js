@@ -5,6 +5,7 @@
 
 import fs from 'node:fs';
 import path from 'upath';
+import { styleText } from 'node:util';
 import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
@@ -280,91 +281,205 @@ export default function parseArguments( args, settings = {} ) {
 		const commandName = settings.commandName || 'ckeditor5-dev-tests';
 		const isManual = settings.mode === 'manual';
 
-		const header = isManual ?
+		const description = isManual ?
 			'Compiles and serves manual tests with a live-reloading dev server.' :
 			'Runs automated tests using Karma and Vitest.';
 
+		const optionGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
+		const examples = isManual ? getManualExamples( commandName ) : getAutomatedExamples( commandName );
+
 		const lines = [
-			`Usage: ${ commandName } [options]`,
 			'',
-			header,
+			styleText( 'bold', `  ${ commandName }` ) + ' [options]',
 			'',
-			'Options:'
+			`  ${ description }`,
+			''
 		];
 
-		if ( !isManual ) {
-			lines.push(
-				'  -f, --files <pattern>               Package names, directories, or files to test (comma-separated) [default: *]',
-				'  -r, --repositories <names>          Repository names whose packages should be tested (comma-separated)',
-				'  -b, --browsers <names>              Browsers for running tests (comma-separated) [default: Chrome]',
-				'  -c, --coverage                      Generate code coverage report',
-				'  -w, --watch                         Watch files and re-run tests on changes',
-				'  -d, --debug [flags]                 Debug flags (e.g. --debug engine,ui). Use --no-debug to disable [default: CK_DEBUG]',
-				'  -s, --source-map                    Generate source maps [default: true]',
-				'  -v, --verbose                       Show Webpack processing details',
-				'  -n, --notify                        Enable desktop notifications on test completion',
-				'  -i, --identity-file <path>          File providing secret keys for test scripts',
-				'      --language <code>               Language for building tests [default: en]',
-				'      --additional-languages <codes>  Additional languages for translations (comma-separated)',
-				'      --reporter <type>               Mocha reporter: "mocha" or "dots" [default: mocha]',
-				'      --production                    Run strictest checks (fail on console calls, DOM leaks)',
-				'      --server                        Run Karma server without opening a browser',
-				'      --cache                         Use Webpack filesystem cache',
-				'      --resolve-js-first              Resolve .js files before .ts files',
-				'      --silent                        Hide processed files info',
-				'      --tsconfig <path>               Path to TypeScript configuration file',
-				'      --karma-config-overrides <path> Path to Karma config overrides file',
-				'      --cwd <path>                    Set current working directory',
-				'  -h, --help                          Show this help message'
-			);
+		for ( const group of optionGroups ) {
+			lines.push( styleText( 'bold', styleText( 'underline', group.title ) ) );
+			lines.push( '' );
 
-			lines.push(
-				'',
-				'Examples:',
-				'  Test specific packages with coverage:',
-				`    ${ commandName } -c --files=enter,paragraph`,
-				'',
-				'  Watch mode for engine view tests:',
-				`    ${ commandName } -w --files=engine/view/`,
-				'',
-				'  Test on multiple browsers:',
-				`    ${ commandName } --browsers=Chrome,Firefox --files=basic-styles/bold`,
-				'',
-				'  Test all packages:',
-				`    ${ commandName } --files=*`
-			);
-		} else {
-			lines.push(
-				'  -f, --files <pattern>               Package names, directories, or files to test (comma-separated)',
-				'  -r, --repositories <names>          Repository names whose packages should be tested (comma-separated)',
-				'  -d, --debug [flags]                 Debug flags (e.g. --debug engine,ui). Use --no-debug to disable [default: CK_DEBUG]',
-				'  -i, --identity-file <path>          File providing secret keys for test scripts',
-				'  -s, --source-map                    Generate source maps [default: true]',
-				'  -v, --verbose                       Show Webpack processing details',
-				'  -n, --notify                        Enable desktop notifications',
-				'      --language <code>               Language for building tests [default: en]',
-				'      --additional-languages <codes>  Additional languages for translations (comma-separated)',
-				'      --port <number>                 Port for the manual test server [default: 8125]',
-				'      --disable-watch                 Disable automatic rebuilding on file changes',
-				'      --production                    Run strictest checks',
-				'      --silent                        Hide processed files info',
-				'      --tsconfig <path>               Path to TypeScript configuration file',
-				'      --cwd <path>                    Set current working directory',
-				'  -h, --help                          Show this help message'
-			);
+			for ( const option of group.options ) {
+				const aliasCol = option.alias ? styleText( 'yellow', `-${ option.alias }` ) + ',' : '   ';
+				const nameCol = styleText( 'yellow', `--${ option.name }` ) +
+					( option.hint ? ' ' + styleText( 'dim', `<${ option.hint }>` ) : '' );
+				const padding = Math.max( 1, 36 - option.name.length - ( option.hint ? option.hint.length + 3 : 0 ) );
+				const defaultVal = option.default ? '  ' + styleText( 'dim', `[default: ${ option.default }]` ) : '';
 
-			lines.push(
-				'',
-				'Examples:',
-				'  Serve manual tests for a specific package:',
-				`    ${ commandName } --files=image`,
-				'',
-				'  Serve all manual tests without watch:',
-				`    ${ commandName } --disable-watch`
-			);
+				lines.push( `  ${ aliasCol } ${ nameCol }${ ' '.repeat( padding ) }${ option.description }${ defaultVal }` );
+			}
+
+			lines.push( '' );
+		}
+
+		lines.push( styleText( 'bold', styleText( 'underline', 'Examples' ) ) );
+		lines.push( '' );
+
+		for ( const example of examples ) {
+			lines.push( `  ${ styleText( 'dim', '#' ) } ${ example.description }` );
+			lines.push( `  ${ styleText( 'cyan', example.command ) }` );
+			lines.push( '' );
 		}
 
 		console.log( lines.join( '\n' ) );
+	}
+
+	/**
+	 * @returns {Array.<Object>}
+	 */
+	function getAutomatedOptionGroups() {
+		return [
+			{
+				title: 'Test selection',
+				options: [
+					{
+						alias: 'f', name: 'files', hint: 'pattern',
+						description: 'Package names, directories, or files to test (comma-separated)',
+						default: '*'
+					},
+					{
+						alias: 'r', name: 'repositories', hint: 'names',
+						description: 'Repository names whose packages should be tested (comma-separated)'
+					},
+					{
+						alias: 'b', name: 'browsers', hint: 'names',
+						description: 'Browsers for running tests (comma-separated)',
+						default: 'Chrome'
+					}
+				]
+			},
+			{
+				title: 'Test execution',
+				options: [
+					{ alias: 'c', name: 'coverage', description: 'Generate code coverage report' },
+					{ alias: 'w', name: 'watch', description: 'Watch files and re-run tests on changes' },
+					{
+						alias: 'd', name: 'debug', hint: 'flags',
+						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
+						default: 'CK_DEBUG'
+					},
+					{ name: 'production', description: 'Run strictest checks (fail on console calls, DOM leaks)' },
+					{ name: 'server', description: 'Run Karma server without opening a browser' },
+					{ name: 'reporter', hint: 'type', description: 'Mocha reporter: "mocha" or "dots"', default: 'mocha' }
+				]
+			},
+			{
+				title: 'Build configuration',
+				options: [
+					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
+					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
+					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
+					{ name: 'cache', description: 'Use Webpack filesystem cache' },
+					{ name: 'resolve-js-first', description: 'Resolve .js files before .ts files' },
+					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
+					{ name: 'karma-config-overrides', hint: 'path', description: 'Path to Karma config overrides file' },
+					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
+				]
+			},
+			{
+				title: 'Output',
+				options: [
+					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
+					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications on test completion' },
+					{ name: 'silent', description: 'Hide processed files info' }
+				]
+			},
+			{
+				title: 'Other',
+				options: [
+					{ name: 'cwd', hint: 'path', description: 'Set current working directory' },
+					{ alias: 'h', name: 'help', description: 'Show this help message' }
+				]
+			}
+		];
+	}
+
+	/**
+	 * @returns {Array.<Object>}
+	 */
+	function getManualOptionGroups() {
+		return [
+			{
+				title: 'Test selection',
+				options: [
+					{
+						alias: 'f', name: 'files', hint: 'pattern',
+						description: 'Package names, directories, or files to test (comma-separated)'
+					},
+					{
+						alias: 'r', name: 'repositories', hint: 'names',
+						description: 'Repository names whose packages should be tested (comma-separated)'
+					}
+				]
+			},
+			{
+				title: 'Server',
+				options: [
+					{
+						name: 'port', hint: 'number',
+						description: 'Port for the manual test server',
+						default: '8125'
+					},
+					{ name: 'disable-watch', description: 'Disable automatic rebuilding on file changes' }
+				]
+			},
+			{
+				title: 'Build configuration',
+				options: [
+					{
+						alias: 'd', name: 'debug', hint: 'flags',
+						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
+						default: 'CK_DEBUG'
+					},
+					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
+					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
+					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
+					{ name: 'production', description: 'Run strictest checks' },
+					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
+					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
+				]
+			},
+			{
+				title: 'Output',
+				options: [
+					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
+					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications' },
+					{ name: 'silent', description: 'Hide processed files info' }
+				]
+			},
+			{
+				title: 'Other',
+				options: [
+					{ name: 'cwd', hint: 'path', description: 'Set current working directory' },
+					{ alias: 'h', name: 'help', description: 'Show this help message' }
+				]
+			}
+		];
+	}
+
+	/**
+	 * @param {string} commandName
+	 * @returns {Array.<Object>}
+	 */
+	function getAutomatedExamples( commandName ) {
+		return [
+			{ description: 'Test specific packages with coverage', command: `${ commandName } -c --files=enter,paragraph` },
+			{ description: 'Watch mode for engine view tests', command: `${ commandName } -w --files=engine/view/` },
+			{ description: 'Test on multiple browsers', command: `${ commandName } --browsers=Chrome,Firefox --files=basic-styles/bold` },
+			{ description: 'Test all packages', command: `${ commandName } --files=*` }
+		];
+	}
+
+	/**
+	 * @param {string} commandName
+	 * @returns {Array.<Object>}
+	 */
+	function getManualExamples( commandName ) {
+		return [
+			{ description: 'Serve manual tests for a specific package', command: `${ commandName } --files=image` },
+			{ description: 'Serve all manual tests without watch', command: `${ commandName } --disable-watch` }
+		];
 	}
 
 	/**
