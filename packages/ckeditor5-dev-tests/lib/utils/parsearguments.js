@@ -11,8 +11,10 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * @param {Array.<string>} args
- * @param {Object} settings
- * @param {string} [settings.allowDefaultIdentityFile]
+ * @param {object} settings
+ * @param {boolean} [settings.allowDefaultIdentityFile]
+ * @param {string} [settings.mode] Either 'automated' or 'manual'. Controls which options are shown in `--help`.
+ * @param {string} [settings.commandName] CLI command name displayed in the `--help` usage line.
  * @returns {object}
  */
 export default function parseArguments( args, settings = {} ) {
