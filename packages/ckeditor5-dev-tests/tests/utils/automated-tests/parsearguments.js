@@ -327,6 +327,64 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	describe( 'help', () => {
+		let processExitStub, consoleLogStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleLogStub = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should print help and exit when --help is passed (automated mode)', () => {
+			parseArguments( [ '--help' ], { mode: 'automated', commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+
+			expect( output ).toContain( 'Usage: ckeditor5-dev-tests-run-automated [options]' );
+			expect( output ).toContain( 'Runs automated tests using Karma and Vitest.' );
+			expect( output ).toContain( '--coverage' );
+			expect( output ).toContain( '--watch' );
+			expect( output ).toContain( '--browsers' );
+		} );
+
+		it( 'should print help and exit when --help is passed (manual mode)', () => {
+			parseArguments( [ '--help' ], { mode: 'manual', commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+
+			expect( output ).toContain( 'Usage: ckeditor5-dev-tests-run-manual [options]' );
+			expect( output ).toContain( 'Compiles and serves manual tests with a live-reloading dev server.' );
+			expect( output ).toContain( '--disable-watch' );
+			expect( output ).toContain( '--port' );
+			expect( output ).not.toContain( '--coverage' );
+			expect( output ).not.toContain( '--watch' );
+		} );
+
+		it( 'should print help and exit when -h alias is passed', () => {
+			parseArguments( [ '-h' ], { mode: 'automated', commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+		} );
+
+		it( 'should use default command name when commandName is not provided', () => {
+			parseArguments( [ '--help' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = consoleLogStub.mock.calls[ 0 ][ 0 ];
+
+			expect( output ).toContain( 'Usage: ckeditor5-dev-tests [options]' );
+		} );
+	} );
+
 	describe( 'identity-file', () => {
 		it( 'should be null by default, if `staging-ff.js` does not exist', () => {
 			const options = parseArguments( [], { allowDefaultIdentityFile: true } );

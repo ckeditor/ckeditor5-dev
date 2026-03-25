@@ -35,6 +35,7 @@ export default function parseArguments( args, settings = {} ) {
 		boolean: [
 			'cache',
 			'coverage',
+			'help',
 			'notify',
 			'production',
 			'resolve-js-first',
@@ -50,6 +51,7 @@ export default function parseArguments( args, settings = {} ) {
 			c: 'coverage',
 			d: 'debug',
 			f: 'files',
+			h: 'help',
 			i: 'identity-file',
 			n: 'notify',
 			r: 'repositories',
@@ -82,6 +84,11 @@ export default function parseArguments( args, settings = {} ) {
 	};
 
 	const options = minimist( args, minimistConfig );
+
+	if ( options.help ) {
+		printHelp( settings );
+		process.exit( 0 );
+	}
 
 	// Delete all aliases because we don't want to use them in the code.
 	// They are useful when calling a command but useless after that.
@@ -262,6 +269,102 @@ export default function parseArguments( args, settings = {} ) {
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * Prints help text for the CLI command.
+	 *
+	 * @param {object} settings
+	 */
+	function printHelp( settings ) {
+		const commandName = settings.commandName || 'ckeditor5-dev-tests';
+		const isManual = settings.mode === 'manual';
+
+		const header = isManual ?
+			'Compiles and serves manual tests with a live-reloading dev server.' :
+			'Runs automated tests using Karma and Vitest.';
+
+		const lines = [
+			`Usage: ${ commandName } [options]`,
+			'',
+			header,
+			'',
+			'Options:'
+		];
+
+		if ( !isManual ) {
+			lines.push(
+				'  -f, --files <pattern>               Package names, directories, or files to test (comma-separated) [default: *]',
+				'  -r, --repositories <names>          Repository names whose packages should be tested (comma-separated)',
+				'  -b, --browsers <names>              Browsers for running tests (comma-separated) [default: Chrome]',
+				'  -c, --coverage                      Generate code coverage report',
+				'  -w, --watch                         Watch files and re-run tests on changes',
+				'  -d, --debug [flags]                 Debug flags (e.g. --debug engine,ui). Use --no-debug to disable [default: CK_DEBUG]',
+				'  -s, --source-map                    Generate source maps [default: true]',
+				'  -v, --verbose                       Show Webpack processing details',
+				'  -n, --notify                        Enable desktop notifications on test completion',
+				'  -i, --identity-file <path>          File providing secret keys for test scripts',
+				'      --language <code>               Language for building tests [default: en]',
+				'      --additional-languages <codes>  Additional languages for translations (comma-separated)',
+				'      --reporter <type>               Mocha reporter: "mocha" or "dots" [default: mocha]',
+				'      --production                    Run strictest checks (fail on console calls, DOM leaks)',
+				'      --server                        Run Karma server without opening a browser',
+				'      --cache                         Use Webpack filesystem cache',
+				'      --resolve-js-first              Resolve .js files before .ts files',
+				'      --silent                        Hide processed files info',
+				'      --tsconfig <path>               Path to TypeScript configuration file',
+				'      --karma-config-overrides <path> Path to Karma config overrides file',
+				'      --cwd <path>                    Set current working directory',
+				'  -h, --help                          Show this help message'
+			);
+
+			lines.push(
+				'',
+				'Examples:',
+				'  Test specific packages with coverage:',
+				`    ${ commandName } -c --files=enter,paragraph`,
+				'',
+				'  Watch mode for engine view tests:',
+				`    ${ commandName } -w --files=engine/view/`,
+				'',
+				'  Test on multiple browsers:',
+				`    ${ commandName } --browsers=Chrome,Firefox --files=basic-styles/bold`,
+				'',
+				'  Test all packages:',
+				`    ${ commandName } --files=*`
+			);
+		} else {
+			lines.push(
+				'  -f, --files <pattern>               Package names, directories, or files to test (comma-separated)',
+				'  -r, --repositories <names>          Repository names whose packages should be tested (comma-separated)',
+				'  -d, --debug [flags]                 Debug flags (e.g. --debug engine,ui). Use --no-debug to disable [default: CK_DEBUG]',
+				'  -i, --identity-file <path>          File providing secret keys for test scripts',
+				'  -s, --source-map                    Generate source maps [default: true]',
+				'  -v, --verbose                       Show Webpack processing details',
+				'  -n, --notify                        Enable desktop notifications',
+				'      --language <code>               Language for building tests [default: en]',
+				'      --additional-languages <codes>  Additional languages for translations (comma-separated)',
+				'      --port <number>                 Port for the manual test server [default: 8125]',
+				'      --disable-watch                 Disable automatic rebuilding on file changes',
+				'      --production                    Run strictest checks',
+				'      --silent                        Hide processed files info',
+				'      --tsconfig <path>               Path to TypeScript configuration file',
+				'      --cwd <path>                    Set current working directory',
+				'  -h, --help                          Show this help message'
+			);
+
+			lines.push(
+				'',
+				'Examples:',
+				'  Serve manual tests for a specific package:',
+				`    ${ commandName } --files=image`,
+				'',
+				'  Serve all manual tests without watch:',
+				`    ${ commandName } --disable-watch`
+			);
+		}
+
+		console.log( lines.join( '\n' ) );
 	}
 
 	/**
