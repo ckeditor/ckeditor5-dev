@@ -279,7 +279,7 @@ export default function parseArguments( args, settings = {} ) {
 	 */
 	function printHelp( settings ) {
 		const commandName = settings.commandName || 'ckeditor5-dev-tests';
-		const isManual = settings.mode === 'manual';
+		const isManual = commandName.endsWith( '-manual' );
 
 		const description = isManual ?
 			'Compiles and serves manual tests with a live-reloading dev server.' :
