@@ -256,8 +256,6 @@ workflows:
           filters:
             branches:
               only:
-                # TODO: Temporary branch for testing Snyk snapshots. Remove after verification.
-                - ck/19989
                 - master-v54
       - trigger_release_process:
           requires:
