@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import path from 'node:path';
 import { spawn } from 'node:child_process';
 
 /**
@@ -14,10 +15,14 @@ import { spawn } from 'node:child_process';
  * @returns {Promise<void>}
  */
 export default function runSnykCommand( snykArguments, allowedExitCodes = [ 0 ] ) {
+	const snykExecutablePath = path.resolve( import.meta.dirname, '..', 'node_modules', '.bin', 'snyk' );
+	const pnpmFlags = process.env.DEBUG ? [] : [ '--silent' ];
+
 	return new Promise( ( resolve, reject ) => {
-		const childProcess = spawn( 'pnpm', [ '--silent', 'exec', 'snyk', ...snykArguments ], {
+		const childProcess = spawn( 'pnpm', [ ...pnpmFlags, 'exec', snykExecutablePath, ...snykArguments ], {
 			cwd: process.cwd(),
-			stdio: 'inherit'
+			stdio: 'inherit',
+			shell: process.platform === 'win32'
 		} );
 
 		childProcess.on( 'error', reject );

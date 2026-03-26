@@ -9,14 +9,19 @@ import { parseArgs } from 'node:util';
 import runSnykCommand from '../lib/run-snyk-command.js';
 
 const SNYK_ENDPOINT = 'https://api.eu.snyk.io';
+const DEFAULT_EXCLUDE = [ 'node_modules', 'external', 'release', 'scripts', 'tests' ];
 
 try {
-	const { CIRCLE_BRANCH, SNYK_TOKEN } = process.env;
+	const { CIRCLE_BRANCH, SNYK_TOKEN, DEBUG } = process.env;
 
 	const { values } = parseArgs( {
 		options: {
+			depth: {
+				default: '2',
+				type: 'string'
+			},
 			exclude: {
-				default: [ 'external', 'tests' ],
+				default: [],
 				multiple: true,
 				type: 'string'
 			},
@@ -39,6 +44,8 @@ try {
 		throw new Error( 'Missing environment variable: CIRCLE_BRANCH' );
 	}
 
+	const exclude = [ ...new Set( [ ...DEFAULT_EXCLUDE, ...values.exclude ] ) ];
+
 	await runSnykCommand( [ 'config', 'set', `endpoint=${ SNYK_ENDPOINT }` ] );
 	await runSnykCommand( [ 'config', 'set', `org=${ values.organization }` ] );
 
@@ -48,7 +55,8 @@ try {
 			'test',
 			'--report',
 			'--project-name=Code analysis',
-			`--target-reference=${ CIRCLE_BRANCH }`
+			`--target-reference=${ CIRCLE_BRANCH }`,
+			...( DEBUG ? [ '-d' ] : [] )
 		],
 
 		/**
@@ -62,8 +70,10 @@ try {
 		[
 			'monitor',
 			'--all-projects',
-			`--exclude=${ values.exclude.join( ',' ) }`,
-			`--target-reference=${ CIRCLE_BRANCH }`
+			`--exclude=${ exclude.join( ',' ) }`,
+			`--detection-depth=${ values.depth }`,
+			`--target-reference=${ CIRCLE_BRANCH }`,
+			...( DEBUG ? [ '-d' ] : [] )
 		],
 
 		/**
