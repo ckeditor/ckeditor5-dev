@@ -132,22 +132,25 @@ These commands accept a mix of environment variables and command line arguments.
 - ⚙️ **`ckeditor5-dev-ci-trigger-snyk-scan`**
 
   Publishes Snyk code and dependency snapshots for the current branch.
-  It configures the Snyk CLI to use the EU endpoint and the provided organization, then runs `snyk code test --report` and `snyk monitor --all-projects --exclude=external,tests`.
+  It configures the Snyk CLI to use the EU endpoint and the provided organization, then runs `snyk code test` and `snyk monitor` commands.
 
   **Environment variables:**
   - `SNYK_TOKEN` &mdash; Snyk token used for authentication.
+  - `DEBUG` &mdash; *(Optional)* When set, appends `-d` to `snyk code test` and `snyk monitor` for verbose output, and removes `--silent` from the `pnpm` invocation.
 
   **CircleCI-provided variables:**
   - `CIRCLE_BRANCH` &mdash; Git branch used as Snyk's `target-reference`.
 
   **Parameters:**
-  - `--exclude` &mdash; *(Optional, repeatable)* Directory or file name passed to Snyk's `--exclude`. Use multiple times, for example `--exclude=external --exclude=tests`. Defaults to `external` and `tests`.
+  - `--depth` &mdash; *(Optional)* Detection depth passed to `snyk monitor` as `--detection-depth`. Defaults to `2`.
+  - `--exclude` &mdash; *(Optional, repeatable)* Additional directory or file name to exclude from Snyk's dependency snapshot. Use multiple times, for example `--exclude=build --exclude=dist`. The provided values are **merged** with the built-in defaults (`external`, `tests`, `node_modules`, `release`, `scripts`).
   - `--organization` &mdash; Snyk organization ID or slug.
 
   **Behavior:**
-  - Excludes directories and files named `external` and `tests` from dependency snapshot detection by default, and allows overriding that list with repeated `--exclude` flags.
-  - Accepts exit code `1` from `snyk code test --report`, so code snapshots are still published when vulnerabilities are found.
-  - Requires exit code `0` from `snyk monitor --all-projects`, because any other code means the dependency snapshot was not created.
+  - Always excludes `external`, `tests`, `node_modules`, `release` and `scripts` from dependency snapshot detection. Any paths provided via `--exclude` are merged with these defaults (duplicates are ignored).
+  - Passes `--detection-depth` (default: `2`) to `snyk monitor` to limit how deep Snyk scans for manifest files, which avoids performance issues caused by deeply nested `node_modules` trees.
+  - Accepts exit code `1` from `snyk code test`, so code snapshots are still published when vulnerabilities are found.
+  - Requires exit code `0` from `snyk monitor`, because any other code means the dependency snapshot was not created.
 
 ## Changelog
 

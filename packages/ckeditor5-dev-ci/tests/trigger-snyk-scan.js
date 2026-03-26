@@ -4,6 +4,7 @@
  */
 
 import { EventEmitter } from 'node:events';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock( 'node:child_process', () => ( {
@@ -18,6 +19,8 @@ import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import runSnykCommand from '../lib/run-snyk-command.js';
 
+const snykExecutablePath = path.resolve( import.meta.dirname, '..', 'node_modules', '.bin', 'snyk' );
+
 describe( 'bin/trigger-snyk-scan', () => {
 	beforeEach( () => {
 		process.exitCode = undefined;
@@ -27,7 +30,8 @@ describe( 'bin/trigger-snyk-scan', () => {
 		vi.mocked( spawn ).mockImplementation( () => createChildProcessThatClosesWith( 0 ) );
 		vi.mocked( parseArgs ).mockReturnValue( {
 			values: {
-				exclude: [ 'external', 'tests' ],
+				depth: '2',
+				exclude: [],
 				organization: 'org-id'
 			}
 		} );
@@ -42,15 +46,15 @@ describe( 'bin/trigger-snyk-scan', () => {
 			[
 				'--silent',
 				'exec',
-				'snyk',
+				snykExecutablePath,
 				'config',
 				'set',
 				'endpoint=https://api.eu.snyk.io'
 			],
-			{
+			expect.objectContaining( {
 				cwd: process.cwd(),
 				stdio: 'inherit'
-			}
+			} )
 		);
 	} );
 
@@ -63,15 +67,15 @@ describe( 'bin/trigger-snyk-scan', () => {
 			[
 				'--silent',
 				'exec',
-				'snyk',
+				snykExecutablePath,
 				'config',
 				'set',
 				'org=org-id'
 			],
-			{
+			expect.objectContaining( {
 				cwd: process.cwd(),
 				stdio: 'inherit'
-			}
+			} )
 		);
 	} );
 
@@ -84,17 +88,17 @@ describe( 'bin/trigger-snyk-scan', () => {
 			[
 				'--silent',
 				'exec',
-				'snyk',
+				snykExecutablePath,
 				'code',
 				'test',
 				'--report',
 				'--project-name=Code analysis',
 				'--target-reference=master-v54'
 			],
-			{
+			expect.objectContaining( {
 				cwd: process.cwd(),
 				stdio: 'inherit'
-			}
+			} )
 		);
 	} );
 
@@ -107,22 +111,43 @@ describe( 'bin/trigger-snyk-scan', () => {
 			[
 				'--silent',
 				'exec',
-				'snyk',
+				snykExecutablePath,
 				'monitor',
 				'--all-projects',
-				'--exclude=external,tests',
+				'--exclude=node_modules,external,release,scripts,tests',
+				'--detection-depth=2',
 				'--target-reference=master-v54'
 			],
-			{
+			expect.objectContaining( {
 				cwd: process.cwd(),
 				stdio: 'inherit'
-			}
+			} )
 		);
 	} );
 
-	it( 'should allow overriding the default excluded paths', async () => {
+	it( 'should merge user-provided exclusions with the defaults', async () => {
 		vi.mocked( parseArgs ).mockReturnValue( {
 			values: {
+				depth: '2',
+				exclude: [ 'fixtures' ],
+				organization: 'org-id'
+			}
+		} );
+
+		await importTriggerSnykScanScript();
+
+		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
+			4,
+			'pnpm',
+			expect.arrayContaining( [ '--exclude=node_modules,external,release,scripts,tests,fixtures' ] ),
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should not duplicate exclusions already present in defaults', async () => {
+		vi.mocked( parseArgs ).mockReturnValue( {
+			values: {
+				depth: '2',
 				exclude: [ 'external', 'fixtures' ],
 				organization: 'org-id'
 			}
@@ -133,9 +158,66 @@ describe( 'bin/trigger-snyk-scan', () => {
 		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
 			4,
 			'pnpm',
-			expect.arrayContaining( [ '--exclude=external,fixtures' ] ),
+			expect.arrayContaining( [ '--exclude=node_modules,external,release,scripts,tests,fixtures' ] ),
 			expect.any( Object )
 		);
+	} );
+
+	it( 'should allow overriding the detection depth', async () => {
+		vi.mocked( parseArgs ).mockReturnValue( {
+			values: {
+				depth: '5',
+				exclude: [],
+				organization: 'org-id'
+			}
+		} );
+
+		await importTriggerSnykScanScript();
+
+		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
+			4,
+			'pnpm',
+			expect.arrayContaining( [ '--detection-depth=5' ] ),
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should pass the -d flag to snyk code test when DEBUG is set', async () => {
+		vi.stubEnv( 'DEBUG', '1' );
+
+		await importTriggerSnykScanScript();
+
+		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
+			3,
+			'pnpm',
+			expect.arrayContaining( [ '-d' ] ),
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should pass the -d flag to snyk monitor when DEBUG is set', async () => {
+		vi.stubEnv( 'DEBUG', '1' );
+
+		await importTriggerSnykScanScript();
+
+		expect( vi.mocked( spawn ) ).toHaveBeenNthCalledWith(
+			4,
+			'pnpm',
+			expect.arrayContaining( [ '-d' ] ),
+			expect.any( Object )
+		);
+	} );
+
+	it( 'should omit --silent from pnpm args for all commands when DEBUG is set', async () => {
+		vi.stubEnv( 'DEBUG', '1' );
+
+		await importTriggerSnykScanScript();
+
+		const allCalls = vi.mocked( spawn ).mock.calls;
+
+		for ( const [ , args ] of allCalls ) {
+			expect( args ).not.toContain( '--silent' );
+		}
 	} );
 
 	it( 'should allow exit code 1 for the Snyk code snapshot step', async () => {
