@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
-import parseArguments from '../../../lib/utils/automated-tests/parsearguments.js';
+import parseArguments from '../../lib/utils/parsearguments.js';
 
 vi.mock( 'upath', () => ( {
 	default: {
@@ -324,6 +324,75 @@ describe( 'parseArguments()', () => {
 			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
 
 			expect( options.tsconfig ).to.equal( null );
+		} );
+	} );
+
+	describe( 'help', () => {
+		let processExitStub, consoleLogStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleLogStub = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
+		} );
+
+		// Strips ANSI escape codes so assertions match visible text.
+		function stripAnsi( str ) {
+			// eslint-disable-next-line no-control-regex
+			return str.replace( /\u001b\[[0-9;]*m/g, '' );
+		}
+
+		it( 'should print help and exit when --help is passed (automated mode)', () => {
+			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
+
+			expect( output ).toContain( 'ckeditor5-dev-tests-run-automated [options]' );
+			expect( output ).toContain( 'Runs automated tests using Karma and Vitest.' );
+			expect( output ).toContain( '--coverage' );
+			expect( output ).toContain( '--watch' );
+			expect( output ).toContain( '--browsers' );
+			expect( output ).toContain( 'Test selection' );
+			expect( output ).toContain( 'Test execution' );
+			expect( output ).toContain( 'Build configuration' );
+			expect( output ).toContain( 'Examples' );
+		} );
+
+		it( 'should print help and exit when --help is passed (manual mode)', () => {
+			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
+
+			expect( output ).toContain( 'ckeditor5-dev-tests-run-manual [options]' );
+			expect( output ).toContain( 'Compiles and serves manual tests with a live-reloading dev server.' );
+			expect( output ).toContain( '--disable-watch' );
+			expect( output ).toContain( '--port' );
+			expect( output ).toContain( 'Server' );
+			expect( output ).not.toContain( '--coverage' );
+			expect( output ).not.toContain( 'Test execution' );
+		} );
+
+		it( 'should print help and exit when -h alias is passed', () => {
+			parseArguments( [ '-h' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+		} );
+
+		it( 'should use default command name when commandName is not provided', () => {
+			parseArguments( [ '--help' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleLogStub ).toHaveBeenCalledOnce();
+
+			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
+
+			expect( output ).toContain( 'ckeditor5-dev-tests [options]' );
 		} );
 	} );
 

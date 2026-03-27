@@ -10,7 +10,9 @@ import { styleText } from 'node:util';
 import { loadEnvFile } from 'node:process';
 import * as tests from '../lib/index.js';
 
-const options = tests.parseArguments( process.argv.slice( 2 ) );
+const options = tests.parseArguments( process.argv.slice( 2 ), {
+	commandName: 'ckeditor5-dev-tests-run-automated'
+} );
 
 if ( options.files.length === 0 ) {
 	options.files = [ '*' ];
