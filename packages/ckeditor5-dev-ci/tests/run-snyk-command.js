@@ -28,6 +28,13 @@ describe( 'lib/run-snyk-command', () => {
 		vi.mocked( spawn ).mockImplementation( () => createChildProcessThatClosesWith( 0 ) );
 	} );
 
+	it( 'should resolve the snyk executable path via fileURLToPath', async () => {
+		await runSnykCommand( [ 'monitor' ] );
+
+		expect( vi.mocked( url.fileURLToPath ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( url.fileURLToPath ).mock.calls[ 0 ][ 0 ] ).toMatch( /snyk\/bin\/snyk/ );
+	} );
+
 	it( 'should spawn pnpm with --silent by default', async () => {
 		await runSnykCommand( [ 'monitor' ] );
 
