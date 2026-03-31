@@ -19,11 +19,12 @@ vi.mock( 'glob' );
 vi.mock( 'dom-combiner' );
 
 describe( 'createManualTestServer()', () => {
-	let loggerStub, server;
+	let loggerStub, server, servers;
 
 	beforeEach( async () => {
 		const { createServer } = http;
 
+		servers = [];
 		loggerStub = vi.fn();
 
 		vi.mocked( logger ).mockReturnValue( {
@@ -32,6 +33,7 @@ describe( 'createManualTestServer()', () => {
 
 		vi.spyOn( http, 'createServer' ).mockImplementation( ( ...theArgs ) => {
 			server = createServer( ...theArgs );
+			servers.push( server );
 
 			vi.spyOn( server, 'listen' );
 
@@ -40,7 +42,9 @@ describe( 'createManualTestServer()', () => {
 	} );
 
 	afterEach( () => {
-		server.close();
+		for ( const s of servers ) {
+			s.close();
+		}
 	} );
 
 	it( 'should start http server', () => {
@@ -49,37 +53,49 @@ describe( 'createManualTestServer()', () => {
 		expect( vi.mocked( http ).createServer ).toHaveBeenCalledOnce();
 	} );
 
-	it( 'should listen on given port', () => {
+	it( 'should listen on given port', async () => {
 		createManualTestServer( 'workspace/build/.manual-tests', 8888 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalled();
+		} );
 
 		expect( server ).toEqual( expect.objectContaining( {
 			listen: expect.any( Function )
 		} ) );
 
-		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8888 );
+		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8888, expect.any( Function ) );
 		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8888/' );
 	} );
 
-	it( 'should listen on 8125 port if no specific port was given', () => {
+	it( 'should listen on 8125 port if no specific port was given', async () => {
 		createManualTestServer( 'workspace/build/.manual-tests' );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalled();
+		} );
 
 		expect( server ).toEqual( expect.objectContaining( {
 			listen: expect.any( Function )
 		} ) );
 
-		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8125 );
+		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8125, expect.any( Function ) );
 		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8125/' );
 	} );
 
-	it( 'should call the specified callback when the server is running (e.g. to allow running web sockets)', () => {
+	it( 'should call the specified callback when the server is running (e.g. to allow running web sockets)', async () => {
 		const spy = vi.fn();
 
 		createManualTestServer( 'workspace/build/.manual-tests', 1234, spy );
 
+		await vi.waitFor( () => {
+			expect( spy ).toHaveBeenCalled();
+		} );
+
 		expect( spy ).toHaveBeenCalledExactlyOnceWith( server );
 	} );
 
-	it( 'should use "readline" to listen to the SIGINT event on Windows', () => {
+	it( 'should use "readline" to listen to the SIGINT event on Windows', async () => {
 		const readlineInterface = {
 			on: vi.fn()
 		};
@@ -89,13 +105,53 @@ describe( 'createManualTestServer()', () => {
 
 		createManualTestServer( 'workspace/build/.manual-tests' );
 
+		await vi.waitFor( () => {
+			expect( vi.mocked( readline ).createInterface ).toHaveBeenCalled();
+		} );
+
 		expect( vi.mocked( readline ).createInterface ).toHaveBeenCalledOnce();
 		expect( readlineInterface.on ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', expect.any( Function ) );
 	} );
 
+	it( 'should write the port to a .port file', async () => {
+		createManualTestServer( 'workspace/build/.manual-tests', 8888 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalled();
+		} );
+
+		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
+			expect.stringContaining( '.port' ),
+			'8888'
+		);
+	} );
+
+	it( 'should try next port when the requested port is in use', async () => {
+		// Occupy the port first.
+		const blockingServer = http.createServer.getMockImplementation()();
+
+		await new Promise( resolve => {
+			blockingServer.listen( 8555, resolve );
+		} );
+
+		createManualTestServer( 'workspace/build/.manual-tests', 8555 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalledWith( '[Server] Server running at http://localhost:8556/' );
+		} );
+
+		expect( loggerStub ).toHaveBeenCalledWith( '[Server] Port 8555 is in use, trying 8556...' );
+
+		blockingServer.close();
+	} );
+
 	describe( 'request handler', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			createManualTestServer( 'workspace/build/.manual-tests' );
+
+			await vi.waitFor( () => {
+				expect( loggerStub ).toHaveBeenCalled();
+			} );
 		} );
 
 		it( 'should handle a request for a favicon (`/favicon.ico`)', () => {

@@ -12,18 +12,36 @@ import combine from 'dom-combiner';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * Basic HTTP server.
+ * Basic HTTP server with automatic free port detection.
  *
  * @param {string} sourcePath Base path where the compiler saved the files.
- * @param {number} [port=8125] Port to listen at.
+ * @param {number} [port=8125] Preferred port to listen at. If the port is already in use,
+ * the server will automatically try subsequent ports until a free one is found.
  * @param {function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
  */
 export default function createManualTestServer( sourcePath, port = 8125, onCreate ) {
-	return new Promise( resolve => {
-		const server = http.createServer( ( request, response ) => {
-			onRequest( sourcePath, request, response );
-		} ).listen( port );
+	return new Promise( ( resolve, reject ) => {
+		tryListenOnPort( sourcePath, port, onCreate, resolve, reject );
+	} );
+}
 
+function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
+	const log = logger();
+
+	const server = http.createServer( ( request, response ) => {
+		onRequest( sourcePath, request, response );
+	} );
+
+	server.once( 'error', error => {
+		if ( error.code === 'EADDRINUSE' ) {
+			log.info( `[Server] Port ${ port } is in use, trying ${ port + 1 }...` );
+			tryListenOnPort( sourcePath, port + 1, onCreate, resolve, reject );
+		} else {
+			reject( error );
+		}
+	} );
+
+	server.listen( port, () => {
 		// SIGINT isn't caught on Windows in process. However, `CTRL+C` can be caught
 		// by `readline` module. After that we can emit SIGINT to the process manually.
 		if ( process.platform === 'win32' ) {
@@ -46,7 +64,10 @@ export default function createManualTestServer( sourcePath, port = 8125, onCreat
 			process.exit();
 		} );
 
-		logger().info( `[Server] Server running at http://localhost:${ port }/` );
+		// Write the port to a file so that external scripts (e.g. check-manual-tests.sh) can discover which port the server is using.
+		fs.writeFileSync( path.join( sourcePath, '.port' ), String( port ) );
+
+		log.info( `[Server] Server running at http://localhost:${ port }/` );
 
 		if ( onCreate ) {
 			onCreate( server );

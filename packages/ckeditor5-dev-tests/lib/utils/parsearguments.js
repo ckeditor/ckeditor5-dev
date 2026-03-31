@@ -73,6 +73,7 @@ export default function parseArguments( args, settings = {} ) {
 			'identity-file': null,
 			language: 'en',
 			notify: false,
+			port: 8125,
 			production: false,
 			reporter: 'mocha',
 			repositories: [],
