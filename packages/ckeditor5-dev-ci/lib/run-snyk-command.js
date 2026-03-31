@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'node:path';
+import url from 'node:url';
 import { spawn } from 'node:child_process';
 
 /**
@@ -15,7 +15,7 @@ import { spawn } from 'node:child_process';
  * @returns {Promise<void>}
  */
 export default function runSnykCommand( snykArguments, allowedExitCodes = [ 0 ] ) {
-	const snykExecutablePath = path.resolve( import.meta.dirname, '..', 'node_modules', '.bin', 'snyk' );
+	const snykExecutablePath = url.fileURLToPath( import.meta.resolve( 'snyk/bin/snyk' ) );
 	const pnpmFlags = process.env.DEBUG ? [] : [ '--silent' ];
 
 	return new Promise( ( resolve, reject ) => {
