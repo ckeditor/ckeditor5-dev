@@ -34,6 +34,12 @@ function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
 
 	server.once( 'error', error => {
 		if ( error.code === 'EADDRINUSE' ) {
+			if ( port >= 65535 ) {
+				reject( new Error( 'Could not find a free port. All ports from the starting port to 65535 are in use.' ) );
+
+				return;
+			}
+
 			log.info( `[Server] Port ${ port } is in use, trying ${ port + 1 }...` );
 			tryListenOnPort( sourcePath, port + 1, onCreate, resolve, reject );
 		} else {
