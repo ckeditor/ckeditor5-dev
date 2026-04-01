@@ -68,11 +68,12 @@ describe( 'typedoc-plugins/tag-event', () => {
 		const eventDefinitions = conversionResult.getReflectionsByKind( ReflectionKind.Class )
 			.flatMap( classReflection => classReflection.ckeditor5Events || [] ) as Array<DeclarationReflection>;
 
-		expect( eventDefinitions ).to.lengthOf( 18 );
+		expect( eventDefinitions ).to.lengthOf( 19 );
 
 		// The order of found events does not matter, so just check if all of them are found.
 		assertEventExists( eventDefinitions, 'event-foo-no-text' );
 		assertEventExists( eventDefinitions, 'event-foo' );
+		assertEventExists( eventDefinitions, 'event-foo-experimental' );
 		assertEventExists( eventDefinitions, 'event-foo-with-params' );
 		assertEventExists( eventDefinitions, 'event-foo-no-content' );
 		assertEventExists( eventDefinitions, 'event-foo-empty-args' );
@@ -190,6 +191,14 @@ describe( 'typedoc-plugins/tag-event', () => {
 
 			expect( eventDefinition.parameters ).to.be.an( 'array' );
 			expect( eventDefinition.parameters ).to.lengthOf( 0 );
+		} );
+
+		it( 'should preserve @experimental in generated events', () => {
+			const eventDefinition = classDefinition.ckeditor5Events!
+				.find( doclet => doclet.name === 'event-foo-experimental' )!;
+
+			expect( eventDefinition.comment!.modifierTags ).to.be.a( 'Set' );
+			expect( eventDefinition.comment!.modifierTags.has( '@experimental' ) ).to.equal( true );
 		} );
 
 		it( 'should find an event tag with description and parameters', () => {

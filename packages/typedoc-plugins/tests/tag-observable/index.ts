@@ -202,6 +202,7 @@ describe( 'typedoc-plugins/tag-observable', () => {
 							'changed value.' :
 							'is going to be set but is not set yet (before the `change` event is fired).'
 					);
+					const expectedModifierTags = eventName === 'key' ? [ '@experimental' ] : [];
 
 					const comment = eventDefinition.comment!;
 
@@ -212,7 +213,7 @@ describe( 'typedoc-plugins/tag-observable', () => {
 					expect( comment.blockTags ).to.be.an( 'array' );
 					expect( comment.blockTags ).to.lengthOf( 0 );
 					expect( comment.modifierTags ).to.be.a( 'Set' );
-					expect( comment.modifierTags.size ).to.equal( 0 );
+					expect( Array.from( comment.modifierTags ) ).to.have.members( expectedModifierTags );
 					expect( comment.summary ).to.be.an( 'array' );
 					expect( comment.summary ).to.lengthOf( 1 );
 					expect( comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
@@ -267,6 +268,16 @@ describe( 'typedoc-plugins/tag-observable', () => {
 				} );
 			}
 		}
+
+		it( 'should preserve @experimental in generated observable events', () => {
+			const changeKeyEvent = baseClassDefinition.ckeditor5Events
+				.find( doclet => doclet.name === 'change:key' )!;
+			const setKeyEvent = baseClassDefinition.ckeditor5Events
+				.find( doclet => doclet.name === 'set:key' )!;
+
+			expect( changeKeyEvent.comment!.modifierTags.has( '@experimental' ) ).to.equal( true );
+			expect( setKeyEvent.comment!.modifierTags.has( '@experimental' ) ).to.equal( true );
+		} );
 
 		it( 'should define the `inheritedFrom` property for an inherited observable property ("change:key" event)', () => {
 			const changeKeyEvent = derivedClassDefinition.ckeditor5Events

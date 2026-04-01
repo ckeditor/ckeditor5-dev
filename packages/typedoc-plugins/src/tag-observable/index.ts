@@ -106,6 +106,8 @@ function createNewEventReflection( context: Context, options: CreateEventReflect
 
 	eventReflection.parameters = [ nameParameter, valueParameter, oldValueParameter ];
 
+	const modifierTags = new Set( reflection.comment?.modifierTags );
+
 	eventReflection.comment = new Comment( [
 		{
 			kind: 'text',
@@ -114,7 +116,7 @@ function createNewEventReflection( context: Context, options: CreateEventReflect
 				`Fired when the \`${ propertyName }\` property is going to be set but is not set yet ` +
 				'(before the `change` event is fired).'
 		}
-	] );
+	], [], modifierTags );
 
 	// Copy the source location as it is the same as the location of the reflection containing the event.
 	eventReflection.sources = [ ...reflection.sources! ];
