@@ -89,6 +89,10 @@ const conversionResult = await typeDoc.convert();
 
   Adds support for creating CKEditor 5 events from properties marked as `@observable`.
 
+- **Experimental tag fixer** &mdash; `typeDocExperimentalTagFixer()`
+
+  The plugin prevents the `@experimental` modifier tag from being cascaded to class members that do not explicitly document experimental behavior. When a class is marked as `@experimental`, TypeDoc propagates the modifier to all its children. This plugin removes the `@experimental` modifier from any member whose JSDoc summary does not contain an explicit `Experimental:` notice.
+
 ------------------------------------------------------------------------------------
 
 ## Changelog

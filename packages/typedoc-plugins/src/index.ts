@@ -5,6 +5,7 @@
 
 export { typeDocModuleFixer } from './module-fixer/index.js';
 export { typeDocSymbolFixer } from './symbol-fixer/index.js';
+export { typeDocExperimentalTagFixer } from './experimental-tag-fixer/index.js';
 export { typeDocTagError } from './tag-error/index.js';
 export { typeDocTagEvent } from './tag-event/index.js';
 export { typeDocTagObservable } from './tag-observable/index.js';
