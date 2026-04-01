@@ -29,7 +29,7 @@ type ReflectionWithComment =
  * from reflections that do not define an explicit experimental notice.
  */
 export function typeDocExperimentalTagFixer( app: Application ): void {
-	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( 'typeDocExperimentalTagFixer' ) );
+	app.converter.on( Converter.EVENT_END, onEventEnd, getPluginPriority( typeDocExperimentalTagFixer.name ) );
 }
 
 function onEventEnd( context: Context ) {
