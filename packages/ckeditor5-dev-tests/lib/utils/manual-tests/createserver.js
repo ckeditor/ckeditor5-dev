@@ -33,6 +33,8 @@ function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
 	} );
 
 	server.once( 'error', error => {
+		server.close();
+
 		if ( error.code === 'EADDRINUSE' ) {
 			if ( port >= 65535 ) {
 				reject( new Error( 'Could not find a free port. All ports from the starting port to 65535 are in use.' ) );
@@ -62,6 +64,14 @@ function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
 		}
 
 		process.on( 'SIGINT', () => {
+			const portFilePath = path.join( sourcePath, '.port' );
+
+			try {
+				fs.unlinkSync( portFilePath );
+			} catch {
+				// Ignore if the file was already removed.
+			}
+
 			if ( server ) {
 				server.close();
 			}

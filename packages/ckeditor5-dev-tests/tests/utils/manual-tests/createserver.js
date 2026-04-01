@@ -152,6 +152,25 @@ describe( 'createManualTestServer()', () => {
 		blockingServer.close();
 	} );
 
+	it( 'should reject when a non-EADDRINUSE error occurs', async () => {
+		const originalCreateServer = http.createServer.getMockImplementation();
+		const fakeServer = originalCreateServer();
+
+		servers.push( fakeServer );
+		vi.spyOn( fakeServer, 'listen' ).mockImplementation( () => {
+			// Simulate a non-EADDRINUSE error.
+			process.nextTick( () => {
+				fakeServer.emit( 'error', new Error( 'EACCES: permission denied' ) );
+			} );
+		} );
+		vi.spyOn( fakeServer, 'close' ).mockImplementation( () => {} );
+
+		vi.mocked( http.createServer ).mockReturnValue( fakeServer );
+
+		await expect( createManualTestServer( 'workspace/build/.manual-tests', 49700 ) )
+			.rejects.toThrow( 'EACCES: permission denied' );
+	} );
+
 	describe( 'request handler', () => {
 		beforeEach( async () => {
 			createManualTestServer( 'workspace/build/.manual-tests', 49800 );
