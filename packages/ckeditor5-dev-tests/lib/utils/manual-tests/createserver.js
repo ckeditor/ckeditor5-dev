@@ -64,14 +64,6 @@ function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
 		}
 
 		process.on( 'SIGINT', () => {
-			const portFilePath = path.join( sourcePath, '.port' );
-
-			try {
-				fs.unlinkSync( portFilePath );
-			} catch {
-				// Ignore if the file was already removed.
-			}
-
 			if ( server ) {
 				server.close();
 			}
@@ -79,9 +71,6 @@ function tryListenOnPort( sourcePath, port, onCreate, resolve, reject ) {
 			resolve();
 			process.exit();
 		} );
-
-		// Write the port to a file so that external scripts (e.g. check-manual-tests.sh) can discover which port the server is using.
-		fs.writeFileSync( path.join( sourcePath, '.port' ), String( port ) );
 
 		log.info( `[Server] Server running at http://localhost:${ port }/` );
 

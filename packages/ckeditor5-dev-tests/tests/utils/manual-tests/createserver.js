@@ -120,19 +120,6 @@ describe( 'createManualTestServer()', () => {
 		expect( readlineInterface.on ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', expect.any( Function ) );
 	} );
 
-	it( 'should write the port to a .port file', async () => {
-		createManualTestServer( 'workspace/build/.manual-tests', 49888 );
-
-		await vi.waitFor( () => {
-			expect( loggerStub ).toHaveBeenCalled();
-		} );
-
-		expect( vi.mocked( fs ).writeFileSync ).toHaveBeenCalledExactlyOnceWith(
-			expect.stringContaining( '.port' ),
-			'49888'
-		);
-	} );
-
 	it( 'should try next port when the requested port is in use', async () => {
 		// Occupy the port first.
 		const blockingServer = http.createServer.getMockImplementation()();
