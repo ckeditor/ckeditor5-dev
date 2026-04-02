@@ -5,20 +5,20 @@
 
 import {
 	Converter,
+	ReflectionKind,
 	type Application,
 	type Context,
 	type Comment,
 	type DeclarationReflection,
 	type ParameterReflection,
-	type ProjectReflection,
 	type SignatureReflection,
 	type TypeParameterReflection
 } from 'typedoc';
 
+import { isReflectionValid } from '../utils/isreflectionvalid.js';
 import { getPluginPriority } from '../utils/getpluginpriority.js';
 
 type ReflectionWithComment =
-	ProjectReflection |
 	DeclarationReflection |
 	SignatureReflection |
 	ParameterReflection |
@@ -33,16 +33,18 @@ export function typeDocExperimentalTagFixer( app: Application ): void {
 }
 
 function onEventEnd( context: Context ) {
-	normalizeReflectionExperimentalTags( context.project );
+	const reflections = context.project
+		.getReflectionsByKind( ReflectionKind.All | ReflectionKind.Document )
+		.filter( isReflectionValid ) as Array<ReflectionWithComment>;
+
+	for ( const reflection of reflections ) {
+		normalizeReflectionExperimentalTags( reflection );
+	}
 }
 
 function normalizeReflectionExperimentalTags( reflection: ReflectionWithComment ) {
 	if ( reflection.comment && shouldRemoveExperimentalModifier( reflection.comment ) ) {
 		reflection.comment.removeModifier( '@experimental' );
-	}
-
-	for ( const childReflection of getChildReflections( reflection ) ) {
-		normalizeReflectionExperimentalTags( childReflection );
 	}
 }
 
@@ -62,38 +64,4 @@ function hasExplicitExperimentalNotice( comment: Comment ): boolean {
 	}
 
 	return false;
-}
-
-function getChildReflections( reflection: ReflectionWithComment ): Array<ReflectionWithComment> {
-	const childReflections: Array<ReflectionWithComment> = [];
-
-	if ( 'children' in reflection && reflection.children ) {
-		childReflections.push( ...( reflection.children as Array<ReflectionWithComment> ) );
-	}
-
-	if ( 'signatures' in reflection && reflection.signatures ) {
-		childReflections.push( ...( reflection.signatures as Array<ReflectionWithComment> ) );
-	}
-
-	if ( 'parameters' in reflection && reflection.parameters ) {
-		childReflections.push( ...( reflection.parameters as Array<ReflectionWithComment> ) );
-	}
-
-	if ( 'typeParameters' in reflection && reflection.typeParameters ) {
-		childReflections.push( ...( reflection.typeParameters as Array<ReflectionWithComment> ) );
-	}
-
-	if ( 'ckeditor5Events' in reflection && reflection.ckeditor5Events ) {
-		childReflections.push( ...( reflection.ckeditor5Events as Array<ReflectionWithComment> ) );
-	}
-
-	if ( 'getSignature' in reflection && reflection.getSignature ) {
-		childReflections.push( reflection.getSignature as ReflectionWithComment );
-	}
-
-	if ( 'setSignature' in reflection && reflection.setSignature ) {
-		childReflections.push( reflection.setSignature as ReflectionWithComment );
-	}
-
-	return childReflections;
 }
