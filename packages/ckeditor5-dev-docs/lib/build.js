@@ -70,6 +70,7 @@ export default async function build( config ) {
 	plugins.typeDocRestoreProgramAfterConversion( app );
 	plugins.typeDocModuleFixer( app );
 	plugins.typeDocSymbolFixer( app );
+	plugins.typeDocExperimentalTagFixer( app );
 	plugins.typeDocTagError( app );
 	plugins.typeDocTagEvent( app );
 	plugins.typeDocTagObservable( app );

@@ -9,6 +9,7 @@ import { Application, OptionDefaults } from 'typedoc';
 import {
 	typeDocModuleFixer,
 	typeDocSymbolFixer,
+	typeDocExperimentalTagFixer,
 	typeDocTagError,
 	typeDocTagEvent,
 	typeDocTagObservable,
@@ -123,6 +124,7 @@ describe( 'lib/build()', () => {
 		const plugins = [
 			typeDocModuleFixer,
 			typeDocSymbolFixer,
+			typeDocExperimentalTagFixer,
 			typeDocTagError,
 			typeDocTagEvent,
 			typeDocTagObservable,

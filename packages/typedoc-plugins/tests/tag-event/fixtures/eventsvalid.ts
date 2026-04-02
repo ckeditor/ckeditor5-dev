@@ -36,6 +36,16 @@ export type EventFoo = {
 };
 
 /**
+ * Experimental event associated with the type.
+ *
+ * @eventName ~EventsValidClass#event-foo-experimental
+ * @experimental
+ */
+export type EventFooExperimental = {
+	name: string;
+};
+
+/**
  * An event associated with the type. Event with three params.
  *
  * See {@link ~EventsValidClass} or {@link module:fixtures/eventsvalid~EventsValidClass Custom label}. A text after.

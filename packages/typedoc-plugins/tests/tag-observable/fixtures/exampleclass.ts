@@ -16,6 +16,7 @@ export class ExampleClass {
 	/**
 	 * Observable public property.
 	 *
+	 * @experimental
 	 * @observable
 	 */
 	public key: number;
