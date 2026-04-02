@@ -21,6 +21,8 @@ describe( 'getTypeScriptMessages()', () => {
 			onErrorCallback: error => errors.push( error )
 		} );
 
+		const collectedMessages = result.get( sourceFilePath );
+
 		expect( result ).toEqual( new Map( [ [
 			sourceFilePath,
 			[
@@ -33,6 +35,7 @@ describe( 'getTypeScriptMessages()', () => {
 				{ id: 'SECOND_BRANCH', string: 'Second conditional branch' }
 			]
 		] ] ) );
+		expect( collectedMessages ).not.toContainEqual( { id: 'Hidden aliased translation', string: 'Hidden aliased translation' } );
 
 		expect( errors ).toEqual( [
 			`First t() call argument should be a string literal or an object literal (${ sourceFilePath }).`
