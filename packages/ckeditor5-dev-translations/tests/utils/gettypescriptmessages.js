@@ -21,6 +21,8 @@ describe( 'getTypeScriptMessages()', () => {
 			onErrorCallback: error => errors.push( error )
 		} );
 
+		expect( result ).not.toBeNull();
+
 		const collectedMessages = result.get( sourceFilePath );
 
 		expect( result ).toEqual( new Map( [ [
