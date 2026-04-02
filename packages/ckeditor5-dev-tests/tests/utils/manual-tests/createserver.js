@@ -19,11 +19,12 @@ vi.mock( 'glob' );
 vi.mock( 'dom-combiner' );
 
 describe( 'createManualTestServer()', () => {
-	let loggerStub, server;
+	let loggerStub, server, servers;
 
 	beforeEach( async () => {
 		const { createServer } = http;
 
+		servers = [];
 		loggerStub = vi.fn();
 
 		vi.mocked( logger ).mockReturnValue( {
@@ -32,6 +33,7 @@ describe( 'createManualTestServer()', () => {
 
 		vi.spyOn( http, 'createServer' ).mockImplementation( ( ...theArgs ) => {
 			server = createServer( ...theArgs );
+			servers.push( server );
 
 			vi.spyOn( server, 'listen' );
 
@@ -40,46 +42,67 @@ describe( 'createManualTestServer()', () => {
 	} );
 
 	afterEach( () => {
-		server.close();
+		for ( const s of servers ) {
+			s.close();
+		}
 	} );
 
-	it( 'should start http server', () => {
-		createManualTestServer( 'workspace/build/.manual-tests' );
+	it( 'should start http server', async () => {
+		createManualTestServer( 'workspace/build/.manual-tests', 49700 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalled();
+		} );
 
 		expect( vi.mocked( http ).createServer ).toHaveBeenCalledOnce();
 	} );
 
-	it( 'should listen on given port', () => {
-		createManualTestServer( 'workspace/build/.manual-tests', 8888 );
+	it( 'should listen on given port', async () => {
+		createManualTestServer( 'workspace/build/.manual-tests', 49888 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalled();
+		} );
 
 		expect( server ).toEqual( expect.objectContaining( {
 			listen: expect.any( Function )
 		} ) );
 
-		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8888 );
-		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8888/' );
+		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 49888, expect.any( Function ) );
+		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:49888/' );
 	} );
 
-	it( 'should listen on 8125 port if no specific port was given', () => {
+	it( 'should listen on 8125 port if no specific port was given', async () => {
 		createManualTestServer( 'workspace/build/.manual-tests' );
 
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalledWith(
+				expect.stringContaining( '[Server] Server running at http://localhost:' )
+			);
+		} );
+
 		expect( server ).toEqual( expect.objectContaining( {
 			listen: expect.any( Function )
 		} ) );
 
-		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8125 );
-		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8125/' );
+		// The first listen attempt should always be on the default port 8125, even if the server
+		// ended up on a different port due to EADDRINUSE retries.
+		expect( servers[ 0 ].listen ).toHaveBeenCalledWith( 8125, expect.any( Function ) );
 	} );
 
-	it( 'should call the specified callback when the server is running (e.g. to allow running web sockets)', () => {
+	it( 'should call the specified callback when the server is running (e.g. to allow running web sockets)', async () => {
 		const spy = vi.fn();
 
-		createManualTestServer( 'workspace/build/.manual-tests', 1234, spy );
+		createManualTestServer( 'workspace/build/.manual-tests', 49234, spy );
+
+		await vi.waitFor( () => {
+			expect( spy ).toHaveBeenCalled();
+		} );
 
 		expect( spy ).toHaveBeenCalledExactlyOnceWith( server );
 	} );
 
-	it( 'should use "readline" to listen to the SIGINT event on Windows', () => {
+	it( 'should use "readline" to listen to the SIGINT event on Windows', async () => {
 		const readlineInterface = {
 			on: vi.fn()
 		};
@@ -87,15 +110,61 @@ describe( 'createManualTestServer()', () => {
 		vi.mocked( readline ).createInterface.mockReturnValue( readlineInterface );
 		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'win32' );
 
-		createManualTestServer( 'workspace/build/.manual-tests' );
+		createManualTestServer( 'workspace/build/.manual-tests', 49900 );
+
+		await vi.waitFor( () => {
+			expect( vi.mocked( readline ).createInterface ).toHaveBeenCalled();
+		} );
 
 		expect( vi.mocked( readline ).createInterface ).toHaveBeenCalledOnce();
 		expect( readlineInterface.on ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', expect.any( Function ) );
 	} );
 
+	it( 'should try next port when the requested port is in use', async () => {
+		// Occupy the port first.
+		const blockingServer = http.createServer.getMockImplementation()();
+
+		await new Promise( resolve => {
+			blockingServer.listen( 49555, resolve );
+		} );
+
+		createManualTestServer( 'workspace/build/.manual-tests', 49555 );
+
+		await vi.waitFor( () => {
+			expect( loggerStub ).toHaveBeenCalledWith( '[Server] Server running at http://localhost:49556/' );
+		} );
+
+		expect( loggerStub ).toHaveBeenCalledWith( '[Server] Port 49555 is in use, trying 49556...' );
+
+		blockingServer.close();
+	} );
+
+	it( 'should reject when a non-EADDRINUSE error occurs', async () => {
+		const originalCreateServer = http.createServer.getMockImplementation();
+		const fakeServer = originalCreateServer();
+
+		servers.push( fakeServer );
+		vi.spyOn( fakeServer, 'listen' ).mockImplementation( () => {
+			// Simulate a non-EADDRINUSE error.
+			process.nextTick( () => {
+				fakeServer.emit( 'error', new Error( 'EACCES: permission denied' ) );
+			} );
+		} );
+		vi.spyOn( fakeServer, 'close' ).mockImplementation( () => {} );
+
+		vi.mocked( http.createServer ).mockReturnValue( fakeServer );
+
+		await expect( createManualTestServer( 'workspace/build/.manual-tests', 49700 ) )
+			.rejects.toThrow( 'EACCES: permission denied' );
+	} );
+
 	describe( 'request handler', () => {
-		beforeEach( () => {
-			createManualTestServer( 'workspace/build/.manual-tests' );
+		beforeEach( async () => {
+			createManualTestServer( 'workspace/build/.manual-tests', 49800 );
+
+			await vi.waitFor( () => {
+				expect( loggerStub ).toHaveBeenCalled();
+			} );
 		} );
 
 		it( 'should handle a request for a favicon (`/favicon.ico`)', () => {
