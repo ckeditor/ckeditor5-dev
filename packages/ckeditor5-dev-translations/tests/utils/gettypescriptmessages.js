@@ -12,12 +12,11 @@ describe( 'getTypeScriptMessages()', () => {
 	const packagePath = upath.join( fixturesPath, 'ckeditor5-method-calls' );
 	const sourceFilePath = upath.join( packagePath, 'src', 'messages.ts' );
 	const fallbackSourceFilePath = upath.join( fixturesPath, 'fallback-package', 'src', 'messages.ts' );
-	const rootPath = upath.join( import.meta.dirname, '..', '..', '..', '..', '..' );
 
 	it( 'should find messages using LocaleTranslate type information', () => {
 		const errors = [];
 		const result = getTypeScriptMessages( {
-			cwd: rootPath,
+			cwd: fixturesPath,
 			sourceFiles: [ sourceFilePath ],
 			onErrorCallback: error => errors.push( error )
 		} );

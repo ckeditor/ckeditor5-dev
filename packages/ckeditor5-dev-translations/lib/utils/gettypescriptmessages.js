@@ -6,8 +6,6 @@
 import ts from 'typescript';
 import upath from 'upath';
 
-const LOCALE_TRANSLATE_DECLARATION_FILE_PATH = /[/\\]ckeditor5-utils[/\\].*[/\\]locale(?:\.d)?\.ts$/;
-
 /**
  * @param {object} options
  * @param {string} [options.cwd=process.cwd()] Current working directory used to locate a TypeScript config.
@@ -23,6 +21,12 @@ export default function getTypeScriptMessages( { cwd = process.cwd(), sourceFile
 	}
 
 	const checker = program.getTypeChecker();
+	const localeTranslateSymbol = getLocaleTranslateSymbol( program, checker, sourceFiles );
+
+	if ( !localeTranslateSymbol ) {
+		return null;
+	}
+
 	const sourceMessages = new Map();
 
 	for ( const filePath of sourceFiles ) {
@@ -38,6 +42,7 @@ export default function getTypeScriptMessages( { cwd = process.cwd(), sourceFile
 		collectMessages( {
 			sourceFile,
 			checker,
+			localeTranslateSymbol,
 			onMessageFound: message => messages.push( message ),
 			onErrorFound: onErrorCallback
 		} );
@@ -46,6 +51,45 @@ export default function getTypeScriptMessages( { cwd = process.cwd(), sourceFile
 	}
 
 	return sourceMessages;
+}
+
+/**
+ * @param {import( 'typescript' ).Program} program
+ * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {Array.<string>} sourceFiles
+ * @returns {import( 'typescript' ).Symbol|null}
+ */
+function getLocaleTranslateSymbol( program, checker, sourceFiles ) {
+	const sampleSourceFilePath = sourceFiles.find( filePath => {
+		return program.getSourceFile( upath.normalize( filePath ) ) || program.getSourceFile( filePath );
+	} );
+
+	if ( !sampleSourceFilePath ) {
+		return null;
+	}
+
+	const resolvedModule = ts.resolveModuleName(
+		'@ckeditor/ckeditor5-utils',
+		upath.normalize( sampleSourceFilePath ),
+		program.getCompilerOptions(),
+		ts.sys
+	).resolvedModule;
+
+	if ( !resolvedModule ) {
+		return null;
+	}
+
+	const moduleSourceFile = program.getSourceFile( resolvedModule.resolvedFileName );
+	const moduleSymbol = moduleSourceFile && checker.getSymbolAtLocation( moduleSourceFile );
+
+	if ( !moduleSymbol ) {
+		return null;
+	}
+
+	const localeTranslateExport = checker.getExportsOfModule( moduleSymbol )
+		.find( symbol => symbol.getName() === 'LocaleTranslate' );
+
+	return localeTranslateExport ? unwrapAliasedSymbol( localeTranslateExport, checker ) : null;
 }
 
 /**
@@ -84,12 +128,13 @@ function createProgram( { cwd, sourceFiles } ) {
  * @param {object} options
  * @param {import( 'typescript' ).SourceFile} options.sourceFile
  * @param {import( 'typescript' ).TypeChecker} options.checker
+ * @param {import( 'typescript' ).Symbol} options.localeTranslateSymbol
  * @param {( msg: Message ) => void} options.onMessageFound
  * @param {( err: string ) => void} options.onErrorFound
  */
-function collectMessages( { sourceFile, checker, onMessageFound, onErrorFound } ) {
+function collectMessages( { sourceFile, checker, localeTranslateSymbol, onMessageFound, onErrorFound } ) {
 	const visit = node => {
-		if ( ts.isCallExpression( node ) && isTranslationCallExpression( node, checker ) ) {
+		if ( ts.isCallExpression( node ) && isTranslationCallExpression( node, checker, localeTranslateSymbol ) ) {
 			const firstArgument = node.arguments[ 0 ];
 
 			if ( firstArgument ) {
@@ -106,10 +151,12 @@ function collectMessages( { sourceFile, checker, onMessageFound, onErrorFound } 
 /**
  * @param {import( 'typescript' ).CallExpression} node
  * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {import( 'typescript' ).Symbol} localeTranslateSymbol
  * @returns {boolean}
  */
-function isTranslationCallExpression( node, checker ) {
-	return isDirectTFunctionCallExpression( node.expression ) || isTMethodCallExpression( node.expression, checker );
+function isTranslationCallExpression( node, checker, localeTranslateSymbol ) {
+	return isDirectTFunctionCallExpression( node.expression ) ||
+		isTMethodCallExpression( node.expression, checker, localeTranslateSymbol );
 }
 
 /**
@@ -123,22 +170,24 @@ function isDirectTFunctionCallExpression( expression ) {
 }
 
 /**
- * @param {import( 'typescript' ).CallExpression} callExpression
+ * @param {import( 'typescript' ).Expression} expression
  * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {import( 'typescript' ).Symbol} localeTranslateSymbol
  * @returns {boolean}
  */
-function isTMethodCallExpression( expression, checker ) {
+function isTMethodCallExpression( expression, checker, localeTranslateSymbol ) {
 	const unwrappedExpression = unwrapExpression( expression );
 
 	if ( ts.isPropertyAccessExpression( unwrappedExpression ) ) {
-		return unwrappedExpression.name.text === 't' && isLocaleTranslateType( checker.getTypeAtLocation( unwrappedExpression ) );
+		return unwrappedExpression.name.text === 't' &&
+			isLocaleTranslateType( checker.getTypeAtLocation( unwrappedExpression ), checker, localeTranslateSymbol );
 	}
 
 	if ( ts.isElementAccessExpression( unwrappedExpression ) && unwrappedExpression.argumentExpression ) {
 		const argumentExpression = unwrapExpression( unwrappedExpression.argumentExpression );
 
 		return ts.isStringLiteralLike( argumentExpression ) && argumentExpression.text === 't' &&
-			isLocaleTranslateType( checker.getTypeAtLocation( unwrappedExpression ) );
+			isLocaleTranslateType( checker.getTypeAtLocation( unwrappedExpression ), checker, localeTranslateSymbol );
 	}
 
 	return false;
@@ -146,55 +195,57 @@ function isTMethodCallExpression( expression, checker ) {
 
 /**
  * @param {import( 'typescript' ).Type|undefined} type
+ * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {import( 'typescript' ).Symbol} localeTranslateSymbol
  * @param {Set<import( 'typescript' ).Type>} visitedTypes
  * @returns {boolean}
  */
-function isLocaleTranslateType( type, visitedTypes = new Set() ) {
+function isLocaleTranslateType( type, checker, localeTranslateSymbol, visitedTypes = new Set() ) {
 	if ( !type || visitedTypes.has( type ) ) {
 		return false;
 	}
 
 	visitedTypes.add( type );
 
-	const aliasSymbol = type.aliasSymbol;
-
-	if ( aliasSymbol?.getName() === 'LocaleTranslate' && aliasSymbol.declarations?.some( isLocaleTranslateDeclaration ) ) {
+	if ( unwrapAliasedSymbol( type.aliasSymbol, checker ) === localeTranslateSymbol ) {
 		return true;
 	}
 
-	const symbol = type.getSymbol();
-
-	if ( symbol?.getName() === 'LocaleTranslate' && symbol.declarations?.some( isLocaleTranslateDeclaration ) ) {
+	if ( unwrapAliasedSymbol( type.getSymbol(), checker ) === localeTranslateSymbol ) {
 		return true;
 	}
 
 	if ( type.flags & ( ts.TypeFlags.Union | ts.TypeFlags.Intersection ) ) {
-		return type.types.some( innerType => isLocaleTranslateType( innerType, visitedTypes ) );
+		return type.types.some( innerType => isLocaleTranslateType( innerType, checker, localeTranslateSymbol, visitedTypes ) );
 	}
 
-	return type.getCallSignatures().some( signature => isLocaleTranslateSignature( signature ) );
+	return type.getCallSignatures().some( signature => isLocaleTranslateSignature( signature, checker, localeTranslateSymbol ) );
 }
 
 /**
  * @param {import( 'typescript' ).Signature|undefined} signature
+ * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {import( 'typescript' ).Symbol} localeTranslateSymbol
  * @returns {boolean}
  */
-function isLocaleTranslateSignature( signature ) {
+function isLocaleTranslateSignature( signature, checker, localeTranslateSymbol ) {
 	const declaration = signature?.getDeclaration();
 
-	return !!declaration && isNodeInsideLocaleTranslateDeclaration( declaration );
+	return !!declaration && isNodeInsideLocaleTranslateDeclaration( declaration, checker, localeTranslateSymbol );
 }
 
 /**
  * @param {import( 'typescript' ).Node} node
+ * @param {import( 'typescript' ).TypeChecker} checker
+ * @param {import( 'typescript' ).Symbol} localeTranslateSymbol
  * @returns {boolean}
  */
-function isNodeInsideLocaleTranslateDeclaration( node ) {
+function isNodeInsideLocaleTranslateDeclaration( node, checker, localeTranslateSymbol ) {
 	let currentNode = node;
 
 	while ( currentNode ) {
 		if ( ts.isTypeAliasDeclaration( currentNode ) ) {
-			return isLocaleTranslateDeclaration( currentNode );
+			return checker.getSymbolAtLocation( currentNode.name ) === localeTranslateSymbol;
 		}
 
 		currentNode = currentNode.parent;
@@ -204,16 +255,16 @@ function isNodeInsideLocaleTranslateDeclaration( node ) {
 }
 
 /**
- * @param {import( 'typescript' ).Node} node
- * @returns {boolean}
+ * @param {import( 'typescript' ).Symbol|undefined} symbol
+ * @param {import( 'typescript' ).TypeChecker} checker
+ * @returns {import( 'typescript' ).Symbol|undefined}
  */
-function isLocaleTranslateDeclaration( node ) {
-	if ( !ts.isTypeAliasDeclaration( node ) ) {
-		return false;
+function unwrapAliasedSymbol( symbol, checker ) {
+	if ( !symbol ) {
+		return undefined;
 	}
 
-	return node.name.text === 'LocaleTranslate' &&
-		LOCALE_TRANSLATE_DECLARATION_FILE_PATH.test( upath.normalize( node.getSourceFile().fileName ) );
+	return symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol( symbol ) : symbol;
 }
 
 /**

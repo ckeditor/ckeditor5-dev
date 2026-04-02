@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "types": [],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./ckeditor5-method-calls/src/**/*.ts",
+    "./fallback-package/src/**/*.ts",
+    "./node_modules/@ckeditor/ckeditor5-utils/index.d.ts"
+  ]
+}
