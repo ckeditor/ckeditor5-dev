@@ -536,6 +536,9 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
       upath:
         specifier: ^2.0.1
         version: 2.0.1
