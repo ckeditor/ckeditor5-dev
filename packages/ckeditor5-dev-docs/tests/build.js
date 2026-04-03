@@ -9,7 +9,6 @@ import { Application, OptionDefaults } from 'typedoc';
 import {
 	typeDocModuleFixer,
 	typeDocSymbolFixer,
-	typeDocExperimentalTagFixer,
 	typeDocTagError,
 	typeDocTagEvent,
 	typeDocTagObservable,
@@ -93,6 +92,14 @@ describe( 'lib/build()', () => {
 		} ) );
 	} );
 
+	it( 'should exclude "@experimental" from `cascadedModifierTags`', async () => {
+		await build( { sourceFiles } );
+
+		const [ config ] = vi.mocked( Application.bootstrapWithPlugins ).mock.calls[ 0 ];
+
+		expect( config.cascadedModifierTags ).not.toContain( '@experimental' );
+	} );
+
 	it( 'should pass normalized source paths to TypeDoc', async () => {
 		vi.mocked( glob ).mockResolvedValue( [
 			'path\\to\\project\\a\\1.ts',
@@ -124,7 +131,6 @@ describe( 'lib/build()', () => {
 		const plugins = [
 			typeDocModuleFixer,
 			typeDocSymbolFixer,
-			typeDocExperimentalTagFixer,
 			typeDocTagError,
 			typeDocTagEvent,
 			typeDocTagObservable,

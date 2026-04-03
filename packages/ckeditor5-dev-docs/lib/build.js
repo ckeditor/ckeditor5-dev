@@ -64,13 +64,15 @@ export default async function build( config ) {
 			// Fixes `"name": 'default" in the output project.
 			'typedoc-plugin-rename-defaults',
 			...extraPlugins
+		],
+		cascadedModifierTags: [
+			...OptionDefaults.cascadedModifierTags.filter( tagName => tagName !== '@experimental' )
 		]
 	} );
 
 	plugins.typeDocRestoreProgramAfterConversion( app );
 	plugins.typeDocModuleFixer( app );
 	plugins.typeDocSymbolFixer( app );
-	plugins.typeDocExperimentalTagFixer( app );
 	plugins.typeDocTagError( app );
 	plugins.typeDocTagEvent( app );
 	plugins.typeDocTagObservable( app );
