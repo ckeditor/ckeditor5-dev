@@ -15,11 +15,11 @@ describe( 'getPluginPriority', () => {
 		expect( getPluginPriority( 'typeDocModuleFixer' ) ).toBe( -1 );
 	} );
 
-	it( 'should return -6 for validators', () => {
-		expect( getPluginPriority( 'validators' ) ).toBe( -6 );
+	it( 'should return -5 for validators', () => {
+		expect( getPluginPriority( 'validators' ) ).toBe( -5 );
 	} );
 
-	it( 'should return -7 for an unknown plugin', () => {
-		expect( getPluginPriority( 'unknown-plugin' ) ).toBe( -7 );
+	it( 'should return -6 for an unknown plugin', () => {
+		expect( getPluginPriority( 'unknown-plugin' ) ).toBe( -6 );
 	} );
 } );
