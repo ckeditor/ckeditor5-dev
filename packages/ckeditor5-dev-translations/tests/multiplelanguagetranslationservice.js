@@ -147,6 +147,31 @@ describe( 'translations', () => {
 
 				expect( Array.from( translationService._languages ) ).to.deep.equal( [ 'pl', 'de' ] );
 			} );
+
+			it( 'should emit an error for non-po files when compiling all languages', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'en',
+					compileAllLanguages: true
+				} );
+				const errorSpy = vi.fn();
+				const translationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
+				const poFilePath = path.join( translationsDirectory, 'en.po' );
+
+				translationService.on( 'error', errorSpy );
+
+				filesAndDirs = [ translationsDirectory, poFilePath ];
+				dirContents = {
+					[ translationsDirectory ]: [ 'en.po', 'README.md' ]
+				};
+				fileContents = {
+					[ poFilePath ]: [ 'msgid "Save"', 'msgstr "Save"', '' ].join( '\n' )
+				};
+
+				translationService.loadPackage( 'pathToPackage' );
+
+				expect( errorSpy ).toHaveBeenCalledOnce();
+				expect( errorSpy.mock.calls[ 0 ][ 0 ] ).toContain( 'should contain only translation files' );
+			} );
 		} );
 
 		describe( 'translateSource()', () => {
@@ -167,6 +192,17 @@ describe( 'translations', () => {
 					'Cancel',
 					'Save'
 				] );
+			} );
+
+			it( 'should forward invalid t() calls as warnings while translating source', () => {
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'en' } );
+				const warningSpy = vi.fn();
+
+				translationService.on( 'warning', warningSpy );
+				translationService.translateSource( 't( foo )', 'file.js' );
+
+				expect( warningSpy ).toHaveBeenCalledOnce();
+				expect( warningSpy.mock.calls[ 0 ][ 0 ] ).toContain( 'First t() call argument should be a string literal' );
 			} );
 		} );
 
@@ -711,6 +747,31 @@ describe( 'translations', () => {
 				expect( assets ).to.have.length( 0 );
 			} );
 
+			it( 'should emit every language as a standalone asset when buildAllTranslationsToSeparateFiles is enabled', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'en' ],
+					buildAllTranslationsToSeparateFiles: true
+				} );
+
+				translationService._foundMessageIds = new Set( [ 'Save' ] );
+				translationService._translationDictionaries = {
+					pl: { Save: [ 'Zapisz' ] },
+					en: { Save: [ 'Save' ] }
+				};
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [ 'app.js' ]
+				} );
+
+				expect( assets ).to.have.length( 2 );
+				expect( assets.map( asset => asset.outputPath ) ).to.deep.equal( [
+					path.join( 'lang', 'pl.js' ),
+					path.join( 'lang', 'en.js' )
+				] );
+			} );
+
 			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as string)', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
@@ -843,6 +904,30 @@ describe( 'translations', () => {
 
 				expect( warningSpy ).not.toHaveBeenCalled();
 				expect( errorSpy ).not.toHaveBeenCalled();
+			} );
+
+			it( 'should throw when translationsOutputFile matcher finds no file', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'en',
+					translationsOutputFile: /missing\.js/
+				} );
+
+				expect( () => translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [ 'app.js' ]
+				} ) ).to.throw( /No file was matching the `translationsOutputFile` option/ );
+			} );
+
+			it( 'should reject unsupported translationsOutputFile predicate types', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'en',
+					translationsOutputFile: 123
+				} );
+
+				expect( () => translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [ 'app.js' ]
+				} ) ).to.throw( /unsupported type of a predicate/ );
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {

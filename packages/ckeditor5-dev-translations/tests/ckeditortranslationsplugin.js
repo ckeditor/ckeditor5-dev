@@ -13,6 +13,10 @@ vi.mock( '../lib/multiplelanguagetranslationservice', () => ( { default: vi.fn()
 
 describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 	describe( 'constructor()', () => {
+		it( 'should throw when constructed without options', () => {
+			expect( () => new CKEditorTranslationsPlugin() ).to.throw( /requires an object/ );
+		} );
+
 		it( 'should initialize with passed options', () => {
 			const options = { language: 'pl' };
 
@@ -36,6 +40,13 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 
 			expect( ckEditorTranslationsPlugin.options.outputDirectory ).to.equal( 'custom' );
+		} );
+
+		it( 'should default assetNamesFilter to JavaScript assets', () => {
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( { language: 'en' } );
+
+			expect( ckEditorTranslationsPlugin.options.assetNamesFilter( 'foo.js' ) ).to.equal( true );
+			expect( ckEditorTranslationsPlugin.options.assetNamesFilter( 'foo.css' ) ).to.equal( false );
 		} );
 
 		describe( 'options', () => {
@@ -94,6 +105,20 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 	} );
 
 	describe( 'apply()', () => {
+		it( 'should warn and stop when language is missing', () => {
+			const consoleWarnSpy = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {} );
+
+			ckEditorTranslationsPlugin.apply( {} );
+
+			expect( consoleWarnSpy ).toHaveBeenCalledOnce();
+			expect( consoleWarnSpy.mock.calls[ 0 ][ 0 ] ).toContain( 'The `language` option is required' );
+			expect( MultipleLanguageTranslationService ).not.toHaveBeenCalled();
+			expect( serveTranslations ).not.toHaveBeenCalled();
+
+			consoleWarnSpy.mockRestore();
+		} );
+
 		it( 'should call serveTranslations() if the options are correct', () => {
 			const options = {
 				language: 'pl'
