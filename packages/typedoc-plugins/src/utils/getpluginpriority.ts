@@ -4,7 +4,7 @@
  */
 
 // Do not use `import * as plugins from '../index.js';` to avoid circular dependency.
-const pluginGroups: Array<Array<string>> = [
+const pluginGroups = [
 	[
 		'typeDocRestoreProgramAfterConversion'
 	],
@@ -12,9 +12,6 @@ const pluginGroups: Array<Array<string>> = [
 		'typeDocModuleFixer',
 		'typeDocSymbolFixer',
 		'typeDocReferenceFixer'
-	],
-	[
-		'typeDocExperimentalTagFixer'
 	],
 	[
 		'typeDocTagObservable',
