@@ -23,6 +23,7 @@ import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslatio
  */
 export default function synchronizeTranslations( options ) {
 	const {
+		cwd,
 		sourceFiles,
 		packagePaths,
 		corePackagePath,
@@ -38,7 +39,7 @@ export default function synchronizeTranslations( options ) {
 	const packageContexts = getPackageContexts( { packagePaths, corePackagePath } );
 
 	log.info( '📍 Loading messages from source files...' );
-	const sourceMessages = getSourceMessages( { packagePaths, sourceFiles, onErrorCallback: error => errors.push( error ) } );
+	const sourceMessages = getSourceMessages( { cwd, packagePaths, sourceFiles, onErrorCallback: error => errors.push( error ) } );
 
 	log.info( '📍 Validating translations contexts against the source messages...' );
 	errors.push(
@@ -186,6 +187,7 @@ function normalizeOptions( options ) {
 	const toAbsolute = path => upath.resolve( cwd, path );
 
 	return {
+		cwd,
 		sourceFiles: sourceFiles.map( toAbsolute ),
 		packagePaths: packagePaths.map( toAbsolute ),
 		corePackagePath: toAbsolute( corePackagePath ),

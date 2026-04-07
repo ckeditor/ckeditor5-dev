@@ -5,30 +5,40 @@
 
 import fs from 'node:fs';
 import findMessages from '../findmessages.js';
+import getTypeScriptMessages from './gettypescriptmessages.js';
 import isFileInDirectory from './isfileindirectory.js';
 
 /**
  * @param {object} options
+ * @param {string} [options.cwd=process.cwd()] Current working directory used to locate a TypeScript config.
  * @param {Array.<string>} options.packagePaths An array of paths to packages that contain source files with messages to translate.
  * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Function} options.onErrorCallback Called when there is an error with parsing the source files.
  * @returns {Array.<TranslatableEntry>}
  */
-export default function getSourceMessages( { packagePaths, sourceFiles, onErrorCallback } ) {
-	return sourceFiles
-		.filter( filePath => packagePaths.some( packagePath => isFileInDirectory( filePath, packagePath ) ) )
+export default function getSourceMessages( { cwd = process.cwd(), packagePaths, sourceFiles, onErrorCallback } ) {
+	const filteredSourceFiles = sourceFiles
+		.filter( filePath => packagePaths.some( packagePath => isFileInDirectory( filePath, packagePath ) ) );
+
+	const typeScriptMessages = getTypeScriptMessages( { cwd, sourceFiles: filteredSourceFiles, onErrorCallback } );
+
+	return filteredSourceFiles
 		.flatMap( filePath => {
-			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const packagePath = packagePaths.find( packagePath => isFileInDirectory( filePath, packagePath ) );
-			const sourceMessages = [];
+			const sourceMessages = typeScriptMessages?.get( filePath ) || typeScriptMessages?.get( filePath.replaceAll( '\\', '/' ) );
 
-			const onMessageCallback = message => {
-				sourceMessages.push( { filePath, packagePath, ...message } );
-			};
+			if ( sourceMessages ) {
+				return sourceMessages.map( message => ( { filePath, packagePath, ...message } ) );
+			}
 
-			findMessages( fileContent, filePath, onMessageCallback, onErrorCallback );
+			const fileContent = fs.readFileSync( filePath, 'utf-8' );
+			const fallbackSourceMessages = [];
 
-			return sourceMessages;
+			findMessages( fileContent, filePath, message => {
+				fallbackSourceMessages.push( { filePath, packagePath, ...message } );
+			}, onErrorCallback );
+
+			return fallbackSourceMessages;
 		} );
 }
 

@@ -90,6 +90,7 @@ describe( 'synchronizeTranslations()', () => {
 
 		expect( getSourceMessages ).toHaveBeenCalledTimes( 1 );
 		expect( getSourceMessages ).toHaveBeenCalledWith( {
+			cwd: '/absolute/path/to',
 			packagePaths: [
 				'/absolute/path/to/packages/ckeditor5-foo',
 				'/absolute/path/to/packages/ckeditor5-bar'
