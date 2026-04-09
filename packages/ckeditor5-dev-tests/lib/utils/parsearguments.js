@@ -31,6 +31,7 @@ export default function parseArguments( args, settings = {} ) {
 			'identity-file',
 			'karma-config-overrides',
 			'language',
+			'port',
 			'reporter',
 			'repositories',
 			'tsconfig'
@@ -39,6 +40,7 @@ export default function parseArguments( args, settings = {} ) {
 		boolean: [
 			'cache',
 			'coverage',
+			'disable-watch',
 			'help',
 			'notify',
 			'production',
@@ -70,10 +72,12 @@ export default function parseArguments( args, settings = {} ) {
 			cache: false,
 			coverage: false,
 			cwd: process.cwd(),
+			'disable-watch': false,
 			files: [],
 			'identity-file': null,
 			language: 'en',
 			notify: false,
+			port: '8125',
 			production: false,
 			reporter: 'mocha',
 			repositories: [],
@@ -99,7 +103,7 @@ export default function parseArguments( args, settings = {} ) {
 	if ( unknownArgs.length ) {
 		console.error( `Unknown option${ unknownArgs.length > 1 ? 's' : '' }: ${ unknownArgs.join( ', ' ) }` );
 		console.error( 'Run this script with the "--help" option to see all available options.' );
-		process.exit( 0 );
+		process.exit( 1 );
 	}
 
 	// Delete all aliases because we don't want to use them in the code.
@@ -109,6 +113,7 @@ export default function parseArguments( args, settings = {} ) {
 	}
 
 	replaceKebabCaseWithCamelCase( options, [
+		'disable-watch',
 		'source-map',
 		'identity-file',
 		'karma-config-overrides',

@@ -43,18 +43,21 @@ describe( 'parseArguments()', () => {
 			'/home/.secret/file.key',
 			'--additional-languages',
 			'de,fr',
-			'--resolve-js-first'
+			'--resolve-js-first',
+			'--disable-watch'
 		] );
 
 		expect( options[ 'source-map' ] ).to.be.undefined;
 		expect( options[ 'identity-file' ] ).to.be.undefined;
 		expect( options[ 'additional-languages' ] ).to.be.undefined;
 		expect( options[ 'resolve-js-first' ] ).to.be.undefined;
+		expect( options[ 'disable-watch' ] ).to.be.undefined;
 
 		expect( options.sourceMap ).to.equal( true );
 		expect( options.identityFile ).to.equal( '/home/.secret/file.key' );
 		expect( options.additionalLanguages ).to.deep.equal( [ 'de', 'fr' ] );
 		expect( options.resolveJsFirst ).to.equal( true );
+		expect( options.disableWatch ).to.equal( true );
 	} );
 
 	it( 'deletes all aliases keys from returned object', () => {
@@ -407,7 +410,7 @@ describe( 'parseArguments()', () => {
 		it( 'should print error and exit when a single unknown option is passed', () => {
 			parseArguments( [ '--unknown-option' ] );
 
-			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
 			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown option: --unknown-option' );
 			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
@@ -416,7 +419,7 @@ describe( 'parseArguments()', () => {
 		it( 'should print error and exit when multiple unknown options are passed', () => {
 			parseArguments( [ '--foo', '--bar' ] );
 
-			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
 			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --foo, --bar' );
 			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
@@ -429,6 +432,15 @@ describe( 'parseArguments()', () => {
 			expect( consoleErrorStub ).not.toHaveBeenCalled();
 			expect( options.coverage ).to.equal( true );
 			expect( options.verbose ).to.equal( true );
+		} );
+
+		it( 'should not treat --port and --disable-watch as unknown options', () => {
+			const options = parseArguments( [ '--port', '9000', '--disable-watch' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.port ).to.equal( '9000' );
+			expect( options.disableWatch ).to.equal( true );
 		} );
 	} );
 
