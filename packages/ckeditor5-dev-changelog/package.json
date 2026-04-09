@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-changelog",
-  "version": "55.4.0",
+  "version": "55.5.0",
   "description": "A CKEditor 5 development tool for handling changelogs.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
+    "cac": "^7.0.0",
     "date-fns": "^4.1.0",
     "glob": "^13.0.6",
     "gray-matter": "^4.0.3",

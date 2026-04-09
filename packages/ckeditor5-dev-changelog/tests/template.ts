@@ -13,6 +13,7 @@ const EXPECTED_FILE_NAME = '20250526105803_ck_1234567890_git_branch_name.md';
 
 const mocks = vi.hoisted( () => ( {
 	log: vi.fn().mockReturnValue( undefined ),
+	info: vi.fn().mockReturnValue( undefined ),
 	warn: vi.fn().mockReturnValue( undefined ),
 	error: vi.fn().mockReturnValue( undefined ),
 	mkdir: vi.fn().mockResolvedValue( undefined ),
@@ -63,6 +64,7 @@ describe( 'generateTemplate', () => {
 		vi.setSystemTime( mocks.time );
 		vi.stubGlobal( 'console', {
 			log: mocks.log,
+			info: mocks.info,
 			warn: mocks.warn,
 			error: mocks.error
 		} );
@@ -139,6 +141,24 @@ describe( 'generateTemplate', () => {
 		);
 	} );
 
+	it( 'shows help when requested via CLI arguments', async () => {
+		mockCliArgs( '--help' );
+
+		await template.generateTemplate();
+
+		expect( mocks.info ).toHaveBeenCalledWith( expect.stringContaining( 'Usage:' ) );
+		expect( mocks.mkdir ).not.toHaveBeenCalled();
+		expect( mocks.copyFile ).not.toHaveBeenCalled();
+	} );
+
+	it( 'fails when unknown CLI argument is used', async () => {
+		mockCliArgs( '--unknown' );
+
+		await expect( template.generateTemplate() ).rejects.toThrow( 'Unknown option `--unknown`' );
+		expect( mocks.mkdir ).not.toHaveBeenCalled();
+		expect( mocks.copyFile ).not.toHaveBeenCalled();
+	} );
+
 	it( 'logs a message when file is created', async () => {
 		await template.generateTemplate();
 
@@ -209,4 +229,3 @@ describe( 'generateTemplate', () => {
 		expect( processExitSpy ).toHaveBeenCalledWith( 1 );
 	} );
 } );
-
