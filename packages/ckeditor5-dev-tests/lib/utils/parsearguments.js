@@ -77,7 +77,6 @@ export default function parseArguments( args, settings = {} ) {
 			'identity-file': null,
 			language: 'en',
 			notify: false,
-			port: 8125,
 			production: false,
 			reporter: 'mocha',
 			repositories: [],
@@ -126,7 +125,11 @@ export default function parseArguments( args, settings = {} ) {
 		'repositories',
 		'additionalLanguages'
 	] );
-	options.port = parseInt( options.port, 10 );
+
+	if ( options.port ) {
+		options.port = parseInt( options.port, 10 );
+	}
+
 	parseDebugOption( options );
 	parseRepositoriesOption( options );
 	parseTsconfigPath( options );

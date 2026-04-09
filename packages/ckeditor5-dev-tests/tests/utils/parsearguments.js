@@ -331,12 +331,16 @@ describe( 'parseArguments()', () => {
 	} );
 
 	describe( 'port', () => {
-		it( 'should be a number to allow arithmetic port-increment (not string concatenation)', () => {
-			const withDefault = parseArguments( [] );
-			const withCustom = parseArguments( [ '--port', '9000' ] );
+		it( 'should be undefined when not specified, so that each consumer can apply its own default', () => {
+			const options = parseArguments( [] );
 
-			expect( withDefault.port + 1 ).to.equal( 8126 );
-			expect( withCustom.port + 1 ).to.equal( 9001 );
+			expect( options.port ).to.be.undefined;
+		} );
+
+		it( 'should be a number to allow arithmetic port-increment (not string concatenation)', () => {
+			const options = parseArguments( [ '--port', '9000' ] );
+
+			expect( options.port + 1 ).to.equal( 9001 );
 		} );
 	} );
 
