@@ -330,6 +330,16 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	describe( 'port', () => {
+		it( 'should be a number to allow arithmetic port-increment (not string concatenation)', () => {
+			const withDefault = parseArguments( [] );
+			const withCustom = parseArguments( [ '--port', '9000' ] );
+
+			expect( withDefault.port + 1 ).to.equal( 8126 );
+			expect( withCustom.port + 1 ).to.equal( 9001 );
+		} );
+	} );
+
 	describe( 'help', () => {
 		let processExitStub, consoleLogStub;
 
@@ -439,7 +449,7 @@ describe( 'parseArguments()', () => {
 
 			expect( processExitStub ).not.toHaveBeenCalled();
 			expect( consoleErrorStub ).not.toHaveBeenCalled();
-			expect( options.port ).to.equal( '9000' );
+			expect( options.port ).to.equal( 9000 );
 			expect( options.disableWatch ).to.equal( true );
 		} );
 	} );
