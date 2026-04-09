@@ -396,6 +396,42 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	describe( 'unknown options', () => {
+		let processExitStub, consoleErrorStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleErrorStub = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should print error and exit when a single unknown option is passed', () => {
+			parseArguments( [ '--unknown-option' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown option: --unknown-option' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should print error and exit when multiple unknown options are passed', () => {
+			parseArguments( [ '--foo', '--bar' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 0 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --foo, --bar' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should not print error when only known options are passed', () => {
+			const options = parseArguments( [ '--coverage', '--verbose' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+			expect( options.verbose ).to.equal( true );
+		} );
+	} );
+
 	describe( 'identity-file', () => {
 		it( 'should be null by default, if `staging-ff.js` does not exist', () => {
 			const options = parseArguments( [], { allowDefaultIdentityFile: true } );

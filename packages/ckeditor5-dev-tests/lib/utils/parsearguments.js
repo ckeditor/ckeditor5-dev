@@ -19,6 +19,7 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
  */
 export default function parseArguments( args, settings = {} ) {
 	const log = logger();
+	const unknownArgs = [];
 
 	const minimistConfig = {
 		string: [
@@ -83,13 +84,21 @@ export default function parseArguments( args, settings = {} ) {
 			tsconfig: null,
 			verbose: false,
 			watch: false
-		}
+		},
+
+		unknown: arg => unknownArgs.push( arg )
 	};
 
 	const options = minimist( args, minimistConfig );
 
 	if ( options.help ) {
 		printHelp( settings );
+		process.exit( 0 );
+	}
+
+	if ( unknownArgs.length ) {
+		console.error( `Unknown option${ unknownArgs.length > 1 ? 's' : '' }: ${ unknownArgs.join( ', ' ) }` );
+		console.error( 'Run this script with the "--help" option to see all available options.' );
 		process.exit( 0 );
 	}
 
