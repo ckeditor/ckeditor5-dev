@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
+    "cac": "^7.0.0",
     "date-fns": "^4.0.0",
     "glob": "^13.0.0",
     "gray-matter": "^4.0.3",
