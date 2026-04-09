@@ -89,7 +89,11 @@ export default function parseArguments( args, settings = {} ) {
 			watch: false
 		},
 
-		unknown: arg => unknownArgs.push( arg )
+		unknown: arg => {
+			unknownArgs.push( arg );
+
+			return false;
+		}
 	};
 
 	const options = minimist( args, minimistConfig );

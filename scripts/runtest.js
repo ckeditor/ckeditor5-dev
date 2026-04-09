@@ -119,7 +119,11 @@ function parseArguments( args ) {
 			files: []
 		},
 
-		unknown: arg => unknownArgs.push( arg )
+		unknown: arg => {
+			unknownArgs.push( arg );
+
+			return false;
+		}
 	};
 
 	const options = minimist( args, config );

@@ -15,11 +15,6 @@ const options = tests.parseArguments( process.argv.slice( 2 ), {
 	commandName: 'ckeditor5-dev-tests-run-manual'
 } );
 
-// By default, the watch mechanism should be enabled in manual tests.
-// However, it makes sense to disable it when a developer wants to compile these files once,
-// without rebuilding it. See: https://github.com/ckeditor/ckeditor5/issues/10982.
-options.disableWatch = process.argv.includes( '--disable-watch' );
-
 if ( fs.existsSync( '.env' ) ) {
 	loadEnvFile( '.env' );
 }
