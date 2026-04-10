@@ -335,8 +335,9 @@ export default function parseArguments( args, settings = {} ) {
 		for ( const arg of rawArgs ) {
 			if ( arg.startsWith( '--' ) ) {
 				const flag = arg.split( '=' )[ 0 ];
+				const baseFlag = flag.startsWith( '--no-' ) ? `--${ flag.slice( 5 ) }` : flag;
 
-				if ( !allowedNames.has( flag ) ) {
+				if ( !allowedNames.has( baseFlag ) ) {
 					unsupportedArgs.push( flag );
 				}
 			} else if ( arg.startsWith( '-' ) ) {

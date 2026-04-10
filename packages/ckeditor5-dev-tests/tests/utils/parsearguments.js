@@ -550,6 +550,21 @@ describe( 'parseArguments()', () => {
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-w' );
 		} );
+
+		it( 'should not reject --no-* flags for options valid in the current command', () => {
+			const options = parseArguments( [ '--no-debug' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.debug ).to.deep.equal( [] );
+		} );
+
+		it( 'should reject --no-* flags for options not valid in the current command', () => {
+			parseArguments( [ '--no-coverage' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--no-coverage' );
+		} );
 	} );
 
 	describe( 'identity-file', () => {
