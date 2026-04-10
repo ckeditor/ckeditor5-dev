@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-stale-bot",
-  "version": "55.4.0",
+  "version": "55.5.0",
   "description": "A stale bot is used to mark issues and pull requests that have not recently been updated.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -26,15 +26,15 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
-    "date-fns": "^4.0.0",
-    "graphql": "^16.8.1",
-    "graphql-request": "^7.0.0",
+    "date-fns": "^4.1.0",
+    "graphql": "^16.13.2",
+    "graphql-request": "^7.4.0",
     "minimist": "^1.2.8",
-    "ora": "^8.0.0",
+    "ora": "^8.2.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.2"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

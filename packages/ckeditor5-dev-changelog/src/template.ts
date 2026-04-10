@@ -4,8 +4,9 @@
  */
 
 import { mkdir, copyFile, constants } from 'node:fs/promises';
-import { promisify, styleText, parseArgs } from 'node:util';
+import { promisify, styleText } from 'node:util';
 import { exec } from 'node:child_process';
+import { cac } from 'cac';
 import path from 'upath';
 import { format } from 'date-fns';
 import { CHANGESET_DIRECTORY, TEMPLATE_FILE } from './utils/constants.js';
@@ -37,20 +38,29 @@ const PROTECTED_BRANCHES = [
 /**
  * Reads CLI arguments and turn the keys into camelcase.
  */
-function getCliArguments(): Partial<GenerateTemplateOptions> {
-	const { values } = parseArgs( {
-		options: {
-			directory: { type: 'string' }
-		},
+function getCliArguments(): Partial<GenerateTemplateOptions> | undefined {
+	const cli = cac( 'ckeditor5-dev-changelog-create-entry' );
 
-		// Skip `node ckeditor5-dev-changelog`.
-		args: process.argv.slice( 2 ),
+	cli.usage( '[options]' );
+	cli.option(
+		'--directory <path>',
+		'Directory where the changelog entry will be created.',
+		{ default: DEFAULT_OPTIONS.directory }
+	);
+	cli.help();
 
-		// Fail when unknown argument is used.
-		strict: true
-	} );
+	const { options } = cli.parse( process.argv );
 
-	return values;
+	if ( options.help ) {
+		return;
+	}
+
+	cli.globalCommand.checkUnknownOptions();
+	cli.globalCommand.checkOptionValue();
+	cli.globalCommand.checkRequiredArgs();
+	cli.globalCommand.checkUnusedArgs();
+
+	return options;
 }
 
 /**
@@ -96,9 +106,13 @@ function getFileName( gitBranchName: string ): string {
  * Generates a template file for the changelog in the specified directory.
  */
 export async function generateTemplate(
-	args: Partial<GenerateTemplateOptions> = getCliArguments(),
+	args: Partial<GenerateTemplateOptions> | undefined = getCliArguments(),
 	retries = 5
 ): Promise<void> {
+	if ( !args ) {
+		return;
+	}
+
 	const options: GenerateTemplateOptions = normalizeOptions( args );
 	const gitBranchName = await getFormattedGitBranchName();
 	const filename = getFileName( gitBranchName );

@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/typedoc-plugins",
-  "version": "55.4.0",
+  "version": "55.5.0",
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -26,15 +26,15 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "12.3.0",
-    "glob": "^13.0.0",
-    "rollup": "^4.9.5",
-    "typedoc": "^0.28.14",
+    "glob": "^13.0.6",
+    "rollup": "^4.60.1",
+    "typedoc": "^0.28.18",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "5.5.4",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "typedoc": "^0.28.14"

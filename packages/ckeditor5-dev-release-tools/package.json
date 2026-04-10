@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "55.4.0",
+  "version": "55.5.0",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -23,20 +23,20 @@
   ],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "cli-columns": "^4.0.0",
-    "glob": "^13.0.0",
-    "inquirer": "^12.5.2",
-    "semver": "^7.6.3",
+    "glob": "^13.0.6",
+    "inquirer": "^12.11.1",
+    "semver": "^7.7.4",
     "shell-escape": "^0.2.0",
-    "simple-git": "^3.27.0",
+    "simple-git": "^3.33.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "date-fns": "^4.0.0",
+    "date-fns": "^4.1.0",
     "jest-extended": "^5.0.3",
-    "mock-fs": "^5.2.0",
-    "vitest": "^4.0.18"
+    "mock-fs": "^5.5.0",
+    "vitest": "^4.1.2"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

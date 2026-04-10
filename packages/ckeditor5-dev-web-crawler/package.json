@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-web-crawler",
-  "version": "55.4.0",
+  "version": "55.5.0",
   "description": "Used to run a web crawler that checks for errors on specified pages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -31,17 +31,17 @@
     "test:dev": "vitest dev"
   },
   "dependencies": {
-    "puppeteer": "^24.6.0",
+    "puppeteer": "^24.40.0",
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "12.3.0",
-    "@vitest/coverage-v8": "^4.0.18",
-    "rollup": "^4.9.5",
+    "@vitest/coverage-v8": "^4.1.2",
+    "rollup": "^4.60.1",
     "typescript": "5.5.4",
     "upath": "^2.0.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.2"
   }
 }
