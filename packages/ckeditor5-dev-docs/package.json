@@ -23,15 +23,15 @@
   ],
   "dependencies": {
     "@ckeditor/typedoc-plugins": "workspace:*",
-    "glob": "^13.0.0",
-    "typedoc": "^0.28.14",
+    "glob": "^13.0.6",
+    "typedoc": "^0.28.18",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "upath": "^2.0.1"
   },
   "devDependencies": {
     "jest-extended": "^5.0.3",
     "typescript": "5.5.4",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.2"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",
