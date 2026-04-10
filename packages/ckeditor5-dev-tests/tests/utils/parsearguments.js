@@ -458,6 +458,100 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	describe( 'command-specific option validation', () => {
+		let processExitStub, consoleErrorStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleErrorStub = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should reject --coverage when running manual tests', () => {
+			parseArguments( [ '--coverage' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown option: --coverage' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should reject -c alias when running manual tests', () => {
+			parseArguments( [ '-c' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
+		} );
+
+		it( 'should reject --watch when running manual tests', () => {
+			parseArguments( [ '--watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--watch' );
+		} );
+
+		it( 'should reject --disable-watch when running automated tests', () => {
+			parseArguments( [ '--disable-watch' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--disable-watch' );
+		} );
+
+		it( 'should reject --port when running automated tests', () => {
+			parseArguments( [ '--port', '9000' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--port' );
+		} );
+
+		it( 'should report multiple unsupported options at once', () => {
+			parseArguments( [ '--coverage', '--watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --coverage, --watch' );
+		} );
+
+		it( 'should accept --coverage for automated tests', () => {
+			const options = parseArguments( [ '--coverage' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+		} );
+
+		it( 'should accept --disable-watch for manual tests', () => {
+			const options = parseArguments( [ '--disable-watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.disableWatch ).to.equal( true );
+		} );
+
+		it( 'should skip validation when commandName is not provided', () => {
+			const options = parseArguments( [ '--coverage', '--disable-watch' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+			expect( options.disableWatch ).to.equal( true );
+		} );
+
+		it( 'should not treat positional values as unknown options', () => {
+			const options = parseArguments( [ '--port', '9000' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.port ).to.equal( 9000 );
+		} );
+
+		it( 'should reject individual letters in combined short flags', () => {
+			parseArguments( [ '-cw' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-w' );
+		} );
+	} );
+
 	describe( 'identity-file', () => {
 		it( 'should be null by default, if `staging-ff.js` does not exist', () => {
 			const options = parseArguments( [], { allowDefaultIdentityFile: true } );
