@@ -43,18 +43,21 @@ describe( 'parseArguments()', () => {
 			'/home/.secret/file.key',
 			'--additional-languages',
 			'de,fr',
-			'--resolve-js-first'
+			'--resolve-js-first',
+			'--disable-watch'
 		] );
 
 		expect( options[ 'source-map' ] ).to.be.undefined;
 		expect( options[ 'identity-file' ] ).to.be.undefined;
 		expect( options[ 'additional-languages' ] ).to.be.undefined;
 		expect( options[ 'resolve-js-first' ] ).to.be.undefined;
+		expect( options[ 'disable-watch' ] ).to.be.undefined;
 
 		expect( options.sourceMap ).to.equal( true );
 		expect( options.identityFile ).to.equal( '/home/.secret/file.key' );
 		expect( options.additionalLanguages ).to.deep.equal( [ 'de', 'fr' ] );
 		expect( options.resolveJsFirst ).to.equal( true );
+		expect( options.disableWatch ).to.equal( true );
 	} );
 
 	it( 'deletes all aliases keys from returned object', () => {
@@ -327,6 +330,20 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	describe( 'port', () => {
+		it( 'should be undefined when not specified, so that each consumer can apply its own default', () => {
+			const options = parseArguments( [] );
+
+			expect( options.port ).to.be.undefined;
+		} );
+
+		it( 'should be a number to allow arithmetic port-increment (not string concatenation)', () => {
+			const options = parseArguments( [ '--port', '9000' ] );
+
+			expect( options.port + 1 ).to.equal( 9001 );
+		} );
+	} );
+
 	describe( 'help', () => {
 		let processExitStub, consoleLogStub;
 
@@ -393,6 +410,160 @@ describe( 'parseArguments()', () => {
 			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
 
 			expect( output ).toContain( 'ckeditor5-dev-tests [options]' );
+		} );
+	} );
+
+	describe( 'unknown options', () => {
+		let processExitStub, consoleErrorStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleErrorStub = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should print error and exit when a single unknown option is passed', () => {
+			parseArguments( [ '--unknown-option' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown option: --unknown-option' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should print error and exit when multiple unknown options are passed', () => {
+			parseArguments( [ '--foo', '--bar' ] );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --foo, --bar' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should not print error when only known options are passed', () => {
+			const options = parseArguments( [ '--coverage', '--verbose' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+			expect( options.verbose ).to.equal( true );
+		} );
+
+		it( 'should not treat --port and --disable-watch as unknown options', () => {
+			const options = parseArguments( [ '--port', '9000', '--disable-watch' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.port ).to.equal( 9000 );
+			expect( options.disableWatch ).to.equal( true );
+		} );
+	} );
+
+	describe( 'command-specific option validation', () => {
+		let processExitStub, consoleErrorStub;
+
+		beforeEach( () => {
+			processExitStub = vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
+			consoleErrorStub = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
+		} );
+
+		it( 'should reject --coverage when running manual tests', () => {
+			parseArguments( [ '--coverage' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub ).toHaveBeenCalledTimes( 2 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown option: --coverage' );
+			expect( consoleErrorStub.mock.calls[ 1 ][ 0 ] ).toContain( '--help' );
+		} );
+
+		it( 'should reject -c alias when running manual tests', () => {
+			parseArguments( [ '-c' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
+		} );
+
+		it( 'should reject --watch when running manual tests', () => {
+			parseArguments( [ '--watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--watch' );
+		} );
+
+		it( 'should reject --disable-watch when running automated tests', () => {
+			parseArguments( [ '--disable-watch' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--disable-watch' );
+		} );
+
+		it( 'should reject --port when running automated tests', () => {
+			parseArguments( [ '--port', '9000' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--port' );
+		} );
+
+		it( 'should report multiple unsupported options at once', () => {
+			parseArguments( [ '--coverage', '--watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --coverage, --watch' );
+		} );
+
+		it( 'should accept --coverage for automated tests', () => {
+			const options = parseArguments( [ '--coverage' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+		} );
+
+		it( 'should accept --disable-watch for manual tests', () => {
+			const options = parseArguments( [ '--disable-watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.disableWatch ).to.equal( true );
+		} );
+
+		it( 'should skip validation when commandName is not provided', () => {
+			const options = parseArguments( [ '--coverage', '--disable-watch' ] );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.coverage ).to.equal( true );
+			expect( options.disableWatch ).to.equal( true );
+		} );
+
+		it( 'should not treat positional values as unknown options', () => {
+			const options = parseArguments( [ '--port', '9000' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.port ).to.equal( 9000 );
+		} );
+
+		it( 'should reject individual letters in combined short flags', () => {
+			parseArguments( [ '-cw' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-w' );
+		} );
+
+		it( 'should not reject --no-* flags for options valid in the current command', () => {
+			const options = parseArguments( [ '--no-debug' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+
+			expect( processExitStub ).not.toHaveBeenCalled();
+			expect( consoleErrorStub ).not.toHaveBeenCalled();
+			expect( options.debug ).to.deep.equal( [] );
+		} );
+
+		it( 'should reject --no-* flags for options not valid in the current command', () => {
+			parseArguments( [ '--no-coverage' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
+
+			expect( processExitStub ).toHaveBeenCalledWith( 1 );
+			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--no-coverage' );
 		} );
 	} );
 

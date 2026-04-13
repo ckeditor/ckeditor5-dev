@@ -17,7 +17,7 @@ main();
 function main() {
 	let hasError = false;
 	const cwd = process.cwd();
-	const { coverage } = parseArguments( process.argv.slice( 2 ) );
+	const { coverage, files } = parseArguments( process.argv.slice( 2 ) );
 
 	const packages = globSync( './packages/*/package.json' )
 		.map( packageJsonPath => ( {
@@ -26,10 +26,15 @@ function main() {
 		} ) )
 		.reverse();
 
-	const testablePackages = packages.filter( item => isTestable( item.packageJson ) );
-	const ignoredPackages = packages.filter( item => !testablePackages.find( testable => item.relativePath === testable.relativePath ) );
+	const testablePackages = packages
+		.filter( item => isTestable( item.packageJson ) );
+	const filteredPackages = testablePackages
+		.filter( item => matchesFileFilter( item.packageJson.name, files ) );
+	const ignoredPackages = packages
+		.filter( item => matchesFileFilter( item.packageJson.name, files ) )
+		.filter( item => !testablePackages.find( testable => item.relativePath === testable.relativePath ) );
 
-	for ( const { relativePath, packageJson } of testablePackages ) {
+	for ( const { relativePath, packageJson } of filteredPackages ) {
 		console.log( styleText( [ 'bold', 'magenta' ], `\nRunning tests for "${ styleText( 'underline', packageJson.name ) }"...` ) );
 		const testScript = coverage ? 'coverage' : 'test';
 
@@ -72,20 +77,93 @@ function isTestable( packageJson ) {
 }
 
 /**
+ * @param {string} packageName
+ * @param {Array.<string>} filters
+ * @returns {boolean}
+ */
+function matchesFileFilter( packageName, filters ) {
+	if ( !filters.length ) {
+		return true;
+	}
+
+	const shortName = packageName.replace( /^@ckeditor\/ckeditor5-/, '' );
+
+	return filters.some( filter => shortName.includes( filter ) );
+}
+
+/**
  * @param {Array.<string>} args
  * @returns {object} result
  * @returns {boolean} result.coverage
  */
 function parseArguments( args ) {
+	const unknownArgs = [];
+
 	const config = {
-		boolean: [
-			'coverage'
+		string: [
+			'files'
 		],
 
+		boolean: [
+			'coverage',
+			'help'
+		],
+
+		alias: {
+			f: 'files',
+			h: 'help'
+		},
+
 		default: {
-			coverage: false
+			coverage: false,
+			files: []
+		},
+
+		unknown: arg => {
+			unknownArgs.push( arg );
+
+			return false;
 		}
 	};
 
-	return minimist( args, config );
+	const options = minimist( args, config );
+
+	if ( options.help ) {
+		printHelp();
+		process.exit( 0 );
+	}
+
+	if ( unknownArgs.length ) {
+		console.error( `Unknown option${ unknownArgs.length > 1 ? 's' : '' }: ${ unknownArgs.join( ', ' ) }` );
+		console.error( 'Run this script with the "--help" option to see all available options.' );
+		process.exit( 1 );
+	}
+
+	if ( typeof options.files === 'string' ) {
+		options.files = options.files.split( ',' );
+	}
+
+	return options;
+}
+
+/**
+ * Prints help text for the CLI command.
+ */
+function printHelp() {
+	const lines = [
+		'',
+		styleText( 'bold', '  ckeditor5-dev unit tests' ) + ' [options]',
+		'',
+		'  Runs tests for all testable packages in the repository.',
+		'',
+		styleText( 'bold', styleText( 'underline', 'Options' ) ),
+		'',
+		`  ${ styleText( 'yellow', '-f' ) }, ${ styleText( 'yellow', '--files' ) } ${ styleText( 'dim', '<pattern>' ) }` +
+		'               Package names without the `@ckeditor/ckeditor5-` prefix to test (comma-separated)',
+		`      ${ styleText( 'yellow', '--coverage' ) }                      Generate code coverage report`,
+		`  ${ styleText( 'yellow', '-h' ) }, ${ styleText( 'yellow', '--help' ) }                          Show this help message`,
+		''
+	];
+
+	console.log( lines.join( '\n' ) );
 }

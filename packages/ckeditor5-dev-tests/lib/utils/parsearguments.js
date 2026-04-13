@@ -19,6 +19,7 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
  */
 export default function parseArguments( args, settings = {} ) {
 	const log = logger();
+	const unknownArgs = [];
 
 	const minimistConfig = {
 		string: [
@@ -30,6 +31,7 @@ export default function parseArguments( args, settings = {} ) {
 			'identity-file',
 			'karma-config-overrides',
 			'language',
+			'port',
 			'reporter',
 			'repositories',
 			'tsconfig'
@@ -38,6 +40,7 @@ export default function parseArguments( args, settings = {} ) {
 		boolean: [
 			'cache',
 			'coverage',
+			'disable-watch',
 			'help',
 			'notify',
 			'production',
@@ -69,6 +72,7 @@ export default function parseArguments( args, settings = {} ) {
 			cache: false,
 			coverage: false,
 			cwd: process.cwd(),
+			'disable-watch': false,
 			files: [],
 			'identity-file': null,
 			language: 'en',
@@ -83,6 +87,12 @@ export default function parseArguments( args, settings = {} ) {
 			tsconfig: null,
 			verbose: false,
 			watch: false
+		},
+
+		unknown: arg => {
+			unknownArgs.push( arg );
+
+			return false;
 		}
 	};
 
@@ -93,6 +103,18 @@ export default function parseArguments( args, settings = {} ) {
 		process.exit( 0 );
 	}
 
+	if ( settings.commandName ) {
+		unknownArgs.push( ...getUnsupportedOptions( settings.commandName, args ) );
+	}
+
+	if ( unknownArgs.length ) {
+		const uniqueArgs = [ ...new Set( unknownArgs ) ];
+
+		console.error( `Unknown option${ uniqueArgs.length > 1 ? 's' : '' }: ${ uniqueArgs.join( ', ' ) }` );
+		console.error( 'Run this script with the "--help" option to see all available options.' );
+		process.exit( 1 );
+	}
+
 	// Delete all aliases because we don't want to use them in the code.
 	// They are useful when calling a command but useless after that.
 	for ( const alias of Object.keys( minimistConfig.alias ) ) {
@@ -100,6 +122,7 @@ export default function parseArguments( args, settings = {} ) {
 	}
 
 	replaceKebabCaseWithCamelCase( options, [
+		'disable-watch',
 		'source-map',
 		'identity-file',
 		'karma-config-overrides',
@@ -112,6 +135,11 @@ export default function parseArguments( args, settings = {} ) {
 		'repositories',
 		'additionalLanguages'
 	] );
+
+	if ( options.port ) {
+		options.port = parseInt( options.port, 10 );
+	}
+
 	parseDebugOption( options );
 	parseRepositoriesOption( options );
 	parseTsconfigPath( options );
@@ -272,6 +300,58 @@ export default function parseArguments( args, settings = {} ) {
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * Checks that no options exclusive to the other command type were used.
+	 * For example, `--coverage` is only valid for automated tests, so passing it
+	 * to the manual-test command is an error.
+	 *
+	 * The set of allowed options is derived from the help-text option groups so
+	 * that the two stay in sync automatically.
+	 *
+	 * @param {string} commandName
+	 * @param {Array.<string>} rawArgs
+	 * @returns {Array.<string>}
+	 */
+	function getUnsupportedOptions( commandName, rawArgs ) {
+		const isManual = commandName.includes( 'manual' );
+		const allowedGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
+
+		const allowedNames = new Set();
+
+		for ( const group of allowedGroups ) {
+			for ( const option of group.options ) {
+				allowedNames.add( `--${ option.name }` );
+
+				if ( option.alias ) {
+					allowedNames.add( `-${ option.alias }` );
+				}
+			}
+		}
+
+		const unsupportedArgs = [];
+
+		for ( const arg of rawArgs ) {
+			if ( arg.startsWith( '--' ) ) {
+				const flag = arg.split( '=' )[ 0 ];
+				const baseFlag = flag.startsWith( '--no-' ) ? `--${ flag.slice( 5 ) }` : flag;
+
+				if ( !allowedNames.has( baseFlag ) ) {
+					unsupportedArgs.push( flag );
+				}
+			} else if ( arg.startsWith( '-' ) ) {
+				for ( const letter of arg.slice( 1 ) ) {
+					const flag = `-${ letter }`;
+
+					if ( minimistConfig.alias[ letter ] && !allowedNames.has( flag ) ) {
+						unsupportedArgs.push( flag );
+					}
+				}
+			}
+		}
+
+		return unsupportedArgs;
 	}
 
 	/**
