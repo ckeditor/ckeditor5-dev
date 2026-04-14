@@ -30,3 +30,6 @@ export { myFunction } from './definitions.js';
 
 // Valid: declare class exported as type-only is fine (ambient declaration).
 export type { DeclareClass } from './definitions.js';
+
+// Valid: namespace (star) re-export is ignored by the validator.
+export * from './definitions.js';
