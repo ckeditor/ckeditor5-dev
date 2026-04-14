@@ -15,6 +15,7 @@ import linkValidator from './link-validator/index.js';
 import firesValidator from './fires-validator/index.js';
 import moduleValidator from './module-validator/index.js';
 import overloadsValidator from './overloads-validator/index.js';
+import typeOnlyExportValidator from './type-only-export-validator/index.js';
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -25,7 +26,8 @@ export function validate( app: Application, options: ValidatorOptions = {} ): vo
 			seeValidator,
 			linkValidator,
 			firesValidator,
-			moduleValidator
+			moduleValidator,
+			typeOnlyExportValidator
 		];
 
 		if ( options.enableOverloadValidator ) {
