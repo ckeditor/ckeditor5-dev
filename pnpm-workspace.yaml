@@ -10,15 +10,17 @@ onlyBuiltDependencies:
 
 overrides:
   'diff@^7': '^8.0.3'
+  'lodash@^4': '^4.18.1'
   'minimatch@^9': '^9.0.7'
   'qs@^6': '^6.14.2'
-  'serialize-javascript@6': '^7.0.3'
+  'serialize-javascript@^6': '^7.0.5'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
+  - 'follow-redirects' # Remove after 2026-04-16.
 
 shellEmulator: true
 shamefullyHoist: true
