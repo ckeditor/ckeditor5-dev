@@ -13,7 +13,6 @@ import { getPluginPriority } from '../utils/getpluginpriority.js';
 import seeValidator from './see-validator/index.js';
 import linkValidator from './link-validator/index.js';
 import firesValidator from './fires-validator/index.js';
-import moduleValidator from './module-validator/index.js';
 import overloadsValidator from './overloads-validator/index.js';
 
 /**
@@ -24,8 +23,7 @@ export function validate( app: Application, options: ValidatorOptions = {} ): vo
 		const validators = [
 			seeValidator,
 			linkValidator,
-			firesValidator,
-			moduleValidator
+			firesValidator
 		];
 
 		if ( options.enableOverloadValidator ) {
