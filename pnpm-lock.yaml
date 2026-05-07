@@ -342,8 +342,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       simple-git:
-        specifier: ^3.27.0
-        version: 3.35.2
+        specifier: ^3.36.0
+        version: 3.36.0
       upath:
         specifier: ^2.0.1
         version: 2.0.1
@@ -634,8 +634,8 @@ importers:
         specifier: ^0.10.0
         version: 0.10.0
       simple-git:
-        specifier: ^3.27.0
-        version: 3.35.2
+        specifier: ^3.36.0
+        version: 3.36.0
       style-loader:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.105.2)
@@ -2019,11 +2019,11 @@ packages:
     resolution: {integrity: sha512-moXtHH33AobOhTZF8xcX1MpOFqdvfCk7v6+teJL8zymBiDXwEsQH6XG9HGx2VIxnJZNm4cNSzflTLDnQLmIdmw==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  '@simple-git/args-pathspec@1.0.2':
-    resolution: {integrity: sha512-nEFVejViHUoL8wU8GTcwqrvqfUG40S5ts6S4fr1u1Ki5CklXlRDYThPVA/qurTmCYFGnaX3XpVUmICLHdvhLaA==}
+  '@simple-git/args-pathspec@1.0.3':
+    resolution: {integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==}
 
-  '@simple-git/argv-parser@1.0.3':
-    resolution: {integrity: sha512-NMKv9sJcSN2VvnPT9Ja7eKfGy8Q8mMFLwPTCcuZMtv3+mYcLIZflg31S/tp2XCCyiY7YAx6cgBHQ0fwA2fWHpQ==}
+  '@simple-git/argv-parser@1.1.1':
+    resolution: {integrity: sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw==}
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -3857,8 +3857,8 @@ packages:
       '@types/node':
         optional: true
 
-  ip-address@10.0.1:
-    resolution: {integrity: sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==}
+  ip-address@10.2.0:
+    resolution: {integrity: sha512-/+S6j4E9AHvW9SWMSEY9Xfy66O5PWvVEJ08O0y5JGyEKQpojb0K0GKpz/v5HJ/G0vi3D2sjGK78119oXZeE0qA==}
     engines: {node: '>= 12'}
 
   is-arrayish@0.2.1:
@@ -5640,8 +5640,8 @@ packages:
     resolution: {integrity: sha512-Gw/FgHtrLM9WP8P5lLcSGh9OQcrTruWCELAiS48ik1QbL0cH+dfjomiRTUE9zzz+D1N6rOLkwXUvVmXZAsNE0Q==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  simple-git@3.35.2:
-    resolution: {integrity: sha512-ZMjl06lzTm1EScxEGuM6+mEX+NQd14h/B3x0vWU+YOXAMF8sicyi1K4cjTfj5is+35ChJEHDl1EjypzYFWH2FA==}
+  simple-git@3.36.0:
+    resolution: {integrity: sha512-cGQjLjK8bxJw4QuYT7gxHw3/IouVESbhahSsHrX97MzCL1gu2u7oy38W6L2ZIGECEfIBG4BabsWDPjBxJENv9Q==}
 
   sinon-chai@3.7.0:
     resolution: {integrity: sha512-mf5NURdUaSdnatJx3uhoBOrY9dtL19fiOtAdT1Azxg3+lNJFiuN0uzaU3xX1LeAfL17kHQhTAJgpsfhbMJMY2g==}
@@ -7478,11 +7478,11 @@ snapshots:
       '@sigstore/core': 3.0.0
       '@sigstore/protobuf-specs': 0.5.0
 
-  '@simple-git/args-pathspec@1.0.2': {}
+  '@simple-git/args-pathspec@1.0.3': {}
 
-  '@simple-git/argv-parser@1.0.3':
+  '@simple-git/argv-parser@1.1.1':
     dependencies:
-      '@simple-git/args-pathspec': 1.0.2
+      '@simple-git/args-pathspec': 1.0.3
 
   '@sinclair/typebox@0.27.8': {}
 
@@ -9583,7 +9583,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.17.1
 
-  ip-address@10.0.1: {}
+  ip-address@10.2.0: {}
 
   is-arrayish@0.2.1: {}
 
@@ -11674,12 +11674,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  simple-git@3.35.2:
+  simple-git@3.36.0:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
-      '@simple-git/args-pathspec': 1.0.2
-      '@simple-git/argv-parser': 1.0.3
+      '@simple-git/args-pathspec': 1.0.3
+      '@simple-git/argv-parser': 1.1.1
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
@@ -11761,7 +11761,7 @@ snapshots:
 
   socks@2.8.7:
     dependencies:
-      ip-address: 10.0.1
+      ip-address: 10.2.0
       smart-buffer: 4.2.0
 
   source-list-map@2.0.1: {}

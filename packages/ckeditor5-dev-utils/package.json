@@ -44,7 +44,7 @@
     "postcss-nesting": "^13.0.0",
     "raw-loader": "^4.0.1",
     "shelljs": "^0.10.0",
-    "simple-git": "^3.27.0",
+    "simple-git": "^3.36.0",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.0.0",
     "through2": "^4.0.0",
