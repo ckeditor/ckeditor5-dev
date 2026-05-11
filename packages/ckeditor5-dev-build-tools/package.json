@@ -52,7 +52,6 @@
   "devDependencies": {
     "@types/css": "^0.0.38",
     "@types/node": "^22.19.17",
-    "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^4.1.2",
     "rolldown": "^1.0.0",
     "type-fest": "^4.41.0",
