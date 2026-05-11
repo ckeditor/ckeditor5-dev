@@ -156,7 +156,7 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(vitest@4.1.2(@types/node@22.19.17)(vite@7.3.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(yaml@2.8.3)))
       rolldown:
-        specifier: ^1.0.0-rc.4
+        specifier: ^1.0.0
         version: 1.0.0
       type-fest:
         specifier: ^4.41.0
