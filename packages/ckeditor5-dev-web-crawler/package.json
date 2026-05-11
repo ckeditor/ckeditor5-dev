@@ -34,7 +34,9 @@
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.2",
     "rolldown": "^1.0.0",
-    "upath": "^2.0.1"
+    "upath": "^2.0.1",
+    "vitest": "^4.1.2"
   }
 }

@@ -625,12 +625,18 @@ importers:
         specifier: ^0.24.0
         version: 0.24.0(puppeteer@24.40.0(typescript@5.5.4))
     devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^4.1.2
+        version: 4.1.2(vitest@4.1.2(@types/node@25.5.2)(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(yaml@2.8.3)))
       rolldown:
         specifier: ^1.0.0
         version: 1.0.0
       upath:
         specifier: ^2.0.1
         version: 2.0.1
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@types/node@25.5.2)(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(yaml@2.8.3))
 
   packages/typedoc-plugins:
     dependencies:
