@@ -74,20 +74,20 @@ export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHa
 
 	page.on( 'request', onRequest );
 	page.on( 'dialog', onDialog );
-	page.on( ERROR_TYPES.PAGE_CRASH.event!, onPageCrash );
-	page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event!, onUncaughtException );
-	page.on( ERROR_TYPES.REQUEST_FAILURE.event!, onRequestFailure );
-	page.on( ERROR_TYPES.RESPONSE_FAILURE.event!, onResponseFailure );
-	page.on( ERROR_TYPES.CONSOLE_ERROR.event!, onConsoleError );
+	page.on( ERROR_TYPES.PAGE_CRASH.event, onPageCrash );
+	page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, onUncaughtException );
+	page.on( ERROR_TYPES.REQUEST_FAILURE.event, onRequestFailure );
+	page.on( ERROR_TYPES.RESPONSE_FAILURE.event, onResponseFailure );
+	page.on( ERROR_TYPES.CONSOLE_ERROR.event, onConsoleError );
 
 	return () => {
 		page.off( 'request', onRequest );
 		page.off( 'dialog', onDialog );
-		page.off( ERROR_TYPES.PAGE_CRASH.event!, onPageCrash );
-		page.off( ERROR_TYPES.UNCAUGHT_EXCEPTION.event!, onUncaughtException );
-		page.off( ERROR_TYPES.REQUEST_FAILURE.event!, onRequestFailure );
-		page.off( ERROR_TYPES.RESPONSE_FAILURE.event!, onResponseFailure );
-		page.off( ERROR_TYPES.CONSOLE_ERROR.event!, onConsoleError );
+		page.off( ERROR_TYPES.PAGE_CRASH.event, onPageCrash );
+		page.off( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, onUncaughtException );
+		page.off( ERROR_TYPES.REQUEST_FAILURE.event, onRequestFailure );
+		page.off( ERROR_TYPES.RESPONSE_FAILURE.event, onResponseFailure );
+		page.off( ERROR_TYPES.CONSOLE_ERROR.event, onConsoleError );
 	};
 }
 

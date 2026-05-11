@@ -6,13 +6,14 @@
  */
 
 import { cpus } from 'node:os';
+import type { PageEvents } from 'puppeteer';
 
-export interface ErrorType {
+export interface ErrorType<TEvent extends keyof PageEvents = keyof PageEvents> {
 
 	/**
 	 * The event name emitted by Puppeteer.
 	 */
-	event?: string;
+	event?: TEvent;
 
 	/**
 	 * Human-readable description of the error.
@@ -20,16 +21,16 @@ export interface ErrorType {
 	description: string;
 }
 
-interface EventErrorType extends ErrorType {
-	event: string;
+interface EventErrorType<TEvent extends keyof PageEvents> extends ErrorType<TEvent> {
+	event: TEvent;
 }
 
 interface ErrorTypes {
-	PAGE_CRASH: EventErrorType;
-	UNCAUGHT_EXCEPTION: EventErrorType;
-	REQUEST_FAILURE: EventErrorType;
-	RESPONSE_FAILURE: EventErrorType;
-	CONSOLE_ERROR: EventErrorType;
+	PAGE_CRASH: EventErrorType<'error'>;
+	UNCAUGHT_EXCEPTION: EventErrorType<'pageerror'>;
+	REQUEST_FAILURE: EventErrorType<'requestfailed'>;
+	RESPONSE_FAILURE: EventErrorType<'response'>;
+	CONSOLE_ERROR: EventErrorType<'console'>;
 	NAVIGATION_ERROR: ErrorType;
 }
 
