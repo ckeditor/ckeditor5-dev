@@ -5,7 +5,7 @@
 
 import upath from 'upath';
 import { test } from 'vitest';
-import { rollup, type RollupOutput } from 'rollup';
+import { rolldown, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
 
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
@@ -24,8 +24,8 @@ const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hel
 /**
  * Helper function for creating a bundle that won't be written to the file system.
  */
-async function generateBundle( options?: RollupTranslationsOptions ): Promise<RollupOutput['output']> {
-	const bundle = await rollup( {
+async function generateBundle( options?: RollupTranslationsOptions ): Promise<RolldownOutput['output']> {
+	const bundle = await rolldown( {
 		input: upath.join( import.meta.dirname, '/fixtures/input.js' ),
 		plugins: [
 			translations( options )

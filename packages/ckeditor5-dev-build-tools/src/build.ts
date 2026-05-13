@@ -7,10 +7,12 @@ import fs from 'node:fs';
 import url from 'node:url';
 import { styleText, parseArgs } from 'node:util';
 import path from 'upath';
-import { rollup, type RollupOutput, type GlobalsOption, type LogLevelOption } from 'rollup';
+import { rolldown, type LogLevelOption, type OutputOptions, type RolldownOutput } from 'rolldown';
 import { loadSourcemaps } from './plugins/loadSourcemaps.js';
-import { getRollupConfig } from './config.js';
+import { getRolldownConfig } from './config.js';
 import { camelizeObjectKeys, removeWhitespace, getOptionalPlugin } from './utils.js';
+
+type GlobalsOption = Record<string, string> | ( ( name: string ) => string );
 
 export interface BuildOptions {
 	input: string;
@@ -107,20 +109,20 @@ function normalizeGlobalsParameter( globals: GlobalsOption | Array<string> ): Gl
 /**
  * Generates `UMD` build based on previous `ESM` build.
  */
-async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
+async function generateUmdBuild( args: BuildOptions, bundle: RolldownOutput ): Promise<RolldownOutput> {
 	args.input = args.output;
 
 	const { dir, name } = path.parse( args.output );
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { plugins, ...config } = await getRollupConfig( args );
+	const { plugins, resolve, tsconfig, transform, moduleTypes, output, ...config } = await getRolldownConfig( args );
 
 	/**
 	 * Ignore the plugins we used for the ESM build. Instead, add a new plugin to not only
-	 * load the source code of the dependencies (which is the default in Rollup for better
+	 * load the source code of the dependencies (which is the default in Rolldown for better
 	 * performance), but also their source maps to generate a proper final source map for
 	 * the UMD bundle.
 	 */
-	const build = await rollup( {
+	const build = await rolldown( {
 		...config,
 		plugins: [
 			getOptionalPlugin(
@@ -131,9 +133,10 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	} );
 
 	const umdBundle = await build.write( {
+		...( output as OutputOptions ),
 		format: 'umd',
 		file: path.join( dir, `${ name }.umd.js` ),
-		inlineDynamicImports: true,
+		codeSplitting: false,
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name,
@@ -148,7 +151,7 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 			...bundle.output,
 			...umdBundle.output
 		]
-	};
+	} as unknown as RolldownOutput;
 }
 
 /**
@@ -196,7 +199,7 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
  */
 export async function build(
 	options: Partial<BuildOptions> = getCliArguments()
-): Promise<RollupOutput> {
+): Promise<RolldownOutput> {
 	try {
 		const args: BuildOptions = await normalizeOptions( options );
 
@@ -210,22 +213,23 @@ export async function build(
 		}
 
 		/**
-		 * Create Rollup configuration based on provided arguments.
+		 * Create Rolldown configuration based on provided arguments.
 		 */
-		const config = await getRollupConfig( args );
+		const { output, ...config } = await getRolldownConfig( args );
 
 		/**
-		 * Run Rollup to generate bundles.
+		 * Run Rolldown to generate bundles.
 		 */
-		const build = await rollup( config );
+		const build = await rolldown( config );
 
 		/**
 		 * Write bundles to the filesystem.
 		 */
 		const bundle = await build.write( {
+			...( output as OutputOptions ),
 			format: 'esm',
 			file: args.output,
-			inlineDynamicImports: true,
+			codeSplitting: false,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
 			name: args.name
@@ -242,7 +246,7 @@ export async function build(
 	} catch ( error: any ) {
 		let message: string;
 
-		if ( error.name === 'RollupError' ) {
+		if ( error.id ) {
 			message = `
 				${ styleText( 'red', 'ERROR: Error occurred when processing the file ' + error.id ) }.
 				${ error.message }

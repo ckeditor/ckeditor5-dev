@@ -4,11 +4,11 @@
  */
 
 import { test, expect } from 'vitest';
-import { getRollupConfig } from '../../src/config.js';
+import { getRolldownConfig } from '../../src/config.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
-import type { Plugin } from 'rollup';
+import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown';
 
-type Options = Parameters<typeof getRollupConfig>[0];
+type Options = Parameters<typeof getRolldownConfig>[0];
 
 const defaults: Options = {
 	input: 'src/index.js',
@@ -29,8 +29,18 @@ const defaults: Options = {
 	cwd: ''
 };
 
-function getConfig( config: Partial<Options> = {} ): ReturnType<typeof getRollupConfig> {
-	return getRollupConfig( Object.assign( {}, defaults, config ) );
+function getConfig( config: Partial<Options> = {} ): ReturnType<typeof getRolldownConfig> {
+	return getRolldownConfig( Object.assign( {}, defaults, config ) );
+}
+
+function getOutputPath( config: RolldownOptions, id: string ): string {
+	const paths = ( config.output as OutputOptions ).paths;
+
+	if ( typeof paths === 'function' ) {
+		return paths( id );
+	}
+
+	return paths?.[ id ] ?? id;
 }
 
 test( '--input', async () => {
@@ -54,23 +64,13 @@ test( '--tsconfig', async () => {
 		declarations: false
 	} );
 
-	expect( ( fileExists.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
-	expect( ( fileDoesntExist.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
-	expect( ( declarationsFalse.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
-} );
+	expect( ( fileExists.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( true );
+	expect( ( fileDoesntExist.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( false );
+	expect( ( declarationsFalse.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( false );
 
-test( '--tsconfig should do typechecking regardless of --declarations', async () => {
-	const withDeclarations = await getConfig( {
-		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
-		declarations: true
-	} );
-	const withoutDeclarations = await getConfig( {
-		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
-		declarations: false
-	} );
-
-	expect( ( withDeclarations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
-	expect( ( withoutDeclarations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( fileExists.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
+	expect( fileDoesntExist.tsconfig ).toBeUndefined();
+	expect( declarationsFalse.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
 } );
 
 test( '--external', async () => {
@@ -120,6 +120,9 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 	expect( ( config.external as Function )( 'ckeditor5/src/ui.js' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-core' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-code-block/theme/codeblock.css' ) ).toBe( false );
+
+	expect( getOutputPath( config, 'ckeditor5/src/ui.js' ) ).toBe( '@ckeditor/ckeditor5-ui/dist/index.js' );
+	expect( getOutputPath( config, '@ckeditor/ckeditor5-core' ) ).toBe( '@ckeditor/ckeditor5-core/dist/index.js' );
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
@@ -143,6 +146,53 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	expect( ( config.external as Function )( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
+
+	expect( getOutputPath( config, 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( 'ckeditor5-collaboration/dist/index.js' );
+	expect( getOutputPath( config, '@ckeditor/ckeditor5-case-change' ) ).toBe( '@ckeditor/ckeditor5-case-change/dist/index.js' );
+} );
+
+test( '--external rewrites CKEditor paths to aggregate packages in browser builds', async () => {
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '*'
+			}
+		} )
+	);
+	await mockGetUserDependency(
+		'ckeditor5-premium-features/package.json',
+		() => ( {
+			name: 'ckeditor5-premium-features',
+			dependencies: {
+				'@ckeditor/ckeditor5-ai': '*',
+				'ckeditor5-collaboration': '*'
+			}
+		} )
+	);
+
+	const config = await getConfig( {
+		external: [
+			'ckeditor5',
+			'ckeditor5-premium-features'
+		],
+		browser: true
+	} );
+
+	expect( getOutputPath( config, 'ckeditor5/src/core.js' ) ).toBe( 'ckeditor5' );
+	expect( getOutputPath( config, '@ckeditor/ckeditor5-core' ) ).toBe( 'ckeditor5' );
+	expect( getOutputPath( config, 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( 'ckeditor5-premium-features' );
+	expect( getOutputPath( config, '@ckeditor/ckeditor5-ai' ) ).toBe( 'ckeditor5-premium-features' );
+} );
+
+test( '--rewrite maps output paths', async () => {
+	const config = await getConfig( {
+		rewrite: [ [ 'dependency', 'dependency/dist/index.js' ] ]
+	} );
+
+	expect( getOutputPath( config, 'dependency' ) ).toBe( 'dependency/dist/index.js' );
+	expect( getOutputPath( config, 'unmatched-dependency' ) ).toBe( 'unmatched-dependency' );
 } );
 
 test( '--external doesn\'t fail when "ckeditor5-premium-features" is not installed', async () => {
@@ -176,6 +226,6 @@ test( '--minify', async () => {
 		minify: true
 	} );
 
-	expect( ( withoutMinification.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'terser' ) ).toBe( false );
-	expect( ( withMinification.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'terser' ) ).toBe( true );
+	expect( withoutMinification.output ).toMatchObject( { minify: false } );
+	expect( withMinification.output ).toMatchObject( { minify: true } );
 } );

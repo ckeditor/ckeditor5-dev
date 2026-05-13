@@ -4,7 +4,7 @@
  */
 
 import { test, expect } from 'vitest';
-import { camelize, camelizeObjectKeys, removeNewline } from '../src/utils.js';
+import { camelize, camelizeObjectKeys, getUserDependency, removeNewline } from '../src/utils.js';
 
 test( 'camelize()', () => {
 	expect( camelize( 'this-is-a-test' ) ).toBe( 'thisIsATest' );
@@ -30,4 +30,8 @@ test( 'camelizeObjectKeys()', () => {
 			'test-three': 3
 		}
 	} );
+} );
+
+test( 'getUserDependency()', () => {
+	expect( getUserDependency( 'upath' ) ).toBeDefined();
 } );

@@ -7,32 +7,19 @@ import path from 'upath';
 import { existsSync } from 'node:fs';
 import { getOptionalPlugin, getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
-import { defineConfig, type Plugin, type RollupOptions } from 'rollup';
+import { defineConfig, type RolldownOptions } from 'rolldown';
 import type { BuildOptions } from './build.js';
-
-/**
- * Rollup plugins
- */
-import swc from '@rollup/plugin-swc';
-import json from '@rollup/plugin-json';
-import terser from '@rollup/plugin-terser';
-import svg from 'rollup-plugin-svg-import';
-import commonjs from '@rollup/plugin-commonjs';
-import typescriptPlugin from '@rollup/plugin-typescript';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { addBanner } from './plugins/banner.js';
 import { bundleCss } from './plugins/bundleCss.js';
-import { emitCss } from './plugins/emitCss.js';
+import { declarationFiles } from './plugins/declarations.js';
 import { rawImport } from './plugins/rawImport.js';
-import { replaceImports } from './plugins/replace.js';
 import { splitCss } from './plugins/splitCss.js';
-import { loadTypeScriptSources } from './plugins/loadSources.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
- * Generates Rollup configurations.
+ * Generates Rolldown configurations.
  */
-export async function getRollupConfig( options: BuildOptions ): Promise<RollupOptions> {
+export async function getRolldownConfig( options: BuildOptions ): Promise<RolldownOptions> {
 	const {
 		input,
 		output,
@@ -53,7 +40,7 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 	 * (e.g. "@ckeditor/ckeditor5-core", "ckeditor5/src/core", etc.) or the new one (e.g. "ckeditor5")
 	 * in their source code. To make this work with the new installation methods, the `external` array
 	 * must be extended to include all packages that make up "ckeditor5" and "ckeditor5-premium-features"
-	 * whenever any of them are present in that array. Then, in the final step of generating the bundle,
+	 * whenever any of them are present in that array. Then, using the output path mapping,
 	 * we replace the old import paths with the new one.
 	 *
 	 * Example: When "ckeditor5" is added to the "external" array, it will be extended to also include
@@ -68,6 +55,10 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ?
 		getPackageDependencies( 'ckeditor5-premium-features' ) :
 		[];
+	const configuredRewrites = new Map( rewrite );
+	const coreRewriteSet = new Set( coreRewrites );
+	const commercialRewriteSet = new Set( commercialRewrites );
+	const hasTsconfig = !!tsconfig && existsSync( tsconfig );
 
 	external.push( ...coreRewrites, ...commercialRewrites );
 
@@ -85,6 +76,38 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 	return defineConfig( {
 		input,
 		logLevel,
+		tsconfig: hasTsconfig ? tsconfig : undefined,
+		platform: 'browser',
+		moduleTypes: {
+			'.svg': 'text'
+		},
+		resolve: {
+			extensions,
+			extensionAlias: {
+				'.js': [ '.ts', '.js' ],
+				'.mjs': [ '.mts', '.mjs' ],
+				'.cjs': [ '.cts', '.cjs' ]
+			}
+		},
+		output: {
+			minify,
+			comments: {
+				legal: false,
+				annotation: true,
+				jsdoc: !minify
+			},
+			paths: id => getOutputPath( id, {
+				browser,
+				configuredRewrites,
+				coreRewriteSet,
+				commercialRewriteSet
+			} )
+		},
+		experimental: {
+			nativeMagicString: true,
+			lazyBarrel: true,
+			attachDebugInfo: 'none'
+		},
 
 		/**
 		 * List of packages that will not be bundled, but their imports will be left as they are.
@@ -118,53 +141,12 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			rawImport(),
 
 			/**
-			 * Ensures that `.ts` files are loaded over `.js` files if both exist.
-			 */
-			loadTypeScriptSources(),
-
-			/**
-			 * Converts CommonJS modules to ES6.
-			 */
-			commonjs( {
-				sourceMap,
-				defaultIsModuleExports: true
-			} ),
-
-			/**
-			 * Resolves imports using the Node resolution algorithm.
-			 */
-			nodeResolve( {
-				extensions,
-				browser: true,
-				preferBuiltins: false
-			} ),
-
-			/**
-			 * Allows importing JSON files.
-			 */
-			json(),
-
-			/**
-			 * Turns SVG file imports into JavaScript strings.
-			 */
-			svg( {
-				stringify: true
-			} ),
-
-			/**
 			 * Allows using imports and nesting in CSS and extracts output CSS to a separate file.
 			 */
 			bundleCss( {
 				fileName: cssFileName,
 				minify,
 				sourceMap
-			} ),
-
-			/**
-			 * Ensures empty files are emitted if files of given names were not generated.
-			 */
-			emitCss( {
-				fileNames: [ cssFileName ]
 			} ),
 
 			/**
@@ -176,22 +158,6 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			} ),
 
 			/**
-			 * Transpiles TypeScript to JavaScript.
-			 */
-			swc( {
-				include: [ '**/*.[jt]s' ],
-				swc: {
-					jsc: {
-						target: 'es2022',
-						loose: false
-					},
-					module: {
-						type: 'es6'
-					}
-				}
-			} ),
-
-			/**
 			 * Builds translation from the `.po` files.
 			 */
 			getOptionalPlugin(
@@ -200,64 +166,14 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 			),
 
 			/**
-			 * Does type checking and generates `.d.ts` files.
+			 * Generates `.d.ts` files.
 			 */
-			getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } ),
-
-			/**
-			 * Replaces parts of the source code with the provided values.
-			 */
-			replaceImports( {
-				replace: [
-					/**
-					 * Rewrites provided in the config.
-					 */
-					...rewrite,
-
-					/**
-					 * Matches:
-					 * - ckeditor5/src/XXX (optionally with `.js` or `.ts` extension).
-					 * - ckeditor5-collaboration/src/XXX (optionally with `.js` or `.ts` extension).
-					 */
-					[
-						/ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/,
-						browser ? 'ckeditor5' : '@ckeditor/ckeditor5-$1/dist/index.js'
-					],
-					[
-						/ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/,
-						browser ? 'ckeditor5-premium-features' : 'ckeditor5-collaboration/dist/index.js'
-					],
-
-					/**
-					 * Rewrite "old" imports to imports used in new installation methods.
-					 *
-					 * Examples:
-					 * [ '@ckeditor/ckeditor5-core', 'ckeditor5' ],
-					 * [ '@ckeditor/ckeditor5-table', 'ckeditor5' ],
-					 * [ '@ckeditor/ckeditor5-ai', 'ckeditor5-premium-features' ],
-					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
-					 */
-					...coreRewrites.map( pkg => [
-						pkg,
-						browser ? 'ckeditor5' : `${ pkg }/dist/index.js`
-					] as [ string, string ] ),
-
-					...commercialRewrites.map( pkg => [
-						pkg,
-						browser ? 'ckeditor5-premium-features' : `${ pkg }/dist/index.js`
-					] as [ string, string ] )
-				]
-			} ),
-
-			/**
-			 * Minifies and mangles the output. It also removes all code comments except for license comments.
-			 */
-			getOptionalPlugin( minify, terser( {
-				sourceMap,
-				format: {
-					comments: false
-				}
-			} ) ),
+			getOptionalPlugin(
+				declarations && hasTsconfig,
+				declarationFiles( {
+					sourceDirectory: path.dirname( input )
+				} )
+			),
 
 			/**
 			 * Adds provided banner to the top of output JavaScript and CSS files.
@@ -271,6 +187,52 @@ export async function getRollupConfig( options: BuildOptions ): Promise<RollupOp
 }
 
 /**
+ * Maps external module IDs to paths emitted in generated bundles.
+ */
+function getOutputPath(
+	id: string,
+	{
+		browser,
+		configuredRewrites,
+		coreRewriteSet,
+		commercialRewriteSet
+	}: {
+		browser: boolean;
+		configuredRewrites: Map<string, string>;
+		coreRewriteSet: Set<string>;
+		commercialRewriteSet: Set<string>;
+	}
+): string {
+	const configuredRewrite = configuredRewrites.get( id );
+
+	if ( configuredRewrite !== undefined ) {
+		return configuredRewrite;
+	}
+
+	const coreSourceImport = id.match( /ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/ );
+
+	if ( coreSourceImport ) {
+		return browser ? 'ckeditor5' : `@ckeditor/ckeditor5-${ coreSourceImport[ 1 ] }/dist/index.js`;
+	}
+
+	const commercialSourceImport = id.match( /ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/ );
+
+	if ( commercialSourceImport ) {
+		return browser ? 'ckeditor5-premium-features' : 'ckeditor5-collaboration/dist/index.js';
+	}
+
+	if ( coreRewriteSet.has( id ) ) {
+		return browser ? 'ckeditor5' : `${ id }/dist/index.js`;
+	}
+
+	if ( commercialRewriteSet.has( id ) ) {
+		return browser ? 'ckeditor5-premium-features' : `${ id }/dist/index.js`;
+	}
+
+	return id;
+}
+
+/**
  * Returns a list of keys in `package.json` file of a given dependency.
  */
 function getPackageDependencies( packageName: string ): Array<string> {
@@ -281,32 +243,4 @@ function getPackageDependencies( packageName: string ): Array<string> {
 	} catch {
 		return [];
 	}
-}
-
-/**
- * Returns the TypeScript plugin if tsconfig file exists, otherwise doesn't return anything.
- */
-function getTypeScriptPlugin( {
-	tsconfig,
-	output,
-	sourceMap,
-	declarations
-}: Pick<BuildOptions, 'tsconfig' | 'output' | 'sourceMap' | 'declarations'> ): Plugin | undefined {
-	if ( !existsSync( tsconfig ) ) {
-		return;
-	}
-
-	return typescriptPlugin( {
-		noForceEmit: true,
-		tsconfig,
-		sourceMap,
-		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
-		typescript: getUserDependency( 'typescript' ),
-		declaration: declarations,
-		declarationDir: declarations ? path.parse( output ).dir : undefined,
-		compilerOptions: {
-			noEmitOnError: true,
-			...( declarations ? { emitDeclarationOnly: true } : { noEmit: true } )
-		}
-	} );
 }

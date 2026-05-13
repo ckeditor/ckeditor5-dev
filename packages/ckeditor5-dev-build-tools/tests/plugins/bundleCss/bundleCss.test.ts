@@ -5,9 +5,7 @@
 
 import { join } from 'node:path';
 import { test, expect } from 'vitest';
-import { rollup, type RollupOutput, type OutputAsset, type OutputOptions, type Plugin } from 'rollup';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { swcPlugin } from '../../_utils/utils.js';
+import { rolldown, type RolldownOutput, type OutputAsset, type OutputOptions, type Plugin } from 'rolldown';
 import { bundleCss, type RollupBundleCssOptions } from '../../../src/index.js';
 
 async function generateBundle(
@@ -15,11 +13,13 @@ async function generateBundle(
 	input: string = './fixtures/input.ts',
 	plugins: Array<Plugin> = [],
 	outputOptions: OutputOptions = {}
-): Promise<RollupOutput[ 'output' ]> {
-	const bundle = await rollup( {
+): Promise<RolldownOutput[ 'output' ]> {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, input ),
+		resolve: {
+			modules: [ join( import.meta.dirname, './fixtures/packages' ), 'node_modules' ]
+		},
 		plugins: [
-			swcPlugin,
 			...plugins,
 			bundleCss( options )
 		]
@@ -40,7 +40,7 @@ async function generateBundle(
 	return output;
 }
 
-function getAsset( output: RollupOutput[ 'output' ], fileName: string ): OutputAsset {
+function getAsset( output: RolldownOutput[ 'output' ], fileName: string ): OutputAsset {
 	const asset = output.find( output => output.fileName === fileName );
 
 	expect( asset ).toBeDefined();
@@ -127,15 +127,10 @@ test( 'Uses transformed CSS code from previous plugins', async () => {
 	expect( stylesheet ).toContain( '.transformed-by-plugin' );
 } );
 
-test( 'Resolves package CSS imports via Rollup resolution', async () => {
+test( 'Resolves package CSS imports via Rolldown resolution', async () => {
 	const output = await generateBundle( {
 		fileName: 'styles.css'
-	}, './fixtures/input-package-import.ts', [
-		nodeResolve( {
-			extensions: [ '.ts', '.js', '.css' ],
-			modulePaths: [ join( import.meta.dirname, './fixtures/packages' ) ]
-		} )
-	] );
+	}, './fixtures/input-package-import.ts' );
 
 	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
 
@@ -143,16 +138,15 @@ test( 'Resolves package CSS imports via Rollup resolution', async () => {
 	expect( stylesheet ).toContain( '.package-import-local' );
 } );
 
-test( 'Emits Lightning CSS warnings through Rollup warnings', async () => {
+test( 'Emits Lightning CSS warnings through Rolldown warnings', async () => {
 	const warnings: Array<string> = [];
 
-	const bundle = await rollup( {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, './fixtures/input-warning.ts' ),
 		onwarn( warning ) {
 			warnings.push( warning.message );
 		},
 		plugins: [
-			swcPlugin,
 			bundleCss( {
 				fileName: 'styles.css'
 			} )

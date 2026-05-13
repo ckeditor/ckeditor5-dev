@@ -5,7 +5,7 @@
 
 import { join } from 'node:path';
 import { test, expect } from 'vitest';
-import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
+import { rolldown, type RolldownOutput, type OutputAsset } from 'rolldown';
 import { verifyDividedStyleSheet } from '../../_utils/utils.js';
 import { splitCss, bundleCss, type RollupSplitCssOptions } from '../../../src/index.js';
 import { removeWhitespace } from '../../../src/utils.js';
@@ -17,8 +17,8 @@ async function generateBundle(
 	input: string,
 	options: RollupSplitCssOptions,
 	banner?: string
-): Promise<RollupOutput['output']> {
-	const bundle = await rollup( {
+): Promise<RolldownOutput['output']> {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, input ),
 		plugins: [
 			bundleCss( {
@@ -38,7 +38,7 @@ async function generateBundle(
 	return output;
 }
 
-function getStylesheetSource( output: RollupOutput['output'], outputFileName: string ): string {
+function getStylesheetSource( output: RolldownOutput['output'], outputFileName: string ): string {
 	const styles = output.find( output => output.fileName === outputFileName );
 
 	expect( styles ).toBeDefined();
@@ -50,8 +50,8 @@ function getStylesheetSource( output: RollupOutput['output'], outputFileName: st
 async function generateBundleWithoutBundledCss(
 	input: string,
 	options: RollupSplitCssOptions
-): Promise<RollupOutput['output']> {
-	const bundle = await rollup( {
+): Promise<RolldownOutput['output']> {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, input ),
 		plugins: [ splitCss( options ) ]
 	} );

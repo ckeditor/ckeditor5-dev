@@ -5,23 +5,23 @@
 
 import { test, expect, vi, beforeEach } from 'vitest';
 import upath from 'upath';
-import * as Rollup from 'rollup';
+import * as Rolldown from 'rolldown';
 import { readFileSync } from 'node:fs';
 import { build } from '../../src/build.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
 
 /**
- * Mock `rollup` to replace `rollup.write` with `rollup.generate`.
+ * Mock `rolldown` to replace `rolldown.write` with `rolldown.generate`.
  */
-vi.mock( 'rollup', async () => {
-	const { rollup, defineConfig } = await vi.importActual<typeof Rollup>( 'rollup' );
+vi.mock( 'rolldown', async () => {
+	const { rolldown, defineConfig } = await vi.importActual<typeof Rolldown>( 'rolldown' );
 
 	return {
-		async rollup( rollupOptions: Rollup.RollupOptions ) {
-			const build = await rollup( rollupOptions );
+		async rolldown( rolldownOptions: Rolldown.RolldownOptions ) {
+			const build = await rolldown( rolldownOptions );
 
 			return {
-				write: build.generate
+				write: ( options: Rolldown.OutputOptions ) => build.generate( options )
 			};
 		},
 
@@ -30,10 +30,10 @@ vi.mock( 'rollup', async () => {
 } );
 
 /**
- * Mocks Rollup.
+ * Mocks Rolldown.
  */
-function setRollupMock( mock: any ) {
-	vi.spyOn( Rollup, 'rollup' ).mockImplementationOnce( mock );
+function setRolldownMock( mock: any ) {
+	vi.spyOn( Rolldown, 'rolldown' ).mockImplementationOnce( mock );
 }
 
 /**
@@ -80,6 +80,13 @@ beforeEach( () => {
 	setProcessCwdMock();
 } );
 
+function expectFileNames( output: Rolldown.RolldownOutput[ 'output' ], fileNames: Array<string> ): void {
+	const actualFileNames = output.map( o => o.fileName );
+
+	expect( actualFileNames ).toHaveLength( fileNames.length );
+	expect( actualFileNames ).toEqual( expect.arrayContaining( fileNames ) );
+}
+
 /**
  * Input
  */
@@ -99,7 +106,7 @@ test( 'TypeScript input', async () => {
 
 	expect( output[ 0 ].code ).not.contain( 'TestType' );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
@@ -116,13 +123,24 @@ test( 'TypeScript declarations', async () => {
 
 	expect( output[ 0 ].code ).not.contain( 'TestType' );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
 		'index-content.css',
-		'input.d.ts'
+		'input.d.ts',
+		'js-extension-import.d.ts',
+		'js-extension-source.d.ts'
 	] );
+} );
+
+test( 'TypeScript source is preferred when a `.js` import has matching `.ts` and `.js` files', async () => {
+	const { output } = await build( {
+		input: 'src/js-extension-import.ts'
+	} );
+
+	expect( output[ 0 ].code ).toContain( 'typescript-source' );
+	expect( output[ 0 ].code ).not.toContain( 'javascript-source' );
 } );
 
 /**
@@ -135,7 +153,7 @@ test( 'Browser parameter set to `false`', async () => {
 		browser: false
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
@@ -150,7 +168,7 @@ test( 'Browser parameter set to `true` and name parameter not set', async () => 
 		browser: true
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
@@ -166,7 +184,7 @@ test( 'Browser parameter set to `true` and name parameter set', async () => {
 		name: 'EXAMPLE_OUTPUT_NAME'
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
@@ -198,7 +216,7 @@ test( 'Output name', async () => {
 		expect( code ).toContain( 'EXAMPLE_OUTPUT_NAME' );
 	}
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.css',
 		'index-editor.css',
@@ -212,7 +230,7 @@ test( 'Custom output name', async () => {
 		input: 'src/input.ts',
 
 		/**
-		 * Because we mocked rollup to use `rollup.generate` instead of `rollup.write`, the output of the
+		 * Because we mocked rolldown to use `rolldown.generate` instead of `rolldown.write`, the output of the
 		 * first ESM build is not saved to the disk, so the UMD build cannot be based on it. That's why the
 		 * `output` filename matches the `input` filename. However, because the default output name is `index`,
 		 * this is still a valid test.
@@ -225,7 +243,7 @@ test( 'Custom output name', async () => {
 		globals: { 'es-toolkit': '_' }
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'input.js',
 		'input.css',
 		'input-editor.css',
@@ -264,7 +282,7 @@ test( 'Externals', async () => {
 		external: [ 'es-toolkit' ]
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'from \'es-toolkit\'' );
+	expect( output[ 0 ].code ).toContain( 'from "es-toolkit"' );
 } );
 
 /**
@@ -276,9 +294,9 @@ test( 'Translations', async () => {
 		translations: '**/*.po'
 	} );
 
-	expect( ( output[ 1 ] as Rollup.OutputChunk ).code ).toContain( 'Hello world' );
+	expect( ( output[ 1 ] as Rolldown.OutputChunk ).code ).toContain( 'Hello world' );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'translations/en.js',
 		'translations/en.umd.js',
@@ -298,7 +316,7 @@ test( 'Source map', async () => {
 		sourceMap: true
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
+	expectFileNames( output, [
 		'index.js',
 		'index.js.map',
 		'index.css.map',
@@ -306,6 +324,25 @@ test( 'Source map', async () => {
 		'index-editor.css',
 		'index-content.css'
 	] );
+} );
+
+test( 'Source map for chunk re-exporting external modules', async () => {
+	const { output } = await build( {
+		input: 'src/external-reexport.js',
+		external: [ 'external-dependency' ],
+		sourceMap: true
+	} );
+	const chunk = output.find( item => item.type === 'chunk' && item.fileName === 'index.js' );
+
+	expectFileNames( output, [
+		'index.js',
+		'index.js.map',
+		'index.css.map',
+		'index.css',
+		'index-editor.css',
+		'index-content.css'
+	] );
+	expect( chunk?.type === 'chunk' ? chunk.code : '' ).toContain( 'sourceMappingURL=index.js.map' );
 } );
 
 /**
@@ -370,7 +407,7 @@ test( 'Overriding', async () => {
  * Error handling
  */
 test( 'Throws error with nicely formatter message when build fails', async () => {
-	setRollupMock( () => ( {
+	setRolldownMock( () => ( {
 		write() {
 			throw new Error( 'REASON' );
 		}
@@ -381,12 +418,11 @@ test( 'Throws error with nicely formatter message when build fails', async () =>
 	await expect( fn ).rejects.toThrow( /The build process failed with the following error(.*)REASON/s );
 } );
 
-test( 'Throws Rollup error with nicely formatter message when build fails', async () => {
-	setRollupMock( () => ( {
+test( 'Throws error with file context using nicely formatter message when build fails', async () => {
+	setRolldownMock( () => ( {
 		write() {
 			const err = new Error() as any;
 
-			err.name = 'RollupError';
 			err.id = 'FILENAME';
 			err.message = 'REASON';
 
@@ -399,12 +435,11 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 	await expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FILENAME(.*)REASON/s );
 } );
 
-test( 'Rollup error includes frame if provided', async () => {
-	setRollupMock( () => ( {
+test( 'Error with file context includes frame if provided', async () => {
+	setRolldownMock( () => ( {
 		write() {
 			const err = new Error() as any;
 
-			err.name = 'RollupError';
 			err.id = 'FILENAME';
 			err.message = 'REASON';
 			err.frame = 'FRAME';
@@ -419,7 +454,7 @@ test( 'Rollup error includes frame if provided', async () => {
 } );
 
 /**
- * Mocking real CKE5 packages and test the `Replace' plugin.
+ * Mocking real CKE5 packages and testing output path rewrites.
  */
 
 test( 'Replace - export from core (browser = false)', async () => {
@@ -435,7 +470,7 @@ test( 'Replace - export from core (browser = false)', async () => {
 	} );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
-	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
+	expect( output[ 0 ].code ).toContain( 'export * from "@ckeditor/ckeditor5-core/dist/index.js"' );
 } );
 
 test( 'Replace - export from commercial (browser = false)', async () => {
@@ -453,7 +488,7 @@ test( 'Replace - export from commercial (browser = false)', async () => {
 	} );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
+	expect( output[ 0 ].code ).toContain( 'export * from "@ckeditor/ckeditor5-ai/dist/index.js"' );
 } );
 
 test( 'Replace - import from core (browser = true)', async () => {
@@ -471,7 +506,7 @@ test( 'Replace - import from core (browser = true)', async () => {
 	} );
 
 	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Plugin } from "ckeditor5"' );
 } );
 
 test( 'Replace - import from core and from commercial (browser = true)', async () => {
@@ -491,16 +526,16 @@ test( 'Replace - import from core and from commercial (browser = true)', async (
 	} );
 
 	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Plugin } from "ckeditor5"' );
 
 	expect( inputFileContent ).toContain( 'import { Command } from \'@ckeditor/ckeditor5-core\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Command } from "ckeditor5"' );
 
 	expect( inputFileContent ).toContain( 'import { AIAssistant } from \'@ckeditor/ckeditor5-ai\'' );
-	expect( output[ 0 ].code ).toContain( 'import { AIAssistant } from \'ckeditor5-premium-features\'' );
+	expect( output[ 0 ].code ).toContain( 'import { AIAssistant } from "ckeditor5-premium-features"' );
 
 	expect( inputFileContent ).toContain( 'import { Users } from \'ckeditor5-collaboration/src/collaboration-core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Users } from \'ckeditor5-premium-features\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Users } from "ckeditor5-premium-features"' );
 } );
 
 test( 'should not throw when processing a file including a dynamic import expression', async () => {
