@@ -48,8 +48,8 @@
     "vitest": "^4.1.2"
   },
   "scripts": {
-    "build": "rolldown -c rolldown.config.js",
-    "dev": "rolldown -c rolldown.config.js --watch",
+    "build": "rolldown -c rolldown.config.ts",
+    "dev": "rolldown -c rolldown.config.ts --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"
