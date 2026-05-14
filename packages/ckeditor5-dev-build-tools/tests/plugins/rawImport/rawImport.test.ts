@@ -5,7 +5,7 @@
 
 import upath from 'upath';
 import { test, expect } from 'vitest';
-import { rolldown, type RolldownOutput } from 'rolldown';
+import { rolldown, type PluginContext, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
 
 import { rawImport } from '../../../src/index.js';
@@ -46,5 +46,5 @@ test( 'does not resolve raw imports without importer context', () => {
 	const plugin = rawImport();
 	const resolveId = typeof plugin.resolveId == 'function' ? plugin.resolveId : plugin.resolveId!.handler;
 
-	expect( resolveId.call( {}, './dependency.css?raw', undefined, {} as any ) ).toBeNull();
+	expect( resolveId.call( {} as PluginContext, './dependency.css?raw', undefined, {} as any ) ).toBeNull();
 } );
