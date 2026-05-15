@@ -6,6 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import getDefinitionsFromFile from '../../../lib/utils/getdefinitionsfromfile.js';
+import getProtobufJsInquireWebpackRule from '../../../lib/utils/getprotobufjsinquirewebpackrule.js';
 import getWebpackConfigForManualTests from '../../../lib/utils/manual-tests/getwebpackconfig.js';
 
 const stubs = vi.hoisted( () => ( {
@@ -32,6 +33,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
 	}
 } ) );
 vi.mock( '../../../lib/utils/getdefinitionsfromfile.js' );
+vi.mock( '../../../lib/utils/getprotobufjsinquirewebpackrule.js' );
 
 describe( 'getWebpackConfigForManualTests()', () => {
 	beforeEach( () => {
@@ -97,6 +99,12 @@ describe( 'getWebpackConfigForManualTests()', () => {
 
 		// The `devtool` property has been replaced by the `SourceMapDevToolPlugin()`.
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
+	} );
+
+	it( 'should add the @protobufjs/inquire webpack rule', () => {
+		getWebpackConfigForManualTests( { disableWatch: true } );
+
+		expect( vi.mocked( getProtobufJsInquireWebpackRule ) ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'should disable watcher mechanism when passing the "disableWatch" option', () => {

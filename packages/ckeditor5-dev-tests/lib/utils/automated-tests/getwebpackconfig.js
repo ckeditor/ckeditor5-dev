@@ -7,6 +7,7 @@ import path from 'node:path';
 import webpack from 'webpack';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
+import getProtobufJsInquireWebpackRule from '../getprotobufjsinquirewebpackrule.js';
 import TreatWarningsAsErrorsWebpackPlugin from './treatwarningsaserrorswebpackplugin.js';
 
 /**
@@ -64,6 +65,8 @@ export default function getWebpackConfigForAutomatedTests( options ) {
 
 		module: {
 			rules: [
+				getProtobufJsInquireWebpackRule(),
+
 				options.coverage ? loaders.getCoverageLoader( { files: options.files } ) : null,
 
 				loaders.getIconsLoader(),
