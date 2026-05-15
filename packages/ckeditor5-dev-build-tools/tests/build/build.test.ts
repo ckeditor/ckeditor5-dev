@@ -6,7 +6,6 @@
 import { test, expect, vi, beforeEach } from 'vitest';
 import upath from 'upath';
 import * as Rolldown from 'rolldown';
-import { readFileSync } from 'node:fs';
 import { build } from '../../src/build.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
 
@@ -453,70 +452,12 @@ test( 'Error with file context includes frame if provided', async () => {
 	await expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FRAME/s );
 } );
 
-/**
- * Mocking real CKE5 packages and testing output path rewrites.
- */
-
-test( 'Replace - export from core (browser = false)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-core.js' ), 'utf-8' );
-
-	await mockCoreDependencies();
-
-	const { output } = await build( {
-		input: 'data-for-rewrites-tests/export-from-core.js',
-		external: [
-			'ckeditor5'
-		]
-	} );
-
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
-	expect( output[ 0 ].code ).toContain( 'export * from "@ckeditor/ckeditor5-core/dist/index.js"' );
-} );
-
-test( 'Replace - export from commercial (browser = false)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-commercial.js' ), 'utf-8' );
-
+test( 'Rewrites package imports to aggregate packages in browser builds', async () => {
 	await mockCoreDependencies();
 	await mockCommercialDependencies();
 
 	const { output } = await build( {
-		input: 'data-for-rewrites-tests/export-from-commercial.js',
-		external: [
-			'ckeditor5',
-			'ckeditor5-premium-features'
-		]
-	} );
-
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-	expect( output[ 0 ].code ).toContain( 'export * from "@ckeditor/ckeditor5-ai/dist/index.js"' );
-} );
-
-test( 'Replace - import from core (browser = true)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-core.js' ), 'utf-8' );
-
-	await mockCoreDependencies();
-
-	const { output } = await build( {
-		input: 'data-for-rewrites-tests/import-from-core.js',
-		external: [
-			'ckeditor5'
-		],
-		browser: true,
-		name: 'ckeditor5-premium-features'
-	} );
-
-	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Plugin } from "ckeditor5"' );
-} );
-
-test( 'Replace - import from core and from commercial (browser = true)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-both.js' ), 'utf-8' );
-
-	await mockCoreDependencies();
-	await mockCommercialDependencies();
-
-	const { output } = await build( {
-		input: 'data-for-rewrites-tests/import-from-both.js',
+		input: 'data-for-aggregate-rewrites-tests/import-from-packages.js',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
@@ -525,17 +466,8 @@ test( 'Replace - import from core and from commercial (browser = true)', async (
 		name: 'ckeditor5-premium-features'
 	} );
 
-	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Plugin } from "ckeditor5"' );
-
-	expect( inputFileContent ).toContain( 'import { Command } from \'@ckeditor/ckeditor5-core\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Command } from "ckeditor5"' );
-
-	expect( inputFileContent ).toContain( 'import { AIAssistant } from \'@ckeditor/ckeditor5-ai\'' );
 	expect( output[ 0 ].code ).toContain( 'import { AIAssistant } from "ckeditor5-premium-features"' );
-
-	expect( inputFileContent ).toContain( 'import { Users } from \'ckeditor5-collaboration/src/collaboration-core.js\'' );
-	expect( output[ 0 ].code ).toContain( 'import { Users } from "ckeditor5-premium-features"' );
 } );
 
 test( 'should not throw when processing a file including a dynamic import expression', async () => {

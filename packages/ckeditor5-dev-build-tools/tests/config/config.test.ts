@@ -6,7 +6,7 @@
 import { test, expect } from 'vitest';
 import { getRolldownConfig } from '../../src/config.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
-import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown';
+import type { OutputOptions, Plugin } from 'rolldown';
 
 type Options = Parameters<typeof getRolldownConfig>[0];
 
@@ -16,7 +16,6 @@ const defaults: Options = {
 	tsconfig: '',
 	banner: '',
 	external: [],
-	rewrite: [],
 	globals: [],
 	declarations: false,
 	translations: '',
@@ -31,16 +30,6 @@ const defaults: Options = {
 
 function getConfig( config: Partial<Options> = {} ): ReturnType<typeof getRolldownConfig> {
 	return getRolldownConfig( Object.assign( {}, defaults, config ) );
-}
-
-function getOutputPath( config: RolldownOptions, id: string ): string {
-	const paths = ( config.output as OutputOptions ).paths;
-
-	if ( typeof paths === 'function' ) {
-		return paths( id );
-	}
-
-	return paths?.[ id ] ?? id;
 }
 
 test( '--input', async () => {
@@ -117,12 +106,8 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 	} );
 
 	expect( ( config.external as Function )( 'ckeditor5' ) ).toBe( true );
-	expect( ( config.external as Function )( 'ckeditor5/src/ui.js' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-core' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-code-block/theme/codeblock.css' ) ).toBe( false );
-
-	expect( getOutputPath( config, 'ckeditor5/src/ui.js' ) ).toBe( '@ckeditor/ckeditor5-ui/dist/index.js' );
-	expect( getOutputPath( config, '@ckeditor/ckeditor5-core' ) ).toBe( '@ckeditor/ckeditor5-core/dist/index.js' );
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
@@ -143,12 +128,9 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	} );
 
 	expect( ( config.external as Function )( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( ( config.external as Function )( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
+	expect( ( config.external as Function )( 'ckeditor5-collaboration' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 	expect( ( config.external as Function )( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
-
-	expect( getOutputPath( config, 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( 'ckeditor5-collaboration/dist/index.js' );
-	expect( getOutputPath( config, '@ckeditor/ckeditor5-case-change' ) ).toBe( '@ckeditor/ckeditor5-case-change/dist/index.js' );
 } );
 
 test( '--external rewrites CKEditor paths to aggregate packages in browser builds', async () => {
@@ -180,19 +162,10 @@ test( '--external rewrites CKEditor paths to aggregate packages in browser build
 		browser: true
 	} );
 
-	expect( getOutputPath( config, 'ckeditor5/src/core.js' ) ).toBe( 'ckeditor5' );
-	expect( getOutputPath( config, '@ckeditor/ckeditor5-core' ) ).toBe( 'ckeditor5' );
-	expect( getOutputPath( config, 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( 'ckeditor5-premium-features' );
-	expect( getOutputPath( config, '@ckeditor/ckeditor5-ai' ) ).toBe( 'ckeditor5-premium-features' );
-} );
+	const paths = ( config.output as OutputOptions ).paths as Function;
 
-test( '--rewrite maps output paths', async () => {
-	const config = await getConfig( {
-		rewrite: [ [ 'dependency', 'dependency/dist/index.js' ] ]
-	} );
-
-	expect( getOutputPath( config, 'dependency' ) ).toBe( 'dependency/dist/index.js' );
-	expect( getOutputPath( config, 'unmatched-dependency' ) ).toBe( 'unmatched-dependency' );
+	expect( paths( '@ckeditor/ckeditor5-core' ) ).toBe( 'ckeditor5' );
+	expect( paths( '@ckeditor/ckeditor5-ai' ) ).toBe( 'ckeditor5-premium-features' );
 } );
 
 test( '--external doesn\'t fail when "ckeditor5-premium-features" is not installed', async () => {

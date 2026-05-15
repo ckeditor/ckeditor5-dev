@@ -26,7 +26,6 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 		tsconfig,
 		banner,
 		external,
-		rewrite,
 		declarations,
 		translations,
 		sourceMap,
@@ -36,12 +35,12 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 	} = options;
 
 	/**
-	 * Until we deprecate the old installation methods, integrators can use either old import paths
-	 * (e.g. "@ckeditor/ckeditor5-core", "ckeditor5/src/core", etc.) or the new one (e.g. "ckeditor5")
-	 * in their source code. To make this work with the new installation methods, the `external` array
-	 * must be extended to include all packages that make up "ckeditor5" and "ckeditor5-premium-features"
-	 * whenever any of them are present in that array. Then, using the output path mapping,
-	 * we replace the old import paths with the new one.
+	 * Until we deprecate the old installation methods, integrators can use either package imports
+	 * (e.g. "@ckeditor/ckeditor5-core") or aggregate imports (e.g. "ckeditor5") in their source code.
+	 * To make this work with the new installation methods, the `external` array must be extended
+	 * to include all packages that make up "ckeditor5" and "ckeditor5-premium-features" whenever
+	 * any of them are present in that array. Then, in browser builds, using the output path mapping,
+	 * we replace package imports with the aggregate package imports.
 	 *
 	 * Example: When "ckeditor5" is added to the "external" array, it will be extended to also include
 	 * "@ckeditor/ckeditor5-core", "@ckeditor/ckeditor5-table" and any other package included in the "ckeditor5" bundle.
@@ -55,7 +54,6 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ?
 		getPackageDependencies( 'ckeditor5-premium-features' ) :
 		[];
-	const configuredRewrites = new Map( rewrite );
 	const coreRewriteSet = new Set( coreRewrites );
 	const commercialRewriteSet = new Set( commercialRewrites );
 	const hasTsconfig = !!tsconfig && existsSync( tsconfig );
@@ -96,12 +94,21 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 				annotation: true,
 				jsdoc: !minify
 			},
-			paths: id => getOutputPath( id, {
-				browser,
-				configuredRewrites,
-				coreRewriteSet,
-				commercialRewriteSet
-			} )
+			paths: id => {
+				if ( !browser ) {
+					return id;
+				}
+
+				if ( coreRewriteSet.has( id ) ) {
+					return 'ckeditor5';
+				}
+
+				if ( commercialRewriteSet.has( id ) ) {
+					return 'ckeditor5-premium-features';
+				}
+
+				return id;
+			}
 		},
 		experimental: {
 			nativeMagicString: true,
@@ -184,52 +191,6 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 			)
 		]
 	} );
-}
-
-/**
- * Maps external module IDs to paths emitted in generated bundles.
- */
-function getOutputPath(
-	id: string,
-	{
-		browser,
-		configuredRewrites,
-		coreRewriteSet,
-		commercialRewriteSet
-	}: {
-		browser: boolean;
-		configuredRewrites: Map<string, string>;
-		coreRewriteSet: Set<string>;
-		commercialRewriteSet: Set<string>;
-	}
-): string {
-	const configuredRewrite = configuredRewrites.get( id );
-
-	if ( configuredRewrite !== undefined ) {
-		return configuredRewrite;
-	}
-
-	const coreSourceImport = id.match( /ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/ );
-
-	if ( coreSourceImport ) {
-		return browser ? 'ckeditor5' : `@ckeditor/ckeditor5-${ coreSourceImport[ 1 ] }/dist/index.js`;
-	}
-
-	const commercialSourceImport = id.match( /ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/ );
-
-	if ( commercialSourceImport ) {
-		return browser ? 'ckeditor5-premium-features' : 'ckeditor5-collaboration/dist/index.js';
-	}
-
-	if ( coreRewriteSet.has( id ) ) {
-		return browser ? 'ckeditor5' : `${ id }/dist/index.js`;
-	}
-
-	if ( commercialRewriteSet.has( id ) ) {
-		return browser ? 'ckeditor5-premium-features' : `${ id }/dist/index.js`;
-	}
-
-	return id;
 }
 
 /**

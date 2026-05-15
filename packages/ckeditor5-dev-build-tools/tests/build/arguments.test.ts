@@ -252,14 +252,6 @@ test( '.globals (empty object)', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { globals: {} } ) );
 } );
 
-test( '.rewrite', async () => {
-	const spy = getConfigMock();
-
-	await build( { rewrite: [ [ 'foo', 'bar' ] ] } );
-
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { rewrite: [ [ 'foo', 'bar' ] ] } ) );
-} );
-
 test( '.declarations', async () => {
 	const spy = getConfigMock();
 

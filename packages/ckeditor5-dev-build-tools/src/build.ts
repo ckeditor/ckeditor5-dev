@@ -22,7 +22,6 @@ export interface BuildOptions {
 	globals: GlobalsOption | Array<string>;
 	banner: string;
 	external: Array<string>;
-	rewrite: Array<[string, string]>;
 	declarations: boolean;
 	translations: string;
 	sourceMap: boolean;
@@ -41,7 +40,6 @@ export const defaultOptions: BuildOptions = {
 	globals: {},
 	banner: '',
 	external: [],
-	rewrite: [],
 	declarations: false,
 	translations: '',
 	sourceMap: false,
