@@ -9,13 +9,14 @@ import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin.js';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
 import getDefinitionsFromFile from '../../../lib/utils/getdefinitionsfromfile.js';
+import getProtobufJsInquireWebpackRule from '../../../lib/utils/getprotobufjsinquirewebpackrule.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( '../../../lib/utils/getdefinitionsfromfile.js' );
+vi.mock( '../../../lib/utils/getprotobufjsinquirewebpackrule.js' );
 vi.mock( '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin', () => ( {
 	default: class TreatWarningsAsErrorsWebpackPlugin {}
 } ) );
-
 describe( 'getWebpackConfigForAutomatedTests()', () => {
 	it( 'should return basic webpack configuration object', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
@@ -39,6 +40,12 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 		expect( webpackConfig.devtool ).to.equal( undefined );
 		expect( webpackConfig.output ).to.have.property( 'devtoolModuleFilenameTemplate' );
+	} );
+
+	it( 'should add the @protobufjs/inquire webpack rule', () => {
+		getWebpackConfigForAutomatedTests( {} );
+
+		expect( vi.mocked( getProtobufJsInquireWebpackRule ) ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'should aggregate events when running with the enabled watch mode', () => {

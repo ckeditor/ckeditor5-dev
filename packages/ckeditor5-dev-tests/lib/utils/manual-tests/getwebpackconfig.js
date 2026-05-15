@@ -9,6 +9,7 @@ import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import WebpackNotifierPlugin from './webpacknotifierplugin.js';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
+import getProtobufJsInquireWebpackRule from '../getprotobufjsinquirewebpackrule.js';
 
 /**
  * @param {object} options
@@ -68,6 +69,8 @@ export default function getWebpackConfigForManualTests( options ) {
 
 		module: {
 			rules: [
+				getProtobufJsInquireWebpackRule(),
+
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {
@@ -126,4 +129,3 @@ export default function getWebpackConfigForManualTests( options ) {
 
 	return webpackConfig;
 }
-
