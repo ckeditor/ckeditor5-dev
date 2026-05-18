@@ -12,6 +12,7 @@ import type { BuildOptions } from './build.js';
 import { addBanner } from './plugins/banner.js';
 import { bundleCss } from './plugins/bundleCss.js';
 import { declarationFiles } from './plugins/declarations.js';
+import { preservePureAnnotations } from './plugins/preservePureAnnotations.js';
 import { rawImport } from './plugins/rawImport.js';
 import { splitCss } from './plugins/splitCss.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
@@ -94,6 +95,9 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 				annotation: true,
 				jsdoc: !minify
 			},
+			plugins: [
+				preservePureAnnotations()
+			],
 			paths: id => {
 				if ( !browser ) {
 					return id;

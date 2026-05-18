@@ -6,6 +6,7 @@
 import { test, expect, vi, beforeEach } from 'vitest';
 import upath from 'upath';
 import * as Rolldown from 'rolldown';
+import { SourceMapConsumer } from 'source-map';
 import { build } from '../../src/build.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
 
@@ -376,6 +377,32 @@ test( 'Minification doesn\'t remove banner', async () => {
 	} );
 
 	expect( output[ 0 ].code ).toContain( 'TEST BANNER' );
+} );
+
+test( 'Pure annotations preserve the marker used by post-processing tools', async () => {
+	const { output } = await build( {
+		input: 'src/pure-annotation.js',
+		sourceMap: true
+	} );
+	const chunk = output.find( item => item.type === 'chunk' && item.fileName === 'index.js' ) as Rolldown.OutputChunk;
+	const sourceMap = output.find( item => item.type === 'asset' && item.fileName === 'index.js.map' ) as Rolldown.OutputAsset;
+	const sourceMapContent = JSON.parse( sourceMap.source.toString() );
+	const originalSourceIndex = sourceMapContent.sources.findIndex( ( source: string ) => source.endsWith( 'pure-annotation.js' ) );
+	const source = sourceMapContent.sourcesContent[ originalSourceIndex ];
+	const originalLine = source.split( '\n' ).findIndex( ( line: string ) => line.includes( 'factory()' ) ) + 1;
+	const originalColumn = source.split( '\n' )[ originalLine - 1 ].indexOf( 'factory()' );
+	const generatedLine = chunk.code.split( '\n' ).findIndex( line => line.includes( 'factory()' ) ) + 1;
+	const generatedColumn = chunk.code.split( '\n' )[ generatedLine - 1 ]!.indexOf( 'factory()' );
+	const consumer = await new SourceMapConsumer( sourceMapContent );
+	const originalPosition = consumer.originalPositionFor( {
+		line: generatedLine,
+		column: generatedColumn
+	} );
+
+	expect( chunk.code ).toContain( '/* @__PURE__ -- @preserve */ factory()' );
+	expect( originalPosition.source ).toBe( sourceMapContent.sources[ originalSourceIndex ] );
+	expect( originalPosition.line ).toBe( originalLine );
+	expect( originalPosition.column ).toBe( originalColumn );
 } );
 
 /**
