@@ -146,10 +146,10 @@ describe( 'provideNewVersion()', () => {
 			] );
 		} );
 
-		it( 'should suggest premajor alpha for prerelease bump type on latest channel', async () => {
+		it( 'should suggest premajor alpha for premajor bump type on latest channel', async () => {
 			await provideNewVersion( {
 				...defaultOptions,
-				bumpType: 'prerelease',
+				bumpType: 'premajor',
 				releaseType: 'prerelease',
 				releaseChannel: 'latest',
 				version: '1.0.0'
@@ -157,6 +157,44 @@ describe( 'provideNewVersion()', () => {
 
 			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
 			expect( promptCall[ 0 ].default ).toBe( '2.0.0-alpha.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0-alpha.0', value: '2.0.0-alpha.0' },
+				{ name: '1.1.0-alpha.0', value: '1.1.0-alpha.0' },
+				{ name: '1.0.1-alpha.0', value: '1.0.1-alpha.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest preminor alpha for preminor bump type on latest channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'preminor',
+				releaseType: 'prerelease',
+				releaseChannel: 'latest',
+				version: '1.0.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.1.0-alpha.0' );
+			expect( promptCall[ 0 ].choices ).toEqual( [
+				{ name: '2.0.0-alpha.0', value: '2.0.0-alpha.0' },
+				{ name: '1.1.0-alpha.0', value: '1.1.0-alpha.0' },
+				{ name: '1.0.1-alpha.0', value: '1.0.1-alpha.0' },
+				{ name: 'Custom...', value: 'custom' }
+			] );
+		} );
+
+		it( 'should suggest prepatch alpha for prepatch bump type on latest channel', async () => {
+			await provideNewVersion( {
+				...defaultOptions,
+				bumpType: 'prepatch',
+				releaseType: 'prerelease',
+				releaseChannel: 'latest',
+				version: '1.0.0'
+			} );
+
+			const promptCall = vi.mocked( inquirer.prompt ).mock.calls[ 0 ]?.[ 0 ] as any;
+			expect( promptCall[ 0 ].default ).toBe( '1.0.1-alpha.0' );
 			expect( promptCall[ 0 ].choices ).toEqual( [
 				{ name: '2.0.0-alpha.0', value: '2.0.0-alpha.0' },
 				{ name: '1.1.0-alpha.0', value: '1.1.0-alpha.0' },
