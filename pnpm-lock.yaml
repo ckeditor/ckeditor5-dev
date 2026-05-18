@@ -512,6 +512,9 @@ importers:
 
   packages/ckeditor5-dev-utils:
     dependencies:
+      '@types/shelljs':
+        specifier: ^0.10.0
+        version: 0.10.0
       '@types/through2':
         specifier: ^2.0.41
         version: 2.0.41
@@ -1804,6 +1807,9 @@ packages:
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
+
+  '@types/shelljs@0.10.0':
+    resolution: {integrity: sha512-OEfyhE5Ox+FeoHbhrEDwm0kXxntO6nsyMRCFvNsIBHPZu5rV1w2OjPcLclaC/IZ1TlzZPgbeMfwAZEi5N238yQ==}
 
   '@types/sinon-chai@2.7.42':
     resolution: {integrity: sha512-6M+l7agAuaS4iFwC9KtmcGznH4WYTcF3/Jq/m4jZ5/Gm1Rlufc7o7rl1Sb9++U81NliT+mV2Ri6UQziaJi6opw==}
@@ -6627,6 +6633,11 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/semver@7.7.1': {}
+
+  '@types/shelljs@0.10.0':
+    dependencies:
+      '@types/node': 22.19.17
+      fast-glob: 3.3.3
 
   '@types/sinon-chai@2.7.42':
     dependencies:

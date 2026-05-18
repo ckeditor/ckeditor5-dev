@@ -23,6 +23,7 @@
     "dist"
   ],
   "dependencies": {
+    "@types/shelljs": "^0.10.0",
     "@types/through2": "^2.0.41",
     "babel-loader": "^10.1.1",
     "cli-cursor": "^5.0.0",
