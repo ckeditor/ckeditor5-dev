@@ -69,9 +69,7 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 	if ( releaseType === 'prerelease' || releaseType === 'prerelease-promote' ) {
 		// When already on a prerelease channel, continuing or promoting uses the plain `prerelease` bump.
 		// Initiating a prerelease from a stable version uses `premajor` / `preminor` / `prepatch` based on commits.
-		bumpType = semver.prerelease( currentVersion ) ?
-			'prerelease' :
-			`pre${ bumpType }` as ReleaseType;
+		bumpType = semver.prerelease( currentVersion ) ? 'prerelease' : `pre${ bumpType }` as ReleaseType;
 	}
 
 	const areErrorsPresent = !!sections.invalid.entries.length;
