@@ -220,8 +220,8 @@ describe( 'determineNextVersion()', () => {
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
-	it( 'should return a prerelease bump version when releaseType is prerelease', async () => {
-		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-alpha.1' );
+	it( 'should return a premajor bump when initiating a prerelease from stable with breaking changes', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '2.0.0-alpha.0' );
 		options.releaseType = 'prerelease';
 		options.sections = createSectionsWithEntries( {
 			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' },
@@ -230,16 +230,66 @@ describe( 'determineNextVersion()', () => {
 
 		const result = await determineNextVersion( options );
 
-		expect( result ).toBe( '1.0.0-alpha.1' );
+		expect( result ).toBe( '2.0.0-alpha.0' );
 
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
-			bumpType: 'prerelease'
+			bumpType: 'premajor'
 		} ) );
 		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', false );
 	} );
 
+	it( 'should return a preminor bump when initiating a prerelease from stable with only feature entries', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.1.0-alpha.0' );
+		options.releaseType = 'prerelease';
+		options.sections = createSectionsWithEntries( {
+			feature: { entries: [ createEntry( 'New feature' ) ], title: 'Features' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result ).toBe( '1.1.0-alpha.0' );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'preminor'
+		} ) );
+	} );
+
+	it( 'should return a prepatch bump when initiating a prerelease from stable with no breaking/feature entries', async () => {
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.1-alpha.0' );
+		options.releaseType = 'prerelease';
+		options.sections = createSectionsWithEntries( {
+			fix: { entries: [ createEntry( 'A fix' ) ], title: 'Bug fixes' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result ).toBe( '1.0.1-alpha.0' );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prepatch'
+		} ) );
+	} );
+
+	it( 'should return a prerelease bump when continuing a prerelease channel', async () => {
+		mockedDetectReleaseChannel.mockReturnValue( 'alpha' );
+		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-alpha.1' );
+		options.currentVersion = '1.0.0-alpha.0';
+		options.releaseType = 'prerelease';
+		options.sections = createSectionsWithEntries( {
+			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' }
+		} );
+
+		const result = await determineNextVersion( options );
+
+		expect( result ).toBe( '1.0.0-alpha.1' );
+		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
+			bumpType: 'prerelease'
+		} ) );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0-alpha.0', false );
+	} );
+
 	it( 'should call detectReleaseChannel with promotePrerelease=true when releaseType is prerelease-promote', async () => {
+		mockedDetectReleaseChannel.mockReturnValue( 'beta' );
 		mockedProvideNewVersion.mockResolvedValueOnce( '1.0.0-beta.0' );
+		options.currentVersion = '1.0.0-alpha.0';
 		options.releaseType = 'prerelease-promote';
 		options.sections = createSectionsWithEntries( {
 			major: { entries: [ createEntry( 'Major breaking change' ) ], title: 'Major Breaking Changes' }
@@ -251,7 +301,7 @@ describe( 'determineNextVersion()', () => {
 		expect( mockedProvideNewVersion ).toHaveBeenCalledWith( expect.objectContaining( {
 			bumpType: 'prerelease'
 		} ) );
-		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0', true );
+		expect( mockedDetectReleaseChannel ).toHaveBeenCalledWith( '1.0.0-alpha.0', true );
 	} );
 
 	it( 'should set displayValidationWarning to true when invalid entries are present', async () => {

@@ -111,14 +111,13 @@ function createVersionQuestion( options: Options ) {
 function getSuggestedVersion( bumpType: ReleaseType, version: string, releaseChannel: ReleaseChannel ) {
 	if ( bumpType === 'prerelease' && releaseChannel !== 'latest' ) {
 		return semver.inc( version, bumpType, releaseChannel );
-	} else if ( bumpType === 'prerelease' && releaseChannel === 'latest' ) {
-		// Using 'premajor` and `alpha` channel for a case, when introducing a prerelease for the next major.
-		// E.g. 1.0.0 -> 2.0.0-alpha.0.
-
-		return semver.inc( version, 'premajor', 'alpha' );
-	} else {
-		return semver.inc( version, bumpType );
 	}
+
+	if ( bumpType === 'premajor' || bumpType === 'preminor' || bumpType === 'prepatch' ) {
+		return semver.inc( version, bumpType, 'alpha' );
+	}
+
+	return semver.inc( version, bumpType );
 }
 
 function getChoices( {
@@ -134,10 +133,11 @@ function getChoices( {
 } ) {
 	const proposedVersions: Array<string> = [];
 	const preReleaseChannels = [ 'alpha', 'beta', 'rc' ];
+	const preInitialBumpTypes: Array<ReleaseType> = [ 'premajor', 'preminor', 'prepatch' ];
 	const validPromotionChannels = preReleaseChannels.filter( ( value, index, array ) => index >= array.indexOf( releaseChannel ) );
 
 	// 6.0.0 => Latest (stable) release (7.0.0 | 6.1.0 | 6.0.1)
-	if ( bumpType !== 'prerelease' && releaseType === 'latest' && releaseChannel === 'latest' ) {
+	if ( releaseType === 'latest' && releaseChannel === 'latest' ) {
 		proposedVersions.push(
 			semver.inc( version, 'major' )!,
 			semver.inc( version, 'minor' )!,
@@ -146,7 +146,7 @@ function getChoices( {
 	}
 
 	// 6.0.0 => Pre-release (7.0.0-alpha.0 | 6.1.0-alpha.0 | 6.0.1-alpha.0)
-	if ( bumpType === 'prerelease' && releaseType === 'prerelease' && releaseChannel === 'latest' ) {
+	if ( preInitialBumpTypes.includes( bumpType ) && releaseType === 'prerelease' && releaseChannel === 'latest' ) {
 		proposedVersions.push(
 			semver.inc( version, 'premajor', 'alpha' )!,
 			semver.inc( version, 'preminor', 'alpha' )!,
@@ -155,7 +155,7 @@ function getChoices( {
 	}
 
 	// 6.0.0-alpha.0 => Latest (stable) release (6.0.0)
-	if ( bumpType !== 'prerelease' && releaseType === 'latest' && preReleaseChannels.includes( releaseChannel ) ) {
+	if ( releaseType === 'latest' && preReleaseChannels.includes( releaseChannel ) ) {
 		proposedVersions.push(
 			semver.inc( version, 'release' )!
 		);
