@@ -17,22 +17,36 @@ const externals = [
 	...Object.keys( packageJson.peerDependencies || {} )
 ];
 
-export default defineConfig( {
-	input: {
-		index: 'src/index.ts',
-		template: 'src/template.ts'
-	},
+const sharedConfig = defineConfig( {
 	platform: 'node',
-	output: {
-		cleanDir: true,
-		format: 'esm',
-		dir: 'dist',
-		assetFileNames: '[name][extname]'
-	},
-	external: id => externals.some( name => id.startsWith( name ) ),
-	plugins: [
-		declarationFiles( {
-			sourceDirectory: 'src'
-		} )
-	]
+	external: id => externals.some( name => id.startsWith( name ) )
 } );
+
+export default defineConfig( [
+	{
+		input: 'src/index.ts',
+		output: {
+			cleanDir: true,
+			format: 'esm',
+			dir: 'dist',
+			entryFileNames: 'index.js',
+			assetFileNames: '[name][extname]'
+		},
+		plugins: [
+			declarationFiles( {
+				sourceDirectory: 'src'
+			} )
+		],
+		...sharedConfig
+	},
+	{
+		input: 'src/template.ts',
+		output: {
+			format: 'esm',
+			dir: 'dist',
+			entryFileNames: 'template.js',
+			assetFileNames: '[name][extname]'
+		},
+		...sharedConfig
+	}
+] );
