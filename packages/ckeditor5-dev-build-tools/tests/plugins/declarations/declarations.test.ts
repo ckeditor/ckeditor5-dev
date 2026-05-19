@@ -63,19 +63,37 @@ test( 'Emits declaration files for TypeScript source files', async () => {
 } );
 
 test( 'Throws formatted declaration generation errors', async () => {
-	isolatedDeclarationMock.mockResolvedValue( {
-		errors: [ {
-			message: 'Declaration error',
-			codeframe: 'const value = unknown;'
-		} ],
-		code: ''
-	} );
+	isolatedDeclarationMock
+		.mockResolvedValueOnce( {
+			errors: [ {
+				message: 'Declaration error',
+				codeframe: 'const value = unknown;'
+			} ],
+			code: ''
+		} )
+		.mockResolvedValueOnce( {
+			errors: [ {
+				message: 'Second declaration error',
+				codeframe: 'const secondValue = unknown;'
+			} ],
+			code: ''
+		} )
+		.mockResolvedValue( {
+			errors: [],
+			code: 'export declare const value: string;'
+		} );
 
 	const plugin = declarationFiles( {
 		sourceDirectory: join( import.meta.dirname, './fixtures' )
 	} );
+	const context = createContext();
 
-	await expect( runGenerateBundle( plugin, createContext() ) ).rejects.toThrow(
-		/Could not generate a declaration file for ".+"\.\nDeclaration error\nconst value = unknown;/
+	await expect( runGenerateBundle( plugin, context ) ).rejects.toThrow(
+		new RegExp( [
+			'Could not generate a declaration file for ".+"\\.\\nDeclaration error\\nconst value = unknown;',
+			'Could not generate a declaration file for ".+"\\.\\nSecond declaration error\\nconst secondValue = unknown;'
+		].join( '\\n\\n' ) )
 	);
+
+	expect( context.emitFile ).not.toHaveBeenCalled();
 } );
