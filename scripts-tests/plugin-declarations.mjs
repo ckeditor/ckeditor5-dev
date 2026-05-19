@@ -100,15 +100,22 @@ describe( 'scripts/plugin-declarations', () => {
 	} );
 
 	it( 'throws an error when declaration generation reports problems', async () => {
-		vi.mocked( globSync ).mockReturnValue( [ 'broken.ts' ] );
+		vi.mocked( globSync ).mockReturnValue( [ 'broken.ts', 'another-broken.ts' ] );
 		vi.mocked( readFileSync ).mockReturnValue( 'export const broken = true;' );
-		vi.mocked( isolatedDeclaration ).mockResolvedValue( {
-			errors: [
-				{ message: 'Broken declaration', codeframe: 'line 1' },
-				{ message: 'Another issue' }
-			],
-			code: ''
-		} );
+		vi.mocked( isolatedDeclaration )
+			.mockResolvedValueOnce( {
+				errors: [
+					{ message: 'Broken declaration', codeframe: 'line 1' },
+					{ message: 'Another issue' }
+				],
+				code: ''
+			} )
+			.mockResolvedValueOnce( {
+				errors: [
+					{ message: 'Second broken declaration', codeframe: 'line 2' }
+				],
+				code: ''
+			} );
 
 		const plugin = declarationFilesPlugin();
 		const emitFile = vi.fn();
@@ -117,7 +124,8 @@ describe( 'scripts/plugin-declarations', () => {
 		} );
 
 		await expect( plugin.generateBundle.call( { emitFile, error } ) ).rejects.toThrow(
-			'Could not generate a declaration file for "broken.ts".\nBroken declaration\nline 1\n\nAnother issue'
+			'Could not generate a declaration file for "broken.ts".\nBroken declaration\nline 1\n\nAnother issue\n\n' +
+			'Could not generate a declaration file for "another-broken.ts".\nSecond broken declaration\nline 2'
 		);
 
 		expect( emitFile ).not.toHaveBeenCalled();

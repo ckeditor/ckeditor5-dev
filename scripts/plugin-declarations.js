@@ -34,7 +34,7 @@ export function declarationFilesPlugin() {
 		async generateBundle() {
 			const sourceFilePaths = getTypeScriptSourceFiles( sourceDirectoryPath );
 
-			await Promise.all( sourceFilePaths.map( async sourceFilePath => {
+			const declarationFiles = await Promise.all( sourceFilePaths.map( async sourceFilePath => {
 				const filename = path.relative( sourceDirectoryPath, sourceFilePath );
 				const source = readFileSync( sourceFilePath, 'utf8' );
 				const { errors, code } = await isolatedDeclaration( filename, source, {
@@ -42,20 +42,35 @@ export function declarationFilesPlugin() {
 					stripInternal: true
 				} );
 
-				if ( errors.length ) {
-					const errorMessage = errors
+				return {
+					fileName: getDeclarationFileName( filename ),
+					filename,
+					errors,
+					source: code
+				};
+			} ) );
+
+			const errorMessages = declarationFiles
+				.filter( declarationFile => declarationFile.errors.length )
+				.map( declarationFile => {
+					const errors = declarationFile.errors
 						.map( error => [ error.message, error.codeframe ].filter( Boolean ).join( '\n' ) )
 						.join( '\n\n' );
 
-					this.error( `Could not generate a declaration file for "${ filename }".\n${ errorMessage }` );
-				}
+					return `Could not generate a declaration file for "${ declarationFile.filename }".\n${ errors }`;
+				} );
 
+			if ( errorMessages.length ) {
+				this.error( errorMessages.join( '\n\n' ) );
+			}
+
+			for ( const declarationFile of declarationFiles ) {
 				this.emitFile( {
 					type: 'asset',
-					fileName: getDeclarationFileName( filename ),
-					source: code
+					fileName: declarationFile.fileName,
+					source: declarationFile.source
 				} );
-			} ) );
+			}
 		}
 	};
 }
