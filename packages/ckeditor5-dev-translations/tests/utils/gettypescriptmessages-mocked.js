@@ -26,7 +26,7 @@ describe( 'getTypeScriptMessages() module resolution failures', () => {
 			};
 		} );
 
-		const fixturesPath = upath.join( import.meta.dirname, '..', '_fixtures', 'getsourcemessages' );
+		const fixturesPath = upath.join( import.meta.dirname, '..', 'fixtures', 'getsourcemessages' );
 		const sourceFilePath = upath.join( fixturesPath, 'ckeditor5-method-calls', 'src', 'messages.ts' );
 		const { default: getTypeScriptMessages } = await import( '../../lib/utils/gettypescriptmessages.js' );
 

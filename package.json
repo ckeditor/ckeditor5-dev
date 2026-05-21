@@ -30,7 +30,9 @@
     "lint-staged": "^16.4.0",
     "listr2": "^8.3.3",
     "minimist": "^1.2.8",
+    "oxc-transform": "^0.112.0",
     "semver": "^7.7.4",
+    "typescript": "5.5.4",
     "upath": "^2.0.1",
     "vite": ">=7.3.2 <8",
     "vitest": "^4.1.2"
@@ -46,6 +48,7 @@
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
     "lint": "eslint --concurrency=4",
+    "typecheck": "tsc",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
     "check-dependencies": "ckeditor5-dev-dependency-checker"

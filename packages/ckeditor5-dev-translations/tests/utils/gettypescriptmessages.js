@@ -8,7 +8,7 @@ import upath from 'upath';
 import getTypeScriptMessages from '../../lib/utils/gettypescriptmessages.js';
 
 describe( 'getTypeScriptMessages()', () => {
-	const fixturesPath = upath.join( import.meta.dirname, '..', '_fixtures', 'getsourcemessages' );
+	const fixturesPath = upath.join( import.meta.dirname, '..', 'fixtures', 'getsourcemessages' );
 	const packagePath = upath.join( fixturesPath, 'ckeditor5-method-calls' );
 	const sourceFilePath = upath.join( packagePath, 'src', 'messages.ts' );
 	const advancedSourceFilePath = upath.join( packagePath, 'src', 'advanced-messages.ts' );

@@ -9,8 +9,11 @@ import upath from 'upath';
 import fs from 'node:fs/promises';
 import pacote from 'pacote';
 
-export const manifest = cacheLessPacoteFactory( pacote.manifest );
-export const packument = cacheLessPacoteFactory( pacote.packument );
+type CacheLessPacoteMethod<T extends ( ...args: Array<any> ) => any> =
+	( ...args: Parameters<T> ) => Promise<Awaited<ReturnType<T>>>;
+
+export const manifest: CacheLessPacoteMethod<typeof pacote.manifest> = cacheLessPacoteFactory( pacote.manifest );
+export const packument: CacheLessPacoteMethod<typeof pacote.packument> = cacheLessPacoteFactory( pacote.packument );
 
 /**
  * Creates a version of a `pacote` function that doesn't use caching.

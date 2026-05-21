@@ -1,18 +1,28 @@
 {
   "compilerOptions": {
+    // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
     "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": [ "ES2022" ],
+    "types": [ "node", "vitest/globals" ],
     "moduleDetection": "force",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "declaration": true,
     "isolatedModules": true,
+    "isolatedDeclarations": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "noEmit": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true
+  },
+  "include": [
+    "packages/**/*.ts"
+  ],
+  "exclude": [
+    "**/fixtures"
+  ]
 }
