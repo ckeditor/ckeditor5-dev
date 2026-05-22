@@ -6,7 +6,7 @@ CKEditor 5 CI utilities
 
 Utils for [CKEditor 5](https://ckeditor.com) CI builds.
 
-Contains tools for sending Slack notifications by Circle CI.
+Contains tools for sending Slack notifications from Circle CI and GitHub Actions workflows.
 
 ## Available scripts
 
@@ -109,6 +109,31 @@ These commands accept a mix of environment variables and command line arguments.
   - `--pipeline-id` &mdash Value of Circle's `<< pipeline.number >>` parameter ([read more](https://circleci.com/docs/guides/orchestrate/pipeline-variables/#pipeline-values)).
   - `--trigger-repository-slug` &mdash; `<org>/<repo>` to construct the commit URL when provided with `--trigger-commit-hash`. Useful when a pipeline was triggered via a different repository.
   - `--trigger-commit-hash` &mdash; Commit SHA to construct the commit URL. Useful when a pipeline was triggered via a different repository.
+  - `--hide-author` &mdash; `"true"`/`"false"` to hide the author in Slack.
+
+- ⚙️ **`ckeditor5-dev-ci-notify-github-actions-status`**
+
+  Sends a Slack notification summarizing the current GitHub Actions workflow run.
+  Designed to be called from a step (or dedicated job) gated by `if: failure()`; the script does not check the workflow status before sending the notification.
+  Fetches the commit author and workflow run start time via the GitHub API (works with private repositories).
+
+  **Environment variables:**
+  - `CKE5_GITHUB_TOKEN` &mdash; GitHub token with the `repo` scope, used to fetch commit author and workflow run metadata.
+  - `CKE5_SLACK_WEBHOOK_URL` &mdash; Incoming Webhook URL for the Slack channel receiving notifications.
+
+  **GitHub-provided variables:**
+  - `GITHUB_REPOSITORY` &mdash; `<owner>/<repo>` of the current workflow.
+  - `GITHUB_REF_NAME` &mdash; Branch or tag name that triggered the workflow.
+  - `GITHUB_SHA` &mdash; Commit SHA of the current run.
+  - `GITHUB_RUN_ID` &mdash; ID of the current workflow run.
+  - `GITHUB_RUN_ATTEMPT` &mdash; *(Optional)* Run attempt number; included in the Slack message when greater than `1`.
+  - `GITHUB_WORKFLOW` &mdash; *(Optional)* Display name of the current workflow.
+  - `GITHUB_SERVER_URL` &mdash; *(Optional)* Server URL; defaults to `https://github.com`.
+  - `GITHUB_API_URL` &mdash; *(Optional)* API base URL; defaults to `https://api.github.com`.
+
+  **Parameters:**
+  - `--trigger-repository-slug` &mdash; `<org>/<repo>` to construct the commit URL when provided with `--trigger-commit-hash`. Useful when a workflow was triggered via a different repository.
+  - `--trigger-commit-hash` &mdash; Commit SHA to construct the commit URL. Useful when a workflow was triggered via a different repository.
   - `--hide-author` &mdash; `"true"`/`"false"` to hide the author in Slack.
 
 - ⚙️ **`ckeditor5-dev-ci-trigger-circle-build`**
