@@ -19,12 +19,13 @@ const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
  * @param {string} options.buildId
  * @param {string} options.githubToken
  * @param {string} options.triggeringCommitUrl
+ * @param {string} [options.apiUrl]
  * @param {number} options.startTime
  * @param {number} options.endTime
  * @param {boolean} options.shouldHideAuthor
  */
 export default async function formatMessage( options ) {
-	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
+	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken, options.apiUrl );
 	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
 
 	return {
@@ -178,10 +179,11 @@ function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
  *
  * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
  * @param {string} githubToken Github token used for authorization a request,
+ * @param {string} [apiUrl] Optional base URL of the GitHub API.
  * @returns {Promise.<object>}
  */
-function getCommitDetails( triggeringCommitUrl, githubToken ) {
-	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl );
+function getCommitDetails( triggeringCommitUrl, githubToken, apiUrl ) {
+	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl, apiUrl );
 	const options = {
 		method: 'GET',
 		credentials: 'include',
@@ -204,8 +206,15 @@ function getCommitDetails( triggeringCommitUrl, githubToken ) {
  * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
  *
  * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
+ * @param {string} [apiUrl] Optional base URL of the GitHub API.
  * @returns {string}
  */
-function getGithubApiUrl( triggeringCommitUrl ) {
+function getGithubApiUrl( triggeringCommitUrl, apiUrl ) {
+	if ( apiUrl ) {
+		const [ , owner, repo, , sha ] = new URL( triggeringCommitUrl ).pathname.split( '/' );
+
+		return `${ apiUrl.replace( /\/$/, '' ) }/repos/${ owner }/${ repo }/commits/${ sha }`;
+	}
+
 	return triggeringCommitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );
 }
