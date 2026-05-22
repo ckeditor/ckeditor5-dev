@@ -96,6 +96,7 @@ async function notifyGitHubActionsStatus() {
 		buildId: `#${ GITHUB_RUN_ID }${ runAttempt > 1 ? ` (attempt ${ runAttempt })` : '' }`,
 		githubToken: CKE5_GITHUB_TOKEN,
 		triggeringCommitUrl: getTriggeringCommitUrl( serverUrl ),
+		apiUrl,
 		startTime: startedAtIso ? Math.ceil( new Date( startedAtIso ).getTime() / 1000 ) : null,
 		endTime: Math.ceil( Date.now() / 1000 ),
 		shouldHideAuthor: isTrueLike( cliArguments[ 'hide-author' ] )
