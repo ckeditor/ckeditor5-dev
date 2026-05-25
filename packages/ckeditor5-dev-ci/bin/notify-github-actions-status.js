@@ -76,8 +76,8 @@ notifyGitHubActionsStatus().catch( err => {
 async function notifyGitHubActionsStatus() {
 	assertRequiredEnvironmentVariables();
 
-	const serverUrl = GITHUB_SERVER_URL || 'https://github.com';
-	const apiUrl = GITHUB_API_URL || 'https://api.github.com';
+	const serverUrl = ( GITHUB_SERVER_URL || 'https://github.com' ).replace( /\/$/, '' );
+	const apiUrl = ( GITHUB_API_URL || 'https://api.github.com' ).replace( /\/$/, '' );
 	const [ repositoryOwner, repositoryName ] = GITHUB_REPOSITORY.split( '/' );
 	const runAttempt = GITHUB_RUN_ATTEMPT ? Number( GITHUB_RUN_ATTEMPT ) : 1;
 
