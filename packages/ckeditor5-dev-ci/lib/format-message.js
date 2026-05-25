@@ -5,8 +5,6 @@
 
 import { bots, members } from './data/index.js';
 
-const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
-
 /**
  * @param {object} options
  * @param {string} options.slackMessageUsername
@@ -163,14 +161,16 @@ function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
 		return '_Unavailable._';
 	}
 
-	const [ , repoOwner, repoName ] = triggeringCommitUrl.match( REPOSITORY_REGEXP );
+	const url = new URL( triggeringCommitUrl );
+	const serverUrl = url.origin;
+	const [ , repoOwner, repoName ] = url.pathname.split( '/' );
 
 	return commitMessage
 		.replace( / #(\d+)/g, ( _, issueId ) => {
-			return ` <https://github.com/${ repoOwner }/${ repoName }/issues/${ issueId }|#${ issueId }>`;
+			return ` <${ serverUrl }/${ repoOwner }/${ repoName }/issues/${ issueId }|#${ issueId }>`;
 		} )
 		.replace( /([\w-]+\/[\w-]+)#(\d+)/g, ( _, repoSlug, issueId ) => {
-			return `<https://github.com/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
+			return `<${ serverUrl }/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
 		} );
 }
 
