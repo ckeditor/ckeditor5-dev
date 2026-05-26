@@ -201,6 +201,37 @@ test( 'Resolves absolute and relative CSS imports without Rolldown results', asy
 	} as NormalizedOutputOptions, {} );
 } );
 
+test( 'Reads transformed CSS using normalized path separators', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		expect( options.resolver.read( 'D:\\src\\components\\nested\\local.css?inline' ) )
+			.toBe( '.transformed {}' );
+
+		return {
+			code: Buffer.from( '' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+
+	const transform = typeof plugin.transform == 'function' ? plugin.transform : plugin.transform!.handler;
+
+	transform.call(
+		createContext() as any,
+		'.transformed {}',
+		'D:/src/components/nested/local.css?inline',
+		{ moduleType: 'js' }
+	);
+
+	await runGenerateBundle( plugin, createContext(), {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, {} );
+} );
+
 test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		await expect( options.resolver.resolve( 'package/theme.css', '/src/source.css' ) )

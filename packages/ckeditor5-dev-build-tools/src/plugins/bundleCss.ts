@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { bundleAsync, Features, type Warning as LightningCssWarning } from 'lightningcss';
 import type { OutputBundle, OutputChunk, Plugin, PluginContext, NormalizedOutputOptions } from 'rolldown';
+import upath from 'upath';
 
 export interface RollupBundleCssOptions {
 
@@ -45,7 +46,7 @@ const PROTOCOL_RELATIVE_URL_REGEXP = /^\/\//;
  * Removes query strings and hash fragments from the module id.
  */
 function normalizeId( id: string ): string {
-	return id.replace( QUERY_AND_HASH_REGEXP, '' );
+	return upath.normalizeSafe( id.replace( QUERY_AND_HASH_REGEXP, '' ) );
 }
 
 /**
