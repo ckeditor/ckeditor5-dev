@@ -78,7 +78,6 @@ function createPuppeteerOptions( {
 		args: [
 			'--disable-extensions', // Disables all browser extensions.
 			'--disable-plugins', // Disables all plugins.
-			'--disable-gpu', // Disables GPU hardware acceleration.
 			'--disable-software-rasterizer', // Disables software fallback for GPU rendering.
 			'--disable-renderer-backgrounding', // Prevents throttling of background tabs renderers.
 			'--disable-background-timer-throttling', // Stops throttling of JavaScript timers in background tabs.
