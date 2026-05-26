@@ -4,6 +4,7 @@
  */
 
 import { Buffer } from 'node:buffer';
+import { resolve } from 'node:path';
 import { expect, test, vi } from 'vitest';
 import type { ModuleInfo, NormalizedOutputOptions, OutputBundle, OutputChunk, PartialResolvedId } from 'rolldown';
 
@@ -181,7 +182,7 @@ test( 'Resolves absolute and relative CSS imports without Rolldown results', asy
 		expect( await options.resolver.resolve( '/styles/absolute.css', '/src/components/source.css' ) )
 			.toBe( '/styles/absolute.css' );
 		expect( await options.resolver.resolve( './nested/local.css', '/src/components/source.css?inline' ) )
-			.toBe( '/src/components/nested/local.css' );
+			.toBe( resolve( '/src/components', './nested/local.css' ) );
 
 		return {
 			code: Buffer.from( '' ),
