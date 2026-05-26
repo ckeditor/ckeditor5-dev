@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "55.6.0",
+  "version": "55.6.1",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -34,11 +34,10 @@
     "is-interactive": "^2.0.0",
     "lightningcss": "^1.32.0",
     "mini-css-extract-plugin": "^2.10.2",
-    "mocha": "^11.7.5",
     "pacote": "^21.5.0",
     "raw-loader": "^4.0.2",
     "shelljs": "^0.10.0",
-    "simple-git": "^3.33.0",
+    "simple-git": "^3.36.0",
     "style-loader": "^4.0.0",
     "through2": "^4.0.2",
     "upath": "^2.0.1"
@@ -62,7 +61,6 @@
     "del",
     "esbuild-loader",
     "raw-loader",
-    "style-loader",
-    "mocha"
+    "style-loader"
   ]
 }

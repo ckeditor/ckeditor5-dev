@@ -4,7 +4,7 @@
  */
 
 import { styleText } from 'node:util';
-import { type ReleaseType } from 'semver';
+import semver, { type ReleaseType } from 'semver';
 import { provideNewVersion } from './providenewversion.js';
 import { logInfo } from './loginfo.js';
 import { detectReleaseChannel } from './detectreleasechannel.js';
@@ -60,12 +60,16 @@ export async function determineNextVersion( options: DetermineNextVersionOptions
 
 	let bumpType: ReleaseType = 'patch';
 
-	if ( releaseType === 'prerelease' || releaseType === 'prerelease-promote' ) {
-		bumpType = 'prerelease';
-	} else if ( sections.major.entries.length || sections.breaking.entries.length ) {
+	if ( sections.major.entries.length || sections.breaking.entries.length ) {
 		bumpType = 'major';
 	} else if ( sections.minor.entries.length || sections.feature.entries.length ) {
 		bumpType = 'minor';
+	}
+
+	if ( releaseType === 'prerelease' || releaseType === 'prerelease-promote' ) {
+		// When already on a prerelease channel, continuing or promoting uses the plain `prerelease` bump.
+		// Initiating a prerelease from a stable version uses `premajor` / `preminor` / `prepatch` based on commits.
+		bumpType = semver.prerelease( currentVersion ) ? 'prerelease' : `pre${ bumpType }` as ReleaseType;
 	}
 
 	const areErrorsPresent = !!sections.invalid.entries.length;

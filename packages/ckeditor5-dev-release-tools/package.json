@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "55.6.0",
+  "version": "55.6.1",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -29,7 +29,7 @@
     "inquirer": "^12.11.1",
     "semver": "^7.7.4",
     "shell-escape": "^0.2.0",
-    "simple-git": "^3.33.0",
+    "simple-git": "^3.36.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
