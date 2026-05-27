@@ -30,7 +30,7 @@
     "@babel/core": "^7.29.0",
     "@ckeditor/ckeditor5-dev-translations": "workspace:*",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
-    "@ckeditor/ckeditor5-inspector": "^5.0.0",
+    "@ckeditor/ckeditor5-inspector": "^5.0.1",
     "@types/chai": "^4.3.20",
     "@types/karma-sinon-chai": "^2.0.6",
     "@types/mocha": "^10.0.10",
