@@ -1,0 +1,409 @@
+.manual-test-container {
+	grid-column: 1;
+	grid-row: 2;
+	order: 1;
+	flex: 1 1 auto;
+	min-width: 0;
+	box-sizing: border-box;
+	padding: 8px;
+}
+
+body.shell-enabled {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-rows: auto minmax(0, 1fr);
+	margin: 0;
+	min-height: 100vh;
+}
+
+.shell {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	position: relative;
+	z-index: 2147483647;
+	display: flex;
+	align-items: stretch;
+	box-sizing: border-box;
+	padding: 6px 8px;
+	width: 100%;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	font-size: 12px;
+	line-height: 1;
+	color: #0a0a0a;
+	background: rgb(255 255 255 / 85%);
+	backdrop-filter: saturate(180%) blur(20px);
+	-webkit-backdrop-filter: saturate(180%) blur(20px);
+	border-bottom: 1px solid rgb(0 0 0 / 8%);
+	box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.shell__pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 14px;
+	border: 0;
+	background: transparent;
+	border-radius: 999px;
+	text-decoration: none;
+	color: inherit;
+	font: inherit;
+	font-weight: 500;
+	white-space: nowrap;
+	transition: background 0.1s;
+	cursor: pointer;
+}
+
+.shell__pill:hover {
+	background: rgb(0 0 0 / 5%);
+}
+
+.shell__pill:active {
+	background: rgb(0 0 0 / 10%);
+}
+
+.shell__pill:focus-visible {
+	outline: 2px solid rgb(0 0 0 / 30%);
+	outline-offset: 1px;
+}
+
+.shell__divider {
+	flex-shrink: 0;
+	align-self: center;
+	width: 1px;
+	height: 16px;
+	background: rgb(0 0 0 / 10%);
+	margin: 0 2px;
+}
+
+.shell__label {
+	display: inline-flex;
+	align-items: center;
+	flex: 1 1 auto;
+	gap: 10px;
+	padding: 8px 14px;
+	overflow: hidden;
+	min-width: 0;
+}
+
+.shell__label-name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.shell__label-package {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-weight: 400;
+	font-size: 11px;
+	opacity: 0.55;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+	.shell {
+		color: #ededed;
+		background: rgb(20 20 20 / 80%);
+		border-color: rgb(255 255 255 / 10%);
+		box-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 50%);
+	}
+
+	.shell__pill:hover {
+		background: rgb(255 255 255 / 8%);
+	}
+
+	.shell__pill:active {
+		background: rgb(255 255 255 / 14%);
+	}
+
+	.shell__pill:focus-visible {
+		outline-color: rgb(255 255 255 / 30%);
+	}
+
+	.shell__divider {
+		background: rgb(255 255 255 / 12%);
+	}
+}
+
+@media (max-width: 600px) {
+	.shell {
+		font-size: 11px;
+	}
+
+	.shell__label-package {
+		display: none;
+	}
+
+	.shell__label-name {
+		max-width: 20ch;
+	}
+}
+
+.shell-instructions {
+	--shell-instructions-width: min(420px, 45vw);
+	--shell-instructions-transition-duration: 0.18s;
+
+	grid-column: 2;
+	grid-row: 2;
+	order: 2;
+	align-self: start;
+	flex: 0 0 0;
+	width: 0;
+	height: 0;
+	min-height: 0;
+	padding: 0;
+	border: 0;
+	background: #fff;
+	color: #0a0a0a;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	line-height: 1.6;
+	overflow: hidden;
+	transition:
+		flex-basis var(--shell-instructions-transition-duration) ease-out,
+		width var(--shell-instructions-transition-duration) ease-out;
+}
+
+.shell-instructions--open,
+.shell-instructions--closing {
+	align-self: stretch;
+	height: auto;
+	border-left: 1px solid rgb(0 0 0 / 8%);
+	box-shadow: -8px 0 24px rgb(0 0 0 / 8%);
+}
+
+.shell-instructions--open {
+	flex-basis: var(--shell-instructions-width);
+	width: var(--shell-instructions-width);
+}
+
+.shell-instructions__inner {
+	display: flex;
+	flex-direction: column;
+	width: var(--shell-instructions-width);
+	height: 100%;
+}
+
+.shell-instructions__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 24px;
+	border-bottom: 1px solid rgb(0 0 0 / 8%);
+	flex-shrink: 0;
+}
+
+.shell-instructions__titles {
+	min-width: 0;
+}
+
+.shell-instructions__title {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.shell-instructions__package {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	color: #737373;
+}
+
+.shell-instructions__close {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: #737373;
+	cursor: pointer;
+	transition: background 0.1s, color 0.1s;
+}
+
+.shell-instructions__close:hover {
+	background: rgb(0 0 0 / 5%);
+	color: #0a0a0a;
+}
+
+.shell-instructions__close:focus-visible {
+	outline: 2px solid rgb(0 0 0 / 30%);
+	outline-offset: 1px;
+}
+
+.shell-instructions__body {
+	padding: 20px 24px 28px;
+	font-size: 14px;
+	overflow-y: auto;
+	min-height: 0;
+}
+
+.shell-instructions__body h1,
+.shell-instructions__body h2,
+.shell-instructions__body h3,
+.shell-instructions__body h4,
+.shell-instructions__body h5,
+.shell-instructions__body h6 {
+	margin: 24px 0 8px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.3;
+}
+
+.shell-instructions__body h1 { font-size: 20px; }
+.shell-instructions__body h2 { font-size: 17px; }
+.shell-instructions__body h3 { font-size: 15px; }
+.shell-instructions__body h4,
+.shell-instructions__body h5,
+.shell-instructions__body h6 { font-size: 14px; }
+
+.shell-instructions__body > :first-child { margin-top: 0; }
+.shell-instructions__body > :last-child { margin-bottom: 0; }
+
+.shell-instructions__body p {
+	margin: 8px 0;
+}
+
+.shell-instructions__body ul,
+.shell-instructions__body ol {
+	margin: 8px 0;
+	padding-left: 24px;
+}
+
+.shell-instructions__body li {
+	margin: 3px 0;
+}
+
+.shell-instructions__body code {
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: #f0f0f0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.9em;
+}
+
+.shell-instructions__body pre {
+	margin: 12px 0;
+	padding: 12px 14px;
+	border-radius: 8px;
+	background: #f5f5f5;
+	overflow-x: auto;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.shell-instructions__body pre code {
+	padding: 0;
+	background: transparent;
+	font-size: inherit;
+}
+
+.shell-instructions__body a {
+	color: #1d4ed8;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.shell-instructions__body blockquote {
+	margin: 12px 0;
+	padding: 4px 14px;
+	border-left: 3px solid rgb(0 0 0 / 15%);
+	color: #525252;
+}
+
+.shell-instructions__body table {
+	margin: 12px 0;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.shell-instructions__body th,
+.shell-instructions__body td {
+	padding: 6px 10px;
+	border: 1px solid rgb(0 0 0 / 10%);
+	text-align: left;
+}
+
+.shell-instructions__body th {
+	background: #f5f5f5;
+	font-weight: 600;
+}
+
+.shell-instructions__body hr {
+	margin: 16px 0;
+	border: 0;
+	border-top: 1px solid rgb(0 0 0 / 10%);
+}
+
+@media (prefers-color-scheme: dark) {
+	.shell-instructions {
+		background: #141414;
+		color: #ededed;
+		border-left-color: rgb(255 255 255 / 10%);
+		box-shadow: -8px 0 24px rgb(0 0 0 / 40%);
+	}
+
+	.shell-instructions__header {
+		border-color: rgb(255 255 255 / 10%);
+	}
+
+	.shell-instructions__package {
+		color: #a3a3a3;
+	}
+
+	.shell-instructions__close {
+		color: #a3a3a3;
+	}
+
+	.shell-instructions__close:hover {
+		background: rgb(255 255 255 / 8%);
+		color: #ededed;
+	}
+
+	.shell-instructions__body code {
+		background: #1e1e1e;
+	}
+
+	.shell-instructions__body pre {
+		background: #1e1e1e;
+	}
+
+	.shell-instructions__body a {
+		color: #93c5fd;
+	}
+
+	.shell-instructions__body blockquote {
+		border-left-color: rgb(255 255 255 / 15%);
+		color: #a3a3a3;
+	}
+
+	.shell-instructions__body th,
+	.shell-instructions__body td {
+		border-color: rgb(255 255 255 / 12%);
+	}
+
+	.shell-instructions__body th {
+		background: #1e1e1e;
+	}
+
+	.shell-instructions__body hr {
+		border-top-color: rgb(255 255 255 / 12%);
+	}
+}
+
+@media (max-width: 800px) {
+	.shell-instructions {
+		--shell-instructions-width: min(360px, 70vw);
+	}
+}
