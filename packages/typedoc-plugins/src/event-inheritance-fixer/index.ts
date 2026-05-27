@@ -192,7 +192,7 @@ function getConstructorReturnTypeReflections(
 ): Array<DeclarationReflection> {
 	return context.checker.getTypeAtLocation( aliasDeclaration.name )
 		.getConstructSignatures()
-		.flatMap( signature => context.checker.getReturnTypeOfSignature( signature ) )
+		.map( signature => context.checker.getReturnTypeOfSignature( signature ) )
 		.flatMap( type => getReflectionsFromType( context, type ) );
 }
 
