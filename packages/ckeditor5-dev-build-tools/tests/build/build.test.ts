@@ -399,7 +399,7 @@ test( 'Pure annotations preserve the marker used by post-processing tools', asyn
 		column: generatedColumn
 	} );
 
-	expect( chunk.code ).toContain( '/* @__PURE__ -- @preserve */ factory()' );
+	expect( chunk.code ).toContain( '/* #__PURE__ -- @preserve */ factory()' );
 	expect( originalPosition.source ).toBe( sourceMapContent.sources[ originalSourceIndex ] );
 	expect( originalPosition.line ).toBe( originalLine );
 	expect( originalPosition.column ).toBe( originalColumn );
