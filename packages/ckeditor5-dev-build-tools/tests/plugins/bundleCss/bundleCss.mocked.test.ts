@@ -50,6 +50,12 @@ function createChunk( name: string, moduleIds: Array<string>, options: Partial<O
 	} as unknown as OutputChunk;
 }
 
+function createCssBundle(): OutputBundle {
+	return {
+		'main.js': createChunk( 'main', [ '/styles/main.css' ] )
+	};
+}
+
 async function runGenerateBundle(
 	plugin: ReturnType<typeof bundleCss>,
 	context: any,
@@ -146,7 +152,7 @@ test( 'Throws when a generated virtual stylesheet import cannot be resolved', as
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Throws when Rolldown resolves a CSS import as external', async () => {
@@ -174,7 +180,7 @@ test( 'Throws when Rolldown resolves a CSS import as external', async () => {
 	await runGenerateBundle( plugin, context, {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Resolves absolute and relative CSS imports without Rolldown results', async () => {
@@ -198,7 +204,27 @@ test( 'Resolves absolute and relative CSS imports without Rolldown results', asy
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
+} );
+
+test( 'Uses the current working directory as the project root when output location is not specified', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		expect( options.projectRoot ).toBe( process.cwd() );
+
+		return {
+			code: Buffer.from( '' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+
+	await runGenerateBundle( plugin, createContext(), {
+		preserveModules: false
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Reads transformed CSS using normalized path separators', async () => {
@@ -229,7 +255,7 @@ test( 'Reads transformed CSS using normalized path separators', async () => {
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
@@ -251,7 +277,7 @@ test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Emits warnings for virtual entry diagnostics without a warning type', async () => {
@@ -276,9 +302,7 @@ test( 'Emits warnings for virtual entry diagnostics without a warning type', asy
 	await runGenerateBundle( plugin, context, {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {
-		'main.js': createChunk( 'main', [ '/styles/main.css' ] )
-	} );
+	} as NormalizedOutputOptions, createCssBundle() );
 
 	expect( context.warn ).toHaveBeenCalledWith(
 		'Lightning CSS warning in styles.css:3:5: Virtual entry warning'
