@@ -61,7 +61,7 @@ function renderManual(): void {
 }
 
 /**
- * Wraps manual test content in a stable container while keeping Shell UI outside it.
+ * Sets up shell-related state for the manual test container injected by the HTML transform.
  */
 function ensureManualTestContainer(): void {
 	document.body.classList.add( 'shell-enabled' );
@@ -70,6 +70,11 @@ function ensureManualTestContainer(): void {
 		document.body.classList.add( 'shell-has-instructions' );
 	}
 
+	if ( document.querySelector( '.manual-test-container' ) ) {
+		return;
+	}
+
+	// The source transform injects this container. Keep this fallback for local setups using stale built plugin files.
 	const container = document.createElement( 'div' );
 	container.className = 'manual-test-container';
 

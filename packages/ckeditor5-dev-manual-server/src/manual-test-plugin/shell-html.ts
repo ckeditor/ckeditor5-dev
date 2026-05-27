@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { parse, serialize } from 'parse5';
 import {
 	appendChild,
+	createElement,
 	getAttribute,
 	getTextContent,
 	hasAttribute,
@@ -67,7 +68,8 @@ export function createManualShellHtml( {
 	removeAttribute( testScriptElement, 'data-manual-test-script' );
 	setTextContent( shellDataElement, stringifyHtmlScriptData( createManualData( entry, workspaceRoot ) ) );
 	appendChildren( shellHead, manualHead.childNodes.filter( shouldMoveManualHeadNode ) );
-	appendChildren( shellBody, [ ...manualBody.childNodes ] );
+	// Wrap before the browser parses the page so iframe elements are not reparented after loading starts.
+	appendChild( shellBody, createManualTestContainer( manualBody ) );
 
 	return serialize( shellDocument );
 }
@@ -105,6 +107,14 @@ function appendChildren( parent: ParentNode, childNodes: Array<ChildNode> ): voi
 		removeNode( node );
 		appendChild( parent, node );
 	}
+}
+
+function createManualTestContainer( manualBody: ParentNode ): Element {
+	const container = createElement( 'div', { class: 'manual-test-container' } );
+
+	appendChildren( container, [ ...manualBody.childNodes ] );
+
+	return container;
 }
 
 function getRequiredElementByTagName( root: Node, tagName: string ): Element {
