@@ -246,7 +246,7 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 		async generateBundle( outputOptions, bundle ) {
 			const orderedCssModules = getOrderedCssModules( bundle, outputOptions, this.getModuleInfo );
 
-			if ( orderedCssModules.length === 0 && !options.sourceMap ) {
+			if ( !orderedCssModules.length ) {
 				this.emitFile( {
 					type: 'asset',
 					fileName: options.fileName,

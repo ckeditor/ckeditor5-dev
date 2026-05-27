@@ -337,7 +337,6 @@ test( 'Source map for chunk re-exporting external modules', async () => {
 	expectFileNames( output, [
 		'index.js',
 		'index.js.map',
-		'index.css.map',
 		'index.css',
 		'index-editor.css',
 		'index-content.css'

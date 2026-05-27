@@ -276,7 +276,9 @@ test( 'Emits warnings for virtual entry diagnostics without a warning type', asy
 	await runGenerateBundle( plugin, context, {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, {
+		'main.js': createChunk( 'main', [ '/styles/main.css' ] )
+	} );
 
 	expect( context.warn ).toHaveBeenCalledWith(
 		'Lightning CSS warning in styles.css:3:5: Virtual entry warning'
