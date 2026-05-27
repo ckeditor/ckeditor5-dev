@@ -24,7 +24,8 @@ import { bots, members } from './data/index.js';
  */
 export default async function formatMessage( options ) {
 	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken, options.apiUrl );
-	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
+	const serverUrl = new URL( options.triggeringCommitUrl ).origin;
+	const repoUrl = `${ serverUrl }/${ options.repositoryOwner }/${ options.repositoryName }`;
 
 	return {
 		username: options.slackMessageUsername,

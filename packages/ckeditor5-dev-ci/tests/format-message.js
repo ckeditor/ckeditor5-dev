@@ -339,5 +339,62 @@ describe( 'lib/format-message', () => {
 				expect( getCommitMessageField( message ) ).toEqual( '_Unavailable._' );
 			} );
 		} );
+
+		describe( 'Repository (branch) attachment field', () => {
+			const baseOptions = {
+				slackMessageUsername: 'Test',
+				iconUrl: 'https://avatars.githubusercontent.com/u/26329082?v=4',
+				branch: 'master',
+				buildTitle: 'Workflow',
+				buildUrl: 'https://...',
+				buildId: 1,
+				githubToken: 'secret-token',
+				startTime: 1,
+				endTime: 2,
+				shouldHideAuthor: false
+			};
+
+			beforeEach( () => {
+				fetchMock.mockResolvedValue( {
+					json: () => Promise.resolve( {
+						author: { login: 'ExampleNick' },
+						commit: { author: { name: 'Example Nick' }, message: '' },
+						sha: '35cbea88dc0b5c00406c9a5f0c357ad2a7195a19'
+					} )
+				} );
+			} );
+
+			function getRepositoryField( message ) {
+				return message.attachments[ 0 ].fields.find( field => field.title === 'Repository (branch)' ).value;
+			}
+
+			it( 'builds the repo + branch links from the public github.com host', async () => {
+				const message = await formatMessage( {
+					...baseOptions,
+					repositoryOwner: 'ckeditor',
+					repositoryName: 'ckeditor5-dev',
+					triggeringCommitUrl: 'https://github.com/ckeditor/ckeditor5-dev/commit/abc'
+				} );
+
+				expect( getRepositoryField( message ) ).toEqual(
+					'<https://github.com/ckeditor/ckeditor5-dev|ckeditor5-dev>' +
+					' (<https://github.com/ckeditor/ckeditor5-dev/tree/master|master>)'
+				);
+			} );
+
+			it( 'builds the repo + branch links from the GitHub Enterprise host', async () => {
+				const message = await formatMessage( {
+					...baseOptions,
+					repositoryOwner: 'owner',
+					repositoryName: 'repo',
+					triggeringCommitUrl: 'https://github.corp.example.com/owner/repo/commit/abc'
+				} );
+
+				expect( getRepositoryField( message ) ).toEqual(
+					'<https://github.corp.example.com/owner/repo|repo>' +
+					' (<https://github.corp.example.com/owner/repo/tree/master|master>)'
+				);
+			} );
+		} );
 	} );
 } );
