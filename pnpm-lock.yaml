@@ -351,8 +351,8 @@ importers:
         specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       '@ckeditor/ckeditor5-inspector':
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^5.0.1
+        version: 5.0.1
       '@types/chai':
         specifier: ^4.3.20
         version: 4.3.20
@@ -709,8 +709,18 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@ckeditor/ckeditor5-inspector@5.0.0':
-    resolution: {integrity: sha512-WVCa1mtePJkLtI81Rn2E6orV0B2Az/+O7f+corJzYapoH5koVEe9TcVyoKRquKUWeBXMG+D1m72vmR2kuoLNhA==}
+  '@ckeditor/ckeditor5-inspector@5.0.1':
+    resolution: {integrity: sha512-O6iuP8EtDZvkkKpMJjJTY+ZZRQA/ZEpguaOmdg4J+mEXHZoI7fshNv8LA/g6cUoPO4W3eRfBZ1VPmrGWjZWdfg==}
+    bundledDependencies:
+      - copy-to-clipboard
+      - es-toolkit
+      - javascript-stringify
+      - react
+      - react-dom
+      - react-modal
+      - react-redux
+      - react-rnd
+      - redux
 
   '@colordx/core@5.0.3':
     resolution: {integrity: sha512-xBQ0MYRTNNxW3mS2sJtlQTT7C3Sasqgh1/PsHva7fyDb5uqYY+gv9V0utDdX8X80mqzbGz3u/IDJdn2d/uW09g==}
@@ -5647,7 +5657,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@ckeditor/ckeditor5-inspector@5.0.0': {}
+  '@ckeditor/ckeditor5-inspector@5.0.1': {}
 
   '@colordx/core@5.0.3': {}
 
