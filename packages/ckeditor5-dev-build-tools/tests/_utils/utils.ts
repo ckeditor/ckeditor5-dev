@@ -4,15 +4,14 @@
  */
 
 import { expect, vi } from 'vitest';
-import swc from '@rollup/plugin-swc';
-import type { RollupOutput, OutputChunk, OutputAsset, Plugin } from 'rollup';
+import type { RolldownOutput, OutputChunk, OutputAsset } from 'rolldown';
 import * as utils from '../../src/utils.js';
 
 /**
- * Helper function for validating Rollup asset.
+ * Helper function for validating Rolldown asset.
  */
 export function verifyAsset(
-	output: RollupOutput['output'],
+	output: RolldownOutput['output'],
 	filename: string,
 	source: string
 ): void {
@@ -24,10 +23,10 @@ export function verifyAsset(
 }
 
 /**
- * Helper function for validating Rollup chunk.
+ * Helper function for validating Rolldown chunk.
  */
 export function verifyChunk(
-	output: RollupOutput['output'],
+	output: RolldownOutput['output'],
 	filename: string,
 	code: string
 ): void {
@@ -42,7 +41,7 @@ export function verifyChunk(
  * Helper function for verifying `CSS` output.
  */
 export function verifyDividedStyleSheet(
-	output: RollupOutput['output'],
+	output: RolldownOutput['output'],
 	outputFileName: string,
 	expectedResult: string
 ): void {
@@ -78,21 +77,4 @@ export async function mockGetUserDependency( path: string, cb: () => any ): Prom
 
 			return actualImport( url );
 		} );
-}
-
-/**
- * Helper function for getting a preconfigured `swc` plugin.
- */
-export function swcPlugin(): Plugin {
-	return swc( {
-		include: [ '**/*.[jt]s' ],
-		swc: {
-			jsc: {
-				target: 'es2022'
-			},
-			module: {
-				type: 'es6'
-			}
-		}
-	} );
 }

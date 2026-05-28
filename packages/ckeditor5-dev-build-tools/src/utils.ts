@@ -5,7 +5,6 @@
 
 import { createRequire } from 'node:module';
 import type { CamelCase, CamelCasedProperties } from 'type-fest';
-import type { InputPluginOption } from 'rollup';
 
 const require = createRequire( import.meta.url );
 
@@ -57,6 +56,6 @@ export function getUserDependency( name: string ): any {
 /**
  * Returns plugin if condition is truthy. This is used only to get the types right.
  */
-export function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plugin: T ): T | undefined {
+export function getOptionalPlugin<T>( condition: unknown, plugin: T ): T | undefined {
 	return condition ? plugin : undefined;
 }

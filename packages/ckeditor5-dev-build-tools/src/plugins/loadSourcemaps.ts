@@ -4,7 +4,7 @@
  */
 
 import fs from 'node:fs';
-import type { Plugin } from 'rollup';
+import type { Plugin } from 'rolldown';
 
 export function loadSourcemaps(): Plugin {
 	return {

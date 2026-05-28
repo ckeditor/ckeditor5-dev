@@ -5,13 +5,14 @@
 
 import {
 	Converter,
+	DeclarationReflection,
 	ReferenceType,
 	ReflectionKind,
+	TypeScript,
 	type Context,
 	type Application,
 	type SomeType,
-	type IntersectionType,
-	type DeclarationReflection
+	type IntersectionType
 } from 'typedoc';
 import { getPluginPriority } from '../utils/getpluginpriority.js';
 
@@ -35,7 +36,7 @@ function onEventEnd( context: Context ) {
 	for ( const reflection of reflections ) {
 		// Find all parents of a given reflection.
 		// Filter function is required in case if the purge plugin removed a reflection.
-		const parentReflections = getParentClasses( reflection ).filter( Boolean );
+		const parentReflections = getParentClasses( context, reflection ).filter( Boolean );
 
 		// Collect all events. The goal is to insert them into a reflection.
 		// When using the mixins concept, Typedoc loses the inheritance tree.
@@ -128,37 +129,85 @@ function getDerivedReflections( reflection: DeclarationReflection ): Array<Decla
  * Finds all parent classes from the specified base reflection. It traverses the whole inheritance chain.
  * If the base reflection is not extending, an empty array is returned.
  */
-function getParentClasses( reflection: DeclarationReflection ): Array<DeclarationReflection> {
+function getParentClasses( context: Context, reflection: DeclarationReflection ): Array<DeclarationReflection> {
 	const extendedTypes = reflection.extendedTypes || [];
 
 	return extendedTypes
-		.filter( entry => {
-			// Cover: `class extends Mixin( BaseClass )`.
-			if ( isIntersectionType( entry ) ) {
-				return entry.types.filter( isReferenceType ).length;
-			}
-
-			return ( entry as ReferenceType ).reflection;
-		} )
-		.flatMap( entry => {
-			if ( isIntersectionType( entry ) ) {
-				const parents = entry.types
-					.filter( isReferenceType )
-					.map( e => e.reflection as DeclarationReflection );
-
-				return [
-					...parents.flatMap( parent => getParentClasses( parent ) ),
-					...parents
-				];
-			}
-
-			const parent = ( entry as ReferenceType ).reflection as DeclarationReflection;
-
+		.flatMap( entry => getDirectParentClasses( context, reflection, entry ) )
+		.flatMap( parent => {
 			return [
-				...getParentClasses( parent ),
+				...getParentClasses( context, parent ),
 				parent
 			];
 		} );
+}
+
+function getDirectParentClasses(
+	context: Context,
+	reflection: DeclarationReflection,
+	type: SomeType
+): Array<DeclarationReflection> {
+	// Cover: `class extends Mixin( BaseClass )`.
+	if ( isIntersectionType( type ) ) {
+		return type.types
+			.filter( isReferenceType )
+			.map( type => type.reflection as DeclarationReflection );
+	}
+
+	const parentReflection = ( type as ReferenceType ).reflection as DeclarationReflection | undefined;
+
+	if ( parentReflection ) {
+		return [ parentReflection ];
+	}
+
+	// TypeDoc does not link classes extending a typed mixin alias, e.g. `class Foo extends FooBase`.
+	// Resolve that alias through TypeScript and read the constructor return type to recover mixed-in parents.
+	const aliasDeclaration = getUnresolvedBaseDeclaration( context, reflection );
+
+	return aliasDeclaration ? getConstructorReturnTypeReflections( context, aliasDeclaration ) : [];
+}
+
+function getUnresolvedBaseDeclaration(
+	context: Context,
+	reflection: DeclarationReflection
+): TypeScript.VariableDeclaration | null {
+	const classDeclaration = context.getSymbolFromReflection( reflection )
+		?.declarations
+		?.find( TypeScript.isClassDeclaration );
+
+	const baseExpression = classDeclaration?.heritageClauses
+		?.find( clause => clause.token === TypeScript.SyntaxKind.ExtendsKeyword )
+		?.types[ 0 ]
+		?.expression;
+
+	const aliasSymbol = baseExpression && context.getSymbolAtLocation( baseExpression );
+	const aliasDeclaration = aliasSymbol?.declarations?.find( TypeScript.isVariableDeclaration );
+
+	return aliasDeclaration || null;
+}
+
+function getConstructorReturnTypeReflections(
+	context: Context,
+	aliasDeclaration: TypeScript.VariableDeclaration
+): Array<DeclarationReflection> {
+	return context.checker.getTypeAtLocation( aliasDeclaration.name )
+		.getConstructSignatures()
+		.map( signature => context.checker.getReturnTypeOfSignature( signature ) )
+		.flatMap( type => getReflectionsFromType( context, type ) );
+}
+
+function getReflectionsFromType( context: Context, type: TypeScript.Type ): Array<DeclarationReflection> {
+	// Mixin constructor aliases usually return intersections like `Base & Observable`.
+	// Each part may define events that need to be inherited by the generated class.
+	if ( type.isIntersection() ) {
+		return type.types.flatMap( type => getReflectionsFromType( context, type ) );
+	}
+
+	const symbol = type.getSymbol() || type.aliasSymbol;
+	const resolvedSymbol = symbol && context.resolveAliasedSymbol( symbol );
+	const reflection = resolvedSymbol && context.getReflectionFromSymbol( resolvedSymbol );
+
+	return reflection instanceof DeclarationReflection ? [ reflection ] : [];
 }
 
 function isIntersectionType( type: SomeType ): type is IntersectionType {

@@ -5,8 +5,8 @@
 
 import { join } from 'node:path';
 import { test, expect, vi } from 'vitest';
-import { rollup, type RollupOutput, type OutputAsset, type Plugin } from 'rollup';
-import { swcPlugin, verifyAsset, verifyChunk } from '../../_utils/utils.js';
+import { rolldown, type RolldownOutput, type OutputAsset, type Plugin } from 'rolldown';
+import { verifyAsset, verifyChunk } from '../../_utils/utils.js';
 import { addBanner, bundleCss, type RollupBannerOptions } from '../../../src/index.js';
 
 const createFilterSpy = vi.hoisted( vi.fn );
@@ -26,12 +26,10 @@ vi.mock( '@rollup/pluginutils', async importOriginal => {
 /**
  * Helper function for creating a bundle that won't be written to the file system.
  */
-async function generateBundle( options: RollupBannerOptions, sourcemap: boolean = false ): Promise<RollupOutput[ 'output' ]> {
-	const bundle = await rollup( {
+async function generateBundle( options: RollupBannerOptions, sourcemap: boolean = false ): Promise<RolldownOutput[ 'output' ]> {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, './fixtures/input.ts' ),
 		plugins: [
-			swcPlugin,
-
 			bundleCss( {
 				fileName: 'styles.css'
 			} ),
@@ -134,10 +132,9 @@ test( 'Should have proper default values', async () => {
 test( 'Handles source maps without the "file" property', async () => {
 	const banner = '/* CUSTOM BANNER */\n';
 
-	const bundle = await rollup( {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, './fixtures/input.ts' ),
 		plugins: [
-			swcPlugin,
 			emitMapWithoutFileProperty(),
 			bundleCss( {
 				fileName: 'styles.css'

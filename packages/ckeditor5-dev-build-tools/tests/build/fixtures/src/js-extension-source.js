@@ -3,6 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import './input.css';
-
-export const test = 123;
+export const value = 'javascript-source';

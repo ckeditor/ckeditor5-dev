@@ -3,4 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-export const test = 456;
+export const value = /* #__PURE__ -- @preserve */ factory();
+
+function factory() {
+	return {};
+}

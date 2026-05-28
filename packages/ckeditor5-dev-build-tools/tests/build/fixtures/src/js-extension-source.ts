@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export * from '@ckeditor/ckeditor5-ai';
+export const value = 'typescript-source';

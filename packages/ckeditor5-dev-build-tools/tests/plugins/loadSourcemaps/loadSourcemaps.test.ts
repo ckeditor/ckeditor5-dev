@@ -5,19 +5,15 @@
 
 import { join } from 'node:path';
 import { test, expect } from 'vitest';
-import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { swcPlugin } from '../../_utils/utils.js';
+import { rolldown, type RolldownOutput, type OutputAsset } from 'rolldown';
 
 import { loadSourcemaps } from '../../../src/index.js';
 import { getOptionalPlugin } from '../../../src/utils.js';
 
-async function generateBundle( input: string, sourcemap: boolean = false ): Promise<RollupOutput[ 'output' ]> {
-	const bundle = await rollup( {
+async function generateBundle( input: string, sourcemap: boolean = false ): Promise<RolldownOutput[ 'output' ]> {
+	const bundle = await rolldown( {
 		input: join( import.meta.dirname, input ),
 		plugins: [
-			nodeResolve(),
-			swcPlugin,
 			getOptionalPlugin( sourcemap, loadSourcemaps() )
 		]
 	} );

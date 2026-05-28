@@ -4,8 +4,9 @@
  */
 
 import { Buffer } from 'node:buffer';
+import { resolve } from 'node:path';
 import { expect, test, vi } from 'vitest';
-import type { ModuleInfo, NormalizedOutputOptions, OutputBundle, OutputChunk, PartialResolvedId } from 'rollup';
+import type { ModuleInfo, NormalizedOutputOptions, OutputBundle, OutputChunk, PartialResolvedId } from 'rolldown';
 
 const bundleAsyncMock = vi.hoisted( () => vi.fn() );
 
@@ -47,6 +48,12 @@ function createChunk( name: string, moduleIds: Array<string>, options: Partial<O
 		viteMetadata: undefined,
 		...options
 	} as unknown as OutputChunk;
+}
+
+function createCssBundle(): OutputBundle {
+	return {
+		'main.js': createChunk( 'main', [ '/styles/main.css' ] )
+	};
 }
 
 async function runGenerateBundle(
@@ -97,7 +104,10 @@ test( 'Processes CSS collected from manual chunks before entry chunks', async ()
 		};
 	} );
 
-	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
 	const context = createContext( {
 		moduleInfo: {
 			'/src/shared.ts': { importedIds: [ '/styles/shared.css' ] },
@@ -109,7 +119,7 @@ test( 'Processes CSS collected from manual chunks before entry chunks', async ()
 			facadeModuleId: null,
 			isEntry: false
 		} ),
-		'main.js': createChunk( 'main', [ '/src/main.ts' ] )
+		'main.js': createChunk( 'main', [ '/src/shared.ts', '/src/main.ts' ] )
 	};
 
 	await runGenerateBundle( plugin, context, {
@@ -134,15 +144,18 @@ test( 'Throws when a generated virtual stylesheet import cannot be resolved', as
 		};
 	} );
 
-	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
 
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
-test( 'Throws when Rollup resolves a CSS import as external', async () => {
+test( 'Throws when Rolldown resolves a CSS import as external', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		await expect( options.resolver.resolve( './external.css', '/src/source.css' ) )
 			.rejects.toThrow( 'External CSS imports are not supported. Found ./external.css in /src/source.css.' );
@@ -153,7 +166,10 @@ test( 'Throws when Rollup resolves a CSS import as external', async () => {
 		};
 	} );
 
-	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
 	const context = createContext( {
 		resolve: () => ( {
 			id: '/styles/external.css',
@@ -164,15 +180,15 @@ test( 'Throws when Rollup resolves a CSS import as external', async () => {
 	await runGenerateBundle( plugin, context, {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
-test( 'Resolves absolute and relative CSS imports without Rollup results', async () => {
+test( 'Resolves absolute and relative CSS imports without Rolldown results', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		expect( await options.resolver.resolve( '/styles/absolute.css', '/src/components/source.css' ) )
 			.toBe( '/styles/absolute.css' );
 		expect( await options.resolver.resolve( './nested/local.css', '/src/components/source.css?inline' ) )
-			.toBe( '/src/components/nested/local.css' );
+			.toBe( resolve( '/src/components', './nested/local.css' ) );
 
 		return {
 			code: Buffer.from( '' ),
@@ -180,12 +196,66 @@ test( 'Resolves absolute and relative CSS imports without Rollup results', async
 		};
 	} );
 
-	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
 
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
+} );
+
+test( 'Uses the current working directory as the project root when output location is not specified', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		expect( options.projectRoot ).toBe( process.cwd() );
+
+		return {
+			code: Buffer.from( '' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+
+	await runGenerateBundle( plugin, createContext(), {
+		preserveModules: false
+	} as NormalizedOutputOptions, createCssBundle() );
+} );
+
+test( 'Reads transformed CSS using normalized path separators', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		expect( options.resolver.read( 'D:\\src\\components\\nested\\local.css?inline' ) )
+			.toBe( '.transformed {}' );
+
+		return {
+			code: Buffer.from( '' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+
+	const transform = typeof plugin.transform == 'function' ? plugin.transform : plugin.transform!.handler;
+
+	transform.call(
+		createContext() as any,
+		'.transformed {}',
+		'D:/src/components/nested/local.css?inline',
+		{ moduleType: 'js' }
+	);
+
+	await runGenerateBundle( plugin, createContext(), {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, createCssBundle() );
 } );
 
 test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
@@ -199,10 +269,42 @@ test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
 		};
 	} );
 
-	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
 
 	await runGenerateBundle( plugin, createContext(), {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, {} );
+	} as NormalizedOutputOptions, createCssBundle() );
+} );
+
+test( 'Emits warnings for virtual entry diagnostics without a warning type', async () => {
+	bundleAsyncMock.mockImplementationOnce( async () => ( {
+		code: Buffer.from( '' ),
+		warnings: [ {
+			loc: {
+				filename: '/__cke5_bundle_css__.css',
+				line: 3,
+				column: 4
+			},
+			message: 'Virtual entry warning'
+		} ]
+	} ) );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+	const context = createContext();
+
+	await runGenerateBundle( plugin, context, {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( context.warn ).toHaveBeenCalledWith(
+		'Lightning CSS warning in styles.css:3:5: Virtual entry warning'
+	);
 } );

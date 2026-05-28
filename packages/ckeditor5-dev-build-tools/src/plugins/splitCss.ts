@@ -5,7 +5,7 @@
 
 import { Buffer } from 'node:buffer';
 import { createFilter } from '@rollup/pluginutils';
-import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
+import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rolldown';
 import cssnano from 'cssnano';
 import litePreset from 'cssnano-preset-lite';
 import { transform, type Selector, type SelectorComponent } from 'lightningcss';
@@ -31,6 +31,8 @@ type PurgeCSSOptions = Omit<UserDefinedOptions, 'css'>;
 type PurgeCSSContent = NonNullable<UserDefinedOptions[ 'content' ]>[ number ];
 
 const filter = createFilter( [ '**/*.css' ] );
+
+const CSS_ID_REGEXP = /\.css(?:[?#].*)?$/;
 
 const REGEX_FOR_REMOVING_VAR_WHITESPACE = /(?<=var\()\s+|\s+(?=\))/g;
 
@@ -91,12 +93,14 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	return {
 		name: 'cke5-split-css',
 
-		transform( code: string, id: string ): string | undefined {
-			if ( !filter( id ) ) {
-				return;
-			}
+		transform: {
+			filter: {
+				id: CSS_ID_REGEXP
+			},
 
-			return '';
+			handler(): string {
+				return '';
+			}
 		},
 
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ): Promise<void> {
@@ -112,25 +116,30 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			const normalizedCss = css.replace( REGEX_FOR_REMOVING_VAR_WHITESPACE, '' );
 
 			// Generate stylesheets for editor and content.
-			const editorStyles = await getStyles( normalizedCss, EDITOR_PURGE_OPTIONS );
-			const contentStyles = await getStyles( normalizedCss, {
-				...CONTENT_PURGE_OPTIONS,
-				content: [
-					...createSyntheticContentSelectors( normalizedCss, 'ck-content' )
-				]
-			} );
+			const [ editorStyles, contentStyles ] = await Promise.all( [
+				getStyles( normalizedCss, EDITOR_PURGE_OPTIONS ),
+				getStyles( normalizedCss, {
+					...CONTENT_PURGE_OPTIONS,
+					content: [
+						...createSyntheticContentSelectors( normalizedCss, 'ck-content' )
+					]
+				} )
+			] );
+			const [ editorSource, contentSource ] = options.minimize ?
+				await Promise.all( [ minifyContent( editorStyles ), minifyContent( contentStyles ) ] ) :
+				[ editorStyles, contentStyles ];
 
 			// Emit those styles into files.
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-editor.css`,
-				source: options.minimize ? await minifyContent( editorStyles ) : editorStyles
+				source: editorSource
 			} );
 
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-content.css`,
-				source: options.minimize ? await minifyContent( contentStyles ) : contentStyles
+				source: contentSource
 			} );
 		}
 	};

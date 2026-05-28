@@ -4,8 +4,8 @@
  */
 
 import upath from 'upath';
-import { test } from 'vitest';
-import { rollup, type RollupOutput } from 'rollup';
+import { test, expect } from 'vitest';
+import { rolldown, type PluginContext, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
 
 import { rawImport } from '../../../src/index.js';
@@ -13,8 +13,8 @@ import { rawImport } from '../../../src/index.js';
 /**
  * Helper function for creating a bundle that won't be written to the file system.
  */
-async function generateBundle(): Promise<RollupOutput['output']> {
-	const bundle = await rollup( {
+async function generateBundle(): Promise<RolldownOutput['output']> {
+	const bundle = await rolldown( {
 		input: upath.join( import.meta.dirname, '/fixtures/input.js' ),
 		plugins: [
 			rawImport()
@@ -40,4 +40,11 @@ test( 'can import raw file content using the `?raw` query parameter', async () =
 
 	// Content from `dependency.txt` file.
 	verifyChunk( output, 'input.js', 'Hello World!' );
+} );
+
+test( 'does not resolve raw imports without importer context', () => {
+	const plugin = rawImport();
+	const resolveId = typeof plugin.resolveId == 'function' ? plugin.resolveId : plugin.resolveId!.handler;
+
+	expect( resolveId.call( {} as PluginContext, './dependency.css?raw', undefined, {} as any ) ).toBeNull();
 } );
