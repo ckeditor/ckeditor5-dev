@@ -34,7 +34,7 @@
     "test:dev": "vitest dev"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-inspector": "^5.0.0",
+    "@ckeditor/ckeditor5-inspector": "^5.0.1",
     "@parse5/tools": "^0.7.0",
     "hast-util-to-html": "^9.0.5",
     "parse5": "^8.0.1",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.2",
-    "rolldown": "^1.0.0",
+    "rolldown": "^1.0.3",
     "upath": "^2.0.1",
     "vitest": "^4.1.2"
   }

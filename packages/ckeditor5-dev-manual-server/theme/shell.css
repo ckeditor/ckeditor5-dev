@@ -20,15 +20,15 @@ body.shell-enabled {
 	grid-column: 1 / -1;
 	grid-row: 1;
 	position: relative;
-	z-index: 2147483647;
+	z-index: 99999;
 	display: flex;
 	align-items: stretch;
 	box-sizing: border-box;
 	padding: 6px 8px;
-	width: 100%;
+	width: 100vw;
 	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	font-size: 12px;
-	line-height: 1;
+	line-height: 1.25;
 	color: #0a0a0a;
 	background: rgb(255 255 255 / 85%);
 	backdrop-filter: saturate(180%) blur(20px);
@@ -102,6 +102,44 @@ body.shell-enabled {
 	white-space: nowrap;
 }
 
+.manual-refresh-prompt {
+	position: fixed;
+	top: calc( var( --shell-height, 44px ) / 1.25 );
+	left: 50%;
+	z-index: 100000;
+	box-sizing: border-box;
+	padding: 8px 14px;
+	border: 1px solid #bfdbfe;
+	border-radius: 999px;
+	font: 600 12px/1.25 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	color: #1d4ed8;
+	background: #dbeafe;
+	cursor: pointer;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, calc( -100% - var( --shell-height, 44px ) ) );
+	transition: transform 0.18s ease-out, opacity 0.18s ease-out, background 0.1s;
+}
+
+.manual-refresh-prompt--visible {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translate(-50%, -50%);
+}
+
+.manual-refresh-prompt:hover {
+	background: #bfdbfe;
+}
+
+.manual-refresh-prompt:active {
+	background: #93c5fd;
+}
+
+.manual-refresh-prompt:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 1px;
+}
+
 @media (prefers-color-scheme: dark) {
 	.shell {
 		color: #ededed;
@@ -125,6 +163,25 @@ body.shell-enabled {
 	.shell__divider {
 		background: rgb(255 255 255 / 12%);
 	}
+
+	.manual-refresh-prompt {
+		color: #bfdbfe;
+		background: #1e3a8a;
+		border-color: #2563eb;
+		box-shadow: 0 8px 24px rgb(37 99 235 / 25%), 0 1px 2px rgb(0 0 0 / 30%);
+	}
+
+	.manual-refresh-prompt:hover {
+		background: #1d4ed8;
+	}
+
+	.manual-refresh-prompt:active {
+		background: #2563eb;
+	}
+
+	.manual-refresh-prompt:focus-visible {
+		outline-color: #93c5fd;
+	}
 }
 
 @media (max-width: 600px) {
@@ -145,8 +202,11 @@ body.shell-enabled {
 	--shell-instructions-width: min(420px, 45vw);
 	--shell-instructions-transition-duration: 0.18s;
 
-	grid-column: 2;
-	grid-row: 2;
+	position: fixed;
+	top: 44px;
+	right: 0;
+	bottom: 0;
+	z-index: 99998;
 	order: 2;
 	align-self: start;
 	flex: 0 0 0;

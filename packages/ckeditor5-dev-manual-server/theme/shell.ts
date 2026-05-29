@@ -10,10 +10,16 @@ import './shell.css';
 
 declare const LICENSE_KEY: string;
 
+interface ViteHotContextLike {
+	on( event: string, callback: () => void ): void;
+}
+
+const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 const globalTarget = window as any;
 
 renderManual();
 ensureManualTestContainer();
+setupManualRefreshPrompt();
 
 // In direct HTML manual tests, `id="editor"` creates `window.editor` as a named DOM property.
 // Reset it so manual tests can safely reuse `window.editor` for the editor instance.
@@ -90,6 +96,34 @@ function ensureManualTestContainer(): void {
 	}
 
 	document.body.appendChild( container );
+}
+
+/**
+ * Shows a manual refresh prompt when the dev server reports source changes.
+ */
+function setupManualRefreshPrompt(): void {
+	const hot = ( import.meta as ImportMeta & { hot?: ViteHotContextLike } ).hot;
+
+	if ( !hot ) {
+		return;
+	}
+
+	const button = document.createElement( 'button' );
+
+	button.type = 'button';
+	button.className = 'manual-refresh-prompt';
+	button.textContent = 'Source changed. Click here to refresh the page.';
+	button.tabIndex = -1;
+	button.setAttribute( 'aria-hidden', 'true' );
+	button.addEventListener( 'click', () => window.location.reload() );
+
+	document.body.appendChild( button );
+
+	hot.on( MANUAL_REFRESH_EVENT_NAME, () => {
+		button.removeAttribute( 'aria-hidden' );
+		button.removeAttribute( 'tabindex' );
+		button.classList.add( 'manual-refresh-prompt--visible' );
+	} );
 }
 
 /**

@@ -6,4 +6,6 @@
 export { createManualTestsPlugin } from './manual-test-plugin/plugin.js';
 export type { ManualData } from './manual-test-plugin/plugin.js';
 
+export { createManualRefreshPlugin } from './manual-refresh-plugin/plugin.js';
+
 export { stringifyValues } from './utils.js';
