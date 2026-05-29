@@ -4,20 +4,22 @@
  */
 
 import { defineConfig } from 'rolldown';
-import { declarationFilesPlugin } from '../../scripts/plugin-declarations.js';
+import { declarationFiles } from '../ckeditor5-dev-build-tools/src/plugins/declarations.js';
 import pkg from './package.json' with { type: 'json' };
 
+const packageJson = pkg as {
+	dependencies?: Record<string, string>;
+	peerDependencies?: Record<string, string>;
+};
+
+// List of external dependencies
 const externals = [
-	...Object.keys( pkg.dependencies || {} ),
-	...Object.keys( pkg.peerDependencies || {} )
+	...Object.keys( packageJson.dependencies || {} ),
+	...Object.keys( packageJson.peerDependencies || {} )
 ];
 
 export default defineConfig( {
-	input: {
-		index: 'src/index.ts',
-		'ck-debug-loader': 'src/loaders/ck-debug-loader.ts',
-		'ck-lightningcss-loader': 'src/loaders/ck-lightningcss-loader.ts'
-	},
+	input: 'src/index.ts',
 	platform: 'node',
 	output: {
 		cleanDir: true,
@@ -26,7 +28,9 @@ export default defineConfig( {
 		assetFileNames: '[name][extname]'
 	},
 	plugins: [
-		declarationFilesPlugin()
+		declarationFiles( {
+			sourceDirectory: 'src'
+		} )
 	],
 	external: id => externals.some( name => id.startsWith( name ) )
 } );

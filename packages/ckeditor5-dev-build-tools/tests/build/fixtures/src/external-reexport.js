@@ -3,5 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export * from './dependency.js';
-export * from 'node:fs';
+export * from 'external-dependency';

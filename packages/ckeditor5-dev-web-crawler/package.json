@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-web-crawler",
-  "version": "55.6.2",
+  "version": "56.0.0",
   "description": "Used to run a web crawler that checks for errors on specified pages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -23,8 +23,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "rolldown -c rolldown.config.js",
-    "dev": "rolldown -c rolldown.config.js --watch",
+    "build": "rolldown -c rolldown.config.ts",
+    "dev": "rolldown -c rolldown.config.ts --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.2",
-    "rolldown": "^1.0.0",
+    "rolldown": "^1.0.3",
     "upath": "^2.0.1",
     "vitest": "^4.1.2"
   }

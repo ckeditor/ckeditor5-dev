@@ -10,10 +10,14 @@ import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 
 /**
- * Mock `rollup`, so it doesn't try to build anything.
+ * Mock `rolldown`, so it doesn't try to build anything.
  */
-vi.mock( 'rollup', () => ( {
-	rollup() {
+vi.mock( 'rolldown', () => ( {
+	defineConfig( config: any ) {
+		return config;
+	},
+
+	rolldown() {
 		return {
 			write() {}
 		};
@@ -30,19 +34,21 @@ vi.mock( 'fs', () => ( {
 } ) );
 
 /**
- * Mock function for generating rollup configuration.
+ * Mock function for generating Rolldown configuration.
  */
-vi.mock( '../../src/config.ts', () => ( {
-	getRollupConfig() {}
+vi.mock( '../../src/config.js', () => ( {
+	getRolldownConfig() {
+		return {};
+	}
 } ) );
 
 /**
- * Returns spy for the `getRollupConfig` function.
+ * Returns spy for the `getRolldownConfig` function.
  */
 function getConfigMock() {
 	return vi
-		.spyOn( config, 'getRollupConfig' )
-		.mockImplementationOnce( (): any => { } );
+		.spyOn( config, 'getRolldownConfig' )
+		.mockImplementationOnce( (): any => ( {} ) );
 }
 
 /**
@@ -244,14 +250,6 @@ test( '.globals (empty object)', async () => {
 	await build( { globals: {} } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { globals: {} } ) );
-} );
-
-test( '.rewrite', async () => {
-	const spy = getConfigMock();
-
-	await build( { rewrite: [ [ 'foo', 'bar' ] ] } );
-
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { rewrite: [ [ 'foo', 'bar' ] ] } ) );
 } );
 
 test( '.declarations', async () => {

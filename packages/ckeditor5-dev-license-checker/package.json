@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-license-checker",
-  "version": "55.6.2",
+  "version": "56.0.0",
   "description": "Contains tools for validating licenses.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -28,12 +28,12 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.2",
-    "rolldown": "^1.0.0",
+    "rolldown": "^1.0.3",
     "vitest": "^4.1.2"
   },
   "scripts": {
-    "build": "rolldown -c rolldown.config.js",
-    "dev": "rolldown -c rolldown.config.js --watch",
+    "build": "rolldown -c rolldown.config.ts",
+    "dev": "rolldown -c rolldown.config.ts --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage"
   },

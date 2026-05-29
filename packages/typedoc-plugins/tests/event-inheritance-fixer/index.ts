@@ -98,6 +98,11 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 	// ClassFoo ⟶ "property"
 	//  ⤷ ClassMixinFoo ⟶ "property" (inherited from ClassFoo)
 	//     ⤷ ClassMixinFooBar ⟶ "property" (inherited from ClassFoo)
+	//  ⤷ ClassObservableMixinFoo ⟶ "property" (inherited from ClassFoo)
+
+	// Observable ⟶ "observable-property"
+	//  ⤷ ClassObservableMixinFoo ⟶ "observable-property" (inherited from Observable)
+	//  ⤷ ClassDefaultObservableMixin ⟶ "observable-property" (inherited from Observable)
 
 	// InterfaceA ⟶ "event-1-interface-a"
 	// InterfaceA ⟶ "event-2-interface-a"
@@ -117,8 +122,9 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 	it( 'should find all events within the project', () => {
 		// There are 8 events from classes and 9 events from interfaces.
 		// There are also 3 events from `MixedClass`, which implements the `InterfaceC`.
-		// Also, 3 events come from the `ClassFoo` and its descendant classes.
-		expect( events ).to.lengthOf( 23 );
+		// Also, 4 events come from the `ClassFoo` and its descendant classes.
+		// The last 3 events come from the `Observable` interface and classes that extend its typed mixin aliases.
+		expect( events ).to.lengthOf( 27 );
 	} );
 
 	it( 'should find all events within the project (verifying classes A-C)', () => {
@@ -154,6 +160,14 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 		expect( findEvent( 'ClassFoo', 'property' ) ).to.not.be.undefined;
 		expect( findEvent( 'ClassMixinFoo', 'property' ) ).to.not.be.undefined;
 		expect( findEvent( 'ClassMixinFooBar', 'property' ) ).to.not.be.undefined;
+	} );
+
+	it( 'should inherit events through typed mixin aliases', () => {
+		expect( findEvent( 'ClassFoo', 'property' ) ).to.not.be.undefined;
+		expect( findEvent( 'Observable', 'observable-property' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassObservableMixinFoo', 'property' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassObservableMixinFoo', 'observable-property' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassDefaultObservableMixin', 'observable-property' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should create new events with own ids in the inherited classes and interfaces', () => {
@@ -379,7 +393,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', () => {
 		} );
 
 		it( 'should find all events within the project', () => {
-			expect( events ).to.lengthOf( 20 );
+			expect( events ).to.lengthOf( 24 );
 		} );
 
 		it( 'should find all events within the project (verifying classes A-C)', () => {

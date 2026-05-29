@@ -5,8 +5,8 @@
 
 import MagicString from 'magic-string';
 import { SourceMapConsumer, SourceMapGenerator } from 'source-map';
+import type { Plugin, OutputChunk, OutputAsset } from 'rolldown';
 import { createFilter, type FilterPattern } from '@rollup/pluginutils';
-import type { Plugin, OutputChunk, OutputAsset } from 'rollup';
 
 export interface RollupBannerOptions {
 
@@ -44,13 +44,6 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 		name: 'cke5-add-banner',
 
 		async generateBundle( outputOptions, bundle ) {
-			/**
-			 * Source maps cannot be overwritten using `chunk.map`. Instead,
-			 * the old source map must be removed from the bundle,
-			 * and the new source map with the same name must be added.
-			 *
-			 * See: https://github.com/rollup/rollup/issues/4665.
-			 */
 			const updateSourceMap = async ( fileName: string, magic: MagicString ): Promise<void> => {
 				if ( !outputOptions.sourcemap ) {
 					return;
@@ -87,13 +80,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 					fileName
 				);
 
-				delete bundle[ sourceMapName ];
-
-				this.emitFile( {
-					type: 'asset',
-					fileName: sourceMapName,
-					source: generator.toString()
-				} );
+				originalSourceMap.source = generator.toString();
 			};
 
 			/**

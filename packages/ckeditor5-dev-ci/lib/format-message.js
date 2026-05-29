@@ -5,8 +5,6 @@
 
 import { bots, members } from './data/index.js';
 
-const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
-
 /**
  * @param {object} options
  * @param {string} options.slackMessageUsername
@@ -19,13 +17,15 @@ const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
  * @param {string} options.buildId
  * @param {string} options.githubToken
  * @param {string} options.triggeringCommitUrl
+ * @param {string} [options.apiUrl]
  * @param {number} options.startTime
  * @param {number} options.endTime
  * @param {boolean} options.shouldHideAuthor
  */
 export default async function formatMessage( options ) {
-	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
-	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
+	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken, options.apiUrl );
+	const serverUrl = new URL( options.triggeringCommitUrl ).origin;
+	const repoUrl = `${ serverUrl }/${ options.repositoryOwner }/${ options.repositoryName }`;
 
 	return {
 		username: options.slackMessageUsername,
@@ -162,14 +162,16 @@ function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
 		return '_Unavailable._';
 	}
 
-	const [ , repoOwner, repoName ] = triggeringCommitUrl.match( REPOSITORY_REGEXP );
+	const url = new URL( triggeringCommitUrl );
+	const serverUrl = url.origin;
+	const [ , repoOwner, repoName ] = url.pathname.split( '/' );
 
 	return commitMessage
 		.replace( / #(\d+)/g, ( _, issueId ) => {
-			return ` <https://github.com/${ repoOwner }/${ repoName }/issues/${ issueId }|#${ issueId }>`;
+			return ` <${ serverUrl }/${ repoOwner }/${ repoName }/issues/${ issueId }|#${ issueId }>`;
 		} )
 		.replace( /([\w-]+\/[\w-]+)#(\d+)/g, ( _, repoSlug, issueId ) => {
-			return `<https://github.com/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
+			return `<${ serverUrl }/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
 		} );
 }
 
@@ -178,10 +180,11 @@ function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
  *
  * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
  * @param {string} githubToken Github token used for authorization a request,
+ * @param {string} [apiUrl] Optional base URL of the GitHub API.
  * @returns {Promise.<object>}
  */
-function getCommitDetails( triggeringCommitUrl, githubToken ) {
-	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl );
+function getCommitDetails( triggeringCommitUrl, githubToken, apiUrl ) {
+	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl, apiUrl );
 	const options = {
 		method: 'GET',
 		credentials: 'include',
@@ -204,8 +207,15 @@ function getCommitDetails( triggeringCommitUrl, githubToken ) {
  * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
  *
  * @param {string} triggeringCommitUrl The URL to the commit on GitHub.
+ * @param {string} [apiUrl] Optional base URL of the GitHub API.
  * @returns {string}
  */
-function getGithubApiUrl( triggeringCommitUrl ) {
+function getGithubApiUrl( triggeringCommitUrl, apiUrl ) {
+	if ( apiUrl ) {
+		const [ , owner, repo, , sha ] = new URL( triggeringCommitUrl ).pathname.split( '/' );
+
+		return `${ apiUrl.replace( /\/$/, '' ) }/repos/${ owner }/${ repo }/commits/${ sha }`;
+	}
+
 	return triggeringCommitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );
 }

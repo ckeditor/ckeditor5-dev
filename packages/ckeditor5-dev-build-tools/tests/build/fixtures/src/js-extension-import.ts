@@ -3,4 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-export const test = 123;
+import { value } from './js-extension-source.js';
+
+export const result: string = value;

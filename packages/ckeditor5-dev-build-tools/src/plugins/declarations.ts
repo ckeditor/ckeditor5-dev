@@ -3,13 +3,25 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync, globSync } from 'node:fs';
-import { isolatedDeclaration } from 'oxc-transform';
+import { globSync, readFileSync } from 'node:fs';
 import path from 'upath';
+import { isolatedDeclaration } from 'rolldown/experimental';
+import type { Plugin } from 'rolldown';
+
+export interface RolldownDeclarationOptions {
+
+	/**
+	 * Directory containing TypeScript source files.
+	 */
+	sourceDirectory: string;
+}
 
 const declarationExtensions = new Set( [ '.mts', '.cts' ] );
 
-function getTypeScriptSourceFiles( directoryPath ) {
+/**
+ * Returns TypeScript source files that should have matching declaration files emitted.
+ */
+function getTypeScriptSourceFiles( directoryPath: string ): Array<string> {
 	const sourceFileNames = globSync( '**/*.{ts,tsx,mts,cts}', {
 		cwd: directoryPath,
 		exclude: [ '**/*.d.ts', '**/*.d.mts', '**/*.d.cts' ]
@@ -18,24 +30,28 @@ function getTypeScriptSourceFiles( directoryPath ) {
 	return sourceFileNames.map( file => path.join( directoryPath, file ) );
 }
 
-function getDeclarationFileName( sourceFileName ) {
+/**
+ * Returns declaration file name for a TypeScript source file.
+ */
+function getDeclarationFileName( sourceFileName: string ): string {
 	const { dir, name, ext } = path.parse( sourceFileName );
 	const declarationExtension = declarationExtensions.has( ext ) ? ext : '.ts';
 
 	return path.join( dir, `${ name }.d${ declarationExtension }` );
 }
 
-export function declarationFilesPlugin() {
-	const sourceDirectoryPath = path.join( process.cwd(), 'src' );
-
+/**
+ * Generates declaration files using isolated declarations.
+ */
+export function declarationFiles( pluginOptions: RolldownDeclarationOptions ): Plugin {
 	return {
 		name: 'emit-declaration-files',
 
 		async generateBundle() {
-			const sourceFilePaths = getTypeScriptSourceFiles( sourceDirectoryPath );
+			const sourceFilePaths = getTypeScriptSourceFiles( pluginOptions.sourceDirectory );
 
 			const declarationFiles = await Promise.all( sourceFilePaths.map( async sourceFilePath => {
-				const filename = path.relative( sourceDirectoryPath, sourceFilePath );
+				const filename = path.relative( pluginOptions.sourceDirectory, sourceFilePath );
 				const source = readFileSync( sourceFilePath, 'utf8' );
 				const { errors, code } = await isolatedDeclaration( filename, source, {
 					sourcemap: false,

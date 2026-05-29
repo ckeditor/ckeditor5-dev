@@ -6,9 +6,9 @@
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
-import { createFilter } from '@rollup/pluginutils';
 import { bundleAsync, Features, type Warning as LightningCssWarning } from 'lightningcss';
-import type { OutputBundle, OutputChunk, Plugin, PluginContext, NormalizedOutputOptions } from 'rollup';
+import type { OutputBundle, OutputChunk, Plugin, PluginContext, NormalizedOutputOptions } from 'rolldown';
+import upath from 'upath';
 
 export interface RollupBundleCssOptions {
 
@@ -32,7 +32,7 @@ export interface RollupBundleCssOptions {
 	sourceMap?: boolean;
 }
 
-const filter = createFilter( [ '**/*.css' ] );
+const CSS_ID_REGEXP = /\.css(?:[?#].*)?$/;
 
 const VIRTUAL_ENTRY_ID = '/__cke5_bundle_css__.css';
 
@@ -46,7 +46,7 @@ const PROTOCOL_RELATIVE_URL_REGEXP = /^\/\//;
  * Removes query strings and hash fragments from the module id.
  */
 function normalizeId( id: string ): string {
-	return id.replace( QUERY_AND_HASH_REGEXP, '' );
+	return upath.normalizeSafe( id.replace( QUERY_AND_HASH_REGEXP, '' ) );
 }
 
 /**
@@ -57,7 +57,7 @@ function createVirtualEntry( filePaths: Array<string> ): { content: string; impo
 
 	const content = filePaths
 		.map( ( filePath, index ) => {
-			const importId = `__rollup_bundle_css_${ index }__`;
+			const importId = `__rolldown_bundle_css_${ index }__`;
 
 			imports.set( importId, filePath );
 
@@ -75,7 +75,7 @@ function createVirtualEntry( filePaths: Array<string> ): { content: string; impo
  * Returns whether the module id points to a CSS file.
  */
 function isCssModule( id: string ): boolean {
-	return filter( normalizeId( id ) );
+	return CSS_ID_REGEXP.test( id );
 }
 
 /**
@@ -105,10 +105,22 @@ function emitLightningCssWarnings( context: PluginContext, warnings: Array<Light
 /**
  * Returns CSS imports from a chunk in the same order as `rollup-plugin-styles`.
  */
-function getChunkCssImports( chunk: OutputChunk, getModuleInfo: PluginContext[ 'getModuleInfo' ] ): Array<string> {
+function getChunkCssImports(
+	chunk: OutputChunk,
+	getModuleInfo: PluginContext[ 'getModuleInfo' ],
+	moduleCssImports: Map<string, Array<string>>
+): Array<string> {
 	const ids: Array<string> = [];
 
 	for ( const moduleId of Object.keys( chunk.modules ) ) {
+		const cachedCssImports = moduleCssImports.get( moduleId );
+
+		if ( cachedCssImports ) {
+			ids.push( ...cachedCssImports );
+
+			continue;
+		}
+
 		const traversed = new Set<string>();
 		let current = [ moduleId ];
 
@@ -139,6 +151,7 @@ function getChunkCssImports( chunk: OutputChunk, getModuleInfo: PluginContext[ '
 			current = imports;
 		}
 
+		moduleCssImports.set( moduleId, current );
 		ids.push( ...current );
 	}
 
@@ -153,6 +166,7 @@ function getOrderedCssModules(
 	outputOptions: NormalizedOutputOptions,
 	getModuleInfo: PluginContext[ 'getModuleInfo' ]
 ): Array<string> {
+	const moduleCssImports = new Map<string, Array<string>>();
 	const chunks = Object.values( bundle ).filter( ( output ): output is OutputChunk => output.type === 'chunk' );
 	const manualChunks = chunks.filter( chunk => !chunk.facadeModuleId );
 	const emittedChunks = outputOptions.preserveModules ?
@@ -162,10 +176,10 @@ function getOrderedCssModules(
 	const ids: Array<string> = [];
 	const moved = new Set<string>();
 
-	// Rollup may move modules from entry chunks to manual chunks.
+	// Rolldown may move modules from entry chunks to manual chunks.
 	// Process manual chunks first to preserve their priority.
 	for ( const chunk of manualChunks ) {
-		const chunkIds = getChunkCssImports( chunk, getModuleInfo );
+		const chunkIds = getChunkCssImports( chunk, getModuleInfo, moduleCssImports );
 
 		chunkIds.forEach( id => moved.add( id ) );
 
@@ -175,7 +189,7 @@ function getOrderedCssModules(
 	// Entry/dynamic chunks can still reference modules already moved above.
 	// Skipping them here keeps ordering stable and prevents duplicates.
 	for ( const chunk of emittedChunks ) {
-		const chunkIds = getChunkCssImports( chunk, getModuleInfo );
+		const chunkIds = getChunkCssImports( chunk, getModuleInfo, moduleCssImports );
 
 		ids.push( ...chunkIds.filter( id => !moved.has( id ) ) );
 	}
@@ -200,18 +214,48 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 			styles.clear();
 		},
 
-		transform( code: string, id: string ): string | undefined {
-			if ( !isCssModule( id ) ) {
-				return;
+		load: {
+			filter: {
+				id: CSS_ID_REGEXP
+			},
+
+			handler( id: string ) {
+				const normalizedId = normalizeId( id );
+
+				this.addWatchFile( normalizedId );
+
+				return {
+					code: fs.readFileSync( normalizedId, 'utf-8' ),
+					moduleType: 'js'
+				};
 			}
+		},
 
-			styles.set( normalizeId( id ), code );
+		transform: {
+			filter: {
+				id: CSS_ID_REGEXP
+			},
 
-			return '';
+			handler( code: string, id: string ): string | undefined {
+				styles.set( normalizeId( id ), code );
+
+				return '';
+			}
 		},
 
 		async generateBundle( outputOptions, bundle ) {
 			const orderedCssModules = getOrderedCssModules( bundle, outputOptions, this.getModuleInfo );
+
+			if ( !orderedCssModules.length ) {
+				this.emitFile( {
+					type: 'asset',
+					fileName: options.fileName,
+					source: '\n'
+				} );
+
+				return;
+			}
+
 			// Lightning CSS bundles from a single entry file, so create a virtual one
 			// that imports CSS modules in the desired order.
 			const virtualEntry = createVirtualEntry( orderedCssModules );
@@ -232,7 +276,7 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 						const normalizedPath = normalizeId( filePath );
 						const transformedStyles = styles.get( normalizedPath );
 
-						// Prefer styles transformed by earlier Rollup plugins.
+						// Prefer styles transformed by earlier Rolldown plugins.
 						if ( transformedStyles !== undefined ) {
 							return transformedStyles;
 						}
@@ -261,15 +305,15 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 							this.error( `External CSS imports are not supported. Found ${ specifier } in ${ normalizedOrigin }.` );
 						}
 
-						// Ask Rollup first so aliases/custom resolvers stay in effect.
-						const resolvedByRollup = await this.resolve( specifier, normalizedOrigin, { skipSelf: true } );
+						// Ask Rolldown first so aliases/custom resolvers stay in effect.
+						const resolvedByRolldown = await this.resolve( specifier, normalizedOrigin, { skipSelf: true } );
 
-						if ( resolvedByRollup ) {
-							if ( resolvedByRollup.external ) {
+						if ( resolvedByRolldown ) {
+							if ( resolvedByRolldown.external ) {
 								this.error( `External CSS imports are not supported. Found ${ specifier } in ${ normalizedOrigin }.` );
 							}
 
-							return normalizeId( resolvedByRollup.id );
+							return normalizeId( resolvedByRolldown.id );
 						}
 
 						if ( isAbsolute( specifier ) ) {

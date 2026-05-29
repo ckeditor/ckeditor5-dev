@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "55.6.2",
+  "version": "56.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -30,7 +30,6 @@
     "lint-staged": "^16.4.0",
     "listr2": "^8.3.3",
     "minimist": "^1.2.8",
-    "oxc-transform": "^0.112.0",
     "semver": "^7.7.4",
     "typescript": "5.5.4",
     "upath": "^2.0.1",

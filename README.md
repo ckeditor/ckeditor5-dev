@@ -47,18 +47,6 @@ Code coverage:
 pnpm run coverage
 ```
 
-## Releasing packages
-
-CircleCI automates the release process and can release both channels: stable (`X.Y.Z`) and pre-releases (`X.Y.Z-alpha.X`, etc.).
-
-Before you start, you need to prepare the changelog entries.
-
-1. Make sure the `#master` branch is up-to-date: `git fetch && git checkout master && git pull`.
-1. Prepare a release branch: `git checkout -b release-[YYYYMMDD]` where `YYYYMMDD` is the current day.
-1. Generate the changelog entries: `pnpm run release:prepare-changelog`.
-1. Commit all changes and prepare a new pull request targeting the `#master` branch.
-1. Ping the `@ckeditor/ckeditor-5-platform` team to review the pull request and trigger the release process.
-
 ## License
 
 Licensed under the terms of [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html). For full details about the license, please check the `LICENSE.md` file.

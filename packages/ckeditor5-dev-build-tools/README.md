@@ -184,18 +184,6 @@ When using the JavaScript API, the option must be an array.
 
 **Example value:** `external: [ 'lodash', 'moment' ]`
 
-#### `rewrite`
-
-**Type:** `string[]`
-
-**Default value:** `[]`
-
-A list of imports to rewrite in the output file. This option can be used if one of the dependencies provided in `external` has a separate build for the new install methods that should be used instead of the one used in the source code.
-
-This option is only available for the JavaScript API.
-
-**Example value:** `rewrite: [ 'dependency', 'dependency/dist/index.js' ]`
-
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-bump-year/CHANGELOG.md) file.
