@@ -90,7 +90,10 @@ function getCliArguments(): Partial<BuildOptions> {
 		args: process.argv.slice( 2 ),
 
 		// Fail when unknown argument is used.
-		strict: true
+		strict: true,
+
+		// Allows explicitly setting boolean options to `false` by prefixing the option name with `--no-`. Example: `--no-strip-internal`.
+		allowNegative: true
 	} );
 
 	return camelizeObjectKeys( values ) as Partial<BuildOptions>;
