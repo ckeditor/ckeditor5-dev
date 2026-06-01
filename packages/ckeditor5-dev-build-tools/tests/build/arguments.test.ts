@@ -155,6 +155,24 @@ test( '--declarations', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { declarations: true } ) );
 } );
 
+test( '--strip-internal', async () => {
+	const spy = getConfigMock();
+
+	mockCliArgs( '--strip-internal' );
+	await build();
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { stripInternal: true } ) );
+} );
+
+test( '--no-strip-internal', async () => {
+	const spy = getConfigMock();
+
+	mockCliArgs( '--no-strip-internal' );
+	await build();
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { stripInternal: false } ) );
+} );
+
 test( '--translations', async () => {
 	const spy = getConfigMock();
 
@@ -258,6 +276,14 @@ test( '.declarations', async () => {
 	await build( { declarations: true } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { declarations: true } ) );
+} );
+
+test( '.stripInternal', async () => {
+	const spy = getConfigMock();
+
+	await build( { stripInternal: false } );
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { stripInternal: false } ) );
 } );
 
 test( '.translations', async () => {

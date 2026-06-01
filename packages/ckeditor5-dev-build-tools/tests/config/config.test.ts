@@ -18,6 +18,7 @@ const defaults: Options = {
 	external: [],
 	globals: [],
 	declarations: false,
+	stripInternal: true,
 	translations: '',
 	sourceMap: false,
 	minify: false,
