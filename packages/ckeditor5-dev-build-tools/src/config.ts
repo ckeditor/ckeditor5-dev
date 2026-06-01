@@ -27,6 +27,7 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 		banner,
 		external,
 		declarations,
+		stripInternal,
 		translations,
 		sourceMap,
 		minify,
@@ -178,7 +179,8 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 			getOptionalPlugin(
 				declarations && hasTsconfig,
 				declarationFiles( {
-					sourceDirectory: path.dirname( input )
+					sourceDirectory: path.dirname( input ),
+					stripInternal
 				} )
 			),
 
