@@ -27,7 +27,7 @@ minimumReleaseAgeExclude:
   - '@cksource/*'
   - '*ckeditor5*'
 
-  # Remove after 2026-06-34
+  # Remove after 2026-06-04
   - 'oxc-transform'
   - '@oxc-transform/*'
 
