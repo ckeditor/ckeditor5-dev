@@ -7,10 +7,9 @@ import type { Plugin } from 'vite';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 
-const DEFAULT_EXTENSIONS = [ '.html' ];
 const RAW_QUERY = '?ckeditor5-raw';
 
-export function rawPlugin( extensions: Array<string> = DEFAULT_EXTENSIONS ): Plugin {
+export function rawHtmlPlugin(): Plugin {
 	return {
 		name: 'ckeditor5-raw',
 		enforce: 'pre',
@@ -20,7 +19,7 @@ export function rawPlugin( extensions: Array<string> = DEFAULT_EXTENSIONS ): Plu
 				return null;
 			}
 
-			if ( !extensions.includes( path.extname( source ) ) ) {
+			if ( path.extname( source ) != '.html' ) {
 				return null;
 			}
 
