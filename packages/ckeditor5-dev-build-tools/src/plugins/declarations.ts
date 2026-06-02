@@ -5,7 +5,7 @@
 
 import { globSync, readFileSync } from 'node:fs';
 import path from 'upath';
-import { isolatedDeclaration } from 'rolldown/experimental';
+import { isolatedDeclaration } from 'oxc-transform';
 import type { Plugin } from 'rolldown';
 
 export interface RolldownDeclarationOptions {
