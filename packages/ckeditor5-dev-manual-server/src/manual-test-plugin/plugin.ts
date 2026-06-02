@@ -21,21 +21,27 @@ interface ManualTestClientEntry {
 	source: 'commercial' | 'oss';
 }
 
+interface ManualTestServerLike {
+	middlewares: {
+		use( middleware: unknown ): void;
+	};
+}
+
 const MANUAL_TEST_PATTERNS = [
 	'packages/*/tests/manual/**/*.{html,js,md,ts}',
 	'external/ckeditor5/packages/*/tests/manual/**/*.{html,js,md,ts}'
 ];
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
-const WORKSPACE_ROOT = process.cwd();
 const MANUAL_THEME_ROOT = path.resolve( import.meta.dirname, '..', 'theme' );
 const MANUAL_CATALOG_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'catalog.html' );
 const MANUAL_SHELL_TEMPLATE_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.html' );
 const MANUAL_SHELL_SCRIPT_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.ts' );
-const MANUAL_CATALOG_PUBLIC_PATH = toPublicFilePath( MANUAL_CATALOG_FILE_PATH, WORKSPACE_ROOT );
-const MANUAL_SHELL_SCRIPT_PUBLIC_PATH = toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, WORKSPACE_ROOT );
 
 export function createManualTestsPlugin(): Plugin {
-	const manualPages = collectManualPages( MANUAL_TEST_PATTERNS, WORKSPACE_ROOT );
+	const workspaceRoot = process.cwd();
+	const manualCatalogPublicPath = toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
+	const manualShellScriptPublicPath = toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
+	const manualPages = collectManualPages( MANUAL_TEST_PATTERNS, workspaceRoot );
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const clientEntries: Array<ManualTestClientEntry> = [ ...manualPages.values() ].map( entry => ( {
 		displayName: entry.displayName,
@@ -50,23 +56,11 @@ export function createManualTestsPlugin(): Plugin {
 		name: 'ckeditor5-manual-tests',
 
 		configureServer( server ) {
-			server.middlewares.use( createManualStaticAssetsMiddleware( WORKSPACE_ROOT ) );
-
-			server.middlewares.use( ( request, _response, next ) => {
-				rewriteCatalogRequest( request );
-
-				next();
-			} );
+			useManualTestMiddlewares( server, workspaceRoot, manualCatalogPublicPath );
 		},
 
 		configurePreviewServer( server ) {
-			server.middlewares.use( createManualStaticAssetsMiddleware( WORKSPACE_ROOT ) );
-
-			server.middlewares.use( ( request, _response, next ) => {
-				rewriteCatalogRequest( request );
-
-				next();
-			} );
+			useManualTestMiddlewares( server, workspaceRoot, manualCatalogPublicPath );
 		},
 
 		config() {
@@ -76,7 +70,7 @@ export function createManualTestsPlugin(): Plugin {
 						input: [
 							MANUAL_CATALOG_FILE_PATH,
 							...[ ...manualPages.values() ].map( entry =>
-								path.resolve( WORKSPACE_ROOT, entry.htmlFilePath.slice( 1 ) )
+								path.resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) )
 							)
 						]
 					}
@@ -104,7 +98,7 @@ export function createManualTestsPlugin(): Plugin {
 			order: 'pre',
 
 			handler( html, context ) {
-				const entry = getManualPageEntryForHtmlPath( manualPages, context.path );
+				const entry = getManualPageEntryForHtmlPath( manualPages, context.path, workspaceRoot );
 
 				if ( !entry ) {
 					return undefined;
@@ -113,20 +107,34 @@ export function createManualTestsPlugin(): Plugin {
 				return createManualShellHtml( {
 					entry,
 					html,
-					shellScriptPublicPath: MANUAL_SHELL_SCRIPT_PUBLIC_PATH,
+					shellScriptPublicPath: manualShellScriptPublicPath,
 					shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
-					workspaceRoot: WORKSPACE_ROOT
+					workspaceRoot
 				} );
 			}
 		}
 	};
 }
 
-function rewriteCatalogRequest( request: { url?: string } ): void {
+function useManualTestMiddlewares(
+	server: ManualTestServerLike,
+	workspaceRoot: string,
+	manualCatalogPublicPath: string
+): void {
+	server.middlewares.use( createManualStaticAssetsMiddleware( workspaceRoot ) );
+
+	server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
+		rewriteCatalogRequest( request, manualCatalogPublicPath );
+
+		next();
+	} );
+}
+
+function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {
 	const requestPath = request.url?.split( '?' )[ 0 ];
 
 	if ( requestPath == '/' || requestPath == '/index.html' ) {
-		request.url = MANUAL_CATALOG_PUBLIC_PATH;
+		request.url = manualCatalogPublicPath;
 	}
 }
 
@@ -138,7 +146,8 @@ function getFilePathFromId( id: string ): string {
 
 function getManualPageEntryForHtmlPath(
 	manualPages: Map<string, ManualPageEntry>,
-	requestPath: string
+	requestPath: string,
+	workspaceRoot: string
 ): ManualPageEntry | undefined {
 	const filePath = getFilePathFromId( requestPath );
 	const entry = manualPages.get( filePath );
@@ -147,8 +156,8 @@ function getManualPageEntryForHtmlPath(
 		return entry;
 	}
 
-	if ( path.isAbsolute( filePath ) && filePath.startsWith( WORKSPACE_ROOT ) ) {
-		return manualPages.get( toPublicSpecifier( path.relative( WORKSPACE_ROOT, filePath ) ) );
+	if ( path.isAbsolute( filePath ) && filePath.startsWith( workspaceRoot ) ) {
+		return manualPages.get( toPublicSpecifier( path.relative( workspaceRoot, filePath ) ) );
 	}
 
 	return undefined;

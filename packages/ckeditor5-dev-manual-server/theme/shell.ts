@@ -5,6 +5,7 @@
 
 import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
 import type { ManualData } from '../src/manual-test-plugin/plugin.js';
+import { MANUAL_REFRESH_EVENT_NAME } from '../src/constants.js';
 
 import './shell.css';
 
@@ -14,7 +15,6 @@ interface ViteHotContextLike {
 	on( event: string, callback: () => void ): void;
 }
 
-const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 const globalTarget = window as any;
 
 renderManual();
@@ -133,7 +133,7 @@ function toggleInstructions( isOpen: boolean ): void {
 	const panel = document.querySelector<HTMLElement>( '.shell-instructions' );
 	const trigger = document.querySelector<HTMLElement>( '[data-shell-action="show-instructions"]' );
 
-	if ( !panel ) {
+	if ( !panel || !trigger ) {
 		return;
 	}
 
@@ -146,7 +146,7 @@ function toggleInstructions( isOpen: boolean ): void {
 	panel.classList.toggle( 'shell-instructions--open', isOpen );
 	panel.setAttribute( 'aria-hidden', String( !isOpen ) );
 	panel.toggleAttribute( 'inert', !isOpen );
-	trigger!.setAttribute( 'aria-expanded', String( isOpen ) );
+	trigger.setAttribute( 'aria-expanded', String( isOpen ) );
 }
 
 /**

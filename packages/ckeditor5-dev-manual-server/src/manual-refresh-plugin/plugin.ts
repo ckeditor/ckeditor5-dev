@@ -4,8 +4,7 @@
  */
 
 import type { HotPayload, Plugin } from 'vite';
-
-const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
+import { MANUAL_REFRESH_EVENT_NAME } from '../constants.js';
 
 type HotSendArguments = [ payload: HotPayload ];
 
