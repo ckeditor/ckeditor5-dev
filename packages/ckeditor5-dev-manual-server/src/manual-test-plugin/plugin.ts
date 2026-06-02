@@ -37,7 +37,7 @@ const MANUAL_CATALOG_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'catalog.html'
 const MANUAL_SHELL_TEMPLATE_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.html' );
 const MANUAL_SHELL_SCRIPT_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
-export function createManualTestsPlugin(): Plugin {
+export function manualTestsPlugin(): Plugin {
 	const workspaceRoot = process.cwd();
 	const manualCatalogPublicPath = toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
 	const manualShellScriptPublicPath = toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );

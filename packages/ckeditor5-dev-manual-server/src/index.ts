@@ -3,9 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-export { createManualTestsPlugin } from './manual-test-plugin/plugin.js';
+export { manualTestsPlugin } from './manual-test-plugin/plugin.js';
 export type { ManualData } from './manual-test-plugin/plugin.js';
 
-export { createManualRefreshPlugin } from './manual-refresh-plugin/plugin.js';
+export { refreshPlugin } from './refresh-plugin/plugin.js';
+
+export { rawPlugin } from './raw-plugin/plugin.js';
 
 export { stringifyValues } from './utils.js';

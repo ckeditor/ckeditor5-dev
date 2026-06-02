@@ -12,7 +12,7 @@ interface BundledDevClientEnvironment {
 	initialBuildCompleted: boolean;
 }
 
-export function createManualRefreshPlugin(): Plugin {
+export function refreshPlugin(): Plugin {
 	return {
 		name: 'ckeditor5-manual-refresh',
 		apply: 'serve',
