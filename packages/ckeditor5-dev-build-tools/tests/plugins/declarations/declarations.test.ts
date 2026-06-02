@@ -8,7 +8,7 @@ import { expect, test, vi } from 'vitest';
 
 const isolatedDeclarationMock = vi.hoisted( () => vi.fn() );
 
-vi.mock( 'rolldown/experimental', () => ( {
+vi.mock( 'oxc-transform', () => ( {
 	isolatedDeclaration: isolatedDeclarationMock
 } ) );
 
@@ -60,6 +60,38 @@ test( 'Emits declaration files for TypeScript source files', async () => {
 		fileName: 'common.d.cts',
 		source: 'export declare const value: string;'
 	} );
+	expect( isolatedDeclarationMock ).toHaveBeenCalledWith(
+		'valid.ts',
+		expect.any( String ),
+		{
+			sourcemap: false,
+			stripInternal: true
+		}
+	);
+} );
+
+test( 'Allows emitting internal APIs in declaration files', async () => {
+	isolatedDeclarationMock.mockResolvedValue( {
+		errors: [],
+		code: 'export declare const value: string;'
+	} );
+
+	const plugin = declarationFiles( {
+		sourceDirectory: join( import.meta.dirname, './fixtures' ),
+		stripInternal: false
+	} );
+	const context = createContext();
+
+	await runGenerateBundle( plugin, context );
+
+	expect( isolatedDeclarationMock ).toHaveBeenCalledWith(
+		'valid.ts',
+		expect.any( String ),
+		{
+			sourcemap: false,
+			stripInternal: false
+		}
+	);
 } );
 
 test( 'Throws formatted declaration generation errors', async () => {

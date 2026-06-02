@@ -5,7 +5,7 @@
 
 import { globSync, readFileSync } from 'node:fs';
 import path from 'upath';
-import { isolatedDeclaration } from 'rolldown/experimental';
+import { isolatedDeclaration } from 'oxc-transform';
 import type { Plugin } from 'rolldown';
 
 export interface RolldownDeclarationOptions {
@@ -14,6 +14,13 @@ export interface RolldownDeclarationOptions {
 	 * Directory containing TypeScript source files.
 	 */
 	sourceDirectory: string;
+
+	/**
+	 * Whether to skip declarations for internal APIs (marked with `@internal` in the source code).
+	 *
+	 * @default true
+	 */
+	stripInternal?: boolean;
 }
 
 const declarationExtensions = new Set( [ '.mts', '.cts' ] );
@@ -44,18 +51,23 @@ function getDeclarationFileName( sourceFileName: string ): string {
  * Generates declaration files using isolated declarations.
  */
 export function declarationFiles( pluginOptions: RolldownDeclarationOptions ): Plugin {
+	const {
+		sourceDirectory,
+		stripInternal = true
+	} = pluginOptions;
+
 	return {
 		name: 'emit-declaration-files',
 
 		async generateBundle() {
-			const sourceFilePaths = getTypeScriptSourceFiles( pluginOptions.sourceDirectory );
+			const sourceFilePaths = getTypeScriptSourceFiles( sourceDirectory );
 
 			const declarationFiles = await Promise.all( sourceFilePaths.map( async sourceFilePath => {
-				const filename = path.relative( pluginOptions.sourceDirectory, sourceFilePath );
+				const filename = path.relative( sourceDirectory, sourceFilePath );
 				const source = readFileSync( sourceFilePath, 'utf8' );
 				const { errors, code } = await isolatedDeclaration( filename, source, {
 					sourcemap: false,
-					stripInternal: true
+					stripInternal
 				} );
 
 				return {

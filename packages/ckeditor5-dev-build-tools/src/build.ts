@@ -23,6 +23,7 @@ export interface BuildOptions {
 	banner: string;
 	external: Array<string>;
 	declarations: boolean;
+	stripInternal: boolean;
 	translations: string;
 	sourceMap: boolean;
 	minify: boolean;
@@ -41,6 +42,7 @@ export const defaultOptions: BuildOptions = {
 	banner: '',
 	external: [],
 	declarations: false,
+	stripInternal: true,
 	translations: '',
 	sourceMap: false,
 	minify: false,
@@ -73,6 +75,7 @@ function getCliArguments(): Partial<BuildOptions> {
 			'banner': { type: 'string' },
 			'external': { type: 'string', multiple: true },
 			'declarations': { type: 'boolean' },
+			'strip-internal': { type: 'boolean' },
 			'translations': { type: 'string' },
 			'source-map': { type: 'boolean' },
 			'minify': { type: 'boolean' },
@@ -87,7 +90,10 @@ function getCliArguments(): Partial<BuildOptions> {
 		args: process.argv.slice( 2 ),
 
 		// Fail when unknown argument is used.
-		strict: true
+		strict: true,
+
+		// Allows explicitly setting boolean options to `false` by prefixing the option name with `--no-`. Example: `--no-strip-internal`.
+		allowNegative: true
 	} );
 
 	return camelizeObjectKeys( values ) as Partial<BuildOptions>;
