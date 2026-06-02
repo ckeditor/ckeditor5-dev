@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-build-tools",
-  "version": "56.0.0",
+  "version": "56.1.0",
   "description": "Rolldown-based tools used to build CKEditor 5 packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
