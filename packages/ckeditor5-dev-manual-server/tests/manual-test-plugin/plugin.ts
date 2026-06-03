@@ -92,6 +92,32 @@ describe( 'manualTestsPlugin()', () => {
 		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
 	} );
 
+	test( 'rewrites root and index requests to the manual test catalog', () => {
+		const plugin = manualTestsPlugin( [] );
+		const server = createServer();
+
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		const middleware = server.middlewares.use.mock.calls[ 1 ]![ 0 ] as (
+			request: { url?: string },
+			response: unknown,
+			next: () => void
+		) => void;
+		const rootRequest = { url: '/?q=1' };
+		const indexRequest = { url: '/index.html' };
+		const otherRequest = { url: '/manual.html' };
+		const next = vi.fn();
+
+		middleware( rootRequest, {}, next );
+		middleware( indexRequest, {}, next );
+		middleware( otherRequest, {}, next );
+
+		expect( rootRequest.url ).to.contain( '/theme/catalog.html' );
+		expect( indexRequest.url ).to.contain( '/theme/catalog.html' );
+		expect( otherRequest.url ).to.equal( '/manual.html' );
+		expect( next ).toHaveBeenCalledTimes( 3 );
+	} );
+
 	test( 'rewrites the catalog script to a public file path', () => {
 		const plugin = manualTestsPlugin( [] );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;

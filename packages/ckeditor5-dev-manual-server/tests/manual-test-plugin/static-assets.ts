@@ -136,8 +136,42 @@ describe( 'manual static assets', () => {
 		const next = vi.fn();
 
 		middleware( { method: 'POST', url: '/asset.png' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/missing.png' } as never, response as never, next );
 
-		expect( next ).toHaveBeenCalledOnce();
+		expect( next ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	test( 'sets content types for supported static asset extensions', async () => {
+		const cases = [
+			[ 'image.avif', 'image/avif' ],
+			[ 'styles.css', 'text/css; charset=utf-8' ],
+			[ 'animation.gif', 'image/gif' ],
+			[ 'favicon.ico', 'image/x-icon' ],
+			[ 'photo.jpg', 'image/jpeg' ],
+			[ 'photo.jpeg', 'image/jpeg' ],
+			[ 'sound.mp3', 'audio/mpeg' ],
+			[ 'video.mp4', 'video/mp4' ],
+			[ 'image.png', 'image/png' ],
+			[ 'readme.txt', 'text/plain; charset=utf-8' ],
+			[ 'image.webp', 'image/webp' ],
+			[ 'font.woff', 'font/woff' ],
+			[ 'font.woff2', 'font/woff2' ],
+			[ 'file.bin', 'application/octet-stream' ]
+		] as const;
+
+		for ( const [ fileName, contentType ] of cases ) {
+			const requestPath = `/packages/ckeditor5-foo/tests/manual/assets/${ fileName }`;
+			const filePath = await createFile( `packages/ckeditor5-foo/tests/manual/assets/${ fileName }`, '' );
+			const response = createResponse();
+			const middleware = createManualStaticAssetsMiddleware( new Map( [ [ requestPath, filePath ] ] ) );
+			const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
+
+			middleware( { method: 'HEAD', url: requestPath } as never, response as never, vi.fn() );
+
+			await finished;
+
+			expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', contentType );
+		}
 	} );
 
 	async function createFile( relativeFilePath: string, content = '' ): Promise<string> {
