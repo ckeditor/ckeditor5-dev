@@ -29,6 +29,7 @@ describe( 'manual static assets', () => {
 		await Promise.all( [
 			createFile( 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
 			createFile( 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
+			createFile( 'packages/ckeditor5-foo/tests/manual/styles.css' ),
 			createFile( 'packages/ckeditor5-foo/tests/manual/test.html' ),
 			createFile( 'packages/ckeditor5-foo/tests/manual/test.js' )
 		] );

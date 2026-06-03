@@ -104,6 +104,18 @@ describe( 'manualTestsPlugin()', () => {
 		) ).to.equal( `<script type="module" src="/@fs/${ catalogScriptFilePath }"></script>` );
 	} );
 
+	test( 'rewrites the catalog script when the context filename uses Windows separators', () => {
+		const plugin = manualTestsPlugin( [] );
+		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
+		const catalogFilePath = resolve( import.meta.dirname, '../../theme/catalog.html' );
+		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
+
+		expect( transformIndexHtml.handler(
+			'<script type="module" src="./catalog.ts"></script>',
+			{ filename: catalogFilePath.replace( /\//g, '\\' ) }
+		) ).to.equal( `<script type="module" src="/@fs/${ catalogScriptFilePath }"></script>` );
+	} );
+
 	test( 'passes through HTML files that are not manual pages', () => {
 		const plugin = manualTestsPlugin( [] );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;

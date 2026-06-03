@@ -8,7 +8,7 @@ import { globSync, statSync, createReadStream } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { toPublicSpecifier } from '../utils.js';
 
-const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.html', '.js', '.md', '.ts' ] );
+const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.css', '.html', '.js', '.md', '.ts' ] );
 const VITE_MODULE_QUERY_PARAMETERS = new Set( [
 	'import',
 	'raw',

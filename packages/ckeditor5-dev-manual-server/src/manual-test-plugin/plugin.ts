@@ -8,7 +8,7 @@ import { dirname, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
 import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
-import { toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import { toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin } from 'vite';
 import type { ManualPageEntry } from './types.js';
 export type { ManualData } from './types.js';
@@ -96,7 +96,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			order: 'pre',
 
 			handler( html, context ) {
-				if ( context.filename == MANUAL_CATALOG_FILE_PATH ) {
+				if ( toPosixPath( context.filename ) == toPosixPath( MANUAL_CATALOG_FILE_PATH ) ) {
 					return html.replace( './catalog.ts', manualCatalogScriptPublicPath );
 				}
 
