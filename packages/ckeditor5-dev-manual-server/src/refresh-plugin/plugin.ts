@@ -4,7 +4,8 @@
  */
 
 import type { Plugin } from 'vite';
-import { MANUAL_REFRESH_EVENT_NAME } from '../constants.js';
+
+export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
 export function refreshPlugin(): Plugin {
 	return {

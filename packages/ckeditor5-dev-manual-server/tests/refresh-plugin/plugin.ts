@@ -4,8 +4,7 @@
  */
 
 import { describe, expect, test, vi } from 'vitest';
-import { MANUAL_REFRESH_EVENT_NAME } from '../../src/constants.js';
-import { refreshPlugin } from '../../src/refresh-plugin/plugin.js';
+import { refreshPlugin, MANUAL_REFRESH_EVENT_NAME } from '../../src/refresh-plugin/plugin.js';
 import type { ModuleNode } from 'vite';
 
 interface TestHmrContext {

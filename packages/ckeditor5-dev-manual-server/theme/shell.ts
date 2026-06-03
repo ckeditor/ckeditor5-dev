@@ -4,17 +4,22 @@
  */
 
 import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
-import type { ManualData } from '../src/manual-test-plugin/plugin.js';
-import { MANUAL_REFRESH_EVENT_NAME } from '../src/constants.js';
 
 import './shell.css';
 
 declare const LICENSE_KEY: string;
 
+interface ManualData {
+	displayName: string;
+	instructionsHtml: string;
+	packageName: string;
+}
+
 interface ViteHotContextLike {
 	on( event: string, callback: () => void ): void;
 }
 
+const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 const globalTarget = window as any;
 
 renderManual();
