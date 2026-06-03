@@ -12,6 +12,7 @@ import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
 type ConfigHook = ( this: unknown, config: Record<string, never>, env: { command: 'build'; mode: string } ) => TestConfig;
 type ResolveIdHook = ( this: unknown, source: string, importer: string | undefined, options: Record<string, never> ) => string | null;
 type LoadHook = ( this: unknown, id: string, options: Record<string, never> ) => string | null;
+type ServerHook = ( server: TestServer ) => void;
 type TestConfig = {
 	build?: {
 		rolldownOptions?: {
@@ -21,6 +22,11 @@ type TestConfig = {
 };
 type TransformIndexHtmlHook = {
 	handler( html: string, context: { filename: string } ): string | undefined;
+};
+type TestServer = {
+	middlewares: {
+		use: ReturnType<typeof vi.fn>;
+	};
 };
 
 describe( 'manualTestsPlugin()', () => {
@@ -67,6 +73,25 @@ describe( 'manualTestsPlugin()', () => {
 		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
+	test( 'returns null for unknown virtual module requests', () => {
+		const plugin = manualTestsPlugin( [] );
+
+		expect( ( plugin.resolveId as unknown as ResolveIdHook ).call( {}, 'virtual:other', undefined, {} ) ).to.be.null;
+		expect( ( plugin.load as unknown as LoadHook ).call( {}, 'virtual:other', {} ) ).to.be.null;
+	} );
+
+	test( 'registers manual test middlewares for dev and preview servers', () => {
+		const plugin = manualTestsPlugin( [] );
+		const devServer = createServer();
+		const previewServer = createServer();
+
+		( plugin.configureServer as unknown as ServerHook )( devServer );
+		( plugin.configurePreviewServer as unknown as ServerHook )( previewServer );
+
+		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
+		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
+	} );
+
 	test( 'rewrites the catalog script to a public file path', () => {
 		const plugin = manualTestsPlugin( [] );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
@@ -79,10 +104,45 @@ describe( 'manualTestsPlugin()', () => {
 		) ).to.equal( `<script type="module" src="/@fs/${ catalogScriptFilePath }"></script>` );
 	} );
 
-	async function createFile( relativeFilePath: string ): Promise<void> {
+	test( 'passes through HTML files that are not manual pages', () => {
+		const plugin = manualTestsPlugin( [] );
+		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
+
+		expect( transformIndexHtml.handler( '<p>Sample</p>', {
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/missing.html' )
+		} ) ).to.be.undefined;
+	} );
+
+	test( 'wraps manual page HTML with the shell', async () => {
+		await Promise.all( [
+			createFile( 'packages/ckeditor5-foo/tests/manual/foo.html', '<title>Foo</title><p>Manual test</p>' ),
+			createFile( 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
+		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
+		const html = transformIndexHtml.handler(
+			'<title>Foo</title><p>Manual test</p>',
+			{ filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ) }
+		)!;
+
+		expect( html ).to.contain( 'manual-test-container' );
+		expect( html ).to.contain( '<title>Foo</title>' );
+		expect( html ).to.contain( '<p>Manual test</p>' );
+	} );
+
+	async function createFile( relativeFilePath: string, content = '' ): Promise<void> {
 		const filePath = join( workspaceRoot, relativeFilePath );
 
 		await mkdir( dirname( filePath ), { recursive: true } );
-		await writeFile( filePath, '' );
+		await writeFile( filePath, content );
 	}
 } );
+
+function createServer(): TestServer {
+	return {
+		middlewares: {
+			use: vi.fn()
+		}
+	};
+}

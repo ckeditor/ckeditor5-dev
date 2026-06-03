@@ -5,10 +5,12 @@
 
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
+import { Writable } from 'node:stream';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	collectManualStaticAssets,
+	createManualStaticAssetsMiddleware,
 	getManualStaticAssetFilePath
 } from '../../src/manual-test-plugin/static-assets.js';
 
@@ -83,10 +85,89 @@ describe( 'manual static assets', () => {
 		expect( getManualStaticAssetFilePath( undefined, staticAssets ) ).to.be.null;
 	} );
 
-	async function createFile( relativeFilePath: string ): Promise<void> {
+	test( 'serves collected static assets', async () => {
+		const filePath = await createFile( 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
+		const response = createResponse();
+		const next = vi.fn();
+		const middleware = createManualStaticAssetsMiddleware( new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/image.svg', filePath ]
+		] ) );
+		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
+
+		middleware( {
+			method: 'GET',
+			url: '/packages/ckeditor5-foo/tests/manual/assets/image.svg'
+		} as never, response as never, next );
+
+		await finished;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( response.statusCode ).to.equal( 200 );
+		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Length', 11 );
+		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', 'image/svg+xml' );
+		expect( response.getBody() ).to.equal( '<svg></svg>' );
+	} );
+
+	test( 'ends HEAD requests without streaming the static asset body', async () => {
+		const filePath = await createFile( 'packages/ckeditor5-foo/tests/manual/assets/data.json', '{ "ok": true }' );
+		const response = createResponse();
+		const next = vi.fn();
+		const middleware = createManualStaticAssetsMiddleware( new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/data.json', filePath ]
+		] ) );
+		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
+
+		middleware( {
+			method: 'HEAD',
+			url: '/packages/ckeditor5-foo/tests/manual/assets/data.json'
+		} as never, response as never, next );
+
+		await finished;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', 'application/json; charset=utf-8' );
+		expect( response.getBody() ).to.equal( '' );
+	} );
+
+	test( 'passes through unsupported static asset requests', () => {
+		const middleware = createManualStaticAssetsMiddleware( new Map() );
+		const response = createResponse();
+		const next = vi.fn();
+
+		middleware( { method: 'POST', url: '/asset.png' } as never, response as never, next );
+
+		expect( next ).toHaveBeenCalledOnce();
+	} );
+
+	async function createFile( relativeFilePath: string, content = '' ): Promise<string> {
 		const filePath = join( workspaceRoot, relativeFilePath );
 
 		await mkdir( dirname( filePath ), { recursive: true } );
-		await writeFile( filePath, '' );
+		await writeFile( filePath, content );
+
+		return filePath;
 	}
 } );
+
+function createResponse(): Writable & {
+	statusCode?: number;
+	setHeader: ReturnType<typeof vi.fn>;
+	getBody(): string;
+} {
+	const chunks: Array<Buffer> = [];
+	const response = new Writable( {
+		write( chunk: Buffer, _encoding, callback ) {
+			chunks.push( Buffer.from( chunk ) );
+			callback();
+		}
+	} ) as Writable & {
+		statusCode?: number;
+		setHeader: ReturnType<typeof vi.fn>;
+		getBody(): string;
+	};
+
+	response.setHeader = vi.fn();
+	response.getBody = () => Buffer.concat( chunks ).toString( 'utf8' );
+
+	return response;
+}
