@@ -31,6 +31,8 @@ describe( 'createManualTestServer()', () => {
 			info: loggerStub
 		} );
 
+		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'linux' );
+
 		vi.spyOn( http, 'createServer' ).mockImplementation( ( ...theArgs ) => {
 			server = createServer( ...theArgs );
 			servers.push( server );
@@ -160,7 +162,7 @@ describe( 'createManualTestServer()', () => {
 
 	describe( 'request handler', () => {
 		beforeEach( async () => {
-			createManualTestServer( 'workspace/build/.manual-tests', 49800 );
+			createManualTestServer( 'workspace/build/.manual-tests', 49700 );
 
 			await vi.waitFor( () => {
 				expect( loggerStub ).toHaveBeenCalled();

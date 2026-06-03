@@ -30,17 +30,16 @@ vi.mock( 'node:worker_threads', () => ( {
 
 describe( 'parallelWorker (worker defined in executeInParallel())', () => {
 	it( 'should execute a module from specified path and pass a package path and task options as arguments', async () => {
+		const postMessage = vi.mocked( parentPort ).postMessage;
+
 		await import( '../../lib/utils/parallelworker.js' );
 
-		// It's needed because `parallelworker` does not export anything. Instead, it processes
-		// an asynchronous loop. We must wait until the current JavaScript loop ends. Adding a new promise at the end
-		// forces it.
-		await new Promise( resolve => {
-			setTimeout( resolve, 100 );
-		} );
+		// Importing the worker starts async work, so wait until it reports completion.
+		await vi.waitFor( () => {
+			expect( postMessage ).toHaveBeenCalledTimes( 2 );
+			expect( postMessage ).toHaveBeenCalledWith( 'done:package' );
+		}, { timeout: 1000 } );
 
-		expect( vi.mocked( parentPort ).postMessage ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( parentPort ).postMessage ).toHaveBeenCalledWith( 'done:package' );
 		expect( vi.mocked( virtual ) ).toHaveBeenCalledTimes( 2 );
 		expect( vi.mocked( virtual ) ).toHaveBeenCalledWith( '/home/ckeditor/packages/a', taskOptions );
 		expect( vi.mocked( virtual ) ).toHaveBeenCalledWith( '/home/ckeditor/packages/b', taskOptions );

@@ -119,7 +119,7 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.files ).toEqual( expect.arrayContaining( [
 			'workspace/entry-file.js',
 			expect.objectContaining( {
-				pattern: expect.stringContaining( 'ckeditor5-utils/tests/_assets/**/*' )
+				pattern: expect.stringMatching( /ckeditor5-utils[/\\]tests[/\\]_assets[/\\]\*\*[/\\]\*/ )
 			} )
 		] ) );
 	} );
