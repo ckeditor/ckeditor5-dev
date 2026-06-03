@@ -146,7 +146,13 @@ function isManualTestScriptNode( node: Element, testScriptFileName: string ): bo
 		return false;
 	}
 
-	return posix.basename( source.split( '?' )[ 0 ]!.split( '#' )[ 0 ]! ) == testScriptFileName;
+	const sourceFileName = posix.basename( source.split( '?' )[ 0 ]!.split( '#' )[ 0 ]! );
+
+	return getScriptModuleName( sourceFileName ) == getScriptModuleName( testScriptFileName );
+}
+
+function getScriptModuleName( fileName: string ): string {
+	return fileName.replace( /\.[jt]s$/, '' );
 }
 
 function getRequiredElementByTagName( root: Node, tagName: string ): Element {

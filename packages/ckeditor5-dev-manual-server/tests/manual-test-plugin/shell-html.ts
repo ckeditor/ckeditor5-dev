@@ -69,4 +69,30 @@ describe( 'createManualShellHtml()', () => {
 		expect( scriptSources.filter( source => source == './iframe.js' ) ).to.have.length( 1 );
 		expect( scriptSources ).to.include( './helper.js' );
 	} );
+
+	test( 'removes stale JavaScript test script when TypeScript test script is selected', () => {
+		const html = createManualShellHtml( {
+			entry: {
+				...entry,
+				scriptFilePath: '/packages/ckeditor5-foo/tests/manual/iframe.ts'
+			},
+			html: [
+				'<head>',
+				'<script type="module" src="./iframe.js"></script>',
+				'<script type="module" src="./iframe-helper.js"></script>',
+				'</head>'
+			].join( '' ),
+			shellScriptPublicPath: '/theme/shell.ts',
+			shellTemplateFilePath,
+			workspaceRoot
+		} );
+		const document = parse( html );
+		const scriptSources = [ ...queryAll<Element>( document, node => isElementNode( node ) && node.tagName == 'script' ) ]
+			.map( script => getAttribute( script, 'src' ) )
+			.filter( ( source ): source is string => Boolean( source ) );
+
+		expect( scriptSources ).to.include( './iframe.ts' );
+		expect( scriptSources ).to.include( './iframe-helper.js' );
+		expect( scriptSources ).not.to.include( './iframe.js' );
+	} );
 } );
