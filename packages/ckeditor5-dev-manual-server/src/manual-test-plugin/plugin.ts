@@ -17,7 +17,6 @@ interface ManualTestClientEntry {
 	displayName: string;
 	href: string;
 	packageName: string;
-	packageShortName: string;
 	slug: string;
 }
 
@@ -50,7 +49,6 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 		displayName: entry.displayName,
 		href: entry.htmlFilePath,
 		packageName: entry.packageName,
-		packageShortName: entry.packageName.replace( /^ckeditor5-/, '' ),
 		slug: entry.slug
 	} ) );
 
