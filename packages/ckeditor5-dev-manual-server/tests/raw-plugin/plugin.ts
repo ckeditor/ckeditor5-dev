@@ -3,26 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-import os from 'node:os';
-import path from 'node:path';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { rawHtmlPlugin } from '../../src/raw-plugin/plugin.js';
-import type { PluginContext } from 'rollup';
+import type { PluginContext, ResolveIdResult } from 'rollup';
 
-interface RawPluginLoadResult {
-	code: string;
-	map: null;
-}
-
-type ResolveIdHook = ( this: PluginContext, source: string, importer?: string ) => Promise<string | null>;
-type LoadHook = ( id: string ) => Promise<RawPluginLoadResult | null>;
+type ResolveIdHook = ( this: PluginContext, source: string, importer?: string ) => Promise<ResolveIdResult>;
 
 describe( 'rawHtmlPlugin()', () => {
 	let temporaryDirectory: string;
 
 	beforeEach( async () => {
-		temporaryDirectory = await mkdtemp( path.join( os.tmpdir(), 'ckeditor5-raw-plugin-' ) );
+		temporaryDirectory = await mkdtemp( join( tmpdir(), 'ckeditor5-raw-plugin-' ) );
 	} );
 
 	afterEach( async () => {
@@ -33,44 +27,35 @@ describe( 'rawHtmlPlugin()', () => {
 		expect( rawHtmlPlugin().enforce ).to.equal( 'pre' );
 	} );
 
-	test( 'resolves imported HTML files as raw JavaScript modules by default', async () => {
+	test( 'resolves imported HTML files as Vite raw imports by default', async () => {
 		const plugin = rawHtmlPlugin();
-		const htmlFilePath = path.join( temporaryDirectory, 'template.html' );
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const htmlFilePath = join( temporaryDirectory, 'template.html' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
-		const load = plugin.load as LoadHook;
 
 		await writeFile( htmlFilePath, '<div class="sample">Text</div>' );
 
-		const resolvedHtmlId = await resolveId.call( createPluginContext( htmlFilePath ), './template.html', importer );
-
-		expect( await load( resolvedHtmlId! ) ).to.deep.equal( {
-			code: 'export default "<div class=\\"sample\\">Text</div>";',
-			map: null
-		} );
+		expect( await resolveId.call( createPluginContext( `${ htmlFilePath }?raw` ), './template.html', importer ) )
+			.to.equal( `${ htmlFilePath }?raw` );
 	} );
 
-	test( 'strips resolved import queries before loading raw HTML', async () => {
+	test( 'delegates raw import resolution to Vite', async () => {
 		const plugin = rawHtmlPlugin();
-		const htmlFilePath = path.join( temporaryDirectory, 'template.html' );
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const htmlFilePath = join( temporaryDirectory, 'template.html' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
-		const load = plugin.load as LoadHook;
+		const context = createPluginContext( `${ htmlFilePath }?raw` );
 
 		await writeFile( htmlFilePath, '<p>Template</p>' );
+		await resolveId.call( context, './template.html', importer );
 
-		const resolvedHtmlId = await resolveId.call( createPluginContext( `${ htmlFilePath }?v=1` ), './template.html', importer );
-
-		expect( await load( resolvedHtmlId! ) ).to.deep.equal( {
-			code: 'export default "<p>Template</p>";',
-			map: null
-		} );
+		expect( context.resolve ).toHaveBeenCalledWith( './template.html?raw', importer, { skipSelf: true } );
 	} );
 
 	test( 'does not resolve SVG files by default', async () => {
 		const plugin = rawHtmlPlugin();
-		const filePath = path.join( temporaryDirectory, 'icon.svg' );
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const filePath = join( temporaryDirectory, 'icon.svg' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 
 		await writeFile( filePath, '<svg><path d="M0 0" /></svg>' );
@@ -78,19 +63,9 @@ describe( 'rawHtmlPlugin()', () => {
 		expect( await resolveId.call( createPluginContext( filePath ), './icon.svg', importer ) ).to.be.null;
 	} );
 
-	test( 'does not load plain HTML files directly', async () => {
-		const plugin = rawHtmlPlugin();
-		const filePath = path.join( temporaryDirectory, 'manual.html' );
-		const load = plugin.load as LoadHook;
-
-		await writeFile( filePath, '<p>Manual test page</p>' );
-
-		expect( await load( filePath ) ).to.be.null;
-	} );
-
 	test( 'does not resolve HTML entry points without an importer', async () => {
 		const plugin = rawHtmlPlugin();
-		const filePath = path.join( temporaryDirectory, 'manual.html' );
+		const filePath = join( temporaryDirectory, 'manual.html' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 
 		expect( await resolveId.call( createPluginContext( filePath ), filePath ) ).to.be.null;
@@ -98,7 +73,7 @@ describe( 'rawHtmlPlugin()', () => {
 
 	test( 'does not resolve HTML imports that Vite cannot resolve', async () => {
 		const plugin = rawHtmlPlugin();
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 
 		expect( await resolveId.call( createPluginContext( null ), './missing.html', importer ) ).to.be.null;
@@ -106,8 +81,8 @@ describe( 'rawHtmlPlugin()', () => {
 
 	test( 'ignores files with unsupported extensions', async () => {
 		const plugin = rawHtmlPlugin();
-		const filePath = path.join( temporaryDirectory, 'script.js' );
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const filePath = join( temporaryDirectory, 'script.js' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 
 		await writeFile( filePath, 'export default 1;' );
@@ -117,8 +92,8 @@ describe( 'rawHtmlPlugin()', () => {
 
 	test( 'ignores imports with explicit request queries', async () => {
 		const plugin = rawHtmlPlugin();
-		const filePath = path.join( temporaryDirectory, 'template.html' );
-		const importer = path.join( temporaryDirectory, 'manual.js' );
+		const filePath = join( temporaryDirectory, 'template.html' );
+		const importer = join( temporaryDirectory, 'manual.js' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 
 		await writeFile( filePath, '<p>Query</p>' );
@@ -127,8 +102,8 @@ describe( 'rawHtmlPlugin()', () => {
 	} );
 } );
 
-function createPluginContext( resolvedId: string | null ): PluginContext {
+function createPluginContext( resolvedId: string | null ): PluginContext & { resolve: ReturnType<typeof vi.fn> } {
 	return {
-		resolve: async () => resolvedId ? { id: resolvedId } : null
-	} as unknown as PluginContext;
+		resolve: vi.fn( async () => resolvedId )
+	} as unknown as PluginContext & { resolve: ReturnType<typeof vi.fn> };
 }

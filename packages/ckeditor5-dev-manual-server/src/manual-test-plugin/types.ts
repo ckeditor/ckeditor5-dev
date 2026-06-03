@@ -16,7 +16,6 @@ export interface ManualPageEntry {
 	packageName: string;
 	scriptFilePath: string;
 	slug: string;
-	source: 'commercial' | 'oss';
 }
 
 export type ManualTestAssetExtension = 'html' | 'js' | 'md' | 'ts';

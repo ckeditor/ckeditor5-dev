@@ -15,10 +15,6 @@
 	--text-subtle: #a3a3a3;
 	--accent: #171717;
 	--accent-ring: rgb(23 23 23 / 10%);
-	--tag-commercial-bg: #f5f3ff;
-	--tag-commercial-fg: #6d28d9;
-	--tag-oss-bg: #f0fdf4;
-	--tag-oss-fg: #15803d;
 	--radius-lg: 12px;
 	--radius-md: 8px;
 	--radius-sm: 6px;
@@ -36,10 +32,6 @@
 		--text-subtle: #737373;
 		--accent: #fafafa;
 		--accent-ring: rgb(250 250 250 / 15%);
-		--tag-commercial-bg: rgb(124 58 237 / 15%);
-		--tag-commercial-fg: #c4b5fd;
-		--tag-oss-bg: rgb(34 197 94 / 15%);
-		--tag-oss-fg: #86efac;
 	}
 }
 
@@ -197,27 +189,6 @@ a {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-}
-
-.pkg__tag {
-	flex-shrink: 0;
-	font-size: 10px;
-	font-weight: 600;
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
-	padding: 3px 8px;
-	border-radius: 999px;
-	line-height: 1.4;
-}
-
-.pkg__tag--commercial {
-	color: var(--tag-commercial-fg);
-	background: var(--tag-commercial-bg);
-}
-
-.pkg__tag--oss {
-	color: var(--tag-oss-fg);
-	background: var(--tag-oss-bg);
 }
 
 .pkg__count {

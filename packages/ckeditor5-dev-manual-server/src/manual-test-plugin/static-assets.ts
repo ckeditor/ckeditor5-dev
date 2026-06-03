@@ -3,13 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+import { resolve, extname } from 'node:path';
+import { globSync, statSync, createReadStream } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { toPosixPath } from '../utils.js';
+import { toPublicSpecifier } from '../utils.js';
 
 const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.html', '.js', '.md', '.ts' ] );
-
 const VITE_MODULE_QUERY_PARAMETERS = new Set( [
 	'import',
 	'raw',
@@ -20,7 +19,20 @@ const VITE_MODULE_QUERY_PARAMETERS = new Set( [
 
 type ManualStaticAssetsMiddleware = ( request: IncomingMessage, response: ServerResponse, next: () => void ) => void;
 
-export function createManualStaticAssetsMiddleware( workspaceRoot: string ): ManualStaticAssetsMiddleware {
+export function collectManualStaticAssets( patterns: Array<string>, workspaceRoot: string ): Map<string, string> {
+	return new Map( patterns
+		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ) )
+		.sort()
+		.filter( relativeFilePath => statSync( resolve( workspaceRoot, relativeFilePath ) ).isFile() )
+		.filter( isManualStaticAssetPath )
+		.map( relativeFilePath => [
+			toPublicSpecifier( relativeFilePath ),
+			resolve( workspaceRoot, relativeFilePath )
+		] )
+	);
+}
+
+export function createManualStaticAssetsMiddleware( staticAssets: Map<string, string> ): ManualStaticAssetsMiddleware {
 	return ( request, response, next ) => {
 		if ( request.method != 'GET' && request.method != 'HEAD' ) {
 			next();
@@ -28,7 +40,7 @@ export function createManualStaticAssetsMiddleware( workspaceRoot: string ): Man
 			return;
 		}
 
-		const filePath = getManualStaticAssetFilePath( request.url, workspaceRoot );
+		const filePath = getManualStaticAssetFilePath( request.url, staticAssets );
 
 		if ( !filePath ) {
 			next();
@@ -36,21 +48,7 @@ export function createManualStaticAssetsMiddleware( workspaceRoot: string ): Man
 			return;
 		}
 
-		let fileStats: fs.Stats;
-
-		try {
-			fileStats = fs.statSync( filePath );
-		} catch {
-			next();
-
-			return;
-		}
-
-		if ( !fileStats.isFile() ) {
-			next();
-
-			return;
-		}
+		const fileStats = statSync( filePath );
 
 		response.statusCode = 200;
 		response.setHeader( 'Content-Length', fileStats.size );
@@ -62,11 +60,14 @@ export function createManualStaticAssetsMiddleware( workspaceRoot: string ): Man
 			return;
 		}
 
-		fs.createReadStream( filePath ).pipe( response );
+		createReadStream( filePath ).pipe( response );
 	};
 }
 
-export function getManualStaticAssetFilePath( requestUrl: string | undefined, workspaceRoot: string ): string | null {
+export function getManualStaticAssetFilePath(
+	requestUrl: string | undefined,
+	staticAssets: Map<string, string>
+): string | null {
 	if ( !requestUrl ) {
 		return null;
 	}
@@ -83,56 +84,11 @@ export function getManualStaticAssetFilePath( requestUrl: string | undefined, wo
 		return null;
 	}
 
-	let requestPath: string;
-
-	try {
-		requestPath = decodeURIComponent( url.pathname );
-	} catch {
-		return null;
-	}
-
-	if ( requestPath.includes( '\0' ) ) {
-		return null;
-	}
-
-	const filePath = path.resolve( workspaceRoot, toPosixPath( requestPath ).replace( /^\/+/, '' ) );
-	const relativeResolvedPath = path.relative( workspaceRoot, filePath );
-
-	if ( relativeResolvedPath.startsWith( '..' ) || path.isAbsolute( relativeResolvedPath ) ) {
-		return null;
-	}
-
-	const relativeFilePath = toPosixPath( relativeResolvedPath );
-
-	if ( !isManualStaticAssetPath( relativeFilePath ) ) {
-		return null;
-	}
-
-	return filePath;
+	return staticAssets.get( url.pathname ) || null;
 }
 
 function isManualStaticAssetPath( filePath: string ): boolean {
-	const pathParts = filePath.split( '/' );
-	const manualDirectoryIndex = pathParts.findIndex( ( part, index ) => part == 'manual' && pathParts[ index - 1 ] == 'tests' );
-
-	if ( manualDirectoryIndex < 0 || manualDirectoryIndex == pathParts.length - 1 ) {
-		return false;
-	}
-
-	const packageRootParts = pathParts.slice( 0, manualDirectoryIndex - 1 );
-	const isCommercialPackage = packageRootParts.length == 2 && packageRootParts[ 0 ] == 'packages';
-	const isOssPackage = packageRootParts.length == 4 &&
-		packageRootParts[ 0 ] == 'external' &&
-		packageRootParts[ 1 ] == 'ckeditor5' &&
-		packageRootParts[ 2 ] == 'packages';
-
-	if ( !isCommercialPackage && !isOssPackage ) {
-		return false;
-	}
-
-	const extension = path.posix.extname( filePath );
-
-	return extension != '' && !PROCESSED_MANUAL_TEST_EXTENSIONS.has( extension );
+	return extname( filePath ) != '' && !PROCESSED_MANUAL_TEST_EXTENSIONS.has( extname( filePath ) );
 }
 
 function getContentType( extension: string ): string {
@@ -156,6 +112,12 @@ function getContentType( extension: string ): string {
 		case '.json':
 		case '.map':
 			return 'application/json; charset=utf-8';
+
+		case '.mp3':
+			return 'audio/mpeg';
+
+		case '.mp4':
+			return 'video/mp4';
 
 		case '.png':
 			return 'image/png';

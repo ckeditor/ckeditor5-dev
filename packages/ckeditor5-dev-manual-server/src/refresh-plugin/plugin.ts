@@ -3,37 +3,25 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { HotPayload, Plugin } from 'vite';
+import type { Plugin } from 'vite';
 import { MANUAL_REFRESH_EVENT_NAME } from '../constants.js';
-
-type HotSendArguments = [ payload: HotPayload ];
-
-interface BundledDevClientEnvironment {
-	initialBuildCompleted: boolean;
-}
 
 export function refreshPlugin(): Plugin {
 	return {
 		name: 'ckeditor5-manual-refresh',
 		apply: 'serve',
 
-		configureServer( server ) {
-			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
-			const hot = clientEnvironment.hot;
-			const send = hot.send.bind( hot );
+		handleHotUpdate( { file, server } ) {
+			if ( file.endsWith( '.css' ) ) {
+				return;
+			}
 
-			hot.send = ( ( ...args: HotSendArguments ) => {
-				const { type } = args[ 0 ];
-
-				if ( type == 'update' || ( type == 'full-reload' && clientEnvironment.initialBuildCompleted ) ) {
-					return send( {
-						type: 'custom',
-						event: MANUAL_REFRESH_EVENT_NAME
-					} );
-				}
-
-				send( ...args );
+			server.hot.send( {
+				type: 'custom',
+				event: MANUAL_REFRESH_EVENT_NAME
 			} );
+
+			return [];
 		}
 	};
 }

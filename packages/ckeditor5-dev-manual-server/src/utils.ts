@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'node:path';
+import { resolve, relative, isAbsolute } from 'node:path';
+import { globSync, readFileSync } from 'node:fs';
 
 /**
  * Stringifies the values of the given object.
@@ -16,10 +17,26 @@ export function stringifyValues( obj: Record<string, unknown> ): Record<string, 
 	);
 }
 
-export function toPublicFilePath( filePath: string, workspaceRoot: string ): string {
-	const relativeFilePath = path.relative( workspaceRoot, filePath );
+/**
+ * Returns package names that should be pre-bundled by the manual test server.
+ */
+export function getOptimizedPackageIncludes( packageJsonGlobs: Array<string> ): Array<string> {
+	const packageNames = globSync( packageJsonGlobs, { cwd: process.cwd() } )
+		.map( packageJsonPath => {
+			const resolvedPath = resolve( process.cwd(), packageJsonPath );
+			const packageJson = JSON.parse( readFileSync( resolvedPath, 'utf8' ) );
 
-	if ( !relativeFilePath.startsWith( '..' ) && !path.isAbsolute( relativeFilePath ) ) {
+			return packageJson.name;
+		} )
+		.sort();
+
+	return [ ...new Set( packageNames ) ];
+}
+
+export function toPublicFilePath( filePath: string, workspaceRoot: string ): string {
+	const relativeFilePath = relative( workspaceRoot, filePath );
+
+	if ( !relativeFilePath.startsWith( '..' ) && !isAbsolute( relativeFilePath ) ) {
 		return toPublicSpecifier( relativeFilePath );
 	}
 

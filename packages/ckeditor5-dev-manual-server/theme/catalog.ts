@@ -86,14 +86,10 @@ function renderGroups( entries: Array<ManualTestEntry> ): Array<HTMLElement> {
  * Renders a single package card with all tests belonging to that package.
  */
 function renderPackageCard( packageName: string, entries: Array<ManualTestEntry> ): HTMLElement {
-	const source = entries[ 0 ].source;
 	const packageCard = cloneTemplateElement( 'manual-package-template' );
-	const sourceTag = packageCard.querySelector<HTMLElement>( '.pkg__tag' )!;
 	const list = packageCard.querySelector<HTMLElement>( '.pkg__list' )!;
 
 	packageCard.querySelector<HTMLElement>( '.pkg__name' )!.textContent = packageName;
-	sourceTag.textContent = source;
-	sourceTag.classList.add( `pkg__tag--${ source }` );
 	packageCard.querySelector<HTMLElement>( '.pkg__count' )!.textContent = String( entries.length );
 	list.replaceChildren( ...entries.map( entry => renderTestItem( entry ) ) );
 

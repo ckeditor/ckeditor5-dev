@@ -10,4 +10,4 @@ export { refreshPlugin } from './refresh-plugin/plugin.js';
 
 export { rawHtmlPlugin } from './raw-plugin/plugin.js';
 
-export { stringifyValues } from './utils.js';
+export { getOptimizedPackageIncludes, stringifyValues } from './utils.js';

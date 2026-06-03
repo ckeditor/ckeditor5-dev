@@ -3,62 +3,90 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'node:path';
-import { describe, expect, test } from 'vitest';
-import { getManualStaticAssetFilePath } from '../../src/manual-test-plugin/static-assets.js';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import {
+	collectManualStaticAssets,
+	getManualStaticAssetFilePath
+} from '../../src/manual-test-plugin/static-assets.js';
 
-describe( 'getManualStaticAssetFilePath()', () => {
-	const workspaceRoot = path.resolve( '/workspace' );
+describe( 'manual static assets', () => {
+	let workspaceRoot: string;
 
-	test( 'returns a workspace file path for a commercial manual test asset', () => {
+	beforeEach( async () => {
+		workspaceRoot = await mkdtemp( join( tmpdir(), 'ckeditor5-manual-static-assets-' ) );
+	} );
+
+	afterEach( async () => {
+		await rm( workspaceRoot, { recursive: true, force: true } );
+	} );
+
+	test( 'collects manual test assets from configured patterns', async () => {
+		await Promise.all( [
+			createFile( 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
+			createFile( 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
+			createFile( 'packages/ckeditor5-foo/tests/manual/test.html' ),
+			createFile( 'packages/ckeditor5-foo/tests/manual/test.js' )
+		] );
+
+		const staticAssets = collectManualStaticAssets( [
+			'packages/*/tests/manual/**/*',
+			'external/ckeditor5/packages/*/tests/manual/**/*'
+		], workspaceRoot );
+
+		expect( [ ...staticAssets.entries() ] ).to.deep.equal( [
+			[
+				'/external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg',
+				join( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' )
+			],
+			[
+				'/packages/ckeditor5-foo/tests/manual/assets/image.png',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
+			]
+		] );
+	} );
+
+	test( 'returns the collected file path for a request URL', () => {
+		const staticAssets = new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
+		] );
+
 		expect( getManualStaticAssetFilePath(
 			'/packages/ckeditor5-foo/tests/manual/assets/image.png?v=1',
-			workspaceRoot
-		) ).to.equal( path.resolve( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' ) );
-	} );
-
-	test( 'returns a workspace file path for an OSS manual test asset', () => {
-		expect( getManualStaticAssetFilePath(
-			'/external/ckeditor5/packages/ckeditor5-bar/tests/manual/fixtures/data.json',
-			workspaceRoot
-		) ).to.equal( path.resolve( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/fixtures/data.json' ) );
-	} );
-
-	test( 'does not return files processed by the manual server', () => {
-		for ( const extension of [ 'html', 'js', 'md', 'ts' ] ) {
-			expect( getManualStaticAssetFilePath(
-				`/packages/ckeditor5-foo/tests/manual/test.${ extension }`,
-				workspaceRoot
-			) ).to.be.null;
-		}
+			staticAssets
+		) ).to.equal( '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' );
 	} );
 
 	test( 'does not handle Vite module requests', () => {
+		const staticAssets = new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
+		] );
+
 		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/assets/image.png?import',
-			workspaceRoot
+			'/packages/ckeditor5-foo/tests/manual/assets/image.png?url',
+			staticAssets
 		) ).to.be.null;
 	} );
 
-	test( 'does not return assets outside supported manual test directories', () => {
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/automated/assets/image.png',
-			workspaceRoot
-		) ).to.be.null;
+	test( 'ignores unknown and invalid request URLs', () => {
+		const staticAssets = new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
+		] );
 
 		expect( getManualStaticAssetFilePath(
-			'/external/other-repository/packages/ckeditor5-bar/tests/manual/fixtures/data.json',
-			workspaceRoot
+			'/packages/ckeditor5-foo/tests/manual/missing.png',
+			staticAssets
 		) ).to.be.null;
+		expect( getManualStaticAssetFilePath( 'http://%', staticAssets ) ).to.be.null;
+		expect( getManualStaticAssetFilePath( undefined, staticAssets ) ).to.be.null;
 	} );
 
-	test( 'does not return paths with traversal segments', () => {
-		for ( const requestPath of [
-			'/packages/ckeditor5-foo/tests/manual/../secret.png',
-			'/packages/ckeditor5-foo/tests/manual/%2e%2e/secret.png',
-			'/packages/ckeditor5-foo/tests/manual/..%5csecret.png'
-		] ) {
-			expect( getManualStaticAssetFilePath( requestPath, workspaceRoot ) ).to.be.null;
-		}
-	} );
+	async function createFile( relativeFilePath: string ): Promise<void> {
+		const filePath = join( workspaceRoot, relativeFilePath );
+
+		await mkdir( dirname( filePath ), { recursive: true } );
+		await writeFile( filePath, '' );
+	}
 } );

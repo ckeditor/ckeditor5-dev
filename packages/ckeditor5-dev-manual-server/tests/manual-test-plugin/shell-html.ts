@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'node:path';
+import { resolve } from 'node:path';
 import { parse } from 'parse5';
 import { describe, expect, test } from 'vitest';
 import { getAttribute, isElementNode, query, queryAll, type Element } from '@parse5/tools';
@@ -11,15 +11,14 @@ import { createManualShellHtml } from '../../src/manual-test-plugin/shell-html.j
 import type { ManualPageEntry } from '../../src/manual-test-plugin/types.js';
 
 describe( 'createManualShellHtml()', () => {
-	const shellTemplateFilePath = path.resolve( import.meta.dirname, '../../theme/shell.html' );
-	const workspaceRoot = path.resolve( '/workspace' );
+	const shellTemplateFilePath = resolve( import.meta.dirname, '../../theme/shell.html' );
+	const workspaceRoot = resolve( '/workspace' );
 	const entry: ManualPageEntry = {
 		displayName: 'Iframe test',
 		htmlFilePath: '/packages/ckeditor5-foo/tests/manual/iframe.html',
 		packageName: 'ckeditor5-foo',
 		scriptFilePath: '/packages/ckeditor5-foo/tests/manual/iframe.js',
-		slug: 'iframe',
-		source: 'commercial'
+		slug: 'iframe'
 	};
 
 	test( 'wraps manual test content during HTML transform to avoid runtime iframe reparenting', () => {

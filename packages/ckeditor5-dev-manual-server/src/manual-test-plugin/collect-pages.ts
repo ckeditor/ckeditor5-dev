@@ -55,8 +55,7 @@ export function collectManualPages( patterns: Array<string>, workspaceRoot: stri
 			instructionsFilePath: matchedFiles.md ? toPublicSpecifier( matchedFiles.md ) : undefined,
 			packageName: parsedPath.packageName,
 			scriptFilePath: toPublicSpecifier( scriptFilePath ),
-			slug: parsedPath.slug,
-			source: parsedPath.packageRootPath == 'packages' ? 'commercial' : 'oss'
+			slug: parsedPath.slug
 		} );
 	}
 

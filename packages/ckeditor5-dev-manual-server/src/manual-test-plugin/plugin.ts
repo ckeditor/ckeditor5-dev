@@ -3,9 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
-import { createManualStaticAssetsMiddleware } from './static-assets.js';
+import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
 import { toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin } from 'vite';
@@ -18,7 +19,6 @@ interface ManualTestClientEntry {
 	packageName: string;
 	packageShortName: string;
 	slug: string;
-	source: 'commercial' | 'oss';
 }
 
 interface ManualTestServerLike {
@@ -27,40 +27,42 @@ interface ManualTestServerLike {
 	};
 }
 
-const MANUAL_TEST_PATTERNS = [
-	'packages/*/tests/manual/**/*.{html,js,md,ts}',
-	'external/ckeditor5/packages/*/tests/manual/**/*.{html,js,md,ts}'
-];
+const PACKAGE_ROOT = dirname( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/package.json' ) ) );
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
-const MANUAL_THEME_ROOT = path.resolve( import.meta.dirname, '..', 'theme' );
-const MANUAL_CATALOG_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'catalog.html' );
-const MANUAL_SHELL_TEMPLATE_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.html' );
-const MANUAL_SHELL_SCRIPT_FILE_PATH = path.resolve( MANUAL_THEME_ROOT, 'shell.ts' );
+const MANUAL_THEME_ROOT = resolve( PACKAGE_ROOT, 'theme' );
+const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
+const MANUAL_CATALOG_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.ts' );
+const MANUAL_SHELL_TEMPLATE_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.html' );
+const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
-export function manualTestsPlugin(): Plugin {
+export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	const workspaceRoot = process.cwd();
 	const manualCatalogPublicPath = toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
+	const manualCatalogScriptPublicPath = toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
 	const manualShellScriptPublicPath = toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
-	const manualPages = collectManualPages( MANUAL_TEST_PATTERNS, workspaceRoot );
+	const manualPages = collectManualPages( manualTestPatterns.map( pattern => `${ pattern }.{html,js,md,ts}` ), workspaceRoot );
+	const manualStaticAssets = collectManualStaticAssets( manualTestPatterns, workspaceRoot );
+	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
+		return manualPages.get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
+	};
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const clientEntries: Array<ManualTestClientEntry> = [ ...manualPages.values() ].map( entry => ( {
 		displayName: entry.displayName,
 		href: entry.htmlFilePath,
 		packageName: entry.packageName,
 		packageShortName: entry.packageName.replace( /^ckeditor5-/, '' ),
-		slug: entry.slug,
-		source: entry.source
+		slug: entry.slug
 	} ) );
 
 	return {
 		name: 'ckeditor5-manual-tests',
 
 		configureServer( server ) {
-			useManualTestMiddlewares( server, workspaceRoot, manualCatalogPublicPath );
+			useManualTestMiddlewares( server, manualCatalogPublicPath, manualStaticAssets );
 		},
 
 		configurePreviewServer( server ) {
-			useManualTestMiddlewares( server, workspaceRoot, manualCatalogPublicPath );
+			useManualTestMiddlewares( server, manualCatalogPublicPath, manualStaticAssets );
 		},
 
 		config() {
@@ -69,9 +71,7 @@ export function manualTestsPlugin(): Plugin {
 					rolldownOptions: {
 						input: [
 							MANUAL_CATALOG_FILE_PATH,
-							...[ ...manualPages.values() ].map( entry =>
-								path.resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) )
-							)
+							...[ ...manualPages.values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
 						]
 					}
 				}
@@ -98,7 +98,11 @@ export function manualTestsPlugin(): Plugin {
 			order: 'pre',
 
 			handler( html, context ) {
-				const entry = getManualPageEntryForHtmlPath( manualPages, context.path, workspaceRoot );
+				if ( context.filename == MANUAL_CATALOG_FILE_PATH ) {
+					return html.replace( './catalog.ts', manualCatalogScriptPublicPath );
+				}
+
+				const entry = getManualPageEntryForFile( context.filename );
 
 				if ( !entry ) {
 					return undefined;
@@ -118,10 +122,10 @@ export function manualTestsPlugin(): Plugin {
 
 function useManualTestMiddlewares(
 	server: ManualTestServerLike,
-	workspaceRoot: string,
-	manualCatalogPublicPath: string
+	manualCatalogPublicPath: string,
+	manualStaticAssets: Map<string, string>
 ): void {
-	server.middlewares.use( createManualStaticAssetsMiddleware( workspaceRoot ) );
+	server.middlewares.use( createManualStaticAssetsMiddleware( manualStaticAssets ) );
 
 	server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
 		rewriteCatalogRequest( request, manualCatalogPublicPath );
@@ -136,29 +140,4 @@ function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPa
 	if ( requestPath == '/' || requestPath == '/index.html' ) {
 		request.url = manualCatalogPublicPath;
 	}
-}
-
-function getFilePathFromId( id: string ): string {
-	const queryIndex = id.indexOf( '?' );
-
-	return queryIndex >= 0 ? id.slice( 0, queryIndex ) : id;
-}
-
-function getManualPageEntryForHtmlPath(
-	manualPages: Map<string, ManualPageEntry>,
-	requestPath: string,
-	workspaceRoot: string
-): ManualPageEntry | undefined {
-	const filePath = getFilePathFromId( requestPath );
-	const entry = manualPages.get( filePath );
-
-	if ( entry ) {
-		return entry;
-	}
-
-	if ( path.isAbsolute( filePath ) && filePath.startsWith( workspaceRoot ) ) {
-		return manualPages.get( toPublicSpecifier( path.relative( workspaceRoot, filePath ) ) );
-	}
-
-	return undefined;
 }

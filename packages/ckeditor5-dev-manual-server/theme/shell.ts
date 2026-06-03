@@ -18,7 +18,7 @@ interface ViteHotContextLike {
 const globalTarget = window as any;
 
 renderManual();
-ensureManualTestContainer();
+setupManualTestContainerState();
 setupManualRefreshPrompt();
 
 // In direct HTML manual tests, `id="editor"` creates `window.editor` as a named DOM property.
@@ -69,33 +69,12 @@ function renderManual(): void {
 /**
  * Sets up shell-related state for the manual test container injected by the HTML transform.
  */
-function ensureManualTestContainer(): void {
+function setupManualTestContainerState(): void {
 	document.body.classList.add( 'shell-enabled' );
 
 	if ( document.querySelector( '.shell-instructions' ) ) {
 		document.body.classList.add( 'shell-has-instructions' );
 	}
-
-	if ( document.querySelector( '.manual-test-container' ) ) {
-		return;
-	}
-
-	// The source transform injects this container. Keep this fallback for local setups using stale built plugin files.
-	const container = document.createElement( 'div' );
-	container.className = 'manual-test-container';
-
-	for ( const node of Array.from( document.body.childNodes ) ) {
-		if (
-			node instanceof Element &&
-			( node.classList.contains( 'shell' ) || node.classList.contains( 'shell-instructions' ) )
-		) {
-			continue;
-		}
-
-		container.appendChild( node );
-	}
-
-	document.body.appendChild( container );
 }
 
 /**
