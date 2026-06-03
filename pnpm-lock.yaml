@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  brace-expansion@^5: ^5.0.6
   diff@^7: ^8.0.3
   lodash@^4: ^4.18.1
   minimatch@^9: ^9.0.7
@@ -12,6 +13,7 @@ overrides:
   qs@^6: ^6.14.2
   serialize-javascript@^6: ^7.0.5
   uuid@^8: ^14.0.0
+  ws@^8: ^8.20.1
 
 importers:
 
@@ -2654,8 +2656,8 @@ packages:
   brace-expansion@2.0.3:
     resolution: {integrity: sha512-MCV/fYJEbqx68aE58kv2cA/kiky1G8vux3OR6/jbS+jIMe/6fJWa0DTzJU7dqijOWYwHi1t29FlfYI9uytqlpA==}
 
-  brace-expansion@5.0.5:
-    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
+  brace-expansion@5.0.6:
+    resolution: {integrity: sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==}
     engines: {node: 18 || 20 || >=22}
 
   braces@3.0.3:
@@ -6291,20 +6293,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.18.3:
-    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -8188,7 +8178,7 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  brace-expansion@5.0.5:
+  brace-expansion@5.0.6:
     dependencies:
       balanced-match: 4.0.4
 
@@ -8863,7 +8853,7 @@ snapshots:
       cors: 2.8.5
       debug: 4.3.7
       engine.io-parser: 5.2.3
-      ws: 8.17.1
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -10449,7 +10439,7 @@ snapshots:
 
   minimatch@10.2.4:
     dependencies:
-      brace-expansion: 5.0.5
+      brace-expansion: 5.0.6
 
   minimatch@3.1.5:
     dependencies:
@@ -11345,7 +11335,7 @@ snapshots:
       devtools-protocol: 0.0.1508733
       typed-query-selector: 2.12.0
       webdriver-bidi-protocol: 0.3.6
-      ws: 8.18.3
+      ws: 8.21.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -11724,7 +11714,7 @@ snapshots:
   socket.io-adapter@2.5.5:
     dependencies:
       debug: 4.3.7
-      ws: 8.17.1
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -12333,9 +12323,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.17.1: {}
-
-  ws@8.18.3: {}
+  ws@8.21.0: {}
 
   y18n@5.0.8: {}
 
