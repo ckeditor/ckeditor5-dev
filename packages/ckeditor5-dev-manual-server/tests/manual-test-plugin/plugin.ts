@@ -8,11 +8,17 @@ import { join, resolve, dirname } from 'node:path';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
-import type { Plugin } from 'vite';
 
-type ConfigHook = Exclude<Plugin[ 'config' ], undefined>;
-type ResolveIdHook = Exclude<Plugin[ 'resolveId' ], undefined>;
-type LoadHook = Exclude<Plugin[ 'load' ], undefined>;
+type ConfigHook = ( this: unknown, config: Record<string, never>, env: { command: 'build'; mode: string } ) => TestConfig;
+type ResolveIdHook = ( this: unknown, source: string, importer: string | undefined, options: Record<string, never> ) => string | null;
+type LoadHook = ( this: unknown, id: string, options: Record<string, never> ) => string | null;
+type TestConfig = {
+	build?: {
+		rolldownOptions?: {
+			input?: unknown;
+		};
+	};
+};
 type TransformIndexHtmlHook = {
 	handler( html: string, context: { filename: string } ): string | undefined;
 };
@@ -38,7 +44,7 @@ describe( 'manualTestsPlugin()', () => {
 		] );
 
 		const plugin = manualTestsPlugin( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
-		const config = ( plugin.config as ConfigHook ).call( {}, {}, { command: 'build', mode: 'production' } );
+		const config = ( plugin.config as unknown as ConfigHook ).call( {}, {}, { command: 'build', mode: 'production' } );
 		const input = config!.build!.rolldownOptions!.input as Array<string>;
 
 		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ) );
@@ -54,8 +60,8 @@ describe( 'manualTestsPlugin()', () => {
 		] );
 
 		const plugin = manualTestsPlugin( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
-		const resolvedId = ( plugin.resolveId as ResolveIdHook ).call( {}, 'virtual:ckeditor5-manual-entries', undefined, {} );
-		const source = ( plugin.load as LoadHook ).call( {}, resolvedId as string, {} ) as string;
+		const resolvedId = ( plugin.resolveId as unknown as ResolveIdHook ).call( {}, 'virtual:ckeditor5-manual-entries', undefined, {} );
+		const source = ( plugin.load as unknown as LoadHook ).call( {}, resolvedId as string, {} ) as string;
 
 		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
 		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );

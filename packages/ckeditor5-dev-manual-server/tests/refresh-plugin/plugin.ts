@@ -64,10 +64,10 @@ function getHandleHotUpdate(): TestHandleHotUpdateHook {
 	const hook = refreshPlugin().handleHotUpdate!;
 
 	if ( typeof hook == 'function' ) {
-		return context => hook.call( {}, context as never );
+		return context => hook.call( {} as never, context as never );
 	}
 
-	return context => hook.handler.call( {}, context as never );
+	return context => hook.handler.call( {} as never, context as never );
 }
 
 function createHmrContext( file: string, modules: Array<TestModule> ): TestHmrContext {

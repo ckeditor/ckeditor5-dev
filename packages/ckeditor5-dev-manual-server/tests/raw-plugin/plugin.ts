@@ -31,7 +31,7 @@ describe( 'rawHtmlPlugin()', () => {
 		const plugin = rawHtmlPlugin();
 		const htmlFilePath = join( temporaryDirectory, 'template.html' );
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		await writeFile( htmlFilePath, '<div class="sample">Text</div>' );
 
@@ -43,7 +43,7 @@ describe( 'rawHtmlPlugin()', () => {
 		const plugin = rawHtmlPlugin();
 		const htmlFilePath = join( temporaryDirectory, 'template.html' );
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 		const context = createPluginContext( `${ htmlFilePath }?raw` );
 
 		await writeFile( htmlFilePath, '<p>Template</p>' );
@@ -56,7 +56,7 @@ describe( 'rawHtmlPlugin()', () => {
 		const plugin = rawHtmlPlugin();
 		const filePath = join( temporaryDirectory, 'icon.svg' );
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		await writeFile( filePath, '<svg><path d="M0 0" /></svg>' );
 
@@ -66,7 +66,7 @@ describe( 'rawHtmlPlugin()', () => {
 	test( 'does not resolve HTML entry points without an importer', async () => {
 		const plugin = rawHtmlPlugin();
 		const filePath = join( temporaryDirectory, 'manual.html' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		expect( await resolveId.call( createPluginContext( filePath ), filePath ) ).to.be.null;
 	} );
@@ -74,7 +74,7 @@ describe( 'rawHtmlPlugin()', () => {
 	test( 'does not resolve HTML imports that Vite cannot resolve', async () => {
 		const plugin = rawHtmlPlugin();
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		expect( await resolveId.call( createPluginContext( null ), './missing.html', importer ) ).to.be.null;
 	} );
@@ -83,7 +83,7 @@ describe( 'rawHtmlPlugin()', () => {
 		const plugin = rawHtmlPlugin();
 		const filePath = join( temporaryDirectory, 'script.js' );
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		await writeFile( filePath, 'export default 1;' );
 
@@ -94,7 +94,7 @@ describe( 'rawHtmlPlugin()', () => {
 		const plugin = rawHtmlPlugin();
 		const filePath = join( temporaryDirectory, 'template.html' );
 		const importer = join( temporaryDirectory, 'manual.js' );
-		const resolveId = plugin.resolveId as ResolveIdHook;
+		const resolveId = plugin.resolveId as unknown as ResolveIdHook;
 
 		await writeFile( filePath, '<p>Query</p>' );
 

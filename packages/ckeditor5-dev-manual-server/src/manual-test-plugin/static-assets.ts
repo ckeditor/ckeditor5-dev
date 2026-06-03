@@ -52,7 +52,7 @@ export function createManualStaticAssetsMiddleware( staticAssets: Map<string, st
 
 		response.statusCode = 200;
 		response.setHeader( 'Content-Length', fileStats.size );
-		response.setHeader( 'Content-Type', getContentType( path.extname( filePath ) ) );
+		response.setHeader( 'Content-Type', getContentType( extname( filePath ) ) );
 
 		if ( request.method == 'HEAD' ) {
 			response.end();
