@@ -61,6 +61,8 @@ export function createManualShellHtml( {
 	const testScriptElement = getRequiredElementByAttribute( shellHead, 'data-manual-test-script' );
 	const testScriptFileName = posix.basename( entry.scriptFilePath );
 
+	removeManualTestScriptNodes( manualDocument, testScriptFileName );
+
 	setTextContent( shellTitle, ( manualTitle ? getTextContent( manualTitle ) : '' ).trim() || entry.displayName );
 	setAttribute( shellScriptElement, 'src', shellScriptPublicPath );
 	removeAttribute( shellScriptElement, 'data-manual-shell-script' );
@@ -115,6 +117,36 @@ function createManualTestContainer( manualBody: ParentNode ): Element {
 	appendChildren( container, [ ...manualBody.childNodes ] );
 
 	return container;
+}
+
+function removeManualTestScriptNodes( parent: ParentNode, testScriptFileName: string ): void {
+	for ( const node of [ ...parent.childNodes ] ) {
+		if ( !isElementNode( node ) ) {
+			continue;
+		}
+
+		if ( isManualTestScriptNode( node, testScriptFileName ) ) {
+			removeNode( node );
+
+			continue;
+		}
+
+		removeManualTestScriptNodes( node, testScriptFileName );
+	}
+}
+
+function isManualTestScriptNode( node: Element, testScriptFileName: string ): boolean {
+	if ( node.tagName != 'script' ) {
+		return false;
+	}
+
+	const source = getAttribute( node, 'src' );
+
+	if ( !source ) {
+		return false;
+	}
+
+	return posix.basename( source.split( '?' )[ 0 ]!.split( '#' )[ 0 ]! ) == testScriptFileName;
 }
 
 function getRequiredElementByTagName( root: Node, tagName: string ): Element {

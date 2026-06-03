@@ -44,4 +44,29 @@ describe( 'createManualShellHtml()', () => {
 		expect( iframe ).not.to.be.null;
 		expect( getAttribute( iframe!, 'src' ) ).to.equal( 'assets/frame.html' );
 	} );
+
+	test( 'keeps only the shell-injected manual test script', () => {
+		const html = createManualShellHtml( {
+			entry,
+			html: [
+				'<head>',
+				'<script type="module" src="./iframe.js"></script>',
+				'<script type="module" src="./helper.js"></script>',
+				'</head>',
+				'<body>',
+				'<script type="module" src="./iframe.js?v=1"></script>',
+				'</body>'
+			].join( '' ),
+			shellScriptPublicPath: '/theme/shell.ts',
+			shellTemplateFilePath,
+			workspaceRoot
+		} );
+		const document = parse( html );
+		const scriptSources = [ ...queryAll<Element>( document, node => isElementNode( node ) && node.tagName == 'script' ) ]
+			.map( script => getAttribute( script, 'src' ) )
+			.filter( ( source ): source is string => Boolean( source ) );
+
+		expect( scriptSources.filter( source => source == './iframe.js' ) ).to.have.length( 1 );
+		expect( scriptSources ).to.include( './helper.js' );
+	} );
 } );

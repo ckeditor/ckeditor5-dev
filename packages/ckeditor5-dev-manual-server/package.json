@@ -23,9 +23,6 @@
     "dist",
     "theme"
   ],
-  "bin": {
-    "ckeditor5-dev-manual-server": "dist/index.js"
-  },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
