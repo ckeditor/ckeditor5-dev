@@ -37,7 +37,11 @@ describe( 'createManualTestServer()', () => {
 			server = createServer( ...theArgs );
 			servers.push( server );
 
-			vi.spyOn( server, 'listen' );
+			vi.spyOn( server, 'listen' ).mockImplementation( ( _port, callback ) => {
+				process.nextTick( callback );
+
+				return server;
+			} );
 
 			return server;
 		} );
@@ -123,11 +127,28 @@ describe( 'createManualTestServer()', () => {
 	} );
 
 	it( 'should try next port when the requested port is in use', async () => {
-		// Occupy the port first.
-		const blockingServer = http.createServer.getMockImplementation()();
+		const originalCreateServer = http.createServer.getMockImplementation();
+		let attempt = 0;
 
-		await new Promise( resolve => {
-			blockingServer.listen( 49555, resolve );
+		vi.mocked( http.createServer ).mockImplementation( ( ...args ) => {
+			const currentServer = originalCreateServer( ...args );
+
+			attempt++;
+
+			if ( attempt === 1 ) {
+				vi.mocked( currentServer.listen ).mockImplementation( () => {
+					process.nextTick( () => {
+						const error = new Error( 'EADDRINUSE: port is already in use' );
+						error.code = 'EADDRINUSE';
+
+						currentServer.emit( 'error', error );
+					} );
+
+					return currentServer;
+				} );
+			}
+
+			return currentServer;
 		} );
 
 		createManualTestServer( 'workspace/build/.manual-tests', 49555 );
@@ -136,9 +157,9 @@ describe( 'createManualTestServer()', () => {
 			expect( loggerStub ).toHaveBeenCalledWith( '[Server] Server running at http://localhost:49556/' );
 		} );
 
+		expect( servers[ 0 ].listen ).toHaveBeenCalledWith( 49555, expect.any( Function ) );
+		expect( servers[ 1 ].listen ).toHaveBeenCalledWith( 49556, expect.any( Function ) );
 		expect( loggerStub ).toHaveBeenCalledWith( '[Server] Port 49555 is in use, trying 49556...' );
-
-		blockingServer.close();
 	} );
 
 	it( 'should reject when a non-EADDRINUSE error occurs', async () => {
