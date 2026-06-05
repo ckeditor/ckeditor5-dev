@@ -8,18 +8,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
 import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';
 
-vi.mock( 'node:path', async () => {
-	const originalModule = await vi.importActual( 'node:path' );
-
-	return {
-		default: {
-			join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
-			dirname: vi.fn(),
-			resolve: originalModule.resolve
-		}
-	};
-} );
-
 vi.mock( '../../../lib/utils/automated-tests/getwebpackconfig.js' );
 
 vi.mock( '../../../lib/utils/resolve-path.js', () => ( {
@@ -119,7 +107,7 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.files ).toEqual( expect.arrayContaining( [
 			'workspace/entry-file.js',
 			expect.objectContaining( {
-				pattern: expect.stringMatching( /ckeditor5-utils[/\\]tests[/\\]_assets[/\\]\*\*[/\\]\*/ )
+				pattern: expect.stringContaining( path.join( 'ckeditor5-utils', 'tests', '_assets', '**', '*' ) )
 			} )
 		] ) );
 	} );
