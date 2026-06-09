@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, test, afterEach, beforeEach } from 'vitest';
-import { type HotPayload, type ViteDevServer } from 'vite';
+import type { HotPayload, ViteDevServer } from 'vite';
 import { refreshPlugin, MANUAL_REFRESH_EVENT_NAME } from '../../src/refresh-plugin/plugin.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import {
