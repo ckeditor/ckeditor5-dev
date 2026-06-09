@@ -145,9 +145,13 @@ function useManualTestMiddlewares(
 }
 
 function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {
-	const requestPath = request.url?.split( '?' )[ 0 ];
+	const url = URL.parse( request.url || '', 'http://localhost' );
 
-	if ( requestPath == '/' || requestPath == '/index.html' ) {
-		request.url = manualCatalogPublicPath;
+	if ( !url ) {
+		return;
+	}
+
+	if ( url.pathname == '/' || url.pathname == '/index.html' ) {
+		request.url = `${ manualCatalogPublicPath }${ url.search }`;
 	}
 }

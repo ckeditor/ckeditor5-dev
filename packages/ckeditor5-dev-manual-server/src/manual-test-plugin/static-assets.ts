@@ -68,15 +68,9 @@ export function getManualStaticAssetFilePath(
 	requestUrl: string | undefined,
 	staticAssets: Map<string, string>
 ): string | null {
-	if ( !requestUrl ) {
-		return null;
-	}
+	const url = URL.parse( requestUrl || '', 'http://localhost' );
 
-	let url: URL;
-
-	try {
-		url = new URL( requestUrl, 'http://ckeditor5.local' );
-	} catch {
+	if ( !url ) {
 		return null;
 	}
 

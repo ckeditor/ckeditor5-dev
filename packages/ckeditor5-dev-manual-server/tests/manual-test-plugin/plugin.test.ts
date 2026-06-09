@@ -146,7 +146,7 @@ describe( 'manualTestsPlugin()', () => {
 			next: () => void
 		) => void;
 		const rootRequest = { url: '/?q=1' };
-		const indexRequest = { url: '/index.html' };
+		const indexRequest = { url: '/index.html?filter=all' };
 		const otherRequest = { url: '/manual.html' };
 		const next = vi.fn();
 
@@ -155,7 +155,9 @@ describe( 'manualTestsPlugin()', () => {
 		middleware( otherRequest, {}, next );
 
 		expect( rootRequest.url ).to.contain( '/theme/catalog.html' );
+		expect( rootRequest.url ).to.contain( '?q=1' );
 		expect( indexRequest.url ).to.contain( '/theme/catalog.html' );
+		expect( indexRequest.url ).to.contain( '?filter=all' );
 		expect( otherRequest.url ).to.equal( '/manual.html' );
 		expect( next ).toHaveBeenCalledTimes( 3 );
 	} );

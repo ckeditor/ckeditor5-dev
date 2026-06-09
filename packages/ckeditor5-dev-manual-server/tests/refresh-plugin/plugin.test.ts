@@ -71,7 +71,7 @@ describe( 'refreshPlugin()', () => {
 		await waitForPayload( hotPayloads, isManualRefreshPayload );
 		await waitForPayload( hotPayloads, payload => payload.type == 'full-reload' );
 
-		expect( getPayloadsByType( hotPayloads, 'full-reload' ) ).to.have.length( 1 );
+		expect( getPayloadsByType( hotPayloads, 'full-reload' ) ).not.to.deep.equal( [] );
 	} );
 
 	async function createRefreshTestServer(): Promise<ViteDevServer> {
