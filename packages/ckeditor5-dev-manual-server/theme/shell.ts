@@ -32,13 +32,8 @@ if ( globalTarget.editor instanceof Element ) {
 	globalTarget.editor = null;
 }
 
-if ( !globalTarget.CKEditorInspector ) {
-	globalTarget.CKEditorInspector = CKEditorInspector;
-}
-
-if ( !globalTarget.CKEDITOR_GLOBAL_LICENSE_KEY ) {
-	globalTarget.CKEDITOR_GLOBAL_LICENSE_KEY = LICENSE_KEY;
-}
+globalTarget.CKEditorInspector ||= CKEditorInspector;
+globalTarget.CKEDITOR_GLOBAL_LICENSE_KEY ||= LICENSE_KEY;
 
 /**
  * Clones the injected Shell template, fills it with current test metadata,

@@ -12,6 +12,21 @@ import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils
 import { createTestServer, getCode } from '../_utils/vite.js';
 
 type ServerHook = ( server: TestServer ) => void;
+type ConfigHook = () => {
+	build: {
+		rolldownOptions: {
+			input: Array<string>;
+		};
+	};
+};
+type ConfigResolvedHook = ( config: {
+	root: string;
+	build: {
+		rolldownOptions: {
+			input: Array<string>;
+		};
+	};
+} ) => void;
 type TransformIndexHtmlHook = {
 	handler( html: string, context: { filename: string } ): string | undefined;
 };
@@ -87,6 +102,38 @@ describe( 'manualTestsPlugin()', () => {
 
 			expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
 			expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+		} finally {
+			await removeDirectory( currentWorkingDirectory );
+		}
+	} );
+
+	test( 'updates build inputs after Vite resolves the root', async () => {
+		const currentWorkingDirectory = await createTemporaryDirectory( 'ckeditor5-manual-test-plugin-cwd-' );
+
+		try {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( currentWorkingDirectory );
+
+			await Promise.all( [
+				createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+				createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
+				createFile( currentWorkingDirectory, 'project/packages/ckeditor5-bar/tests/manual/bar.html' ),
+				createFile( currentWorkingDirectory, 'project/packages/ckeditor5-bar/tests/manual/bar.ts' )
+			] );
+
+			const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+			const config = ( plugin.config as ConfigHook )();
+
+			( plugin.configResolved as ConfigResolvedHook )( {
+				root: workspaceRoot,
+				build: config.build
+			} );
+
+			expect( config.build.rolldownOptions.input ).to.include(
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' )
+			);
+			expect( config.build.rolldownOptions.input ).not.to.include(
+				join( currentWorkingDirectory, 'project/packages/ckeditor5-bar/tests/manual/bar.html' )
+			);
 		} finally {
 			await removeDirectory( currentWorkingDirectory );
 		}

@@ -40,7 +40,8 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 			return;
 		}
 
-		const filePath = getManualStaticAssetFilePath( request.url, collectStaticAssets() );
+		const publicPath = getManualStaticAssetPublicPath( request.url );
+		const filePath = publicPath && collectStaticAssets().get( publicPath );
 
 		if ( !filePath ) {
 			next();
@@ -68,6 +69,12 @@ export function getManualStaticAssetFilePath(
 	requestUrl: string | undefined,
 	staticAssets: Map<string, string>
 ): string | null {
+	const publicPath = getManualStaticAssetPublicPath( requestUrl );
+
+	return publicPath && staticAssets.get( publicPath ) || null;
+}
+
+function getManualStaticAssetPublicPath( requestUrl: string | undefined ): string | null {
 	const url = URL.parse( requestUrl || '', 'http://localhost' );
 
 	if ( !url ) {
@@ -78,7 +85,11 @@ export function getManualStaticAssetFilePath(
 		return null;
 	}
 
-	return staticAssets.get( url.pathname ) || null;
+	if ( !isManualStaticAssetPath( url.pathname ) ) {
+		return null;
+	}
+
+	return url.pathname;
 }
 
 function isManualStaticAssetPath( filePath: string ): boolean {

@@ -108,7 +108,7 @@ describe( 'manual static assets', () => {
 		expect( response.getBody() ).to.equal( '<svg></svg>' );
 	} );
 
-	test( 'collects static assets for every request', async () => {
+	test( 'collects static assets when a candidate static asset is requested', async () => {
 		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/image.svg';
 		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
 		const staticAssets = new Map<string, string>();
@@ -131,6 +131,22 @@ describe( 'manual static assets', () => {
 		expect( next ).toHaveBeenCalledTimes( 1 );
 		expect( response.statusCode ).to.equal( 200 );
 		expect( response.getBody() ).to.equal( '<svg></svg>' );
+	} );
+
+	test( 'does not collect static assets for Vite-handled requests', () => {
+		const collectStaticAssets = vi.fn( () => new Map<string, string>() );
+		const middleware = createManualStaticAssetsMiddleware( collectStaticAssets );
+		const response = createResponse();
+		const next = vi.fn();
+
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.html' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.css' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.ts' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/image.png?url' } as never, response as never, next );
+		middleware( { method: 'POST', url: '/packages/ckeditor5-foo/tests/manual/image.png' } as never, response as never, next );
+
+		expect( collectStaticAssets ).not.toHaveBeenCalled();
+		expect( next ).toHaveBeenCalledTimes( 5 );
 	} );
 
 	test( 'ends HEAD requests without streaming the static asset body', async () => {
@@ -168,7 +184,6 @@ describe( 'manual static assets', () => {
 	test( 'sets content types for supported static asset extensions', async () => {
 		const cases = [
 			[ 'image.avif', 'image/avif' ],
-			[ 'styles.css', 'text/css; charset=utf-8' ],
 			[ 'animation.gif', 'image/gif' ],
 			[ 'favicon.ico', 'image/x-icon' ],
 			[ 'photo.jpg', 'image/jpeg' ],

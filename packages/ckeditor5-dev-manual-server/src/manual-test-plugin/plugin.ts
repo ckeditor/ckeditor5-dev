@@ -45,9 +45,10 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	const getManualCatalogPublicPath = () => toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
 	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
-	const updateWorkspaceRoot = ( root: string ) => {
-		workspaceRoot = resolve( root );
-	};
+	const getManualBuildInputs = () => [
+		MANUAL_CATALOG_FILE_PATH,
+		...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
+	];
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const getClientEntries = (): Array<ManualTestClientEntry> => [ ...getManualPages().values() ].map( entry => ( {
 		displayName: entry.displayName,
@@ -59,25 +60,20 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	return {
 		name: 'ckeditor5-manual-tests',
 
-		config( config ) {
-			if ( typeof config.root == 'string' ) {
-				updateWorkspaceRoot( config.root );
-			}
-
+		config() {
 			return {
 				build: {
 					rolldownOptions: {
-						input: [
-							MANUAL_CATALOG_FILE_PATH,
-							...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
-						]
+						input: MANUAL_CATALOG_FILE_PATH
 					}
 				}
 			};
 		},
 
 		configResolved( config ) {
-			updateWorkspaceRoot( config.root );
+			workspaceRoot = config.root;
+
+			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
 
 		configureServer( server ) {
