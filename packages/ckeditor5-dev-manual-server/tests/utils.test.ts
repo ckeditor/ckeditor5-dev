@@ -3,21 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { getOptimizedPackageIncludes, stringifyValues, toPublicFilePath, toPublicSpecifier } from '../src/utils.js';
+import { createTemporaryDirectory, removeDirectory } from './_utils/files.js';
 
 describe( 'getOptimizedPackageIncludes()', () => {
 	let temporaryDirectory: string;
 
 	beforeEach( async () => {
-		temporaryDirectory = await mkdtemp( join( tmpdir(), 'ckeditor5-optimized-package-includes-' ) );
+		temporaryDirectory = await createTemporaryDirectory( 'ckeditor5-optimized-package-includes-' );
 	} );
 
 	afterEach( async () => {
-		await rm( temporaryDirectory, { recursive: true, force: true } );
+		await removeDirectory( temporaryDirectory );
 	} );
 
 	test( 'returns sorted unique package names', async () => {

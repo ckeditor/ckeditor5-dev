@@ -3,35 +3,34 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import { Writable } from 'node:stream';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	collectManualStaticAssets,
 	createManualStaticAssetsMiddleware,
 	getManualStaticAssetFilePath
 } from '../../src/manual-test-plugin/static-assets.js';
+import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
 describe( 'manual static assets', () => {
 	let workspaceRoot: string;
 
 	beforeEach( async () => {
-		workspaceRoot = await mkdtemp( join( tmpdir(), 'ckeditor5-manual-static-assets-' ) );
+		workspaceRoot = await createTemporaryDirectory( 'ckeditor5-manual-static-assets-' );
 	} );
 
 	afterEach( async () => {
-		await rm( workspaceRoot, { recursive: true, force: true } );
+		await removeDirectory( workspaceRoot );
 	} );
 
 	test( 'collects manual test assets from configured patterns', async () => {
 		await Promise.all( [
-			createFile( 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
-			createFile( 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
-			createFile( 'packages/ckeditor5-foo/tests/manual/styles.css' ),
-			createFile( 'packages/ckeditor5-foo/tests/manual/test.html' ),
-			createFile( 'packages/ckeditor5-foo/tests/manual/test.js' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
+			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.js' )
 		] );
 
 		const staticAssets = collectManualStaticAssets( [
@@ -87,7 +86,7 @@ describe( 'manual static assets', () => {
 	} );
 
 	test( 'serves collected static assets', async () => {
-		const filePath = await createFile( 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
 		const response = createResponse();
 		const next = vi.fn();
 		const middleware = createManualStaticAssetsMiddleware( new Map( [
@@ -110,7 +109,7 @@ describe( 'manual static assets', () => {
 	} );
 
 	test( 'ends HEAD requests without streaming the static asset body', async () => {
-		const filePath = await createFile( 'packages/ckeditor5-foo/tests/manual/assets/data.json', '{ "ok": true }' );
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/data.json', '{ "ok": true }' );
 		const response = createResponse();
 		const next = vi.fn();
 		const middleware = createManualStaticAssetsMiddleware( new Map( [
@@ -161,7 +160,7 @@ describe( 'manual static assets', () => {
 
 		for ( const [ fileName, contentType ] of cases ) {
 			const requestPath = `/packages/ckeditor5-foo/tests/manual/assets/${ fileName }`;
-			const filePath = await createFile( `packages/ckeditor5-foo/tests/manual/assets/${ fileName }`, '' );
+			const filePath = await createFile( workspaceRoot, `packages/ckeditor5-foo/tests/manual/assets/${ fileName }` );
 			const response = createResponse();
 			const middleware = createManualStaticAssetsMiddleware( new Map( [ [ requestPath, filePath ] ] ) );
 			const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
@@ -173,15 +172,6 @@ describe( 'manual static assets', () => {
 			expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', contentType );
 		}
 	} );
-
-	async function createFile( relativeFilePath: string, content = '' ): Promise<string> {
-		const filePath = join( workspaceRoot, relativeFilePath );
-
-		await mkdir( dirname( filePath ), { recursive: true } );
-		await writeFile( filePath, content );
-
-		return filePath;
-	}
 } );
 
 function createResponse(): Writable & {

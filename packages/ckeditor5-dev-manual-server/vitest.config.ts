@@ -13,9 +13,6 @@ export default defineConfig( {
 		mockReset: true,
 		unstubEnvs: true,
 		unstubGlobals: true,
-		include: [
-			'tests/**/*.ts'
-		],
 		coverage: {
 			provider: 'v8',
 			include: [

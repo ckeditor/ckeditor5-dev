@@ -12,15 +12,17 @@ export function refreshPlugin(): Plugin {
 		name: 'ckeditor5-manual-refresh',
 		apply: 'serve',
 
-		handleHotUpdate( { file, server } ) {
+		hotUpdate( { file } ) {
 			if ( file.endsWith( '.css' ) ) {
 				return;
 			}
 
-			server.hot.send( {
-				type: 'custom',
-				event: MANUAL_REFRESH_EVENT_NAME
-			} );
+			if ( this.environment.name == 'client' ) {
+				this.environment.hot.send( {
+					type: 'custom',
+					event: MANUAL_REFRESH_EVENT_NAME
+				} );
+			}
 
 			return [];
 		}
