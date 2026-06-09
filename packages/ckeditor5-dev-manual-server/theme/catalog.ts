@@ -8,6 +8,8 @@ import { manualTestEntries, type ManualTestEntry } from 'virtual:ckeditor5-manua
 
 import './catalog.css';
 
+const SEARCH_QUERY_PARAMETER = 'q';
+
 /**
  * Root element for the manual test index application.
  */
@@ -32,7 +34,19 @@ function renderApp( root: HTMLElement, entries: Array<ManualTestEntry> ): void {
 		listElement.replaceChildren( ...renderGroups( filterEntries( entries, query ) ) );
 	};
 
-	searchInput.addEventListener( 'input', () => render( searchInput.value ) );
+	const setQuery = ( query: string ): void => {
+		searchInput.value = query;
+		render( query );
+	};
+
+	searchInput.addEventListener( 'input', () => {
+		updateSearchQueryInUrl( searchInput.value );
+		render( searchInput.value );
+	} );
+
+	window.addEventListener( 'popstate', () => {
+		setQuery( getSearchQueryFromUrl() );
+	} );
 
 	document.addEventListener( 'keydown', event => {
 		if ( event.key == '/' && document.activeElement != searchInput ) {
@@ -42,7 +56,33 @@ function renderApp( root: HTMLElement, entries: Array<ManualTestEntry> ): void {
 		}
 	} );
 
-	render( '' );
+	setQuery( getSearchQueryFromUrl() );
+}
+
+/**
+ * Returns the current search query from the page URL.
+ */
+function getSearchQueryFromUrl(): string {
+	return new URL( window.location.href ).searchParams.get( SEARCH_QUERY_PARAMETER ) || '';
+}
+
+/**
+ * Updates the page URL to reflect the current search query.
+ */
+function updateSearchQueryInUrl( query: string ): void {
+	if ( query == getSearchQueryFromUrl() ) {
+		return;
+	}
+
+	const url = new URL( window.location.href );
+
+	if ( query ) {
+		url.searchParams.set( SEARCH_QUERY_PARAMETER, query );
+	} else {
+		url.searchParams.delete( SEARCH_QUERY_PARAMETER );
+	}
+
+	history.pushState( null, '', `${ url.pathname }${ url.search }${ url.hash }` );
 }
 
 /**
