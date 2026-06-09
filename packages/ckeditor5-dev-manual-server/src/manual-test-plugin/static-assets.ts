@@ -32,7 +32,7 @@ export function collectManualStaticAssets( patterns: Array<string>, workspaceRoo
 	);
 }
 
-export function createManualStaticAssetsMiddleware( staticAssets: Map<string, string> ): ManualStaticAssetsMiddleware {
+export function createManualStaticAssetsMiddleware( collectStaticAssets: () => Map<string, string> ): ManualStaticAssetsMiddleware {
 	return ( request, response, next ) => {
 		if ( request.method != 'GET' && request.method != 'HEAD' ) {
 			next();
@@ -40,7 +40,7 @@ export function createManualStaticAssetsMiddleware( staticAssets: Map<string, st
 			return;
 		}
 
-		const filePath = getManualStaticAssetFilePath( request.url, staticAssets );
+		const filePath = getManualStaticAssetFilePath( request.url, collectStaticAssets() );
 
 		if ( !filePath ) {
 			next();

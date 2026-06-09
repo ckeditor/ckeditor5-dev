@@ -68,6 +68,54 @@ describe( 'manualTestsPlugin()', () => {
 		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
+	test( 'uses the Vite root instead of the current working directory for page entries', async () => {
+		const currentWorkingDirectory = await createTemporaryDirectory( 'ckeditor5-manual-test-plugin-cwd-' );
+
+		try {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( currentWorkingDirectory );
+
+			await Promise.all( [
+				createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+				createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
+				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
+			] );
+
+			server = await createManualTestServer( [ 'packages/*/tests/manual/**/*' ] );
+			const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
+			const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+			expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+			expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+		} finally {
+			await removeDirectory( currentWorkingDirectory );
+		}
+	} );
+
+	test( 'updates entries when new manual page files are added', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		server = await createManualTestServer( [ 'packages/*/tests/manual/**/*' ] );
+		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
+		const initialSource = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( initialSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+		expect( initialSource ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
+		] );
+
+		const updatedSource = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( updatedSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+		expect( updatedSource ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+	} );
+
 	test( 'does not resolve unknown virtual module requests', async () => {
 		server = await createManualTestServer( [] );
 

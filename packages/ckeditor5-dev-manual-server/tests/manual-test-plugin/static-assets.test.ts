@@ -89,7 +89,7 @@ describe( 'manual static assets', () => {
 		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
 		const response = createResponse();
 		const next = vi.fn();
-		const middleware = createManualStaticAssetsMiddleware( new Map( [
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
 			[ '/packages/ckeditor5-foo/tests/manual/assets/image.svg', filePath ]
 		] ) );
 		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
@@ -108,11 +108,36 @@ describe( 'manual static assets', () => {
 		expect( response.getBody() ).to.equal( '<svg></svg>' );
 	} );
 
+	test( 'collects static assets for every request', async () => {
+		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/image.svg';
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
+		const staticAssets = new Map<string, string>();
+		const middleware = createManualStaticAssetsMiddleware( () => staticAssets );
+		const next = vi.fn();
+
+		middleware( { method: 'GET', url: requestPath } as never, createResponse() as never, next );
+
+		expect( next ).toHaveBeenCalledTimes( 1 );
+
+		staticAssets.set( requestPath, filePath );
+
+		const response = createResponse();
+		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
+
+		middleware( { method: 'GET', url: requestPath } as never, response as never, next );
+
+		await finished;
+
+		expect( next ).toHaveBeenCalledTimes( 1 );
+		expect( response.statusCode ).to.equal( 200 );
+		expect( response.getBody() ).to.equal( '<svg></svg>' );
+	} );
+
 	test( 'ends HEAD requests without streaming the static asset body', async () => {
 		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/data.json', '{ "ok": true }' );
 		const response = createResponse();
 		const next = vi.fn();
-		const middleware = createManualStaticAssetsMiddleware( new Map( [
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
 			[ '/packages/ckeditor5-foo/tests/manual/assets/data.json', filePath ]
 		] ) );
 		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
@@ -130,7 +155,7 @@ describe( 'manual static assets', () => {
 	} );
 
 	test( 'passes through unsupported static asset requests', () => {
-		const middleware = createManualStaticAssetsMiddleware( new Map() );
+		const middleware = createManualStaticAssetsMiddleware( () => new Map() );
 		const response = createResponse();
 		const next = vi.fn();
 
@@ -162,7 +187,7 @@ describe( 'manual static assets', () => {
 			const requestPath = `/packages/ckeditor5-foo/tests/manual/assets/${ fileName }`;
 			const filePath = await createFile( workspaceRoot, `packages/ckeditor5-foo/tests/manual/assets/${ fileName }` );
 			const response = createResponse();
-			const middleware = createManualStaticAssetsMiddleware( new Map( [ [ requestPath, filePath ] ] ) );
+			const middleware = createManualStaticAssetsMiddleware( () => new Map( [ [ requestPath, filePath ] ] ) );
 			const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
 
 			middleware( { method: 'HEAD', url: requestPath } as never, response as never, vi.fn() );

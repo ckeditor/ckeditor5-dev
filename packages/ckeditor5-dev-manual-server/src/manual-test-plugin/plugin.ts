@@ -35,17 +35,21 @@ const MANUAL_SHELL_TEMPLATE_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.html'
 const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
 export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
-	const workspaceRoot = process.cwd();
-	const manualCatalogPublicPath = toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
-	const manualCatalogScriptPublicPath = toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
-	const manualShellScriptPublicPath = toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
-	const manualPages = collectManualPages( manualTestPatterns.map( pattern => `${ pattern }.{html,js,md,ts}` ), workspaceRoot );
-	const manualStaticAssets = collectManualStaticAssets( manualTestPatterns, workspaceRoot );
+	let workspaceRoot = process.cwd();
+	const manualPagePatterns = manualTestPatterns.map( pattern => `${ pattern }.{html,js,md,ts}` );
+	const getManualPages = () => collectManualPages( manualPagePatterns, workspaceRoot );
+	const getManualStaticAssets = () => collectManualStaticAssets( manualTestPatterns, workspaceRoot );
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
-		return manualPages.get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
+		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
+	};
+	const getManualCatalogPublicPath = () => toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
+	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
+	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
+	const updateWorkspaceRoot = ( root: string ) => {
+		workspaceRoot = resolve( root );
 	};
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
-	const clientEntries: Array<ManualTestClientEntry> = [ ...manualPages.values() ].map( entry => ( {
+	const getClientEntries = (): Array<ManualTestClientEntry> => [ ...getManualPages().values() ].map( entry => ( {
 		displayName: entry.displayName,
 		href: entry.htmlFilePath,
 		packageName: entry.packageName,
@@ -55,25 +59,33 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	return {
 		name: 'ckeditor5-manual-tests',
 
-		configureServer( server ) {
-			useManualTestMiddlewares( server, manualCatalogPublicPath, manualStaticAssets );
-		},
+		config( config ) {
+			if ( typeof config.root == 'string' ) {
+				updateWorkspaceRoot( config.root );
+			}
 
-		configurePreviewServer( server ) {
-			useManualTestMiddlewares( server, manualCatalogPublicPath, manualStaticAssets );
-		},
-
-		config() {
 			return {
 				build: {
 					rolldownOptions: {
 						input: [
 							MANUAL_CATALOG_FILE_PATH,
-							...[ ...manualPages.values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
+							...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
 						]
 					}
 				}
 			};
+		},
+
+		configResolved( config ) {
+			updateWorkspaceRoot( config.root );
+		},
+
+		configureServer( server ) {
+			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
+		},
+
+		configurePreviewServer( server ) {
+			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
 		},
 
 		resolveId( source ) {
@@ -86,7 +98,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 		load( id ) {
 			if ( id == resolvedVirtualModuleId ) {
-				return `export const manualTestEntries = ${ JSON.stringify( clientEntries, null, 2 ) };`;
+				return `export const manualTestEntries = ${ JSON.stringify( getClientEntries(), null, 2 ) };`;
 			}
 
 			return null;
@@ -97,7 +109,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 			handler( html, context ) {
 				if ( toPosixPath( context.filename ) == toPosixPath( MANUAL_CATALOG_FILE_PATH ) ) {
-					return html.replace( './catalog.ts', manualCatalogScriptPublicPath );
+					return html.replace( './catalog.ts', getManualCatalogScriptPublicPath() );
 				}
 
 				const entry = getManualPageEntryForFile( context.filename );
@@ -109,7 +121,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 				return createManualShellHtml( {
 					entry,
 					html,
-					shellScriptPublicPath: manualShellScriptPublicPath,
+					shellScriptPublicPath: getManualShellScriptPublicPath(),
 					shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
 					workspaceRoot
 				} );
@@ -120,13 +132,13 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 function useManualTestMiddlewares(
 	server: ManualTestServerLike,
-	manualCatalogPublicPath: string,
-	manualStaticAssets: Map<string, string>
+	getManualCatalogPublicPath: () => string,
+	getManualStaticAssets: () => Map<string, string>
 ): void {
-	server.middlewares.use( createManualStaticAssetsMiddleware( manualStaticAssets ) );
+	server.middlewares.use( createManualStaticAssetsMiddleware( getManualStaticAssets ) );
 
 	server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
-		rewriteCatalogRequest( request, manualCatalogPublicPath );
+		rewriteCatalogRequest( request, getManualCatalogPublicPath() );
 
 		next();
 	} );
