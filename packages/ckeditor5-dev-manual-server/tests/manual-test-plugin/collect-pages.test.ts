@@ -64,6 +64,39 @@ describe( 'collectManualPages()', () => {
 		expect( collectManualPages( [ 'packages/**/*.{html,js,md,ts}' ], workspaceRoot ) ).to.deep.equal( new Map() );
 	} );
 
+	test( 'collects manual pages from any package tree location matched by the patterns', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/tests/manual/sample.html' ),
+			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/tests/manual/sample.ts' ),
+			createFile( workspaceRoot, 'ckeditor5-top-level/tests/manual/sample.html' ),
+			createFile( workspaceRoot, 'ckeditor5-top-level/tests/manual/sample.js' )
+		] );
+
+		const pages = collectManualPages( [
+			'custom/tree/*/tests/manual/**/*.{html,js,md,ts}',
+			'ckeditor5-top-level/tests/manual/**/*.{html,js,md,ts}'
+		], workspaceRoot );
+
+		expect( [ ...pages.values() ] ).to.deep.equal( [
+			{
+				displayName: 'Sample',
+				htmlFilePath: '/custom/tree/ckeditor5-custom/tests/manual/sample.html',
+				instructionsFilePath: undefined,
+				packageName: 'ckeditor5-custom',
+				scriptFilePath: '/custom/tree/ckeditor5-custom/tests/manual/sample.ts',
+				slug: 'sample'
+			},
+			{
+				displayName: 'Sample',
+				htmlFilePath: '/ckeditor5-top-level/tests/manual/sample.html',
+				instructionsFilePath: undefined,
+				packageName: 'ckeditor5-top-level',
+				scriptFilePath: '/ckeditor5-top-level/tests/manual/sample.js',
+				slug: 'sample'
+			}
+		] );
+	} );
+
 	test( 'prefers TypeScript test scripts over JavaScript scripts', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/sample.html' ),

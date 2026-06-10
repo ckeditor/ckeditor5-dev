@@ -67,7 +67,7 @@ export function collectManualPages( patterns: Array<string>, workspaceRoot: stri
 function parseManualTestAssetPath( filePath: string ): ParsedManualTestAssetPath | null {
 	const normalizedFilePath = stripLeadingSlash( toPosixPath( filePath ) );
 	const match = normalizedFilePath.match(
-		/^(packages|external\/ckeditor5\/packages)\/([^/]+)\/tests\/manual\/(.+)\.(html|js|md|ts)$/
+		/^(?:(.*?)\/)?([^/]+)\/tests\/manual\/(.+)\.(html|js|md|ts)$/
 	);
 
 	if ( !match ) {
@@ -77,7 +77,7 @@ function parseManualTestAssetPath( filePath: string ): ParsedManualTestAssetPath
 	return {
 		extension: match[ 4 ]! as ParsedManualTestAssetPath[ 'extension' ],
 		packageName: match[ 2 ]!,
-		packageRootPath: match[ 1 ]!,
+		packageRootPath: match[ 1 ] || '',
 		slug: match[ 3 ]!
 	};
 }

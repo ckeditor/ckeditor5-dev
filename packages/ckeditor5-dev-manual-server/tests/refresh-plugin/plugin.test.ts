@@ -7,6 +7,10 @@ import { describe, expect, test, vi } from 'vitest';
 import type { HotPayload } from 'vite';
 import { refreshPlugin, MANUAL_REFRESH_EVENT_NAME } from '../../src/refresh-plugin/plugin.js';
 
+function configureServer( server: unknown ): void {
+	( refreshPlugin().configureServer as unknown as ( server: unknown ) => void )( server );
+}
+
 describe( 'refreshPlugin()', () => {
 	test( 'applies only in the dev server', () => {
 		expect( refreshPlugin().apply ).to.equal( 'serve' );
@@ -17,7 +21,7 @@ describe( 'refreshPlugin()', () => {
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
 
-		refreshPlugin().configureServer!( server as never );
+		configureServer( server );
 		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
 			type: 'update',
@@ -40,7 +44,7 @@ describe( 'refreshPlugin()', () => {
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
 
-		refreshPlugin().configureServer!( server as never );
+		configureServer( server );
 		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
 			type: 'update',
@@ -62,7 +66,7 @@ describe( 'refreshPlugin()', () => {
 		const server = createBundledDevServer( handledFullReloads );
 		const client = createBundledDevClient( clientPayloads );
 
-		refreshPlugin().configureServer!( server as never );
+		configureServer( server );
 		server.environments.client.handleHmrOutput( client, [ '/workspace/article.js' ], { type: 'FullReload' } );
 
 		expect( handledFullReloads ).to.deep.equal( [] );
@@ -79,7 +83,7 @@ describe( 'refreshPlugin()', () => {
 		const server = createBundledDevServer( handledFullReloads );
 		const client = createBundledDevClient( clientPayloads );
 
-		refreshPlugin().configureServer!( server as never );
+		configureServer( server );
 		server.environments.client.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
 
 		expect( handledFullReloads ).to.deep.equal( [ [ '/workspace/article.html' ] ] );
@@ -97,7 +101,7 @@ describe( 'refreshPlugin()', () => {
 					devEngine: {
 						ensureLatestBuildOutput: vi.fn().mockResolvedValue( undefined )
 					},
-					handleHmrOutput: vi.fn( ( _client, files ) => {
+					handleHmrOutput: vi.fn<( client: unknown, files: Array<string>, hmrOutput: unknown ) => void>( ( _client, files ) => {
 						handledFullReloads.push( files );
 					} ),
 					initialBuildCompleted: true

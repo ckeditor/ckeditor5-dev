@@ -5,6 +5,30 @@
 
 import { relative, isAbsolute } from 'node:path';
 
+export interface CachedValue<T> {
+	get(): T;
+	invalidate(): void;
+}
+
+/**
+ * Caches the computed value until the cache is invalidated.
+ */
+export function cacheValue<T>( compute: () => T ): CachedValue<T> {
+	let cached: { value: T } | null = null;
+
+	return {
+		get() {
+			cached ||= { value: compute() };
+
+			return cached.value;
+		},
+
+		invalidate() {
+			cached = null;
+		}
+	};
+}
+
 /**
  * Stringifies the values of the given object.
  */

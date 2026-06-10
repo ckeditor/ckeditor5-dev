@@ -45,6 +45,21 @@ describe( 'createManualShellHtml()', () => {
 		expect( getAttribute( iframe!, 'src' ) ).to.equal( 'assets/frame.html' );
 	} );
 
+	test( 'preserves manual body attributes on the shell body', () => {
+		const html = createManualShellHtml( {
+			entry,
+			html: '<body class="ai-multi-manual" data-test="preserved"><p>Manual test</p></body>',
+			shellScriptPublicPath: '/theme/shell.ts',
+			shellTemplateFilePath,
+			workspaceRoot
+		} );
+		const document = parse( html );
+		const body = query<Element>( document, node => isElementNode( node ) && node.tagName == 'body' )!;
+
+		expect( getAttribute( body, 'class' ) ).to.equal( 'ai-multi-manual' );
+		expect( getAttribute( body, 'data-test' ) ).to.equal( 'preserved' );
+	} );
+
 	test( 'keeps only the shell-injected manual test script', () => {
 		const html = createManualShellHtml( {
 			entry,

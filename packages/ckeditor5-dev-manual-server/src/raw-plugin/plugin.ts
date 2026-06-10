@@ -4,6 +4,7 @@
  */
 
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite';
 
@@ -14,7 +15,7 @@ export function rawHtmlPlugin(): Plugin {
 		name: 'ckeditor5-raw',
 		enforce: 'pre',
 
-		async resolveId( source, importer ) {
+		resolveId( source, importer ) {
 			if ( !importer || source.includes( '?' ) ) {
 				return null;
 			}
@@ -23,13 +24,13 @@ export function rawHtmlPlugin(): Plugin {
 				return null;
 			}
 
-			const resolved = await this.resolve( source, importer, { skipSelf: true } );
+			const filePath = resolveHtmlFilePath( source, importer );
 
-			if ( !resolved ) {
-				return null;
+			if ( filePath ) {
+				return `${ filePath }${ RAW_QUERY }`;
 			}
 
-			return `${ getFilePathFromId( resolved.id ) }${ RAW_QUERY }`;
+			return null;
 		},
 
 		async load( id ) {
@@ -46,6 +47,16 @@ export function rawHtmlPlugin(): Plugin {
 			};
 		}
 	};
+}
+
+function resolveHtmlFilePath( source: string, importer: string ): string | null {
+	if ( !source.startsWith( '.' ) ) {
+		return null;
+	}
+
+	const filePath = path.resolve( path.dirname( getFilePathFromId( importer ) ), source );
+
+	return existsSync( filePath ) ? filePath : null;
 }
 
 function getFilePathFromId( id: string ): string {

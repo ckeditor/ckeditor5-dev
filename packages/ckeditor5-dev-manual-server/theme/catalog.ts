@@ -82,7 +82,7 @@ function updateSearchQueryInUrl( query: string ): void {
 		url.searchParams.delete( SEARCH_QUERY_PARAMETER );
 	}
 
-	history.pushState( null, '', `${ url.pathname }${ url.search }${ url.hash }` );
+	history.replaceState( null, '', `${ url.pathname }${ url.search }${ url.hash }` );
 }
 
 /**

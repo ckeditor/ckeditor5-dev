@@ -4,8 +4,8 @@
  */
 
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
-import { type ViteDevServer } from 'vite';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { Plugin, ViteDevServer } from 'vite';
 import { rawHtmlPlugin } from '../../src/raw-plugin/plugin.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import { createTestServer, getCode } from '../_utils/vite.js';
@@ -38,6 +38,18 @@ describe( 'rawHtmlPlugin()', () => {
 
 		expect( ( await server.pluginContainer.resolveId( './template.html', importer ) )!.id )
 			.to.equal( join( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
+	} );
+
+	test( 'resolves relative HTML imports without calling the Vite resolver', async () => {
+		const importer = join( temporaryDirectory, 'manual.js' );
+		const resolve = vi.fn();
+		const plugin = rawHtmlPlugin();
+
+		await createFile( temporaryDirectory, 'template.html', '<div class="sample">Text</div>' );
+
+		expect( await getResolveIdHook( plugin ).call( { resolve }, './template.html', importer ) )
+			.to.equal( join( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
+		expect( resolve ).not.toHaveBeenCalled();
 	} );
 
 	test( 'loads imported HTML files as raw strings', async () => {
@@ -94,6 +106,15 @@ describe( 'rawHtmlPlugin()', () => {
 		expect( await server.pluginContainer.resolveId( './missing.html', importer ) ).to.be.null;
 	} );
 
+	test( 'ignores non-relative HTML imports', async () => {
+		const importer = join( temporaryDirectory, 'manual.js' );
+
+		await createFile( temporaryDirectory, 'manual.js', 'import template from "fixtures/template.html";' );
+		server = await createRawTestServer();
+
+		expect( await server.pluginContainer.resolveId( 'fixtures/template.html', importer ) ).to.be.null;
+	} );
+
 	test( 'ignores files with unsupported extensions', async () => {
 		const importer = join( temporaryDirectory, 'manual.js' );
 
@@ -125,3 +146,7 @@ describe( 'rawHtmlPlugin()', () => {
 		} );
 	}
 } );
+
+function getResolveIdHook( plugin: Plugin ): ( this: { resolve: ReturnType<typeof vi.fn> }, source: string, importer: string ) => unknown {
+	return plugin.resolveId as unknown as ( this: { resolve: ReturnType<typeof vi.fn> }, source: string, importer: string ) => unknown;
+}

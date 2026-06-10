@@ -15,7 +15,7 @@ import type { ManualPageEntry } from './types.js';
 const markdownProcessor = unified()
 	.use( remarkParse )
 	.use( remarkGfm )
-	.use( remarkRehype );
+	.use( remarkRehype, { allowDangerousHtml: true } );
 
 export function loadRenderedInstructions( entry: ManualPageEntry, workspaceRoot: string ): string {
 	if ( !entry.instructionsFilePath ) {
@@ -31,6 +31,6 @@ export function loadRenderedInstructions( entry: ManualPageEntry, workspaceRoot:
 
 	const tree = markdownProcessor.runSync( markdownProcessor.parse( markdown ) );
 
-	return toHtml( tree );
+	return toHtml( tree, { allowDangerousHtml: true } );
 }
 

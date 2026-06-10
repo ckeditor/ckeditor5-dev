@@ -69,6 +69,7 @@ export function createManualShellHtml( {
 	setAttribute( testScriptElement, 'src', `./${ testScriptFileName }` );
 	removeAttribute( testScriptElement, 'data-manual-test-script' );
 	setTextContent( shellDataElement, stringifyHtmlScriptData( createManualData( entry, workspaceRoot ) ) );
+	copyManualBodyAttributes( manualBody, shellBody );
 	appendChildren( shellHead, manualHead.childNodes.filter( shouldMoveManualHeadNode ) );
 	// Wrap before the browser parses the page so iframe elements are not reparented after loading starts.
 	appendChild( shellBody, createManualTestContainer( manualBody ) );
@@ -86,6 +87,22 @@ function createManualData( entry: ManualPageEntry, workspaceRoot: string ): Manu
 
 function stringifyHtmlScriptData( value: ManualData ): string {
 	return JSON.stringify( value ).split( '<' ).join( '\\u003c' );
+}
+
+function copyManualBodyAttributes( manualBody: Element, shellBody: Element ): void {
+	for ( const { name, value } of manualBody.attrs ) {
+		if ( name == 'class' ) {
+			const shellBodyClass = getAttribute( shellBody, 'class' );
+
+			setAttribute( shellBody, 'class', [ shellBodyClass, value ].filter( Boolean ).join( ' ' ) );
+
+			continue;
+		}
+
+		if ( !hasAttribute( shellBody, name ) ) {
+			setAttribute( shellBody, name, value );
+		}
+	}
 }
 
 function shouldMoveManualHeadNode( node: ChildNode ): boolean {

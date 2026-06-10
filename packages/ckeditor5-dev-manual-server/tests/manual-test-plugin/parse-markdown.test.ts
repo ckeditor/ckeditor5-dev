@@ -38,6 +38,20 @@ describe( 'loadRenderedInstructions()', () => {
 			instructionsFilePath: '/packages/ckeditor5-foo/tests/manual/sample.md'
 		} ), workspaceRoot ) ).to.equal( '<h2>Steps</h2>\n<ul>\n<li>Click <strong>Bold</strong></li>\n</ul>' );
 	} );
+
+	test( 'preserves raw HTML in markdown instructions', async () => {
+		await createFile(
+			workspaceRoot,
+			'packages/ckeditor5-foo/tests/manual/sample.md',
+			'Press <kbd>Ctrl</kbd>+<kbd>B</kbd>.\n\n<details><summary>More</summary>Hidden steps.</details>'
+		);
+
+		expect( loadRenderedInstructions( createEntry( {
+			instructionsFilePath: '/packages/ckeditor5-foo/tests/manual/sample.md'
+		} ), workspaceRoot ) ).to.equal(
+			'<p>Press <kbd>Ctrl</kbd>+<kbd>B</kbd>.</p>\n<details><summary>More</summary>Hidden steps.</details>'
+		);
+	} );
 } );
 
 function createEntry( overrides: Partial<ManualPageEntry> = {} ): ManualPageEntry {

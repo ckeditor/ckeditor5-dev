@@ -3,15 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
+import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, posix, resolve, relative } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { posix, resolve, relative } from 'node:path';
 import { parse, serialize } from 'parse5';
 import { appendChild, getAttribute, isElementNode, query, removeNode, type Element, type Node } from '@parse5/tools';
 import { collectManualPages } from './collect-pages.js';
 import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
-import { toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import { cacheValue, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin } from 'vite';
 import type { ManualPageEntry } from './types.js';
 export type { ManualData } from './types.js';
@@ -27,18 +27,24 @@ interface ManualTestServerLike {
 	middlewares: {
 		use( middleware: unknown ): void;
 	};
-	environments?: {
-		client?: {
-			memoryFiles?: {
-				get( filePath: string ): { source: string | Uint8Array } | undefined;
-			};
-		};
-	};
+	watcher?: ManualFileWatcherLike;
 }
 
-const PACKAGE_ROOT = dirname( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/package.json' ) ) );
+interface ManualFileWatcherLike {
+	on( eventName: string, listener: ( filePath: string ) => void ): unknown;
+}
+
+interface BundledDevClientEnvironment {
+	memoryFiles?: ManualMemoryFilesLike;
+}
+
+interface ManualMemoryFilesLike {
+	get( filePath: string ): { source: string | Uint8Array } | undefined;
+}
+
+const MANUAL_FILE_SET_EVENTS = [ 'add', 'addDir', 'unlink', 'unlinkDir' ];
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
-const MANUAL_THEME_ROOT = resolve( PACKAGE_ROOT, 'theme' );
+const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
 const MANUAL_CATALOG_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.ts' );
 const MANUAL_SHELL_TEMPLATE_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.html' );
@@ -47,8 +53,14 @@ const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	let workspaceRoot = process.cwd();
 	const manualPagePatterns = manualTestPatterns.map( pattern => `${ pattern }.{html,js,md,ts}` );
-	const getManualPages = () => collectManualPages( manualPagePatterns, workspaceRoot );
-	const getManualStaticAssets = () => collectManualStaticAssets( manualTestPatterns, workspaceRoot );
+	const manualPagesCache = cacheValue( () => collectManualPages( manualPagePatterns, workspaceRoot ) );
+	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets( manualTestPatterns, workspaceRoot ) );
+	const getManualPages = manualPagesCache.get;
+	const getManualStaticAssets = manualStaticAssetsCache.get;
+	const invalidateManualFileCaches = () => {
+		manualPagesCache.invalidate();
+		manualStaticAssetsCache.invalidate();
+	};
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
 	};
@@ -83,12 +95,17 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 		configResolved( config ) {
 			workspaceRoot = config.root;
 
+			invalidateManualFileCaches();
+
 			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
 
 		configureServer( server ) {
+			const { memoryFiles } = server.environments.client as BundledDevClientEnvironment;
+
+			useManualFileCacheInvalidation( server.watcher, invalidateManualFileCaches );
 			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
-			useBundledDevManualHtmlSource( server, getManualPages, getManualShellScriptPublicPath, () => workspaceRoot );
+			useBundledDevManualHtmlSource( memoryFiles, getManualPages, getManualShellScriptPublicPath, () => workspaceRoot );
 		},
 
 		configurePreviewServer( server ) {
@@ -109,6 +126,16 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			}
 
 			return null;
+		},
+
+		generateBundle() {
+			for ( const [ publicPath, filePath ] of getManualStaticAssets() ) {
+				this.emitFile( {
+					type: 'asset',
+					fileName: stripLeadingSlash( publicPath ),
+					source: readFileSync( filePath )
+				} );
+			}
 		},
 
 		transformIndexHtml: {
@@ -137,6 +164,12 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	};
 }
 
+function useManualFileCacheInvalidation( watcher: ManualFileWatcherLike | undefined, invalidate: () => void ): void {
+	for ( const eventName of MANUAL_FILE_SET_EVENTS ) {
+		watcher?.on( eventName, invalidate );
+	}
+}
+
 function useManualTestMiddlewares(
 	server: ManualTestServerLike,
 	getManualCatalogPublicPath: () => string,
@@ -152,13 +185,11 @@ function useManualTestMiddlewares(
 }
 
 function useBundledDevManualHtmlSource(
-	server: ManualTestServerLike,
+	memoryFiles: ManualMemoryFilesLike | undefined,
 	getManualPages: () => Map<string, ManualPageEntry>,
 	getManualShellScriptPublicPath: () => string,
 	getWorkspaceRoot: () => string
 ): void {
-	const memoryFiles = server.environments?.client?.memoryFiles;
-
 	if ( !memoryFiles ) {
 		return;
 	}
@@ -176,13 +207,14 @@ function useBundledDevManualHtmlSource(
 		const workspaceRoot = getWorkspaceRoot();
 		const shellScriptPublicPath = getManualShellScriptPublicPath();
 		const bundledHtml = getFileSource( file );
-		const html = mergeBundledAssetTags( createManualShellHtml( {
+		const transformedSourceHtml = createManualShellHtml( {
 			entry,
 			html: readFileSync( resolve( workspaceRoot, filePath ), 'utf8' ),
 			shellScriptPublicPath,
 			shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
 			workspaceRoot
-		} ), bundledHtml, entry, shellScriptPublicPath );
+		} );
+		const html = mergeBundledAssetTags( transformedSourceHtml, bundledHtml, entry, shellScriptPublicPath );
 
 		return { source: html };
 	};
@@ -237,8 +269,10 @@ function isBundledAssetTag( node: Node ): node is Element {
 		return false;
 	}
 
-	return node.tagName == 'script' && getAttribute( node, 'src' )?.startsWith( '/assets/' ) ||
-		node.tagName == 'link' && getAttribute( node, 'href' )?.startsWith( '/assets/' );
+	return Boolean(
+		node.tagName == 'script' && getAttribute( node, 'src' )?.startsWith( '/assets/' ) ||
+		node.tagName == 'link' && getAttribute( node, 'href' )?.startsWith( '/assets/' )
+	);
 }
 
 function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {

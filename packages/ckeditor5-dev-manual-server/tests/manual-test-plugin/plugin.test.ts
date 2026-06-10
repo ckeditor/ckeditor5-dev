@@ -4,7 +4,8 @@
  */
 
 import { join, resolve } from 'node:path';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { EventEmitter } from 'node:events';
+import { afterEach, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 import { type ViteDevServer } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
 import { toPublicFilePath } from '../../src/utils.js';
@@ -30,14 +31,19 @@ type ConfigResolvedHook = ( config: {
 type TransformIndexHtmlHook = {
 	handler( html: string, context: { filename: string } ): string | undefined;
 };
+type GenerateBundleHook = ( this: { emitFile: ReturnType<typeof vi.fn> } ) => void;
+type LoadHook = ( id: string ) => string | null;
+type MemoryFile = { etag?: string; source: string | Uint8Array };
+type MemoryFilesGetMock = Mock<( filePath: string ) => MemoryFile | undefined>;
 type TestServer = {
 	middlewares: {
 		use: ReturnType<typeof vi.fn>;
 	};
+	watcher: EventEmitter;
 	environments: {
 		client: {
 			memoryFiles: {
-				get: ReturnType<typeof vi.fn>;
+				get: MemoryFilesGetMock;
 			};
 		};
 	};
@@ -177,11 +183,45 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
 		] );
+		server.watcher.emit( 'add', join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ) );
+		server.watcher.emit( 'add', join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' ) );
 
 		const updatedSource = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
 		expect( updatedSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
 		expect( updatedSource ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+	} );
+
+	test( 'caches collected entries until the watcher reports manual file changes', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const mockServer = createMiddlewareServer();
+		const config = ( plugin.config as ConfigHook )();
+		const load = plugin.load as LoadHook;
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: config.build
+		} );
+		( plugin.configureServer as unknown as ServerHook )( mockServer );
+
+		const initialSource = load( '\u0000virtual:ckeditor5-manual-entries' )!;
+
+		expect( initialSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+
+		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' );
+
+		await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' );
+
+		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.equal( initialSource );
+
+		mockServer.watcher.emit( 'add', addedFilePath );
+
+		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
 	test( 'does not resolve unknown virtual module requests', async () => {
@@ -200,6 +240,25 @@ describe( 'manualTestsPlugin()', () => {
 
 		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
 		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	test( 'emits manual static assets during build', async () => {
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const config = ( plugin.config as ConfigHook )();
+		const emitFile = vi.fn();
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: config.build
+		} );
+		( plugin.generateBundle as unknown as GenerateBundleHook ).call( { emitFile } );
+
+		expect( emitFile ).toHaveBeenCalledWith( {
+			type: 'asset',
+			fileName: 'packages/ckeditor5-foo/tests/manual/assets/image.png',
+			source: Buffer.from( 'image' )
+		} );
 	} );
 
 	test( 'updates bundled manual HTML from current source in dev server', async () => {
@@ -325,10 +384,11 @@ function createMiddlewareServer(): TestServer {
 		middlewares: {
 			use: vi.fn()
 		},
+		watcher: new EventEmitter(),
 		environments: {
 			client: {
 				memoryFiles: {
-					get: vi.fn()
+					get: vi.fn<( filePath: string ) => MemoryFile | undefined>()
 				}
 			}
 		}
