@@ -109,4 +109,17 @@ describe( 'collectManualPages()', () => {
 		expect( pages.get( '/packages/ckeditor5-foo/tests/manual/sample.html' )!.scriptFilePath )
 			.to.equal( '/packages/ckeditor5-foo/tests/manual/sample.ts' );
 	} );
+
+	test( 'sorts manual pages by slug within the same package', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/zeta.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/zeta.ts' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/alpha.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/alpha.ts' )
+		] );
+
+		const pages = collectManualPages( [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ], workspaceRoot );
+
+		expect( [ ...pages.values() ].map( entry => entry.slug ) ).to.deep.equal( [ 'alpha', 'zeta' ] );
+	} );
 } );

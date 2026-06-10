@@ -362,6 +362,12 @@ describe( 'manualTestsPlugin()', () => {
 		expect( await server.pluginContainer.resolveId( 'virtual:other' ) ).to.be.null;
 	} );
 
+	test( 'does not load unknown virtual module requests', () => {
+		const plugin = manualTestsPlugin( [] );
+
+		expect( ( plugin.load as LoadHook )( '\u0000virtual:other' ) ).to.be.null;
+	} );
+
 	test( 'registers manual test middlewares for dev and preview servers', () => {
 		const plugin = manualTestsPlugin( [] );
 		const devServer = createMiddlewareServer();
@@ -421,6 +427,36 @@ describe( 'manualTestsPlugin()', () => {
 		expect( html ).not.to.contain( 'src="./foo.js"' );
 	} );
 
+	test( 'replaces source shell script when bundled manual HTML includes bundled shell assets', async () => {
+		await Promise.all( [
+			createFile(
+				workspaceRoot,
+				'packages/ckeditor5-foo/tests/manual/foo.html',
+				'<head><script>window.inline = true;</script></head><p>Fresh manual test</p>'
+			),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const server = createMiddlewareServer();
+
+		server.environments.client.memoryFiles.get.mockReturnValue( {
+			source: '<html><head>\n<script type="module" crossorigin src="/assets/shell-abc.js"></script>' +
+				'<script type="module" crossorigin src="/assets/foo.js"></script></head><body>Old</body></html>'
+		} );
+
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		const file = server.environments.client.memoryFiles.get( 'packages/ckeditor5-foo/tests/manual/foo.html' )!;
+		const html = file.source as string;
+
+		expect( html ).to.contain( '<script>window.inline = true;</script>' );
+		expect( html ).to.contain( 'src="/assets/shell-abc.js"' );
+		expect( html ).to.contain( 'src="/assets/foo.js"' );
+		expect( html ).not.to.contain( 'theme/shell.ts' );
+		expect( html ).not.to.contain( 'src="./foo.js"' );
+	} );
+
 	test( 'updates bundled manual HTML from current source for leading slash paths in dev server', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
@@ -444,6 +480,39 @@ describe( 'manualTestsPlugin()', () => {
 		expect( html ).not.to.contain( 'src="./foo.js"' );
 	} );
 
+	test( 'keeps bundled files that are not collected manual pages unchanged', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const server = createMiddlewareServer();
+		const bundledFile = { source: '<html><head></head><body>Other</body></html>' };
+
+		server.environments.client.memoryFiles.get.mockReturnValue( bundledFile );
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		expect( server.environments.client.memoryFiles.get( 'packages/ckeditor5-foo/tests/manual/missing.html' ) )
+			.to.equal( bundledFile );
+	} );
+
+	test( 'keeps missing bundled files unchanged', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const server = createMiddlewareServer();
+
+		server.environments.client.memoryFiles.get.mockReturnValue( undefined );
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		expect( server.environments.client.memoryFiles.get( 'packages/ckeditor5-foo/tests/manual/foo.html' ) )
+			.to.be.undefined;
+	} );
+
 	test( 'rewrites root and index requests to the manual test catalog', () => {
 		const plugin = manualTestsPlugin( [] );
 		const server = createMiddlewareServer();
@@ -458,18 +527,24 @@ describe( 'manualTestsPlugin()', () => {
 		const rootRequest = { url: '/?q=1' };
 		const indexRequest = { url: '/index.html?filter=all' };
 		const otherRequest = { url: '/manual.html' };
+		const missingUrlRequest = {};
+		const invalidUrlRequest = { url: 'http://%' };
 		const next = vi.fn();
 
 		middleware( rootRequest, {}, next );
 		middleware( indexRequest, {}, next );
 		middleware( otherRequest, {}, next );
+		middleware( missingUrlRequest, {}, next );
+		middleware( invalidUrlRequest, {}, next );
 
 		expect( rootRequest.url ).to.contain( '/theme/catalog.html' );
 		expect( rootRequest.url ).to.contain( '?q=1' );
 		expect( indexRequest.url ).to.contain( '/theme/catalog.html' );
 		expect( indexRequest.url ).to.contain( '?filter=all' );
 		expect( otherRequest.url ).to.equal( '/manual.html' );
-		expect( next ).toHaveBeenCalledTimes( 3 );
+		expect( missingUrlRequest ).to.have.property( 'url' ).that.contains( '/theme/catalog.html' );
+		expect( invalidUrlRequest.url ).to.equal( 'http://%' );
+		expect( next ).toHaveBeenCalledTimes( 5 );
 	} );
 
 	test( 'rewrites the catalog script to a public file path', async () => {

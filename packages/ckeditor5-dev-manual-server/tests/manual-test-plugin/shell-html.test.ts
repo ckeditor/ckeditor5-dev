@@ -8,6 +8,7 @@ import { parse } from 'parse5';
 import { describe, expect, test } from 'vitest';
 import { getAttribute, isElementNode, query, queryAll, type Element } from '@parse5/tools';
 import { createManualShellHtml } from '../../src/manual-test-plugin/shell-html.js';
+import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import type { ManualPageEntry } from '../../src/manual-test-plugin/types.js';
 
 describe( 'createManualShellHtml()', () => {
@@ -60,12 +61,43 @@ describe( 'createManualShellHtml()', () => {
 		expect( getAttribute( body, 'data-test' ) ).to.equal( 'preserved' );
 	} );
 
+	test( 'keeps existing shell body attributes when manual body duplicates them', async () => {
+		const temporaryDirectory = await createTemporaryDirectory( 'ckeditor5-manual-shell-html-' );
+
+		try {
+			const customShellTemplateFilePath = await createFile( temporaryDirectory, 'shell.html', [
+				'<!DOCTYPE html><html><head>',
+				'<title></title>',
+				'<script type="module" data-manual-shell-script></script>',
+				'<script type="module" data-manual-test-script></script>',
+				'</head><body data-test="shell">',
+				'<script id="manual-shell-data" type="application/json"></script>',
+				'</body></html>'
+			].join( '' ) );
+			const html = createManualShellHtml( {
+				entry,
+				html: '<body data-test="manual" data-extra="preserved"><p>Manual test</p></body>',
+				shellScriptPublicPath: '/theme/shell.ts',
+				shellTemplateFilePath: customShellTemplateFilePath,
+				workspaceRoot
+			} );
+			const document = parse( html );
+			const body = query<Element>( document, node => isElementNode( node ) && node.tagName == 'body' )!;
+
+			expect( getAttribute( body, 'data-test' ) ).to.equal( 'shell' );
+			expect( getAttribute( body, 'data-extra' ) ).to.equal( 'preserved' );
+		} finally {
+			await removeDirectory( temporaryDirectory );
+		}
+	} );
+
 	test( 'keeps only the shell-injected manual test script', () => {
 		const html = createManualShellHtml( {
 			entry,
 			html: [
 				'<head>',
 				'<script type="module" src="./iframe.js"></script>',
+				'<script>window.inline = true;</script>',
 				'<script type="module" src="./helper.js"></script>',
 				'</head>',
 				'<body>',
@@ -83,6 +115,31 @@ describe( 'createManualShellHtml()', () => {
 
 		expect( scriptSources.filter( source => source == './iframe.js' ) ).to.have.length( 1 );
 		expect( scriptSources ).to.include( './helper.js' );
+		expect( html ).to.contain( '<script>window.inline = true;</script>' );
+	} );
+
+	test( 'moves supported manual head nodes and skips duplicated shell metadata', () => {
+		const html = createManualShellHtml( {
+			entry,
+			html: [
+				'<head>',
+				'<!-- manual comment -->',
+				'<meta charset="utf-8">',
+				'<meta name="viewport" content="width=device-width">',
+				'<meta name="robots" content="noindex">',
+				'<style>.manual { color: red; }</style>',
+				'</head>'
+			].join( '' ),
+			shellScriptPublicPath: '/theme/shell.ts',
+			shellTemplateFilePath,
+			workspaceRoot
+		} );
+
+		expect( html ).to.contain( '<!-- manual comment -->' );
+		expect( html ).to.contain( '<meta name="robots" content="noindex">' );
+		expect( html ).to.contain( '<style>.manual { color: red; }</style>' );
+		expect( html ).not.to.contain( '<meta charset="utf-8"><meta charset="utf-8">' );
+		expect( html ).not.to.contain( '<meta name="viewport" content="width=device-width"><meta name="viewport"' );
 	} );
 
 	test( 'removes stale JavaScript test script when TypeScript test script is selected', () => {

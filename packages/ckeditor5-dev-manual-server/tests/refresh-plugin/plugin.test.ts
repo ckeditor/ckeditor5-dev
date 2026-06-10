@@ -60,6 +60,50 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads[ 0 ]!.type ).to.equal( 'update' );
 	} );
 
+	test( 'keeps non-update payloads sent directly to clients', () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		configureServer( server );
+		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
+		client.send( { type: 'full-reload' } );
+
+		expect( clientPayloads ).to.deep.equal( [ { type: 'full-reload' } ] );
+	} );
+
+	test( 'does not wrap the same bundled dev client more than once', () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		configureServer( server );
+		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
+		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
+		client.send( {
+			type: 'update',
+			updates: [ {
+				type: 'js-update',
+				path: '/assets/article.js',
+				acceptedPath: '/assets/article.js',
+				timestamp: Date.now()
+			} ]
+		} );
+
+		expect( clientPayloads ).to.deep.equal( [ {
+			type: 'custom',
+			event: MANUAL_REFRESH_EVENT_NAME
+		} ] );
+	} );
+
+	test( 'does not wrap client setup when bundled dev clients are unavailable', () => {
+		const server = createBundledDevServer();
+
+		delete ( server.environments.client as Partial<typeof server.environments.client> ).clients;
+
+		expect( () => configureServer( server ) ).not.to.throw();
+	} );
+
 	test( 'replaces bundled dev JavaScript full reloads with the manual refresh prompt', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
@@ -89,6 +133,14 @@ describe( 'refreshPlugin()', () => {
 		expect( handledFullReloads ).to.deep.equal( [ [ '/workspace/article.html' ] ] );
 		expect( server.environments.client.devEngine.ensureLatestBuildOutput ).not.toHaveBeenCalled();
 		expect( clientPayloads ).to.deep.equal( [] );
+	} );
+
+	test( 'does not wrap full reloads when bundled dev HMR handling is unavailable', () => {
+		const server = createBundledDevServer();
+
+		delete ( server.environments.client as Partial<typeof server.environments.client> ).handleHmrOutput;
+
+		expect( () => configureServer( server ) ).not.to.throw();
 	} );
 
 	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
