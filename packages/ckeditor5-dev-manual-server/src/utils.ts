@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { resolve, relative, isAbsolute } from 'node:path';
-import { globSync, readFileSync } from 'node:fs';
+import { relative, isAbsolute } from 'node:path';
 
 /**
  * Stringifies the values of the given object.
@@ -15,22 +14,6 @@ export function stringifyValues( obj: Record<string, unknown> ): Record<string, 
 			.entries( obj )
 			.map( ( [ key, value ] ) => [ key, JSON.stringify( value ) ] )
 	);
-}
-
-/**
- * Returns package names that should be pre-bundled by the manual test server.
- */
-export function getOptimizedPackageIncludes( packageJsonGlobs: Array<string> ): Array<string> {
-	const packageNames = globSync( packageJsonGlobs, { cwd: process.cwd() } )
-		.map( packageJsonPath => {
-			const resolvedPath = resolve( process.cwd(), packageJsonPath );
-			const packageJson = JSON.parse( readFileSync( resolvedPath, 'utf8' ) );
-
-			return packageJson.name;
-		} )
-		.sort();
-
-	return [ ...new Set( packageNames ) ];
 }
 
 export function toPublicFilePath( filePath: string, workspaceRoot: string ): string {

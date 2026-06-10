@@ -34,6 +34,13 @@ type TestServer = {
 	middlewares: {
 		use: ReturnType<typeof vi.fn>;
 	};
+	environments: {
+		client: {
+			memoryFiles: {
+				get: ReturnType<typeof vi.fn>;
+			};
+		};
+	};
 };
 
 describe( 'manualTestsPlugin()', () => {
@@ -139,6 +146,20 @@ describe( 'manualTestsPlugin()', () => {
 		}
 	} );
 
+	test( 'uses current working directory for initial build inputs', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const config = ( plugin.config as ConfigHook )();
+
+		expect( config.build.rolldownOptions.input ).to.include(
+			join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' )
+		);
+	} );
+
 	test( 'updates entries when new manual page files are added', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
@@ -179,6 +200,33 @@ describe( 'manualTestsPlugin()', () => {
 
 		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
 		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	test( 'updates bundled manual HTML from current source in dev server', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const server = createMiddlewareServer();
+
+		server.environments.client.memoryFiles.get.mockReturnValue( {
+			etag: 'stale-etag',
+			source: '<html><head><script type="module" crossorigin src="/assets/foo.js"></script>' +
+				'<link rel="modulepreload" crossorigin href="/assets/chunk.js"></head><body>Old</body></html>'
+		} );
+
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		const file = server.environments.client.memoryFiles.get( 'packages/ckeditor5-foo/tests/manual/foo.html' )!;
+		const html = file.source as string;
+
+		expect( file ).not.to.have.property( 'etag' );
+		expect( html ).to.contain( '<p>Fresh manual test</p>' );
+		expect( html ).to.contain( 'src="/assets/foo.js"' );
+		expect( html ).to.contain( 'href="/assets/chunk.js"' );
+		expect( html ).not.to.contain( 'src="./foo.js"' );
 	} );
 
 	test( 'rewrites root and index requests to the manual test catalog', () => {
@@ -276,6 +324,13 @@ function createMiddlewareServer(): TestServer {
 	return {
 		middlewares: {
 			use: vi.fn()
+		},
+		environments: {
+			client: {
+				memoryFiles: {
+					get: vi.fn()
+				}
+			}
 		}
 	};
 }

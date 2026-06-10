@@ -3,9 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
+import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite';
 
-const RAW_QUERY = '?raw';
+const RAW_QUERY = '?ckeditor5-raw';
 
 export function rawHtmlPlugin(): Plugin {
 	return {
@@ -17,11 +19,37 @@ export function rawHtmlPlugin(): Plugin {
 				return null;
 			}
 
-			if ( !source.endsWith( '.html' ) ) {
+			if ( path.extname( source ) != '.html' ) {
 				return null;
 			}
 
-			return this.resolve( `${ source }${ RAW_QUERY }`, importer, { skipSelf: true } );
+			const resolved = await this.resolve( source, importer, { skipSelf: true } );
+
+			if ( !resolved ) {
+				return null;
+			}
+
+			return `${ getFilePathFromId( resolved.id ) }${ RAW_QUERY }`;
+		},
+
+		async load( id ) {
+			if ( !id.endsWith( RAW_QUERY ) ) {
+				return null;
+			}
+
+			const filePath = id.slice( 0, -RAW_QUERY.length );
+			const source = await readFile( filePath, 'utf8' );
+
+			return {
+				code: `export default ${ JSON.stringify( source ) };`,
+				map: null
+			};
 		}
 	};
+}
+
+function getFilePathFromId( id: string ): string {
+	const queryIndex = id.indexOf( '?' );
+
+	return queryIndex >= 0 ? id.slice( 0, queryIndex ) : id;
 }

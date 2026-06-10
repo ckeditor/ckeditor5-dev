@@ -5,9 +5,6 @@
 
 export { manualTestsPlugin } from './manual-test-plugin/plugin.js';
 export type { ManualData } from './manual-test-plugin/plugin.js';
-
 export { refreshPlugin } from './refresh-plugin/plugin.js';
-
 export { rawHtmlPlugin } from './raw-plugin/plugin.js';
-
-export { getOptimizedPackageIncludes, stringifyValues } from './utils.js';
+export { stringifyValues } from './utils.js';

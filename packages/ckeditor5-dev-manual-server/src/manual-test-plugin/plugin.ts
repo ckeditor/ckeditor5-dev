@@ -4,7 +4,10 @@
  */
 
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve, relative } from 'node:path';
+import { dirname, posix, resolve, relative } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { parse, serialize } from 'parse5';
+import { appendChild, getAttribute, isElementNode, query, removeNode, type Element, type Node } from '@parse5/tools';
 import { collectManualPages } from './collect-pages.js';
 import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
@@ -23,6 +26,13 @@ interface ManualTestClientEntry {
 interface ManualTestServerLike {
 	middlewares: {
 		use( middleware: unknown ): void;
+	};
+	environments?: {
+		client?: {
+			memoryFiles?: {
+				get( filePath: string ): { source: string | Uint8Array } | undefined;
+			};
+		};
 	};
 }
 
@@ -64,7 +74,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			return {
 				build: {
 					rolldownOptions: {
-						input: MANUAL_CATALOG_FILE_PATH
+						input: getManualBuildInputs()
 					}
 				}
 			};
@@ -78,6 +88,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 		configureServer( server ) {
 			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
+			useBundledDevManualHtmlSource( server, getManualPages, getManualShellScriptPublicPath, () => workspaceRoot );
 		},
 
 		configurePreviewServer( server ) {
@@ -140,9 +151,98 @@ function useManualTestMiddlewares(
 	} );
 }
 
+function useBundledDevManualHtmlSource(
+	server: ManualTestServerLike,
+	getManualPages: () => Map<string, ManualPageEntry>,
+	getManualShellScriptPublicPath: () => string,
+	getWorkspaceRoot: () => string
+): void {
+	const memoryFiles = server.environments?.client?.memoryFiles;
+
+	if ( !memoryFiles ) {
+		return;
+	}
+
+	const getBundledFile = memoryFiles.get.bind( memoryFiles );
+
+	memoryFiles.get = ( filePath: string ) => {
+		const file = getBundledFile( filePath );
+		const entry = getManualPages().get( toPublicSpecifier( filePath ) );
+
+		if ( !file || !entry ) {
+			return file;
+		}
+
+		const workspaceRoot = getWorkspaceRoot();
+		const shellScriptPublicPath = getManualShellScriptPublicPath();
+		const bundledHtml = getFileSource( file );
+		const html = mergeBundledAssetTags( createManualShellHtml( {
+			entry,
+			html: readFileSync( resolve( workspaceRoot, filePath ), 'utf8' ),
+			shellScriptPublicPath,
+			shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
+			workspaceRoot
+		} ), bundledHtml, entry, shellScriptPublicPath );
+
+		return { source: html };
+	};
+}
+
+function getFileSource( file: { source: string | Uint8Array } ): string {
+	return typeof file.source == 'string' ? file.source : Buffer.from( file.source ).toString( 'utf8' );
+}
+
+function mergeBundledAssetTags(
+	sourceHtml: string,
+	bundledHtml: string,
+	entry: ManualPageEntry,
+	shellScriptPublicPath: string
+): string {
+	const sourceDocument = parse( sourceHtml );
+	const bundledDocument = parse( bundledHtml );
+	const sourceHead = getRequiredElementByTagName( sourceDocument, 'head' );
+	const bundledHead = getRequiredElementByTagName( bundledDocument, 'head' );
+	const testScriptFileName = posix.basename( entry.scriptFilePath );
+
+	for ( const node of [ ...sourceHead.childNodes ] ) {
+		if ( isSourceModuleScript( node, testScriptFileName, shellScriptPublicPath ) ) {
+			removeNode( node );
+		}
+	}
+
+	for ( const node of bundledHead.childNodes.filter( isBundledAssetTag ) ) {
+		removeNode( node );
+		appendChild( sourceHead, node );
+	}
+
+	return serialize( sourceDocument );
+}
+
+function isSourceModuleScript( node: Node, testScriptFileName: string, shellScriptPublicPath: string ): boolean {
+	if ( !isElementNode( node ) || node.tagName != 'script' ) {
+		return false;
+	}
+
+	const source = getAttribute( node, 'src' );
+
+	if ( !source ) {
+		return false;
+	}
+
+	return source == shellScriptPublicPath || posix.basename( source ) == testScriptFileName;
+}
+
+function isBundledAssetTag( node: Node ): node is Element {
+	if ( !isElementNode( node ) ) {
+		return false;
+	}
+
+	return node.tagName == 'script' && getAttribute( node, 'src' )?.startsWith( '/assets/' ) ||
+		node.tagName == 'link' && getAttribute( node, 'href' )?.startsWith( '/assets/' );
+}
+
 function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {
-	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
-	const url = URL.parse( request.url || '', 'http://localhost' );
+	const url = parseRequestUrl( request.url );
 
 	if ( !url ) {
 		return;
@@ -151,4 +251,13 @@ function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPa
 	if ( url.pathname == '/' || url.pathname == '/index.html' ) {
 		request.url = `${ manualCatalogPublicPath }${ url.search }`;
 	}
+}
+
+function parseRequestUrl( requestUrl: string | undefined ): URL | null {
+	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
+	return URL.parse( requestUrl || '', 'http://localhost' );
+}
+
+function getRequiredElementByTagName( root: Node, tagName: string ): Element {
+	return query<Element>( root, candidate => isElementNode( candidate ) && candidate.tagName == tagName )!;
 }

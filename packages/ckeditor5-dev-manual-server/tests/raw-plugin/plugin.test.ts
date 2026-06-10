@@ -29,7 +29,7 @@ describe( 'rawHtmlPlugin()', () => {
 		expect( rawHtmlPlugin().enforce ).to.equal( 'pre' );
 	} );
 
-	test( 'resolves imported HTML files as Vite raw imports by default', async () => {
+	test( 'resolves imported HTML files as manual raw imports by default', async () => {
 		const importer = join( temporaryDirectory, 'manual.js' );
 
 		await createFile( temporaryDirectory, 'template.html', '<div class="sample">Text</div>' );
@@ -37,7 +37,7 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		expect( ( await server.pluginContainer.resolveId( './template.html', importer ) )!.id )
-			.to.equal( join( temporaryDirectory, 'template.html?raw' ) );
+			.to.equal( join( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
 	} );
 
 	test( 'loads imported HTML files as raw strings', async () => {
@@ -48,6 +48,19 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		const resolved = await server.pluginContainer.resolveId( './template.html', importer );
+		const loaded = await server.pluginContainer.load( resolved!.id );
+
+		expect( getCode( loaded ) ).to.contain( 'export default "<p>Template</p>"' );
+	} );
+
+	test( 'strips resolved import queries before loading raw HTML', async () => {
+		const importer = join( temporaryDirectory, 'manual.js' );
+
+		await createFile( temporaryDirectory, 'template.html', '<p>Template</p>' );
+		await createFile( temporaryDirectory, 'manual.js', 'import template from "./template.html";' );
+		server = await createRawTestServer();
+
+		const resolved = await server.pluginContainer.resolveId( './template.html', `${ importer }?v=1` );
 		const loaded = await server.pluginContainer.load( resolved!.id );
 
 		expect( getCode( loaded ) ).to.contain( 'export default "<p>Template</p>"' );
