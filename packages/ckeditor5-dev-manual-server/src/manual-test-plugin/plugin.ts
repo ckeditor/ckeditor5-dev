@@ -53,7 +53,7 @@ const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
 export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	let workspaceRoot = process.cwd();
-	const manualPagePatterns = manualTestPatterns.map( pattern => `${ pattern }.{html,js,md,ts}` );
+	const manualPagePatterns = manualTestPatterns.map( toManualPagePattern );
 	const manualPagesCache = cacheValue( () => collectManualPages( manualPagePatterns, workspaceRoot ) );
 	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets( manualTestPatterns, workspaceRoot ) );
 	const getManualPages = manualPagesCache.get;
@@ -271,6 +271,14 @@ function getFileSource( file: { source: string | Uint8Array } ): string {
 	return typeof file.source == 'string' ? file.source : Buffer.from( file.source ).toString( 'utf8' );
 }
 
+function toManualPagePattern( pattern: string ): string {
+	if ( /\.(?:html|js|md|ts|\{[^}]*\})$/.test( pattern ) ) {
+		return pattern;
+	}
+
+	return `${ pattern }.{html,js,md,ts}`;
+}
+
 function mergeBundledAssetTags(
 	sourceHtml: string,
 	bundledHtml: string,
@@ -282,9 +290,13 @@ function mergeBundledAssetTags(
 	const sourceHead = getRequiredElementByTagName( sourceDocument, 'head' );
 	const bundledHead = getRequiredElementByTagName( bundledDocument, 'head' );
 	const testScriptFileName = posix.basename( entry.scriptFilePath );
+	const hasBundledShellScript = bundledHead.childNodes.some( node => isBundledModuleScript( node, 'shell' ) );
 
 	for ( const node of [ ...sourceHead.childNodes ] ) {
-		if ( isSourceModuleScript( node, testScriptFileName, shellScriptPublicPath ) ) {
+		if (
+			isSourceTestScript( node, testScriptFileName ) ||
+			hasBundledShellScript && isSourceShellScript( node, shellScriptPublicPath )
+		) {
 			removeNode( node );
 		}
 	}
@@ -297,7 +309,7 @@ function mergeBundledAssetTags(
 	return serialize( sourceDocument );
 }
 
-function isSourceModuleScript( node: Node, testScriptFileName: string, shellScriptPublicPath: string ): boolean {
+function isSourceTestScript( node: Node, testScriptFileName: string ): boolean {
 	if ( !isElementNode( node ) || node.tagName != 'script' ) {
 		return false;
 	}
@@ -308,7 +320,19 @@ function isSourceModuleScript( node: Node, testScriptFileName: string, shellScri
 		return false;
 	}
 
-	return source == shellScriptPublicPath || posix.basename( source ) == testScriptFileName;
+	return posix.basename( source ) == testScriptFileName;
+}
+
+function isSourceShellScript( node: Node, shellScriptPublicPath: string ): boolean {
+	return isElementNode( node ) && node.tagName == 'script' && getAttribute( node, 'src' ) == shellScriptPublicPath;
+}
+
+function isBundledModuleScript( node: Node, moduleName: string ): boolean {
+	if ( !isElementNode( node ) || node.tagName != 'script' ) {
+		return false;
+	}
+
+	return Boolean( getAttribute( node, 'src' )?.startsWith( `/assets/${ moduleName }-` ) );
 }
 
 function isBundledAssetTag( node: Node ): node is Element {

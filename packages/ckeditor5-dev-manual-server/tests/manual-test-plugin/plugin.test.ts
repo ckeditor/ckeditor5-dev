@@ -103,6 +103,19 @@ describe( 'manualTestsPlugin()', () => {
 		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
+	test( 'exposes entries collected from manual test globs with extension patterns', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		server = await createManualTestServer( [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ] );
+		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
+		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+	} );
+
 	test( 'uses the Vite root instead of the current working directory for page entries', async () => {
 		const currentWorkingDirectory = await createTemporaryDirectory( 'ckeditor5-manual-test-plugin-cwd-' );
 
@@ -402,6 +415,7 @@ describe( 'manualTestsPlugin()', () => {
 
 		expect( file ).not.to.have.property( 'etag' );
 		expect( html ).to.contain( '<p>Fresh manual test</p>' );
+		expect( html ).to.contain( 'theme/shell.ts' );
 		expect( html ).to.contain( 'src="/assets/foo.js"' );
 		expect( html ).to.contain( 'href="/assets/chunk.js"' );
 		expect( html ).not.to.contain( 'src="./foo.js"' );
