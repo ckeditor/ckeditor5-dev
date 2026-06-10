@@ -141,6 +141,7 @@ function useManualTestMiddlewares(
 }
 
 function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {
+	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	const url = URL.parse( request.url || '', 'http://localhost' );
 
 	if ( !url ) {

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
-    "target": "ES2023",
-    "lib": [ "ES2023" ],
+    "target": "ES2022",
+    "lib": [ "ES2022" ],
     "types": [ "node", "vitest/globals" ],
     "moduleDetection": "force",
     "module": "ESNext",
