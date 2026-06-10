@@ -60,6 +60,27 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads[ 0 ]!.type ).to.equal( 'update' );
 	} );
 
+	test( 'keeps bundled dev CSS patches sent as JavaScript HMR updates directly to clients', () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+		const payload: HotPayload = {
+			type: 'update',
+			updates: [ {
+				type: 'js-update',
+				path: 'packages/foo/theme/foo.css',
+				acceptedPath: 'packages/foo/theme/foo.css',
+				timestamp: Date.now()
+			} ]
+		};
+
+		configureServer( server );
+		server.environments.client.clients.setupIfNeeded( client, 'client-1' );
+		client.send( payload );
+
+		expect( clientPayloads ).to.deep.equal( [ payload ] );
+	} );
+
 	test( 'keeps non-update payloads sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();

@@ -113,7 +113,9 @@ function shouldShowManualRefreshPrompt( payload: HotPayload ): boolean {
 }
 
 function isCssUpdatePayload( payload: HotPayload ): boolean {
-	return payload.type == 'update' && payload.updates.length > 0 && payload.updates.every( update => update.type == 'css-update' );
+	return payload.type == 'update' && payload.updates.length > 0 && payload.updates.every( update => {
+		return update.type == 'css-update' || ( update.type == 'js-update' && update.acceptedPath.endsWith( '.css' ) );
+	} );
 }
 
 function shouldShowManualRefreshPromptForFiles( files: Array<string> ): boolean {
