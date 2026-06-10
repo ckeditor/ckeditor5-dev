@@ -30,7 +30,7 @@ describe( 'serveTranslations()', () => {
 	let cwdSpy;
 
 	beforeEach( () => {
-		cwdSpy = vi.spyOn( process, 'cwd' ).mockReturnValue( '/project' );
+		cwdSpy = vi.spyOn( process, 'cwd' ).mockReturnValue( path.join( path.sep, 'project' ) );
 		vi.mocked( fs.existsSync ).mockReturnValue( false );
 		vi.mocked( fs.readFileSync ).mockReset();
 		vi.mocked( rimraf.sync ).mockReset();
@@ -141,7 +141,7 @@ describe( 'serveTranslations()', () => {
 		expect( module.loaders[ 0 ].options.translateSource( 'SOURCE', 'file.ts' ) ).to.equal( 'translated:file.ts' );
 		expect( translationService.translateSource ).toHaveBeenCalledWith( 'SOURCE', 'file.ts' );
 		expect(
-			translationService.loadPackage.mock.calls.some( call => String( call[ 0 ] ).includes( 'packages/ckeditor5-foo/' ) )
+			translationService.loadPackage.mock.calls.some( call => /packages[/\\]ckeditor5-foo[/\\]/.test( String( call[ 0 ] ) ) )
 		).to.equal( true );
 
 		compilation.hooks.optimizeChunkAssets.call( [ { files: [ 'main.js', 'other.js' ] } ] );
