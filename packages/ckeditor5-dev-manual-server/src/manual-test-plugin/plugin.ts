@@ -290,12 +290,12 @@ function mergeBundledAssetTags(
 	const sourceHead = getRequiredElementByTagName( sourceDocument, 'head' );
 	const bundledHead = getRequiredElementByTagName( bundledDocument, 'head' );
 	const testScriptFileName = posix.basename( entry.scriptFilePath );
-	const hasBundledShellScript = bundledHead.childNodes.some( node => isBundledModuleScript( node, 'shell' ) );
+	const hasBundledShellAsset = bundledHead.childNodes.some( node => isBundledModuleAsset( node, 'shell' ) );
 
 	for ( const node of [ ...sourceHead.childNodes ] ) {
 		if (
 			isSourceTestScript( node, testScriptFileName ) ||
-			hasBundledShellScript && isSourceShellScript( node, shellScriptPublicPath )
+			hasBundledShellAsset && isSourceShellScript( node, shellScriptPublicPath )
 		) {
 			removeNode( node );
 		}
@@ -327,12 +327,21 @@ function isSourceShellScript( node: Node, shellScriptPublicPath: string ): boole
 	return isElementNode( node ) && node.tagName == 'script' && getAttribute( node, 'src' ) == shellScriptPublicPath;
 }
 
-function isBundledModuleScript( node: Node, moduleName: string ): boolean {
-	if ( !isElementNode( node ) || node.tagName != 'script' ) {
+function isBundledModuleAsset( node: Node, moduleName: string ): boolean {
+	if ( !isElementNode( node ) ) {
 		return false;
 	}
 
-	return Boolean( getAttribute( node, 'src' )?.startsWith( `/assets/${ moduleName }-` ) );
+	if ( node.tagName == 'script' ) {
+		return isBundledModulePath( getAttribute( node, 'src' ), moduleName );
+	}
+
+	return node.tagName == 'link' && getAttribute( node, 'rel' ) == 'modulepreload' &&
+		isBundledModulePath( getAttribute( node, 'href' ), moduleName );
+}
+
+function isBundledModulePath( path: string | null, moduleName: string ): boolean {
+	return Boolean( path?.startsWith( `/assets/${ moduleName }-` ) );
 }
 
 function isBundledAssetTag( node: Node ): node is Element {
