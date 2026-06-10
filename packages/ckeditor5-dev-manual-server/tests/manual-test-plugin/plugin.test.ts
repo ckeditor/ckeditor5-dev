@@ -42,8 +42,15 @@ type TestServer = {
 	watcher: EventEmitter;
 	environments: {
 		client: {
+			hot: {
+				send: ReturnType<typeof vi.fn>;
+			};
 			memoryFiles: {
 				get: MemoryFilesGetMock;
+			};
+			moduleGraph: {
+				getModuleById: ReturnType<typeof vi.fn>;
+				invalidateModule: ReturnType<typeof vi.fn>;
 			};
 		};
 	};
@@ -224,6 +231,118 @@ describe( 'manualTestsPlugin()', () => {
 		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
+	test( 'invalidates the entries module and reloads clients when served entries become stale', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const mockServer = createMiddlewareServer();
+		const load = plugin.load as LoadHook;
+		const virtualModule = {};
+
+		mockServer.environments.client.moduleGraph.getModuleById.mockReturnValue( virtualModule );
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: ( plugin.config as ConfigHook )().build
+		} );
+		( plugin.configureServer as unknown as ServerHook )( mockServer );
+
+		load( '\u0000virtual:ckeditor5-manual-entries' );
+
+		const addedFilePaths = await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
+		] );
+
+		vi.useFakeTimers();
+
+		try {
+			for ( const addedFilePath of addedFilePaths ) {
+				mockServer.watcher.emit( 'add', addedFilePath );
+			}
+
+			vi.runAllTimers();
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( mockServer.environments.client.moduleGraph.getModuleById )
+			.toHaveBeenCalledWith( '\u0000virtual:ckeditor5-manual-entries' );
+		expect( mockServer.environments.client.moduleGraph.invalidateModule ).toHaveBeenCalledWith( virtualModule );
+		expect( mockServer.environments.client.hot.send ).toHaveBeenCalledTimes( 1 );
+		expect( mockServer.environments.client.hot.send ).toHaveBeenCalledWith( { type: 'full-reload' } );
+		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+	} );
+
+	test( 'does not reload clients when manual file changes leave the served entries unchanged', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const mockServer = createMiddlewareServer();
+		const load = plugin.load as LoadHook;
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: ( plugin.config as ConfigHook )().build
+		} );
+		( plugin.configureServer as unknown as ServerHook )( mockServer );
+
+		load( '\u0000virtual:ckeditor5-manual-entries' );
+
+		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/README.md' );
+
+		vi.useFakeTimers();
+
+		try {
+			mockServer.watcher.emit( 'add', addedFilePath );
+			vi.runAllTimers();
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( mockServer.environments.client.moduleGraph.invalidateModule ).not.toHaveBeenCalled();
+		expect( mockServer.environments.client.hot.send ).not.toHaveBeenCalled();
+	} );
+
+	test( 'does not reload clients before the entries module is served', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const mockServer = createMiddlewareServer();
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: ( plugin.config as ConfigHook )().build
+		} );
+		( plugin.configureServer as unknown as ServerHook )( mockServer );
+
+		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' );
+
+		await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' );
+
+		vi.useFakeTimers();
+
+		try {
+			mockServer.watcher.emit( 'add', addedFilePath );
+			vi.runAllTimers();
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( mockServer.environments.client.hot.send ).not.toHaveBeenCalled();
+		expect( ( plugin.load as LoadHook )( '\u0000virtual:ckeditor5-manual-entries' ) )
+			.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+	} );
+
 	test( 'does not resolve unknown virtual module requests', async () => {
 		server = await createManualTestServer( [] );
 
@@ -239,7 +358,7 @@ describe( 'manualTestsPlugin()', () => {
 		( plugin.configurePreviewServer as unknown as ServerHook )( previewServer );
 
 		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
-		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
+		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'emits manual static assets during build', async () => {
@@ -285,6 +404,29 @@ describe( 'manualTestsPlugin()', () => {
 		expect( html ).to.contain( '<p>Fresh manual test</p>' );
 		expect( html ).to.contain( 'src="/assets/foo.js"' );
 		expect( html ).to.contain( 'href="/assets/chunk.js"' );
+		expect( html ).not.to.contain( 'src="./foo.js"' );
+	} );
+
+	test( 'updates bundled manual HTML from current source for leading slash paths in dev server', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const server = createMiddlewareServer();
+
+		server.environments.client.memoryFiles.get.mockReturnValue( {
+			source: '<html><head><script type="module" crossorigin src="/assets/foo.js"></script></head><body>Old</body></html>'
+		} );
+
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		const file = server.environments.client.memoryFiles.get( '/packages/ckeditor5-foo/tests/manual/foo.html' )!;
+		const html = file.source as string;
+
+		expect( html ).to.contain( '<p>Fresh manual test</p>' );
+		expect( html ).to.contain( 'src="/assets/foo.js"' );
 		expect( html ).not.to.contain( 'src="./foo.js"' );
 	} );
 
@@ -387,8 +529,15 @@ function createMiddlewareServer(): TestServer {
 		watcher: new EventEmitter(),
 		environments: {
 			client: {
+				hot: {
+					send: vi.fn()
+				},
 				memoryFiles: {
 					get: vi.fn<( filePath: string ) => MemoryFile | undefined>()
+				},
+				moduleGraph: {
+					getModuleById: vi.fn(),
+					invalidateModule: vi.fn()
 				}
 			}
 		}

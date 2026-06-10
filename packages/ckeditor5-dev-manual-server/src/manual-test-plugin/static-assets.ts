@@ -23,7 +23,7 @@ export function collectManualStaticAssets( patterns: Array<string>, workspaceRoo
 	return new Map( patterns
 		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ) )
 		.sort()
-		.filter( relativeFilePath => statSync( resolve( workspaceRoot, relativeFilePath ) ).isFile() )
+		.filter( relativeFilePath => statSync( resolve( workspaceRoot, relativeFilePath ), { throwIfNoEntry: false } )?.isFile() )
 		.filter( isManualStaticAssetPath )
 		.map( relativeFilePath => [
 			toPublicSpecifier( relativeFilePath ),
@@ -42,14 +42,13 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 
 		const publicPath = getManualStaticAssetPublicPath( request.url );
 		const filePath = publicPath && collectStaticAssets().get( publicPath );
+		const fileStats = filePath ? statSync( filePath, { throwIfNoEntry: false } ) : undefined;
 
-		if ( !filePath ) {
+		if ( !filePath || !fileStats?.isFile() ) {
 			next();
 
 			return;
 		}
-
-		const fileStats = statSync( filePath );
 
 		response.statusCode = 200;
 		response.setHeader( 'Content-Length', fileStats.size );
@@ -61,7 +60,11 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 			return;
 		}
 
-		createReadStream( filePath ).pipe( response );
+		const fileStream = createReadStream( filePath );
+
+		// Destroy the response when the file disappears mid-stream so the unhandled stream error does not crash the server.
+		fileStream.on( 'error', () => response.destroy() );
+		fileStream.pipe( response );
 	};
 }
 
@@ -86,11 +89,21 @@ function getManualStaticAssetPublicPath( requestUrl: string | undefined ): strin
 		return null;
 	}
 
-	if ( !isManualStaticAssetPath( url.pathname ) ) {
+	const pathname = decodePathname( url.pathname );
+
+	if ( !pathname || !isManualStaticAssetPath( pathname ) ) {
 		return null;
 	}
 
-	return url.pathname;
+	return pathname;
+}
+
+function decodePathname( pathname: string ): string | null {
+	try {
+		return decodeURIComponent( pathname );
+	} catch {
+		return null;
+	}
 }
 
 function isManualStaticAssetPath( filePath: string ): boolean {

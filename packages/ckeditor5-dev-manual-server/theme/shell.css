@@ -132,50 +132,6 @@ body.shell-enabled {
 	outline-offset: 1px;
 }
 
-@media (prefers-color-scheme: dark) {
-	.shell {
-		color: #ededed;
-		background: rgb(20 20 20 / 80%);
-		border-color: rgb(255 255 255 / 10%);
-		box-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 50%);
-	}
-
-	.shell__pill:hover {
-		background: rgb(255 255 255 / 8%);
-	}
-
-	.shell__pill:active {
-		background: rgb(255 255 255 / 14%);
-	}
-
-	.shell__pill:focus-visible {
-		outline-color: rgb(255 255 255 / 30%);
-	}
-
-	.shell__divider {
-		background: rgb(255 255 255 / 12%);
-	}
-
-	.manual-refresh-prompt {
-		color: #bfdbfe;
-		background: #1e3a8a;
-		border-color: #2563eb;
-		box-shadow: 0 8px 24px rgb(37 99 235 / 25%), 0 1px 2px rgb(0 0 0 / 30%);
-	}
-
-	.manual-refresh-prompt:hover {
-		background: #1d4ed8;
-	}
-
-	.manual-refresh-prompt:active {
-		background: #2563eb;
-	}
-
-	.manual-refresh-prompt:focus-visible {
-		outline-color: #93c5fd;
-	}
-}
-
 @media (max-width: 600px) {
 	.shell {
 		font-size: 11px;
@@ -396,62 +352,6 @@ body.shell-enabled {
 	margin: 16px 0;
 	border: 0;
 	border-top: 1px solid rgb(0 0 0 / 10%);
-}
-
-@media (prefers-color-scheme: dark) {
-	.shell-instructions {
-		background: #141414;
-		color: #ededed;
-		border-left-color: rgb(255 255 255 / 10%);
-		box-shadow: -8px 0 24px rgb(0 0 0 / 40%);
-	}
-
-	.shell-instructions__header {
-		border-color: rgb(255 255 255 / 10%);
-	}
-
-	.shell-instructions__package {
-		color: #a3a3a3;
-	}
-
-	.shell-instructions__close {
-		color: #a3a3a3;
-	}
-
-	.shell-instructions__close:hover {
-		background: rgb(255 255 255 / 8%);
-		color: #ededed;
-	}
-
-	.shell-instructions__body code {
-		background: #1e1e1e;
-	}
-
-	.shell-instructions__body pre {
-		background: #1e1e1e;
-	}
-
-	.shell-instructions__body a {
-		color: #93c5fd;
-	}
-
-	.shell-instructions__body blockquote {
-		border-left-color: rgb(255 255 255 / 15%);
-		color: #a3a3a3;
-	}
-
-	.shell-instructions__body th,
-	.shell-instructions__body td {
-		border-color: rgb(255 255 255 / 12%);
-	}
-
-	.shell-instructions__body th {
-		background: #1e1e1e;
-	}
-
-	.shell-instructions__body hr {
-		border-top-color: rgb(255 255 255 / 12%);
-	}
 }
 
 @media (max-width: 800px) {

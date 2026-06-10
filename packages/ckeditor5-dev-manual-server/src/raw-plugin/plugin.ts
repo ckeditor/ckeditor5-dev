@@ -6,6 +6,7 @@
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { toPosixPath } from '../utils.js';
 import type { Plugin } from 'vite';
 
 const RAW_QUERY = '?ckeditor5-raw';
@@ -56,7 +57,8 @@ function resolveHtmlFilePath( source: string, importer: string ): string | null 
 
 	const filePath = path.resolve( path.dirname( getFilePathFromId( importer ) ), source );
 
-	return existsSync( filePath ) ? filePath : null;
+	// Vite expects module ids to use POSIX separators, also on Windows.
+	return existsSync( filePath ) ? toPosixPath( filePath ) : null;
 }
 
 function getFilePathFromId( id: string ): string {

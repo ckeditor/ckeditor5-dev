@@ -81,8 +81,26 @@ describe( 'manual static assets', () => {
 			'/packages/ckeditor5-foo/tests/manual/missing.png',
 			staticAssets
 		) ).to.be.null;
+		expect( getManualStaticAssetFilePath(
+			'/packages/ckeditor5-foo/tests/manual/assets/100%.png',
+			staticAssets
+		) ).to.be.null;
 		expect( getManualStaticAssetFilePath( 'http://%', staticAssets ) ).to.be.null;
 		expect( getManualStaticAssetFilePath( undefined, staticAssets ) ).to.be.null;
+	} );
+
+	test( 'decodes percent-encoded characters in request URLs', () => {
+		const staticAssets = new Map( [
+			[
+				'/packages/ckeditor5-foo/tests/manual/assets/sample image.png',
+				'/workspace/packages/ckeditor5-foo/tests/manual/assets/sample image.png'
+			]
+		] );
+
+		expect( getManualStaticAssetFilePath(
+			'/packages/ckeditor5-foo/tests/manual/assets/sample%20image.png',
+			staticAssets
+		) ).to.equal( '/workspace/packages/ckeditor5-foo/tests/manual/assets/sample image.png' );
 	} );
 
 	test( 'serves collected static assets', async () => {
@@ -179,6 +197,20 @@ describe( 'manual static assets', () => {
 		middleware( { method: 'GET', url: '/missing.png' } as never, response as never, next );
 
 		expect( next ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	test( 'passes through requests for collected static assets that no longer exist', () => {
+		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/removed.png';
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
+			[ requestPath, join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/removed.png' ) ]
+		] ) );
+		const response = createResponse();
+		const next = vi.fn();
+
+		middleware( { method: 'GET', url: requestPath } as never, response as never, next );
+
+		expect( next ).toHaveBeenCalledTimes( 1 );
+		expect( response.setHeader ).not.toHaveBeenCalled();
 	} );
 
 	test( 'sets content types for supported static asset extensions', async () => {
