@@ -46,6 +46,10 @@ describe( 'manual static assets', () => {
 			[
 				'/packages/ckeditor5-foo/tests/manual/assets/image.png',
 				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
+			],
+			[
+				'/packages/ckeditor5-foo/tests/manual/styles.css',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' )
 			]
 		] );
 	} );
@@ -104,26 +108,26 @@ describe( 'manual static assets', () => {
 	} );
 
 	test( 'serves collected static assets', async () => {
-		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css', 'body { color: red; }' );
 		const response = createResponse();
 		const next = vi.fn();
 		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
-			[ '/packages/ckeditor5-foo/tests/manual/assets/image.svg', filePath ]
+			[ '/packages/ckeditor5-foo/tests/manual/styles.css', filePath ]
 		] ) );
 		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
 
 		middleware( {
 			method: 'GET',
-			url: '/packages/ckeditor5-foo/tests/manual/assets/image.svg'
+			url: '/packages/ckeditor5-foo/tests/manual/styles.css'
 		} as never, response as never, next );
 
 		await finished;
 
 		expect( next ).not.toHaveBeenCalled();
 		expect( response.statusCode ).to.equal( 200 );
-		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Length', 11 );
-		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', 'image/svg+xml' );
-		expect( response.getBody() ).to.equal( '<svg></svg>' );
+		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Length', 20 );
+		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', 'text/css; charset=utf-8' );
+		expect( response.getBody() ).to.equal( 'body { color: red; }' );
 	} );
 
 	test( 'collects static assets when a candidate static asset is requested', async () => {
@@ -158,7 +162,7 @@ describe( 'manual static assets', () => {
 		const next = vi.fn();
 
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.html' } as never, response as never, next );
-		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.css' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.css?import' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.ts' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/image.png?url' } as never, response as never, next );
 		middleware( { method: 'POST', url: '/packages/ckeditor5-foo/tests/manual/image.png' } as never, response as never, next );
