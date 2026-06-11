@@ -8,7 +8,7 @@ import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 import { type ViteDevServer } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
-import { toPublicFilePath } from '../../src/utils.js';
+import { stripLeadingSlash, toPublicFilePath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import { createTestServer, getCode } from '../_utils/vite.js';
 
@@ -583,7 +583,7 @@ describe( 'manualTestsPlugin()', () => {
 		);
 
 		expect( html ).to.contain( '<script type="module" src="/@vite/client"></script>' );
-		expect( html ).to.contain( `<script type="module" src="/@fs${ catalogScriptFilePath }"></script>` );
+		expect( html ).to.contain( `<script type="module" src="/@fs/${ stripLeadingSlash( catalogScriptFilePath ) }"></script>` );
 	} );
 
 	test( 'rewrites the catalog script when the context filename uses Windows separators', () => {

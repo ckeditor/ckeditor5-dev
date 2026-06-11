@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Plugin, ViteDevServer } from 'vite';
 import { rawHtmlPlugin } from '../../src/raw-plugin/plugin.js';
+import { toPosixPath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import { createTestServer, getCode } from '../_utils/vite.js';
 
@@ -37,7 +38,7 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		expect( ( await server.pluginContainer.resolveId( './template.html', importer ) )!.id )
-			.to.equal( join( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
+			.to.equal( createExpectedViteId( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
 	} );
 
 	test( 'resolves relative HTML imports without calling the Vite resolver', async () => {
@@ -48,7 +49,7 @@ describe( 'rawHtmlPlugin()', () => {
 		await createFile( temporaryDirectory, 'template.html', '<div class="sample">Text</div>' );
 
 		expect( await getResolveIdHook( plugin ).call( { resolve }, './template.html', importer ) )
-			.to.equal( join( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
+			.to.equal( createExpectedViteId( temporaryDirectory, 'template.html?ckeditor5-raw' ) );
 		expect( resolve ).not.toHaveBeenCalled();
 	} );
 
@@ -86,7 +87,7 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		expect( ( await server.pluginContainer.resolveId( './icon.svg', importer ) )!.id )
-			.to.equal( join( temporaryDirectory, 'icon.svg' ) );
+			.to.equal( createExpectedViteId( temporaryDirectory, 'icon.svg' ) );
 	} );
 
 	test( 'does not affect HTML documents transformed by Vite', async () => {
@@ -123,7 +124,7 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		expect( ( await server.pluginContainer.resolveId( './script.js', importer ) )!.id )
-			.to.equal( join( temporaryDirectory, 'script.js' ) );
+			.to.equal( createExpectedViteId( temporaryDirectory, 'script.js' ) );
 	} );
 
 	test( 'ignores imports with explicit request queries', async () => {
@@ -134,7 +135,7 @@ describe( 'rawHtmlPlugin()', () => {
 		server = await createRawTestServer();
 
 		expect( ( await server.pluginContainer.resolveId( './template.html?url', importer ) )!.id )
-			.to.equal( join( temporaryDirectory, 'template.html?url' ) );
+			.to.equal( createExpectedViteId( temporaryDirectory, 'template.html?url' ) );
 	} );
 
 	async function createRawTestServer(): Promise<ViteDevServer> {
@@ -149,4 +150,8 @@ describe( 'rawHtmlPlugin()', () => {
 
 function getResolveIdHook( plugin: Plugin ): ( this: { resolve: ReturnType<typeof vi.fn> }, source: string, importer: string ) => unknown {
 	return plugin.resolveId as unknown as ( this: { resolve: ReturnType<typeof vi.fn> }, source: string, importer: string ) => unknown;
+}
+
+function createExpectedViteId( ...segments: Array<string> ): string {
+	return toPosixPath( join( ...segments ) );
 }
