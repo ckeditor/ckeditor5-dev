@@ -36,7 +36,7 @@ export default async function runAutomatedTests( options ) {
 
 	const globPatterns = resolveTestGlobs( options.files );
 	const testFiles = collectTestFiles( globPatterns );
-	const { karmaFiles, vitestSelection } = partitionByRunner( testFiles );
+	const { karmaFiles, vitestSelection, vitestPackageRoots } = partitionByRunner( testFiles );
 
 	if ( !karmaFiles.length && !vitestSelection.length ) {
 		throw new Error( 'No test files found. Specified patterns are invalid.' );
@@ -68,7 +68,7 @@ export default async function runAutomatedTests( options ) {
 
 	if ( vitestSelection.length ) {
 		try {
-			await spawnVitest( options, vitestSelection );
+			await spawnVitest( options, vitestSelection, vitestPackageRoots );
 		} catch ( error ) {
 			errors.push( error );
 		}
@@ -129,6 +129,7 @@ function collectTestFiles( globPatterns ) {
 function partitionByRunner( testFiles ) {
 	const karmaFiles = [];
 	const vitestSelection = new Map();
+	const vitestPackageRoots = new Map();
 	const runnerCache = new Map();
 
 	for ( const filePath of testFiles ) {
@@ -144,12 +145,17 @@ function partitionByRunner( testFiles ) {
 			const files = vitestSelection.get( projectName ) || [];
 			files.push( filePath );
 			vitestSelection.set( projectName, files );
+			vitestPackageRoots.set( projectName, packageRoot );
 		} else {
 			karmaFiles.push( filePath );
 		}
 	}
 
-	return { karmaFiles, vitestSelection: [ ...vitestSelection.entries() ] };
+	return {
+		karmaFiles,
+		vitestSelection: [ ...vitestSelection.entries() ],
+		vitestPackageRoots
+	};
 }
 
 function getPackageRoot( filePath ) {
@@ -269,12 +275,12 @@ function startKarmaServer( options ) {
 
 // -- Vitest runner --------------------------------------------------------------------------------
 
-async function spawnVitest( options, vitestSelection ) {
+async function spawnVitest( options, vitestSelection, packageRoots ) {
 	const errors = [];
 
 	for ( const [ project, selectedFiles ] of vitestSelection ) {
 		try {
-			await spawnVitestProject( options, project, selectedFiles );
+			await spawnVitestProject( options, project, selectedFiles, packageRoots.get( project ) );
 		} catch ( error ) {
 			errors.push( error );
 		}
@@ -298,7 +304,13 @@ async function spawnVitest( options, vitestSelection ) {
 	}
 }
 
-function spawnVitestProject( options, project, selectedFiles ) {
+// Vitest runs from the package directory, so it loads the package-level config directly.
+// Using the workspace config with `--project <name>` hangs in browser mode when multiple
+// test files run, because per-file isolation does not tear down the browser context.
+// Running per-package avoids that path while keeping coverage compatible: reports still
+// go to the workspace `coverage-vitest/<project>/` directory via absolute
+// `--coverage.reportsDirectory`.
+function spawnVitestProject( options, project, selectedFiles, packageRoot ) {
 	return new Promise( ( resolve, reject ) => {
 		const args = [ 'vitest' ];
 
@@ -306,18 +318,27 @@ function spawnVitestProject( options, project, selectedFiles ) {
 
 		if ( options.coverage ) {
 			const coverageDir = upath.join( process.cwd(), 'coverage-vitest', project );
-			args.push( '--coverage.enabled', '--coverage.reportsDirectory', coverageDir );
+
+			args.push(
+				'--coverage.enabled',
+				'--coverage.reportsDirectory', coverageDir,
+				// Force the reporters the wrapper expects. The package's own `vitest.config.ts`
+				// defaults to `text`/`html` (developer-friendly); downstream coverage merging
+				// needs `json` (for nyc) and `lcovonly` (collected by
+				// `check-unit-tests-for-package.mjs`).
+				'--coverage.reporter', 'json',
+				'--coverage.reporter', 'lcovonly',
+				'--coverage.reporter', 'html'
+			);
 		}
 
-		args.push( '--project', project );
-
 		for ( const filePath of selectedFiles ) {
-			args.push( upath.relative( process.cwd(), filePath ) );
+			args.push( upath.relative( packageRoot, filePath ) );
 		}
 
 		const child = spawn( 'pnpm', args, {
 			stdio: 'inherit',
-			cwd: process.cwd(),
+			cwd: packageRoot,
 			shell: process.platform === 'win32'
 		} );
 

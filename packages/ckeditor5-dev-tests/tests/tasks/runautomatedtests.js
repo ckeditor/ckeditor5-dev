@@ -545,11 +545,13 @@ describe( 'runAutomatedTests()', () => {
 			[
 				'vitest',
 				'--run',
-				'--project',
-				'engine',
-				'packages/ckeditor5-engine/tests/model/model.js'
+				'tests/model/model.js'
 			],
-			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+			{
+				stdio: 'inherit',
+				cwd: '/workspace/packages/ckeditor5-engine',
+				shell: process.platform === 'win32'
+			}
 		);
 		expect( vi.mocked( fs ).writeFileSync ).not.toHaveBeenCalledWith(
 			'/workspace/build/.automated-tests/entry-point.js',
@@ -588,11 +590,9 @@ describe( 'runAutomatedTests()', () => {
 			[
 				'vitest',
 				'--watch',
-				'--project',
-				'engine',
-				'packages/ckeditor5-engine/tests/model/model.js'
+				'tests/model/model.js'
 			],
-			expect.any( Object )
+			expect.objectContaining( { cwd: '/workspace/packages/ckeditor5-engine' } )
 		);
 	} );
 
@@ -630,7 +630,7 @@ describe( 'runAutomatedTests()', () => {
 
 		await promise;
 
-		// Vitest was called with per-project coverage directory.
+		// Vitest was called with per-project coverage directory and forced reporters.
 		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
 			1,
 			'pnpm',
@@ -640,11 +640,15 @@ describe( 'runAutomatedTests()', () => {
 				'--coverage.enabled',
 				'--coverage.reportsDirectory',
 				'/workspace/coverage-vitest/engine',
-				'--project',
-				'engine',
-				'packages/ckeditor5-engine/tests/model/model.js'
+				'--coverage.reporter',
+				'json',
+				'--coverage.reporter',
+				'lcovonly',
+				'--coverage.reporter',
+				'html',
+				'tests/model/model.js'
 			],
-			expect.any( Object )
+			expect.objectContaining( { cwd: '/workspace/packages/ckeditor5-engine' } )
 		);
 
 		// coverage-final.json was copied into .nyc_output.
@@ -703,6 +707,97 @@ describe( 'runAutomatedTests()', () => {
 		await expect( promise ).rejects.toThrow( 'Vitest finished with "1" code.' );
 	} );
 
+	// Regression: ckeditor/ckeditor5-commercial#10462. Going through the workspace config with
+	// `--project <name>` triggers a hang in Vitest browser mode whenever more than one test file
+	// runs. Spawning per-package (cwd = package root, no --project flag) side-steps that path.
+	it( 'should spawn Vitest with cwd set to the package root and no --project flag', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: false
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js',
+			'/workspace/packages/ckeditor5-engine/tests/view/view.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
+		subprocess.emit( 'close', 0 );
+
+		await promise;
+
+		const [ [ command, args, spawnOptions ] ] = stubs.spawn.call.mock.calls;
+
+		expect( command ).to.equal( 'pnpm' );
+		expect( spawnOptions ).toEqual( expect.objectContaining( {
+			cwd: '/workspace/packages/ckeditor5-engine'
+		} ) );
+		expect( args ).not.toContain( '--project' );
+		// File paths are passed relative to the package root, not the workspace root.
+		expect( args ).toEqual( expect.arrayContaining( [
+			'tests/model/model.js',
+			'tests/view/view.js'
+		] ) );
+		expect( args ).not.toEqual( expect.arrayContaining( [
+			expect.stringMatching( /^packages\// )
+		] ) );
+	} );
+
+	// Regression: ckeditor/ckeditor5-commercial#10462. Running per-package means the package's
+	// own `vitest.config.ts` wins, and its `text`/`html` reporters are not enough for the CI
+	// merge step — so the wrapper forces `json` (nyc) and `lcovonly` (lcov collation) on top.
+	it( 'should force json, lcovonly and html reporters when coverage is enabled', async () => {
+		const options = {
+			files: [ 'engine' ],
+			production: true,
+			watch: false,
+			coverage: true
+		};
+
+		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/**/*.js'
+		] );
+		vi.mocked( globSync ).mockReturnValue( [
+			'/workspace/packages/ckeditor5-engine/tests/model/model.js'
+		] );
+		vi.mocked( fs ).readFileSync.mockReturnValue( JSON.stringify( {
+			scripts: { test: 'vitest --run' }
+		} ) );
+		vi.mocked( fs ).existsSync.mockReturnValue( false );
+
+		const promise = runAutomatedTests( options );
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ vitestProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		vitestProcess.emit( 'close', 0 );
+
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		const [ , nycProcess ] = vi.mocked( spawn ).mock.results.map( r => r.value );
+		nycProcess.emit( 'close', 0 );
+
+		await promise;
+
+		const [ [ , args ] ] = stubs.spawn.call.mock.calls;
+
+		expect( args ).toEqual( expect.arrayContaining( [
+			'--coverage.reporter', 'json',
+			'--coverage.reporter', 'lcovonly',
+			'--coverage.reporter', 'html'
+		] ) );
+	} );
+
 	// -- Mixed Karma + Vitest tests ---------------------------------------------------------------
 
 	it( 'should route mixed package selection to Karma and Vitest', async () => {
@@ -752,8 +847,12 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.karma.server.constructor ).toHaveBeenCalledOnce();
 		expect( stubs.spawn.call ).toHaveBeenCalledExactlyOnceWith(
 			'pnpm',
-			[ 'vitest', '--run', '--project', 'utils', 'packages/ckeditor5-utils/tests/first.js' ],
-			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+			[ 'vitest', '--run', 'tests/first.js' ],
+			{
+				stdio: 'inherit',
+				cwd: '/workspace/packages/ckeditor5-utils',
+				shell: process.platform === 'win32'
+			}
 		);
 	} );
 
@@ -916,11 +1015,13 @@ describe( 'runAutomatedTests()', () => {
 			[
 				'vitest',
 				'--run',
-				'--project',
-				'utils',
-				'external/ckeditor5/packages/ckeditor5-utils/tests/first.js'
+				'tests/first.js'
 			],
-			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+			{
+				stdio: 'inherit',
+				cwd: '/workspace/external/ckeditor5/packages/ckeditor5-utils',
+				shell: process.platform === 'win32'
+			}
 		);
 		expect( stubs.spawn.call ).toHaveBeenNthCalledWith(
 			2,
@@ -928,11 +1029,13 @@ describe( 'runAutomatedTests()', () => {
 			[
 				'vitest',
 				'--run',
-				'--project',
-				'engine',
-				'external/ckeditor5/packages/ckeditor5-engine/tests/model.js'
+				'tests/model.js'
 			],
-			{ stdio: 'inherit', cwd: '/workspace', shell: process.platform === 'win32' }
+			{
+				stdio: 'inherit',
+				cwd: '/workspace/external/ckeditor5/packages/ckeditor5-engine',
+				shell: process.platform === 'win32'
+			}
 		);
 	} );
 
