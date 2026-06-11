@@ -1,0 +1,6 @@
+---
+type: Feature
+scope: ckeditor5-dev-manual-server
+---
+
+Added a new `@ckeditor/ckeditor5-dev-manual-server` package containing plugins for a new Vite-based manual test server.

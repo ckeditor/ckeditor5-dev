@@ -1,0 +1,51 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-manual-server",
+  "version": "0.1.0",
+  "description": "Used to extend Vite to create a manual test server for CKEditor 5.",
+  "keywords": [],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-manual-server",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-manual-server"
+  },
+  "engines": {
+    "node": ">=24.11.0",
+    "npm": ">=5.7.1"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "theme"
+  ],
+  "scripts": {
+    "build": "rolldown -c rolldown.config.ts",
+    "dev": "rolldown -c rolldown.config.ts --watch",
+    "test": "vitest run --config vitest.config.ts",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:dev": "vitest dev"
+  },
+  "dependencies": {
+    "@ckeditor/ckeditor5-inspector": "^5.0.1",
+    "@parse5/tools": "^0.7.0",
+    "hast-util-to-html": "^9.0.5",
+    "parse5": "^8.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5",
+    "vite": "^8.0.13",
+    "vite-svg-loader": "^5.1.1"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.2",
+    "rolldown": "^1.0.3",
+    "upath": "^2.0.1",
+    "vitest": "^4.1.2"
+  }
+}

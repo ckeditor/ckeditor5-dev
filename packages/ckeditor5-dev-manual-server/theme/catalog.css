@@ -1,0 +1,252 @@
+:root {
+	color-scheme: light;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	--bg: #fafafa;
+	--surface: #fff;
+	--surface-hover: #f5f5f5;
+	--border: #e5e5e5;
+	--border-strong: #d4d4d4;
+	--text: #0a0a0a;
+	--text-muted: #737373;
+	--text-subtle: #a3a3a3;
+	--accent: #171717;
+	--accent-ring: rgb(23 23 23 / 10%);
+	--radius-lg: 12px;
+	--radius-md: 8px;
+	--radius-sm: 6px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	background: var(--bg);
+	color: var(--text);
+	font-size: 14px;
+}
+
+a {
+	color: inherit;
+}
+
+.app {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 0 24px 80px;
+}
+
+.app__header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 32px 0 24px;
+	background: linear-gradient(var(--bg) 80%, transparent);
+	backdrop-filter: blur(8px);
+}
+
+.app__titles {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.app__title {
+	margin: 0;
+	font-size: clamp(24px, 3vw, 32px);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+.app__subtitle {
+	margin: 0;
+	font-size: 13px;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.app__search {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 44px;
+	padding: 0 14px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.app__search:focus-within {
+	border-color: var(--border-strong);
+	box-shadow: 0 0 0 4px var(--accent-ring);
+}
+
+.app__search-icon {
+	flex-shrink: 0;
+	color: var(--text-subtle);
+}
+
+.app__search-input {
+	flex: 1;
+	min-width: 0;
+	font: inherit;
+	font-size: 14px;
+	color: var(--text);
+	background: transparent;
+	border: 0;
+	outline: none;
+	padding: 0;
+}
+
+.app__search-input::-webkit-search-cancel-button {
+	cursor: pointer;
+}
+
+.app__search-input::placeholder {
+	color: var(--text-muted);
+}
+
+.app__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.app__empty {
+	grid-column: 1 / -1;
+	padding: 64px 24px;
+	text-align: center;
+	background: var(--surface);
+	border: 1px dashed var(--border);
+	border-radius: var(--radius-lg);
+}
+
+.app__empty-title {
+	margin: 0 0 4px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.app__empty-hint {
+	margin: 0;
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.pkg {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	transition: border-color 0.12s;
+}
+
+.pkg:hover {
+	border-color: var(--border-strong);
+}
+
+.pkg__header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--border);
+}
+
+.pkg__name {
+	flex: 1;
+	min-width: 0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 13px;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pkg__count {
+	flex-shrink: 0;
+	min-width: 24px;
+	text-align: right;
+	font-size: 12px;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.pkg__list {
+	list-style: none;
+	margin: 0;
+	padding: 6px;
+}
+
+.pkg__link {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	text-decoration: none;
+	color: inherit;
+	transition: background 0.08s;
+}
+
+.pkg__link:hover {
+	background: var(--surface-hover);
+}
+
+.pkg__link:focus-visible {
+	outline: none;
+	background: var(--surface-hover);
+	box-shadow: inset 0 0 0 2px var(--border-strong);
+}
+
+.pkg__test-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pkg__test-slug {
+	flex-shrink: 0;
+	max-width: 50%;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--text-subtle);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+	.app {
+		padding: 0 16px 48px;
+	}
+
+	.app__header {
+		padding: 20px 0 16px;
+	}
+
+	.app__list {
+		grid-template-columns: 1fr;
+	}
+
+	.pkg__test-slug {
+		display: none;
+	}
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="data:image/png;base64,iVBORw0KGgo=">
+	<title>CKEditor 5 manual tests catalog</title>
+	<script type="module" src="./catalog.ts"></script>
+</head>
+<body>
+	<template id="manual-index-template">
+		<main class="app">
+			<header class="app__header">
+				<div class="app__titles">
+					<h1 class="app__title">CKEditor 5 manual tests</h1>
+					<p class="app__subtitle"></p>
+				</div>
+				<label class="app__search">
+					<svg class="app__search-icon" viewBox="0 0 16 16" aria-hidden="true" width="16" height="16">
+						<path fill="currentColor" d="M7 2a5 5 0 103.546 8.546l3.204 3.204a.75.75 0 101.06-1.06l-3.204-3.204A5 5 0 007 2zM3.5 7a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+					</svg>
+					<input type="search" class="app__search-input" placeholder="Filter by package or test name…" autocomplete="off" autofocus>
+				</label>
+			</header>
+			<div class="app__list" role="list"></div>
+		</main>
+	</template>
+
+	<template id="manual-empty-template">
+		<div class="app__empty">
+			<p class="app__empty-title">No matches</p>
+			<p class="app__empty-hint">Try a different search term.</p>
+		</div>
+	</template>
+
+	<template id="manual-package-template">
+		<section class="pkg" role="listitem">
+			<header class="pkg__header">
+				<code class="pkg__name"></code>
+				<span class="pkg__count"></span>
+			</header>
+			<ul class="pkg__list"></ul>
+		</section>
+	</template>
+
+	<template id="manual-test-template">
+		<li class="pkg__item">
+			<a class="pkg__link">
+				<span class="pkg__test-name"></span>
+				<span class="pkg__test-slug"></span>
+			</a>
+		</li>
+	</template>
+
+	<div id="app"></div>
+</body>
+</html>
