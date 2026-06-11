@@ -4,7 +4,6 @@
  */
 
 import { join, resolve } from 'node:path';
-import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 import { type ViteDevServer } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
@@ -39,18 +38,10 @@ type TestServer = {
 	middlewares: {
 		use: ReturnType<typeof vi.fn>;
 	};
-	watcher: EventEmitter;
 	environments: {
 		client: {
-			hot: {
-				send: ReturnType<typeof vi.fn>;
-			};
 			memoryFiles: {
 				get: MemoryFilesGetMock;
-			};
-			moduleGraph: {
-				getModuleById: ReturnType<typeof vi.fn>;
-				invalidateModule: ReturnType<typeof vi.fn>;
 			};
 		};
 	};
@@ -184,176 +175,6 @@ describe( 'manualTestsPlugin()', () => {
 		expect( config.build.rolldownOptions.input ).to.include(
 			join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' )
 		);
-	} );
-
-	test( 'updates entries when new manual page files are added', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
-		] );
-
-		server = await createManualTestServer( [ 'packages/*/tests/manual/**/*' ] );
-		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
-		const initialSource = getCode( await server.pluginContainer.load( resolvedId!.id ) );
-
-		expect( initialSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
-		expect( initialSource ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
-
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
-		] );
-		server.watcher.emit( 'add', join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ) );
-		server.watcher.emit( 'add', join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' ) );
-
-		const updatedSource = getCode( await server.pluginContainer.load( resolvedId!.id ) );
-
-		expect( updatedSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
-		expect( updatedSource ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
-	} );
-
-	test( 'caches collected entries until the watcher reports manual file changes', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
-		] );
-
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
-		const mockServer = createMiddlewareServer();
-		const config = ( plugin.config as ConfigHook )();
-		const load = plugin.load as LoadHook;
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: config.build
-		} );
-		( plugin.configureServer as unknown as ServerHook )( mockServer );
-
-		const initialSource = load( '\u0000virtual:ckeditor5-manual-entries' )!;
-
-		expect( initialSource ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
-
-		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' );
-
-		await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' );
-
-		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.equal( initialSource );
-
-		mockServer.watcher.emit( 'add', addedFilePath );
-
-		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
-	} );
-
-	test( 'invalidates the entries module and reloads clients when served entries become stale', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
-		] );
-
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
-		const mockServer = createMiddlewareServer();
-		const load = plugin.load as LoadHook;
-		const virtualModule = {};
-
-		mockServer.environments.client.moduleGraph.getModuleById.mockReturnValue( virtualModule );
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: ( plugin.config as ConfigHook )().build
-		} );
-		( plugin.configureServer as unknown as ServerHook )( mockServer );
-
-		load( '\u0000virtual:ckeditor5-manual-entries' );
-
-		const addedFilePaths = await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
-		] );
-
-		vi.useFakeTimers();
-
-		try {
-			for ( const addedFilePath of addedFilePaths ) {
-				mockServer.watcher.emit( 'add', addedFilePath );
-			}
-
-			vi.runAllTimers();
-		} finally {
-			vi.useRealTimers();
-		}
-
-		expect( mockServer.environments.client.moduleGraph.getModuleById )
-			.toHaveBeenCalledWith( '\u0000virtual:ckeditor5-manual-entries' );
-		expect( mockServer.environments.client.moduleGraph.invalidateModule ).toHaveBeenCalledWith( virtualModule );
-		expect( mockServer.environments.client.hot.send ).toHaveBeenCalledTimes( 1 );
-		expect( mockServer.environments.client.hot.send ).toHaveBeenCalledWith( { type: 'full-reload' } );
-		expect( load( '\u0000virtual:ckeditor5-manual-entries' ) ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
-	} );
-
-	test( 'does not reload clients when manual file changes leave the served entries unchanged', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
-		] );
-
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
-		const mockServer = createMiddlewareServer();
-		const load = plugin.load as LoadHook;
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: ( plugin.config as ConfigHook )().build
-		} );
-		( plugin.configureServer as unknown as ServerHook )( mockServer );
-
-		load( '\u0000virtual:ckeditor5-manual-entries' );
-
-		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/README.md' );
-
-		vi.useFakeTimers();
-
-		try {
-			mockServer.watcher.emit( 'add', addedFilePath );
-			vi.runAllTimers();
-		} finally {
-			vi.useRealTimers();
-		}
-
-		expect( mockServer.environments.client.moduleGraph.invalidateModule ).not.toHaveBeenCalled();
-		expect( mockServer.environments.client.hot.send ).not.toHaveBeenCalled();
-	} );
-
-	test( 'does not reload clients before the entries module is served', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
-		] );
-
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
-		const mockServer = createMiddlewareServer();
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: ( plugin.config as ConfigHook )().build
-		} );
-		( plugin.configureServer as unknown as ServerHook )( mockServer );
-
-		const addedFilePath = await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' );
-
-		await createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' );
-
-		vi.useFakeTimers();
-
-		try {
-			mockServer.watcher.emit( 'add', addedFilePath );
-			vi.runAllTimers();
-		} finally {
-			vi.useRealTimers();
-		}
-
-		expect( mockServer.environments.client.hot.send ).not.toHaveBeenCalled();
-		expect( ( plugin.load as LoadHook )( '\u0000virtual:ckeditor5-manual-entries' ) )
-			.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
 	test( 'does not resolve unknown virtual module requests', async () => {
@@ -640,18 +461,10 @@ function createMiddlewareServer(): TestServer {
 		middlewares: {
 			use: vi.fn()
 		},
-		watcher: new EventEmitter(),
 		environments: {
 			client: {
-				hot: {
-					send: vi.fn()
-				},
 				memoryFiles: {
 					get: vi.fn<( filePath: string ) => MemoryFile | undefined>()
-				},
-				moduleGraph: {
-					getModuleById: vi.fn(),
-					invalidateModule: vi.fn()
 				}
 			}
 		}

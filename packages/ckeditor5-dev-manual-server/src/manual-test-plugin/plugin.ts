@@ -12,7 +12,7 @@ import { collectManualPages } from './collect-pages.js';
 import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
 import { cacheValue, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
-import type { Plugin, ViteDevServer } from 'vite';
+import type { Plugin } from 'vite';
 import type { ManualPageEntry } from './types.js';
 export type { ManualData } from './types.js';
 
@@ -27,11 +27,6 @@ interface ManualTestServerLike {
 	middlewares: {
 		use( middleware: unknown ): void;
 	};
-	watcher?: ManualFileWatcherLike;
-}
-
-interface ManualFileWatcherLike {
-	on( eventName: string, listener: ( filePath: string ) => void ): unknown;
 }
 
 interface BundledDevClientEnvironment {
@@ -42,8 +37,6 @@ interface ManualMemoryFilesLike {
 	get( filePath: string ): { source: string | Uint8Array } | undefined;
 }
 
-const MANUAL_FILE_SET_EVENTS = [ 'add', 'addDir', 'unlink', 'unlinkDir' ];
-const MANUAL_FILE_SET_RELOAD_DEBOUNCE_DELAY = 100;
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -81,43 +74,6 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	} ) );
 	const getManualEntriesJson = () => JSON.stringify( getClientEntries(), null, 2 );
 
-	// Manual entries JSON last returned by the `load()` hook, used to detect changes to the manual test set.
-	let servedManualEntriesJson: string | null = null;
-
-	const reloadManualCatalogIfEntriesChanged = ( server: ViteDevServer ): void => {
-		if ( servedManualEntriesJson == null ) {
-			return;
-		}
-
-		const updatedManualEntriesJson = getManualEntriesJson();
-
-		if ( updatedManualEntriesJson == servedManualEntriesJson ) {
-			return;
-		}
-
-		servedManualEntriesJson = updatedManualEntriesJson;
-
-		const clientEnvironment = server.environments.client;
-		const virtualModule = clientEnvironment.moduleGraph?.getModuleById( resolvedVirtualModuleId );
-
-		if ( virtualModule ) {
-			clientEnvironment.moduleGraph.invalidateModule( virtualModule );
-		}
-
-		clientEnvironment.hot?.send( { type: 'full-reload' } );
-	};
-
-	const createManualFileSetChangeHandler = ( server: ViteDevServer ): ( () => void ) => {
-		let reloadTimeout: ReturnType<typeof setTimeout> | undefined;
-
-		return () => {
-			invalidateManualFileCaches();
-
-			clearTimeout( reloadTimeout );
-			reloadTimeout = setTimeout( () => reloadManualCatalogIfEntriesChanged( server ), MANUAL_FILE_SET_RELOAD_DEBOUNCE_DELAY );
-		};
-	};
-
 	return {
 		name: 'ckeditor5-manual-tests',
 
@@ -142,7 +98,6 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 		configureServer( server ) {
 			const { memoryFiles } = server.environments.client as BundledDevClientEnvironment;
 
-			useManualFileCacheInvalidation( server.watcher, createManualFileSetChangeHandler( server ) );
 			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
 			useBundledDevManualHtmlSource( memoryFiles, getManualPages, getManualShellScriptPublicPath, () => workspaceRoot );
 		},
@@ -161,9 +116,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 		load( id ) {
 			if ( id == resolvedVirtualModuleId ) {
-				servedManualEntriesJson = getManualEntriesJson();
-
-				return `export const manualTestEntries = ${ servedManualEntriesJson };`;
+				return `export const manualTestEntries = ${ getManualEntriesJson() };`;
 			}
 
 			return null;
@@ -203,12 +156,6 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			}
 		}
 	};
-}
-
-function useManualFileCacheInvalidation( watcher: ManualFileWatcherLike | undefined, invalidate: () => void ): void {
-	for ( const eventName of MANUAL_FILE_SET_EVENTS ) {
-		watcher?.on( eventName, invalidate );
-	}
 }
 
 function useManualTestMiddlewares(
