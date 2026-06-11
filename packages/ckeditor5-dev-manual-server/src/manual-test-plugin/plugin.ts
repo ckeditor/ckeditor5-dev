@@ -267,7 +267,15 @@ function isSourceTestScript( node: Node, testScriptFileName: string ): boolean {
 		return false;
 	}
 
+	if ( isExternalScriptSource( source ) ) {
+		return false;
+	}
+
 	return posix.basename( source ) == testScriptFileName;
+}
+
+function isExternalScriptSource( source: string ): boolean {
+	return source.startsWith( 'http://' ) || source.startsWith( 'https://' ) || source.startsWith( '//' );
 }
 
 function isSourceShellScript( node: Node, shellScriptPublicPath: string ): boolean {

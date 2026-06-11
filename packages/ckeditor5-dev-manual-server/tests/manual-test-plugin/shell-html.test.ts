@@ -98,6 +98,7 @@ describe( 'createManualShellHtml()', () => {
 				'<head>',
 				'<script type="module" src="./iframe.js"></script>',
 				'<script>window.inline = true;</script>',
+				'<script src="https://cdn.example.com/iframe.js"></script>',
 				'<script type="module" src="./helper.js"></script>',
 				'</head>',
 				'<body>',
@@ -114,6 +115,7 @@ describe( 'createManualShellHtml()', () => {
 			.filter( ( source ): source is string => Boolean( source ) );
 
 		expect( scriptSources.filter( source => source == './iframe.js' ) ).to.have.length( 1 );
+		expect( scriptSources ).to.include( 'https://cdn.example.com/iframe.js' );
 		expect( scriptSources ).to.include( './helper.js' );
 		expect( html ).to.contain( '<script>window.inline = true;</script>' );
 	} );

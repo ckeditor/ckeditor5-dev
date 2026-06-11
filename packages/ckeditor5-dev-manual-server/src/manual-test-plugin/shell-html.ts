@@ -163,9 +163,17 @@ function isManualTestScriptNode( node: Element, testScriptFileName: string ): bo
 		return false;
 	}
 
+	if ( isExternalScriptSource( source ) ) {
+		return false;
+	}
+
 	const sourceFileName = posix.basename( source.split( '?' )[ 0 ]!.split( '#' )[ 0 ]! );
 
 	return getScriptModuleName( sourceFileName ) == getScriptModuleName( testScriptFileName );
+}
+
+function isExternalScriptSource( source: string ): boolean {
+	return source.startsWith( 'http://' ) || source.startsWith( 'https://' ) || source.startsWith( '//' );
 }
 
 function getScriptModuleName( fileName: string ): string {
