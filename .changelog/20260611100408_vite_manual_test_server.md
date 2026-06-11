@@ -1,5 +1,5 @@
 ---
-type: Other
+type: Feature
 scope: ckeditor5-dev-manual-server
 ---
 
