@@ -222,7 +222,11 @@ describe( 'manualTestsPlugin()', () => {
 
 	test( 'updates bundled manual HTML from current source in dev server', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<p>Fresh manual test</p>' ),
+			createFile(
+				workspaceRoot,
+				'packages/ckeditor5-foo/tests/manual/foo.html',
+				'<head><script src="https://cdn.example.com/foo.js"></script></head><p>Fresh manual test</p>'
+			),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
@@ -243,6 +247,7 @@ describe( 'manualTestsPlugin()', () => {
 		expect( file ).not.to.have.property( 'etag' );
 		expect( html ).to.contain( '<p>Fresh manual test</p>' );
 		expect( html ).to.contain( 'theme/shell.ts' );
+		expect( html ).to.contain( 'src="https://cdn.example.com/foo.js"' );
 		expect( html ).to.contain( 'src="/assets/foo.js"' );
 		expect( html ).to.contain( 'href="/assets/chunk.js"' );
 		expect( html ).not.to.contain( 'src="./foo.js"' );
