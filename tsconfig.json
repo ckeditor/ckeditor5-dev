@@ -20,6 +20,7 @@
     "noImplicitOverride": true
   },
   "include": [
+    "packages/*/rolldown.config.ts",
     "packages/*/src/**/*.ts",
     "packages/*/tests/**/*.ts"
   ],
