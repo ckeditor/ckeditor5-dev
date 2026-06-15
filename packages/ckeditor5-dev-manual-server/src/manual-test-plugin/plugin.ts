@@ -46,6 +46,7 @@ const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
 export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	let workspaceRoot = process.cwd();
+	let base = '/';
 	const manualPagePatterns = manualTestPatterns.map( toManualPagePattern );
 	const manualPagesCache = cacheValue( () => collectManualPages( manualPagePatterns, workspaceRoot ) );
 	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets( manualTestPatterns, workspaceRoot ) );
@@ -62,6 +63,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	const getManualCatalogBuildInputFilePath = () => resolve( workspaceRoot, 'index.html' );
 	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
+	const getManualCatalogClientPath = ( entry: ManualPageEntry ) => toBaseCatalogPath( base, entry.htmlFilePath );
 	const getManualBuildInputs = () => [
 		getManualCatalogBuildInputFilePath(),
 		...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
@@ -69,7 +71,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const getClientEntries = (): Array<ManualTestClientEntry> => [ ...getManualPages().values() ].map( entry => ( {
 		displayName: entry.displayName,
-		href: entry.htmlFilePath,
+		href: toBasePublicPath( entry.htmlFilePath, base ),
 		packageName: entry.packageName,
 		slug: entry.slug
 	} ) );
@@ -90,6 +92,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 
 		configResolved( config ) {
 			workspaceRoot = config.root;
+			base = config.base || '/';
 
 			invalidateManualFileCaches();
 
@@ -100,11 +103,13 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			const { memoryFiles } = server.environments.client as BundledDevClientEnvironment;
 
 			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
-			useBundledDevManualHtmlSource( memoryFiles, getManualPages, getManualShellScriptPublicPath, () => workspaceRoot );
-		},
-
-		configurePreviewServer( server ) {
-			useManualCatalogMiddleware( server, getManualCatalogPublicPath );
+			useBundledDevManualHtmlSource(
+				memoryFiles,
+				getManualPages,
+				getManualShellScriptPublicPath,
+				getManualCatalogClientPath,
+				() => workspaceRoot
+			);
 		},
 
 		resolveId( source ) {
@@ -156,6 +161,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 				}
 
 				return createManualShellHtml( {
+					catalogPublicPath: getManualCatalogClientPath( entry ),
 					entry,
 					html,
 					shellScriptPublicPath: getManualShellScriptPublicPath(),
@@ -191,6 +197,7 @@ function useBundledDevManualHtmlSource(
 	memoryFiles: ManualMemoryFilesLike | undefined,
 	getManualPages: () => Map<string, ManualPageEntry>,
 	getManualShellScriptPublicPath: () => string,
+	getManualCatalogClientPath: ( entry: ManualPageEntry ) => string,
 	getWorkspaceRoot: () => string
 ): void {
 	if ( !memoryFiles ) {
@@ -211,6 +218,7 @@ function useBundledDevManualHtmlSource(
 		const shellScriptPublicPath = getManualShellScriptPublicPath();
 		const bundledHtml = getFileSource( file );
 		const transformedSourceHtml = createManualShellHtml( {
+			catalogPublicPath: getManualCatalogClientPath( entry ),
 			entry,
 			html: readFileSync( resolve( workspaceRoot, stripLeadingSlash( entry.htmlFilePath ) ), 'utf8' ),
 			shellScriptPublicPath,
@@ -244,6 +252,22 @@ function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: s
 
 function isManualCatalogBuildInputSpecifier( source: string, catalogBuildInputFilePath: string, workspaceRoot: string ): boolean {
 	return toPosixPath( resolve( workspaceRoot, source ) ) == toPosixPath( catalogBuildInputFilePath );
+}
+
+function toBasePublicPath( publicPath: string, base: string ): string {
+	if ( base == '' || base == './' ) {
+		return `.${ publicPath }`;
+	}
+
+	return `${ base.replace( /\/$/, '' ) }${ publicPath }`;
+}
+
+function toBaseCatalogPath( base: string, entryHtmlFilePath: string ): string {
+	if ( base == '' || base == './' ) {
+		return posix.relative( posix.dirname( stripLeadingSlash( entryHtmlFilePath ) ), 'index.html' );
+	}
+
+	return base;
 }
 
 function mergeBundledAssetTags(

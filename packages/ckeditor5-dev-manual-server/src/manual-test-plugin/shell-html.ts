@@ -27,6 +27,7 @@ import { loadRenderedInstructions } from './parse-markdown.js';
 import type { ManualData, ManualPageEntry } from './types.js';
 
 export interface CreateManualShellHtmlOptions {
+	catalogPublicPath?: string;
 	entry: ManualPageEntry;
 	html: string;
 	shellScriptPublicPath: string;
@@ -35,6 +36,7 @@ export interface CreateManualShellHtmlOptions {
 }
 
 export function createManualShellHtml( {
+	catalogPublicPath = '/',
 	entry,
 	html,
 	shellScriptPublicPath,
@@ -42,7 +44,8 @@ export function createManualShellHtml( {
 	workspaceRoot
 }: CreateManualShellHtmlOptions ): string {
 	// Elements from shell template.
-	const shellHtml = readFileSync( shellTemplateFilePath, 'utf8' );
+	const shellHtml = readFileSync( shellTemplateFilePath, 'utf8' )
+		.replace( 'href="/" title="Back to test index"', `href="${ catalogPublicPath }" title="Back to test index"` );
 	const shellDocument = parse( shellHtml );
 	const shellHead = getRequiredElementByTagName( shellDocument, 'head' );
 	const shellBody = getRequiredElementByTagName( shellDocument, 'body' );
