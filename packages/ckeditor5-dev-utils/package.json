@@ -46,7 +46,7 @@
     "@types/pacote": "^11.1.8",
     "@vitest/coverage-v8": "^4.1.2",
     "jest-extended": "^5.0.3",
-    "rolldown": "^1.0.3",
+    "rolldown": "^1.1.1",
     "vitest": "^4.1.2"
   },
   "scripts": {

@@ -33,10 +33,8 @@ test( 'Emits source maps combined with source maps of dependencies', async () =>
 	const sourceMap = output.find( asset => asset.fileName === 'input.js.map' ) as OutputAsset;
 
 	/**
-	 * The resulting source map will only contain the `/magic-string/src/` string if the source map
-	 * of the `magic-string` dependency was loaded and combined with the source map of the input file.
-	 * Otherwise, the source map will contain the `/magic-string/dist/` string, which is the bundled
-	 * build of the `magic-string` dependency.
+	 * The resulting source map will only contain the `dependency.ts` string if the source map
+	 * of the `dependency.js` fixture was loaded and combined with the source map of the input file.
 	 */
-	expect( sourceMap.source ).toContain( '/magic-string/src/' );
+	expect( sourceMap.source ).toContain( 'dependency.ts' );
 } );
