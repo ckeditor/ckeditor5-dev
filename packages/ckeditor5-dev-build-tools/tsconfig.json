@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "rolldown.config.ts",
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": []
+}
