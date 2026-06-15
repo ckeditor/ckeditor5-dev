@@ -61,6 +61,18 @@ describe( 'createManualShellHtml()', () => {
 		expect( getAttribute( body, 'data-test' ) ).to.equal( 'preserved' );
 	} );
 
+	test( 'sets the catalog link href', () => {
+		const html = createManualShellHtml( {
+			catalogPublicPath: '../../../../index.html',
+			entry,
+			html: '<p>Manual test</p>',
+			shellScriptPublicPath: '/theme/shell.ts',
+			shellTemplateFilePath,
+			workspaceRoot
+		} );
+		expect( html ).to.contain( 'href="../../../../index.html" title="Back to test index"' );
+	} );
+
 	test( 'keeps existing shell body attributes when manual body duplicates them', async () => {
 		const temporaryDirectory = await createTemporaryDirectory( 'ckeditor5-manual-shell-html-' );
 

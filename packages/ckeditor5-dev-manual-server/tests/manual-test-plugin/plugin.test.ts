@@ -21,6 +21,7 @@ type ConfigHook = () => {
 };
 type ConfigResolvedHook = ( config: {
 	root: string;
+	base?: string;
 	build: {
 		rolldownOptions: {
 			input: Array<string>;
@@ -108,6 +109,69 @@ describe( 'manualTestsPlugin()', () => {
 		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
 	} );
 
+	test( 'exposes entry links relative to the catalog when using relative Vite base', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const config = ( plugin.config as ConfigHook )();
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			base: './',
+			build: config.build
+		} );
+
+		const source = ( plugin.load as LoadHook )( '\0virtual:ckeditor5-manual-entries' )!;
+
+		expect( source ).to.contain( './packages/ckeditor5-foo/tests/manual/foo.html' );
+	} );
+
+	test( 'exposes entry links prefixed with the configured Vite base', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const config = ( plugin.config as ConfigHook )();
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			base: '/manual/',
+			build: config.build
+		} );
+
+		const source = ( plugin.load as LoadHook )( '\0virtual:ckeditor5-manual-entries' )!;
+
+		expect( source ).to.contain( '/manual/packages/ckeditor5-foo/tests/manual/foo.html' );
+	} );
+
+	test( 'links wrapped manual pages back to the catalog when using relative Vite base', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
+		] );
+
+		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const config = ( plugin.config as ConfigHook )();
+		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			base: './',
+			build: config.build
+		} );
+
+		const html = transformIndexHtml.handler( '<p>Manual test</p>', {
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' )
+		} )!;
+
+		expect( html ).to.contain( 'href="../../../../index.html"' );
+	} );
+
 	test( 'uses the Vite root instead of the current working directory for page entries', async () => {
 		const currentWorkingDirectory = await createTemporaryDirectory( 'ckeditor5-manual-test-plugin-cwd-' );
 
@@ -190,16 +254,13 @@ describe( 'manualTestsPlugin()', () => {
 		expect( ( plugin.load as LoadHook )( '\u0000virtual:other' ) ).to.be.null;
 	} );
 
-	test( 'registers manual test middlewares for dev and preview servers', () => {
+	test( 'registers manual test middlewares for dev server', () => {
 		const plugin = manualTestsPlugin( [] );
 		const devServer = createMiddlewareServer();
-		const previewServer = createMiddlewareServer();
 
 		( plugin.configureServer as unknown as ServerHook )( devServer );
-		( plugin.configurePreviewServer as unknown as ServerHook )( previewServer );
 
 		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
-		expect( previewServer.middlewares.use ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'emits manual static assets during build', async () => {
