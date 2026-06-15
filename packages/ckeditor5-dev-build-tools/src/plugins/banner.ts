@@ -3,9 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import MagicString from 'magic-string';
 import { SourceMapConsumer, SourceMapGenerator } from 'source-map';
-import type { Plugin, OutputChunk, OutputAsset } from 'rolldown';
+import { RolldownMagicString, type Plugin, type OutputChunk, type OutputAsset } from 'rolldown';
 import { createFilter, type FilterPattern } from '@rollup/pluginutils';
 
 export interface RollupBannerOptions {
@@ -44,7 +43,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 		name: 'cke5-add-banner',
 
 		async generateBundle( outputOptions, bundle ) {
-			const updateSourceMap = async ( fileName: string, magic: MagicString ): Promise<void> => {
+			const updateSourceMap = async ( fileName: string, magic: RolldownMagicString ): Promise<void> => {
 				if ( !outputOptions.sourcemap ) {
 					return;
 				}
@@ -68,7 +67,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 				 * we need to merge new source map with the original.
 				 */
 				const generator = SourceMapGenerator.fromSourceMap(
-					await new SourceMapConsumer( newSourceMap )
+					await new SourceMapConsumer( newSourceMap.toString() )
 				);
 
 				const originalMapConsumer = await new SourceMapConsumer(
@@ -87,7 +86,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 			 * Adds banner to the beginning of the asset and updates its source map.
 			 */
 			const updateAsset = ( asset: OutputAsset ) => {
-				const magic = new MagicString( asset.source.toString() );
+				const magic = new RolldownMagicString( asset.source.toString() );
 				magic.prepend( options.banner );
 
 				asset.source = magic.toString();
@@ -99,7 +98,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 			 * Adds banner to the beginning of the chunk and updates its source map.
 			 */
 			const updateChunk = ( chunk: OutputChunk ) => {
-				const magic = new MagicString( chunk.code );
+				const magic = new RolldownMagicString( chunk.code );
 				magic.prepend( options.banner );
 
 				chunk.code = magic.toString();

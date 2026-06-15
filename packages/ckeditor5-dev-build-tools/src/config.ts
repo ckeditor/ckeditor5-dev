@@ -75,7 +75,7 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 	return defineConfig( {
 		input,
 		logLevel,
-		tsconfig: hasTsconfig ? tsconfig : undefined,
+		tsconfig: hasTsconfig ? tsconfig : false,
 		platform: 'browser',
 		moduleTypes: {
 			'.svg': 'text'
@@ -113,7 +113,6 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 		},
 		experimental: {
 			nativeMagicString: true,
-			lazyBarrel: true,
 			attachDebugInfo: 'none'
 		},
 

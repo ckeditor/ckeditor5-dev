@@ -14,7 +14,7 @@ import { mockGetUserDependency } from '../_utils/utils.js';
  * Mock `rolldown` to replace `rolldown.write` with `rolldown.generate`.
  */
 vi.mock( 'rolldown', async () => {
-	const { rolldown, defineConfig } = await vi.importActual<typeof Rolldown>( 'rolldown' );
+	const { rolldown, defineConfig, RolldownMagicString } = await vi.importActual<typeof Rolldown>( 'rolldown' );
 
 	return {
 		async rolldown( rolldownOptions: Rolldown.RolldownOptions ) {
@@ -25,7 +25,8 @@ vi.mock( 'rolldown', async () => {
 			};
 		},
 
-		defineConfig
+		defineConfig,
+		RolldownMagicString
 	};
 } );
 

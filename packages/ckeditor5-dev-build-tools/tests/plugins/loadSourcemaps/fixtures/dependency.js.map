@@ -1,0 +1,1 @@
+{"version":3,"file":"dependency.js","sources":["dependency.ts"],"sourcesContent":["export const value: string = 'foo';\n"],"names":[],"mappings":"AAAA,MAAM,MAAM,KAAc,KAAK"}

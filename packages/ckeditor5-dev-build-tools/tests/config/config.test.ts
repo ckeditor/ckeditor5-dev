@@ -59,7 +59,7 @@ test( '--tsconfig', async () => {
 	expect( ( declarationsFalse.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( false );
 
 	expect( fileExists.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
-	expect( fileDoesntExist.tsconfig ).toBeUndefined();
+	expect( fileDoesntExist.tsconfig ).toBe( false );
 	expect( declarationsFalse.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
 } );
 

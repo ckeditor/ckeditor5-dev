@@ -3,5 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-// @ts-expect-error - It's a JS file.
-export { value } from './dependency.js';
+/* eslint-disable @stylistic/spaced-comment */
+
+export const value = 'foo';
+//# sourceMappingURL=dependency.js.map

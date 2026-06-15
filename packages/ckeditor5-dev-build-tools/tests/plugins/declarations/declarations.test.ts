@@ -8,7 +8,7 @@ import { expect, test, vi } from 'vitest';
 
 const isolatedDeclarationMock = vi.hoisted( () => vi.fn() );
 
-vi.mock( 'oxc-transform', () => ( {
+vi.mock( 'rolldown/experimental', () => ( {
 	isolatedDeclaration: isolatedDeclarationMock
 } ) );
 
