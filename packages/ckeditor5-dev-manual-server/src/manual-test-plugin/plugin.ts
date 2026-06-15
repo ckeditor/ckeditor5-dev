@@ -59,10 +59,11 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
 	};
 	const getManualCatalogPublicPath = () => toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
+	const getManualCatalogBuildInputFilePath = () => resolve( workspaceRoot, 'index.html' );
 	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualBuildInputs = () => [
-		MANUAL_CATALOG_FILE_PATH,
+		getManualCatalogBuildInputFilePath(),
 		...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
 	];
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
@@ -111,12 +112,20 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 				return resolvedVirtualModuleId;
 			}
 
+			if ( isManualCatalogBuildInputSpecifier( source, getManualCatalogBuildInputFilePath(), workspaceRoot ) ) {
+				return getManualCatalogBuildInputFilePath();
+			}
+
 			return null;
 		},
 
 		load( id ) {
 			if ( id == resolvedVirtualModuleId ) {
 				return `export const manualTestEntries = ${ getManualEntriesJson() };`;
+			}
+
+			if ( toPosixPath( id ) == toPosixPath( getManualCatalogBuildInputFilePath() ) ) {
+				return readFileSync( MANUAL_CATALOG_FILE_PATH, 'utf8' );
 			}
 
 			return null;
@@ -136,7 +145,7 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 			order: 'pre',
 
 			handler( html, context ) {
-				if ( toPosixPath( context.filename ) == toPosixPath( MANUAL_CATALOG_FILE_PATH ) ) {
+				if ( isManualCatalogHtmlFile( context.filename, getManualCatalogBuildInputFilePath() ) ) {
 					return html.replace( './catalog.ts', getManualCatalogScriptPublicPath() );
 				}
 
@@ -224,6 +233,17 @@ function toManualPagePattern( pattern: string ): string {
 	}
 
 	return `${ pattern }.{html,js,md,ts}`;
+}
+
+function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: string ): boolean {
+	const normalizedFilePath = toPosixPath( filePath );
+
+	return normalizedFilePath == toPosixPath( MANUAL_CATALOG_FILE_PATH ) ||
+		normalizedFilePath == toPosixPath( catalogBuildInputFilePath );
+}
+
+function isManualCatalogBuildInputSpecifier( source: string, catalogBuildInputFilePath: string, workspaceRoot: string ): boolean {
+	return toPosixPath( resolve( workspaceRoot, source ) ) == toPosixPath( catalogBuildInputFilePath );
 }
 
 function mergeBundledAssetTags(

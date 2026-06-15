@@ -32,6 +32,7 @@ type TransformIndexHtmlHook = {
 };
 type GenerateBundleHook = ( this: { emitFile: ReturnType<typeof vi.fn> } ) => void;
 type LoadHook = ( id: string ) => string | null;
+type ResolveIdHook = ( id: string ) => string | null;
 type MemoryFile = { etag?: string; source: string | Uint8Array };
 type MemoryFilesGetMock = Mock<( filePath: string ) => MemoryFile | undefined>;
 type TestServer = {
@@ -218,6 +219,23 @@ describe( 'manualTestsPlugin()', () => {
 			fileName: 'packages/ckeditor5-foo/tests/manual/assets/image.png',
 			source: Buffer.from( 'image' )
 		} );
+	} );
+
+	test( 'registers the catalog HTML as the build index page', () => {
+		const plugin = manualTestsPlugin( [] );
+		const config = ( plugin.config as ConfigHook )();
+		const catalogBuildInputFilePath = join( workspaceRoot, 'index.html' );
+
+		expect( config.build.rolldownOptions.input ).to.include( catalogBuildInputFilePath );
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: config.build
+		} );
+
+		expect( ( plugin.resolveId as ResolveIdHook )( 'index.html' ) ).to.equal( catalogBuildInputFilePath );
+		expect( ( plugin.load as LoadHook )( catalogBuildInputFilePath ) )
+			.to.contain( '<script type="module" src="./catalog.ts"></script>' );
 	} );
 
 	test( 'updates bundled manual HTML from current source in dev server', async () => {
@@ -421,6 +439,23 @@ describe( 'manualTestsPlugin()', () => {
 		expect( transformIndexHtml.handler(
 			'<script type="module" src="./catalog.ts"></script>',
 			{ filename: catalogFilePath.replace( /\//g, '\\' ) }
+		) ).to.equal( `<script type="module" src="/@fs/${ catalogScriptFilePath }"></script>` );
+	} );
+
+	test( 'rewrites the catalog script for the synthetic build index page', () => {
+		const plugin = manualTestsPlugin( [] );
+		const config = ( plugin.config as ConfigHook )();
+		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
+		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: config.build
+		} );
+
+		expect( transformIndexHtml.handler(
+			'<script type="module" src="./catalog.ts"></script>',
+			{ filename: join( workspaceRoot, 'index.html' ) }
 		) ).to.equal( `<script type="module" src="/@fs/${ catalogScriptFilePath }"></script>` );
 	} );
 
