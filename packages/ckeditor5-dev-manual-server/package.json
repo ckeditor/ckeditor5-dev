@@ -39,7 +39,7 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "unified": "^11.0.5",
-    "vite": "^8.0.13",
+    "vite": "^8.0.16",
     "vite-svg-loader": "^5.1.1"
   },
   "devDependencies": {
