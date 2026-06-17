@@ -34,7 +34,7 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.8"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",
