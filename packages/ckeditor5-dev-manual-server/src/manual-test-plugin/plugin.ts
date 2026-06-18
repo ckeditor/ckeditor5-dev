@@ -293,10 +293,6 @@ function getManualTestRootDirectory( entry: ManualPageEntry ): string {
 	const manualDirectoryMarker = '/tests/manual/';
 	const manualDirectoryIndex = htmlFilePath.indexOf( manualDirectoryMarker );
 
-	if ( manualDirectoryIndex == -1 ) {
-		return posix.dirname( htmlFilePath );
-	}
-
 	return htmlFilePath.slice( 0, manualDirectoryIndex + manualDirectoryMarker.length - 1 );
 }
 

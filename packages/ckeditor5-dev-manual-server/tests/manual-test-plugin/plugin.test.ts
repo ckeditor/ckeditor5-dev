@@ -412,6 +412,30 @@ describe( 'manualTestsPlugin()', () => {
 		expect( html ).not.to.contain( 'src="./foo.js"' );
 	} );
 
+	test( 'updates bundled manual HTML provided as a binary buffer in dev server', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html', '<head></head><p>Fresh manual test</p>' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
+		] );
+
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
+		const server = createMiddlewareServer();
+
+		server.environments.client.memoryFiles.get.mockReturnValue( {
+			source: Buffer.from(
+				'<html><head><script type="module" crossorigin src="/assets/foo.js"></script></head><body>Old</body></html>'
+			)
+		} );
+
+		( plugin.configureServer as unknown as ServerHook )( server );
+
+		const file = server.environments.client.memoryFiles.get( 'packages/ckeditor5-foo/tests/manual/foo.html' )!;
+		const html = file.source as string;
+
+		expect( html ).to.contain( '<p>Fresh manual test</p>' );
+		expect( html ).to.contain( 'src="/assets/foo.js"' );
+	} );
+
 	test( 'replaces source shell script when bundled manual HTML includes bundled shell assets', async () => {
 		await Promise.all( [
 			createFile(
