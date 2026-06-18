@@ -37,6 +37,11 @@ interface ManualMemoryFilesLike {
 	get( filePath: string ): { source: string | Uint8Array } | undefined;
 }
 
+export interface ManualTestsPluginOptions {
+	paths: Array<string>;
+	include?: Array<string>;
+}
+
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -44,13 +49,21 @@ const MANUAL_CATALOG_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.ts'
 const MANUAL_SHELL_TEMPLATE_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.html' );
 const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 
-export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
+export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	let workspaceRoot = process.cwd();
 	let base = '/';
+	const manualTestPatterns = options.paths;
 	const manualPagePatterns = manualTestPatterns.map( toManualPagePattern );
-	const manualPagesCache = cacheValue( () => collectManualPages( manualPagePatterns, workspaceRoot ) );
-	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets( manualTestPatterns, workspaceRoot ) );
+	const includePackageNames = ( options.include || [] ).filter( Boolean );
+	const manualPagesCache = cacheValue( () => filterManualPages(
+		collectManualPages( manualPagePatterns, workspaceRoot ),
+		includePackageNames
+	) );
 	const getManualPages = manualPagesCache.get;
+	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets(
+		getManualStaticAssetPatterns( getManualPages(), manualTestPatterns, includePackageNames ),
+		workspaceRoot
+	) );
 	const getManualStaticAssets = manualStaticAssetsCache.get;
 	const invalidateManualFileCaches = () => {
 		manualPagesCache.invalidate();
@@ -59,8 +72,8 @@ export function manualTestsPlugin( manualTestPatterns: Array<string> ): Plugin {
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
 	};
-	const getManualCatalogPublicPath = () => toPublicFilePath( MANUAL_CATALOG_FILE_PATH, workspaceRoot );
 	const getManualCatalogBuildInputFilePath = () => resolve( workspaceRoot, 'index.html' );
+	const getManualCatalogPublicPath = () => toPublicFilePath( getManualCatalogBuildInputFilePath(), workspaceRoot );
 	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualCatalogClientPath = ( entry: ManualPageEntry ) => toBaseCatalogPath( base, entry.htmlFilePath );
@@ -241,6 +254,50 @@ function toManualPagePattern( pattern: string ): string {
 	}
 
 	return `${ pattern }.{html,js,md,ts}`;
+}
+
+function filterManualPages(
+	manualPages: Map<string, ManualPageEntry>,
+	includePackageNames: Array<string>
+): Map<string, ManualPageEntry> {
+	if ( includePackageNames.length == 0 ) {
+		return manualPages;
+	}
+
+	const normalizedIncludePackageNames = new Set( includePackageNames.map( normalizePackageName ) );
+
+	return new Map( [ ...manualPages ].filter(
+		( [ , entry ] ) => normalizedIncludePackageNames.has( normalizePackageName( entry.packageName ) )
+	) );
+}
+
+function normalizePackageName( packageName: string ): string {
+	return packageName.replace( /^ckeditor5-/, '' );
+}
+
+function getManualStaticAssetPatterns(
+	manualPages: Map<string, ManualPageEntry>,
+	manualTestPatterns: Array<string>,
+	includePackageNames: Array<string>
+): Array<string> {
+	if ( includePackageNames.length == 0 ) {
+		return manualTestPatterns;
+	}
+
+	return [ ...new Set( [ ...manualPages.values() ].map( getManualTestRootDirectory ) ) ]
+		.map( manualTestRootDirectory => `${ manualTestRootDirectory }/**/*` );
+}
+
+function getManualTestRootDirectory( entry: ManualPageEntry ): string {
+	const htmlFilePath = stripLeadingSlash( entry.htmlFilePath );
+	const manualDirectoryMarker = '/tests/manual/';
+	const manualDirectoryIndex = htmlFilePath.indexOf( manualDirectoryMarker );
+
+	if ( manualDirectoryIndex == -1 ) {
+		return posix.dirname( htmlFilePath );
+	}
+
+	return htmlFilePath.slice( 0, manualDirectoryIndex + manualDirectoryMarker.length - 1 );
 }
 
 function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: string ): boolean {

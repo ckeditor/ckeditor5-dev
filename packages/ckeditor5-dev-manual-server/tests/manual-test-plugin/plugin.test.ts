@@ -6,7 +6,7 @@
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 import { type ViteDevServer } from 'vite';
-import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
+import { manualTestsPlugin, type ManualTestsPluginOptions } from '../../src/manual-test-plugin/plugin.js';
 import { stripLeadingSlash, toPublicFilePath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import { createTestServer, getCode } from '../_utils/vite.js';
@@ -73,7 +73,9 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.js' )
 		] );
 
-		server = await createManualTestServer( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
+		server = await createManualTestServer( {
+			paths: [ 'packages/ckeditor5-foo/tests/manual/**/*' ]
+		} );
 		const input = server.config.build.rolldownOptions.input as Array<string>;
 
 		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ) );
@@ -88,7 +90,9 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
 		] );
 
-		server = await createManualTestServer( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
+		server = await createManualTestServer( {
+			paths: [ 'packages/ckeditor5-foo/tests/manual/**/*' ]
+		} );
 		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
@@ -102,11 +106,54 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
 		] );
 
-		server = await createManualTestServer( [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ] );
+		server = await createManualTestServer( {
+			paths: [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ]
+		} );
 		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
 		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+	} );
+
+	test( 'filters build inputs and catalog entries using included full package names', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
+		] );
+
+		server = await createManualTestServer( {
+			paths: [ 'packages/*/tests/manual/**/*' ],
+			include: [ 'ckeditor5-bar' ]
+		} );
+		const input = server.config.build.rolldownOptions.input as Array<string>;
+		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
+		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ) );
+		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ) );
+		expect( source ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
+		expect( source ).not.to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+	} );
+
+	test( 'filters manual tests using included short package names', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
+		] );
+
+		server = await createManualTestServer( {
+			paths: [ 'packages/*/tests/manual/**/*' ],
+			include: [ 'foo' ]
+		} );
+		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
+		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.html' );
+		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.html' );
 	} );
 
 	test( 'exposes entry links relative to the catalog when using relative Vite base', async () => {
@@ -115,7 +162,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 
 		( plugin.configResolved as ConfigResolvedHook )( {
@@ -135,7 +182,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 
 		( plugin.configResolved as ConfigResolvedHook )( {
@@ -155,7 +202,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
@@ -185,7 +232,7 @@ describe( 'manualTestsPlugin()', () => {
 				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/tests/manual/bar.ts' )
 			] );
 
-			server = await createManualTestServer( [ 'packages/*/tests/manual/**/*' ] );
+			server = await createManualTestServer( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 			const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 			const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
@@ -209,7 +256,7 @@ describe( 'manualTestsPlugin()', () => {
 				createFile( currentWorkingDirectory, 'project/packages/ckeditor5-bar/tests/manual/bar.ts' )
 			] );
 
-			const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+			const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 			const config = ( plugin.config as ConfigHook )();
 
 			( plugin.configResolved as ConfigResolvedHook )( {
@@ -234,7 +281,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 
 		expect( config.build.rolldownOptions.input ).to.include(
@@ -243,19 +290,19 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'does not resolve unknown virtual module requests', async () => {
-		server = await createManualTestServer( [] );
+		server = await createManualTestServer( { paths: [] } );
 
 		expect( await server.pluginContainer.resolveId( 'virtual:other' ) ).to.be.null;
 	} );
 
 	test( 'does not load unknown virtual module requests', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 
 		expect( ( plugin.load as LoadHook )( '\u0000virtual:other' ) ).to.be.null;
 	} );
 
 	test( 'registers manual test middlewares for dev server', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const devServer = createMiddlewareServer();
 
 		( plugin.configureServer as unknown as ServerHook )( devServer );
@@ -265,7 +312,7 @@ describe( 'manualTestsPlugin()', () => {
 
 	test( 'emits manual static assets during build', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 		const emitFile = vi.fn();
 
@@ -282,8 +329,41 @@ describe( 'manualTestsPlugin()', () => {
 		} );
 	} );
 
+	test( 'emits static assets only from included manual test roots during build', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/foo.png', 'foo image' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/assets/bar.png', 'bar image' )
+		] );
+
+		const plugin = manualTestsPlugin( {
+			paths: [ 'packages/*/tests/manual/**/*' ],
+			include: [ 'foo' ]
+		} );
+		const config = ( plugin.config as ConfigHook )();
+		const emitFile = vi.fn();
+
+		( plugin.configResolved as ConfigResolvedHook )( {
+			root: workspaceRoot,
+			build: config.build
+		} );
+		( plugin.generateBundle as unknown as GenerateBundleHook ).call( { emitFile } );
+
+		expect( emitFile ).toHaveBeenCalledWith( {
+			type: 'asset',
+			fileName: 'packages/ckeditor5-foo/tests/manual/assets/foo.png',
+			source: Buffer.from( 'foo image' )
+		} );
+		expect( emitFile ).not.toHaveBeenCalledWith( expect.objectContaining( {
+			fileName: 'packages/ckeditor5-bar/tests/manual/assets/bar.png'
+		} ) );
+	} );
+
 	test( 'registers the catalog HTML as the build index page', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const config = ( plugin.config as ConfigHook )();
 		const catalogBuildInputFilePath = join( workspaceRoot, 'index.html' );
 
@@ -309,7 +389,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 
 		server.environments.client.memoryFiles.get.mockReturnValue( {
@@ -342,7 +422,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 
 		server.environments.client.memoryFiles.get.mockReturnValue( {
@@ -368,7 +448,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 
 		server.environments.client.memoryFiles.get.mockReturnValue( {
@@ -393,7 +473,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 
 		server.environments.client.memoryFiles.get.mockReturnValue( {
@@ -416,7 +496,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 		const bundledFile = { source: '<html><head></head><body>Other</body></html>' };
 
@@ -433,7 +513,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		const plugin = manualTestsPlugin( [ 'packages/*/tests/manual/**/*' ] );
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
 		const server = createMiddlewareServer();
 
 		server.environments.client.memoryFiles.get.mockReturnValue( undefined );
@@ -444,7 +524,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'rewrites root and index requests to the manual test catalog', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const server = createMiddlewareServer();
 
 		( plugin.configureServer as unknown as ServerHook )( server );
@@ -467,12 +547,10 @@ describe( 'manualTestsPlugin()', () => {
 		middleware( missingUrlRequest, {}, next );
 		middleware( invalidUrlRequest, {}, next );
 
-		expect( rootRequest.url ).to.contain( '/theme/catalog.html' );
-		expect( rootRequest.url ).to.contain( '?q=1' );
-		expect( indexRequest.url ).to.contain( '/theme/catalog.html' );
-		expect( indexRequest.url ).to.contain( '?filter=all' );
+		expect( rootRequest.url ).to.equal( '/index.html?q=1' );
+		expect( indexRequest.url ).to.equal( '/index.html?filter=all' );
 		expect( otherRequest.url ).to.equal( '/manual.html' );
-		expect( missingUrlRequest ).to.have.property( 'url' ).that.contains( '/theme/catalog.html' );
+		expect( missingUrlRequest ).to.have.property( 'url' ).that.equals( '/index.html' );
 		expect( invalidUrlRequest.url ).to.equal( 'http://%' );
 		expect( next ).toHaveBeenCalledTimes( 5 );
 	} );
@@ -480,7 +558,7 @@ describe( 'manualTestsPlugin()', () => {
 	test( 'rewrites the catalog script to a public file path', async () => {
 		const catalogFilePath = resolve( import.meta.dirname, '../../theme/catalog.html' );
 		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
-		server = await createManualTestServer( [] );
+		server = await createManualTestServer( { paths: [] } );
 
 		const html = await server.transformIndexHtml(
 			toPublicFilePath( catalogFilePath, workspaceRoot ),
@@ -492,7 +570,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'rewrites the catalog script when the context filename uses Windows separators', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 		const catalogFilePath = resolve( import.meta.dirname, '../../theme/catalog.html' );
 		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
@@ -504,7 +582,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'rewrites the catalog script for the synthetic build index page', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const config = ( plugin.config as ConfigHook )();
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
@@ -521,7 +599,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'passes through HTML files that are not manual pages', () => {
-		const plugin = manualTestsPlugin( [] );
+		const plugin = manualTestsPlugin( { paths: [] } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
 		expect( transformIndexHtml.handler( '<p>Sample</p>', {
@@ -535,7 +613,9 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' )
 		] );
 
-		server = await createManualTestServer( [ 'packages/ckeditor5-foo/tests/manual/**/*' ] );
+		server = await createManualTestServer( {
+			paths: [ 'packages/ckeditor5-foo/tests/manual/**/*' ]
+		} );
 		const html = await server.transformIndexHtml(
 			'/packages/ckeditor5-foo/tests/manual/foo.html',
 			'<title>Foo</title><p>Manual test</p>'
@@ -546,12 +626,12 @@ describe( 'manualTestsPlugin()', () => {
 		expect( html ).to.contain( '<p>Manual test</p>' );
 	} );
 
-	async function createManualTestServer( manualTestPatterns: Array<string> ): Promise<ViteDevServer> {
+	async function createManualTestServer( options: ManualTestsPluginOptions ): Promise<ViteDevServer> {
 		return createTestServer( {
 			root: workspaceRoot,
 			appType: 'mpa',
 			plugins: [
-				manualTestsPlugin( manualTestPatterns )
+				manualTestsPlugin( options )
 			]
 		} );
 	}
