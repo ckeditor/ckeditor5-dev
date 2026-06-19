@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [56.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v56.3.0...v56.4.0) (June 19, 2026)
+
+### Features
+
+* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: The `manualTestsPlugin()` now accepts an options object with an `paths` array and an optional `include` array that limits the Vite manual test server to the manual tests of the listed packages. Package names can be provided in a short (`core`) or full (`ckeditor5-core`) form. When the option is empty or omitted, all manual tests matched by `paths` are served.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/56.4.0): v56.3.0 => v56.4.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/56.4.0): v56.3.0 => v56.4.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/56.4.0): v56.3.0 => v56.4.0
+</details>
+
+
 ## [56.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v56.2.1...v56.3.0) (June 15, 2026)
 
 ### Bug fixes
@@ -151,60 +187,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/56.1.0): v56.0.0 => v56.1.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/56.1.0): v56.0.0 => v56.1.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/56.1.0): v56.0.0 => v56.1.0
-</details>
-
-
-## [56.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v55.6.3...v56.0.0) (May 29, 2026)
-
-### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Removed output path rewriting from `ckeditor5-dev-build-tools` except for package imports rewritten to `ckeditor5` and `ckeditor5-premium-features` in browser builds.
-
-  The `rewrite` JavaScript API option was removed. Imports using `ckeditor5/src/*` and `ckeditor5-collaboration/src/*` are no longer rewritten automatically.
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Replaced Rollup with Rolldown in `ckeditor5-dev-build-tools`.
-
-  Rollup-specific dependencies that are no longer needed because Rolldown provides equivalent features out of the box were removed.
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Changed `ckeditor5-dev-build-tools` to assume that package sources use TypeScript isolated declarations.
-
-  Declaration files are now generated without invoking TypeScript, so builds no longer perform type checking.
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Removed the `loadTypeScriptSources`, `replaceImports`, and `emitCss` exports from `ckeditor5-dev-build-tools`.
-
-  The `loadTypeScriptSources` and `replaceImports` behavior is now handled by Rolldown. The `bundleCss` plugin now ensures that a CSS file is always emitted, including when the generated file is empty.
-
-### Features
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Added the `declarationFiles` plugin to `ckeditor5-dev-build-tools` for generating `.d.ts` files from TypeScript sources that use isolated declarations.
-
-### Other changes
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Improved the performance of selected `ckeditor5-dev-build-tools` plugins.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Major releases (contain major breaking changes):
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/56.0.0): v55.6.3 => v56.0.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/56.0.0): v55.6.3 => v56.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/56.0.0): v55.6.3 => v56.0.0
 </details>
 
 ---
