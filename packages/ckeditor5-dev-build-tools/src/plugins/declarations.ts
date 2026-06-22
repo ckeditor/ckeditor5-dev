@@ -16,7 +16,7 @@ export interface RolldownDeclarationOptions {
 	sourceDirectory: string;
 
 	/**
-	 * Whether to skip declarations for internal APIs (marked with `@internal` in the source code).
+	 * Whether to skip declarations for internal APIs.
 	 *
 	 * @default true
 	 */
