@@ -28,11 +28,11 @@
     "ckeditor5-dev-changelog-create-entry": "bin/generate-template.js"
   },
   "dependencies": {
+    "@11ty/gray-matter": "^2.1.0",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "cac": "^7.0.0",
     "date-fns": "^4.1.0",
     "glob": "^13.0.6",
-    "gray-matter": "^4.0.3",
     "inquirer": "^12.11.1",
     "semver": "^7.7.4",
     "upath": "^2.0.1"
