@@ -38,10 +38,10 @@
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.9",
     "rollup": "^4.9.5",
     "typescript": "5.3.3",
     "upath": "^2.0.1",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   }
 }

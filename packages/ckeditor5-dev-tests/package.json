@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "jest-extended": "^5.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "postinstall": "node bin/postinstall.js",

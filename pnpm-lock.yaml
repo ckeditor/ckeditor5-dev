@@ -26,8 +26,8 @@ importers:
         specifier: ^2.0.21
         version: 2.0.22(@inquirer/prompts@7.8.6(@types/node@22.17.1))
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       eslint:
         specifier: ^9.34.0
         version: 9.39.1(jiti@2.6.1)
@@ -68,8 +68,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-build-tools:
     dependencies:
@@ -156,8 +156,8 @@ importers:
         specifier: ^9.0.5
         version: 9.0.6
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       type-fest:
         specifier: ^4.10.2
         version: 4.41.0
@@ -165,8 +165,8 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-bump-year:
     dependencies:
@@ -176,6 +176,9 @@ importers:
 
   packages/ckeditor5-dev-changelog:
     dependencies:
+      '@11ty/gray-matter':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@ckeditor/ckeditor5-dev-utils':
         specifier: workspace:*
         version: link:../ckeditor5-dev-utils
@@ -185,9 +188,6 @@ importers:
       glob:
         specifier: ^13.0.0
         version: 13.0.0
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
       inquirer:
         specifier: ^12.5.2
         version: 12.9.6(@types/node@22.17.1)
@@ -208,8 +208,8 @@ importers:
         specifier: ^7.7.0
         version: 7.7.1
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       rollup:
         specifier: ^4.9.5
         version: 4.59.0
@@ -217,8 +217,8 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-ci:
     dependencies:
@@ -233,8 +233,8 @@ importers:
         version: 1.1303.1
     devDependencies:
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-dependency-checker:
     dependencies:
@@ -261,8 +261,8 @@ importers:
         version: 2.0.1
     devDependencies:
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-docs:
     dependencies:
@@ -289,8 +289,8 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-license-checker:
     dependencies:
@@ -308,8 +308,8 @@ importers:
         specifier: 12.1.2
         version: 12.1.2(rollup@4.59.0)(tslib@2.8.1)(typescript@5.3.3)
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       rollup:
         specifier: ^4.9.5
         version: 4.59.0
@@ -317,8 +317,8 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-release-tools:
     dependencies:
@@ -360,8 +360,8 @@ importers:
         specifier: ^5.2.0
         version: 5.5.0
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-stale-bot:
     dependencies:
@@ -388,8 +388,8 @@ importers:
         version: 2.0.1
     devDependencies:
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-tests:
     dependencies:
@@ -533,8 +533,8 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-translations:
     dependencies:
@@ -567,8 +567,8 @@ importers:
         version: 3.3.3
     devDependencies:
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-utils:
     dependencies:
@@ -597,8 +597,8 @@ importers:
         specifier: ^7.1.3
         version: 7.1.3(postcss@8.5.12)
       esbuild-loader:
-        specifier: ^4.4.3
-        version: 4.4.3(webpack@5.107.2(cssnano@7.1.3(postcss@8.5.12))(postcss@8.5.12))
+        specifier: ^4.5.0
+        version: 4.5.0(webpack@5.107.2(cssnano@7.1.3(postcss@8.5.12))(postcss@8.5.12))
       glob:
         specifier: ^13.0.0
         version: 13.0.0
@@ -661,8 +661,8 @@ importers:
         specifier: ^11.1.8
         version: 11.1.8
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       jest-extended:
         specifier: ^5.0.3
         version: 5.0.3
@@ -673,8 +673,8 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/ckeditor5-dev-web-crawler:
     dependencies:
@@ -695,8 +695,8 @@ importers:
         specifier: 12.1.2
         version: 12.1.2(rollup@4.59.0)(tslib@2.8.1)(typescript@5.3.3)
       '@vitest/coverage-v8':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
+        specifier: ^4.1.9
+        version: 4.1.9(vitest@4.1.9)
       rollup:
         specifier: ^4.9.5
         version: 4.59.0
@@ -707,8 +707,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
   packages/typedoc-plugins:
     dependencies:
@@ -741,10 +741,14 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
       vitest:
-        specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
 packages:
+
+  '@11ty/gray-matter@2.1.0':
+    resolution: {integrity: sha512-fNdBOb3MgDz/1UCIoeY4wDuGbp+/3s5y6UrsyfMabECbh/CVycj7Er33JXqSxRwxrRKXcGE1Jipuq/1mODInsQ==}
+    engines: {node: '>=11'}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -2190,20 +2194,20 @@ packages:
     resolution: {integrity: sha512-W8FQi6kEh2e8zVhQ0eeRnxdvIoOkAp/CPAahcNio6nO9dsIwb9b34z90KOlheoyuVf6LSOEdjlkxSkapNEc+4A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vitest/coverage-v8@4.1.8':
-    resolution: {integrity: sha512-lt3kovsyHwYe00wq4D1ti0Z974fWj4NLp6siqiyEufUpyFwK9Yhi7rBhac9JL5aA0zoMrJqc4vYPZRUnI7l7nw==}
+  '@vitest/coverage-v8@4.1.9':
+    resolution: {integrity: sha512-G9/lgqibheLVBDRuya45EbsEXTYcWoSG+TLg7i2axuzx0Eq62eXn+aWXyaVdV5vKvFSWd6ywcX8hA7la9Pvu8g==}
     peerDependencies:
-      '@vitest/browser': 4.1.8
-      vitest: 4.1.8
+      '@vitest/browser': 4.1.9
+      vitest: 4.1.9
     peerDependenciesMeta:
       '@vitest/browser':
         optional: true
 
-  '@vitest/expect@4.1.8':
-    resolution: {integrity: sha512-h3nDO677RDLEGlBxyQ5CW8RlMThSKSRLUePLOx09gNIWRL40edgA1GCZSZgf1W55MFAG6/Sw14KeaAnqv0NKdQ==}
+  '@vitest/expect@4.1.9':
+    resolution: {integrity: sha512-vl/rYsUKcBr3SnQn166+XR5ZQcgMx3DQhFWdfli/cWpLnLUmbxZvyrJZotLFUryib+LtArYMSTJ5RbQ57ZqrlA==}
 
-  '@vitest/mocker@4.1.8':
-    resolution: {integrity: sha512-LEiN/xe4OSIbKe9HQIp5OC24agGD9J5CnmMgsLohVVoOPWL9a2sBoR6VBx43jQZb7Kr1l4RCuyCJzcAa0+dojw==}
+  '@vitest/mocker@4.1.9':
+    resolution: {integrity: sha512-EVkXzBjrPGM+cK8/ANWgBrkUCfJfb38/EfTSO8h7pWvKkyPkpWxvR7BkD2MyItMF62C97zAEoqdpUixwR/e+Rw==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -2213,20 +2217,20 @@ packages:
       vite:
         optional: true
 
-  '@vitest/pretty-format@4.1.8':
-    resolution: {integrity: sha512-9GasEBxpZ1VYIpqHf/0+YGg121uSNwCKOJqIrTwWP/TB7DmFCiaBpNl3aPZzoLWfWkuqhbH8vJIVobZkvdo2cA==}
+  '@vitest/pretty-format@4.1.9':
+    resolution: {integrity: sha512-s0iufns3iIFitdgm+YR7g1whCAaGtXz459VS9/PqyKDEEFgYIhsHOQmXgIgDuYCt7DeQmiZT0Qe2OA2p4ZPu5A==}
 
-  '@vitest/runner@4.1.8':
-    resolution: {integrity: sha512-EmVxeBAfMJvycdjd6Hm+RbFBbA9fKvo0Kx37hNpBYoYeavH3RNsBXWDooR1mgD52dCrxIIuP7UotpfiwOikvcg==}
+  '@vitest/runner@4.1.9':
+    resolution: {integrity: sha512-KXLMDtc7oe70+3mJfGrPUWPesswH+3sTxAMAMl8DG7I8IUQT4XW718dY5ID3vPUcmlu27CcKfY4P3h3I29SLJg==}
 
-  '@vitest/snapshot@4.1.8':
-    resolution: {integrity: sha512-acfZboRmAIf05DEKcBQy33VXojFJjtUdLyo7oOmV9kebb2xdU01UknNiPuPZoJZQyO7DF0gZdTGTpeAzET9QPQ==}
+  '@vitest/snapshot@4.1.9':
+    resolution: {integrity: sha512-Jc7RKGNBo8Z28WYIm0Niej4xdSPByRf6mU58VpHQkd6Zh05rlnA+twjbK5HyeIGHxrzsc3mJgS43uM0CZKzaIA==}
 
-  '@vitest/spy@4.1.8':
-    resolution: {integrity: sha512-6EevtBp6OZOPF7bmz36HrGMeP3txgVSrgebWxHOafDXGkhIzfXK14f8KF6MuFfgXXUeHxmpD3BQxkV00/3s5mA==}
+  '@vitest/spy@4.1.9':
+    resolution: {integrity: sha512-fHpsS6mIi+PiEW+vcRVOMkX1oSaPKne3VOclSFICPcGOmfKgXPU5iAah+wcNcj2xPrCCmfq99IDGf+EojhhvhA==}
 
-  '@vitest/utils@4.1.8':
-    resolution: {integrity: sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==}
+  '@vitest/utils@4.1.9':
+    resolution: {integrity: sha512-A51o8ymO5PpqlWNnBP9ZHPXDIpuMtTLlGSjN7la4US+LJzoUMyhwjA5QXlm39JexgwHKW4Xjs8Z2d3dLCXOeuA==}
 
   '@vue/compiler-core@3.5.22':
     resolution: {integrity: sha512-jQ0pFPmZwTEiRNSb+i9Ow/I/cHv2tXYqsnHKKyCQ08irI2kdF5qmYedmF8si8mA7zepUFmJ2hqzS8CQmNOWOkQ==}
@@ -3175,8 +3179,8 @@ packages:
   es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
 
-  esbuild-loader@4.4.3:
-    resolution: {integrity: sha512-Wpui03EzqC151xFteKlgJQhbyZl5CgnBpUHXVuao02nItULlkaTeiLdEMPTmR2zdwpEBWkXVNoT5dDOYJluUzg==}
+  esbuild-loader@4.5.0:
+    resolution: {integrity: sha512-rVYe97IN1+VoealVHQ3STEPbfTm+vvPk7AZPrL53Pt6JUGBhHTnIqyaow7EveMFlmQ2A1bLp7q19sP4PppaCDQ==}
     peerDependencies:
       webpack: ^4.40.0 || ^5.0.0
 
@@ -3578,10 +3582,6 @@ packages:
   graphql@16.11.0:
     resolution: {integrity: sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
-
-  gray-matter@4.0.3:
-    resolution: {integrity: sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q==}
-    engines: {node: '>=6.0'}
 
   growly@1.3.0:
     resolution: {integrity: sha512-+xGQY0YyAWCnqy7Cd++hc2JqMYzlm0dG30Jd0beaA64sROr8C4nt8Yc9V5Ro3avlSUDTN0ulqP/VBKi1/lLygw==}
@@ -5130,12 +5130,16 @@ packages:
     peerDependencies:
       postcss: ^8.4.32
 
-  postcss-selector-parser@6.1.4:
-    resolution: {integrity: sha512-bIoJLOmjCO1S9XdY/DcnR5hJxvrDir1PbGChrzXG3vw0/FOliy/fA3dmdhQ441kah4gKv+TwckGzex6wNS5cnQ==}
+  postcss-selector-parser@6.1.2:
+    resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
     engines: {node: '>=4'}
 
-  postcss-selector-parser@7.1.4:
-    resolution: {integrity: sha512-HeP7D2wyhkR+XaK6v4W8oRF62Dsz4flyuczALJp61GckGm42u1saSSJ/0auvcBqxs3jMRFEcPK34At/0JBKdOg==}
+  postcss-selector-parser@7.1.0:
+    resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
+    engines: {node: '>=4'}
+
+  postcss-selector-parser@7.1.1:
+    resolution: {integrity: sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg==}
     engines: {node: '>=4'}
 
   postcss-simple-vars@7.0.1:
@@ -5674,10 +5678,6 @@ packages:
     resolution: {integrity: sha512-iq6eVVI64nQQTRYq2KtEg2d2uU7LElhTJwsH4YzIHZshxlgZms/wIc4VoDQTlG/IvVIrBKG06CrZnp0qv7hkcQ==}
     engines: {node: '>=12'}
 
-  strip-bom-string@1.0.0:
-    resolution: {integrity: sha512-uCC2VHvQRYu+lMh4My/sFNmF2klFymLX1wHJeXnbEJERpV/ZsVuonzerjfrGpIGF7LBVa1O7i9kjiWvJiFck8g==}
-    engines: {node: '>=0.10.0'}
-
   strip-final-newline@2.0.0:
     resolution: {integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==}
     engines: {node: '>=6'}
@@ -6053,20 +6053,20 @@ packages:
       yaml:
         optional: true
 
-  vitest@4.1.8:
-    resolution: {integrity: sha512-flY6ScbCIt9HThs+C5HS7jvGOB560DJtk/Z15IQROTA6zEy49Nh8T/dofWTQL+n3vswqn87sbJNiuqw1SDp5Ig==}
+  vitest@4.1.9:
+    resolution: {integrity: sha512-nE3/LEyc0z87uHYLZebqCUOaJr2hdtuPp7BQ4BosVFnfltxgAvMG08NyrSGlPpOUWvR27c5flSmYFTNr78L9GQ==}
     engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
       '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 4.1.8
-      '@vitest/browser-preview': 4.1.8
-      '@vitest/browser-webdriverio': 4.1.8
-      '@vitest/coverage-istanbul': 4.1.8
-      '@vitest/coverage-v8': 4.1.8
-      '@vitest/ui': 4.1.8
+      '@vitest/browser-playwright': 4.1.9
+      '@vitest/browser-preview': 4.1.9
+      '@vitest/browser-webdriverio': 4.1.9
+      '@vitest/coverage-istanbul': 4.1.9
+      '@vitest/coverage-v8': 4.1.9
+      '@vitest/ui': 4.1.9
       happy-dom: '*'
       jsdom: '*'
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -6258,6 +6258,11 @@ packages:
 
 snapshots:
 
+  '@11ty/gray-matter@2.1.0':
+    dependencies:
+      js-yaml: 4.2.0
+      section-matter: 1.0.0
+
   '@babel/code-frame@7.27.1':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -6413,13 +6418,13 @@ snapshots:
 
   '@colors/colors@1.5.0': {}
 
-  '@csstools/selector-resolve-nested@3.1.0(postcss-selector-parser@7.1.4)':
+  '@csstools/selector-resolve-nested@3.1.0(postcss-selector-parser@7.1.0)':
     dependencies:
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
 
-  '@csstools/selector-specificity@5.0.0(postcss-selector-parser@7.1.4)':
+  '@csstools/selector-specificity@5.0.0(postcss-selector-parser@7.1.0)':
     dependencies:
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
 
   '@emnapi/core@1.5.0':
     dependencies:
@@ -7652,10 +7657,10 @@ snapshots:
       '@typescript-eslint/types': 8.39.1
       eslint-visitor-keys: 4.2.1
 
-  '@vitest/coverage-v8@4.1.8(vitest@4.1.8)':
+  '@vitest/coverage-v8@4.1.9(vitest@4.1.9)':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
-      '@vitest/utils': 4.1.8
+      '@vitest/utils': 4.1.9
       ast-v8-to-istanbul: 1.0.4
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
@@ -7664,46 +7669,46 @@ snapshots:
       obug: 2.1.1
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+      vitest: 4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
 
-  '@vitest/expect@4.1.8':
+  '@vitest/expect@4.1.9':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@types/chai': 5.2.2
-      '@vitest/spy': 4.1.8
-      '@vitest/utils': 4.1.8
+      '@vitest/spy': 4.1.9
+      '@vitest/utils': 4.1.9
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.8(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))':
+  '@vitest/mocker@4.1.9(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))':
     dependencies:
-      '@vitest/spy': 4.1.8
+      '@vitest/spy': 4.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       vite: 7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3)
 
-  '@vitest/pretty-format@4.1.8':
+  '@vitest/pretty-format@4.1.9':
     dependencies:
       tinyrainbow: 3.1.0
 
-  '@vitest/runner@4.1.8':
+  '@vitest/runner@4.1.9':
     dependencies:
-      '@vitest/utils': 4.1.8
+      '@vitest/utils': 4.1.9
       pathe: 2.0.3
 
-  '@vitest/snapshot@4.1.8':
+  '@vitest/snapshot@4.1.9':
     dependencies:
-      '@vitest/pretty-format': 4.1.8
-      '@vitest/utils': 4.1.8
+      '@vitest/pretty-format': 4.1.9
+      '@vitest/utils': 4.1.9
       magic-string: 0.30.21
       pathe: 2.0.3
 
-  '@vitest/spy@4.1.8': {}
+  '@vitest/spy@4.1.9': {}
 
-  '@vitest/utils@4.1.8':
+  '@vitest/utils@4.1.9':
     dependencies:
-      '@vitest/pretty-format': 4.1.8
+      '@vitest/pretty-format': 4.1.9
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
@@ -8758,7 +8763,7 @@ snapshots:
 
   es6-error@4.1.1: {}
 
-  esbuild-loader@4.4.3(webpack@5.107.2(cssnano@7.1.3(postcss@8.5.12))(postcss@8.5.12)):
+  esbuild-loader@4.5.0(webpack@5.107.2(cssnano@7.1.3(postcss@8.5.12))(postcss@8.5.12)):
     dependencies:
       esbuild: 0.28.1
       get-tsconfig: 4.12.0
@@ -9249,13 +9254,6 @@ snapshots:
       graphql: 16.11.0
 
   graphql@16.11.0: {}
-
-  gray-matter@4.0.3:
-    dependencies:
-      js-yaml: 4.2.0
-      kind-of: 6.0.3
-      section-matter: 1.0.0
-      strip-bom-string: 1.0.0
 
   growly@1.3.0: {}
 
@@ -10699,13 +10697,13 @@ snapshots:
   postcss-calc@10.1.1(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
       postcss-value-parser: 4.2.0
 
   postcss-calc@8.2.4(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
   postcss-colormin@5.3.1(postcss@8.5.12):
@@ -10743,12 +10741,12 @@ snapshots:
   postcss-discard-comments@7.0.4(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
 
   postcss-discard-comments@7.0.6(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
 
   postcss-discard-duplicates@5.1.0(postcss@8.5.12):
     dependencies:
@@ -10815,7 +10813,7 @@ snapshots:
       caniuse-api: 3.0.0
       cssnano-utils: 3.1.0(postcss@8.5.12)
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
 
   postcss-merge-rules@7.0.8(postcss@8.5.12):
     dependencies:
@@ -10823,7 +10821,7 @@ snapshots:
       caniuse-api: 3.0.0
       cssnano-utils: 5.0.1(postcss@8.5.12)
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
 
   postcss-minify-font-values@5.1.0(postcss@8.5.12):
     dependencies:
@@ -10866,13 +10864,13 @@ snapshots:
   postcss-minify-selectors@5.2.1(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
 
   postcss-minify-selectors@7.0.6(postcss@8.5.12):
     dependencies:
       cssesc: 3.0.0
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
 
   postcss-mixins@11.0.3(postcss@8.5.12):
     dependencies:
@@ -10890,13 +10888,13 @@ snapshots:
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.12)
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
       postcss-value-parser: 4.2.0
 
   postcss-modules-scope@3.2.1(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
 
   postcss-modules-values@4.0.0(postcss@8.5.12):
     dependencies:
@@ -10905,10 +10903,10 @@ snapshots:
 
   postcss-nesting@13.0.2(postcss@8.5.12):
     dependencies:
-      '@csstools/selector-resolve-nested': 3.1.0(postcss-selector-parser@7.1.4)
-      '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.4)
+      '@csstools/selector-resolve-nested': 3.1.0(postcss-selector-parser@7.1.0)
+      '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.0
 
   postcss-normalize-charset@5.1.0(postcss@8.5.12):
     dependencies:
@@ -11035,12 +11033,17 @@ snapshots:
       postcss: 8.5.12
       postcss-value-parser: 4.2.0
 
-  postcss-selector-parser@6.1.4:
+  postcss-selector-parser@6.1.2:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
 
-  postcss-selector-parser@7.1.4:
+  postcss-selector-parser@7.1.0:
+    dependencies:
+      cssesc: 3.0.0
+      util-deprecate: 1.0.2
+
+  postcss-selector-parser@7.1.1:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
@@ -11064,12 +11067,12 @@ snapshots:
   postcss-unique-selectors@5.1.1(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
 
   postcss-unique-selectors@7.0.5(postcss@8.5.12):
     dependencies:
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
 
   postcss-value-parser@4.2.0: {}
 
@@ -11176,7 +11179,7 @@ snapshots:
       commander: 12.1.0
       glob: 11.1.0
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
 
   qjobs@1.2.0: {}
 
@@ -11673,8 +11676,6 @@ snapshots:
     dependencies:
       ansi-regex: 6.1.0
 
-  strip-bom-string@1.0.0: {}
-
   strip-final-newline@2.0.0: {}
 
   strip-json-comments@3.1.1: {}
@@ -11687,13 +11688,13 @@ snapshots:
     dependencies:
       browserslist: 4.28.1
       postcss: 8.5.12
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 6.1.2
 
   stylehacks@7.0.6(postcss@8.5.12):
     dependencies:
       browserslist: 4.28.1
       postcss: 8.5.12
-      postcss-selector-parser: 7.1.4
+      postcss-selector-parser: 7.1.1
 
   sugarss@4.0.1(postcss@8.5.12):
     dependencies:
@@ -11993,15 +11994,15 @@ snapshots:
       terser: 5.43.1
       yaml: 2.8.3
 
-  vitest@4.1.8(@types/node@22.17.1)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3)):
+  vitest@4.1.9(@types/node@22.17.1)(@vitest/coverage-v8@4.1.9)(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3)):
     dependencies:
-      '@vitest/expect': 4.1.8
-      '@vitest/mocker': 4.1.8(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
-      '@vitest/pretty-format': 4.1.8
-      '@vitest/runner': 4.1.8
-      '@vitest/snapshot': 4.1.8
-      '@vitest/spy': 4.1.8
-      '@vitest/utils': 4.1.8
+      '@vitest/expect': 4.1.9
+      '@vitest/mocker': 4.1.9(vite@7.3.5(@types/node@22.17.1)(jiti@2.6.1)(sass@1.92.1)(terser@5.43.1)(yaml@2.8.3))
+      '@vitest/pretty-format': 4.1.9
+      '@vitest/runner': 4.1.9
+      '@vitest/snapshot': 4.1.9
+      '@vitest/spy': 4.1.9
+      '@vitest/utils': 4.1.9
       es-module-lexer: 2.0.0
       expect-type: 1.3.0
       magic-string: 0.30.21
@@ -12017,7 +12018,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.17.1
-      '@vitest/coverage-v8': 4.1.8(vitest@4.1.8)
+      '@vitest/coverage-v8': 4.1.9(vitest@4.1.9)
     transitivePeerDependencies:
       - msw
 
