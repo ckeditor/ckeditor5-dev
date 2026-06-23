@@ -35,7 +35,7 @@
     "lightningcss": "^1.32.0",
     "pofile": "^1.1.4",
     "purgecss": "^8.0.0",
-    "rolldown": "^1.1.1",
+    "rolldown": "^1.1.2",
     "source-map": "^0.7.6",
     "upath": "^2.0.1"
   },

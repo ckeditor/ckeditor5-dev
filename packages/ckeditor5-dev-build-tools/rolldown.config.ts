@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { defineConfig } from 'rolldown';
+import { defineConfig, type RolldownOptions } from 'rolldown';
+import { isBuiltin } from 'node:module';
 import { declarationFiles } from './src/plugins/declarations.js';
 import pkg from './package.json' with { type: 'json' };
 
@@ -31,5 +32,5 @@ export default defineConfig( {
 			sourceDirectory: 'src'
 		} )
 	],
-	external: id => externals.some( name => id.startsWith( name ) )
-} );
+	external: id => isBuiltin( id ) || externals.some( name => id.startsWith( name ) )
+} ) as RolldownOptions;
