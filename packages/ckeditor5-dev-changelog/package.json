@@ -28,10 +28,10 @@
     "ckeditor5-dev-changelog-create-entry": "bin/generate-template.js"
   },
   "dependencies": {
+    "@11ty/gray-matter": "^2.1.0",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "date-fns": "^4.0.0",
     "glob": "^13.0.0",
-    "gray-matter": "^4.0.3",
     "inquirer": "^12.5.2",
     "semver": "^7.6.3",
     "upath": "^2.0.1"
@@ -40,10 +40,10 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
     "@types/semver": "^7.7.0",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.9",
     "rollup": "^4.9.5",
     "typescript": "5.3.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit",
