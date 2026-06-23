@@ -4,7 +4,7 @@
  */
 
 import fs from 'node:fs/promises';
-import matter from 'gray-matter';
+import matter from '@11ty/gray-matter';
 import { isValid, parse } from 'date-fns';
 import { AsyncArray } from './asyncarray.js';
 import { sortEntriesByScopeAndDate } from './sortentriesbyscopeanddate.js';

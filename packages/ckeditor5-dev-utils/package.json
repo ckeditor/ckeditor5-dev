@@ -29,7 +29,7 @@
     "cli-cursor": "^5.0.0",
     "cli-spinners": "^3.4.0",
     "css-loader": "^7.1.4",
-    "esbuild-loader": "^4.4.3",
+    "esbuild-loader": "^4.5.0",
     "glob": "^13.0.6",
     "is-interactive": "^2.0.0",
     "lightningcss": "^1.32.0",
