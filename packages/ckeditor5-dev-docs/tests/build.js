@@ -86,7 +86,7 @@ describe( 'lib/build()', () => {
 			inlineTags: expect.arrayContaining( OptionDefaults.inlineTags ),
 			modifierTags: expect.arrayContaining( OptionDefaults.modifierTags ),
 			plugin: [
-				'typedoc-plugin-rename-defaults',
+				expect.stringContaining( 'typedoc-plugin-rename-defaults' ),
 				'typedoc-plugin-custom'
 			]
 		} ) );

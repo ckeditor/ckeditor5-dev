@@ -42,7 +42,7 @@ describe( 'typedoc-plugins/tag-error', () => {
 				'@customTag'
 			],
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			]
 		} );
 
