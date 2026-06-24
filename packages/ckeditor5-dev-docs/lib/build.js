@@ -61,8 +61,11 @@ export default async function build( config ) {
 			'@skipSource'
 		],
 		plugin: [
-			// Fixes `"name": 'default" in the output project.
-			'typedoc-plugin-rename-defaults',
+			// Fixes `"name": 'default" in the output project. Resolved to an absolute path so typedoc
+			// loads it regardless of the `node_modules` layout - typedoc resolves a bare plugin name
+			// relative to its own install location, which fails when typedoc is linked from pnpm's
+			// global store (`enableGlobalVirtualStore`) and the plugin is a sibling dependency.
+			import.meta.resolve( 'typedoc-plugin-rename-defaults' ),
 			...extraPlugins
 		],
 		cascadedModifierTags: [

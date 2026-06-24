@@ -32,7 +32,7 @@ describe( 'typedoc-plugins/restore-program-after-conversion', () => {
 			entryPoints,
 			tsconfig: upath.join( fixturesPath, 'tsconfig.test.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			]
 		} );
 

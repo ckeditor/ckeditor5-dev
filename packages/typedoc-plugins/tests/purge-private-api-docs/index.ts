@@ -57,7 +57,7 @@ describe( 'typedoc-plugins/purge-private-api-docs', () => {
 			entryPoints,
 			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.test.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			],
 			excludePrivate: false
 		} );
