@@ -16,11 +16,6 @@ overrides:
   'ws@^8': '^8.20.1'
   'js-yaml@^3': '^4.2.0'
 
-packageExtensions:
-  '@listr2/prompt-adapter-inquirer':
-    peerDependencies:
-      listr2: '*'
-
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
   - '@ckeditor/*'
@@ -31,4 +26,3 @@ shellEmulator: true
 shamefullyHoist: true
 preferFrozenLockfile: true
 linkWorkspacePackages: true
-enableGlobalVirtualStore: true
