@@ -54,7 +54,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			entryPoints,
 			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			]
 		} );
 
@@ -90,7 +90,7 @@ describe( 'typedoc-plugins/event-param-fixer', () => {
 			entryPoints: entryPoints.filter( file => !file.endsWith( 'eventinfo.ts' ) ),
 			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			]
 		} );
 

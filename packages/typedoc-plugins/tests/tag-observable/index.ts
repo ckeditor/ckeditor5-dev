@@ -48,7 +48,7 @@ describe( 'typedoc-plugins/tag-observable', () => {
 			entryPoints: files,
 			tsconfig: upath.join( FIXTURES_PATH, 'tsconfig.json' ),
 			plugin: [
-				'typedoc-plugin-rename-defaults'
+				import.meta.resolve( 'typedoc-plugin-rename-defaults' )
 			],
 			// TODO: To resolve types.
 			// @ts-expect-error TS2322
