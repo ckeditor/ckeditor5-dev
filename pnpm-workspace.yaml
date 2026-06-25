@@ -19,21 +19,13 @@ overrides:
   'esbuild@^0.27': '^0.28.1'
   'js-yaml@^3': '^4.2.0'
 
-packageExtensions:
-  '@listr2/prompt-adapter-inquirer':
-    peerDependencies:
-      listr2: '*'
-
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
-  - 'follow-redirects' # Remove after 2026-04-16.
 
 shellEmulator: true
 shamefullyHoist: true
 preferFrozenLockfile: true
 linkWorkspacePackages: true
-enableGlobalVirtualStore: true
-

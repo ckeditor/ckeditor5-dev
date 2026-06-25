@@ -15,8 +15,6 @@ overrides:
   esbuild@^0.27: ^0.28.1
   js-yaml@^3: ^4.2.0
 
-packageExtensionsChecksum: sha256-eR9VC0bHjQImuvhKkQHHHXk+Efx8vHdZV87nNBHgUuQ=
-
 importers:
 
   .:
@@ -26,7 +24,7 @@ importers:
         version: 7.8.6(@types/node@22.17.1)
       '@listr2/prompt-adapter-inquirer':
         specifier: ^2.0.21
-        version: 2.0.22(@inquirer/prompts@7.8.6(@types/node@22.17.1))(listr2@8.3.3)
+        version: 2.0.22(@inquirer/prompts@7.8.6(@types/node@22.17.1))
       '@vitest/coverage-v8':
         specifier: ^4.1.9
         version: 4.1.9(vitest@4.1.9)
@@ -1326,7 +1324,6 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@inquirer/prompts': '>= 3 < 8'
-      listr2: '*'
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -6823,11 +6820,10 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@listr2/prompt-adapter-inquirer@2.0.22(@inquirer/prompts@7.8.6(@types/node@22.17.1))(listr2@8.3.3)':
+  '@listr2/prompt-adapter-inquirer@2.0.22(@inquirer/prompts@7.8.6(@types/node@22.17.1))':
     dependencies:
       '@inquirer/prompts': 7.8.6(@types/node@22.17.1)
       '@inquirer/type': 1.5.5
-      listr2: 8.3.3
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
