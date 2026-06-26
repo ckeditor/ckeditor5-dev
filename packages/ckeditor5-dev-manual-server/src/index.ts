@@ -5,6 +5,7 @@
 
 export { manualTestsPlugin } from './manual-test-plugin/plugin.js';
 export type { ManualData, ManualTestsPluginOptions } from './manual-test-plugin/plugin.js';
+export { ckDebugPlugin } from './debug-plugin/plugin.js';
 export { refreshPlugin } from './refresh-plugin/plugin.js';
 export { rawHtmlPlugin } from './raw-plugin/plugin.js';
 export { stringifyValues } from './utils.js';
