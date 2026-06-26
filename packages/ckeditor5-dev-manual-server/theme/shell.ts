@@ -35,6 +35,8 @@ if ( globalTarget.editor instanceof Element ) {
 globalTarget.CKEditorInspector ||= CKEditorInspector;
 globalTarget.CKEDITOR_GLOBAL_LICENSE_KEY ||= LICENSE_KEY;
 
+autoAttachInspector();
+
 /**
  * Clones the injected Shell template, fills it with current test metadata,
  * and prepends it to the page before the test content is wrapped.
@@ -102,6 +104,24 @@ function setupManualRefreshPrompt(): void {
 		button.removeAttribute( 'aria-hidden' );
 		button.removeAttribute( 'tabindex' );
 		button.classList.add( 'manual-refresh-prompt--visible' );
+	} );
+}
+
+function autoAttachInspector(): void {
+	let editor = globalTarget.editor;
+
+	Object.defineProperty( globalTarget, 'editor', {
+		configurable: true,
+		set( value ) {
+			editor = value;
+
+			if ( editor ) {
+				CKEditorInspector.attach( editor );
+			}
+		},
+		get() {
+			return editor;
+		}
 	} );
 }
 
