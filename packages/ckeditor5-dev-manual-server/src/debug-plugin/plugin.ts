@@ -10,9 +10,17 @@ const SOURCE_FILE_REGEXP = /\.[cm]?[jt]sx?$/;
 export function ckDebugPlugin(): Plugin {
 	const debugFlags = getDebugFlags( process.env.CK_DEBUG );
 
-	return {
+	const plugin: Plugin = {
 		name: 'ck-debug',
-		enforce: 'pre',
+		enforce: 'pre'
+	};
+
+	if ( !debugFlags.size ) {
+		return plugin;
+	}
+
+	return {
+		...plugin,
 		transform: {
 			filter: {
 				id: {

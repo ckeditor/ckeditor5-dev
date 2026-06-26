@@ -22,6 +22,8 @@ describe( 'ckDebugPlugin()', () => {
 	} );
 
 	test( 'filters transform hook calls to JavaScript and TypeScript files', () => {
+		vi.stubEnv( 'CK_DEBUG', 'true' );
+
 		const transform = getTransformHook( ckDebugPlugin() );
 
 		expect( transform.filter.id.include ).to.be.instanceOf( RegExp );
@@ -30,9 +32,10 @@ describe( 'ckDebugPlugin()', () => {
 		expect( transform.filter.id.include.test( '/path/manual.css' ) ).to.equal( false );
 	} );
 
-	test( 'does not transform debug comments when the debug flag is disabled', () => {
+	test( 'does not register the transform hook when the debug flag is disabled', () => {
 		vi.stubEnv( 'CK_DEBUG', 'false' );
 
+		expect( ckDebugPlugin().transform ).to.equal( undefined );
 		expect( transformCode( 'const value = 1;\n// @if CK_DEBUG // console.log( value );' ) ).to.equal( null );
 	} );
 
@@ -58,7 +61,13 @@ describe( 'ckDebugPlugin()', () => {
 } );
 
 function transformCode( code: string ): string | null {
-	const result = getTransformHook( ckDebugPlugin() ).handler( code, '/path/manual.js' );
+	const plugin = ckDebugPlugin();
+
+	if ( !plugin.transform ) {
+		return null;
+	}
+
+	const result = getTransformHook( plugin ).handler( code, '/path/manual.js' );
 
 	if ( !result ) {
 		return null;
