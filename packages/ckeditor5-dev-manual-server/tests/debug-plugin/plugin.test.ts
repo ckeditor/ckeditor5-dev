@@ -47,6 +47,12 @@ describe( 'ckDebugPlugin()', () => {
 		);
 	} );
 
+	test( 'does not run debug replacement when source has no debug comments', () => {
+		vi.stubEnv( 'CK_DEBUG', 'true' );
+
+		expect( transformCode( 'const value = 1;\nconsole.log( value );' ) ).to.equal( null );
+	} );
+
 	test( 'transforms debug comments for selected debug namespaces', () => {
 		vi.stubEnv( 'CK_DEBUG', 'engine, ui' );
 
