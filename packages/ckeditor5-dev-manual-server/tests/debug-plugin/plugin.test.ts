@@ -39,6 +39,15 @@ describe( 'ckDebugPlugin()', () => {
 		expect( transformCode( 'const value = 1;\n// @if CK_DEBUG // console.log( value );' ) ).to.equal( null );
 	} );
 
+	test( 'enables the base debug flag by default when CK_DEBUG is not set', () => {
+		vi.stubEnv( 'CK_DEBUG', undefined );
+
+		expect( transformCode( '// @if CK_DEBUG // console.log( "debug" );' ) ).to.equal(
+			'/* @if CK_DEBUG */ console.log( "debug" );'
+		);
+		expect( transformCode( '// @if CK_DEBUG_ENGINE // console.log( "engine" );' ) ).to.equal( null );
+	} );
+
 	test( 'transforms debug comments when the global debug flag is enabled', () => {
 		vi.stubEnv( 'CK_DEBUG', 'true' );
 

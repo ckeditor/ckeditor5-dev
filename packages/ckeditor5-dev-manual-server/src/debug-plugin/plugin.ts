@@ -49,16 +49,18 @@ export function ckDebugPlugin(): Plugin {
 	};
 }
 
-function getDebugFlags( debugOption?: string ): Set<string> {
-	if ( !debugOption || debugOption === 'false' ) {
+function getDebugFlags( debugOption: string = '' ): Set<string> {
+	if ( debugOption === 'false' ) {
 		return new Set();
 	}
 
-	return new Set( [
-		'CK_DEBUG',
-		...debugOption.split( ',' )
-			.map( flag => flag.trim() )
-			.filter( Boolean )
-			.map( flag => `CK_DEBUG_${ flag.toUpperCase() }` )
-	] );
+	const flags = new Set( [ 'CK_DEBUG' ] );
+
+	debugOption
+		.split( ',' )
+		.map( flag => flag.trim() )
+		.filter( Boolean )
+		.forEach( flag => flags.add( `CK_DEBUG_${ flag.toUpperCase() }` ) );
+
+	return flags;
 }
