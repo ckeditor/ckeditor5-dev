@@ -25,7 +25,7 @@ export default function processJobStatuses( jobs ) {
 	const jobsToProcess = jobsClone
 		.filter( job => {
 			// Ignore job with no dependencies.
-			if ( !job.dependencies.length ) {
+			if ( !job.dependencies?.length ) {
 				return false;
 			}
 
@@ -92,5 +92,5 @@ function clone( obj ) {
  *
  * @property {'blocked'|'running'|'failed'|'canceled'|'failed_parent'|'success'|'skipped'} status
  *
- * @property {Array.<string>} dependencies
+ * @property {Array.<string>} [dependencies]
  */

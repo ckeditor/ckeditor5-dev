@@ -570,5 +570,88 @@ describe( 'lib/process-job-statuses', () => {
 				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 			} );
 		} );
+
+		// The CircleCI API may return job objects without the `dependencies` property.
+		// See: https://github.com/ckeditor/ckeditor5-internal/issues/4559.
+		describe( 'job without "dependencies"', () => {
+			// Workflow:
+			// ┌─────┐
+			// │Job A│
+			// └─────┘
+			it( 'should not throw and not modify a single job with missing "dependencies"', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'success'
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'success'
+				} ];
+
+				expect( () => processJobStatuses( jobs ) ).to.not.throw();
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+
+			// Workflow:
+			// ┌────┐     ┌────┐
+			// │Id 1├────►│Id 2│
+			// └────┘     └────┘
+			it( 'should treat a job with missing "dependencies" as a job with no dependencies', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'blocked'
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'blocked'
+				} ];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+
+			// Workflow:
+			// ┌────┐     ┌────┐
+			// │Id 1├────►│Id 2│
+			// └────┘     └────┘
+			it( 'should still mark children of a failed job when an unrelated job is missing "dependencies"', () => {
+				const jobs = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'blocked',
+					dependencies: [ 'id1' ]
+				}, {
+					id: 'id3',
+					status: 'running'
+				} ];
+
+				const expectedOutput = [ {
+					id: 'id1',
+					status: 'failed',
+					dependencies: []
+				}, {
+					id: 'id2',
+					status: 'failed_parent',
+					dependencies: [ 'id1' ]
+				}, {
+					id: 'id3',
+					status: 'running'
+				} ];
+
+				expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
+			} );
+		} );
 	} );
 } );
