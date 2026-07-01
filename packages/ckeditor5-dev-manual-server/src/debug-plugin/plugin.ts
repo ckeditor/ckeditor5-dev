@@ -49,8 +49,8 @@ export function ckDebugPlugin(): Plugin {
 	};
 }
 
-function getDebugFlags( debugOption: string = '' ): Set<string> {
-	if ( debugOption === 'false' ) {
+function getDebugFlags( debugOption: string | undefined ): Set<string> {
+	if ( !debugOption || debugOption === 'false' ) {
 		return new Set();
 	}
 
