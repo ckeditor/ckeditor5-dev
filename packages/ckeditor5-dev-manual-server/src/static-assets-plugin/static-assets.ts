@@ -74,6 +74,7 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 }
 
 function getManualStaticAssetPublicPath( requestUrl: string | undefined ): string | null {
+	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	const url = URL.parse( requestUrl || '', 'http://localhost' );
 
 	if ( !url ) {

@@ -81,6 +81,7 @@ export function refreshPlugin(): Plugin {
 				return;
 			}
 
+			// @ts-expect-error Not typed but works.
 			wrapBundledDevClientSend( bundledDev.clients );
 			wrapBundledDevFullReloads( bundledDev );
 		}

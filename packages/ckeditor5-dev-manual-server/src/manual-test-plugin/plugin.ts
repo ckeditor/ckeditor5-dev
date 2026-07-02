@@ -236,5 +236,6 @@ function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPa
 }
 
 function parseRequestUrl( requestUrl: string | undefined ): URL | null {
+	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	return URL.parse( requestUrl || '', 'http://localhost' );
 }
