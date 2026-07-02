@@ -10,7 +10,6 @@ import type { ManualPageEntry } from './types.js';
 
 interface ParsedManualTestPath {
 	packageName: string;
-	packageRootPath: string;
 	slug: string;
 }
 
@@ -56,7 +55,6 @@ function parseManualTestPath( filePath: string ): ParsedManualTestPath | null {
 
 	return {
 		packageName: match[ 2 ]!,
-		packageRootPath: match[ 1 ] || '',
 		slug: match[ 3 ]!
 	};
 }
