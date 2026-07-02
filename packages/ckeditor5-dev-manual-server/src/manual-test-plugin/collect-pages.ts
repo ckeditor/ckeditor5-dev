@@ -19,8 +19,7 @@ const MANUAL_TEST_SUFFIX = '.manual.html';
  */
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
 	const manualPages = matchManualPageFiles( patterns, workspaceRoot )
-		.map( toManualPageEntry )
-		.filter( ( entry ): entry is ManualPageEntry => entry != null );
+		.map( toManualPageEntry );
 
 	manualPages.sort( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) );
 
@@ -33,12 +32,10 @@ function matchManualPageFiles( patterns: Array<string>, workspaceRoot: string ):
 		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
 }
 
-function toManualPageEntry( relativeFilePath: string ): ManualPageEntry | null {
+function toManualPageEntry( relativeFilePath: string ): ManualPageEntry {
+	// The glob in `matchManualPageFiles` appends `/tests/manual/**/*.manual.html` to every package
+	// root pattern, so each matched (posix-normalized) path is guaranteed to contain `/tests/manual/`.
 	const separatorIndex = relativeFilePath.indexOf( `/${ MANUAL_TESTS_DIRECTORY }` );
-
-	if ( separatorIndex < 0 ) {
-		return null;
-	}
 
 	const packagePath = relativeFilePath.slice( 0, separatorIndex );
 	const slugPath = relativeFilePath.slice( separatorIndex + MANUAL_TESTS_DIRECTORY.length + 1 );
