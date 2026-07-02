@@ -7,7 +7,7 @@ import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
-import { cacheValue, normalizePackageName, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import { cacheValue, createPackageNameFilter, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
 
@@ -15,12 +15,6 @@ interface ManualTestClientEntry {
 	href: string;
 	packageName: string;
 	slug: string;
-}
-
-interface ManualTestServerLike {
-	middlewares: {
-		use( middleware: unknown ): void;
-	};
 }
 
 export interface ManualTestsPluginOptions {
@@ -90,7 +84,11 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		},
 
 		configureServer( server ) {
-			useManualCatalogMiddleware( server, getManualCatalogPublicPath );
+			server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
+				rewriteCatalogRequest( request, getManualCatalogPublicPath() );
+
+				next();
+			} );
 		},
 
 		resolveId( source ) {
@@ -189,30 +187,13 @@ function createModuleScriptTag( src: string ): HtmlTagDescriptor {
 	};
 }
 
-function useManualCatalogMiddleware(
-	server: ManualTestServerLike,
-	getManualCatalogPublicPath: () => string
-): void {
-	server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
-		rewriteCatalogRequest( request, getManualCatalogPublicPath() );
-
-		next();
-	} );
-}
-
 function filterManualPages(
 	manualPages: Map<string, ManualPageEntry>,
 	includePackageNames: Array<string>
 ): Map<string, ManualPageEntry> {
-	if ( includePackageNames.length == 0 ) {
-		return manualPages;
-	}
+	const isIncluded = createPackageNameFilter( includePackageNames );
 
-	const normalizedIncludePackageNames = new Set( includePackageNames.map( normalizePackageName ) );
-
-	return new Map( [ ...manualPages ].filter(
-		( [ , entry ] ) => normalizedIncludePackageNames.has( normalizePackageName( entry.packageName ) )
-	) );
+	return new Map( [ ...manualPages ].filter( ( [ , entry ] ) => isIncluded( entry.packageName ) ) );
 }
 
 function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: string ): boolean {

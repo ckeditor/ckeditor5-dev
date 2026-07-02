@@ -11,17 +11,21 @@ export function rawSvgPlugin(): Plugin {
 		name: 'ckeditor5-raw-svg',
 		enforce: 'pre',
 
-		load( id ) {
-			if ( !id.endsWith( '.svg' ) ) {
-				return null;
+		load: {
+			filter: {
+				id: {
+					include: /\.svg$/
+				}
+			},
+
+			handler( id ) {
+				const content = readFileSync( id, 'utf-8' );
+
+				return {
+					code: `export default ${ JSON.stringify( content ) };`,
+					map: null
+				};
 			}
-
-			const content = readFileSync( id, 'utf-8' );
-
-			return {
-				code: `export default ${ JSON.stringify( content ) };`,
-				map: null
-			};
 		}
 	};
 }

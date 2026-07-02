@@ -5,7 +5,7 @@
 
 import { readFileSync } from 'node:fs';
 import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
-import { cacheValue, normalizePackageName, stripLeadingSlash } from '../utils.js';
+import { cacheValue, createPackageNameFilter, stripLeadingSlash } from '../utils.js';
 import type { Plugin } from 'vite';
 
 export interface ManualStaticAssetsPluginOptions {
@@ -27,8 +27,6 @@ export function manualStaticAssetsPlugin( options: ManualStaticAssetsPluginOptio
 
 		configResolved( config ) {
 			workspaceRoot = config.root;
-
-			manualStaticAssetsCache.invalidate();
 		},
 
 		configureServer( server ) {
@@ -51,17 +49,11 @@ function filterManualStaticAssets(
 	staticAssets: Map<string, string>,
 	includePackageNames: Array<string>
 ): Map<string, string> {
-	if ( includePackageNames.length == 0 ) {
-		return staticAssets;
-	}
+	const isIncluded = createPackageNameFilter( includePackageNames );
 
-	const normalizedIncludePackageNames = new Set( includePackageNames.map( normalizePackageName ) );
-
-	return new Map( [ ...staticAssets ].filter( ( [ publicPath ] ) => {
-		const packageName = getManualTestPackageName( publicPath );
-
-		return packageName != null && normalizedIncludePackageNames.has( normalizePackageName( packageName ) );
-	} ) );
+	return new Map( [ ...staticAssets ].filter(
+		( [ publicPath ] ) => isIncluded( getManualTestPackageName( publicPath ) )
+	) );
 }
 
 function getManualTestPackageName( publicPath: string ): string | null {

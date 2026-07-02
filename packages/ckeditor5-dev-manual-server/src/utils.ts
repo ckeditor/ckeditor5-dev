@@ -44,6 +44,24 @@ export function normalizePackageName( packageName: string ): string {
 	return packageName.replace( /^ckeditor5-/, '' );
 }
 
+/**
+ * Builds a predicate that decides whether a package is part of the `include` selection. When the
+ * selection is empty every package is included. Package names are matched by their normalized form,
+ * so both short (`case-change`) and full (`ckeditor5-case-change`) names work. A `null` package name
+ * (an asset without a package segment) is only kept when the selection is empty.
+ */
+export function createPackageNameFilter(
+	includePackageNames: Array<string>
+): ( packageName: string | null ) => boolean {
+	if ( includePackageNames.length == 0 ) {
+		return () => true;
+	}
+
+	const normalizedIncludePackageNames = new Set( includePackageNames.map( normalizePackageName ) );
+
+	return packageName => packageName != null && normalizedIncludePackageNames.has( normalizePackageName( packageName ) );
+}
+
 export function toPublicFilePath( filePath: string, workspaceRoot: string ): string {
 	const relativeFilePath = relative( workspaceRoot, filePath );
 

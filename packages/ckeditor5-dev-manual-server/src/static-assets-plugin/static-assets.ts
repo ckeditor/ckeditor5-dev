@@ -73,15 +73,6 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 	};
 }
 
-export function getManualStaticAssetFilePath(
-	requestUrl: string | undefined,
-	staticAssets: Map<string, string>
-): string | null {
-	const publicPath = getManualStaticAssetPublicPath( requestUrl );
-
-	return publicPath && staticAssets.get( publicPath ) || null;
-}
-
 function getManualStaticAssetPublicPath( requestUrl: string | undefined ): string | null {
 	const url = URL.parse( requestUrl || '', 'http://localhost' );
 
