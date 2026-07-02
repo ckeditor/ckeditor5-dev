@@ -12,7 +12,6 @@ import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
 
 interface ManualTestClientEntry {
-	displayName: string;
 	href: string;
 	packageName: string;
 	slug: string;
@@ -62,7 +61,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	];
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const getClientEntries = (): Array<ManualTestClientEntry> => [ ...getManualPages().values() ].map( entry => ( {
-		displayName: entry.displayName,
 		href: toBasePublicPath( entry.htmlFilePath, base ),
 		packageName: entry.packageName,
 		slug: entry.slug
@@ -157,8 +155,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 /**
  * Injection contract for the `<ck-manual-header>` component, added to `<head>` only when the
  * page source contains the element:
- * - a `<meta>` carrying the package name, display name and the base-aware catalog href the
- *   component reads;
+ * - a `<meta>` carrying the package name and the base-aware catalog href the component reads;
  * - the module `<script>` that defines the custom element (folded into the page bundle under
  *   `bundledDev`, which is fine — it still executes).
  */
@@ -173,7 +170,6 @@ function createManualHeaderTags(
 			attrs: {
 				'name': MANUAL_HEADER_ELEMENT,
 				'data-package-name': entry.packageName,
-				'data-display-name': entry.displayName,
 				'data-catalog-href': catalogHref
 			},
 			injectTo: 'head'

@@ -4,7 +4,6 @@
  */
 
 export interface ManualPageEntry {
-	displayName: string;
 	htmlFilePath: string;
 	packageName: string;
 	slug: string;

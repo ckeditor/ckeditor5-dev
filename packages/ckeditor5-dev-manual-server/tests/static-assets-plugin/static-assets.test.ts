@@ -35,8 +35,8 @@ describe( 'manual static assets', () => {
 		] );
 
 		const staticAssets = collectManualStaticAssets( [
-			'packages/*/tests/manual/**/*',
-			'external/ckeditor5/packages/*/tests/manual/**/*'
+			'packages/*',
+			'external/ckeditor5/packages/*'
 		], workspaceRoot );
 
 		// Plain `.html` files are static fixtures; `.manual.html` entries and `.js`/`.ts` modules are not collected.

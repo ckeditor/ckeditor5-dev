@@ -35,7 +35,7 @@ describe( 'manualStaticAssetsPlugin()', () => {
 	test( 'serves collected static assets in dev server', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css', 'body { color: red; }' );
 
-		const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
+		const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*' ] } );
 		const devServer = { middlewares: { use: vi.fn() } };
 
 		( plugin.configureServer as unknown as ServerHook )( devServer );
@@ -58,7 +58,7 @@ describe( 'manualStaticAssetsPlugin()', () => {
 	test( 'emits manual static assets during build', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
 
-		const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
+		const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*' ] } );
 		const emitFile = vi.fn();
 
 		( plugin.configResolved as unknown as ConfigResolvedHook )( { root: workspaceRoot } );
@@ -78,7 +78,7 @@ describe( 'manualStaticAssetsPlugin()', () => {
 		] );
 
 		const plugin = manualStaticAssetsPlugin( {
-			paths: [ 'packages/*/tests/manual/**/*' ],
+			paths: [ 'packages/*' ],
 			include: [ 'foo' ]
 		} );
 		const emitFile = vi.fn();
@@ -103,7 +103,7 @@ describe( 'manualStaticAssetsPlugin()', () => {
 		] );
 
 		const plugin = manualStaticAssetsPlugin( {
-			paths: [ 'packages/*/tests/manual/**/*' ],
+			paths: [ 'packages/*' ],
 			include: [ 'ckeditor5-foo' ]
 		} );
 		const emitFile = vi.fn();
@@ -117,11 +117,11 @@ describe( 'manualStaticAssetsPlugin()', () => {
 		} ) );
 	} );
 
-	test( 'ignores static assets outside manual test directories when filtering by package', async () => {
-		await createFile( workspaceRoot, 'assets/image.png', 'image' );
+	test( 'ignores static assets without a package name segment when filtering by package', async () => {
+		await createFile( workspaceRoot, 'tests/manual/image.png', 'image' );
 
 		const plugin = manualStaticAssetsPlugin( {
-			paths: [ 'assets/**/*' ],
+			paths: [ '.' ],
 			include: [ 'foo' ]
 		} );
 		const emitFile = vi.fn();
@@ -143,7 +143,7 @@ describe( 'manualStaticAssetsPlugin()', () => {
 				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/tests/manual/assets/bar.png', 'bar image' )
 			] );
 
-			const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
+			const plugin = manualStaticAssetsPlugin( { paths: [ 'packages/*' ] } );
 			const emitFile = vi.fn();
 
 			( plugin.configResolved as unknown as ConfigResolvedHook )( { root: workspaceRoot } );

@@ -215,19 +215,9 @@ a {
 .pkg__test-name {
 	flex: 1;
 	min-width: 0;
-	font-size: 13px;
-	font-weight: 500;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.pkg__test-slug {
-	flex-shrink: 0;
-	max-width: 50%;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: 11px;
-	color: var(--text-subtle);
+	font-size: 12px;
+	font-weight: 500;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -244,9 +234,5 @@ a {
 
 	.app__list {
 		grid-template-columns: 1fr;
-	}
-
-	.pkg__test-slug {
-		display: none;
 	}
 }

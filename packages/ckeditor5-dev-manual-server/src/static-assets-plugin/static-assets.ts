@@ -25,6 +25,7 @@ type ManualStaticAssetsMiddleware = ( request: IncomingMessage, response: Server
 
 export function collectManualStaticAssets( patterns: Array<string>, workspaceRoot: string ): Map<string, string> {
 	return new Map( patterns
+		.map( pattern => `${ pattern.replace( /\/+$/, '' ) }/tests/manual/**/*` )
 		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ) )
 		.sort()
 		.filter( relativeFilePath => statSync( resolve( workspaceRoot, relativeFilePath ), { throwIfNoEntry: false } )?.isFile() )
@@ -82,7 +83,6 @@ export function getManualStaticAssetFilePath(
 }
 
 function getManualStaticAssetPublicPath( requestUrl: string | undefined ): string | null {
-	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	const url = URL.parse( requestUrl || '', 'http://localhost' );
 
 	if ( !url ) {

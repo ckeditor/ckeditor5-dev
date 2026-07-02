@@ -52,7 +52,7 @@ const TEMPLATE = /* html */ `
  * projects the element's light-DOM children (default slot).
  *
  * The manual test server injects a `<meta name="ck-manual-header">` carrying the package
- * name, display name and the base-aware catalog href, and the `<script>` that defines this
+ * name and the base-aware catalog href, and the `<script>` that defines this
  * element — only on pages whose source contains `<ck-manual-header`. Pages without the
  * element render with no chrome. The invisible environment setup (license key, inspector,
  * refresh prompt) lives in `manual-bootstrap.ts` and is injected into every manual test page.
@@ -84,7 +84,7 @@ class ManualHeaderElement extends HTMLElement {
 		backLink.href = data.catalogHref;
 
 		for ( const element of shadow.querySelectorAll<HTMLElement>( '[data-field="name"]' ) ) {
-			element.textContent = this._resolveDisplayName( data.displayName );
+			element.textContent = this._resolveDisplayName();
 		}
 
 		for ( const element of shadow.querySelectorAll<HTMLElement>( '[data-field="package"]' ) ) {
@@ -97,14 +97,14 @@ class ManualHeaderElement extends HTMLElement {
 
 	/**
 	 * The visible name comes from the first slotted heading if present, otherwise `document.title`,
-	 * falling back to the display name injected by the server (from `<title>` or a humanized slug).
+	 * falling back to the test path relative to `tests/manual/` derived from the page URL.
 	 * This avoids `<title>`/instructions drift while letting authors override it with a heading.
 	 */
-	private _resolveDisplayName( fallback: string ): string {
+	private _resolveDisplayName(): string {
 		const heading = this.querySelector( 'h1, h2, h3, h4, h5, h6' );
 		const headingText = heading?.textContent?.trim();
 
-		return headingText || document.title.trim() || fallback;
+		return headingText || document.title.trim() || getSlugFromLocation();
 	}
 
 	/**
@@ -153,14 +153,20 @@ class ManualHeaderElement extends HTMLElement {
 	}
 }
 
-function readManualHeaderData(): { packageName: string; displayName: string; catalogHref: string } {
+function readManualHeaderData(): { packageName: string; catalogHref: string } {
 	const meta = document.querySelector<HTMLMetaElement>( `meta[name="${ MANUAL_HEADER_DATA_META }"]` );
 
 	return {
 		packageName: meta?.dataset.packageName || '',
-		displayName: meta?.dataset.displayName || '',
 		catalogHref: meta?.dataset.catalogHref || '/'
 	};
+}
+
+function getSlugFromLocation(): string {
+	const path = decodeURIComponent( window.location.pathname );
+	const slugPath = path.split( '/tests/manual/' )[ 1 ] || path.split( '/' ).pop() || '';
+
+	return slugPath.replace( /\.manual\.html$/, '' );
 }
 
 function hasSlottedContent( slot: HTMLSlotElement ): boolean {
