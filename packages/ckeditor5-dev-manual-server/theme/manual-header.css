@@ -1,0 +1,217 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/* Styles for the shadow DOM of the <ck-manual-header> component (test chrome). */
+
+:host {
+	display: block;
+	--ck-manual-header-height: 44px;
+}
+
+.bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 99999;
+	display: flex;
+	align-items: stretch;
+	box-sizing: border-box;
+	padding: 6px 8px;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	font-size: 12px;
+	line-height: 1.25;
+	color: #0a0a0a;
+	background: rgb(255 255 255 / 85%);
+	backdrop-filter: saturate(180%) blur(20px);
+	-webkit-backdrop-filter: saturate(180%) blur(20px);
+	border-bottom: 1px solid rgb(0 0 0 / 8%);
+	box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 14px;
+	border: 0;
+	background: transparent;
+	border-radius: 999px;
+	text-decoration: none;
+	color: inherit;
+	font: inherit;
+	font-weight: 500;
+	white-space: nowrap;
+	transition: background 0.1s;
+	cursor: pointer;
+}
+
+.pill:hover {
+	background: rgb(0 0 0 / 5%);
+}
+
+.pill:active {
+	background: rgb(0 0 0 / 10%);
+}
+
+.pill:focus-visible {
+	outline: 2px solid rgb(0 0 0 / 30%);
+	outline-offset: 1px;
+}
+
+.divider {
+	flex-shrink: 0;
+	align-self: center;
+	width: 1px;
+	height: 16px;
+	background: rgb(0 0 0 / 10%);
+	margin: 0 2px;
+}
+
+.label {
+	display: inline-flex;
+	align-items: center;
+	flex: 1 1 auto;
+	gap: 10px;
+	padding: 8px 14px;
+	overflow: hidden;
+	min-width: 0;
+}
+
+.label__name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.label__package {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-weight: 400;
+	font-size: 11px;
+	opacity: 0.55;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+:host( :not( [ has-instructions ] ) ) .instructions-only {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.bar {
+		font-size: 11px;
+	}
+
+	.label__package {
+		display: none;
+	}
+
+	.label__name {
+		max-width: 20ch;
+	}
+}
+
+.panel {
+	--panel-width: min(420px, 45vw);
+	--panel-transition-duration: 0.18s;
+
+	position: fixed;
+	top: var(--ck-manual-header-height);
+	right: 0;
+	bottom: 0;
+	z-index: 99998;
+	box-sizing: border-box;
+	width: 0;
+	background: #fff;
+	color: #0a0a0a;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	line-height: 1.6;
+	overflow: hidden;
+	transition: width var(--panel-transition-duration) ease-out;
+}
+
+.panel--open {
+	width: var(--panel-width);
+	border-left: 1px solid rgb(0 0 0 / 8%);
+	box-shadow: -8px 0 24px rgb(0 0 0 / 8%);
+}
+
+.panel__inner {
+	display: flex;
+	flex-direction: column;
+	width: var(--panel-width);
+	height: 100%;
+}
+
+.panel__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 24px;
+	border-bottom: 1px solid rgb(0 0 0 / 8%);
+	flex-shrink: 0;
+}
+
+.panel__titles {
+	min-width: 0;
+}
+
+.panel__title {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.panel__package {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	color: #737373;
+}
+
+.panel__close {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: #737373;
+	cursor: pointer;
+	transition: background 0.1s, color 0.1s;
+}
+
+.panel__close:hover {
+	background: rgb(0 0 0 / 5%);
+	color: #0a0a0a;
+}
+
+.panel__close:focus-visible {
+	outline: 2px solid rgb(0 0 0 / 30%);
+	outline-offset: 1px;
+}
+
+.panel__body {
+	padding: 20px 24px 28px;
+	font-size: 14px;
+	overflow-y: auto;
+	min-height: 0;
+}
+
+@media (max-width: 800px) {
+	.panel {
+		--panel-width: min(360px, 70vw);
+	}
+}

@@ -3,58 +3,38 @@
  * For licensing, see LICENSE.md.
  */
 
-import { globSync } from 'node:fs';
+import { globSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { stripLeadingSlash, toPosixPath, toPublicSpecifier } from '../utils.js';
-import type { ManualPageEntry, ManualTestAssetExtension } from './types.js';
+import type { ManualPageEntry } from './types.js';
 
-interface ParsedManualTestAssetPath {
-	extension: ManualTestAssetExtension;
+interface ParsedManualTestPath {
 	packageName: string;
 	packageRootPath: string;
 	slug: string;
 }
 
+const MANUAL_TEST_SUFFIX = '.manual.html';
+
+/**
+ * Discovers manual test pages. A manual test is a single full HTML document named
+ * `<slug>.manual.html` located under a package's `tests/manual/` directory. Plain `.html`
+ * files are treated as static fixtures and are never collected here.
+ */
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
-	const groupedFiles = new Map<string, Partial<Record<ManualTestAssetExtension, string>>>();
 	const manualPages: Array<ManualPageEntry> = [];
 
 	for ( const relativeFilePath of matchFiles( patterns, workspaceRoot ) ) {
-		if ( relativeFilePath.includes( '/_utils/' ) ) {
-			continue;
-		}
-
-		const parsedPath = parseManualTestAssetPath( relativeFilePath );
+		const parsedPath = parseManualTestPath( relativeFilePath );
 
 		if ( !parsedPath ) {
 			continue;
 		}
 
-		const entryKey = `${ parsedPath.packageRootPath }/${ parsedPath.packageName }/${ parsedPath.slug }`;
-		const matchedFiles = groupedFiles.get( entryKey ) || {};
-
-		matchedFiles[ parsedPath.extension ] = relativeFilePath;
-		groupedFiles.set( entryKey, matchedFiles );
-	}
-
-	for ( const matchedFiles of groupedFiles.values() ) {
-		if ( !matchedFiles.html ) {
-			continue;
-		}
-
-		const scriptFilePath = matchedFiles.ts || matchedFiles.js;
-
-		if ( !scriptFilePath ) {
-			continue;
-		}
-
-		const parsedPath = parseManualTestAssetPath( scriptFilePath )!;
-
 		manualPages.push( {
-			displayName: humanizeSlug( parsedPath.slug ),
-			htmlFilePath: toPublicSpecifier( matchedFiles.html ),
-			instructionsFilePath: matchedFiles.md ? toPublicSpecifier( matchedFiles.md ) : undefined,
+			displayName: readTitle( resolve( workspaceRoot, relativeFilePath ) ) || humanizeSlug( parsedPath.slug ),
+			htmlFilePath: toPublicSpecifier( relativeFilePath ),
 			packageName: parsedPath.packageName,
-			scriptFilePath: toPublicSpecifier( scriptFilePath ),
 			slug: parsedPath.slug
 		} );
 	}
@@ -64,10 +44,10 @@ export function collectManualPages( patterns: Array<string>, workspaceRoot: stri
 	return new Map( manualPages.map( entry => [ entry.htmlFilePath, entry ] ) );
 }
 
-function parseManualTestAssetPath( filePath: string ): ParsedManualTestAssetPath | null {
+function parseManualTestPath( filePath: string ): ParsedManualTestPath | null {
 	const normalizedFilePath = stripLeadingSlash( toPosixPath( filePath ) );
 	const match = normalizedFilePath.match(
-		/^(?:(.*?)\/)?([^/]+)\/tests\/manual\/(.+)\.(html|js|md|ts)$/
+		/^(?:(.*?)\/)?([^/]+)\/tests\/manual\/(.+)\.manual\.html$/
 	);
 
 	if ( !match ) {
@@ -75,11 +55,16 @@ function parseManualTestAssetPath( filePath: string ): ParsedManualTestAssetPath
 	}
 
 	return {
-		extension: match[ 4 ]! as ParsedManualTestAssetPath[ 'extension' ],
 		packageName: match[ 2 ]!,
 		packageRootPath: match[ 1 ] || '',
 		slug: match[ 3 ]!
 	};
+}
+
+function readTitle( absoluteFilePath: string ): string {
+	const match = readFileSync( absoluteFilePath, 'utf8' ).match( /<title[^>]*>([\s\S]*?)<\/title>/i );
+
+	return match ? match[ 1 ]!.trim() : '';
 }
 
 function humanizeSlug( slug: string ): string {
@@ -95,5 +80,16 @@ function humanizeSlug( slug: string ): string {
 }
 
 function matchFiles( patterns: Array<string>, workspaceRoot: string ): Array<string> {
-	return patterns.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
+	return patterns
+		.map( toManualPagePattern )
+		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
+}
+
+function toManualPagePattern( pattern: string ): string {
+	if ( pattern.endsWith( MANUAL_TEST_SUFFIX ) ) {
+		return pattern;
+	}
+
+	// `packages/*/tests/manual/**/*` -> `packages/*/tests/manual/**/*.manual.html`.
+	return `${ pattern.replace( /\/+$/, '' ) }${ MANUAL_TEST_SUFFIX }`;
 }

@@ -29,7 +29,8 @@ describe( 'manual static assets', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
 			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.js' )
 		] );
 
@@ -38,6 +39,7 @@ describe( 'manual static assets', () => {
 			'external/ckeditor5/packages/*/tests/manual/**/*'
 		], workspaceRoot );
 
+		// Plain `.html` files are static fixtures; `.manual.html` entries and `.js`/`.ts` modules are not collected.
 		expect( [ ...staticAssets.entries() ] ).to.deep.equal( [
 			[
 				'/external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg',
@@ -46,6 +48,10 @@ describe( 'manual static assets', () => {
 			[
 				'/packages/ckeditor5-foo/tests/manual/assets/image.png',
 				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
+			],
+			[
+				'/packages/ckeditor5-foo/tests/manual/fixture.html',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' )
 			],
 			[
 				'/packages/ckeditor5-foo/tests/manual/styles.css',
@@ -161,7 +167,7 @@ describe( 'manual static assets', () => {
 		const response = createResponse();
 		const next = vi.fn();
 
-		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.html' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.manual.html' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.css?import' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.ts' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/image.png?url' } as never, response as never, next );
@@ -221,6 +227,7 @@ describe( 'manual static assets', () => {
 		const cases = [
 			[ 'image.avif', 'image/avif' ],
 			[ 'animation.gif', 'image/gif' ],
+			[ 'fixture.html', 'text/html; charset=utf-8' ],
 			[ 'favicon.ico', 'image/x-icon' ],
 			[ 'photo.jpg', 'image/jpeg' ],
 			[ 'photo.jpeg', 'image/jpeg' ],

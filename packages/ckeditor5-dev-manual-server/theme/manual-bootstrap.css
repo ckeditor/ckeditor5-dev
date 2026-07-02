@@ -1,0 +1,44 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/* Styles for the shadow DOM hosting the "source changed" refresh prompt (manual-bootstrap.ts). */
+
+.refresh-prompt {
+	position: fixed;
+	top: calc( var( --ck-manual-header-height, 44px ) / 1.25 );
+	left: 50%;
+	z-index: 100000;
+	box-sizing: border-box;
+	padding: 8px 14px;
+	border: 1px solid #bfdbfe;
+	border-radius: 999px;
+	font: 600 12px/1.25 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	color: #1d4ed8;
+	background: #dbeafe;
+	cursor: pointer;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, calc( -100% - var( --ck-manual-header-height, 44px ) ) );
+	transition: transform 0.18s ease-out, opacity 0.18s ease-out, background 0.1s;
+}
+
+.refresh-prompt--visible {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translate(-50%, -50%);
+}
+
+.refresh-prompt:hover {
+	background: #bfdbfe;
+}
+
+.refresh-prompt:active {
+	background: #93c5fd;
+}
+
+.refresh-prompt:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 1px;
+}

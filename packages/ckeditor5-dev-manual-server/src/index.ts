@@ -3,9 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-export { manualTestsPlugin, type ManualData, type ManualTestsPluginOptions } from './manual-test-plugin/plugin.js';
+export { manualTestsPlugin, type ManualTestsPluginOptions } from './manual-test-plugin/plugin.js';
+export { renderMarkdown } from './manual-test-plugin/parse-markdown.js';
 export { manualStaticAssetsPlugin, type ManualStaticAssetsPluginOptions } from './static-assets-plugin/plugin.js';
 export { ckDebugPlugin } from './debug-plugin/plugin.js';
 export { refreshPlugin } from './refresh-plugin/plugin.js';
-export { rawHtmlPlugin } from './raw-plugin/plugin.js';
+export { rawSvgPlugin } from './svg-plugin/plugin.js';
 export { stringifyValues } from './utils.js';
