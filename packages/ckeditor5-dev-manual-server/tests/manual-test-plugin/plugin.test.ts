@@ -31,7 +31,6 @@ type ConfigResolvedHook = ( config: {
 type TransformIndexHtmlHook = {
 	handler( html: string, context: { filename: string } ): string | undefined;
 };
-type GenerateBundleHook = ( this: { emitFile: ReturnType<typeof vi.fn> } ) => void;
 type LoadHook = ( id: string ) => string | null;
 type ResolveIdHook = ( id: string ) => string | null;
 type MemoryFile = { etag?: string; source: string | Uint8Array };
@@ -301,65 +300,13 @@ describe( 'manualTestsPlugin()', () => {
 		expect( ( plugin.load as LoadHook )( '\u0000virtual:other' ) ).to.be.null;
 	} );
 
-	test( 'registers manual test middlewares for dev server', () => {
+	test( 'registers the manual catalog middleware for dev server', () => {
 		const plugin = manualTestsPlugin( { paths: [] } );
 		const devServer = createMiddlewareServer();
 
 		( plugin.configureServer as unknown as ServerHook )( devServer );
 
-		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 2 );
-	} );
-
-	test( 'emits manual static assets during build', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
-		const plugin = manualTestsPlugin( { paths: [ 'packages/*/tests/manual/**/*' ] } );
-		const config = ( plugin.config as ConfigHook )();
-		const emitFile = vi.fn();
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: config.build
-		} );
-		( plugin.generateBundle as unknown as GenerateBundleHook ).call( { emitFile } );
-
-		expect( emitFile ).toHaveBeenCalledWith( {
-			type: 'asset',
-			fileName: 'packages/ckeditor5-foo/tests/manual/assets/image.png',
-			source: Buffer.from( 'image' )
-		} );
-	} );
-
-	test( 'emits static assets only from included manual test roots during build', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.ts' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/foo.png', 'foo image' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.ts' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/assets/bar.png', 'bar image' )
-		] );
-
-		const plugin = manualTestsPlugin( {
-			paths: [ 'packages/*/tests/manual/**/*' ],
-			include: [ 'foo' ]
-		} );
-		const config = ( plugin.config as ConfigHook )();
-		const emitFile = vi.fn();
-
-		( plugin.configResolved as ConfigResolvedHook )( {
-			root: workspaceRoot,
-			build: config.build
-		} );
-		( plugin.generateBundle as unknown as GenerateBundleHook ).call( { emitFile } );
-
-		expect( emitFile ).toHaveBeenCalledWith( {
-			type: 'asset',
-			fileName: 'packages/ckeditor5-foo/tests/manual/assets/foo.png',
-			source: Buffer.from( 'foo image' )
-		} );
-		expect( emitFile ).not.toHaveBeenCalledWith( expect.objectContaining( {
-			fileName: 'packages/ckeditor5-bar/tests/manual/assets/bar.png'
-		} ) );
+		expect( devServer.middlewares.use ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'registers the catalog HTML as the build index page', () => {
@@ -553,7 +500,7 @@ describe( 'manualTestsPlugin()', () => {
 
 		( plugin.configureServer as unknown as ServerHook )( server );
 
-		const middleware = server.middlewares.use.mock.calls[ 1 ]![ 0 ] as (
+		const middleware = server.middlewares.use.mock.calls[ 0 ]![ 0 ] as (
 			request: { url?: string },
 			response: unknown,
 			next: () => void

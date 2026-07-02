@@ -40,6 +40,10 @@ export function stringifyValues( obj: Record<string, unknown> ): Record<string, 
 	);
 }
 
+export function normalizePackageName( packageName: string ): string {
+	return packageName.replace( /^ckeditor5-/, '' );
+}
+
 export function toPublicFilePath( filePath: string, workspaceRoot: string ): string {
 	const relativeFilePath = relative( workspaceRoot, filePath );
 

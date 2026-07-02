@@ -9,9 +9,8 @@ import { posix, resolve, relative } from 'node:path';
 import { parse, serialize } from 'parse5';
 import { appendChild, getAttribute, isElementNode, query, removeNode, type Element, type Node } from '@parse5/tools';
 import { collectManualPages } from './collect-pages.js';
-import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
 import { createManualShellHtml } from './shell-html.js';
-import { cacheValue, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import { cacheValue, normalizePackageName, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin } from 'vite';
 import type { ManualPageEntry } from './types.js';
 export type { ManualData } from './types.js';
@@ -52,23 +51,13 @@ const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
 export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	let workspaceRoot = process.cwd();
 	let base = '/';
-	const manualTestPatterns = options.paths;
-	const manualPagePatterns = manualTestPatterns.map( toManualPagePattern );
+	const manualPagePatterns = options.paths.map( toManualPagePattern );
 	const includePackageNames = ( options.include || [] ).filter( Boolean );
 	const manualPagesCache = cacheValue( () => filterManualPages(
 		collectManualPages( manualPagePatterns, workspaceRoot ),
 		includePackageNames
 	) );
 	const getManualPages = manualPagesCache.get;
-	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets(
-		getManualStaticAssetPatterns( getManualPages(), manualTestPatterns, includePackageNames ),
-		workspaceRoot
-	) );
-	const getManualStaticAssets = manualStaticAssetsCache.get;
-	const invalidateManualFileCaches = () => {
-		manualPagesCache.invalidate();
-		manualStaticAssetsCache.invalidate();
-	};
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
 	};
@@ -107,7 +96,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			workspaceRoot = config.root;
 			base = config.base || '/';
 
-			invalidateManualFileCaches();
+			manualPagesCache.invalidate();
 
 			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
@@ -115,7 +104,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		configureServer( server ) {
 			const { memoryFiles } = server.environments.client as BundledDevClientEnvironment;
 
-			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
+			useManualCatalogMiddleware( server, getManualCatalogPublicPath );
 			useBundledDevManualHtmlSource(
 				memoryFiles,
 				getManualPages,
@@ -149,16 +138,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			return null;
 		},
 
-		generateBundle() {
-			for ( const [ publicPath, filePath ] of getManualStaticAssets() ) {
-				this.emitFile( {
-					type: 'asset',
-					fileName: stripLeadingSlash( publicPath ),
-					source: readFileSync( filePath )
-				} );
-			}
-		},
-
 		transformIndexHtml: {
 			order: 'pre',
 
@@ -184,15 +163,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			}
 		}
 	};
-}
-
-function useManualTestMiddlewares(
-	server: ManualTestServerLike,
-	getManualCatalogPublicPath: () => string,
-	getManualStaticAssets: () => Map<string, string>
-): void {
-	server.middlewares.use( createManualStaticAssetsMiddleware( getManualStaticAssets ) );
-	useManualCatalogMiddleware( server, getManualCatalogPublicPath );
 }
 
 function useManualCatalogMiddleware(
@@ -269,31 +239,6 @@ function filterManualPages(
 	return new Map( [ ...manualPages ].filter(
 		( [ , entry ] ) => normalizedIncludePackageNames.has( normalizePackageName( entry.packageName ) )
 	) );
-}
-
-function normalizePackageName( packageName: string ): string {
-	return packageName.replace( /^ckeditor5-/, '' );
-}
-
-function getManualStaticAssetPatterns(
-	manualPages: Map<string, ManualPageEntry>,
-	manualTestPatterns: Array<string>,
-	includePackageNames: Array<string>
-): Array<string> {
-	if ( includePackageNames.length == 0 ) {
-		return manualTestPatterns;
-	}
-
-	return [ ...new Set( [ ...manualPages.values() ].map( getManualTestRootDirectory ) ) ]
-		.map( manualTestRootDirectory => `${ manualTestRootDirectory }/**/*` );
-}
-
-function getManualTestRootDirectory( entry: ManualPageEntry ): string {
-	const htmlFilePath = stripLeadingSlash( entry.htmlFilePath );
-	const manualDirectoryMarker = '/tests/manual/';
-	const manualDirectoryIndex = htmlFilePath.indexOf( manualDirectoryMarker );
-
-	return htmlFilePath.slice( 0, manualDirectoryIndex + manualDirectoryMarker.length - 1 );
 }
 
 function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: string ): boolean {

@@ -10,7 +10,7 @@ import {
 	collectManualStaticAssets,
 	createManualStaticAssetsMiddleware,
 	getManualStaticAssetFilePath
-} from '../../src/manual-test-plugin/static-assets.js';
+} from '../../src/static-assets-plugin/static-assets.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
 describe( 'manual static assets', () => {
