@@ -10,7 +10,6 @@ import {
 	manualTestsPlugin,
 	rawSvgPlugin,
 	refreshPlugin,
-	renderMarkdown,
 	stringifyValues
 } from '../src/index.js';
 
@@ -21,7 +20,6 @@ describe( 'package entry point', () => {
 		expect( manualTestsPlugin ).to.be.a( 'function' );
 		expect( rawSvgPlugin ).to.be.a( 'function' );
 		expect( refreshPlugin ).to.be.a( 'function' );
-		expect( renderMarkdown ).to.be.a( 'function' );
 		expect( stringifyValues ).to.be.a( 'function' );
 	} );
 } );

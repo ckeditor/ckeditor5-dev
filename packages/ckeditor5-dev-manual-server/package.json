@@ -32,11 +32,6 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-inspector": "^5.0.1",
-    "hast-util-to-html": "^9.0.5",
-    "remark-gfm": "^4.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.2",
-    "unified": "^11.0.5",
     "vite": "^8.1.0"
   },
   "devDependencies": {
