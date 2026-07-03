@@ -18,11 +18,13 @@ const MANUAL_TEST_SUFFIX = '.manual.html';
  * The `patterns` are package root globs, for example `packages/*`.
  */
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
-	const manualPages = matchManualPageFiles( patterns, workspaceRoot ).map( toManualPageEntry );
+	const manualPages: Array<[ string, ManualPageEntry ]> = matchManualPageFiles( patterns, workspaceRoot )
+		.map( toManualPageEntry )
+		// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
+		.toSorted( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) )
+		.map( ( entry: ManualPageEntry ) => [ entry.htmlFilePath, entry ] );
 
-	manualPages.sort( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) );
-
-	return new Map( manualPages.map( entry => [ entry.htmlFilePath, entry ] ) );
+	return new Map( manualPages );
 }
 
 function matchManualPageFiles( patterns: Array<string>, workspaceRoot: string ): Array<string> {

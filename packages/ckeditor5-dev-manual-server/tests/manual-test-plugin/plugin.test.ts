@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { utimesSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { type HtmlTagDescriptor, type ViteDevServer } from 'vite';
@@ -34,9 +35,22 @@ type TransformIndexHtmlHook = {
 };
 type LoadHook = ( id: string ) => string | null;
 type ResolveIdHook = ( id: string ) => string | null;
+interface MemoryFile {
+	source: string | Uint8Array;
+}
+interface MemoryFilesLike {
+	get( filePath: string ): MemoryFile | undefined;
+}
 type TestServer = {
 	middlewares: {
 		use: ReturnType<typeof vi.fn>;
+	};
+	environments: {
+		client: {
+			bundledDev?: {
+				memoryFiles?: MemoryFilesLike;
+			};
+		};
 	};
 };
 
@@ -379,6 +393,93 @@ describe( 'manualTestsPlugin()', () => {
 		} ) ).to.be.undefined;
 	} );
 
+	describe( 'bundled dev HTML source freshness', () => {
+		const RELATIVE_PATH = 'packages/ckeditor5-foo/tests/manual/foo.manual.html';
+		const MEMORY_KEY = 'packages/ckeditor5-foo/tests/manual/foo.manual.html';
+		const SOURCE_HTML = '<!DOCTYPE html><head><title>Foo</title></head>\n<div id="editor"><h2>OLD</h2></div>';
+
+		// Mirrors the in-memory bundle Vite serves: the built <head> carries injected/asset tags,
+		// while the post-</head> markup is a verbatim copy of the (initial) source.
+		const BUILT_HTML = '<!DOCTYPE html><head><title>Foo</title>' +
+			'<script type="module" src="/assets/foo.manual.js"></script></head>\n<div id="editor"><h2>OLD</h2></div>';
+
+		test( 'serves fresh post-<head> markup after the source changes', async () => {
+			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+
+			// First read records the baseline mtime and returns the built output untouched.
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML.replace( 'OLD', 'NEW' ) );
+			touchInFuture( sourceFilePath );
+
+			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
+
+			expect( fresh ).to.contain( '<h2>NEW</h2>' );
+			expect( fresh ).not.to.contain( '<h2>OLD</h2>' );
+			// The built <head> (asset tags) is preserved; only the post-</head> markup is refreshed.
+			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
+		} );
+
+		test( 'keeps serving the built output while the source is unchanged', async () => {
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+		} );
+
+		test( 'passes memory files that are not manual pages through unchanged', async () => {
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const asset = { source: 'console.log( 1 );' };
+			const memoryFiles = createMemoryFiles( { 'assets/foo.manual.js': asset.source } );
+
+			configureFreshness( memoryFiles );
+
+			expect( memoryFiles.get( 'assets/foo.manual.js' )!.source ).to.equal( asset.source );
+		} );
+
+		test( 'falls back to the built output when the source cannot be spliced', async () => {
+			const headlessSource = '<div id="editor"><h2>NEW</h2></div>';
+			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+			memoryFiles.get( MEMORY_KEY );
+
+			await createFile( workspaceRoot, RELATIVE_PATH, headlessSource );
+			touchInFuture( sourceFilePath );
+
+			// The updated source has no `</head>`, so the built output is served instead.
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+		} );
+
+		test( 'does not wrap memory files when bundled dev is unavailable', () => {
+			const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
+			const config = ( plugin.config as ConfigHook )();
+			const server = createMiddlewareServer();
+
+			( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './', build: config.build } );
+
+			expect( () => ( plugin.configureServer as unknown as ServerHook )( server ) ).not.to.throw();
+		} );
+
+		function configureFreshness( memoryFiles: MemoryFilesLike ): void {
+			const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
+			const config = ( plugin.config as ConfigHook )();
+			const server = createMiddlewareServer();
+
+			server.environments.client.bundledDev = { memoryFiles };
+
+			( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './', build: config.build } );
+			( plugin.configureServer as unknown as ServerHook )( server );
+		}
+	} );
+
 	function loadEntries( options: ManualTestsPluginOptions, base: string ): string {
 		const plugin = manualTestsPlugin( options );
 		const config = ( plugin.config as ConfigHook )();
@@ -403,6 +504,29 @@ function createMiddlewareServer(): TestServer {
 	return {
 		middlewares: {
 			use: vi.fn()
+		},
+		environments: {
+			client: {}
 		}
 	};
+}
+
+function createMemoryFiles( entries: Record<string, string> ): MemoryFilesLike {
+	const files = new Map<string, MemoryFile>(
+		Object.entries( entries ).map( ( [ key, source ] ) => [ key, { source } ] )
+	);
+
+	return {
+		get: ( filePath: string ) => files.get( filePath )
+	};
+}
+
+/**
+ * Sets the file modification time a minute into the future so the freshness check reliably detects
+ * the change regardless of the filesystem mtime resolution.
+ */
+function touchInFuture( filePath: string ): void {
+	const future = new Date( Date.now() + 60_000 );
+
+	utimesSync( filePath, future, future );
 }

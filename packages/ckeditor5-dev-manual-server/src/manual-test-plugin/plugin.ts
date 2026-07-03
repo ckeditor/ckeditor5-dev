@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync, realpathSync } from 'node:fs';
+import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
@@ -25,6 +25,7 @@ export interface ManualTestsPluginOptions {
 // The custom element that opts a page into the test chrome. The component script and its data
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
+const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -89,6 +90,10 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 				next();
 			} );
+
+			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
+
+			keepManualHtmlSourceFresh( clientEnvironment.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
 		},
 
 		resolveId( source ) {
@@ -148,6 +153,110 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			}
 		}
 	};
+}
+
+interface ManualMemoryFile {
+	source: string | Uint8Array;
+}
+
+interface ManualMemoryFiles {
+	get( filePath: string ): ManualMemoryFile | undefined;
+}
+
+interface BundledDevClientEnvironment {
+	bundledDev?: {
+		memoryFiles?: ManualMemoryFiles;
+	};
+}
+
+/**
+ * Keeps the served manual test HTML in sync with the source file while the dev server runs.
+ *
+ * Under `experimental.bundledDev`, Vite serves each manual test's HTML from an in-memory bundle
+ * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
+ * build and never regenerates it when the source `.html` changes: its bundle state reports no
+ * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
+ * forced full build leaves the HTML memory file untouched (verified against Vite 8.1.0). A `.html`
+ * edit still triggers a full page reload, so without this the browser reloads into the same stale
+ * HTML until the server is restarted.
+ *
+ * The built-in-memory HTML rewrites the entry script, injects the asset tags and manual chrome,
+ * and copies the source `<head>` — all inside `<head>`. The markup after `</head>` is a verbatim
+ * copy of the source. So on every request for a changed page we keep the freshly built `<head>`
+ * and splice in the current post-`</head>` markup read from disk. This reflects edits to the test
+ * body without re-running Vite's HTML transform or parsing the document. Edits confined to the
+ * `<head>` (styles, meta, extra scripts) are not picked up this way and still need a server
+ * restart, because reproducing them would require re-running the build pipeline the dev engine
+ * refuses to run for HTML entries.
+ *
+ * When `bundledDev` is not enabled the store is absent and this is a no-op: Vite's normal dev
+ * pipeline already serves fresh HTML on every request.
+ */
+function keepManualHtmlSourceFresh(
+	memoryFiles: ManualMemoryFiles | undefined,
+	getManualPages: () => Map<string, ManualPageEntry>,
+	workspaceRoot: string
+): void {
+	if ( !memoryFiles ) {
+		return;
+	}
+
+	const getBundledFile = memoryFiles.get.bind( memoryFiles );
+
+	// The source mtime captured on the first request for each entry, when the memory file still
+	// matches disk. Later requests re-read the source only once its mtime moves past this baseline,
+	// so unmodified pages keep serving the exact built output (including hashed asset URLs).
+	const builtSourceMtimes = new Map<string, number>();
+
+	memoryFiles.get = ( filePath: string ) => {
+		const file = getBundledFile( filePath );
+
+		// Only discovered `.manual.html` entries are refreshed; asset memory files pass through.
+		if ( !file || !getManualPages().has( toPublicSpecifier( filePath ) ) ) {
+			return file;
+		}
+
+		try {
+			const sourceFilePath = resolve( workspaceRoot, filePath );
+			const sourceMtime = statSync( sourceFilePath ).mtimeMs;
+			const builtSourceMtime = builtSourceMtimes.get( filePath );
+
+			if ( builtSourceMtime == undefined ) {
+				builtSourceMtimes.set( filePath, sourceMtime );
+
+				return file;
+			}
+
+			if ( sourceMtime <= builtSourceMtime ) {
+				return file;
+			}
+
+			// HTML entry outputs are always emitted as strings.
+			const freshHtml = composeFreshManualHtml( file.source as string, readFileSync( sourceFilePath, 'utf8' ) );
+
+			return freshHtml == null ? file : { source: freshHtml };
+		} catch {
+			// Reading or splicing the source must never break serving the page; fall back to the
+			// built memory file if anything goes wrong (e.g. the file was removed by a branch switch).
+			return file;
+		}
+	};
+}
+
+/**
+ * Combines the freshly built `<head>` (asset tags and injected manual chrome) with the current
+ * post-`</head>` markup from the source file. Returns `null` when either document is missing a
+ * `</head>`, so the caller can fall back to the built output.
+ */
+function composeFreshManualHtml( builtHtml: string, sourceHtml: string ): string | null {
+	const builtHeadEnd = builtHtml.toLowerCase().indexOf( HEAD_CLOSE_TAG );
+	const sourceHeadEnd = sourceHtml.toLowerCase().indexOf( HEAD_CLOSE_TAG );
+
+	if ( builtHeadEnd == -1 || sourceHeadEnd == -1 ) {
+		return null;
+	}
+
+	return builtHtml.slice( 0, builtHeadEnd + HEAD_CLOSE_TAG.length ) + sourceHtml.slice( sourceHeadEnd + HEAD_CLOSE_TAG.length );
 }
 
 /**
