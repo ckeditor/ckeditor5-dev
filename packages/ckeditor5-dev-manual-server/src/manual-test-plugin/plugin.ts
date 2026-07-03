@@ -184,10 +184,13 @@ interface BundledDevClientEnvironment {
  * and copies the source `<head>` — all inside `<head>`. The markup after `</head>` is a verbatim
  * copy of the source. So on every request for a changed page we keep the freshly built `<head>`
  * and splice in the current post-`</head>` markup read from disk. This reflects edits to the test
- * body without re-running Vite's HTML transform or parsing the document. Edits confined to the
- * `<head>` (styles, meta, extra scripts) are not picked up this way and still need a server
- * restart, because reproducing them would require re-running the build pipeline the dev engine
- * refuses to run for HTML entries.
+ * body without re-running Vite's HTML transform or parsing the document. Any edit that would change
+ * what belongs in `<head>` is not picked up this way and still needs a server restart, because
+ * reproducing it would require re-running the build pipeline the dev engine refuses to run for HTML
+ * entries. That covers edits confined to the `<head>` (styles, meta, extra scripts) as well as
+ * adding or removing `<ck-manual-header>` in the body: toggling it changes the injected header
+ * chrome (`<meta>` and the component script) in `<head>`, so the chrome only updates after a
+ * restart even though the body splice already reflects the element itself.
  *
  * When `bundledDev` is not enabled the store is absent and this is a no-op: Vite's normal dev
  * pipeline already serves fresh HTML on every request.
