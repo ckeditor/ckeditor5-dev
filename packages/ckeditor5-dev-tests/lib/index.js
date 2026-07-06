@@ -6,3 +6,4 @@
 export { default as runAutomatedTests } from './tasks/runautomatedtests.js';
 export { default as runManualTests } from './tasks/runmanualtests.js';
 export { default as parseArguments } from './utils/parsearguments.js';
+export { markupMatchers, toEqualMarkup } from './vitest/matchers.js';
