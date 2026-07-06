@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { Writable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -169,6 +170,27 @@ describe( 'manual static assets', () => {
 		expect( response.getBody() ).to.equal( 'body { color: red; }' );
 	} );
 
+	test( 'destroys the response when the asset disappears mid-stream', async () => {
+		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/image.png';
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
+		const response = createResponse();
+		const next = vi.fn();
+		const destroy = vi.spyOn( response, 'destroy' );
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [ [ requestPath, filePath ] ] ) );
+		const closed = new Promise<void>( resolve => response.on( 'close', resolve ) );
+
+		middleware( { method: 'GET', url: requestPath } as never, response as never, next );
+
+		// The stream opens the file asynchronously, so a removal in the same tick makes the open fail.
+		rmSync( filePath );
+
+		await closed;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( destroy ).toHaveBeenCalled();
+		expect( response.getBody() ).to.equal( '' );
+	} );
+
 	test( 'collects static assets when a candidate static asset is requested', async () => {
 		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/image.svg';
 		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.svg', '<svg></svg>' );
@@ -260,7 +282,10 @@ describe( 'manual static assets', () => {
 		const cases = [
 			[ 'image.avif', 'image/avif' ],
 			[ 'animation.gif', 'image/gif' ],
+			[ 'fixture.htm', 'text/html; charset=utf-8' ],
 			[ 'fixture.html', 'text/html; charset=utf-8' ],
+			[ 'bundle.js.map', 'application/json; charset=utf-8' ],
+			[ 'icon.svg', 'image/svg+xml' ],
 			[ 'favicon.ico', 'image/x-icon' ],
 			[ 'photo.jpg', 'image/jpeg' ],
 			[ 'photo.jpeg', 'image/jpeg' ],

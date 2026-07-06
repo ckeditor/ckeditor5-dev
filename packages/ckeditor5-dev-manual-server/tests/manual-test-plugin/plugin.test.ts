@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { utimesSync } from 'node:fs';
+import { rmSync, utimesSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { type HtmlTagDescriptor, type ViteDevServer } from 'vite';
@@ -455,6 +455,19 @@ describe( 'manualTestsPlugin()', () => {
 			touchInFuture( sourceFilePath );
 
 			// The updated source has no `</head>`, so the built output is served instead.
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+		} );
+
+		test( 'falls back to the built output when the source file disappears', async () => {
+			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+			memoryFiles.get( MEMORY_KEY );
+
+			// E.g. a branch switch removed the source; serving must not break.
+			rmSync( sourceFilePath );
+
 			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
 		} );
 

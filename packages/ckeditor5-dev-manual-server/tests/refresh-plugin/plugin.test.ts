@@ -134,6 +134,26 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
+	test( 'still shows the manual refresh prompt when refreshing the build output fails', async () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput =
+			vi.fn().mockRejectedValue( new Error( 'build output unavailable' ) );
+
+		configureServer( server );
+		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.js' ], { type: 'FullReload' } );
+
+		// The rejection must be swallowed; an unhandled rejection would fail the test run.
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		expect( clientPayloads ).to.deep.equal( [ {
+			type: 'custom',
+			event: MANUAL_REFRESH_EVENT_NAME
+		} ] );
+	} );
+
 	test( 'keeps bundled dev HTML full reloads', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
