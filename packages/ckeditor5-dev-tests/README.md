@@ -4,7 +4,9 @@ CKEditor 5 testing environment
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)
 [![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
 
-Testing environment for [CKEditor 5](https://ckeditor.com). Automated tests are discovered across CKEditor 5 packages and executed with [Vitest](https://vitest.dev/), while manual tests are compiled and served with [webpack](https://webpack.github.io/). It's normally used in the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5). Read more about [CKEditor 5's testing environment](https://docs.ckeditor.com/ckeditor5/latest/framework/guides/contributing/testing-environment.html).
+Testing environment for [CKEditor 5](https://ckeditor.com). It provides the manual test server (manual tests are compiled and served with [webpack](https://webpack.js.org/)) and the custom [Vitest](https://vitest.dev/) matchers used by the automated tests. It's normally used in the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5). Read more about [CKEditor 5's testing environment](https://docs.ckeditor.com/ckeditor5/latest/framework/guides/contributing/testing-environment.html).
+
+Automated tests are executed directly with Vitest using the packages' own `test` scripts — this package no longer provides an automated test runner.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
@@ -16,70 +18,33 @@ First, you need to install the package:
 npm i --save-dev @ckeditor/ckeditor5-dev-tests
 ```
 
-An example npm task to test CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5) can look like this:
+An example npm task to serve manual tests of CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5) can look like this:
 
 ```json
 {
   "scripts": {
-      "test": "node ./node_modules/.bin/ckeditor5-dev-tests-run-automated",
       "manual": "node ./node_modules/.bin/ckeditor5-dev-tests-run-manual"
   }
 }
 ```
 
-If you encounter problems with big test folders pass `--max_old_space_size=4096` option to node runner:
-
-```json
-{
-  "scripts": {
-      "test": "node --max_old_space_size=4096 ./node_modules/.bin/ckeditor5-dev-tests-run-automated"
-  }
-}
-```
-
-You can also use the bin script for testing a package:
-
-```bash
-# For running all the tests (for the current package and all dependencies).
-./node_modules/.bin/ckeditor5-dev-tests --files=*
-
-# For running tests in the current package.
-./node_modules/.bin/ckeditor5-dev-tests
-```
-
 #### CLI options
 
-* `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
-* `debug` - Allows specifying custom debug flags. For example, the `--debug engine` option uncomments the `// @if CK_DEBUG_ENGINE //` lines in the code. By default `--debug` is set to true even if you did not specify it. This enables the base set of debug logs (`// @if CK_DEBUG //`) which should always be enabled in the testing environment. You can completely turn off the debug mode by setting the `--debug false` option or `--no-debug`.
-* `files` - Package names, directories or files to tests. Also available as an alias: `-f`. Read more about this option in the [Rules for using the `--files` option](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/testing-environment.html#rules-for-using-the-files-option) section.
-* `repositories` (`-r`) - Specifies names of repositories containing packages that should be tested. Those repositories should be cloned into the `external/` directory in the root directory of the project. It's a shortcut of the `--files` option as these repository packages' names will be read by the tool automatically.
-* `watch` - Whether to watch the files and executing tests whenever any file changes. Also available as an alias: `-w`.
+* `files` - Package names, directories or files to serve. Also available as an alias: `-f`. Read more about this option in the [Rules for using the `--files` option](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/testing-environment.html#rules-for-using-the-files-option) section.
+* `repositories` (`-r`) - Specifies names of repositories containing packages that should be served. Those repositories should be cloned into the `external/` directory in the root directory of the project. It's a shortcut of the `--files` option as these repository packages' names will be read by the tool automatically.
+* `debug` (`-d`) - Allows specifying custom debug flags. For example, the `--debug engine` option uncomments the `// @if CK_DEBUG_ENGINE //` lines in the code. By default `--debug` is set to true even if you did not specify it. This enables the base set of debug logs (`// @if CK_DEBUG //`) which should always be enabled in the testing environment. You can completely turn off the debug mode by setting the `--debug false` option or `--no-debug`.
 
-#### Examples
+Run with `--help` to see all available options.
 
-Test the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generate code coverage report:
+## Custom Vitest matchers
 
-```bash
-$ npm t -- -c --files=enter,paragraph
-```
+The `toEqualMarkup()` matcher tests whether two given strings containing markup language are equal, formatting the markup before showing a diff. Register it in a Vitest setup file:
 
-Run `tests/view/**/*.js` tests from `ckeditor5-engine` and rerun them once any file change (the watch mode):
+```js
+import { expect } from 'vitest';
+import { toEqualMarkup } from '@ckeditor/ckeditor5-dev-tests';
 
-```bash
-$ npm t -- -w --files=engine/view/
-```
-
-Test all installed packages:
-
-```bash
-$ npm t -- --files=*
-```
-
-Test all installed packages except one (or more):
-
-```bash
-$ npm t -- --files='!(engine)'
-$ npm t -- --files='!(engine|ui)'
+expect.extend( { toEqualMarkup } );
 ```
 
 ## Changelog

@@ -61,8 +61,6 @@ describe( 'parseArguments()', () => {
 		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		const options = parseArguments( [
-			'-c',
-			'true',
 			'-d',
 			'engine',
 			'-f',
@@ -74,16 +72,13 @@ describe( 'parseArguments()', () => {
 			'-s',
 			'true',
 			'-v',
-			'false',
-			'-w',
-			true
+			'false'
 		] );
 
-		for ( const key of [ 'c', 'd', 'f', 'i', 'r', 's', 'v', 'w' ] ) {
+		for ( const key of [ 'd', 'f', 'i', 'r', 's', 'v' ] ) {
 			expect( options[ key ], `Checked "${ key }"` ).to.be.undefined;
 		}
 
-		expect( options.coverage ).to.equal( true );
 		expect( options.verbose ).to.equal( false );
 		expect( options.debug ).to.deep.equal( [ 'CK_DEBUG', 'CK_DEBUG_ENGINE' ] );
 		expect( options.files ).to.deep.equal( [ 'core' ] );
@@ -352,25 +347,7 @@ describe( 'parseArguments()', () => {
 			return str.replace( /\u001b\[[0-9;]*m/g, '' );
 		}
 
-		it( 'should print help and exit when --help is passed (automated mode)', () => {
-			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
-
-			expect( processExitStub ).toHaveBeenCalledWith( 0 );
-			expect( consoleLogStub ).toHaveBeenCalledOnce();
-
-			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
-
-			expect( output ).toContain( 'ckeditor5-dev-tests-run-automated [options]' );
-			expect( output ).toContain( 'Runs automated tests using Vitest.' );
-			expect( output ).toContain( '--coverage' );
-			expect( output ).toContain( '--watch' );
-			expect( output ).not.toContain( '--browsers' );
-			expect( output ).toContain( 'Test selection' );
-			expect( output ).toContain( 'Test execution' );
-			expect( output ).toContain( 'Examples' );
-		} );
-
-		it( 'should print help and exit when --help is passed (manual mode)', () => {
+		it( 'should print help and exit when --help is passed', () => {
 			parseArguments( [ '--help' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
@@ -385,10 +362,11 @@ describe( 'parseArguments()', () => {
 			expect( output ).toContain( 'Server' );
 			expect( output ).not.toContain( '--coverage' );
 			expect( output ).not.toContain( 'Test execution' );
+			expect( output ).toContain( 'Examples' );
 		} );
 
 		it( 'should print help and exit when -h alias is passed', () => {
-			parseArguments( [ '-h' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+			parseArguments( [ '-h' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 0 );
 			expect( consoleLogStub ).toHaveBeenCalledOnce();
@@ -433,11 +411,11 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should not print error when only known options are passed', () => {
-			const options = parseArguments( [ '--coverage', '--verbose' ] );
+			const options = parseArguments( [ '--silent', '--verbose' ] );
 
 			expect( processExitStub ).not.toHaveBeenCalled();
 			expect( consoleErrorStub ).not.toHaveBeenCalled();
-			expect( options.coverage ).to.equal( true );
+			expect( options.silent ).to.equal( true );
 			expect( options.verbose ).to.equal( true );
 		} );
 
@@ -482,33 +460,11 @@ describe( 'parseArguments()', () => {
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--watch' );
 		} );
 
-		it( 'should reject --disable-watch when running automated tests', () => {
-			parseArguments( [ '--disable-watch' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
-
-			expect( processExitStub ).toHaveBeenCalledWith( 1 );
-			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--disable-watch' );
-		} );
-
-		it( 'should reject --port when running automated tests', () => {
-			parseArguments( [ '--port', '9000' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
-
-			expect( processExitStub ).toHaveBeenCalledWith( 1 );
-			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '--port' );
-		} );
-
 		it( 'should report multiple unsupported options at once', () => {
 			parseArguments( [ '--coverage', '--watch' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 1 );
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( 'Unknown options: --coverage, --watch' );
-		} );
-
-		it( 'should accept --coverage for automated tests', () => {
-			const options = parseArguments( [ '--coverage' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
-
-			expect( processExitStub ).not.toHaveBeenCalled();
-			expect( consoleErrorStub ).not.toHaveBeenCalled();
-			expect( options.coverage ).to.equal( true );
 		} );
 
 		it( 'should accept --disable-watch for manual tests', () => {
@@ -520,11 +476,11 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should skip validation when commandName is not provided', () => {
-			const options = parseArguments( [ '--coverage', '--disable-watch' ] );
+			const options = parseArguments( [ '--verbose', '--disable-watch' ] );
 
 			expect( processExitStub ).not.toHaveBeenCalled();
 			expect( consoleErrorStub ).not.toHaveBeenCalled();
-			expect( options.coverage ).to.equal( true );
+			expect( options.verbose ).to.equal( true );
 			expect( options.disableWatch ).to.equal( true );
 		} );
 
@@ -536,16 +492,15 @@ describe( 'parseArguments()', () => {
 			expect( options.port ).to.equal( 9000 );
 		} );
 
-		it( 'should reject individual letters in combined short flags', () => {
+		it( 'should reject combined unknown short flags', () => {
 			parseArguments( [ '-cw' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).toHaveBeenCalledWith( 1 );
 			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-c' );
-			expect( consoleErrorStub.mock.calls[ 0 ][ 0 ] ).toContain( '-w' );
 		} );
 
 		it( 'should not reject --no-* flags for options valid in the current command', () => {
-			const options = parseArguments( [ '--no-debug' ], { commandName: 'ckeditor5-dev-tests-run-automated' } );
+			const options = parseArguments( [ '--no-debug' ], { commandName: 'ckeditor5-dev-tests-run-manual' } );
 
 			expect( processExitStub ).not.toHaveBeenCalled();
 			expect( consoleErrorStub ).not.toHaveBeenCalled();

@@ -35,30 +35,25 @@ export default function parseArguments( args, settings = {} ) {
 		],
 
 		boolean: [
-			'coverage',
 			'disable-watch',
 			'help',
 			'silent',
 			'source-map',
-			'verbose',
-			'watch'
+			'verbose'
 		],
 
 		alias: {
-			c: 'coverage',
 			d: 'debug',
 			f: 'files',
 			h: 'help',
 			i: 'identity-file',
 			r: 'repositories',
 			s: 'source-map',
-			v: 'verbose',
-			w: 'watch'
+			v: 'verbose'
 		},
 
 		default: {
 			'additional-languages': null,
-			coverage: false,
 			cwd: process.cwd(),
 			'disable-watch': false,
 			files: [],
@@ -68,8 +63,7 @@ export default function parseArguments( args, settings = {} ) {
 			silent: false,
 			'source-map': true,
 			tsconfig: null,
-			verbose: false,
-			watch: false
+			verbose: false
 		},
 
 		unknown: arg => {
@@ -283,9 +277,7 @@ export default function parseArguments( args, settings = {} ) {
 	}
 
 	/**
-	 * Checks that no options exclusive to the other command type were used.
-	 * For example, `--coverage` is only valid for automated tests, so passing it
-	 * to the manual-test command is an error.
+	 * Checks that no unsupported options were used.
 	 *
 	 * The set of allowed options is derived from the help-text option groups so
 	 * that the two stay in sync automatically.
@@ -295,8 +287,7 @@ export default function parseArguments( args, settings = {} ) {
 	 * @returns {Array.<string>}
 	 */
 	function getUnsupportedOptions( commandName, rawArgs ) {
-		const isManual = commandName.includes( 'manual' );
-		const allowedGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
+		const allowedGroups = getManualOptionGroups();
 
 		const allowedNames = new Set();
 
@@ -341,14 +332,11 @@ export default function parseArguments( args, settings = {} ) {
 	 */
 	function printHelp( settings ) {
 		const commandName = settings.commandName || 'ckeditor5-dev-tests';
-		const isManual = commandName.includes( 'manual' );
 
-		const description = isManual ?
-			'Compiles and serves manual tests with a live-reloading dev server.' :
-			'Runs automated tests using Vitest.';
+		const description = 'Compiles and serves manual tests with a live-reloading dev server.';
 
-		const optionGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
-		const examples = isManual ? getManualExamples( commandName ) : getAutomatedExamples( commandName );
+		const optionGroups = getManualOptionGroups();
+		const examples = getManualExamples( commandName );
 
 		const lines = [
 			'',
@@ -385,47 +373,6 @@ export default function parseArguments( args, settings = {} ) {
 		}
 
 		console.log( lines.join( '\n' ) );
-	}
-
-	/**
-	 * @returns {Array.<Object>}
-	 */
-	function getAutomatedOptionGroups() {
-		return [
-			{
-				title: 'Test selection',
-				options: [
-					{
-						alias: 'f', name: 'files', hint: 'pattern',
-						description: 'Package names, directories, or files to test (comma-separated)',
-						default: '*'
-					},
-					{
-						alias: 'r', name: 'repositories', hint: 'names',
-						description: 'Repository names whose packages should be tested (comma-separated)'
-					}
-				]
-			},
-			{
-				title: 'Test execution',
-				options: [
-					{ alias: 'c', name: 'coverage', description: 'Generate code coverage report' },
-					{ alias: 'w', name: 'watch', description: 'Watch files and re-run tests on changes' },
-					{
-						alias: 'd', name: 'debug', hint: 'flags',
-						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
-						default: 'CK_DEBUG'
-					}
-				]
-			},
-			{
-				title: 'Other',
-				options: [
-					{ name: 'cwd', hint: 'path', description: 'Set current working directory' },
-					{ alias: 'h', name: 'help', description: 'Show this help message' }
-				]
-			}
-		];
 	}
 
 	/**
@@ -486,18 +433,6 @@ export default function parseArguments( args, settings = {} ) {
 					{ alias: 'h', name: 'help', description: 'Show this help message' }
 				]
 			}
-		];
-	}
-
-	/**
-	 * @param {string} commandName
-	 * @returns {Array.<Object>}
-	 */
-	function getAutomatedExamples( commandName ) {
-		return [
-			{ description: 'Test specific packages with coverage', command: `${ commandName } -c --files=enter,paragraph` },
-			{ description: 'Watch mode for engine view tests', command: `${ commandName } -w --files=engine/view/` },
-			{ description: 'Test all packages', command: `${ commandName } --files=*` }
 		];
 	}
 
