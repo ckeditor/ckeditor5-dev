@@ -455,16 +455,24 @@ describe( 'manualTestsPlugin()', () => {
 			expect( memoryFiles.get( 'assets/foo.manual.js' )!.source ).to.equal( asset.source );
 		} );
 
-		test( 'falls back to the built output when the source cannot be spliced', async () => {
-			const headlessSource = '<div id="editor"><h2>NEW</h2></div>';
+		test( 'falls back to the built output when the source has no </head>', async () => {
+			await createFile( workspaceRoot, RELATIVE_PATH, '<div id="editor"><h2>NEW</h2></div>' );
 			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
 
 			configureFreshness( memoryFiles );
 
-			// The source has no `</head>`, so the built output is served instead.
-			await createFile( workspaceRoot, RELATIVE_PATH, headlessSource );
-
 			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
+		} );
+
+		test( 'falls back to the built output when the built HTML has no </head>', async () => {
+			const headlessBuiltHtml = '<div id="editor"><h2>OLD</h2></div>';
+
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: headlessBuiltHtml } );
+
+			configureFreshness( memoryFiles );
+
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( headlessBuiltHtml );
 		} );
 
 		test( 'falls back to the built output when the source file disappears', async () => {
