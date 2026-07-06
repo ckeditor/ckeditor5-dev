@@ -236,7 +236,7 @@ describe( 'refreshPlugin()', () => {
 			);
 		} );
 
-		test( 'warns when `devEngine.ensureLatestBuildOutput` is unavailable', () => {
+		test( 'warns when `devEngine` is unavailable', () => {
 			const server = createBundledDevServer();
 
 			delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).devEngine;
@@ -245,7 +245,7 @@ describe( 'refreshPlugin()', () => {
 
 			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
 			expect( server.config.logger.warn ).toHaveBeenCalledWith(
-				expect.stringContaining( 'bundledDev.devEngine.ensureLatestBuildOutput' )
+				expect.stringContaining( 'bundledDev.devEngine' )
 			);
 		} );
 
@@ -265,7 +265,7 @@ describe( 'refreshPlugin()', () => {
 
 			expect( message ).to.include( 'bundledDev.clients.setupIfNeeded' );
 			expect( message ).to.include( 'bundledDev.handleHmrOutput' );
-			expect( message ).to.include( 'bundledDev.devEngine.ensureLatestBuildOutput' );
+			expect( message ).to.include( 'bundledDev.devEngine' );
 		} );
 
 		test( 'falls back to `console.warn` when the server has no logger', () => {

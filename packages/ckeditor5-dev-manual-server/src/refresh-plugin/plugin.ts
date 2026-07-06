@@ -72,39 +72,29 @@ export function refreshPlugin(): Plugin {
 		apply: 'serve',
 
 		configureServer( server ) {
-			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
+			const clientEnvironment = server.environments.client as unknown as BundledDevClientEnvironment;
 			const bundledDev = clientEnvironment.bundledDev;
-
-			warnAboutMissingBundledDevInternals( server, bundledDev );
+			const missing: Array<string> = [];
 
 			if ( !bundledDev ) {
-				return;
+				missing.push( 'bundledDev' );
+			} else {
+				if ( !wrapBundledDevClientSend( bundledDev.clients ) ) {
+					missing.push( 'bundledDev.clients.setupIfNeeded' );
+				}
+
+				if ( !wrapBundledDevFullReloads( bundledDev ) ) {
+					missing.push( 'bundledDev.handleHmrOutput' );
+				}
+
+				if ( !( 'devEngine' in bundledDev ) ) {
+					missing.push( 'bundledDev.devEngine' );
+				}
 			}
 
-			// @ts-expect-error Not typed but works.
-			wrapBundledDevClientSend( bundledDev.clients );
-			wrapBundledDevFullReloads( bundledDev );
+			warnAboutMissingBundledDevInternals( server, missing );
 		}
 	};
-}
-
-/**
- * Checks whether the `BundledDev` helper exposes the dev engine without eagerly invoking it:
- * `devEngine` is a getter that throws until the initial build starts, and this plugin runs
- * before that.
- */
-function hasDevEngine( bundledDev: BundledDevInternals ): boolean {
-	try {
-		const devEngine = bundledDev.devEngine;
-
-		if ( !devEngine ) {
-			return 'devEngine' in bundledDev;
-		}
-
-		return typeof devEngine.ensureLatestBuildOutput == 'function';
-	} catch {
-		return 'devEngine' in bundledDev;
-	}
 }
 
 /**
@@ -114,25 +104,7 @@ function hasDevEngine( bundledDev: BundledDevInternals ): boolean {
  * runs on every dev server startup and, when an internal is missing, logs a loud, actionable
  * warning instead of failing silently into full page reloads on every JS edit.
  */
-function warnAboutMissingBundledDevInternals( server: ViteDevServer, bundledDev: BundledDevInternals | undefined ): void {
-	const missing: Array<string> = [];
-
-	if ( !bundledDev ) {
-		missing.push( 'bundledDev' );
-	} else {
-		if ( typeof bundledDev.clients?.setupIfNeeded != 'function' ) {
-			missing.push( 'bundledDev.clients.setupIfNeeded' );
-		}
-
-		if ( typeof bundledDev.handleHmrOutput != 'function' ) {
-			missing.push( 'bundledDev.handleHmrOutput' );
-		}
-
-		if ( !hasDevEngine( bundledDev ) ) {
-			missing.push( 'bundledDev.devEngine.ensureLatestBuildOutput' );
-		}
-	}
-
+function warnAboutMissingBundledDevInternals( server: ViteDevServer, missing: Array<string> ): void {
 	if ( missing.length == 0 ) {
 		return;
 	}
@@ -151,9 +123,9 @@ function warnAboutMissingBundledDevInternals( server: ViteDevServer, bundledDev:
 	);
 }
 
-function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): void {
+function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): boolean {
 	if ( !clients || typeof clients.setupIfNeeded != 'function' ) {
-		return;
+		return false;
 	}
 
 	const setupIfNeeded = clients.setupIfNeeded.bind( clients );
@@ -170,11 +142,13 @@ function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): 
 
 		return setupIfNeeded( client, clientId );
 	};
+
+	return true;
 }
 
-function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
+function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): boolean {
 	if ( typeof bundledDev.handleHmrOutput != 'function' ) {
-		return;
+		return false;
 	}
 
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
@@ -193,6 +167,8 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
 
 		return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
 	};
+
+	return true;
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
