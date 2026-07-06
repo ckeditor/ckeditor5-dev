@@ -3,7 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { html_beautify as beautify } from 'js-beautify';
+// The `js-beautify` package is a CommonJS module that does not declare its named exports in a way detectable
+// by Node.js, so it must be imported via the default export to work in both Node.js and Vitest environments.
+import jsBeautify from 'js-beautify';
+
+const { html_beautify: beautify } = jsBeautify;
 
 /**
  * Custom matcher that tests whether two given strings containing markup language are equal.
