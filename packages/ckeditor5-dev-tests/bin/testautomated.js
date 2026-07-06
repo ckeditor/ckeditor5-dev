@@ -8,9 +8,10 @@
 import fs from 'node:fs';
 import { styleText } from 'node:util';
 import { loadEnvFile } from 'node:process';
-import * as tests from '../lib/index.js';
+import runAutomatedTests from '../lib/tasks/runautomatedtests.js';
+import parseArguments from '../lib/utils/parsearguments.js';
 
-const options = tests.parseArguments( process.argv.slice( 2 ), {
+const options = parseArguments( process.argv.slice( 2 ), {
 	commandName: 'ckeditor5-dev-tests-run-automated'
 } );
 
@@ -22,7 +23,7 @@ if ( fs.existsSync( '.env' ) ) {
 	loadEnvFile( '.env' );
 }
 
-tests.runAutomatedTests( options )
+runAutomatedTests( options )
 	.then( () => {
 		process.exit( 0 );
 	} )

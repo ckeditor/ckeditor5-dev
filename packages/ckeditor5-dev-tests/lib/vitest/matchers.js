@@ -18,7 +18,7 @@ const { html_beautify: beautify } = jsBeautify;
  * To register the matcher, use the `expect.extend()` API in a Vitest setup file:
  *
  *		import { expect } from 'vitest';
- *		import { markupMatchers } from '@ckeditor/ckeditor5-dev-tests/lib/vitest/matchers.js';
+ *		import { markupMatchers } from '@ckeditor/ckeditor5-dev-tests';
  *
  *		expect.extend( markupMatchers );
  *
