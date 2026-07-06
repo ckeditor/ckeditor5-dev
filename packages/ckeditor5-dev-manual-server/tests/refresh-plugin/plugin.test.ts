@@ -172,117 +172,6 @@ describe( 'refreshPlugin()', () => {
 		expect( () => configureServer( server ) ).not.to.throw();
 	} );
 
-	describe( 'bundled dev internals assertion', () => {
-		test( 'does not warn when every patched internal is present', () => {
-			const server = createBundledDevServer();
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).not.toHaveBeenCalled();
-		} );
-
-		test( 'treats a `devEngine` getter that throws before initialization as present', () => {
-			const server = createBundledDevServer();
-			const bundledDev = server.environments.client.bundledDev as Record<string, unknown>;
-
-			delete bundledDev.devEngine;
-			Object.defineProperty( bundledDev, 'devEngine', {
-				configurable: true,
-				get() {
-					throw new Error( 'dev engine was not yet initialized' );
-				}
-			} );
-
-			expect( () => configureServer( server ) ).not.to.throw();
-			expect( server.config.logger.warn ).not.toHaveBeenCalled();
-		} );
-
-		test( 'warns when the bundled dev helper is unavailable', () => {
-			const server = createBundledDevServer();
-
-			delete ( server.environments.client as Partial<typeof server.environments.client> ).bundledDev;
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
-			expect( server.config.logger.warn ).toHaveBeenCalledWith(
-				expect.stringContaining( 'bundledDev' )
-			);
-		} );
-
-		test( 'warns when `clients.setupIfNeeded` is unavailable', () => {
-			const server = createBundledDevServer();
-
-			delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).clients;
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
-			expect( server.config.logger.warn ).toHaveBeenCalledWith(
-				expect.stringContaining( 'bundledDev.clients.setupIfNeeded' )
-			);
-		} );
-
-		test( 'warns when `handleHmrOutput` is unavailable', () => {
-			const server = createBundledDevServer();
-
-			delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).handleHmrOutput;
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
-			expect( server.config.logger.warn ).toHaveBeenCalledWith(
-				expect.stringContaining( 'bundledDev.handleHmrOutput' )
-			);
-		} );
-
-		test( 'warns when `devEngine` is unavailable', () => {
-			const server = createBundledDevServer();
-
-			delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).devEngine;
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
-			expect( server.config.logger.warn ).toHaveBeenCalledWith(
-				expect.stringContaining( 'bundledDev.devEngine' )
-			);
-		} );
-
-		test( 'reports all missing internals in a single warning', () => {
-			const server = createBundledDevServer();
-			const bundledDev = server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev>;
-
-			delete bundledDev.clients;
-			delete bundledDev.handleHmrOutput;
-			delete bundledDev.devEngine;
-
-			configureServer( server );
-
-			expect( server.config.logger.warn ).toHaveBeenCalledOnce();
-
-			const [ message ] = server.config.logger.warn.mock.calls[ 0 ]!;
-
-			expect( message ).to.include( 'bundledDev.clients.setupIfNeeded' );
-			expect( message ).to.include( 'bundledDev.handleHmrOutput' );
-			expect( message ).to.include( 'bundledDev.devEngine' );
-		} );
-
-		test( 'falls back to `console.warn` when the server has no logger', () => {
-			const server = createBundledDevServer();
-			const consoleWarn = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
-
-			delete ( server.environments.client as Partial<typeof server.environments.client> ).bundledDev;
-			( server as { config?: unknown } ).config = undefined;
-
-			configureServer( server );
-
-			expect( consoleWarn ).toHaveBeenCalledOnce();
-
-			consoleWarn.mockRestore();
-		} );
-	} );
-
 	// Mirrors the Vite 8.1+ layout: the patched internals live on the `BundledDev` helper
 	// exposed as `server.environments.client.bundledDev`.
 	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
@@ -303,11 +192,6 @@ describe( 'refreshPlugin()', () => {
 						),
 						initialBuildCompleted: true
 					}
-				}
-			},
-			config: {
-				logger: {
-					warn: vi.fn()
 				}
 			}
 		};

@@ -19,16 +19,14 @@
 // `server.environments.client.bundledDev`, carrying `clients`, `handleHmrOutput`
 // and `devEngine`. Because these internals are undocumented, they move without
 // notice — in Vite 8.0.x the very same members lived directly on the client
-// environment, and the 8.0 → 8.1 relocation silently turned the patches below
-// into no-ops until a startup assertion caught it. That is why `configureServer`
-// verifies on every startup that the patched internals still exist and warns
-// loudly when they do not, so an upstream Vite bump fails visibly instead of
-// silently regressing to full page reloads.
+// environment. When a Vite upgrade relocates them again, the patches below turn
+// into no-ops and manual tests regress to full page reloads on every JS edit
+// (losing editor state) instead of showing the refresh prompt.
 //
 // Revisit this plugin (and delete the patches below) once Vite exposes HMR plugin
 // hooks for bundled dev.
 
-import type { Plugin, ViteDevServer, HotPayload } from 'vite';
+import type { Plugin, HotPayload } from 'vite';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
@@ -74,58 +72,20 @@ export function refreshPlugin(): Plugin {
 		configureServer( server ) {
 			const clientEnvironment = server.environments.client as unknown as BundledDevClientEnvironment;
 			const bundledDev = clientEnvironment.bundledDev;
-			const missing: Array<string> = [];
 
 			if ( !bundledDev ) {
-				missing.push( 'bundledDev' );
-			} else {
-				if ( !wrapBundledDevClientSend( bundledDev.clients ) ) {
-					missing.push( 'bundledDev.clients.setupIfNeeded' );
-				}
-
-				if ( !wrapBundledDevFullReloads( bundledDev ) ) {
-					missing.push( 'bundledDev.handleHmrOutput' );
-				}
-
-				if ( !( 'devEngine' in bundledDev ) ) {
-					missing.push( 'bundledDev.devEngine' );
-				}
+				return;
 			}
 
-			warnAboutMissingBundledDevInternals( server, missing );
+			wrapBundledDevClientSend( bundledDev.clients );
+			wrapBundledDevFullReloads( bundledDev );
 		}
 	};
 }
 
-/**
- * `ckeditor5-manual-refresh` patches undocumented bundled dev internals (see the file header
- * comment for why). Those internals can disappear or be renamed by any Vite upgrade without
- * a semver-visible signal — exactly what happened between Vite 8.0.x and 8.1.0. This check
- * runs on every dev server startup and, when an internal is missing, logs a loud, actionable
- * warning instead of failing silently into full page reloads on every JS edit.
- */
-function warnAboutMissingBundledDevInternals( server: ViteDevServer, missing: Array<string> ): void {
-	if ( missing.length == 0 ) {
-		return;
-	}
-
-	const warn = server.config?.logger?.warn ?? console.warn;
-
-	warn(
-		'[ckeditor5-manual-refresh] The following undocumented Vite internal(s) this plugin ' +
-		`relies on are missing on \`server.environments.client\`: ${ missing.join( ', ' ) }. ` +
-		'This plugin requires Vite 8.1+ with `experimental.bundledDev` enabled, so this likely ' +
-		'means Vite was upgraded and changed its internal implementation. ' +
-		'The manual test "refresh available" prompt is now degraded: JavaScript edits will ' +
-		'trigger full page reloads (losing editor state) instead of the prompt. ' +
-		'See src/refresh-plugin/plugin.ts in @ckeditor/ckeditor5-dev-manual-server for details ' +
-		'and update the patched internals to match the new Vite version.'
-	);
-}
-
-function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): boolean {
+function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): void {
 	if ( !clients || typeof clients.setupIfNeeded != 'function' ) {
-		return false;
+		return;
 	}
 
 	const setupIfNeeded = clients.setupIfNeeded.bind( clients );
@@ -142,13 +102,11 @@ function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): 
 
 		return setupIfNeeded( client, clientId );
 	};
-
-	return true;
 }
 
-function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): boolean {
+function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
 	if ( typeof bundledDev.handleHmrOutput != 'function' ) {
-		return false;
+		return;
 	}
 
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
@@ -167,8 +125,6 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): boolean {
 
 		return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
 	};
-
-	return true;
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
