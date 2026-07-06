@@ -429,7 +429,7 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
-	describe( 'command-specific option validation', () => {
+	describe( 'unknown aliases and negated flags', () => {
 		let processExitStub, consoleErrorStub;
 
 		beforeEach( () => {

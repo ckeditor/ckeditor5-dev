@@ -80,10 +80,6 @@ export default function parseArguments( args, settings = {} ) {
 		process.exit( 0 );
 	}
 
-	if ( settings.commandName ) {
-		unknownArgs.push( ...getUnsupportedOptions( settings.commandName, args ) );
-	}
-
 	if ( unknownArgs.length ) {
 		const uniqueArgs = [ ...new Set( unknownArgs ) ];
 
@@ -274,55 +270,6 @@ export default function parseArguments( args, settings = {} ) {
 		} catch {
 			return false;
 		}
-	}
-
-	/**
-	 * Checks that no unsupported options were used.
-	 *
-	 * The set of allowed options is derived from the help-text option groups so
-	 * that the two stay in sync automatically.
-	 *
-	 * @param {string} commandName
-	 * @param {Array.<string>} rawArgs
-	 * @returns {Array.<string>}
-	 */
-	function getUnsupportedOptions( commandName, rawArgs ) {
-		const allowedGroups = getManualOptionGroups();
-
-		const allowedNames = new Set();
-
-		for ( const group of allowedGroups ) {
-			for ( const option of group.options ) {
-				allowedNames.add( `--${ option.name }` );
-
-				if ( option.alias ) {
-					allowedNames.add( `-${ option.alias }` );
-				}
-			}
-		}
-
-		const unsupportedArgs = [];
-
-		for ( const arg of rawArgs ) {
-			if ( arg.startsWith( '--' ) ) {
-				const flag = arg.split( '=' )[ 0 ];
-				const baseFlag = flag.startsWith( '--no-' ) ? `--${ flag.slice( 5 ) }` : flag;
-
-				if ( !allowedNames.has( baseFlag ) ) {
-					unsupportedArgs.push( flag );
-				}
-			} else if ( arg.startsWith( '-' ) ) {
-				for ( const letter of arg.slice( 1 ) ) {
-					const flag = `-${ letter }`;
-
-					if ( minimistConfig.alias[ letter ] && !allowedNames.has( flag ) ) {
-						unsupportedArgs.push( flag );
-					}
-				}
-			}
-		}
-
-		return unsupportedArgs;
 	}
 
 	/**
