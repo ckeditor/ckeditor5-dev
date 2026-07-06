@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { rmSync, utimesSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { type HtmlTagDescriptor, type ViteDevServer } from 'vite';
@@ -404,22 +404,34 @@ describe( 'manualTestsPlugin()', () => {
 			'<script type="module" src="/assets/foo.manual.js"></script></head>\n<div id="editor"><h2>OLD</h2></div>';
 
 		test( 'serves fresh post-<head> markup after the source changes', async () => {
-			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
 			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
 
 			configureFreshness( memoryFiles );
 
-			// First read records the baseline mtime and returns the built output untouched.
 			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
 
 			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML.replace( 'OLD', 'NEW' ) );
-			touchInFuture( sourceFilePath );
 
 			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
 
 			expect( fresh ).to.contain( '<h2>NEW</h2>' );
 			expect( fresh ).not.to.contain( '<h2>OLD</h2>' );
 			// The built <head> (asset tags) is preserved; only the post-</head> markup is refreshed.
+			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
+		} );
+
+		test( 'serves fresh markup on the first request when the source changed after the build', async () => {
+			// The source was edited between the initial build and the first request for the page.
+			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML.replace( 'OLD', 'NEW' ) );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+
+			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
+
+			expect( fresh ).to.contain( '<h2>NEW</h2>' );
+			expect( fresh ).not.to.contain( '<h2>OLD</h2>' );
 			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
 		} );
 
@@ -445,16 +457,13 @@ describe( 'manualTestsPlugin()', () => {
 
 		test( 'falls back to the built output when the source cannot be spliced', async () => {
 			const headlessSource = '<div id="editor"><h2>NEW</h2></div>';
-			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
 			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
 
 			configureFreshness( memoryFiles );
-			memoryFiles.get( MEMORY_KEY );
 
+			// The source has no `</head>`, so the built output is served instead.
 			await createFile( workspaceRoot, RELATIVE_PATH, headlessSource );
-			touchInFuture( sourceFilePath );
 
-			// The updated source has no `</head>`, so the built output is served instead.
 			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
 		} );
 
@@ -463,7 +472,6 @@ describe( 'manualTestsPlugin()', () => {
 			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
 
 			configureFreshness( memoryFiles );
-			memoryFiles.get( MEMORY_KEY );
 
 			// E.g. a branch switch removed the source; serving must not break.
 			rmSync( sourceFilePath );
@@ -534,12 +542,3 @@ function createMemoryFiles( entries: Record<string, string> ): MemoryFilesLike {
 	};
 }
 
-/**
- * Sets the file modification time a minute into the future so the freshness check reliably detects
- * the change regardless of the filesystem mtime resolution.
- */
-function touchInFuture( filePath: string ): void {
-	const future = new Date( Date.now() + 60_000 );
-
-	utimesSync( filePath, future, future );
-}

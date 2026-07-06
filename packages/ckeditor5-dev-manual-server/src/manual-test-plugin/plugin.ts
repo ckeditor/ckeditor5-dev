@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync, realpathSync, statSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
@@ -182,9 +182,11 @@ interface BundledDevClientEnvironment {
  *
  * The built-in-memory HTML rewrites the entry script, injects the asset tags and manual chrome,
  * and copies the source `<head>` — all inside `<head>`. The markup after `</head>` is a verbatim
- * copy of the source. So on every request for a changed page we keep the freshly built `<head>`
- * and splice in the current post-`</head>` markup read from disk. This reflects edits to the test
- * body without re-running Vite's HTML transform or parsing the document. Any edit that would change
+ * copy of the source. So on every request we keep the freshly built `<head>` and splice in the
+ * current post-`</head>` markup read from disk. Splicing unconditionally (rather than only after a
+ * detected change) also covers sources that changed between the initial build and the first request
+ * for the page, and it is idempotent for unchanged sources. This reflects edits to the test body
+ * without re-running Vite's HTML transform or parsing the document. Any edit that would change
  * what belongs in `<head>` is not picked up this way and still needs a server restart, because
  * reproducing it would require re-running the build pipeline the dev engine refuses to run for HTML
  * entries. That covers edits confined to the `<head>` (styles, meta, extra scripts) as well as
@@ -206,11 +208,6 @@ function keepManualHtmlSourceFresh(
 
 	const getBundledFile = memoryFiles.get.bind( memoryFiles );
 
-	// The source mtime captured on the first request for each entry, when the memory file still
-	// matches disk. Later requests re-read the source only once its mtime moves past this baseline,
-	// so unmodified pages keep serving the exact built output (including hashed asset URLs).
-	const builtSourceMtimes = new Map<string, number>();
-
 	memoryFiles.get = ( filePath: string ) => {
 		const file = getBundledFile( filePath );
 
@@ -221,18 +218,6 @@ function keepManualHtmlSourceFresh(
 
 		try {
 			const sourceFilePath = resolve( workspaceRoot, filePath );
-			const sourceMtime = statSync( sourceFilePath ).mtimeMs;
-			const builtSourceMtime = builtSourceMtimes.get( filePath );
-
-			if ( builtSourceMtime == undefined ) {
-				builtSourceMtimes.set( filePath, sourceMtime );
-
-				return file;
-			}
-
-			if ( sourceMtime <= builtSourceMtime ) {
-				return file;
-			}
 
 			// HTML entry outputs are always emitted as strings.
 			const freshHtml = composeFreshManualHtml( file.source as string, readFileSync( sourceFilePath, 'utf8' ) );
