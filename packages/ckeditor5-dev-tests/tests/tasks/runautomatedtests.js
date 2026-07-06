@@ -6,7 +6,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
-import { styleText } from 'node:util';
 import { globSync } from 'glob';
 import transformFileOptionToTestGlob from '../../lib/utils/transformfileoptiontotestglob.js';
 
@@ -63,7 +62,7 @@ describe( 'runAutomatedTests()', () => {
 	} );
 
 	it( 'throws when files are not specified', async () => {
-		await expect( runAutomatedTests( { production: true } ) )
+		await expect( runAutomatedTests( {} ) )
 			.rejects.toThrow( 'Test runner requires files to test. `options.files` has to be a non-empty array.' );
 	} );
 
@@ -72,8 +71,7 @@ describe( 'runAutomatedTests()', () => {
 			files: [
 				'basic-foo',
 				'bar-core'
-			],
-			production: true
+			]
 		};
 
 		vi.mocked( transformFileOptionToTestGlob )
@@ -96,45 +94,9 @@ describe( 'runAutomatedTests()', () => {
 		expect( stubs.devUtilsLogger.warning ).toHaveBeenCalledWith( 'Pattern "bar-core" does not match any file.' );
 	} );
 
-	it( 'should warn when the `production` option is set to `false`', async () => {
-		const options = {
-			files: [ 'basic-styles' ],
-			production: false,
-			watch: false,
-			coverage: false
-		};
-
-		const consoleWarnStub = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
-
-		vi.mocked( styleText ).mockReturnValue( 'chalk.yellow: warn' );
-
-		vi.mocked( transformFileOptionToTestGlob ).mockReturnValue( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js'
-		] );
-		vi.mocked( globSync ).mockReturnValue( [
-			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js'
-		] );
-
-		const promise = runAutomatedTests( options );
-		await new Promise( resolve => setTimeout( resolve ) );
-
-		const [ subprocess ] = vi.mocked( spawn ).mock.results.map( result => result.value );
-		subprocess.emit( 'close', 0 );
-
-		await promise;
-
-		expect( consoleWarnStub ).toHaveBeenCalledExactlyOnceWith( 'chalk.yellow: warn' );
-		expect( vi.mocked( styleText ) ).toHaveBeenCalledExactlyOnceWith(
-			'yellow',
-			'⚠ You\'re running tests in dev mode - some error protections are loose. ' +
-			'Use the `--production` flag to use strictest verification methods.'
-		);
-	} );
-
 	it( 'should run Vitest for the selected package', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -173,7 +135,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should pass --watch flag to Vitest when watch mode is enabled', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: true,
 			coverage: false
 		};
@@ -207,7 +168,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should pass coverage flags to Vitest and merge coverage with nyc', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -288,7 +248,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should reject when Vitest process exits with non-zero code', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -315,7 +274,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should spawn Vitest with cwd set to the package root and no --project flag', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -359,7 +317,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should force json, lcovonly and html reporters when coverage is enabled', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -399,7 +356,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should run each Vitest project in a separate process with selected files', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -464,7 +420,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should throw when watch mode is used with multiple Vitest projects', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
-			production: true,
 			watch: true,
 			coverage: false
 		};
@@ -495,7 +450,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should continue running remaining Vitest projects after a project failure', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -532,7 +486,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should merge Vitest coverage even when a project fails', async () => {
 		const options = {
 			files: [ 'utils', 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -582,7 +535,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should resolve when Vitest exits with code 130 (SIGINT)', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -606,7 +558,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should reject when spawn emits an error event', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};
@@ -630,7 +581,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should skip copying coverage-final.json when the file does not exist', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -662,7 +612,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should reject when nyc report fails', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -692,7 +641,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should reject when nyc spawn emits an error', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: true
 		};
@@ -722,7 +670,6 @@ describe( 'runAutomatedTests()', () => {
 	it( 'should throw when a test file path does not contain /tests/ segment', async () => {
 		const options = {
 			files: [ 'engine' ],
-			production: true,
 			watch: false,
 			coverage: false
 		};

@@ -23,14 +23,6 @@ const IGNORE_GLOBS = [
 ];
 
 export default async function runAutomatedTests( options ) {
-	if ( !options.production ) {
-		console.warn( styleText(
-			'yellow',
-			'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
-			'to use strictest verification methods.'
-		) );
-	}
-
 	const globPatterns = resolveTestGlobs( options.files );
 	const testFiles = collectTestFiles( globPatterns );
 	const { vitestSelection, vitestPackageRoots } = groupTestFilesByPackage( testFiles );

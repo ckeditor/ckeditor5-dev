@@ -38,7 +38,6 @@ export default function parseArguments( args, settings = {} ) {
 			'coverage',
 			'disable-watch',
 			'help',
-			'production',
 			'silent',
 			'source-map',
 			'verbose',
@@ -65,7 +64,6 @@ export default function parseArguments( args, settings = {} ) {
 			files: [],
 			'identity-file': null,
 			language: 'en',
-			production: false,
 			repositories: [],
 			silent: false,
 			'source-map': true,
@@ -417,8 +415,7 @@ export default function parseArguments( args, settings = {} ) {
 						alias: 'd', name: 'debug', hint: 'flags',
 						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
 						default: 'CK_DEBUG'
-					},
-					{ name: 'production', description: 'Run strictest checks (configured in the Vitest setup of each package)' }
+					}
 				]
 			},
 			{
@@ -471,7 +468,6 @@ export default function parseArguments( args, settings = {} ) {
 					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
 					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
 					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
-					{ name: 'production', description: 'Run strictest checks' },
 					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
 					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
 				]
