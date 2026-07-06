@@ -18,9 +18,9 @@ const { html_beautify: beautify } = jsBeautify;
  * To register the matcher, use the `expect.extend()` API in a Vitest setup file:
  *
  *		import { expect } from 'vitest';
- *		import { markupMatchers } from '@ckeditor/ckeditor5-dev-tests';
+ *		import { toEqualMarkup } from '@ckeditor/ckeditor5-dev-tests';
  *
- *		expect.extend( markupMatchers );
+ *		expect.extend( { toEqualMarkup } );
  *
  * Then, in tests:
  *
@@ -61,11 +61,6 @@ export function toEqualMarkup( received, expected ) {
 		expected: areFormattedStringsEqual ? expected : expectedFormatted
 	};
 }
-
-/**
- * An object with all matchers defined in this module, ready to be passed to the `expect.extend()` API.
- */
-export const markupMatchers = { toEqualMarkup };
 
 // Renames the $text occurrences as it is not properly formatted by the beautifier - it is treated as a block.
 const TEXT_TAG_PLACEHOLDER = 'span data-cke="true"';

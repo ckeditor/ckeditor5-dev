@@ -4,16 +4,15 @@
  */
 
 import { beforeAll, describe, expect, it } from 'vitest';
-import { markupMatchers, toEqualMarkup } from '../../lib/vitest/matchers.js';
+import { toEqualMarkup } from '../../lib/vitest/matchers.js';
 
 describe( 'toEqualMarkup matcher', () => {
 	beforeAll( () => {
-		expect.extend( markupMatchers );
+		expect.extend( { toEqualMarkup } );
 	} );
 
-	it( 'should be exposed in the "markupMatchers" object', () => {
-		expect( markupMatchers.toEqualMarkup ).toBeInstanceOf( Function );
-		expect( markupMatchers.toEqualMarkup ).toEqual( toEqualMarkup );
+	it( 'should be a function', () => {
+		expect( toEqualMarkup ).toBeInstanceOf( Function );
 	} );
 
 	it( 'should not throw for equal markups', () => {

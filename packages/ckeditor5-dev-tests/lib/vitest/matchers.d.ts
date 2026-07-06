@@ -14,10 +14,6 @@ export interface MarkupMatcherResult {
 
 export declare function toEqualMarkup( received: string, expected: string ): MarkupMatcherResult;
 
-export declare const markupMatchers: {
-	toEqualMarkup: typeof toEqualMarkup;
-};
-
 declare module 'vitest' {
 	interface Matchers<R = any> {
 

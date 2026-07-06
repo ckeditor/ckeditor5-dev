@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { markupMatchers, toEqualMarkup, MarkupMatcherResult } from './vitest/matchers.js';
+export { toEqualMarkup, MarkupMatcherResult } from './vitest/matchers.js';

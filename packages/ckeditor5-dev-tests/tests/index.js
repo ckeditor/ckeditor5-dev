@@ -5,12 +5,11 @@
 
 import { describe, expect, it } from 'vitest';
 import * as index from '../lib/index.js';
-import { markupMatchers, toEqualMarkup } from '../lib/vitest/matchers.js';
+import { toEqualMarkup } from '../lib/vitest/matchers.js';
 
 describe( 'index.js', () => {
-	describe( 'markupMatchers', () => {
+	describe( 'toEqualMarkup()', () => {
 		it( 'should be re-exported', () => {
-			expect( index.markupMatchers ).toEqual( markupMatchers );
 			expect( index.toEqualMarkup ).toEqual( toEqualMarkup );
 		} );
 	} );
