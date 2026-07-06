@@ -7,12 +7,9 @@ import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { styleText } from 'node:util';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import getKarmaConfig from '../utils/automated-tests/getkarmaconfig.js';
 import { globSync } from 'glob';
 import { minimatch } from 'minimatch';
 import { mkdirp } from 'mkdirp';
-import karmaLogger from 'karma/lib/logger.js';
-import karma from 'karma';
 import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
 import upath from 'upath';
 
@@ -36,17 +33,10 @@ export default async function runAutomatedTests( options ) {
 
 	const globPatterns = resolveTestGlobs( options.files );
 	const testFiles = collectTestFiles( globPatterns );
-	const { karmaFiles, vitestSelection, vitestPackageRoots } = partitionByRunner( testFiles );
+	const { vitestSelection, vitestPackageRoots } = groupTestFilesByPackage( testFiles );
 
-	if ( !karmaFiles.length && !vitestSelection.length ) {
+	if ( !vitestSelection.length ) {
 		throw new Error( 'No test files found. Specified patterns are invalid.' );
-	}
-
-	if ( karmaFiles.length && vitestSelection.length && ( options.watch || options.server ) ) {
-		throw new Error(
-			'Watch/server mode cannot be used in a mixed Karma + Vitest run. ' +
-			'Run watch/server mode separately for Karma and Vitest packages.'
-		);
 	}
 
 	if ( options.watch && vitestSelection.length > 1 ) {
@@ -56,27 +46,7 @@ export default async function runAutomatedTests( options ) {
 		);
 	}
 
-	const errors = [];
-
-	if ( karmaFiles.length ) {
-		try {
-			await runKarmaTests( options, karmaFiles );
-		} catch ( error ) {
-			errors.push( error );
-		}
-	}
-
-	if ( vitestSelection.length ) {
-		try {
-			await spawnVitest( options, vitestSelection, vitestPackageRoots );
-		} catch ( error ) {
-			errors.push( error );
-		}
-	}
-
-	if ( errors.length ) {
-		throw aggregateErrors( errors );
-	}
+	return spawnVitest( options, vitestSelection, vitestPackageRoots );
 }
 
 // -- Glob resolution & file collection -----------------------------------------------------------
@@ -96,9 +66,7 @@ function resolveTestGlobs( files ) {
 }
 
 function collectTestFiles( globPatterns ) {
-	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
-
-	const log = karmaLogger.create( 'config' );
+	const log = logger();
 	const allFiles = [];
 
 	for ( const [ pattern, resolvedGlobs ] of Object.entries( globPatterns ) ) {
@@ -117,42 +85,30 @@ function collectTestFiles( globPatterns ) {
 		}
 
 		if ( !hasFiles ) {
-			log.warn( 'Pattern "%s" does not match any file.', pattern );
+			log.warning( `Pattern "${ pattern }" does not match any file.` );
 		}
 	}
 
 	return allFiles;
 }
 
-// -- Runner partitioning --------------------------------------------------------------------------
+// -- Test files grouping --------------------------------------------------------------------------
 
-function partitionByRunner( testFiles ) {
-	const karmaFiles = [];
+function groupTestFilesByPackage( testFiles ) {
 	const vitestSelection = new Map();
 	const vitestPackageRoots = new Map();
-	const runnerCache = new Map();
 
 	for ( const filePath of testFiles ) {
 		const packageRoot = getPackageRoot( filePath );
+		const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
 
-		if ( !runnerCache.has( packageRoot ) ) {
-			runnerCache.set( packageRoot, detectPackageRunner( packageRoot ) );
-		}
-
-		const { runner, projectName } = runnerCache.get( packageRoot );
-
-		if ( runner === 'vitest' ) {
-			const files = vitestSelection.get( projectName ) || [];
-			files.push( filePath );
-			vitestSelection.set( projectName, files );
-			vitestPackageRoots.set( projectName, packageRoot );
-		} else {
-			karmaFiles.push( filePath );
-		}
+		const files = vitestSelection.get( projectName ) || [];
+		files.push( filePath );
+		vitestSelection.set( projectName, files );
+		vitestPackageRoots.set( projectName, packageRoot );
 	}
 
 	return {
-		karmaFiles,
 		vitestSelection: [ ...vitestSelection.entries() ],
 		vitestPackageRoots
 	};
@@ -167,110 +123,6 @@ function getPackageRoot( filePath ) {
 	}
 
 	return normalized.slice( 0, testsIndex );
-}
-
-function detectPackageRunner( packageRoot ) {
-	const projectName = upath.basename( packageRoot ).replace( /^ckeditor5-/, '' );
-	const packageJson = JSON.parse( fs.readFileSync( upath.join( packageRoot, 'package.json' ), 'utf8' ) );
-	const runner = packageJson.scripts?.test?.includes( 'vitest' ) ? 'vitest' : 'karma';
-
-	return { projectName, runner };
-}
-
-// -- Karma runner ---------------------------------------------------------------------------------
-
-async function runKarmaTests( options, karmaFiles ) {
-	const entryFilePath = upath.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
-
-	createKarmaEntryFile( entryFilePath, karmaFiles, options.production );
-
-	// Build globPatterns from karmaFiles only, so the coverage loader instruments
-	// just the Karma packages' source code — not Vitest packages that happen to be
-	// imported transitively.
-	return startKarmaServer( {
-		...options,
-		entryFile: entryFilePath,
-		globPatterns: { karma: karmaFiles }
-	} );
-}
-
-function createKarmaEntryFile( entryFilePath, files, production ) {
-	const utilsDir = upath.join( import.meta.dirname, '..', 'utils', 'automated-tests' );
-	const testImports = [ ...files ];
-
-	// Set global license key in the `before` hook.
-	testImports.unshift( upath.join( utilsDir, 'licensekeybefore.js' ) );
-
-	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
-	testImports.splice( 0, 0, upath.join( utilsDir, 'leaksdetectorbefore.js' ) );
-	testImports.push( upath.join( utilsDir, 'leaksdetectorafter.js' ) );
-
-	const entryLines = testImports.map( file => `import "${ file }";` );
-
-	// Inject the custom chai assertions. See ckeditor/ckeditor5#9668.
-	const assertionsDir = upath.join( utilsDir, 'assertions' );
-	const customAssertions = fs.readdirSync( assertionsDir ).map( assertionFileName => {
-		return [
-			assertionFileName,
-			upath.parse( assertionFileName ).name.replace( /-([a-z])/g, value => value[ 1 ].toUpperCase() )
-		];
-	} );
-
-	// Two loops are needed to achieve correct order in `ckeditor5/build/.automated-tests/entry-point.js`.
-	for ( const [ fileName, functionName ] of customAssertions ) {
-		entryLines.push( `import ${ functionName }Factory from "${ assertionsDir }/${ fileName }";` );
-	}
-	for ( const [ , functionName ] of customAssertions ) {
-		entryLines.push( `${ functionName }Factory( chai );` );
-	}
-
-	if ( production ) {
-		entryLines.unshift( assertConsoleUsageToThrowErrors() );
-	}
-
-	mkdirp.sync( upath.dirname( entryFilePath ) );
-	fs.writeFileSync( entryFilePath, entryLines.join( '\n' ) + '\n' );
-
-	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
-	// A ugly hack blocks the loop and tests are executed once.
-	// See: https://github.com/webpack/watchpack/issues/25.
-	const now = Date.now() / 1000;
-	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
-	const then = now - 10;
-	fs.utimesSync( entryFilePath, then, then );
-}
-
-function startKarmaServer( options ) {
-	return new Promise( ( resolve, reject ) => {
-		const KarmaServer = karma.Server;
-		const parseConfig = karma.config.parseConfig;
-
-		const config = getKarmaConfig( options );
-		const parsedConfig = parseConfig( null, config, { throwErrors: true } );
-
-		const server = new KarmaServer( parsedConfig, exitCode => {
-			if ( exitCode === 0 ) {
-				resolve();
-			} else {
-				reject( new Error( `Karma finished with "${ exitCode }" code.` ) );
-			}
-		} );
-
-		if ( options.coverage ) {
-			const coveragePath = upath.join( process.cwd(), 'coverage' );
-
-			server.on( 'run_complete', () => {
-				// Use timeout to not write to the console in the middle of Karma's status.
-				setTimeout( () => {
-					const log = logger();
-
-					log.info( `Coverage report saved in '${ styleText( 'cyan', coveragePath ) }'.` );
-				} );
-			} );
-		}
-
-		server.start();
-	} );
 }
 
 // -- Vitest runner --------------------------------------------------------------------------------
@@ -397,68 +249,5 @@ function mergeVitestCoverage( vitestSelection ) {
 				reject( new Error( `nyc report finished with "${ exitCode }" code.` ) );
 			}
 		} );
-	} );
-}
-
-// -- Error handling -------------------------------------------------------------------------------
-
-function aggregateErrors( errors ) {
-	if ( errors.length === 1 ) {
-		return errors[ 0 ];
-	}
-
-	const details = errors.map( e => `- ${ e.message }` ).join( '\n' );
-	return new Error( `Test execution failed in multiple runners:\n${ details }` );
-}
-
-// -- Console assertion (production mode) ----------------------------------------------------------
-
-function assertConsoleUsageToThrowErrors() {
-	const functionString = makeConsoleUsageToThrowErrors.toString();
-
-	return functionString
-		// Extract the body of the function from between the opening and closing braces.
-		.substring(
-			functionString.indexOf( '{' ) + 1,
-			functionString.lastIndexOf( '}' )
-		)
-		// Remove the leading and trailing new lines.
-		.trim()
-		// Decrease indent for the extracted function body by one tab.
-		.replace( /^\t/gm, '' );
-}
-
-function makeConsoleUsageToThrowErrors() {
-	const originalWarn = console.warn;
-
-	window.production = true;
-
-	// Important: Do not remove the comment below. It is used to assert this function insertion in tests.
-	//
-	// Make using any method from the console to fail.
-	before( () => {
-		Object.keys( console )
-			.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
-			.forEach( method => {
-				console[ method ] = ( ...data ) => {
-					originalWarn( 'Detected `console.' + method + '()`:', ...data );
-
-					// Previously, the error was thrown at this point. Unfortunately, it may happen that some asynchronous piece of code
-					// will call a console method after Mocha has finished the test. In that case:
-					// * Mocha will not be able to catch such a thrown error, even though it has registered the "uncaughtException" and the
-					//   "unhandledRejection" error handlers.
-					// * Mocha will not be able to mark the test as failed.
-					// * Karma will finish the whole test run, and in the console, you will see something like "Executed 42 of 191 SUCCESS".
-					//
-					// Probably the test that causes such problems is incorrectly written:
-					// * The "done()" function is not called at the right moment, or the test does not return a promise.
-					// * Not all dependencies used in the source code under test are mocked, and they cause side effects, i.e., asynchronous
-					//   console method calls after the test is over.
-					//
-					// To ensure that the console methods usage still fail the whole test run, we are calling the error handler from Karma
-					// to stop the Karma server.
-					__karma__.error( 'Detected `console.' + method + '()`: ' + data[ 0 ] );
-				};
-			} );
 	} );
 }

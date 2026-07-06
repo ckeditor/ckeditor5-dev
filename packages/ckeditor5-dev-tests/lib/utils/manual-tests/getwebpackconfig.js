@@ -113,10 +113,8 @@ export default function getWebpackConfigForManualTests( options ) {
 			// See https://github.com/ckeditor/ckeditor5/issues/11006.
 			//
 			// Previously, the 'cheap-source-map' was used, because Safari had problem with ES6 + inline source maps.
-			// We could use cheap source maps everywhere, but karma-webpack doesn't support it. The `columns` and `module` options
-			// set to `false` are equivalent to the use of `webpackConfig.devtool = 'cheap-source-map'`.
-			//
-			// See https://github.com/webpack/karma-webpack/pull/76.
+			// The `columns` and `module` options set to `false` are equivalent to the use of
+			// `webpackConfig.devtool = 'cheap-source-map'`.
 			new webpack.SourceMapDevToolPlugin( {
 				columns: false,
 				module: true,

@@ -4,7 +4,7 @@ CKEditor 5 testing environment
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)
 [![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
 
-Testing environment for [CKEditor 5](https://ckeditor.com). It's based on [Karma](https://karma-runner.github.io/) and [webpack](https://webpack.github.io/) and it's normally used in the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5). Read more about [CKEditor 5's testing environment](https://docs.ckeditor.com/ckeditor5/latest/framework/guides/contributing/testing-environment.html).
+Testing environment for [CKEditor 5](https://ckeditor.com). Automated tests are discovered across CKEditor 5 packages and executed with [Vitest](https://vitest.dev/), while manual tests are compiled and served with [webpack](https://webpack.github.io/). It's normally used in the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5). Read more about [CKEditor 5's testing environment](https://docs.ckeditor.com/ckeditor5/latest/framework/guides/contributing/testing-environment.html).
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
@@ -49,17 +49,11 @@ You can also use the bin script for testing a package:
 
 #### CLI options
 
-* `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `debug` - Allows specifying custom debug flags. For example, the `--debug engine` option uncomments the `// @if CK_DEBUG_ENGINE //` lines in the code. By default `--debug` is set to true even if you did not specify it. This enables the base set of debug logs (`// @if CK_DEBUG //`) which should always be enabled in the testing environment. You can completely turn off the debug mode by setting the `--debug false` option or `--no-debug`.
 * `files` - Package names, directories or files to tests. Also available as an alias: `-f`. Read more about this option in the [Rules for using the `--files` option](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/testing-environment.html#rules-for-using-the-files-option) section.
-* `language` – Specifies a language that will be used while building tests. By default it is `en`.
-* `production` - Run strictest set of checks. E.g. it fails test run when there are [console calls](https://github.com/ckeditor/ckeditor5/issues/1996) or [DOM leaks](https://github.com/ckeditor/ckeditor5/issues/6002).
+* `production` - Run strictest set of checks, as configured in the Vitest setup of each tested package.
 * `repositories` (`-r`) - Specifies names of repositories containing packages that should be tested. Those repositories should be cloned into the `external/` directory in the root directory of the project. It's a shortcut of the `--files` option as these repository packages' names will be read by the tool automatically.
-* `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
-* `server` - Whether to run the server without opening any browser.
-* `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
-* `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
 * `watch` - Whether to watch the files and executing tests whenever any file changes. Also available as an alias: `-w`.
 
 #### Examples
@@ -76,12 +70,6 @@ Run `tests/view/**/*.js` tests from `ckeditor5-engine` and rerun them once any f
 $ npm t -- -w --files=engine/view/
 ```
 
-Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox):
-
-```bash
-$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/bold,basic-styles/italic
-```
-
 Test all installed packages:
 
 ```bash
@@ -94,12 +82,6 @@ Test all installed packages except one (or more):
 $ npm t -- --files='!(engine)'
 $ npm t -- --files='!(engine|ui)'
 ```
-
-## IDE integrations
-
-The CKEditor 5 can be integrated with IDEs via integrations.
-
-Currently only the IntelliJ based IDEs are supported (WebStorm, PHPStorm, etc). Detailed information are provided in [`bin/intellijkarmarunner/README.md`](./bin/intellijkarmarunner/README.md).
 
 ## Changelog
 

@@ -16,7 +16,8 @@ if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
 
 	husky();
 
-	execSync( 'pnpm run -r postinstall', {
+	// The `--if-present` flag prevents an error when no workspace package defines the script.
+	execSync( 'pnpm run -r --if-present postinstall', {
 		cwd: ROOT_DIRECTORY,
 		stdio: 'inherit'
 	} );

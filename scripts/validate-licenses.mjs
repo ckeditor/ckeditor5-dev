@@ -70,7 +70,6 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-tests',
 		dependencies: [
-			{ license: 'MIT', name: 'karma-sinon', copyright: 'Copyright (c) Janusz J (https://github.com/yanoosh).' },
 			{ license: 'MIT', name: 'chokidar', copyright: 'Copyright (c) 2012-2019 Paul Miller (https://paulmillr.com), Elan Shanker.' },
 			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' },
 			{ license: 'BSD-2-Clause', name: 'sinon-chai', copyright: 'Copyright © 2012–2017 Domenic Denicola <d@domenic.me>.' },

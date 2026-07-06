@@ -43,20 +43,17 @@ describe( 'parseArguments()', () => {
 			'/home/.secret/file.key',
 			'--additional-languages',
 			'de,fr',
-			'--resolve-js-first',
 			'--disable-watch'
 		] );
 
 		expect( options[ 'source-map' ] ).to.be.undefined;
 		expect( options[ 'identity-file' ] ).to.be.undefined;
 		expect( options[ 'additional-languages' ] ).to.be.undefined;
-		expect( options[ 'resolve-js-first' ] ).to.be.undefined;
 		expect( options[ 'disable-watch' ] ).to.be.undefined;
 
 		expect( options.sourceMap ).to.equal( true );
 		expect( options.identityFile ).to.equal( '/home/.secret/file.key' );
 		expect( options.additionalLanguages ).to.deep.equal( [ 'de', 'fr' ] );
-		expect( options.resolveJsFirst ).to.equal( true );
 		expect( options.disableWatch ).to.equal( true );
 	} );
 
@@ -64,8 +61,6 @@ describe( 'parseArguments()', () => {
 		vi.mocked( fs ).readFileSync.mockReturnValue( '{}' );
 
 		const options = parseArguments( [
-			'-b',
-			'Chrome,Firefox',
 			'-c',
 			'true',
 			'-d',
@@ -84,13 +79,12 @@ describe( 'parseArguments()', () => {
 			true
 		] );
 
-		for ( const key of [ 'b', 'c', 'd', 'f', 'i', 'r', 's', 'v', 'w' ] ) {
+		for ( const key of [ 'c', 'd', 'f', 'i', 'r', 's', 'v', 'w' ] ) {
 			expect( options[ key ], `Checked "${ key }"` ).to.be.undefined;
 		}
 
 		expect( options.coverage ).to.equal( true );
 		expect( options.verbose ).to.equal( false );
-		expect( options.browsers ).to.deep.equal( [ 'Chrome', 'Firefox' ] );
 		expect( options.debug ).to.deep.equal( [ 'CK_DEBUG', 'CK_DEBUG_ENGINE' ] );
 		expect( options.files ).to.deep.equal( [ 'core' ] );
 		expect( options.repositories ).to.deep.equal( [ 'custom-monorepo' ] );
@@ -367,13 +361,12 @@ describe( 'parseArguments()', () => {
 			const output = stripAnsi( consoleLogStub.mock.calls[ 0 ][ 0 ] );
 
 			expect( output ).toContain( 'ckeditor5-dev-tests-run-automated [options]' );
-			expect( output ).toContain( 'Runs automated tests using Karma and Vitest.' );
+			expect( output ).toContain( 'Runs automated tests using Vitest.' );
 			expect( output ).toContain( '--coverage' );
 			expect( output ).toContain( '--watch' );
-			expect( output ).toContain( '--browsers' );
+			expect( output ).not.toContain( '--browsers' );
 			expect( output ).toContain( 'Test selection' );
 			expect( output ).toContain( 'Test execution' );
-			expect( output ).toContain( 'Build configuration' );
 			expect( output ).toContain( 'Examples' );
 		} );
 

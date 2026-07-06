@@ -24,28 +24,21 @@ export default function parseArguments( args, settings = {} ) {
 	const minimistConfig = {
 		string: [
 			'additional-languages',
-			'browsers',
 			'cwd',
 			'debug',
 			'files',
 			'identity-file',
-			'karma-config-overrides',
 			'language',
 			'port',
-			'reporter',
 			'repositories',
 			'tsconfig'
 		],
 
 		boolean: [
-			'cache',
 			'coverage',
 			'disable-watch',
 			'help',
-			'notify',
 			'production',
-			'resolve-js-first',
-			'server',
 			'silent',
 			'source-map',
 			'verbose',
@@ -53,13 +46,11 @@ export default function parseArguments( args, settings = {} ) {
 		],
 
 		alias: {
-			b: 'browsers',
 			c: 'coverage',
 			d: 'debug',
 			f: 'files',
 			h: 'help',
 			i: 'identity-file',
-			n: 'notify',
 			r: 'repositories',
 			s: 'source-map',
 			v: 'verbose',
@@ -68,20 +59,14 @@ export default function parseArguments( args, settings = {} ) {
 
 		default: {
 			'additional-languages': null,
-			browsers: 'Chrome',
-			cache: false,
 			coverage: false,
 			cwd: process.cwd(),
 			'disable-watch': false,
 			files: [],
 			'identity-file': null,
 			language: 'en',
-			notify: false,
 			production: false,
-			reporter: 'mocha',
 			repositories: [],
-			'resolve-js-first': false,
-			server: false,
 			silent: false,
 			'source-map': true,
 			tsconfig: null,
@@ -125,12 +110,9 @@ export default function parseArguments( args, settings = {} ) {
 		'disable-watch',
 		'source-map',
 		'identity-file',
-		'karma-config-overrides',
-		'additional-languages',
-		'resolve-js-first'
+		'additional-languages'
 	] );
 	splitOptionsToArray( options, [
-		'browsers',
 		'files',
 		'repositories',
 		'additionalLanguages'
@@ -365,7 +347,7 @@ export default function parseArguments( args, settings = {} ) {
 
 		const description = isManual ?
 			'Compiles and serves manual tests with a live-reloading dev server.' :
-			'Runs automated tests using Karma and Vitest.';
+			'Runs automated tests using Vitest.';
 
 		const optionGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
 		const examples = isManual ? getManualExamples( commandName ) : getAutomatedExamples( commandName );
@@ -423,11 +405,6 @@ export default function parseArguments( args, settings = {} ) {
 					{
 						alias: 'r', name: 'repositories', hint: 'names',
 						description: 'Repository names whose packages should be tested (comma-separated)'
-					},
-					{
-						alias: 'b', name: 'browsers', hint: 'names',
-						description: 'Browsers for running tests (comma-separated)',
-						default: 'Chrome'
 					}
 				]
 			},
@@ -441,30 +418,7 @@ export default function parseArguments( args, settings = {} ) {
 						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
 						default: 'CK_DEBUG'
 					},
-					{ name: 'production', description: 'Run strictest checks (fail on console calls, DOM leaks)' },
-					{ name: 'server', description: 'Run Karma server without opening a browser' },
-					{ name: 'reporter', hint: 'type', description: 'Mocha reporter: "mocha" or "dots"', default: 'mocha' }
-				]
-			},
-			{
-				title: 'Build configuration',
-				options: [
-					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
-					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
-					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
-					{ name: 'cache', description: 'Use Webpack filesystem cache' },
-					{ name: 'resolve-js-first', description: 'Resolve .js files before .ts files' },
-					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
-					{ name: 'karma-config-overrides', hint: 'path', description: 'Path to Karma config overrides file' },
-					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
-				]
-			},
-			{
-				title: 'Output',
-				options: [
-					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
-					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications on test completion' },
-					{ name: 'silent', description: 'Hide processed files info' }
+					{ name: 'production', description: 'Run strictest checks (configured in the Vitest setup of each package)' }
 				]
 			},
 			{
@@ -526,7 +480,6 @@ export default function parseArguments( args, settings = {} ) {
 				title: 'Output',
 				options: [
 					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
-					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications' },
 					{ name: 'silent', description: 'Hide processed files info' }
 				]
 			},
@@ -548,7 +501,6 @@ export default function parseArguments( args, settings = {} ) {
 		return [
 			{ description: 'Test specific packages with coverage', command: `${ commandName } -c --files=enter,paragraph` },
 			{ description: 'Watch mode for engine view tests', command: `${ commandName } -w --files=engine/view/` },
-			{ description: 'Test on multiple browsers', command: `${ commandName } --browsers=Chrome,Firefox --files=basic-styles/bold` },
 			{ description: 'Test all packages', command: `${ commandName } --files=*` }
 		];
 	}
