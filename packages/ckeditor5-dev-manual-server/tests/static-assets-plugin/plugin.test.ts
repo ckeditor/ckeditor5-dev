@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { basename } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { manualStaticAssetsPlugin } from '../../src/static-assets-plugin/plugin.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
@@ -117,7 +118,24 @@ describe( 'manualStaticAssetsPlugin()', () => {
 		} ) );
 	} );
 
-	test( 'ignores static assets without a package name segment when filtering by package', async () => {
+	test( 'resolves workspace root assets to the root directory as the package when filtering', async () => {
+		await createFile( workspaceRoot, 'tests/manual/image.png', 'image' );
+
+		const plugin = manualStaticAssetsPlugin( {
+			paths: [ '.' ],
+			include: [ basename( workspaceRoot ) ]
+		} );
+		const emitFile = vi.fn();
+
+		( plugin.configResolved as unknown as ConfigResolvedHook )( { root: workspaceRoot } );
+		( plugin.generateBundle as unknown as GenerateBundleHook ).call( { emitFile } );
+
+		expect( emitFile ).toHaveBeenCalledWith( expect.objectContaining( {
+			fileName: 'tests/manual/image.png'
+		} ) );
+	} );
+
+	test( 'excludes workspace root assets when the root package is not included', async () => {
 		await createFile( workspaceRoot, 'tests/manual/image.png', 'image' );
 
 		const plugin = manualStaticAssetsPlugin( {
