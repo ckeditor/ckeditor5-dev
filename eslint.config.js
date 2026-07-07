@@ -69,9 +69,7 @@ export default defineConfig( [
 
 		languageOptions: {
 			globals: {
-				...globals.mocha,
 				...globals.browser,
-				'__karma__': true,
 				CKEditorInspector: true,
 				io: true
 			}

@@ -3,6 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-before( function() {
-	window.CKEDITOR_GLOBAL_LICENSE_KEY = process.env.CKEDITOR_LICENSE_KEY || 'GPL';
-} );
+export { toEqualMarkup, MarkupMatcherResult } from './vitest/matchers.js';

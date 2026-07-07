@@ -5,7 +5,6 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import * as loaders from '../../src/loaders/index.js';
-import getCoverageLoader from '../../src/loaders/getcoverageloader.js';
 import getTypeScriptLoader from '../../src/loaders/gettypescriptloader.js';
 import getDebugLoader from '../../src/loaders/getdebugloader.js';
 import getIconsLoader from '../../src/loaders/geticonsloader.js';
@@ -13,7 +12,6 @@ import getFormattedTextLoader from '../../src/loaders/getformattedtextloader.js'
 import getJavaScriptLoader from '../../src/loaders/getjavascriptloader.js';
 import getStylesLoader from '../../src/loaders/getstylesloader.js';
 
-vi.mock( '../../src/loaders/getcoverageloader.js' );
 vi.mock( '../../src/loaders/gettypescriptloader.js' );
 vi.mock( '../../src/loaders/getdebugloader.js' );
 vi.mock( '../../src/loaders/geticonsloader.js' );
@@ -22,13 +20,6 @@ vi.mock( '../../src/loaders/getjavascriptloader.js' );
 vi.mock( '../../src/loaders/getstylesloader.js' );
 
 describe( 'loaders/index.js', () => {
-	describe( 'getCoverageLoader()', () => {
-		it( 'should be a function', () => {
-			expect( loaders.getCoverageLoader ).to.be.a( 'function' );
-			expect( loaders.getCoverageLoader ).toEqual( getCoverageLoader );
-		} );
-	} );
-
 	describe( 'getTypeScriptLoader()', () => {
 		it( 'should be a function', () => {
 			expect( loaders.getTypeScriptLoader ).to.be.a( 'function' );

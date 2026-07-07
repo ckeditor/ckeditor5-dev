@@ -24,69 +24,46 @@ export default function parseArguments( args, settings = {} ) {
 	const minimistConfig = {
 		string: [
 			'additional-languages',
-			'browsers',
 			'cwd',
 			'debug',
 			'files',
 			'identity-file',
-			'karma-config-overrides',
 			'language',
 			'port',
-			'reporter',
 			'repositories',
 			'tsconfig'
 		],
 
 		boolean: [
-			'cache',
-			'coverage',
 			'disable-watch',
 			'help',
-			'notify',
-			'production',
-			'resolve-js-first',
-			'server',
 			'silent',
 			'source-map',
-			'verbose',
-			'watch'
+			'verbose'
 		],
 
 		alias: {
-			b: 'browsers',
-			c: 'coverage',
 			d: 'debug',
 			f: 'files',
 			h: 'help',
 			i: 'identity-file',
-			n: 'notify',
 			r: 'repositories',
 			s: 'source-map',
-			v: 'verbose',
-			w: 'watch'
+			v: 'verbose'
 		},
 
 		default: {
 			'additional-languages': null,
-			browsers: 'Chrome',
-			cache: false,
-			coverage: false,
 			cwd: process.cwd(),
 			'disable-watch': false,
 			files: [],
 			'identity-file': null,
 			language: 'en',
-			notify: false,
-			production: false,
-			reporter: 'mocha',
 			repositories: [],
-			'resolve-js-first': false,
-			server: false,
 			silent: false,
 			'source-map': true,
 			tsconfig: null,
-			verbose: false,
-			watch: false
+			verbose: false
 		},
 
 		unknown: arg => {
@@ -101,10 +78,6 @@ export default function parseArguments( args, settings = {} ) {
 	if ( options.help ) {
 		printHelp( settings );
 		process.exit( 0 );
-	}
-
-	if ( settings.commandName ) {
-		unknownArgs.push( ...getUnsupportedOptions( settings.commandName, args ) );
 	}
 
 	if ( unknownArgs.length ) {
@@ -125,12 +98,9 @@ export default function parseArguments( args, settings = {} ) {
 		'disable-watch',
 		'source-map',
 		'identity-file',
-		'karma-config-overrides',
-		'additional-languages',
-		'resolve-js-first'
+		'additional-languages'
 	] );
 	splitOptionsToArray( options, [
-		'browsers',
 		'files',
 		'repositories',
 		'additionalLanguages'
@@ -303,72 +273,17 @@ export default function parseArguments( args, settings = {} ) {
 	}
 
 	/**
-	 * Checks that no options exclusive to the other command type were used.
-	 * For example, `--coverage` is only valid for automated tests, so passing it
-	 * to the manual-test command is an error.
-	 *
-	 * The set of allowed options is derived from the help-text option groups so
-	 * that the two stay in sync automatically.
-	 *
-	 * @param {string} commandName
-	 * @param {Array.<string>} rawArgs
-	 * @returns {Array.<string>}
-	 */
-	function getUnsupportedOptions( commandName, rawArgs ) {
-		const isManual = commandName.includes( 'manual' );
-		const allowedGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
-
-		const allowedNames = new Set();
-
-		for ( const group of allowedGroups ) {
-			for ( const option of group.options ) {
-				allowedNames.add( `--${ option.name }` );
-
-				if ( option.alias ) {
-					allowedNames.add( `-${ option.alias }` );
-				}
-			}
-		}
-
-		const unsupportedArgs = [];
-
-		for ( const arg of rawArgs ) {
-			if ( arg.startsWith( '--' ) ) {
-				const flag = arg.split( '=' )[ 0 ];
-				const baseFlag = flag.startsWith( '--no-' ) ? `--${ flag.slice( 5 ) }` : flag;
-
-				if ( !allowedNames.has( baseFlag ) ) {
-					unsupportedArgs.push( flag );
-				}
-			} else if ( arg.startsWith( '-' ) ) {
-				for ( const letter of arg.slice( 1 ) ) {
-					const flag = `-${ letter }`;
-
-					if ( minimistConfig.alias[ letter ] && !allowedNames.has( flag ) ) {
-						unsupportedArgs.push( flag );
-					}
-				}
-			}
-		}
-
-		return unsupportedArgs;
-	}
-
-	/**
 	 * Prints help text for the CLI command.
 	 *
 	 * @param {object} settings
 	 */
 	function printHelp( settings ) {
 		const commandName = settings.commandName || 'ckeditor5-dev-tests';
-		const isManual = commandName.includes( 'manual' );
 
-		const description = isManual ?
-			'Compiles and serves manual tests with a live-reloading dev server.' :
-			'Runs automated tests using Karma and Vitest.';
+		const description = 'Compiles and serves manual tests with a live-reloading dev server.';
 
-		const optionGroups = isManual ? getManualOptionGroups() : getAutomatedOptionGroups();
-		const examples = isManual ? getManualExamples( commandName ) : getAutomatedExamples( commandName );
+		const optionGroups = getManualOptionGroups();
+		const examples = getManualExamples( commandName );
 
 		const lines = [
 			'',
@@ -405,76 +320,6 @@ export default function parseArguments( args, settings = {} ) {
 		}
 
 		console.log( lines.join( '\n' ) );
-	}
-
-	/**
-	 * @returns {Array.<Object>}
-	 */
-	function getAutomatedOptionGroups() {
-		return [
-			{
-				title: 'Test selection',
-				options: [
-					{
-						alias: 'f', name: 'files', hint: 'pattern',
-						description: 'Package names, directories, or files to test (comma-separated)',
-						default: '*'
-					},
-					{
-						alias: 'r', name: 'repositories', hint: 'names',
-						description: 'Repository names whose packages should be tested (comma-separated)'
-					},
-					{
-						alias: 'b', name: 'browsers', hint: 'names',
-						description: 'Browsers for running tests (comma-separated)',
-						default: 'Chrome'
-					}
-				]
-			},
-			{
-				title: 'Test execution',
-				options: [
-					{ alias: 'c', name: 'coverage', description: 'Generate code coverage report' },
-					{ alias: 'w', name: 'watch', description: 'Watch files and re-run tests on changes' },
-					{
-						alias: 'd', name: 'debug', hint: 'flags',
-						description: 'Debug flags (e.g. --debug engine,ui). Use --no-debug to disable',
-						default: 'CK_DEBUG'
-					},
-					{ name: 'production', description: 'Run strictest checks (fail on console calls, DOM leaks)' },
-					{ name: 'server', description: 'Run Karma server without opening a browser' },
-					{ name: 'reporter', hint: 'type', description: 'Mocha reporter: "mocha" or "dots"', default: 'mocha' }
-				]
-			},
-			{
-				title: 'Build configuration',
-				options: [
-					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
-					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
-					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
-					{ name: 'cache', description: 'Use Webpack filesystem cache' },
-					{ name: 'resolve-js-first', description: 'Resolve .js files before .ts files' },
-					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
-					{ name: 'karma-config-overrides', hint: 'path', description: 'Path to Karma config overrides file' },
-					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
-				]
-			},
-			{
-				title: 'Output',
-				options: [
-					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
-					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications on test completion' },
-					{ name: 'silent', description: 'Hide processed files info' }
-				]
-			},
-			{
-				title: 'Other',
-				options: [
-					{ name: 'cwd', hint: 'path', description: 'Set current working directory' },
-					{ alias: 'h', name: 'help', description: 'Show this help message' }
-				]
-			}
-		];
 	}
 
 	/**
@@ -517,7 +362,6 @@ export default function parseArguments( args, settings = {} ) {
 					{ alias: 's', name: 'source-map', description: 'Generate source maps', default: 'true' },
 					{ name: 'language', hint: 'code', description: 'Language for building tests', default: 'en' },
 					{ name: 'additional-languages', hint: 'codes', description: 'Additional languages for translations (comma-separated)' },
-					{ name: 'production', description: 'Run strictest checks' },
 					{ name: 'tsconfig', hint: 'path', description: 'Path to TypeScript configuration file' },
 					{ alias: 'i', name: 'identity-file', hint: 'path', description: 'File providing secret keys for test scripts' }
 				]
@@ -526,7 +370,6 @@ export default function parseArguments( args, settings = {} ) {
 				title: 'Output',
 				options: [
 					{ alias: 'v', name: 'verbose', description: 'Show Webpack processing details' },
-					{ alias: 'n', name: 'notify', description: 'Enable desktop notifications' },
 					{ name: 'silent', description: 'Hide processed files info' }
 				]
 			},
@@ -537,19 +380,6 @@ export default function parseArguments( args, settings = {} ) {
 					{ alias: 'h', name: 'help', description: 'Show this help message' }
 				]
 			}
-		];
-	}
-
-	/**
-	 * @param {string} commandName
-	 * @returns {Array.<Object>}
-	 */
-	function getAutomatedExamples( commandName ) {
-		return [
-			{ description: 'Test specific packages with coverage', command: `${ commandName } -c --files=enter,paragraph` },
-			{ description: 'Watch mode for engine view tests', command: `${ commandName } -w --files=engine/view/` },
-			{ description: 'Test on multiple browsers', command: `${ commandName } --browsers=Chrome,Firefox --files=basic-styles/bold` },
-			{ description: 'Test all packages', command: `${ commandName } --files=*` }
 		];
 	}
 
