@@ -461,6 +461,39 @@ describe( 'manualTestsPlugin()', () => {
 			expect( memoryFiles.get( 'assets/foo.manual.js' )!.source ).to.equal( asset.source );
 		} );
 
+		test( 'splices at the real </head> when a head script contains a </head> literal', async () => {
+			const trickyHead = '<!DOCTYPE html><html><head><title>Foo</title>' +
+				'<script>const marker = \'</head>\';</script>';
+			const trickySource = `${ trickyHead }</head>` +
+				'<body><div id="editor"><h2>OLD</h2></div></body></html>';
+			// The asset tags injected at the end of the built <head> sit after the false match,
+			// so a splice at the literal would drop them.
+			const trickyBuilt = `${ trickyHead }` +
+				'<script type="module" src="/assets/foo.manual.js"></script></head>' +
+				'<body><div id="editor"><h2>OLD</h2></div></body></html>';
+
+			await createFile( workspaceRoot, RELATIVE_PATH, trickySource.replace( 'OLD', 'NEW' ) );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: trickyBuilt } );
+
+			configureFreshness( memoryFiles );
+
+			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( trickyBuilt.replace( 'OLD', 'NEW' ) );
+		} );
+
+		test( 'matches the </head> tag case-insensitively', async () => {
+			const upperCaseSource = SOURCE_HTML.replace( '</head>', '</HEAD>' ).replace( 'OLD', 'NEW' );
+
+			await createFile( workspaceRoot, RELATIVE_PATH, upperCaseSource );
+			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+
+			configureFreshness( memoryFiles );
+
+			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
+
+			expect( fresh ).to.contain( '<h2>NEW</h2>' );
+			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
+		} );
+
 		test( 'falls back to the built output when the source has no </head>', async () => {
 			await createFile( workspaceRoot, RELATIVE_PATH, '<div id="editor"><h2>NEW</h2></div>' );
 			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );

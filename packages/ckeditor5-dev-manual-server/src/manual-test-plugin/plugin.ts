@@ -26,7 +26,6 @@ export interface ManualTestsPluginOptions {
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const HEAD_CLOSE_TAG = '</head>';
-const HEAD_CLOSE_TAG_PATTERN = /<\/head>/i;
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -241,14 +240,40 @@ function keepManualHtmlSourceFresh(
  * `</head>`, so the caller can fall back to the built output.
  */
 function composeFreshManualHtml( builtHtml: string, sourceHtml: string ): string | null {
-	const builtHeadEnd = HEAD_CLOSE_TAG_PATTERN.exec( builtHtml )?.index;
-	const sourceHeadEnd = HEAD_CLOSE_TAG_PATTERN.exec( sourceHtml )?.index;
+	const builtHeadEnd = findHeadCloseTagIndex( builtHtml );
+	const sourceHeadEnd = findHeadCloseTagIndex( sourceHtml );
 
-	if ( builtHeadEnd === undefined || sourceHeadEnd === undefined ) {
+	if ( builtHeadEnd == -1 || sourceHeadEnd == -1 ) {
 		return null;
 	}
 
 	return builtHtml.slice( 0, builtHeadEnd + HEAD_CLOSE_TAG.length ) + sourceHtml.slice( sourceHeadEnd + HEAD_CLOSE_TAG.length );
+}
+
+/**
+ * Finds the index of the `</head>` closing tag, or `-1` when the document has none. A `</head>`
+ * literal may also appear earlier inside a `<head>` comment or an inline script string, so of all
+ * the occurrences preceding the `<body>` tag the last one is taken. Without a `<body>` tag (or
+ * when every occurrence follows it) the first occurrence wins, matching the pre-heuristic
+ * behavior for such malformed documents.
+ */
+function findHeadCloseTagIndex( html: string ): number {
+	const firstHeadCloseIndex = /<\/head>/i.exec( html )?.index ?? -1;
+	const bodyMatch = /<body[\s>]/i.exec( html );
+
+	if ( !bodyMatch ) {
+		return firstHeadCloseIndex;
+	}
+
+	const headClosePattern = /<\/head>/gi;
+	let lastHeadCloseIndex = -1;
+	let match;
+
+	while ( ( match = headClosePattern.exec( html ) ) && match.index < bodyMatch.index ) {
+		lastHeadCloseIndex = match.index;
+	}
+
+	return lastHeadCloseIndex == -1 ? firstHeadCloseIndex : lastHeadCloseIndex;
 }
 
 /**
