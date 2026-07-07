@@ -1,6 +1,54 @@
 Changelog
 =========
 
+## [57.0.0-alpha.0](https://github.com/ckeditor/ckeditor5-dev/compare/v56.6.0...v57.0.0-alpha.0) (July 7, 2026)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests), [utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Removed the automated test runner: the `ckeditor5-dev-tests-run-automated` binary and the entire Karma testing environment. Automated tests are now executed directly with Vitest, using the packages' own `test` scripts. The manual test server (`ckeditor5-dev-tests-run-manual`) is unaffected. See [ckeditor/ckeditor5-internal#4595](https://github.com/ckeditor/ckeditor5-internal/issues/4595).
+
+  Along with the Karma environment, the following were removed:
+
+  * The IntelliJ Karma runner integration and desktop notifications support (`node-notifier`).
+  * The `loaders.getCoverageLoader()` function from `@ckeditor/ckeditor5-dev-utils`.
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Replaced the `equalMarkup` Chai assertion with the `toEqualMarkup()` Vitest matcher to match the Vitest naming style. Update the call sites (`expect( a ).to.equalMarkup( b )` → `expect( a ).toEqualMarkup( b )`) and register the matcher in a Vitest setup file via `expect.extend( { toEqualMarkup } )`, importing it from `@ckeditor/ckeditor5-dev-tests`. Closes [ckeditor/ckeditor5-internal#4595](https://github.com/ckeditor/ckeditor5-internal/issues/4595).
+
+  The main entry point of the package now exposes only the custom Vitest matchers, so it can be imported in a browser context (for example, in a Vitest setup file). It no longer exports the `runAutomatedTests()`, `runManualTests()`, and `parseArguments()` functions, which were only used internally by the test runner binaries. Additionally, the unused `attribute` Chai assertion was removed.
+
+### Other changes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Added missing team members (`michnowak`, `tomaszdurka`, `Saddage`) to the `members.json` file used by the CI notification scripts.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/57.0.0-alpha.0): v56.6.0 => v57.0.0-alpha.0
+</details>
+
+
 ## [56.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/v56.5.0...v56.6.0) (July 1, 2026)
 
 ### Features
@@ -151,44 +199,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/56.3.0): v56.2.1 => v56.3.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/56.3.0): v56.2.1 => v56.3.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/56.3.0): v56.2.1 => v56.3.0
-</details>
-
-
-## [56.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v56.2.0...v56.2.1) (June 11, 2026)
-
-### Bug fixes
-
-* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: The manual test server no longer removes external scripts whose file names match a manual test entry script.
-
-  This preserves CDN scripts when wrapping and serving manual tests.
-* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: The manual test server now serves CSS files linked from manual test HTML files.
-
-  This preserves manual test stylesheets when wrapping and serving manual tests.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/56.2.1): v56.2.0 => v56.2.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/56.2.1): v56.2.0 => v56.2.1
 </details>
 
 ---
