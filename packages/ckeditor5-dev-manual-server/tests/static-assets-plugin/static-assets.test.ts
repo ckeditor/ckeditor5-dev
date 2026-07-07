@@ -30,6 +30,7 @@ describe( 'manual static assets', () => {
 			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/notes.md' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.js' )
 		] );
@@ -39,7 +40,7 @@ describe( 'manual static assets', () => {
 			'external/ckeditor5/packages/*'
 		], workspaceRoot );
 
-		// Plain `.html` files are static fixtures; `.manual.html` entries and `.js`/`.ts` modules are not collected.
+		// Plain `.html` and `.md` files are static fixtures; `.manual.html` entries and `.js`/`.ts` modules are not collected.
 		expect( [ ...staticAssets.entries() ] ).to.deep.equal( [
 			[
 				'/external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg',
@@ -52,6 +53,10 @@ describe( 'manual static assets', () => {
 			[
 				'/packages/ckeditor5-foo/tests/manual/fixture.html',
 				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' )
+			],
+			[
+				'/packages/ckeditor5-foo/tests/manual/notes.md',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/notes.md' )
 			],
 			[
 				'/packages/ckeditor5-foo/tests/manual/styles.css',

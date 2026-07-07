@@ -26,6 +26,7 @@ export interface ManualTestsPluginOptions {
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const HEAD_CLOSE_TAG = '</head>';
+const HEAD_CLOSE_TAG_PATTERN = /<\/head>/i;
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -220,7 +221,7 @@ function keepManualHtmlSourceFresh(
 		}
 
 		try {
-			const sourceFilePath = resolve( workspaceRoot, filePath );
+			const sourceFilePath = resolve( workspaceRoot, stripLeadingSlash( filePath ) );
 
 			// HTML entry outputs are always emitted as strings.
 			const freshHtml = composeFreshManualHtml( file.source as string, readFileSync( sourceFilePath, 'utf8' ) );
@@ -240,10 +241,10 @@ function keepManualHtmlSourceFresh(
  * `</head>`, so the caller can fall back to the built output.
  */
 function composeFreshManualHtml( builtHtml: string, sourceHtml: string ): string | null {
-	const builtHeadEnd = builtHtml.toLowerCase().indexOf( HEAD_CLOSE_TAG );
-	const sourceHeadEnd = sourceHtml.toLowerCase().indexOf( HEAD_CLOSE_TAG );
+	const builtHeadEnd = HEAD_CLOSE_TAG_PATTERN.exec( builtHtml )?.index;
+	const sourceHeadEnd = HEAD_CLOSE_TAG_PATTERN.exec( sourceHtml )?.index;
 
-	if ( builtHeadEnd == -1 || sourceHeadEnd == -1 ) {
+	if ( builtHeadEnd === undefined || sourceHeadEnd === undefined ) {
 		return null;
 	}
 

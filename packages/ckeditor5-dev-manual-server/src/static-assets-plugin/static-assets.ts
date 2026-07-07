@@ -11,7 +11,7 @@ import { toPublicSpecifier } from '../utils.js';
 // Extensions handled by Vite's module/HTML pipeline, never served raw as static fixtures.
 // `.manual.html` entries go through the HTML pipeline too, but plain `.html` fixtures must be
 // served raw, so they are excluded by suffix in `isManualStaticAssetPath` rather than by extension.
-const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.js', '.md', '.ts' ] );
+const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.js', '.ts' ] );
 const MANUAL_TEST_SUFFIX = '.manual.html';
 const VITE_MODULE_QUERY_PARAMETERS = new Set( [
 	'import',
