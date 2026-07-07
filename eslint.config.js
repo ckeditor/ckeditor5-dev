@@ -65,17 +65,6 @@ export default defineConfig( [
 		}
 	},
 	{
-		files: [ 'packages/ckeditor5-dev-tests/lib/**/*.@(js|ts)' ],
-
-		languageOptions: {
-			globals: {
-				...globals.browser,
-				CKEditorInspector: true,
-				io: true
-			}
-		}
-	},
-	{
 		extends: ckeditor5Config,
 
 		files: [ '.changelog/**/*.md' ],
