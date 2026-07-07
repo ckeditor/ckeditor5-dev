@@ -8,6 +8,6 @@ see:
   - ckeditor/ckeditor5-internal#4595
 ---
 
-Removed the `attribute` Chai assertion (`lib/utils/automated-tests/assertions/attribute.js`). It is no longer used by any CKEditor 5 tests.
+Introduced the `toEqualMarkup()` Vitest matcher. It replaces the `equalMarkup` Chai assertion and is exported from the main entry point of the package.
 
-Additionally, the main entry point of the package no longer exports the `runAutomatedTests()`, `runManualTests()`, and `parseArguments()` functions, as their Node.js-only dependencies would prevent importing the module in a browser context (a Vitest setup file). They are used internally by the `ckeditor5-dev-tests-run-automated` and `ckeditor5-dev-tests-run-manual` binary scripts, which remain the public interface of the test runners. The main entry point now exposes only the custom Vitest matchers.
+The main entry point now exposes only the custom Vitest matchers, so it can be imported in a browser context (for example, in a Vitest setup file). It no longer exports the `runAutomatedTests()`, `runManualTests()`, and `parseArguments()` functions, which were only used internally by the test runner binaries. Additionally, the unused `attribute` Chai assertion was removed.
