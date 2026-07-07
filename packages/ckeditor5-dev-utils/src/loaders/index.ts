@@ -3,7 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getCoverageLoader } from './getcoverageloader.js';
 export { default as getTypeScriptLoader } from './gettypescriptloader.js';
 export { default as getDebugLoader } from './getdebugloader.js';
 export { default as getIconsLoader } from './geticonsloader.js';

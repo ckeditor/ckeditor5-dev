@@ -8,9 +8,10 @@
 import fs from 'node:fs';
 import { styleText } from 'node:util';
 import { loadEnvFile } from 'node:process';
-import * as tests from '../lib/index.js';
+import runManualTests from '../lib/tasks/runmanualtests.js';
+import parseArguments from '../lib/utils/parsearguments.js';
 
-const options = tests.parseArguments( process.argv.slice( 2 ), {
+const options = parseArguments( process.argv.slice( 2 ), {
 	allowDefaultIdentityFile: true,
 	commandName: 'ckeditor5-dev-tests-run-manual'
 } );
@@ -19,7 +20,7 @@ if ( fs.existsSync( '.env' ) ) {
 	loadEnvFile( '.env' );
 }
 
-tests.runManualTests( options )
+runManualTests( options )
 	.catch( error => {
 		const message = error instanceof Error ? error.stack : error.toString();
 		console.log( styleText( 'red', message ) );

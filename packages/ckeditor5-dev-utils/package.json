@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "56.6.0",
+  "version": "57.0.0-alpha.0",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -25,7 +25,6 @@
   "dependencies": {
     "@types/shelljs": "^0.10.0",
     "@types/through2": "^2.0.41",
-    "babel-loader": "^10.1.1",
     "cli-cursor": "^5.0.0",
     "cli-spinners": "^3.4.0",
     "css-loader": "^7.1.4",

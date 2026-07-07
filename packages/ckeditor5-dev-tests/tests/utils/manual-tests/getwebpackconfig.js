@@ -42,7 +42,6 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		vi.mocked( loaders ).getStylesLoader.mockReturnValue( {} );
 		vi.mocked( loaders ).getTypeScriptLoader.mockReturnValue( {} );
 		vi.mocked( loaders ).getFormattedTextLoader.mockReturnValue( {} );
-		vi.mocked( loaders ).getCoverageLoader.mockReturnValue( {} );
 		vi.mocked( loaders ).getJavaScriptLoader.mockReturnValue( {} );
 	} );
 
@@ -78,8 +77,6 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( vi.mocked( loaders ).getJavaScriptLoader ).toHaveBeenCalledExactlyOnceWith( {
 			debugFlags: debug
 		} );
-
-		expect( vi.mocked( loaders ).getCoverageLoader ).not.toHaveBeenCalledOnce();
 
 		expect( webpackConfig ).toEqual( expect.objectContaining( {
 			// To avoid "eval()" in files.

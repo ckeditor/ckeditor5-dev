@@ -13,9 +13,9 @@ describe( 'resolveLoader()', () => {
 	} );
 
 	it( 'should resolve a loader path', () => {
-		const loaderPath = resolveLoader( 'babel-loader' );
+		const loaderPath = resolveLoader( 'raw-loader' );
 
 		expect( loaderPath ).to.be.a( 'string' );
-		expect( loaderPath ).toEndWith( join( 'node_modules', 'babel-loader', 'lib', 'index.js' ) );
+		expect( loaderPath ).toEndWith( join( 'node_modules', 'raw-loader', 'dist', 'cjs.js' ) );
 	} );
 } );
