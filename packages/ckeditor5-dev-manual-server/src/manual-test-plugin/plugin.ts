@@ -6,35 +6,15 @@
 import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
-import { parse, serialize } from 'parse5';
-import { appendChild, getAttribute, isElementNode, query, removeNode, type Element, type Node } from '@parse5/tools';
 import { collectManualPages } from './collect-pages.js';
-import { collectManualStaticAssets, createManualStaticAssetsMiddleware } from './static-assets.js';
-import { createManualShellHtml } from './shell-html.js';
-import { cacheValue, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
-import type { Plugin } from 'vite';
+import { cacheValue, createPackageNameFilter, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
-export type { ManualData } from './types.js';
 
 interface ManualTestClientEntry {
-	displayName: string;
 	href: string;
 	packageName: string;
 	slug: string;
-}
-
-interface ManualTestServerLike {
-	middlewares: {
-		use( middleware: unknown ): void;
-	};
-}
-
-interface BundledDevClientEnvironment {
-	memoryFiles?: ManualMemoryFilesLike;
-}
-
-interface ManualMemoryFilesLike {
-	get( filePath: string ): { source: string | Uint8Array } | undefined;
 }
 
 export interface ManualTestsPluginOptions {
@@ -42,48 +22,40 @@ export interface ManualTestsPluginOptions {
 	include?: Array<string>;
 }
 
+// The custom element that opts a page into the test chrome. The component script and its data
+// are injected only when the page source contains this marker.
+const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
+const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
 const MANUAL_CATALOG_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.ts' );
-const MANUAL_SHELL_TEMPLATE_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.html' );
-const MANUAL_SHELL_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'shell.ts' );
+const MANUAL_BOOTSTRAP_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'manual-bootstrap.ts' );
+const MANUAL_HEADER_SCRIPT_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'manual-header.ts' );
 
 export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	let workspaceRoot = process.cwd();
 	let base = '/';
-	const manualTestPatterns = options.paths;
-	const manualPagePatterns = manualTestPatterns.map( toManualPagePattern );
 	const includePackageNames = ( options.include || [] ).filter( Boolean );
 	const manualPagesCache = cacheValue( () => filterManualPages(
-		collectManualPages( manualPagePatterns, workspaceRoot ),
+		collectManualPages( options.paths, workspaceRoot ),
 		includePackageNames
 	) );
 	const getManualPages = manualPagesCache.get;
-	const manualStaticAssetsCache = cacheValue( () => collectManualStaticAssets(
-		getManualStaticAssetPatterns( getManualPages(), manualTestPatterns, includePackageNames ),
-		workspaceRoot
-	) );
-	const getManualStaticAssets = manualStaticAssetsCache.get;
-	const invalidateManualFileCaches = () => {
-		manualPagesCache.invalidate();
-		manualStaticAssetsCache.invalidate();
-	};
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
 	};
 	const getManualCatalogBuildInputFilePath = () => resolve( workspaceRoot, 'index.html' );
 	const getManualCatalogPublicPath = () => toPublicFilePath( getManualCatalogBuildInputFilePath(), workspaceRoot );
 	const getManualCatalogScriptPublicPath = () => toPublicFilePath( MANUAL_CATALOG_SCRIPT_FILE_PATH, workspaceRoot );
-	const getManualShellScriptPublicPath = () => toPublicFilePath( MANUAL_SHELL_SCRIPT_FILE_PATH, workspaceRoot );
-	const getManualCatalogClientPath = ( entry: ManualPageEntry ) => toBaseCatalogPath( base, entry.htmlFilePath );
+	const getManualBootstrapScriptPublicPath = () => toPublicFilePath( MANUAL_BOOTSTRAP_SCRIPT_FILE_PATH, workspaceRoot );
+	const getManualHeaderScriptPublicPath = () => toPublicFilePath( MANUAL_HEADER_SCRIPT_FILE_PATH, workspaceRoot );
 	const getManualBuildInputs = () => [
 		getManualCatalogBuildInputFilePath(),
-		...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, entry.htmlFilePath.slice( 1 ) ) )
+		...[ ...getManualPages().values() ].map( entry => resolve( workspaceRoot, stripLeadingSlash( entry.htmlFilePath ) ) )
 	];
 	const resolvedVirtualModuleId = `\0${ MANUAL_ENTRIES_VIRTUAL_ID }`;
 	const getClientEntries = (): Array<ManualTestClientEntry> => [ ...getManualPages().values() ].map( entry => ( {
-		displayName: entry.displayName,
 		href: toBasePublicPath( entry.htmlFilePath, base ),
 		packageName: entry.packageName,
 		slug: entry.slug
@@ -107,22 +79,21 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			workspaceRoot = config.root;
 			base = config.base || '/';
 
-			invalidateManualFileCaches();
+			manualPagesCache.invalidate();
 
 			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
 
 		configureServer( server ) {
-			const { memoryFiles } = server.environments.client as BundledDevClientEnvironment;
+			server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
+				rewriteCatalogRequest( request, getManualCatalogPublicPath() );
 
-			useManualTestMiddlewares( server, getManualCatalogPublicPath, getManualStaticAssets );
-			useBundledDevManualHtmlSource(
-				memoryFiles,
-				getManualPages,
-				getManualShellScriptPublicPath,
-				getManualCatalogClientPath,
-				() => workspaceRoot
-			);
+				next();
+			} );
+
+			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
+
+			keepManualHtmlSourceFresh( clientEnvironment.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
 		},
 
 		resolveId( source ) {
@@ -149,16 +120,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			return null;
 		},
 
-		generateBundle() {
-			for ( const [ publicPath, filePath ] of getManualStaticAssets() ) {
-				this.emitFile( {
-					type: 'asset',
-					fileName: stripLeadingSlash( publicPath ),
-					source: readFileSync( filePath )
-				} );
-			}
-		},
-
 		transformIndexHtml: {
 			order: 'pre',
 
@@ -169,49 +130,80 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 				const entry = getManualPageEntryForFile( context.filename );
 
+				// Only discovered `.manual.html` entries are touched; plain `.html` fixtures get nothing.
 				if ( !entry ) {
 					return undefined;
 				}
 
-				return createManualShellHtml( {
-					catalogPublicPath: getManualCatalogClientPath( entry ),
-					entry,
-					html,
-					shellScriptPublicPath: getManualShellScriptPublicPath(),
-					shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
-					workspaceRoot
-				} );
+				// Every manual test gets the invisible environment bootstrap (license key, inspector,
+				// refresh prompt). It is prepended to `<head>` so it executes before the test's own
+				// module script: the bootstrap must set the global license key and install the
+				// `window.editor` inspector setter first. The header chrome is opt-in via
+				// `<ck-manual-header>` in the source.
+				const tags: Array<HtmlTagDescriptor> = [
+					createModuleScriptTag( getManualBootstrapScriptPublicPath(), 'head-prepend' )
+				];
+
+				if ( html.includes( `<${ MANUAL_HEADER_ELEMENT }` ) ) {
+					tags.push( ...createManualHeaderTags(
+						entry,
+						getManualHeaderScriptPublicPath(),
+						toBaseCatalogPath( base, entry.htmlFilePath )
+					) );
+				}
+
+				return { html, tags };
 			}
 		}
 	};
 }
 
-function useManualTestMiddlewares(
-	server: ManualTestServerLike,
-	getManualCatalogPublicPath: () => string,
-	getManualStaticAssets: () => Map<string, string>
-): void {
-	server.middlewares.use( createManualStaticAssetsMiddleware( getManualStaticAssets ) );
-	useManualCatalogMiddleware( server, getManualCatalogPublicPath );
+interface ManualMemoryFile {
+	source: string | Uint8Array;
 }
 
-function useManualCatalogMiddleware(
-	server: ManualTestServerLike,
-	getManualCatalogPublicPath: () => string
-): void {
-	server.middlewares.use( ( request: { url?: string }, _response: unknown, next: () => void ) => {
-		rewriteCatalogRequest( request, getManualCatalogPublicPath() );
-
-		next();
-	} );
+interface ManualMemoryFiles {
+	get( filePath: string ): ManualMemoryFile | undefined;
 }
 
-function useBundledDevManualHtmlSource(
-	memoryFiles: ManualMemoryFilesLike | undefined,
+interface BundledDevClientEnvironment {
+	bundledDev?: {
+		memoryFiles?: ManualMemoryFiles;
+	};
+}
+
+/**
+ * Keeps the served manual test HTML in sync with the source file while the dev server runs.
+ *
+ * Under `experimental.bundledDev`, Vite serves each manual test's HTML from an in-memory bundle
+ * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
+ * build and never regenerates it when the source `.html` changes: its bundle state reports no
+ * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
+ * forced full build leaves the HTML memory file untouched (verified against Vite 8.1.0). A `.html`
+ * edit still triggers a full page reload, so without this the browser reloads into the same stale
+ * HTML until the server is restarted.
+ *
+ * The built-in-memory HTML rewrites the entry script, injects the asset tags and manual chrome,
+ * and copies the source `<head>` — all inside `<head>`. The markup after `</head>` is a verbatim
+ * copy of the source. So on every request we keep the freshly built `<head>` and splice in the
+ * current post-`</head>` markup read from disk. Splicing unconditionally (rather than only after a
+ * detected change) also covers sources that changed between the initial build and the first request
+ * for the page, and it is idempotent for unchanged sources. This reflects edits to the test body
+ * without re-running Vite's HTML transform or parsing the document. Any edit that would change
+ * what belongs in `<head>` is not picked up this way and still needs a server restart, because
+ * reproducing it would require re-running the build pipeline the dev engine refuses to run for HTML
+ * entries. That covers edits confined to the `<head>` (styles, meta, extra scripts) as well as
+ * adding or removing `<ck-manual-header>` in the body: toggling it changes the injected header
+ * chrome (`<meta>` and the component script) in `<head>`, so the chrome only updates after a
+ * restart even though the body splice already reflects the element itself.
+ *
+ * When `bundledDev` is not enabled the store is absent and this is a no-op: Vite's normal dev
+ * pipeline already serves fresh HTML on every request.
+ */
+function keepManualHtmlSourceFresh(
+	memoryFiles: ManualMemoryFiles | undefined,
 	getManualPages: () => Map<string, ManualPageEntry>,
-	getManualShellScriptPublicPath: () => string,
-	getManualCatalogClientPath: ( entry: ManualPageEntry ) => string,
-	getWorkspaceRoot: () => string
+	workspaceRoot: string
 ): void {
 	if ( !memoryFiles ) {
 		return;
@@ -221,79 +213,113 @@ function useBundledDevManualHtmlSource(
 
 	memoryFiles.get = ( filePath: string ) => {
 		const file = getBundledFile( filePath );
-		const entry = getManualPages().get( toPublicSpecifier( filePath ) );
 
-		if ( !file || !entry ) {
+		// Only discovered `.manual.html` entries are refreshed; asset memory files pass through.
+		if ( !file || !getManualPages().has( toPublicSpecifier( filePath ) ) ) {
 			return file;
 		}
 
-		const workspaceRoot = getWorkspaceRoot();
-		const shellScriptPublicPath = getManualShellScriptPublicPath();
-		const bundledHtml = getFileSource( file );
-		const transformedSourceHtml = createManualShellHtml( {
-			catalogPublicPath: getManualCatalogClientPath( entry ),
-			entry,
-			html: readFileSync( resolve( workspaceRoot, stripLeadingSlash( entry.htmlFilePath ) ), 'utf8' ),
-			shellScriptPublicPath,
-			shellTemplateFilePath: MANUAL_SHELL_TEMPLATE_FILE_PATH,
-			workspaceRoot
-		} );
-		const html = mergeBundledAssetTags( transformedSourceHtml, bundledHtml, entry, shellScriptPublicPath );
+		try {
+			const sourceFilePath = resolve( workspaceRoot, stripLeadingSlash( filePath ) );
 
-		return { source: html };
+			// HTML entry outputs are always emitted as strings.
+			const freshHtml = composeFreshManualHtml( file.source as string, readFileSync( sourceFilePath, 'utf8' ) );
+
+			return freshHtml == null ? file : { source: freshHtml };
+		} catch {
+			// Reading or splicing the source must never break serving the page; fall back to the
+			// built memory file if anything goes wrong (e.g. the file was removed by a branch switch).
+			return file;
+		}
 	};
 }
 
-function getFileSource( file: { source: string | Uint8Array } ): string {
-	return typeof file.source == 'string' ? file.source : Buffer.from( file.source ).toString( 'utf8' );
-}
+/**
+ * Combines the freshly built `<head>` (asset tags and injected manual chrome) with the current
+ * post-`</head>` markup from the source file. Returns `null` when either document is missing a
+ * `</head>`, so the caller can fall back to the built output.
+ */
+function composeFreshManualHtml( builtHtml: string, sourceHtml: string ): string | null {
+	const builtHeadEnd = findHeadCloseTagIndex( builtHtml );
+	const sourceHeadEnd = findHeadCloseTagIndex( sourceHtml );
 
-function toManualPagePattern( pattern: string ): string {
-	if ( /\.(?:html|js|md|ts|\{[^}]*\})$/.test( pattern ) ) {
-		return pattern;
+	if ( builtHeadEnd == -1 || sourceHeadEnd == -1 ) {
+		return null;
 	}
 
-	return `${ pattern }.{html,js,md,ts}`;
+	return builtHtml.slice( 0, builtHeadEnd + HEAD_CLOSE_TAG.length ) + sourceHtml.slice( sourceHeadEnd + HEAD_CLOSE_TAG.length );
+}
+
+/**
+ * Finds the index of the `</head>` closing tag, or `-1` when the document has none. A `</head>`
+ * literal may also appear earlier inside a `<head>` comment or an inline script string, so of all
+ * the occurrences preceding the `<body>` tag the last one is taken. Without a `<body>` tag (or
+ * when every occurrence follows it) the first occurrence wins, matching the pre-heuristic
+ * behavior for such malformed documents.
+ */
+function findHeadCloseTagIndex( html: string ): number {
+	const firstHeadCloseIndex = /<\/head>/i.exec( html )?.index ?? -1;
+	const bodyMatch = /<body[\s>]/i.exec( html );
+
+	if ( !bodyMatch ) {
+		return firstHeadCloseIndex;
+	}
+
+	const headClosePattern = /<\/head>/gi;
+	let lastHeadCloseIndex = -1;
+	let match;
+
+	while ( ( match = headClosePattern.exec( html ) ) && match.index < bodyMatch.index ) {
+		lastHeadCloseIndex = match.index;
+	}
+
+	return lastHeadCloseIndex == -1 ? firstHeadCloseIndex : lastHeadCloseIndex;
+}
+
+/**
+ * Injection contract for the `<ck-manual-header>` component, added to `<head>` only when the
+ * page source contains the element:
+ * - a `<meta>` carrying the package name and the base-aware catalog href the component reads;
+ * - the module `<script>` that defines the custom element (folded into the page bundle under
+ *   `bundledDev`, which is fine — it still executes).
+ */
+function createManualHeaderTags(
+	entry: ManualPageEntry,
+	headerScriptPublicPath: string,
+	catalogHref: string
+): Array<HtmlTagDescriptor> {
+	return [
+		{
+			tag: 'meta',
+			attrs: {
+				'name': MANUAL_HEADER_ELEMENT,
+				'data-package-name': entry.packageName,
+				'data-catalog-href': catalogHref
+			},
+			injectTo: 'head'
+		},
+		createModuleScriptTag( headerScriptPublicPath )
+	];
+}
+
+function createModuleScriptTag( src: string, injectTo: 'head' | 'head-prepend' = 'head' ): HtmlTagDescriptor {
+	return {
+		tag: 'script',
+		attrs: {
+			type: 'module',
+			src
+		},
+		injectTo
+	};
 }
 
 function filterManualPages(
 	manualPages: Map<string, ManualPageEntry>,
 	includePackageNames: Array<string>
 ): Map<string, ManualPageEntry> {
-	if ( includePackageNames.length == 0 ) {
-		return manualPages;
-	}
+	const isIncluded = createPackageNameFilter( includePackageNames );
 
-	const normalizedIncludePackageNames = new Set( includePackageNames.map( normalizePackageName ) );
-
-	return new Map( [ ...manualPages ].filter(
-		( [ , entry ] ) => normalizedIncludePackageNames.has( normalizePackageName( entry.packageName ) )
-	) );
-}
-
-function normalizePackageName( packageName: string ): string {
-	return packageName.replace( /^ckeditor5-/, '' );
-}
-
-function getManualStaticAssetPatterns(
-	manualPages: Map<string, ManualPageEntry>,
-	manualTestPatterns: Array<string>,
-	includePackageNames: Array<string>
-): Array<string> {
-	if ( includePackageNames.length == 0 ) {
-		return manualTestPatterns;
-	}
-
-	return [ ...new Set( [ ...manualPages.values() ].map( getManualTestRootDirectory ) ) ]
-		.map( manualTestRootDirectory => `${ manualTestRootDirectory }/**/*` );
-}
-
-function getManualTestRootDirectory( entry: ManualPageEntry ): string {
-	const htmlFilePath = stripLeadingSlash( entry.htmlFilePath );
-	const manualDirectoryMarker = '/tests/manual/';
-	const manualDirectoryIndex = htmlFilePath.indexOf( manualDirectoryMarker );
-
-	return htmlFilePath.slice( 0, manualDirectoryIndex + manualDirectoryMarker.length - 1 );
+	return new Map( [ ...manualPages ].filter( ( [ , entry ] ) => isIncluded( entry.packageName ) ) );
 }
 
 function isManualCatalogHtmlFile( filePath: string, catalogBuildInputFilePath: string ): boolean {
@@ -323,90 +349,6 @@ function toBaseCatalogPath( base: string, entryHtmlFilePath: string ): string {
 	return base;
 }
 
-function mergeBundledAssetTags(
-	sourceHtml: string,
-	bundledHtml: string,
-	entry: ManualPageEntry,
-	shellScriptPublicPath: string
-): string {
-	const sourceDocument = parse( sourceHtml );
-	const bundledDocument = parse( bundledHtml );
-	const sourceHead = getRequiredElementByTagName( sourceDocument, 'head' );
-	const bundledHead = getRequiredElementByTagName( bundledDocument, 'head' );
-	const testScriptFileName = posix.basename( entry.scriptFilePath );
-	const hasBundledShellAsset = bundledHead.childNodes.some( node => isBundledModuleAsset( node, 'shell' ) );
-
-	for ( const node of [ ...sourceHead.childNodes ] ) {
-		if (
-			isSourceTestScript( node, testScriptFileName ) ||
-			hasBundledShellAsset && isSourceShellScript( node, shellScriptPublicPath )
-		) {
-			removeNode( node );
-		}
-	}
-
-	for ( const node of bundledHead.childNodes.filter( isBundledAssetTag ) ) {
-		removeNode( node );
-		appendChild( sourceHead, node );
-	}
-
-	return serialize( sourceDocument );
-}
-
-function isSourceTestScript( node: Node, testScriptFileName: string ): boolean {
-	if ( !isElementNode( node ) || node.tagName != 'script' ) {
-		return false;
-	}
-
-	const source = getAttribute( node, 'src' );
-
-	if ( !source ) {
-		return false;
-	}
-
-	if ( isExternalScriptSource( source ) ) {
-		return false;
-	}
-
-	return posix.basename( source ) == testScriptFileName;
-}
-
-function isExternalScriptSource( source: string ): boolean {
-	return source.startsWith( 'http://' ) || source.startsWith( 'https://' ) || source.startsWith( '//' );
-}
-
-function isSourceShellScript( node: Node, shellScriptPublicPath: string ): boolean {
-	return isElementNode( node ) && node.tagName == 'script' && getAttribute( node, 'src' ) == shellScriptPublicPath;
-}
-
-function isBundledModuleAsset( node: Node, moduleName: string ): boolean {
-	if ( !isElementNode( node ) ) {
-		return false;
-	}
-
-	if ( node.tagName == 'script' ) {
-		return isBundledModulePath( getAttribute( node, 'src' ), moduleName );
-	}
-
-	return node.tagName == 'link' && getAttribute( node, 'rel' ) == 'modulepreload' &&
-		isBundledModulePath( getAttribute( node, 'href' ), moduleName );
-}
-
-function isBundledModulePath( path: string | null, moduleName: string ): boolean {
-	return Boolean( path?.startsWith( `/assets/${ moduleName }-` ) );
-}
-
-function isBundledAssetTag( node: Node ): node is Element {
-	if ( !isElementNode( node ) ) {
-		return false;
-	}
-
-	return Boolean(
-		node.tagName == 'script' && getAttribute( node, 'src' )?.startsWith( '/assets/' ) ||
-		node.tagName == 'link' && getAttribute( node, 'href' )?.startsWith( '/assets/' )
-	);
-}
-
 function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPath: string ): void {
 	const url = parseRequestUrl( request.url );
 
@@ -422,8 +364,4 @@ function rewriteCatalogRequest( request: { url?: string }, manualCatalogPublicPa
 function parseRequestUrl( requestUrl: string | undefined ): URL | null {
 	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	return URL.parse( requestUrl || '', 'http://localhost' );
-}
-
-function getRequiredElementByTagName( root: Node, tagName: string ): Element {
-	return query<Element>( root, candidate => isElementNode( candidate ) && candidate.tagName == tagName )!;
 }

@@ -4,96 +4,46 @@
  */
 
 import { globSync } from 'node:fs';
-import { stripLeadingSlash, toPosixPath, toPublicSpecifier } from '../utils.js';
-import type { ManualPageEntry, ManualTestAssetExtension } from './types.js';
+import { basename } from 'node:path';
+import { toPosixPath, toPublicSpecifier } from '../utils.js';
+import type { ManualPageEntry } from './types.js';
 
-interface ParsedManualTestAssetPath {
-	extension: ManualTestAssetExtension;
-	packageName: string;
-	packageRootPath: string;
-	slug: string;
-}
+const MANUAL_TESTS_DIRECTORY = 'tests/manual/';
+const MANUAL_TEST_SUFFIX = '.manual.html';
 
+/**
+ * Discovers manual test pages. A manual test is a single full HTML document named
+ * `<slug>.manual.html` located under a package's `tests/manual/` directory. Plain `.html`
+ * files are treated as static fixtures and are never collected here.
+ *
+ * The `patterns` are package root globs, for example `packages/*`.
+ */
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
-	const groupedFiles = new Map<string, Partial<Record<ManualTestAssetExtension, string>>>();
-	const manualPages: Array<ManualPageEntry> = [];
+	const manualPages: Array<[ string, ManualPageEntry ]> = matchManualPageFiles( patterns, workspaceRoot )
+		.map( ( relativeFilePath: string ) => toManualPageEntry( relativeFilePath, workspaceRoot ) )
+		// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
+		.toSorted( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) )
+		.map( ( entry: ManualPageEntry ) => [ entry.htmlFilePath, entry ] );
 
-	for ( const relativeFilePath of matchFiles( patterns, workspaceRoot ) ) {
-		if ( relativeFilePath.includes( '/_utils/' ) ) {
-			continue;
-		}
-
-		const parsedPath = parseManualTestAssetPath( relativeFilePath );
-
-		if ( !parsedPath ) {
-			continue;
-		}
-
-		const entryKey = `${ parsedPath.packageRootPath }/${ parsedPath.packageName }/${ parsedPath.slug }`;
-		const matchedFiles = groupedFiles.get( entryKey ) || {};
-
-		matchedFiles[ parsedPath.extension ] = relativeFilePath;
-		groupedFiles.set( entryKey, matchedFiles );
-	}
-
-	for ( const matchedFiles of groupedFiles.values() ) {
-		if ( !matchedFiles.html ) {
-			continue;
-		}
-
-		const scriptFilePath = matchedFiles.ts || matchedFiles.js;
-
-		if ( !scriptFilePath ) {
-			continue;
-		}
-
-		const parsedPath = parseManualTestAssetPath( scriptFilePath )!;
-
-		manualPages.push( {
-			displayName: humanizeSlug( parsedPath.slug ),
-			htmlFilePath: toPublicSpecifier( matchedFiles.html ),
-			instructionsFilePath: matchedFiles.md ? toPublicSpecifier( matchedFiles.md ) : undefined,
-			packageName: parsedPath.packageName,
-			scriptFilePath: toPublicSpecifier( scriptFilePath ),
-			slug: parsedPath.slug
-		} );
-	}
-
-	manualPages.sort( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) );
-
-	return new Map( manualPages.map( entry => [ entry.htmlFilePath, entry ] ) );
+	return new Map( manualPages );
 }
 
-function parseManualTestAssetPath( filePath: string ): ParsedManualTestAssetPath | null {
-	const normalizedFilePath = stripLeadingSlash( toPosixPath( filePath ) );
-	const match = normalizedFilePath.match(
-		/^(?:(.*?)\/)?([^/]+)\/tests\/manual\/(.+)\.(html|js|md|ts)$/
-	);
+function matchManualPageFiles( patterns: Array<string>, workspaceRoot: string ): Array<string> {
+	return patterns
+		.map( pattern => `${ pattern.replace( /\/+$/, '' ) }/${ MANUAL_TESTS_DIRECTORY }**/*${ MANUAL_TEST_SUFFIX }` )
+		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
+}
 
-	if ( !match ) {
-		return null;
-	}
+function toManualPageEntry( relativeFilePath: string, workspaceRoot: string ): ManualPageEntry {
+	const directoryStartIndex = relativeFilePath.startsWith( MANUAL_TESTS_DIRECTORY ) ?
+		0 :
+		relativeFilePath.indexOf( `/${ MANUAL_TESTS_DIRECTORY }` ) + 1;
+	const packagePath = relativeFilePath.slice( 0, Math.max( directoryStartIndex - 1, 0 ) );
+	const slugPath = relativeFilePath.slice( directoryStartIndex + MANUAL_TESTS_DIRECTORY.length );
 
 	return {
-		extension: match[ 4 ]! as ParsedManualTestAssetPath[ 'extension' ],
-		packageName: match[ 2 ]!,
-		packageRootPath: match[ 1 ] || '',
-		slug: match[ 3 ]!
+		htmlFilePath: toPublicSpecifier( relativeFilePath ),
+		packageName: packagePath ? packagePath.slice( packagePath.lastIndexOf( '/' ) + 1 ) : basename( workspaceRoot ),
+		slug: slugPath.slice( 0, -MANUAL_TEST_SUFFIX.length )
 	};
-}
-
-function humanizeSlug( slug: string ): string {
-	return slug
-		.split( '/' )
-		.map( pathPart =>
-			pathPart
-				.split( '-' )
-				.map( part => part.charAt( 0 ).toUpperCase() + part.slice( 1 ) )
-				.join( ' ' )
-		)
-		.join( ' / ' );
-}
-
-function matchFiles( patterns: Array<string>, workspaceRoot: string ): Array<string> {
-	return patterns.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
 }

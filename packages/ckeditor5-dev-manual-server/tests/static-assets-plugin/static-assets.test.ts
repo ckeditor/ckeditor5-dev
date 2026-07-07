@@ -3,14 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { Writable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	collectManualStaticAssets,
-	createManualStaticAssetsMiddleware,
-	getManualStaticAssetFilePath
-} from '../../src/manual-test-plugin/static-assets.js';
+	createManualStaticAssetsMiddleware
+} from '../../src/static-assets-plugin/static-assets.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
 describe( 'manual static assets', () => {
@@ -29,15 +29,18 @@ describe( 'manual static assets', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' ),
 			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/notes.md' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/test.js' )
 		] );
 
 		const staticAssets = collectManualStaticAssets( [
-			'packages/*/tests/manual/**/*',
-			'external/ckeditor5/packages/*/tests/manual/**/*'
+			'packages/*',
+			'external/ckeditor5/packages/*'
 		], workspaceRoot );
 
+		// Plain `.html` and `.md` files are static fixtures; `.manual.html` entries and `.js`/`.ts` modules are not collected.
 		expect( [ ...staticAssets.entries() ] ).to.deep.equal( [
 			[
 				'/external/ckeditor5/packages/ckeditor5-bar/tests/manual/sample.jpg',
@@ -48,63 +51,105 @@ describe( 'manual static assets', () => {
 				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
 			],
 			[
+				'/packages/ckeditor5-foo/tests/manual/fixture.html',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' )
+			],
+			[
+				'/packages/ckeditor5-foo/tests/manual/notes.md',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/notes.md' )
+			],
+			[
 				'/packages/ckeditor5-foo/tests/manual/styles.css',
 				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/styles.css' )
 			]
 		] );
 	} );
 
-	test( 'returns the collected file path for a request URL', () => {
-		const staticAssets = new Map( [
-			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
-		] );
+	test( 'serves a collected static asset when the request URL carries a query string', async () => {
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
+		const response = createResponse();
+		const next = vi.fn();
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', filePath ]
+		] ) );
+		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
 
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/assets/image.png?v=1',
-			staticAssets
-		) ).to.equal( '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' );
+		middleware( {
+			method: 'GET',
+			url: '/packages/ckeditor5-foo/tests/manual/assets/image.png?v=1'
+		} as never, response as never, next );
+
+		await finished;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( response.statusCode ).to.equal( 200 );
+		expect( response.getBody() ).to.equal( 'image' );
 	} );
 
-	test( 'does not handle Vite module requests', () => {
-		const staticAssets = new Map( [
-			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
-		] );
-
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/assets/image.png?url',
-			staticAssets
-		) ).to.be.null;
-	} );
-
-	test( 'ignores unknown and invalid request URLs', () => {
-		const staticAssets = new Map( [
-			[ '/packages/ckeditor5-foo/tests/manual/assets/image.png', '/workspace/packages/ckeditor5-foo/tests/manual/assets/image.png' ]
-		] );
-
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/missing.png',
-			staticAssets
-		) ).to.be.null;
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/assets/100%.png',
-			staticAssets
-		) ).to.be.null;
-		expect( getManualStaticAssetFilePath( 'http://%', staticAssets ) ).to.be.null;
-		expect( getManualStaticAssetFilePath( undefined, staticAssets ) ).to.be.null;
-	} );
-
-	test( 'decodes percent-encoded characters in request URLs', () => {
-		const staticAssets = new Map( [
+	test( 'does not serve Vite module requests', () => {
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
 			[
-				'/packages/ckeditor5-foo/tests/manual/assets/sample image.png',
-				'/workspace/packages/ckeditor5-foo/tests/manual/assets/sample image.png'
+				'/packages/ckeditor5-foo/tests/manual/assets/image.png',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
 			]
-		] );
+		] ) );
+		const response = createResponse();
+		const next = vi.fn();
 
-		expect( getManualStaticAssetFilePath(
-			'/packages/ckeditor5-foo/tests/manual/assets/sample%20image.png',
-			staticAssets
-		) ).to.equal( '/workspace/packages/ckeditor5-foo/tests/manual/assets/sample image.png' );
+		middleware( {
+			method: 'GET',
+			url: '/packages/ckeditor5-foo/tests/manual/assets/image.png?url'
+		} as never, response as never, next );
+
+		expect( next ).toHaveBeenCalledTimes( 1 );
+		expect( response.setHeader ).not.toHaveBeenCalled();
+	} );
+
+	test( 'passes through unknown and invalid request URLs', () => {
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
+			[
+				'/packages/ckeditor5-foo/tests/manual/assets/image.png',
+				join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png' )
+			]
+		] ) );
+		const next = vi.fn();
+
+		// Unknown file, undecodable percent-escape, invalid URL and a missing URL all fall through.
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/missing.png' } as never, createResponse() as never, next );
+		middleware(
+			{ method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/assets/100%.png' } as never,
+			createResponse() as never,
+			next
+		);
+		middleware( { method: 'GET', url: 'http://%' } as never, createResponse() as never, next );
+		middleware( { method: 'GET', url: undefined } as never, createResponse() as never, next );
+
+		expect( next ).toHaveBeenCalledTimes( 4 );
+	} );
+
+	test( 'decodes percent-encoded characters in request URLs', async () => {
+		const filePath = await createFile(
+			workspaceRoot,
+			'packages/ckeditor5-foo/tests/manual/assets/sample image.png',
+			'image'
+		);
+		const response = createResponse();
+		const next = vi.fn();
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [
+			[ '/packages/ckeditor5-foo/tests/manual/assets/sample image.png', filePath ]
+		] ) );
+		const finished = new Promise<void>( resolve => response.on( 'finish', resolve ) );
+
+		middleware( {
+			method: 'GET',
+			url: '/packages/ckeditor5-foo/tests/manual/assets/sample%20image.png'
+		} as never, response as never, next );
+
+		await finished;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( response.statusCode ).to.equal( 200 );
+		expect( response.getBody() ).to.equal( 'image' );
 	} );
 
 	test( 'serves collected static assets', async () => {
@@ -128,6 +173,27 @@ describe( 'manual static assets', () => {
 		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Length', 20 );
 		expect( response.setHeader ).toHaveBeenCalledWith( 'Content-Type', 'text/css; charset=utf-8' );
 		expect( response.getBody() ).to.equal( 'body { color: red; }' );
+	} );
+
+	test( 'destroys the response when the asset disappears mid-stream', async () => {
+		const requestPath = '/packages/ckeditor5-foo/tests/manual/assets/image.png';
+		const filePath = await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/assets/image.png', 'image' );
+		const response = createResponse();
+		const next = vi.fn();
+		const destroy = vi.spyOn( response, 'destroy' );
+		const middleware = createManualStaticAssetsMiddleware( () => new Map( [ [ requestPath, filePath ] ] ) );
+		const closed = new Promise<void>( resolve => response.on( 'close', resolve ) );
+
+		middleware( { method: 'GET', url: requestPath } as never, response as never, next );
+
+		// The stream opens the file asynchronously, so a removal in the same tick makes the open fail.
+		rmSync( filePath );
+
+		await closed;
+
+		expect( next ).not.toHaveBeenCalled();
+		expect( destroy ).toHaveBeenCalled();
+		expect( response.getBody() ).to.equal( '' );
 	} );
 
 	test( 'collects static assets when a candidate static asset is requested', async () => {
@@ -161,7 +227,7 @@ describe( 'manual static assets', () => {
 		const response = createResponse();
 		const next = vi.fn();
 
-		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.html' } as never, response as never, next );
+		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.manual.html' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.css?import' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/foo.ts' } as never, response as never, next );
 		middleware( { method: 'GET', url: '/packages/ckeditor5-foo/tests/manual/image.png?url' } as never, response as never, next );
@@ -221,6 +287,10 @@ describe( 'manual static assets', () => {
 		const cases = [
 			[ 'image.avif', 'image/avif' ],
 			[ 'animation.gif', 'image/gif' ],
+			[ 'fixture.htm', 'text/html; charset=utf-8' ],
+			[ 'fixture.html', 'text/html; charset=utf-8' ],
+			[ 'bundle.js.map', 'application/json; charset=utf-8' ],
+			[ 'icon.svg', 'image/svg+xml' ],
 			[ 'favicon.ico', 'image/x-icon' ],
 			[ 'photo.jpg', 'image/jpeg' ],
 			[ 'photo.jpeg', 'image/jpeg' ],

@@ -3,13 +3,40 @@
  * For licensing, see LICENSE.md.
  */
 
-import type { HotPayload, Plugin } from 'vite';
+// Why monkey-patch instead of using the documented `hotUpdate` plugin hook?
+//
+// Spike result (2026-07-02, Vite 8.1.0): under `experimental.bundledDev`, Vite's
+// `handleHMRUpdate()` early-returns on `config.experimental.bundledDev` BEFORE it
+// ever reaches the plugin hook loop, so `hotUpdate`/`handleHotUpdate` are never
+// invoked. Bundled dev HMR instead runs entirely on a separate rolldown dev-engine
+// path (`onHmrUpdates` → `handleHmrOutput` → `client.send`) that has no plugin
+// extension point today. A control run with `bundledDev` disabled confirmed the
+// documented `hotUpdate` hook + suppression + custom events all work fine there —
+// this file only needs to reach for undocumented internals because `bundledDev`
+// must stay enabled.
+//
+// This plugin targets the Vite 8.1+ internals: the `BundledDev` helper exposed as
+// `server.environments.client.bundledDev`, carrying `clients`, `handleHmrOutput`
+// and `devEngine`. Because these internals are undocumented, they move without
+// notice — in Vite 8.0.x the very same members lived directly on the client
+// environment. When a Vite upgrade relocates them again, the patches below turn
+// into no-ops and manual tests regress to full page reloads on every JS edit
+// (losing editor state) instead of showing the refresh prompt.
+//
+// Revisit this plugin (and delete the patches below) once Vite exposes HMR plugin
+// hooks for bundled dev.
+
+import type { Plugin, HotPayload } from 'vite';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
 const isManualRefreshWrappedClient = Symbol( 'isManualRefreshWrappedClient' );
 
-interface BundledDevClientEnvironment {
+/**
+ * The undocumented `BundledDev` internals this plugin patches, exposed as
+ * `server.environments.client.bundledDev` in Vite 8.1+.
+ */
+interface BundledDevInternals {
 	clients?: {
 		setupIfNeeded( client: BundledDevClient, clientId: string ): unknown;
 	};
@@ -22,6 +49,10 @@ interface BundledDevClientEnvironment {
 		hmrOutput: BundledDevHmrOutput,
 		invalidateInformation?: unknown
 	): unknown;
+}
+
+interface BundledDevClientEnvironment {
+	bundledDev?: BundledDevInternals;
 }
 
 interface BundledDevClient {
@@ -39,16 +70,21 @@ export function refreshPlugin(): Plugin {
 		apply: 'serve',
 
 		configureServer( server ) {
-			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
+			const clientEnvironment = server.environments.client as unknown as BundledDevClientEnvironment;
+			const bundledDev = clientEnvironment.bundledDev;
 
-			wrapBundledDevClientSend( clientEnvironment.clients );
-			wrapBundledDevFullReloads( clientEnvironment );
+			if ( !bundledDev ) {
+				return;
+			}
+
+			wrapBundledDevClientSend( bundledDev.clients );
+			wrapBundledDevFullReloads( bundledDev );
 		}
 	};
 }
 
-function wrapBundledDevClientSend( clients: BundledDevClientEnvironment[ 'clients' ] ): void {
-	if ( !clients ) {
+function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): void {
+	if ( !clients || typeof clients.setupIfNeeded != 'function' ) {
 		return;
 	}
 
@@ -68,16 +104,16 @@ function wrapBundledDevClientSend( clients: BundledDevClientEnvironment[ 'client
 	};
 }
 
-function wrapBundledDevFullReloads( clientEnvironment: BundledDevClientEnvironment ): void {
-	if ( !clientEnvironment.handleHmrOutput ) {
+function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
+	if ( typeof bundledDev.handleHmrOutput != 'function' ) {
 		return;
 	}
 
-	const handleHmrOutput = clientEnvironment.handleHmrOutput.bind( clientEnvironment );
+	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
 
-	clientEnvironment.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
+	bundledDev.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
 		if ( hmrOutput.type == 'FullReload' && shouldShowManualRefreshPromptForFiles( files ) ) {
-			clientEnvironment.devEngine?.ensureLatestBuildOutput().catch( () => {} );
+			ensureLatestBuildOutput( bundledDev );
 
 			client.send( {
 				type: 'custom',
@@ -89,6 +125,15 @@ function wrapBundledDevFullReloads( clientEnvironment: BundledDevClientEnvironme
 
 		return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
 	};
+}
+
+function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
+	try {
+		bundledDev.devEngine?.ensureLatestBuildOutput().catch( () => {} );
+	} catch {
+		// The `devEngine` getter throws until initialized. An HMR update arriving before
+		// that is unlikely, but do not let it break the update handling.
+	}
 }
 
 function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayload ) => void ): void {

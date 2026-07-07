@@ -1,0 +1,130 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/*
+ * Adopted into the *document* (not the shadow root) by the <ck-manual-header> component.
+ *
+ * The instructions are authored as light-DOM children of <ck-manual-header> and projected
+ * into the shadow slot. Because slotted content stays in the light DOM, `::slotted()` cannot
+ * reach nested nodes, so instruction typography is scoped here to `ck-manual-header` descendants.
+ */
+
+/* Offset for the fixed header bar injected by the component. */
+body {
+	padding-top: var( --ck-manual-header-height, 44px );
+}
+
+ck-manual-header {
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	line-height: 1.6;
+	color: #0a0a0a;
+}
+
+ck-manual-header h1,
+ck-manual-header h2,
+ck-manual-header h3,
+ck-manual-header h4,
+ck-manual-header h5,
+ck-manual-header h6 {
+	margin: 24px 0 8px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.3;
+}
+
+ck-manual-header h1 { font-size: 20px; }
+ck-manual-header h2 { font-size: 17px; }
+ck-manual-header h3 { font-size: 15px; }
+ck-manual-header h4,
+ck-manual-header h5,
+ck-manual-header h6 { font-size: 14px; }
+
+ck-manual-header > :first-child { margin-top: 0; }
+ck-manual-header > :last-child { margin-bottom: 0; }
+
+ck-manual-header p {
+	margin: 8px 0;
+}
+
+ck-manual-header ul,
+ck-manual-header ol {
+	margin: 8px 0;
+	padding-left: 24px;
+}
+
+ck-manual-header li {
+	margin: 3px 0;
+}
+
+ck-manual-header code {
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: #f0f0f0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.9em;
+}
+
+ck-manual-header kbd {
+	padding: 1px 6px;
+	border: 1px solid rgb(0 0 0 / 15%);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	background: #fafafa;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.85em;
+}
+
+ck-manual-header pre {
+	margin: 12px 0;
+	padding: 12px 14px;
+	border-radius: 8px;
+	background: #f5f5f5;
+	overflow-x: auto;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+ck-manual-header pre code {
+	padding: 0;
+	background: transparent;
+	font-size: inherit;
+}
+
+ck-manual-header a {
+	color: #1d4ed8;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+ck-manual-header blockquote {
+	margin: 12px 0;
+	padding: 4px 14px;
+	border-left: 3px solid rgb(0 0 0 / 15%);
+	color: #525252;
+}
+
+ck-manual-header table {
+	margin: 12px 0;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+ck-manual-header th,
+ck-manual-header td {
+	padding: 6px 10px;
+	border: 1px solid rgb(0 0 0 / 10%);
+	text-align: left;
+}
+
+ck-manual-header th {
+	background: #f5f5f5;
+	font-weight: 600;
+}
+
+ck-manual-header hr {
+	margin: 16px 0;
+	border: 0;
+	border-top: 1px solid rgb(0 0 0 / 10%);
+}

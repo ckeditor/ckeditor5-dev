@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { basename } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { collectManualPages } from '../../src/manual-test-plugin/collect-pages.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
@@ -18,108 +19,113 @@ describe( 'collectManualPages()', () => {
 		await removeDirectory( workspaceRoot );
 	} );
 
-	test( 'collects sorted manual page entries from package and external package paths', async () => {
+	test( 'collects sorted manual page entries from package root globs', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-zeta/tests/manual/nested/demo-case.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-zeta/tests/manual/nested/demo-case.js' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-zeta/tests/manual/nested/demo-case.md' ),
-			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.html' ),
-			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.ts' )
+			createFile( workspaceRoot, 'packages/ckeditor5-zeta/tests/manual/nested/demo-case.manual.html' ),
+			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.manual.html' )
 		] );
 
 		const pages = collectManualPages( [
-			'packages/*/tests/manual/**/*.{html,js,md,ts}',
-			'external/ckeditor5/packages/*/tests/manual/**/*.{html,js,md,ts}'
+			'packages/*',
+			'external/ckeditor5/packages/*'
 		], workspaceRoot );
 
 		expect( [ ...pages.values() ] ).to.deep.equal( [
 			{
-				displayName: 'Sample',
-				htmlFilePath: '/external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.html',
-				instructionsFilePath: undefined,
+				htmlFilePath: '/external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.manual.html',
 				packageName: 'ckeditor5-alpha',
-				scriptFilePath: '/external/ckeditor5/packages/ckeditor5-alpha/tests/manual/sample.ts',
 				slug: 'sample'
 			},
 			{
-				displayName: 'Nested / Demo Case',
-				htmlFilePath: '/packages/ckeditor5-zeta/tests/manual/nested/demo-case.html',
-				instructionsFilePath: '/packages/ckeditor5-zeta/tests/manual/nested/demo-case.md',
+				htmlFilePath: '/packages/ckeditor5-zeta/tests/manual/nested/demo-case.manual.html',
 				packageName: 'ckeditor5-zeta',
-				scriptFilePath: '/packages/ckeditor5-zeta/tests/manual/nested/demo-case.js',
 				slug: 'nested/demo-case'
 			}
 		] );
 	} );
 
-	test( 'ignores utility files, unsupported paths, and incomplete manual pages', async () => {
+	test( 'ignores plain .html fixtures and files outside tests/manual', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/_utils/helper.js' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/html-only.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/script-only.js' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/other/sample.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/other/sample.js' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/other/sample.manual.html' )
 		] );
 
-		expect( collectManualPages( [ 'packages/**/*.{html,js,md,ts}' ], workspaceRoot ) ).to.deep.equal( new Map() );
+		expect( collectManualPages( [ 'packages/*' ], workspaceRoot ) ).to.deep.equal( new Map() );
 	} );
 
 	test( 'collects manual pages from any package tree location matched by the patterns', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/tests/manual/sample.html' ),
-			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/tests/manual/sample.ts' ),
-			createFile( workspaceRoot, 'ckeditor5-top-level/tests/manual/sample.html' ),
-			createFile( workspaceRoot, 'ckeditor5-top-level/tests/manual/sample.js' )
+			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/tests/manual/sample.manual.html' ),
+			createFile( workspaceRoot, 'ckeditor5-top-level/tests/manual/sample.manual.html' )
 		] );
 
 		const pages = collectManualPages( [
-			'custom/tree/*/tests/manual/**/*.{html,js,md,ts}',
-			'ckeditor5-top-level/tests/manual/**/*.{html,js,md,ts}'
+			'custom/tree/*',
+			'ckeditor5-top-level'
 		], workspaceRoot );
 
 		expect( [ ...pages.values() ] ).to.deep.equal( [
 			{
-				displayName: 'Sample',
-				htmlFilePath: '/custom/tree/ckeditor5-custom/tests/manual/sample.html',
-				instructionsFilePath: undefined,
+				htmlFilePath: '/custom/tree/ckeditor5-custom/tests/manual/sample.manual.html',
 				packageName: 'ckeditor5-custom',
-				scriptFilePath: '/custom/tree/ckeditor5-custom/tests/manual/sample.ts',
 				slug: 'sample'
 			},
 			{
-				displayName: 'Sample',
-				htmlFilePath: '/ckeditor5-top-level/tests/manual/sample.html',
-				instructionsFilePath: undefined,
+				htmlFilePath: '/ckeditor5-top-level/tests/manual/sample.manual.html',
 				packageName: 'ckeditor5-top-level',
-				scriptFilePath: '/ckeditor5-top-level/tests/manual/sample.js',
 				slug: 'sample'
 			}
 		] );
 	} );
 
-	test( 'prefers TypeScript test scripts over JavaScript scripts', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/sample.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/sample.js' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/sample.ts' )
-		] );
+	test( 'includes files under _utils/ (no exclusion — the suffix is the opt-in)', async () => {
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/_utils/shared.manual.html' );
 
-		const pages = collectManualPages( [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ], workspaceRoot );
+		const pages = collectManualPages( [ 'packages/*' ], workspaceRoot );
 
-		expect( pages.get( '/packages/ckeditor5-foo/tests/manual/sample.html' )!.scriptFilePath )
-			.to.equal( '/packages/ckeditor5-foo/tests/manual/sample.ts' );
+		expect( pages.has( '/packages/ckeditor5-foo/tests/manual/_utils/shared.manual.html' ) ).to.equal( true );
 	} );
 
 	test( 'sorts manual pages by slug within the same package', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/zeta.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/zeta.ts' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/alpha.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/alpha.ts' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/zeta.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/alpha.manual.html' )
 		] );
 
-		const pages = collectManualPages( [ 'packages/*/tests/manual/**/*.{html,js,md,ts}' ], workspaceRoot );
+		const pages = collectManualPages( [ 'packages/*' ], workspaceRoot );
 
 		expect( [ ...pages.values() ].map( entry => entry.slug ) ).to.deep.equal( [ 'alpha', 'zeta' ] );
+	} );
+
+	test( 'accepts the workspace root itself as a package root pattern', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'tests/manual/sample.manual.html' ),
+			createFile( workspaceRoot, 'tests/manual/nested/demo-case.manual.html' )
+		] );
+
+		const pages = collectManualPages( [ '.' ], workspaceRoot );
+
+		expect( [ ...pages.values() ] ).to.deep.equal( [
+			{
+				htmlFilePath: '/tests/manual/nested/demo-case.manual.html',
+				packageName: basename( workspaceRoot ),
+				slug: 'nested/demo-case'
+			},
+			{
+				htmlFilePath: '/tests/manual/sample.manual.html',
+				packageName: basename( workspaceRoot ),
+				slug: 'sample'
+			}
+		] );
+	} );
+
+	test( 'accepts package root patterns with a trailing slash', async () => {
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/sample.manual.html' );
+
+		const pages = collectManualPages( [ 'packages/*/' ], workspaceRoot );
+
+		expect( pages.has( '/packages/ckeditor5-foo/tests/manual/sample.manual.html' ) ).to.equal( true );
 	} );
 } );

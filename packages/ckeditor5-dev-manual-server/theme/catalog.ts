@@ -97,8 +97,7 @@ function filterEntries( entries: Array<ManualTestEntry>, query: string ): Array<
 
 	return entries.filter( entry =>
 		entry.packageName.toLowerCase().includes( normalized ) ||
-		entry.slug.toLowerCase().includes( normalized ) ||
-		entry.displayName.toLowerCase().includes( normalized )
+		entry.slug.toLowerCase().includes( normalized )
 	);
 }
 
@@ -144,8 +143,7 @@ function renderTestItem( entry: ManualTestEntry ): HTMLElement {
 	const link = testItem.querySelector<HTMLAnchorElement>( '.pkg__link' )!;
 
 	link.href = entry.href;
-	testItem.querySelector<HTMLElement>( '.pkg__test-name' )!.textContent = entry.displayName;
-	testItem.querySelector<HTMLElement>( '.pkg__test-slug' )!.textContent = entry.slug;
+	testItem.querySelector<HTMLElement>( '.pkg__test-name' )!.textContent = entry.slug;
 
 	return testItem;
 }

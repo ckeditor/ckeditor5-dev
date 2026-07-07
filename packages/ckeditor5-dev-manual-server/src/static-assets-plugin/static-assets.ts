@@ -8,7 +8,11 @@ import { globSync, statSync, createReadStream } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { toPublicSpecifier } from '../utils.js';
 
-const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.html', '.js', '.md', '.ts' ] );
+// Extensions handled by Vite's module/HTML pipeline, never served raw as static fixtures.
+// `.manual.html` entries go through the HTML pipeline too, but plain `.html` fixtures must be
+// served raw, so they are excluded by suffix in `isManualStaticAssetPath` rather than by extension.
+const PROCESSED_MANUAL_TEST_EXTENSIONS = new Set( [ '.js', '.ts' ] );
+const MANUAL_TEST_SUFFIX = '.manual.html';
 const VITE_MODULE_QUERY_PARAMETERS = new Set( [
 	'import',
 	'raw',
@@ -21,6 +25,7 @@ type ManualStaticAssetsMiddleware = ( request: IncomingMessage, response: Server
 
 export function collectManualStaticAssets( patterns: Array<string>, workspaceRoot: string ): Map<string, string> {
 	return new Map( patterns
+		.map( pattern => `${ pattern.replace( /\/+$/, '' ) }/tests/manual/**/*` )
 		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ) )
 		.sort()
 		.filter( relativeFilePath => statSync( resolve( workspaceRoot, relativeFilePath ), { throwIfNoEntry: false } )?.isFile() )
@@ -68,15 +73,6 @@ export function createManualStaticAssetsMiddleware( collectStaticAssets: () => M
 	};
 }
 
-export function getManualStaticAssetFilePath(
-	requestUrl: string | undefined,
-	staticAssets: Map<string, string>
-): string | null {
-	const publicPath = getManualStaticAssetPublicPath( requestUrl );
-
-	return publicPath && staticAssets.get( publicPath ) || null;
-}
-
 function getManualStaticAssetPublicPath( requestUrl: string | undefined ): string | null {
 	// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 	const url = URL.parse( requestUrl || '', 'http://localhost' );
@@ -107,6 +103,10 @@ function decodePathname( pathname: string ): string | null {
 }
 
 function isManualStaticAssetPath( filePath: string ): boolean {
+	if ( filePath.endsWith( MANUAL_TEST_SUFFIX ) ) {
+		return false;
+	}
+
 	return extname( filePath ) != '' && !PROCESSED_MANUAL_TEST_EXTENSIONS.has( extname( filePath ) );
 }
 
@@ -120,6 +120,10 @@ function getContentType( extension: string ): string {
 
 		case '.gif':
 			return 'image/gif';
+
+		case '.htm':
+		case '.html':
+			return 'text/html; charset=utf-8';
 
 		case '.ico':
 			return 'image/x-icon';
