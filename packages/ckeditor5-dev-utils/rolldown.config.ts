@@ -19,11 +19,7 @@ const externals = [
 ];
 
 export default defineConfig( {
-	input: {
-		index: 'src/index.ts',
-		'ck-debug-loader': 'src/loaders/ck-debug-loader.ts',
-		'ck-lightningcss-loader': 'src/loaders/ck-lightningcss-loader.ts'
-	},
+	input: 'src/index.ts',
 	platform: 'node',
 	output: {
 		cleanDir: true,

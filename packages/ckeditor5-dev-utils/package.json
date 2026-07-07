@@ -27,17 +27,11 @@
     "@types/through2": "^2.0.41",
     "cli-cursor": "^5.0.0",
     "cli-spinners": "^3.4.0",
-    "css-loader": "^7.1.4",
-    "esbuild-loader": "^4.5.0",
     "glob": "^13.0.6",
     "is-interactive": "^2.0.0",
-    "lightningcss": "^1.32.0",
-    "mini-css-extract-plugin": "^2.10.2",
     "pacote": "^21.5.0",
-    "raw-loader": "^4.0.2",
     "shelljs": "^0.10.0",
     "simple-git": "^3.36.0",
-    "style-loader": "^4.0.0",
     "through2": "^4.0.2",
     "upath": "^2.0.1"
   },
@@ -54,12 +48,5 @@
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "test:dev": "vitest dev"
-  },
-  "depcheckIgnore": [
-    "css-loader",
-    "del",
-    "esbuild-loader",
-    "raw-loader",
-    "style-loader"
-  ]
+  }
 }
