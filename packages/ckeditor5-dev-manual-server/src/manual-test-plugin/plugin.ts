@@ -136,9 +136,12 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				}
 
 				// Every manual test gets the invisible environment bootstrap (license key, inspector,
-				// refresh prompt). The header chrome is opt-in via `<ck-manual-header>` in the source.
+				// refresh prompt). It is prepended to `<head>` so it executes before the test's own
+				// module script: the bootstrap must set the global license key and install the
+				// `window.editor` inspector setter first. The header chrome is opt-in via
+				// `<ck-manual-header>` in the source.
 				const tags: Array<HtmlTagDescriptor> = [
-					createModuleScriptTag( getManualBootstrapScriptPublicPath() )
+					createModuleScriptTag( getManualBootstrapScriptPublicPath(), 'head-prepend' )
 				];
 
 				if ( html.includes( `<${ MANUAL_HEADER_ELEMENT }` ) ) {
@@ -273,14 +276,14 @@ function createManualHeaderTags(
 	];
 }
 
-function createModuleScriptTag( src: string ): HtmlTagDescriptor {
+function createModuleScriptTag( src: string, injectTo: 'head' | 'head-prepend' = 'head' ): HtmlTagDescriptor {
 	return {
 		tag: 'script',
 		attrs: {
 			type: 'module',
 			src
 		},
-		injectTo: 'head'
+		injectTo
 	};
 }
 

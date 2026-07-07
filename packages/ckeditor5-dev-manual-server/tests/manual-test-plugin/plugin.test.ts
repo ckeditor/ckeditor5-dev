@@ -197,8 +197,13 @@ describe( 'manualTestsPlugin()', () => {
 
 		for ( const script of scripts ) {
 			expect( script.attrs!.type ).to.equal( 'module' );
-			expect( script.injectTo ).to.equal( 'head' );
 		}
+
+		const bootstrapScript = scripts.find( script => String( script.attrs!.src ).includes( 'manual-bootstrap.ts' ) )!;
+		const headerScript = scripts.find( script => String( script.attrs!.src ).includes( 'manual-header.ts' ) )!;
+
+		expect( bootstrapScript.injectTo ).to.equal( 'head-prepend' );
+		expect( headerScript.injectTo ).to.equal( 'head' );
 	} );
 
 	test( 'uses the configured base as the catalog href for a non-relative base', async () => {
@@ -236,6 +241,7 @@ describe( 'manualTestsPlugin()', () => {
 		expect( result.tags[ 0 ]!.tag ).to.equal( 'script' );
 		expect( String( result.tags[ 0 ]!.attrs!.src ) ).to.contain( 'manual-bootstrap.ts' );
 		expect( result.tags[ 0 ]!.attrs!.type ).to.equal( 'module' );
+		expect( result.tags[ 0 ]!.injectTo ).to.equal( 'head-prepend' );
 	} );
 
 	test( 'uses the Vite root instead of the current working directory for page entries', async () => {
