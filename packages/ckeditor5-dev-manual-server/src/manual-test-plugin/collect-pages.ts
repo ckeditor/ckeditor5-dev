@@ -4,6 +4,7 @@
  */
 
 import { globSync } from 'node:fs';
+import { basename } from 'node:path';
 import { toPosixPath, toPublicSpecifier } from '../utils.js';
 import type { ManualPageEntry } from './types.js';
 
@@ -19,7 +20,7 @@ const MANUAL_TEST_SUFFIX = '.manual.html';
  */
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
 	const manualPages: Array<[ string, ManualPageEntry ]> = matchManualPageFiles( patterns, workspaceRoot )
-		.map( toManualPageEntry )
+		.map( ( relativeFilePath: string ) => toManualPageEntry( relativeFilePath, workspaceRoot ) )
 		// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 		.toSorted( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) )
 		.map( ( entry: ManualPageEntry ) => [ entry.htmlFilePath, entry ] );
@@ -33,14 +34,16 @@ function matchManualPageFiles( patterns: Array<string>, workspaceRoot: string ):
 		.flatMap( pattern => globSync( pattern, { cwd: workspaceRoot } ).map( match => toPosixPath( match ) ) );
 }
 
-function toManualPageEntry( relativeFilePath: string ): ManualPageEntry {
-	const separatorIndex = relativeFilePath.indexOf( `/${ MANUAL_TESTS_DIRECTORY }` );
-	const packagePath = relativeFilePath.slice( 0, separatorIndex );
-	const slugPath = relativeFilePath.slice( separatorIndex + MANUAL_TESTS_DIRECTORY.length + 1 );
+function toManualPageEntry( relativeFilePath: string, workspaceRoot: string ): ManualPageEntry {
+	const directoryStartIndex = relativeFilePath.startsWith( MANUAL_TESTS_DIRECTORY ) ?
+		0 :
+		relativeFilePath.indexOf( `/${ MANUAL_TESTS_DIRECTORY }` ) + 1;
+	const packagePath = relativeFilePath.slice( 0, Math.max( directoryStartIndex - 1, 0 ) );
+	const slugPath = relativeFilePath.slice( directoryStartIndex + MANUAL_TESTS_DIRECTORY.length );
 
 	return {
 		htmlFilePath: toPublicSpecifier( relativeFilePath ),
-		packageName: packagePath.slice( packagePath.lastIndexOf( '/' ) + 1 ),
+		packageName: packagePath ? packagePath.slice( packagePath.lastIndexOf( '/' ) + 1 ) : basename( workspaceRoot ),
 		slug: slugPath.slice( 0, -MANUAL_TEST_SUFFIX.length )
 	};
 }

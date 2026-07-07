@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import { basename } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { collectManualPages } from '../../src/manual-test-plugin/collect-pages.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
@@ -96,6 +97,28 @@ describe( 'collectManualPages()', () => {
 		const pages = collectManualPages( [ 'packages/*' ], workspaceRoot );
 
 		expect( [ ...pages.values() ].map( entry => entry.slug ) ).to.deep.equal( [ 'alpha', 'zeta' ] );
+	} );
+
+	test( 'accepts the workspace root itself as a package root pattern', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'tests/manual/sample.manual.html' ),
+			createFile( workspaceRoot, 'tests/manual/nested/demo-case.manual.html' )
+		] );
+
+		const pages = collectManualPages( [ '.' ], workspaceRoot );
+
+		expect( [ ...pages.values() ] ).to.deep.equal( [
+			{
+				htmlFilePath: '/tests/manual/nested/demo-case.manual.html',
+				packageName: basename( workspaceRoot ),
+				slug: 'nested/demo-case'
+			},
+			{
+				htmlFilePath: '/tests/manual/sample.manual.html',
+				packageName: basename( workspaceRoot ),
+				slug: 'sample'
+			}
+		] );
 	} );
 
 	test( 'accepts package root patterns with a trailing slash', async () => {
