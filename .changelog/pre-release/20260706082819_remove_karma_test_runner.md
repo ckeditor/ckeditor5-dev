@@ -2,7 +2,6 @@
 type: Major breaking change
 
 scope:
-  - ckeditor5-dev-tests
   - ckeditor5-dev-utils
 
 see:

@@ -1,9 +1,6 @@
 ---
 type: Major breaking change
 
-scope:
-  - ckeditor5-dev-tests
-
 closes:
   - ckeditor/ckeditor5-internal#4595
 ---
