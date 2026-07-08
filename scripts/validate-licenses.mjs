@@ -68,13 +68,6 @@ validateLicenseFiles( {
 			minimistOverride
 		]
 	}, {
-		packageName: '@ckeditor/ckeditor5-dev-tests',
-		dependencies: [
-			{ license: 'MIT', name: 'chokidar', copyright: 'Copyright (c) 2012-2019 Paul Miller (https://paulmillr.com), Elan Shanker.' },
-			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' },
-			minimistOverride
-		]
-	}, {
 		packageName: '@ckeditor/ckeditor5-dev-translations',
 		dependencies: [
 			{ license: 'MIT', name: '@babel/parser', copyright: 'Copyright (C) 2012-2014 by various contributors.' },
