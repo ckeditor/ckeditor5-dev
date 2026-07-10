@@ -27,7 +27,16 @@ vi.stubGlobal( 'console', {
 } );
 
 vi.mock( 'glob' );
-vi.mock( 'typedoc' );
+vi.mock( 'typedoc', async importOriginal => {
+	const typedoc = await importOriginal();
+
+	return {
+		...typedoc,
+		Application: {
+			bootstrapWithPlugins: vi.fn()
+		}
+	};
+} );
 vi.mock( '@ckeditor/typedoc-plugins' );
 
 describe( 'lib/build()', () => {
