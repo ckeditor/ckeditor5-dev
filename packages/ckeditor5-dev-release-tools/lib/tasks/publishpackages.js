@@ -19,7 +19,9 @@ import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
  *
  * The validation contains the following steps:
  *
- * - A user (a CLI session) must be logged to npm on the specified account (`npmOwner`).
+ * - A user (a CLI session) must be logged to npm on the specified account (`npmOwner`). When publishing via npm Trusted Publishing
+ *   (`useOidc`), this check is replaced by verifying that the `NPM_ID_TOKEN` environment variable is set, as `npm whoami` does not
+ *   reflect OIDC authentication.
  * - A package directory must contain `package.json` file.
  * - All files defined in the `optionalEntryPointPackages` option must exist in a package directory.
  * - An npm tag (dist-tag) must match the tag calculated from the package version.
@@ -33,7 +35,10 @@ import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
  *
  * @param {object} options
  * @param {string} options.packagesDirectory Relative path to a location of packages to release.
- * @param {string} options.npmOwner The account name on npm, which should be used to publish the packages.
+ * @param {string} [options.npmOwner] The account name on npm, which should be used to publish the packages.
+ * Required unless `useOidc` is enabled.
+ * @param {boolean} [options.useOidc=false] Whether to publish packages using npm Trusted Publishing (OIDC). When enabled,
+ * the `npm whoami` authorization check is skipped and the `NPM_ID_TOKEN` environment variable must be set instead.
  * @param {ListrTaskObject} [options.listrTask] An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process.
  * @param {string} [options.npmTag='staging'] The npm distribution tag.
@@ -57,6 +62,7 @@ export default async function publishPackages( options ) {
 	const {
 		packagesDirectory,
 		npmOwner,
+		useOidc = false,
 		listrTask,
 		signal = null,
 		npmTag = 'staging',
@@ -70,7 +76,15 @@ export default async function publishPackages( options ) {
 		attempts = 5
 	} = options;
 
-	await assertNpmAuthorization( npmOwner );
+	if ( useOidc ) {
+		// npm exchanges the OIDC token only during supported operations, such as `npm publish`, and `npm whoami`
+		// does not reflect Trusted Publishing authentication. Hence, only the token presence can be verified upfront.
+		if ( !process.env.NPM_ID_TOKEN ) {
+			throw new Error( 'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).' );
+		}
+	} else {
+		await assertNpmAuthorization( npmOwner );
+	}
 
 	// Find packages that would be published...
 	const packagePaths = await workspaces.findPathsToPackages( cwd, packagesDirectory );
