@@ -292,6 +292,37 @@ describe( 'manualTestsPlugin()', () => {
 		expect( result!.code ).to.contain( 'import \'../../theme/index.css\';' );
 	} );
 
+	test( 'does not transform non-script modules', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css', '.ck {}' )
+		] );
+
+		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
+		const styleFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' );
+
+		expect( transform.handler( '.ck {}', styleFilePath ) ).to.equal( undefined );
+	} );
+
+	test( 'transforms every manual test entry script of the same package', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.js', 'console.log( 2 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+		] );
+
+		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
+		const fooFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
+		const barFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.js' );
+		const fooResult = transform.handler( 'console.log( 1 );\n', fooFilePath );
+		const barResult = transform.handler( 'console.log( 2 );\n', barFilePath );
+
+		expect( fooResult!.code ).to.contain( 'import \'../../theme/index.css\';' );
+		expect( barResult!.code ).to.contain( 'import \'../../theme/index.css\';' );
+	} );
+
 	test( 'does not transform helper modules without a sibling manual page', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
