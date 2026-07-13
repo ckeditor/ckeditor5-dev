@@ -153,6 +153,8 @@ These commands accept a mix of environment variables and command line arguments.
   - `--trigger-repository-slug` &mdash; *(Optional)* Repository slug (`org/name`) that triggered the new pipeline.
     Can be omitted if it matches `--slug`.
   - `--release-branch` &mdash; *(Optional)* Branch that leads the release process.
+  - `--pipeline-definition-id` &mdash; *(Optional)* GitHub App pipeline definition ID. When provided, the specified pipeline
+    definition is triggered instead of the project's default OAuth pipeline.
 
 - ⚙️ **`ckeditor5-dev-ci-trigger-snyk-scan`**
 

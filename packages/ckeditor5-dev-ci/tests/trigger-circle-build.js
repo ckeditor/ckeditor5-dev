@@ -48,6 +48,49 @@ describe( 'lib/triggerCircleBuild', () => {
 		);
 	} );
 
+	it( 'should trigger a specified pipeline definition', async () => {
+		vi.mocked( fetchMock ).mockResolvedValue( {
+			json: () => Promise.resolve( {
+				error_message: null
+			} )
+		} );
+
+		await triggerCircleBuild( {
+			circleToken: 'circle-token',
+			commit: 'abcd1234',
+			branch: 'master',
+			repositorySlug: 'ckeditor/ckeditor5-dev',
+			pipelineDefinitionId: 'pipeline-definition-id',
+			releaseBranch: 'master'
+		} );
+
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/gh/ckeditor/ckeditor5-dev/pipeline/run',
+			{
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					definition_id: 'pipeline-definition-id',
+					config: {
+						branch: 'master'
+					},
+					checkout: {
+						branch: 'master'
+					},
+					parameters: {
+						triggerCommitHash: 'abcd1234',
+						isRelease: true
+					}
+				} )
+			}
+		);
+	} );
+
 	it( 'should include the "isRelease=true" parameter when passing the `releaseBranch` option (the same release branch)', async () => {
 		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
