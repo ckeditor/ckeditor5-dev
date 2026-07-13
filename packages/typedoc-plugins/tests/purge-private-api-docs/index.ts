@@ -12,6 +12,7 @@ import {
 	ReflectionKind,
 	SourceReference,
 	DeclarationReflection,
+	normalizePath,
 	type Context,
 	type ProjectReflection
 } from 'typedoc';
@@ -33,7 +34,7 @@ function createInterface( name: string, isPrivate?: boolean ) {
 	const publicPath = '/fixtures/public-package/src/augmentedinterface.ts';
 	const fullFileName = upath.join( __dirname + ( isPrivate ? privatePath : publicPath ) );
 
-	const source = new SourceReference( fullFileName, 1, 1 );
+	const source = new SourceReference( normalizePath( fullFileName ), 1, 1 );
 	source.url = 'https://github.com/ckeditor/ckeditor5-dev/blob/hash/file.ts#L1';
 
 	const reflection = new DeclarationReflection( name, ReflectionKind.Interface );
