@@ -118,6 +118,65 @@ describe( 'publishPackages()', () => {
 			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'fake-pepe' );
 		} );
 
+		it( 'should not verify npm authorization when publishing using OIDC (`useOidc=true`)', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
+
+			const promise = publishPackages( {
+				packagesDirectory: 'packages',
+				useOidc: true,
+				listrTask: {}
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
+		} );
+
+		it( 'should throw when publishing using OIDC while the "NPM_ID_TOKEN" environment variable is not set', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', undefined );
+
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				useOidc: true,
+				listrTask: {}
+			} ) ).rejects.toThrow(
+				'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).'
+			);
+
+			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should throw when publishing using OIDC while the "NPM_ID_TOKEN" environment variable is empty', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', '' );
+
+			await expect( publishPackages( {
+				packagesDirectory: 'packages',
+				useOidc: true,
+				listrTask: {}
+			} ) ).rejects.toThrow(
+				'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).'
+			);
+
+			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should verify npm authorization when the `useOidc` option is disabled explicitly', async () => {
+			vi.mocked( workspaces.findPathsToPackages ).mockReset().mockResolvedValue( [] );
+
+			await publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				useOidc: false,
+				listrTask: {}
+			} );
+
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
+		} );
+
 		it( 'should assert that each found directory is a package', async () => {
 			const promise = publishPackages( {
 				packagesDirectory: 'packages',
