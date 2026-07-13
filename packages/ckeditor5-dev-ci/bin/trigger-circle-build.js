@@ -20,6 +20,7 @@ import triggerCircleBuild from '../lib/trigger-circle-build.js';
  *   - `--trigger-repository-slug` - (optional) a repository slug (org/name) that triggers a new pipeline.
  *     Can be skipped when overlaps with `--slug`.
  *   - `--release-branch` - (optional) define a branch that leads the release process.
+ *   - `--pipeline-definition-id` - (optional) define a GitHub App pipeline to trigger.
  *
  * Example usage:
  * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-trigger-circle-build
@@ -38,6 +39,9 @@ const { values: cliOptions } = parseArgs( {
 		'release-branch': {
 			type: 'string',
 			default: process.env.CKE5_GITHUB_RELEASE_BRANCH
+		},
+		'pipeline-definition-id': {
+			type: 'string'
 		}
 	}
 } );
@@ -46,6 +50,7 @@ const options = {
 	circleToken: process.env.CKE5_CIRCLE_TOKEN,
 	commit: process.env.CIRCLE_SHA1,
 	branch: process.env.CIRCLE_BRANCH,
+	pipelineDefinitionId: cliOptions[ 'pipeline-definition-id' ],
 	releaseBranch: cliOptions[ 'release-branch' ],
 	repositorySlug: cliOptions.slug
 };
