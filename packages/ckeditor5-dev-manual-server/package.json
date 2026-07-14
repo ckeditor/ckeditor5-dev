@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-manual-server",
-  "version": "57.2.0",
+  "version": "57.3.0",
   "description": "Used to extend Vite to create a manual test server for CKEditor 5.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
