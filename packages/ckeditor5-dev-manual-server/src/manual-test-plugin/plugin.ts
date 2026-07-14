@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { readFileSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
@@ -25,6 +25,9 @@ export interface ManualTestsPluginOptions {
 // The custom element that opts a page into the test chrome. The component script and its data
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
+const MANUAL_TEST_SUFFIX = '.manual.html';
+const MANUAL_TESTS_DIRECTORY = '/tests/manual/';
+const THEME_ENTRY_FILE_PATH = 'theme/index.css';
 const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
@@ -44,6 +47,21 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	const getManualPages = manualPagesCache.get;
 	const getManualPageEntryForFile = ( filePath: string ): ManualPageEntry | undefined => {
 		return getManualPages().get( toPublicSpecifier( relative( workspaceRoot, filePath ) ) );
+	};
+	const getManualPageEntryForScriptSpecifier = ( scriptSpecifier: string ): ManualPageEntry | undefined => {
+		const htmlSpecifier = scriptSpecifier.replace( /\.(?:js|ts)$/, MANUAL_TEST_SUFFIX );
+
+		return htmlSpecifier == scriptSpecifier ? undefined : getManualPages().get( htmlSpecifier );
+	};
+	const packageThemeEntryCache = new Map<string, boolean>();
+	const hasPackageThemeEntry = ( packageRootSpecifier: string ): boolean => {
+		if ( !packageThemeEntryCache.has( packageRootSpecifier ) ) {
+			const themeEntryFilePath = resolve( workspaceRoot, stripLeadingSlash( packageRootSpecifier ), THEME_ENTRY_FILE_PATH );
+
+			packageThemeEntryCache.set( packageRootSpecifier, existsSync( themeEntryFilePath ) );
+		}
+
+		return packageThemeEntryCache.get( packageRootSpecifier )!;
 	};
 	const getManualCatalogBuildInputFilePath = () => resolve( workspaceRoot, 'index.html' );
 	const getManualCatalogPublicPath = () => toPublicFilePath( getManualCatalogBuildInputFilePath(), workspaceRoot );
@@ -80,6 +98,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			base = config.base || '/';
 
 			manualPagesCache.invalidate();
+			packageThemeEntryCache.clear();
 
 			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
@@ -118,6 +137,46 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			}
 
 			return null;
+		},
+
+		transform: {
+			order: 'pre',
+
+			// Loads the package theme entry stylesheet (`theme/index.css`) in manual tests.
+			// Package stylesheets are imported by the package entry module (`src/index.ts`), not by
+			// individual source modules, and manual tests import source modules directly - without
+			// this they would render without the package's own styles. Stylesheets of other packages
+			// still arrive transitively through their package entry imports. Only the entry script of
+			// a discovered manual page is transformed; helper modules receive the styles through the
+			// entry that imports them. The import is appended after the module code: import
+			// declarations evaluate in source order, so the package styles load after the dependency
+			// styles pulled by the module's own imports, matching the cascade of the built bundles
+			// (where the package entry imports its stylesheet last). Appending also keeps the
+			// original line numbers, so no source map is needed.
+			handler( code, id ) {
+				const scriptSpecifier = toPublicSpecifier( relative( workspaceRoot, id.split( '?' )[ 0 ]! ) );
+				const entry = getManualPageEntryForScriptSpecifier( scriptSpecifier );
+
+				if ( !entry ) {
+					return;
+				}
+
+				const packageRootSpecifier = entry.htmlFilePath.slice( 0, entry.htmlFilePath.indexOf( MANUAL_TESTS_DIRECTORY ) );
+
+				if ( !hasPackageThemeEntry( packageRootSpecifier ) ) {
+					return;
+				}
+
+				const themeEntrySpecifier = posix.relative(
+					posix.dirname( scriptSpecifier ),
+					`${ packageRootSpecifier }/${ THEME_ENTRY_FILE_PATH }`
+				);
+
+				return {
+					code: `${ code }\nimport '${ themeEntrySpecifier }';\n`,
+					map: null
+				};
+			}
 		},
 
 		transformIndexHtml: {
