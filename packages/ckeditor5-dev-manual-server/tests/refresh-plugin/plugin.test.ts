@@ -214,6 +214,34 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
+	test( 'keeps bundled dev output other than full reloads', () => {
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( [] );
+		const handleHmrOutput = server.environments.client.bundledDev.handleHmrOutput;
+		const hmrOutput = { type: 'Patch' };
+		const invalidateInformation = {};
+
+		configureServer( server );
+		( server.environments.client.bundledDev.handleHmrOutput as (
+			client: unknown,
+			files: Array<string>,
+			hmrOutput: unknown,
+			invalidateInformation?: unknown
+		) => void )(
+			client,
+			[ '/workspace/article.css' ],
+			hmrOutput,
+			invalidateInformation
+		);
+
+		expect( handleHmrOutput ).toHaveBeenCalledExactlyOnceWith(
+			client,
+			[ '/workspace/article.css' ],
+			hmrOutput,
+			invalidateInformation
+		);
+	} );
+
 	test( 'does not crash when the bundled dev helper is unavailable', () => {
 		const server = createBundledDevServer();
 
