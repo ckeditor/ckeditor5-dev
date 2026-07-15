@@ -154,18 +154,64 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'keeps bundled dev HTML full reloads', () => {
+	test( 'sends bundled dev HTML full reloads only to the affected client', async () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const otherClientPayloads: Array<HotPayload> = [];
+		const handledFullReloads: Array<Array<string>> = [];
+		const server = createBundledDevServer( handledFullReloads );
+		const client = createBundledDevClient( clientPayloads );
+		const otherClient = createBundledDevClient( otherClientPayloads );
+
+		configureServer( server );
+		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
+		server.environments.client.bundledDev.clients.setupIfNeeded( otherClient, 'client-2' );
+		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
+		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
+
+		expect( handledFullReloads ).to.deep.equal( [] );
+		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
+		expect( clientPayloads ).to.deep.equal( [ {
+			type: 'full-reload',
+			path: '/article.html'
+		} ] );
+		expect( otherClientPayloads ).to.deep.equal( [] );
+	} );
+
+	test( 'sends bundled dev CSS full reloads only to the affected client', async () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
 		const server = createBundledDevServer( handledFullReloads );
 		const client = createBundledDevClient( clientPayloads );
 
 		configureServer( server );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
+		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
+		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/styles.css' ], { type: 'FullReload' } );
+		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
 
-		expect( handledFullReloads ).to.deep.equal( [ [ '/workspace/article.html' ] ] );
-		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).not.toHaveBeenCalled();
-		expect( clientPayloads ).to.deep.equal( [] );
+		expect( handledFullReloads ).to.deep.equal( [] );
+		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
+		expect( clientPayloads ).to.deep.equal( [ {
+			type: 'full-reload',
+			path: undefined
+		} ] );
+	} );
+
+	test( 'reloads the affected client when refreshing the build output fails', async () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput =
+			vi.fn().mockRejectedValue( new Error( 'build output unavailable' ) );
+
+		configureServer( server );
+		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
+		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
+
+		expect( clientPayloads ).to.deep.equal( [ {
+			type: 'full-reload',
+			path: '/article.html'
+		} ] );
 	} );
 
 	test( 'does not crash when the bundled dev helper is unavailable', () => {
@@ -196,6 +242,9 @@ describe( 'refreshPlugin()', () => {
 	// exposed as `server.environments.client.bundledDev`.
 	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
 		return {
+			config: {
+				root: '/workspace'
+			},
 			environments: {
 				client: {
 					bundledDev: {

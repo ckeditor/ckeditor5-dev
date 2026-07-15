@@ -26,7 +26,9 @@
 // Revisit this plugin (and delete the patches below) once Vite exposes HMR plugin
 // hooks for bundled dev.
 
+import { relative } from 'node:path';
 import type { Plugin, HotPayload } from 'vite';
+import { toPosixPath } from '../utils.js';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
@@ -78,7 +80,7 @@ export function refreshPlugin(): Plugin {
 			}
 
 			wrapBundledDevClientSend( bundledDev.clients );
-			wrapBundledDevFullReloads( bundledDev );
+			wrapBundledDevFullReloads( bundledDev, server.config.root );
 		}
 	};
 }
@@ -104,7 +106,7 @@ function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): 
 	};
 }
 
-function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
+function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRoot: string ): void {
 	if ( typeof bundledDev.handleHmrOutput != 'function' ) {
 		return;
 	}
@@ -112,19 +114,47 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals ): void {
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
 
 	bundledDev.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
-		if ( hmrOutput.type == 'FullReload' && shouldShowManualRefreshPromptForFiles( files ) ) {
-			ensureLatestBuildOutput( bundledDev );
+		if ( hmrOutput.type == 'FullReload' ) {
+			if ( shouldShowManualRefreshPromptForFiles( files ) ) {
+				ensureLatestBuildOutput( bundledDev );
 
-			client.send( {
-				type: 'custom',
-				event: MANUAL_REFRESH_EVENT_NAME
-			} );
+				client.send( {
+					type: 'custom',
+					event: MANUAL_REFRESH_EVENT_NAME
+				} );
+			} else {
+				reloadClientAfterLatestBuildOutput( bundledDev, client, files, workspaceRoot );
+			}
 
 			return;
 		}
 
 		return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
 	};
+}
+
+async function reloadClientAfterLatestBuildOutput(
+	bundledDev: BundledDevInternals,
+	client: BundledDevClient,
+	files: Array<string>,
+	workspaceRoot: string
+): Promise<void> {
+	try {
+		await bundledDev.devEngine?.ensureLatestBuildOutput();
+	} catch {
+		// Reload using the best output available instead of leaving the page stale.
+	}
+
+	client.send( {
+		type: 'full-reload',
+		path: getChangedHtmlPublicPath( files, workspaceRoot )
+	} );
+}
+
+function getChangedHtmlPublicPath( files: Array<string>, workspaceRoot: string ): string | undefined {
+	const htmlFile = files.find( file => file.endsWith( '.html' ) );
+
+	return htmlFile ? `/${ toPosixPath( relative( workspaceRoot, htmlFile ) ) }` : undefined;
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
