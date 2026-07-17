@@ -152,6 +152,31 @@ test( 'ignores raw CSS imports handled by the rawImport plugin', async () => {
 	expect( stylesheet ).not.toContain( '.direct-import' );
 } );
 
+test( 'leaves raw CSS imports to other plugins regardless of the plugin order', async () => {
+	const bundle = await rolldown( {
+		input: join( import.meta.dirname, './fixtures/input-raw-import.ts' ),
+		// Unlike in the default configuration, `bundleCss()` is registered before `rawImport()`.
+		plugins: [ bundleCss( { fileName: 'styles.css' } ), rawImport() ]
+	} );
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		assetFileNames: '[name][extname]',
+		file: 'input.js'
+	} );
+	const chunk = output.find( item => item.type === 'chunk' )!;
+
+	expect( chunk.code ).toContain( '.direct-import' );
+	expect( getAsset( output, 'styles.css' ).source.toString() ).not.toContain( '.direct-import' );
+} );
+
+test( 'derives editor and content bundle names from a fileName without the ".css" extension', async () => {
+	const output = await generateBundle( { fileName: 'styles' } );
+
+	expect( getAsset( output, 'styles' ).source.toString() ).toContain( '.order-one' );
+	expect( getAsset( output, 'styles-editor.css' ).source.toString() ).toContain( '.order-one' );
+	expect( getAsset( output, 'styles-content.css' ).source.toString() ).toContain( '.order-two' );
+} );
+
 test( 'resolves package CSS imports via Rolldown resolution and ignores imports in comments and strings', async () => {
 	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-package-import.ts' );
 	const stylesheet = getAsset( output, 'styles-editor.css' ).source.toString();

@@ -181,7 +181,7 @@ test( 'Collects CSS imports of modules reachable only through an inlined dynamic
 	} ) );
 } );
 
-test( 'Traverses every module of chunks without a facade module and caches shared results', async () => {
+test( 'Traverses every module of entry and dynamic entry chunks without a facade module and caches shared results', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
 		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
@@ -206,7 +206,13 @@ test( 'Traverses every module of chunks without a facade module and caches share
 	} );
 	const bundle: OutputBundle = {
 		'first.js': createChunk( 'first', [ '/src/shared.ts' ], { facadeModuleId: null } ),
-		'second.js': createChunk( 'second', [ '/src/shared.ts', '/src/second.ts' ], { facadeModuleId: null } )
+
+		// The `/src/no-module-info.ts` module has no module info registered, so it ends the traversal.
+		'second.js': createChunk( 'second', [ '/src/shared.ts', '/src/second.ts', '/src/no-module-info.ts' ], {
+			facadeModuleId: null,
+			isEntry: false,
+			isDynamicEntry: true
+		} )
 	};
 
 	await runGenerateBundle( plugin, context, {
