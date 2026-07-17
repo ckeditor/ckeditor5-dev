@@ -114,22 +114,23 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRo
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
 
 	bundledDev.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
-		if ( hmrOutput.type == 'FullReload' ) {
-			if ( shouldShowManualRefreshPromptForFiles( files ) ) {
-				ensureLatestBuildOutput( bundledDev );
+		if ( hmrOutput.type != 'FullReload' ) {
+			return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
+		}
 
-				client.send( {
-					type: 'custom',
-					event: MANUAL_REFRESH_EVENT_NAME
-				} );
-			} else {
-				reloadClientAfterLatestBuildOutput( bundledDev, client, files, workspaceRoot );
-			}
+		if ( !shouldShowManualRefreshPromptForFiles( files ) ) {
+			// Vite invokes this synchronous handler without awaiting its result.
+			reloadClientAfterLatestBuildOutput( bundledDev, client, files, workspaceRoot );
 
 			return;
 		}
 
-		return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
+		ensureLatestBuildOutput( bundledDev );
+
+		client.send( {
+			type: 'custom',
+			event: MANUAL_REFRESH_EVENT_NAME
+		} );
 	};
 }
 
