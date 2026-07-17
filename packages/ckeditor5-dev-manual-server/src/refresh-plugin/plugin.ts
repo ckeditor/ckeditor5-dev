@@ -26,9 +26,8 @@
 // Revisit this plugin (and delete the patches below) once Vite exposes HMR plugin
 // hooks for bundled dev.
 
-import { relative } from 'node:path';
 import type { Plugin, HotPayload } from 'vite';
-import { toPosixPath } from '../utils.js';
+import { toPublicFilePath } from '../utils.js';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
@@ -155,7 +154,7 @@ async function reloadClientAfterLatestBuildOutput(
 function getChangedHtmlPublicPath( files: Array<string>, workspaceRoot: string ): string | undefined {
 	const htmlFile = files.find( file => file.endsWith( '.html' ) );
 
-	return htmlFile ? `/${ toPosixPath( relative( workspaceRoot, htmlFile ) ) }` : undefined;
+	return htmlFile ? toPublicFilePath( htmlFile, workspaceRoot ) : undefined;
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
