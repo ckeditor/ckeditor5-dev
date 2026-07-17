@@ -3,5 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-import './first.css';
+import './index-editor.css';
 import './nested.ts';

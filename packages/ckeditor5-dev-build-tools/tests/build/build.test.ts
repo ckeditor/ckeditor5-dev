@@ -88,6 +88,10 @@ function expectFileNames( output: Rolldown.RolldownOutput[ 'output' ], fileNames
 	expect( actualFileNames ).toEqual( expect.arrayContaining( fileNames ) );
 }
 
+function getAsset( output: Rolldown.RolldownOutput[ 'output' ], fileName: string ): Rolldown.OutputAsset {
+	return output.find( item => item.type === 'asset' && item.fileName === fileName ) as Rolldown.OutputAsset;
+}
+
 /**
  * Input
  */
@@ -113,6 +117,11 @@ test( 'TypeScript input', async () => {
 		'index-editor.css',
 		'index-content.css'
 	] );
+	expect( getAsset( output, 'index.css' ).source.toString() ).toContain( 'border: 1px solid red' );
+	expect( getAsset( output, 'index.css' ).source.toString() ).toContain( '.ck-content' );
+	expect( getAsset( output, 'index.css' ).source.toString() ).not.toContain( '@import' );
+	expect( getAsset( output, 'index-editor.css' ).source.toString() ).toContain( 'border: 1px solid red' );
+	expect( getAsset( output, 'index-content.css' ).source.toString() ).toContain( '.ck-content' );
 } );
 
 test( 'TypeScript declarations', async () => {
@@ -175,6 +184,13 @@ test( 'Browser parameter set to `true` and name parameter not set', async () => 
 		'index-editor.css',
 		'index-content.css'
 	] );
+
+	for ( const fileName of [ 'index.css', 'index-editor.css', 'index-content.css' ] ) {
+		expect( getAsset( output, fileName ).source.toString() ).not.toContain( '@import' );
+	}
+
+	expect( getAsset( output, 'index.css' ).source.toString() ).toContain( 'border: 1px solid red' );
+	expect( getAsset( output, 'index.css' ).source.toString() ).toContain( '.ck-content' );
 } );
 
 test( 'Browser parameter set to `true` and name parameter set', async () => {
@@ -253,6 +269,22 @@ test( 'Custom output name', async () => {
 	] );
 } );
 
+test.each( [ 'ckeditor5', 'ckeditor5-premium-features' ] )( 'Uses the JavaScript basename for %s CSS outputs', async outputName => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		output: `dist/${ outputName }.js`,
+		tsconfig: 'tsconfig.json'
+	} );
+
+	expectFileNames( output, [
+		`${ outputName }.js`,
+		`${ outputName }.css`,
+		`${ outputName }-editor.css`,
+		`${ outputName }-content.css`
+	] );
+	expect( getAsset( output, `${ outputName }.css` ).source.toString() ).not.toContain( '@import' );
+} );
+
 /**
  * Banner
  */
@@ -321,6 +353,8 @@ test( 'Source map', async () => {
 		'index.js',
 		'index.js.map',
 		'index.css.map',
+		'index-editor.css.map',
+		'index-content.css.map',
 		'index.css',
 		'index-editor.css',
 		'index-content.css'
@@ -338,6 +372,9 @@ test( 'Source map for chunk re-exporting external modules', async () => {
 	expectFileNames( output, [
 		'index.js',
 		'index.js.map',
+		'index.css.map',
+		'index-editor.css.map',
+		'index-content.css.map',
 		'index.css',
 		'index-editor.css',
 		'index-content.css'

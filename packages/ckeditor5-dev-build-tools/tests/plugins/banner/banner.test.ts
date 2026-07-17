@@ -31,7 +31,8 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 		input: join( import.meta.dirname, './fixtures/input.ts' ),
 		plugins: [
 			bundleCss( {
-				fileName: 'styles.css'
+				fileName: 'styles.css',
+				sourceMap: sourcemap
 			} ),
 
 			addBanner( options )
@@ -80,6 +81,8 @@ test( 'Adds banner to .js and .css files by default', async () => {
 
 	verifyChunk( output, 'input.js', banner );
 	verifyAsset( output, 'styles.css', banner );
+	verifyAsset( output, 'styles-editor.css', banner );
+	verifyAsset( output, 'styles-content.css', banner );
 } );
 
 test( 'Updates the source map', async () => {
@@ -87,10 +90,15 @@ test( 'Updates the source map', async () => {
 	const banner = '/* CUSTOM BANNER */\n';
 	const output = await generateBundle( { banner }, true );
 
-	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
+	const unmodifiedSourceMap = unmodifiedOutput.find( item => item.fileName === 'styles-editor.css.map' ) as OutputAsset;
+	const sourceMap = output.find( item => item.fileName === 'styles-editor.css.map' ) as OutputAsset;
+
+	expect( unmodifiedSourceMap.source ).not.toBe( sourceMap.source );
 
 	verifyChunk( output, 'input.js', banner );
 	verifyAsset( output, 'styles.css', banner );
+	verifyAsset( output, 'styles-editor.css', banner );
+	verifyAsset( output, 'styles-content.css', banner );
 } );
 
 test( 'Allows overriding "include" option', async () => {

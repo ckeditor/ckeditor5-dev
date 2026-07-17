@@ -19,12 +19,8 @@ async function generateBundle(
 		resolve: {
 			modules: [ join( import.meta.dirname, './fixtures/packages' ), 'node_modules' ]
 		},
-		plugins: [
-			...plugins,
-			bundleCss( options )
-		]
+		plugins: [ ...plugins, bundleCss( options ) ]
 	} );
-
 	const generateOptions: OutputOptions = {
 		format: 'esm',
 		assetFileNames: '[name][extname]',
@@ -35,9 +31,7 @@ async function generateBundle(
 		generateOptions.file = 'input.js';
 	}
 
-	const { output } = await bundle.generate( generateOptions );
-
-	return output;
+	return ( await bundle.generate( generateOptions ) ).output;
 }
 
 function getAsset( output: RolldownOutput[ 'output' ], fileName: string ): OutputAsset {
@@ -49,123 +43,133 @@ function getAsset( output: RolldownOutput[ 'output' ], fileName: string ): Outpu
 	return asset as OutputAsset;
 }
 
-test( 'Emits a single CSS bundle preserving import order', async () => {
-	const output = await generateBundle( {
-		fileName: 'styles.css'
-	} );
+test( 'bundles explicit editor and content roots into three self-contained assets in source order', async () => {
+	const output = await generateBundle( { fileName: 'styles.css' } );
+	const combined = getAsset( output, 'styles.css' ).source.toString();
+	const editor = getAsset( output, 'styles-editor.css' ).source.toString();
+	const content = getAsset( output, 'styles-content.css' ).source.toString();
 
-	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
-
-	expect( stylesheet ).toContain( '.order-one' );
-	expect( stylesheet ).toContain( '.order-two' );
-	expect( stylesheet.indexOf( '.order-one' ) ).toBeLessThan( stylesheet.indexOf( '.order-two' ) );
-	expect( output.filter( output => output.fileName.endsWith( '.css' ) ) ).toHaveLength( 1 );
+	expect( combined ).toContain( '.order-one' );
+	expect( combined ).toContain( '.order-two' );
+	expect( combined.indexOf( '.order-one' ) ).toBeLessThan( combined.indexOf( '.order-two' ) );
+	expect( editor ).toContain( '.order-one' );
+	expect( editor ).not.toContain( '.order-two' );
+	expect( content ).toContain( '.order-two' );
+	expect( content ).not.toContain( '.order-one' );
+	expect( output.filter( output => output.fileName.endsWith( '.css' ) ) ).toHaveLength( 3 );
+	expect( [ combined, editor, content ].every( css => !css.includes( '@import' ) ) ).toBe( true );
 } );
 
-test( 'Allows minifying the generated bundle', async () => {
-	const unminifiedOutput = await generateBundle( {
-		fileName: 'styles.css'
-	} );
+test( 'bundles monorepo source dependency roots into self-contained assets', async () => {
+	const output = await generateBundle( {
+		fileName: 'aggregate.css'
+	}, './fixtures/monorepo/packages/aggregate-package/src/index.ts' );
+	const combined = getAsset( output, 'aggregate.css' ).source.toString();
+	const editor = getAsset( output, 'aggregate-editor.css' ).source.toString();
+	const content = getAsset( output, 'aggregate-content.css' ).source.toString();
 
-	const minifiedOutput = await generateBundle( {
-		fileName: 'styles.css',
-		minify: true
-	} );
+	expect( editor ).not.toContain( '@import' );
+	expect( content ).not.toContain( '@import' );
+	expect( editor ).toContain( '.aggregate-editor-leaf' );
+	expect( editor ).toContain( '.dependency-editor-leaf' );
+	expect( content ).toContain( '.aggregate-content-leaf' );
+	expect( content ).toContain( '.dependency-content-leaf' );
 
-	const unminifiedStylesheet = getAsset( unminifiedOutput, 'styles.css' ).source.toString();
-	const minifiedStylesheet = getAsset( minifiedOutput, 'styles.css' ).source.toString();
+	const combinedOrder = [
+		'.aggregate-editor-leaf',
+		'.aggregate-content-leaf',
+		'.dependency-editor-leaf',
+		'.dependency-content-leaf'
+	].map( selector => combined.indexOf( selector ) );
 
-	expect( minifiedStylesheet.length ).toBeLessThan( unminifiedStylesheet.length );
+	expect( combinedOrder ).toEqual( [ ...combinedOrder ].sort( ( a, b ) => a - b ) );
+	expect( combinedOrder.every( index => index >= 0 ) ).toBe( true );
+
+	// CSS entry points imported multiple times must be bundled only once.
+	expect( editor.match( /\.dependency-editor-leaf/g ) ).toHaveLength( 1 );
 } );
 
-test( 'Emits source map assets when enabled', async () => {
-	const output = await generateBundle( {
-		fileName: 'styles.css',
+test( 'always emits all three assets when no CSS roots are imported', async () => {
+	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-empty.ts' );
+
+	expect( getAsset( output, 'styles.css' ).source.toString() ).toBe( '\n' );
+	expect( getAsset( output, 'styles-editor.css' ).source.toString() ).toBe( '\n' );
+	expect( getAsset( output, 'styles-content.css' ).source.toString() ).toBe( '\n' );
+} );
+
+test( 'throws when CSS is imported directly instead of through a theme entry point', async () => {
+	await expect( generateBundle( { fileName: 'styles.css' }, './fixtures/input-direct-css.ts' ) )
+		.rejects.toThrow( 'CSS must be imported through an "index-editor.css" or "index-content.css" entry point' );
+} );
+
+test( 'allows minifying all generated bundles', async () => {
+	const unminified = await generateBundle( { fileName: 'styles.css' } );
+	const minified = await generateBundle( { fileName: 'styles.css', minify: true } );
+
+	for ( const fileName of [ 'styles.css', 'styles-editor.css', 'styles-content.css' ] ) {
+		expect( getAsset( minified, fileName ).source.toString().length )
+			.toBeLessThan( getAsset( unminified, fileName ).source.toString().length );
+	}
+} );
+
+test( 'emits source maps for all three assets, including empty outputs', async () => {
+	const output = await generateBundle( { fileName: 'styles.css', sourceMap: true } );
+
+	for ( const fileName of [ 'styles.css', 'styles-editor.css', 'styles-content.css' ] ) {
+		const stylesheet = getAsset( output, fileName ).source.toString();
+		const sourceMap = JSON.parse( getAsset( output, `${ fileName }.map` ).source.toString() );
+
+		expect( stylesheet ).toContain( `sourceMappingURL=${ fileName }.map` );
+		expect( sourceMap.file ).toBe( fileName );
+	}
+
+	const emptyOutput = await generateBundle( {
+		fileName: 'empty.css',
 		sourceMap: true
-	} );
+	}, './fixtures/input-empty.ts' );
 
-	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
-	const sourceMapAsset = getAsset( output, 'styles.css.map' ).source.toString();
-	const sourceMap = JSON.parse( sourceMapAsset ) as { sources: Array<string> };
-
-	expect( stylesheet ).toContain( 'sourceMappingURL=styles.css.map' );
-	expect( sourceMap.sources.some( source => source.endsWith( 'first.css' ) ) ).toBe( true );
-	expect( sourceMap.sources.some( source => source.endsWith( 'second.css' ) ) ).toBe( true );
+	expect( getAsset( emptyOutput, 'empty-editor.css.map' ) ).toBeDefined();
+	expect( getAsset( emptyOutput, 'empty-content.css.map' ) ).toBeDefined();
 } );
 
-test( 'Works with output.dir (without output.file)', async () => {
-	const output = await generateBundle( {
-		fileName: 'styles.css'
-	}, './fixtures/input.ts', [], {
+test( 'works with output.dir and preserved modules', async () => {
+	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input.ts', [], {
 		dir: 'dist',
 		preserveModules: true
 	} );
 
-	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
-
-	expect( stylesheet ).toContain( '.order-one' );
-	expect( stylesheet ).toContain( '.order-two' );
+	expect( getAsset( output, 'styles-editor.css' ).source.toString() ).toContain( '.order-one' );
 } );
 
-test( 'Uses transformed CSS code from previous plugins', async () => {
-	const transformCssPlugin: Plugin = {
-		name: 'transform-css-fixture',
-
-		transform( code, id ) {
-			if ( id.endsWith( 'first.css' ) ) {
-				return `${ code }\n.transformed-by-plugin { color: green; }`;
-			}
-		}
-	};
-
-	const output = await generateBundle( {
-		fileName: 'styles.css'
-	}, './fixtures/input.ts', [ transformCssPlugin ] );
-
-	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
-
-	expect( stylesheet ).toContain( '.transformed-by-plugin' );
-} );
-
-test( 'Resolves package CSS imports via Rolldown resolution', async () => {
-	const output = await generateBundle( {
-		fileName: 'styles.css'
-	}, './fixtures/input-package-import.ts' );
-
-	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
+test( 'resolves package CSS imports via Rolldown resolution and ignores imports in comments and strings', async () => {
+	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-package-import.ts' );
+	const stylesheet = getAsset( output, 'styles-editor.css' ).source.toString();
 
 	expect( stylesheet ).toContain( '.from-package' );
 	expect( stylesheet ).toContain( '.package-import-local' );
+
+	// Imports inside comments and strings reference nonexistent packages,
+	// so resolving them would fail the build. Strings must remain intact.
+	expect( stylesheet ).toContain( 'string-package/style.css' );
+	expect( /^@import/m.test( stylesheet ) ).toBe( false );
 } );
 
-test( 'Emits Lightning CSS warnings through Rolldown warnings', async () => {
+test( 'emits Lightning CSS warnings through Rolldown warnings', async () => {
 	const warnings: Array<string> = [];
-
 	const bundle = await rolldown( {
 		input: join( import.meta.dirname, './fixtures/input-warning.ts' ),
-		onwarn( warning ) {
-			warnings.push( warning.message );
-		},
-		plugins: [
-			bundleCss( {
-				fileName: 'styles.css'
-			} )
-		]
+		onwarn: warning => warnings.push( warning.message ),
+		plugins: [ bundleCss( { fileName: 'styles.css' } ) ]
 	} );
 
-	await bundle.generate( {
-		format: 'esm',
-		assetFileNames: '[name][extname]',
-		file: 'input.js'
-	} );
+	await bundle.generate( { format: 'esm', assetFileNames: '[name][extname]', file: 'input.js' } );
 
 	expect( warnings.some( warning => warning.includes( 'Lightning CSS warning in' ) ) ).toBe( true );
 	expect( warnings.some( warning => warning.includes( 'Unknown at rule: @unknown' ) ) ).toBe( true );
 	expect( warnings.some( warning => warning.includes( 'warning.css' ) ) ).toBe( true );
 } );
 
-test( 'Throws when encountering external CSS imports', async () => {
-	await expect( generateBundle( {
-		fileName: 'styles.css'
-	}, './fixtures/input-external-import.ts' ) ).rejects.toThrow( 'External CSS imports are not supported' );
+test( 'throws when encountering external CSS imports', async () => {
+	await expect( generateBundle( { fileName: 'styles.css' }, './fixtures/input-external-import.ts' ) )
+		.rejects.toThrow( 'External CSS imports are not supported' );
 } );

@@ -3,9 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-disable-next-line css/no-invalid-at-rules -- Triggers a Lightning CSS warning on purpose. */
-@unknown test;
-
-.warning {
+.dependency-editor-leaf {
 	color: hsl(0deg 100% 50%);
 }

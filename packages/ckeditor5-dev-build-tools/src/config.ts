@@ -13,7 +13,6 @@ import { addBanner } from './plugins/banner.js';
 import { bundleCss } from './plugins/bundleCss.js';
 import { declarationFiles } from './plugins/declarations.js';
 import { rawImport } from './plugins/rawImport.js';
-import { splitCss } from './plugins/splitCss.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
@@ -112,6 +111,7 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 			}
 		},
 		experimental: {
+			lazyBarrel: true,
 			nativeMagicString: true,
 			attachDebugInfo: 'none'
 		},
@@ -148,20 +148,12 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 			rawImport(),
 
 			/**
-			 * Allows using imports and nesting in CSS and extracts output CSS to a separate file.
+			 * Bundles explicit editor and content CSS entry points and emits combined, editor and content assets.
 			 */
 			bundleCss( {
 				fileName: cssFileName,
 				minify,
 				sourceMap
-			} ),
-
-			/**
-			 * Generates CSS files containing only content and only editor styles.
-			 */
-			splitCss( {
-				baseFileName,
-				minimize: minify
 			} ),
 
 			/**

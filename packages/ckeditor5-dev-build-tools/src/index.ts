@@ -9,5 +9,4 @@ export { bundleCss, type RollupBundleCssOptions } from './plugins/bundleCss.js';
 export { declarationFiles, type RolldownDeclarationOptions } from './plugins/declarations.js';
 export { loadSourcemaps } from './plugins/loadSourcemaps.js';
 export { rawImport } from './plugins/rawImport.js';
-export { splitCss, type RollupSplitCssOptions } from './plugins/splitCss.js';
 export { translations, type RollupTranslationsOptions } from './plugins/translations.js';

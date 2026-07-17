@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import './warning.css';
+import './warning/index-editor.css';
