@@ -43,6 +43,8 @@ const CONTENT_ENTRY_FILE_NAME = 'index-content.css';
 
 const QUERY_AND_HASH_REGEXP = /[#?].*$/;
 
+const RAW_QUERY_REGEXP = /[?&]raw\b/;
+
 /**
  * Removes query strings and hash fragments from the module id.
  */
@@ -51,10 +53,11 @@ function normalizeId( id: string ): string {
 }
 
 /**
- * Returns whether the module id points to a CSS file.
+ * Returns whether the module id points to a CSS file. Imports with the `?raw` query
+ * only embed the file text in JavaScript, so they do not feed the CSS bundles.
  */
 function isCssModule( id: string ): boolean {
-	return CSS_ID_REGEXP.test( id );
+	return CSS_ID_REGEXP.test( id ) && !RAW_QUERY_REGEXP.test( id );
 }
 
 /**
@@ -214,7 +217,12 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 				id: CSS_ID_REGEXP
 			},
 
-			handler() {
+			handler( id: string ) {
+				// Leave raw imports to the `rawImport` plugin regardless of the plugin order.
+				if ( RAW_QUERY_REGEXP.test( id ) ) {
+					return;
+				}
+
 				return {
 					code: '',
 					moduleType: 'js'

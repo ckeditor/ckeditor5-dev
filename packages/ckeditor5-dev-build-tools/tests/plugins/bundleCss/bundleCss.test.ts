@@ -6,7 +6,7 @@
 import { join } from 'node:path';
 import { test, expect } from 'vitest';
 import { rolldown, type RolldownOutput, type OutputAsset, type OutputOptions, type Plugin } from 'rolldown';
-import { bundleCss, type RollupBundleCssOptions } from '../../../src/index.js';
+import { bundleCss, rawImport, type RollupBundleCssOptions } from '../../../src/index.js';
 
 async function generateBundle(
 	options: RollupBundleCssOptions,
@@ -139,6 +139,17 @@ test( 'works with output.dir and preserved modules', async () => {
 	} );
 
 	expect( getAsset( output, 'styles-editor.css' ).source.toString() ).toContain( '.order-one' );
+} );
+
+test( 'ignores raw CSS imports handled by the rawImport plugin', async () => {
+	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-raw-import.ts', [ rawImport() ] );
+	const stylesheet = getAsset( output, 'styles.css' ).source.toString();
+	const chunk = output.find( item => item.type === 'chunk' )!;
+
+	// The raw import must be embedded in the JavaScript output, not in the CSS bundles.
+	expect( chunk.code ).toContain( '.direct-import' );
+	expect( stylesheet ).toContain( '.order-one' );
+	expect( stylesheet ).not.toContain( '.direct-import' );
 } );
 
 test( 'resolves package CSS imports via Rolldown resolution and ignores imports in comments and strings', async () => {
