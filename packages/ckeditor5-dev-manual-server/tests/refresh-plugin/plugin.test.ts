@@ -81,6 +81,21 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [ payload ] );
 	} );
 
+	test( 'drops bundled dev empty HMR updates sent to clients unaffected by a change', () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		configureServer( server );
+		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
+		client.send( {
+			type: 'update',
+			updates: []
+		} );
+
+		expect( clientPayloads ).to.deep.equal( [] );
+	} );
+
 	test( 'keeps non-update payloads sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();

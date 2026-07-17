@@ -168,6 +168,10 @@ function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
 }
 
 function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayload ) => void ): void {
+	if ( payload.type == 'update' && !payload.updates.length ) {
+		return;
+	}
+
 	if ( shouldShowManualRefreshPrompt( payload ) ) {
 		send( {
 			type: 'custom',
