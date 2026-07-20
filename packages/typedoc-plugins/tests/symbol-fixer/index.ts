@@ -64,4 +64,3 @@ describe( 'typedoc-plugins/symbol-fixer', () => {
 		expect( warnSpy ).toHaveBeenCalledWith( 'Non-symbol wrapped in square brackets', expect.any( Object ) );
 	} );
 } );
-

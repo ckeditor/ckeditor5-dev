@@ -9,6 +9,7 @@ allowBuilds:
   'snyk': true
 
 overrides:
+  '@typescript-eslint/utils@^8.32': '^8.57.0'
   'diff@^7': '^8.0.3'
   'lodash@^4': '^4.18.0'
   'serialize-javascript@6': '^7.0.3'

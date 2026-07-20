@@ -43,4 +43,3 @@ function onEventCreateDeclaration(): ( ( context: Context, reflection: Reflectio
 function isWrappedInSquareBrackets( value: string ): boolean {
 	return value.startsWith( '[' ) && value.endsWith( ']' );
 }
-
