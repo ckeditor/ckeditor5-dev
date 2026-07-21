@@ -62,7 +62,7 @@ describe( 'getLanguages()', () => {
 		expect( languageChineseTaiwan ).toEqual( {
 			localeCode: 'zh_TW',
 			languageCode: 'zh-tw',
-			languageFileName: 'zh'
+			languageFileName: 'zh-tw'
 		} );
 	} );
 } );
