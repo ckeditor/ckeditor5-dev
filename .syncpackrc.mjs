@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Configuration for `syncpack`, which ensures that `dependencies` and `devDependencies`
  * across the repository use consistent versions. Executed in CI via the
@@ -14,7 +12,7 @@
  * Unlike in the `ckeditor5` repository, version ranges (the `^` operator) are allowed here.
  * When the same dependency is declared with different versions, the highest one wins.
  */
-module.exports = {
+export default {
 	source: [
 		'package.json',
 		'packages/*/package.json'

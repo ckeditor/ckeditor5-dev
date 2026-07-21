@@ -20,7 +20,7 @@ const { status } = spawnSync(
 	upath.join( ROOT_DIRECTORY, 'node_modules', '.bin', 'syncpack' ),
 	[
 		shouldFix ? 'fix' : 'lint',
-		'--config', upath.join( ROOT_DIRECTORY, '.syncpackrc.cjs' ),
+		'--config', upath.join( ROOT_DIRECTORY, '.syncpackrc.mjs' ),
 		'--dependency-types', 'prod,dev'
 	],
 	{
