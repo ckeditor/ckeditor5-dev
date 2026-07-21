@@ -1,34 +1,32 @@
+#!/usr/bin/env node
+
 /**
  * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
+import { spawnSync } from 'node:child_process';
 import upath from 'upath';
-import { glob } from 'glob';
-import fs from 'fs-extra';
-import { checkVersionMatch } from '../../packages/ckeditor5-dev-dependency-checker/lib/index.js';
 
+/**
+ * Runs `syncpack` (see `.syncpackrc.cjs`) to verify that `dependencies` and `devDependencies`
+ * across the repository use consistent versions.
+ */
 const shouldFix = process.argv[ 2 ] === '--fix';
 
 const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..', '..' );
 
-const PACKAGES_DIRECTORY = upath.join( ROOT_DIRECTORY, 'packages' );
-
-const allPathsToPackageJson = await glob( PACKAGES_DIRECTORY + '/*/package.json', {
-	cwd: ROOT_DIRECTORY,
-	nodir: true,
-	absolute: true
-} );
-
-const allPackageJson = await Promise.all(
-	allPathsToPackageJson.map( pathToPackageJson => fs.readJson( pathToPackageJson ) )
+const { status } = spawnSync(
+	upath.join( ROOT_DIRECTORY, 'node_modules', '.bin', 'syncpack' ),
+	[
+		shouldFix ? 'fix' : 'lint',
+		'--config', upath.join( ROOT_DIRECTORY, '.syncpackrc.cjs' ),
+		'--dependency-types', 'prod,dev'
+	],
+	{
+		cwd: ROOT_DIRECTORY,
+		stdio: 'inherit'
+	}
 );
 
-const allPackageNames = allPackageJson.map( packageJson => packageJson.name );
-
-checkVersionMatch( {
-	cwd: ROOT_DIRECTORY,
-	fix: shouldFix,
-	allowRanges: true,
-	workspacePackages: allPackageNames
-} );
+process.exit( status );

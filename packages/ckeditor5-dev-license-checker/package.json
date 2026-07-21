@@ -36,8 +36,5 @@
     "dev": "rolldown -c rolldown.config.ts --watch",
     "test": "vitest run --config vitest.config.ts",
     "coverage": "vitest run --config vitest.config.ts --coverage"
-  },
-  "depcheckIgnore": [
-    "typescript"
-  ]
+  }
 }

@@ -16,6 +16,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@ckeditor/ckeditor5-dev-changelog": "workspace:*",
     "@inquirer/prompts": "^7.10.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.22",
     "@vitest/coverage-v8": "^4.1.2",
@@ -27,10 +28,11 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "js-yaml": "^4.2.0",
+    "knip": "^6.27.0",
     "lint-staged": "^16.4.0",
     "listr2": "^8.3.3",
     "minimist": "^1.2.8",
-    "semver": "^7.7.4",
+    "syncpack": "^15.3.2",
     "typescript": "5.5.4",
     "upath": "^2.0.1",
     "vite": "^8.1.0",
@@ -50,7 +52,7 @@
     "typecheck": "tsc",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
-    "check-dependencies": "ckeditor5-dev-dependency-checker"
+    "check-dependencies": "knip --dependencies --no-config-hints && knip --dependencies --production --strict --no-config-hints"
   },
   "lint-staged": {
     "**/*": [
