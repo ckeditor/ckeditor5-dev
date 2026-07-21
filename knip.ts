@@ -14,17 +14,35 @@ import type { KnipConfig } from 'knip';
  * Patterns marked with the `!` suffix describe production code. They must match the folders
  * that end up in the published packages (`lib`, `src`, `bin`, `theme`).
  */
-// Shared patterns for `packages/*` workspaces. Knip does not merge a specific workspace entry
-// with the `packages/*` one, so specific entries must repeat them.
-const packagePatterns = [
-	'lib/**/*.{js,mjs,cjs}!',
-	'src/**/*.{js,mjs,cjs,ts}!',
-	'bin/**/*.{js,mjs,cjs}!',
-	'theme/**/*.{js,mjs,cjs,ts}!',
-	'theme/**/*.css!',
-	'tests/**/*.{js,mjs,cjs,ts}',
-	'scripts/**/*.{js,mjs,cjs,ts}'
-];
+
+/**
+ * Common configuration for the `packages/*` workspaces. Knip supports workspace configuration
+ * only in the root config and a specific workspace entry does not merge with the `packages/*`
+ * one, so single-package overrides go through this helper instead of repeating the patterns.
+ */
+const packageWorkspace = ( ignoreDependencies: Array<string> = [] ) => ( {
+	// Test fixtures reference intentionally non-existent packages.
+	ignore: [ 'tests/**/fixtures/**' ],
+	entry: [
+		'lib/**/*.{js,mjs,cjs}!',
+		'src/**/*.{js,mjs,cjs,ts}!',
+		'bin/**/*.{js,mjs,cjs}!',
+		'theme/**/*.{js,mjs,cjs,ts}!',
+		'theme/**/*.css!',
+		'tests/**/*.{js,mjs,cjs,ts}',
+		'scripts/**/*.{js,mjs,cjs,ts}'
+	],
+	project: [
+		'lib/**/*.{js,mjs,cjs}!',
+		'src/**/*.{js,mjs,cjs,ts}!',
+		'bin/**/*.{js,mjs,cjs}!',
+		'theme/**/*.{js,mjs,cjs,ts}!',
+		'theme/**/*.css!',
+		'tests/**/*.{js,mjs,cjs,ts}',
+		'scripts/**/*.{js,mjs,cjs,ts}'
+	],
+	ignoreDependencies
+} );
 
 /**
  * Type packages imported by production code live in `dependencies`, because type-only imports
@@ -35,12 +53,8 @@ const packagePatterns = [
  * mode would report such packages as unused, so they are ignored there (the `!` suffix scopes
  * the ignore to production mode). See https://github.com/webpro-nl/knip/issues/248.
  */
-const typeDependencyWorkspace = ( ignoreDependencies: Array<string> ) => ( {
-	ignore: [ 'tests/**/fixtures/**' ],
-	entry: [ ...packagePatterns ],
-	project: [ ...packagePatterns ],
-	ignoreDependencies: ignoreDependencies.map( dependency => `${ dependency }!` )
-} );
+const typeDependencyWorkspace = ( ignoreDependencies: Array<string> ) =>
+	packageWorkspace( ignoreDependencies.map( dependency => `${ dependency }!` ) );
 
 const config: KnipConfig = {
 	compilers: {
@@ -59,37 +73,16 @@ const config: KnipConfig = {
 				'syncpack'
 			]
 		},
-		// Note: a specific workspace entry replaces the `packages/*` one, so it repeats the patterns.
-		'packages/ckeditor5-dev-manual-server': {
-			ignore: [ 'tests/**/fixtures/**' ],
-			entry: [
-				'src/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.css!',
-				'tests/**/*.{js,mjs,cjs,ts}'
-			],
-			project: [
-				'src/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.css!',
-				'tests/**/*.{js,mjs,cjs,ts}'
-			],
-			ignoreDependencies: [
-				// The package exports Vite plugins and imports `vite` only in type positions,
-				// but it deliberately ships `vite` as a runtime dependency for its consumers,
-				// which run the manual test server.
-				'vite'
-			]
-		},
+		'packages/ckeditor5-dev-manual-server': packageWorkspace( [
+			// The package exports Vite plugins and imports `vite` only in type positions,
+			// but it deliberately ships `vite` as a runtime dependency for its consumers,
+			// which run the manual test server.
+			'vite'
+		] ),
 		'packages/ckeditor5-dev-build-tools': typeDependencyWorkspace( [ 'type-fest' ] ),
 		'packages/ckeditor5-dev-changelog': typeDependencyWorkspace( [ '@types/semver' ] ),
 		'packages/ckeditor5-dev-utils': typeDependencyWorkspace( [ '@types/pacote' ] ),
-		'packages/*': {
-			// Test fixtures reference intentionally non-existent packages.
-			ignore: [ 'tests/**/fixtures/**' ],
-			entry: [ ...packagePatterns ],
-			project: [ ...packagePatterns ]
-		}
+		'packages/*': packageWorkspace()
 	}
 };
 
