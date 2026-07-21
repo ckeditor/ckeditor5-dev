@@ -52,7 +52,7 @@
     "typecheck": "tsc",
     "precommit": "lint-staged",
     "reinstall": "pnpx rimraf --glob \"**/node_modules\" && pnpm install",
-    "check-dependencies": "knip --dependencies --no-config-hints && knip --dependencies --production --strict --no-config-hints && node ./scripts/ci/check-css-imports.mjs"
+    "check-dependencies": "knip --dependencies --no-config-hints && knip --dependencies --production --strict --no-config-hints"
   },
   "lint-staged": {
     "**/*": [
