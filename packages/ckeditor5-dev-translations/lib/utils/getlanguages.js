@@ -78,12 +78,10 @@ const SUPPORTED_LOCALES = [
 	'uz', // Uzbek
 	'vi' // Vietnamese
 ];
-
 const LOCALES_FILENAME_MAP = {
 	'ne_NP': 'ne',
 	'si_LK': 'si',
-	'sr@latin': 'sr-latn',
-	'zh_TW': 'zh'
+	'sr@latin': 'sr-latn'
 };
 
 /**
