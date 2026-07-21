@@ -29,4 +29,5 @@ const { status } = spawnSync(
 	}
 );
 
-process.exit( status );
+// `status` is `null` when `syncpack` failed to start or was killed by a signal.
+process.exit( status ?? 1 );
