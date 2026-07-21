@@ -20,27 +20,26 @@ import type { KnipConfig } from 'knip';
  * only in the root config and a specific workspace entry does not merge with the `packages/*`
  * one, so single-package overrides go through this helper instead of repeating the patterns.
  */
+// The `entry` and `project` options receive the same patterns: for dependency checks every
+// analyzed file acts as an entry point, and restricting `project` prevents Knip from pulling
+// unrelated files into the analysis.
+const packageFiles = [
+	'lib/**/*.{js,mjs,cjs}!',
+	'src/**/*.{js,mjs,cjs,ts}!',
+	'bin/**/*.{js,mjs,cjs}!',
+	'theme/**/*.{js,mjs,cjs,ts}!',
+	'theme/**/*.css!',
+	'tests/**/*.{js,mjs,cjs,ts}',
+	'scripts/**/*.{js,mjs,cjs,ts}'
+];
+
+const rootFiles = [ 'scripts/**/*.{js,mjs,cjs}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ];
+
 const packageWorkspace = ( ignoreDependencies: Array<string> = [] ) => ( {
 	// Test fixtures reference intentionally non-existent packages.
 	ignore: [ 'tests/**/fixtures/**' ],
-	entry: [
-		'lib/**/*.{js,mjs,cjs}!',
-		'src/**/*.{js,mjs,cjs,ts}!',
-		'bin/**/*.{js,mjs,cjs}!',
-		'theme/**/*.{js,mjs,cjs,ts}!',
-		'theme/**/*.css!',
-		'tests/**/*.{js,mjs,cjs,ts}',
-		'scripts/**/*.{js,mjs,cjs,ts}'
-	],
-	project: [
-		'lib/**/*.{js,mjs,cjs}!',
-		'src/**/*.{js,mjs,cjs,ts}!',
-		'bin/**/*.{js,mjs,cjs}!',
-		'theme/**/*.{js,mjs,cjs,ts}!',
-		'theme/**/*.css!',
-		'tests/**/*.{js,mjs,cjs,ts}',
-		'scripts/**/*.{js,mjs,cjs,ts}'
-	],
+	entry: packageFiles,
+	project: packageFiles,
 	ignoreDependencies
 } );
 
@@ -65,8 +64,8 @@ const config: KnipConfig = {
 
 	workspaces: {
 		'.': {
-			entry: [ 'scripts/**/*.{js,mjs,cjs}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ],
-			project: [ 'scripts/**/*.{js,mjs,cjs}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ],
+			entry: rootFiles,
+			project: rootFiles,
 			ignoreDependencies: [
 				// Spawned via an explicit `node_modules/.bin` path in
 				// `scripts/ci/check-dependencies-versions-match.mjs`, invisible to static analysis.
