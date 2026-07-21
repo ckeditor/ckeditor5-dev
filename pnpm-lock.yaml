@@ -118,6 +118,9 @@ importers:
       source-map:
         specifier: ^0.7.6
         version: 0.7.6
+      type-fest:
+        specifier: ^4.41.0
+        version: 4.41.0
       upath:
         specifier: ^2.0.1
         version: 2.0.1
@@ -128,9 +131,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.2
         version: 4.1.7(vitest@4.1.7)
-      type-fest:
-        specifier: ^4.41.0
-        version: 4.41.0
       vitest:
         specifier: ^4.1.2
         version: 4.1.7(@types/node@22.19.19)(@vitest/coverage-v8@4.1.7)(vite@8.1.0(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
@@ -149,6 +149,9 @@ importers:
       '@ckeditor/ckeditor5-dev-utils':
         specifier: workspace:*
         version: link:../ckeditor5-dev-utils
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
       cac:
         specifier: ^7.0.0
         version: 7.0.0
@@ -168,9 +171,6 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
     devDependencies:
-      '@types/semver':
-        specifier: ^7.7.1
-        version: 7.7.1
       '@vitest/coverage-v8':
         specifier: ^4.1.2
         version: 4.1.7(vitest@4.1.7)
@@ -364,6 +364,9 @@ importers:
 
   packages/ckeditor5-dev-utils:
     dependencies:
+      '@types/pacote':
+        specifier: ^11.1.8
+        version: 11.1.8
       '@types/shelljs':
         specifier: ^0.10.0
         version: 0.10.0
@@ -398,9 +401,6 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
     devDependencies:
-      '@types/pacote':
-        specifier: ^11.1.8
-        version: 11.1.8
       '@vitest/coverage-v8':
         specifier: ^4.1.2
         version: 4.1.7(vitest@4.1.7)

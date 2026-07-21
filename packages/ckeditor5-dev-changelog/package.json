@@ -30,6 +30,7 @@
   "dependencies": {
     "@11ty/gray-matter": "^2.1.0",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
+    "@types/semver": "^7.7.1",
     "cac": "^7.0.0",
     "date-fns": "^4.1.0",
     "glob": "^13.0.6",
@@ -38,7 +39,6 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.1.2",
     "rolldown": "^1.1.2",
     "vitest": "^4.1.2"

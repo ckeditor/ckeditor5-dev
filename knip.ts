@@ -14,6 +14,34 @@ import type { KnipConfig } from 'knip';
  * Patterns marked with the `!` suffix describe production code. They must match the folders
  * that end up in the published packages (`lib`, `src`, `bin`, `theme`).
  */
+// Shared patterns for `packages/*` workspaces. Knip does not merge a specific workspace entry
+// with the `packages/*` one, so specific entries must repeat them.
+const packagePatterns = [
+	'lib/**/*.{js,mjs,cjs}!',
+	'src/**/*.{js,mjs,cjs,ts}!',
+	'bin/**/*.{js,mjs,cjs}!',
+	'theme/**/*.{js,mjs,cjs,ts}!',
+	'theme/**/*.css!',
+	'tests/**/*.{js,mjs,cjs,ts}',
+	'scripts/**/*.{js,mjs,cjs,ts}'
+];
+
+/**
+ * Type packages imported by production code live in `dependencies`, because type-only imports
+ * that are part of a package's public API must resolve in consumer projects, for example under
+ * Yarn PnP. See https://github.com/ckeditor/ckeditor5/issues/17213.
+ *
+ * Knip expects the opposite (type-only imports in `devDependencies`) and its strict production
+ * mode would report such packages as unused, so they are ignored there (the `!` suffix scopes
+ * the ignore to production mode). See https://github.com/webpro-nl/knip/issues/248.
+ */
+const typeDependencyWorkspace = ( ignoreDependencies: Array<string> ) => ( {
+	ignore: [ 'tests/**/fixtures/**' ],
+	entry: [ ...packagePatterns ],
+	project: [ ...packagePatterns ],
+	ignoreDependencies: ignoreDependencies.map( dependency => `${ dependency }!` )
+} );
+
 const config: KnipConfig = {
 	compilers: {
 		// Extracts `@import` statements from plain CSS files, so packages imported in `theme/`
@@ -53,27 +81,14 @@ const config: KnipConfig = {
 				'vite'
 			]
 		},
+		'packages/ckeditor5-dev-build-tools': typeDependencyWorkspace( [ 'type-fest' ] ),
+		'packages/ckeditor5-dev-changelog': typeDependencyWorkspace( [ '@types/semver' ] ),
+		'packages/ckeditor5-dev-utils': typeDependencyWorkspace( [ '@types/pacote' ] ),
 		'packages/*': {
 			// Test fixtures reference intentionally non-existent packages.
 			ignore: [ 'tests/**/fixtures/**' ],
-			entry: [
-				'lib/**/*.{js,mjs,cjs}!',
-				'src/**/*.{js,mjs,cjs,ts}!',
-				'bin/**/*.{js,mjs,cjs}!',
-				'theme/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.css!',
-				'tests/**/*.{js,mjs,cjs,ts}',
-				'scripts/**/*.{js,mjs,cjs,ts}'
-			],
-			project: [
-				'lib/**/*.{js,mjs,cjs}!',
-				'src/**/*.{js,mjs,cjs,ts}!',
-				'bin/**/*.{js,mjs,cjs}!',
-				'theme/**/*.{js,mjs,cjs,ts}!',
-				'theme/**/*.css!',
-				'tests/**/*.{js,mjs,cjs,ts}',
-				'scripts/**/*.{js,mjs,cjs,ts}'
-			]
+			entry: [ ...packagePatterns ],
+			project: [ ...packagePatterns ]
 		}
 	}
 };
