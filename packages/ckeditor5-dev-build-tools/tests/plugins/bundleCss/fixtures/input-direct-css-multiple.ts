@@ -3,6 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-.ck {
-	color: hsl(0deg 100% 50%);
-}
+import './direct.css';
+import './direct-second.css';

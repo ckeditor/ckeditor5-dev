@@ -3,5 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+// @ts-expect-error - The `?raw` import is resolved by the `rawImport` plugin.
+import direct from './direct.css?raw';
 import './index-editor.css';
-import './nested.ts';
+
+console.log( direct );

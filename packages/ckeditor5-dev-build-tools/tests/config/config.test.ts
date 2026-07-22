@@ -203,3 +203,14 @@ test( '--minify', async () => {
 	expect( withoutMinification.output ).toMatchObject( { minify: false } );
 	expect( withMinification.output ).toMatchObject( { minify: true } );
 } );
+
+test( 'configures a single CSS plugin for npm and browser builds', async () => {
+	const npmConfig = await getConfig();
+	const browserConfig = await getConfig( { browser: true } );
+	const getCssPlugins = ( config: Awaited<ReturnType<typeof getConfig>> ) => {
+		return ( config.plugins as Array<Plugin> ).filter( plugin => plugin?.name.includes( 'css' ) );
+	};
+
+	expect( getCssPlugins( npmConfig ).map( plugin => plugin.name ) ).toEqual( [ 'cke5-bundle-css' ] );
+	expect( getCssPlugins( browserConfig ).map( plugin => plugin.name ) ).toEqual( [ 'cke5-bundle-css' ] );
+} );
