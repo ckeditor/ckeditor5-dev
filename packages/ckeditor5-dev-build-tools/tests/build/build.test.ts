@@ -399,11 +399,17 @@ test( 'Bundle', async () => {
  */
 test( 'Minify', async () => {
 	const { output } = await build( {
-		input: 'src/banner.js',
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
 		minify: true
 	} );
 
 	expect( output[ 0 ].code ).toContain( 'export{' );
+
+	// The `minify` option must reach the CSS bundler, so all three stylesheets must be minified.
+	expect( getAsset( output, 'index.css' ).source.toString() ).toBe( 'div{border:1px solid red}.ck-content{color:#00f}' );
+	expect( getAsset( output, 'index-editor.css' ).source.toString() ).toBe( 'div{border:1px solid red}' );
+	expect( getAsset( output, 'index-content.css' ).source.toString() ).toBe( '.ck-content{color:#00f}' );
 } );
 
 test( 'Minification doesn\'t remove banner', async () => {

@@ -132,6 +132,8 @@ test( 'Orders CSS modules by the JavaScript import order of the entry chunk', as
 		preserveModules: false
 	} as NormalizedOutputOptions, bundle );
 
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+
 	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
 		fileName: 'styles.css',
 		type: 'asset'
@@ -174,6 +176,8 @@ test( 'Collects CSS imports of modules reachable only through an inlined dynamic
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, bundle );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 
 	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
 		fileName: 'styles.css',
@@ -220,6 +224,8 @@ test( 'Traverses every module of entry and dynamic entry chunks without a facade
 		preserveModules: false
 	} as NormalizedOutputOptions, bundle );
 
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+
 	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
 		fileName: 'styles.css',
 		type: 'asset'
@@ -252,6 +258,8 @@ test( 'Throws when Rolldown resolves a CSS import as external', async () => {
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
 test( 'Uses the current working directory as the project root when output location is not specified', async () => {
@@ -272,6 +280,8 @@ test( 'Uses the current working directory as the project root when output locati
 	await runGenerateBundle( plugin, createContext(), {
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
 test( 'Throws when a CSS import cannot be resolved by Rolldown', async () => {
@@ -296,6 +306,8 @@ test( 'Throws when a CSS import cannot be resolved by Rolldown', async () => {
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
 test( 'Emits warnings for virtual entry diagnostics without a warning type', async () => {
@@ -321,6 +333,8 @@ test( 'Emits warnings for virtual entry diagnostics without a warning type', asy
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 
 	expect( context.warn ).toHaveBeenCalledWith(
 		'Lightning CSS warning in styles.css:3:5: Virtual entry warning'

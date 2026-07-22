@@ -4,7 +4,8 @@
  */
 
 import { join } from 'node:path';
-import { test, expect } from 'vitest';
+import { test, expect, vi } from 'vitest';
+import upath from 'upath';
 import { rolldown, type RolldownOutput, type OutputAsset, type OutputOptions, type Plugin } from 'rolldown';
 import { bundleCss, rawImport, type RollupBundleCssOptions } from '../../../src/index.js';
 
@@ -89,6 +90,23 @@ test( 'bundles monorepo source dependency roots into self-contained assets', asy
 	expect( editor.match( /\.dependency-editor-leaf/g ) ).toHaveLength( 1 );
 } );
 
+test( 'keeps the last occurrence of CSS entry points imported multiple times', async () => {
+	const output = await generateBundle( {
+		fileName: 'aggregate.css'
+	}, './fixtures/monorepo/input-dependency-first.ts' );
+	const combined = getAsset( output, 'aggregate.css' ).source.toString();
+
+	expect( combined ).toContain( '.aggregate-editor-leaf' );
+	expect( combined ).toContain( '.dependency-editor-leaf' );
+	expect( combined ).toContain( '.aggregate-content-leaf' );
+	expect( combined ).toContain( '.dependency-content-leaf' );
+
+	// `dependency-package` is imported before `aggregate-package`, but `aggregate-package` re-imports it,
+	// so the keep-last deduplication must move the dependency styles after the aggregate styles.
+	expect( combined.indexOf( '.aggregate-editor-leaf' ) ).toBeLessThan( combined.indexOf( '.dependency-editor-leaf' ) );
+	expect( combined.indexOf( '.aggregate-content-leaf' ) ).toBeLessThan( combined.indexOf( '.dependency-content-leaf' ) );
+} );
+
 test( 'always emits all three assets when no CSS roots are imported', async () => {
 	const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-empty.ts' );
 
@@ -100,6 +118,13 @@ test( 'always emits all three assets when no CSS roots are imported', async () =
 test( 'throws when CSS is imported directly instead of through a theme entry point', async () => {
 	await expect( generateBundle( { fileName: 'styles.css' }, './fixtures/input-direct-css.ts' ) )
 		.rejects.toThrow( 'CSS must be imported through an "index-editor.css" or "index-content.css" entry point' );
+} );
+
+test( 'lists every CSS file imported outside a theme entry point in the error message', async () => {
+	const promise = generateBundle( { fileName: 'styles.css' }, './fixtures/input-direct-css-multiple.ts' );
+
+	await expect( promise ).rejects.toThrow( 'CSS must be imported through an "index-editor.css" or "index-content.css" entry point' );
+	await expect( promise ).rejects.toThrow( / - .*\/direct\.css\n - .*\/direct-second\.css/ );
 } );
 
 test( 'allows minifying all generated bundles', async () => {
@@ -200,12 +225,58 @@ test( 'emits Lightning CSS warnings through Rolldown warnings', async () => {
 
 	await bundle.generate( { format: 'esm', assetFileNames: '[name][extname]', file: 'input.js' } );
 
-	expect( warnings.some( warning => warning.includes( 'Lightning CSS warning in' ) ) ).toBe( true );
-	expect( warnings.some( warning => warning.includes( 'Unknown at rule: @unknown' ) ) ).toBe( true );
-	expect( warnings.some( warning => warning.includes( 'warning.css' ) ) ).toBe( true );
+	// The same warning appears in the combined, editor, and content bundling passes,
+	// but it must be forwarded to Rolldown exactly once.
+	const lightningCssWarnings = warnings.filter( warning => warning.includes( 'Lightning CSS warning in' ) );
+
+	expect( lightningCssWarnings ).toHaveLength( 1 );
+	expect( lightningCssWarnings[ 0 ] ).toContain( 'Unknown at rule: @unknown' );
+	expect( lightningCssWarnings[ 0 ] ).toContain( 'warning.css' );
 } );
 
 test( 'throws when encountering external CSS imports', async () => {
 	await expect( generateBundle( { fileName: 'styles.css' }, './fixtures/input-external-import.ts' ) )
 		.rejects.toThrow( 'External CSS imports are not supported' );
+} );
+
+test( 'throws when encountering protocol-relative external CSS imports', async () => {
+	await expect( generateBundle( { fileName: 'styles.css' }, './fixtures/input-external-import-protocol-relative.ts' ) )
+		.rejects.toThrow( 'External CSS imports are not supported' );
+} );
+
+test( 'registers the CSS entry points and their nested imports as watch files', async () => {
+	const entryPath = upath.join( import.meta.dirname, 'fixtures/index-editor.css' );
+	const nestedPath = upath.join( import.meta.dirname, 'fixtures/first.css' );
+	const plugin = bundleCss( { fileName: 'styles.css' } );
+	const generateBundleHook = typeof plugin.generateBundle === 'function' ? plugin.generateBundle : plugin.generateBundle!.handler;
+	const addWatchFile = vi.fn();
+	const context = {
+		addWatchFile,
+		emitFile: vi.fn(),
+		error: ( message: string ) => {
+			throw new Error( message );
+		},
+		getModuleInfo: () => null,
+		resolve: async ( specifier: string, importer: string ) => ( {
+			id: upath.join( upath.dirname( importer ), specifier ),
+			external: false
+		} ),
+		warn: vi.fn()
+	};
+	const bundle = {
+		'main.js': {
+			type: 'chunk',
+			isEntry: true,
+			isDynamicEntry: false,
+			facadeModuleId: null,
+			modules: { [ entryPath ]: {} }
+		}
+	};
+
+	await generateBundleHook.call( context as any, { file: 'dist/main.js' } as any, bundle as any, false );
+
+	const watchedFiles = addWatchFile.mock.calls.flat();
+
+	expect( watchedFiles ).toContain( entryPath );
+	expect( watchedFiles ).toContain( nestedPath );
 } );
