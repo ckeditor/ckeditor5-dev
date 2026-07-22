@@ -99,7 +99,7 @@ function emitLightningCssWarnings(
  *
  * Walking the import graph from every module of the chunk works, but is very slow for large
  * bundles. Walking from the facade (entry) module alone gives the same result: it reaches every
- * CSS file, and since it is the last module in the chunk, it also decides the final CSS order
+ * CSS file, and since it is returned as the last root, it also decides the final CSS order
  * after the keep-last deduplication in `getOrderedCssModules()`.
  *
  * Two special cases: the walk follows only static imports, so targets of inlined dynamic imports
@@ -122,7 +122,12 @@ function getTraversalRoots( chunk: OutputChunk, getModuleInfo: PluginContext[ 'g
 		}
 	}
 
-	return moduleIds.filter( moduleId => moduleId === chunk.facadeModuleId || dynamicImportTargets.has( moduleId ) );
+	// The facade module goes last regardless of the chunk module order, so its CSS order
+	// wins the keep-last deduplication over the inlined dynamic import targets.
+	return [
+		...moduleIds.filter( moduleId => moduleId !== chunk.facadeModuleId && dynamicImportTargets.has( moduleId ) ),
+		chunk.facadeModuleId
+	];
 }
 
 /**

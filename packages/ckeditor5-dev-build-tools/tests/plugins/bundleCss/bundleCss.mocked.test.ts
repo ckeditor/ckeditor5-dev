@@ -185,6 +185,51 @@ test( 'Collects CSS imports of modules reachable only through an inlined dynamic
 	} ) );
 } );
 
+test( 'Lets the facade module decide the CSS order regardless of the chunk module order', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
+		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
+
+		// The facade and the dynamic import target both import the shared CSS entry point. The facade
+		// must be processed last, so its import order wins the keep-last deduplication.
+		expect( specifiers ).toEqual( [
+			'/styles/lazy/index-editor.css',
+			'/styles/shared/index-editor.css',
+			'/styles/main/index-editor.css'
+		] );
+
+		return {
+			code: Buffer.from( '.ck {}' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+	const context = createContext( {
+		moduleInfo: {
+			'/src/lazy.ts': { importedIds: [ '/styles/lazy/index-editor.css', '/styles/shared/index-editor.css' ] },
+			'/src/main.ts': {
+				importedIds: [ '/styles/shared/index-editor.css', '/styles/main/index-editor.css' ],
+				dynamicallyImportedIds: [ '/src/lazy.ts' ]
+			}
+		}
+	} );
+	const bundle: OutputBundle = {
+		// The facade module is intentionally listed before the dynamic import target.
+		'main.js': createChunk( 'main', [ '/src/main.ts', '/src/lazy.ts' ] )
+	};
+
+	await runGenerateBundle( plugin, context, {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, bundle );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+} );
+
 test( 'Traverses every module of entry and dynamic entry chunks without a facade module and caches shared results', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
