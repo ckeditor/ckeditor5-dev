@@ -64,8 +64,6 @@ export const DEFAULT_CONCURRENCY: number = Math.min( cpus().length, 16 );
 
 export const DEFAULT_TIMEOUT: number = 20 * 1000;
 
-export const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
-
 export const DEFAULT_RETRIES = 3;
 
 export const DEFAULT_RETRY_DELAY = 1000;
