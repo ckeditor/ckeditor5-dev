@@ -73,24 +73,33 @@ function renderApp( root: HTMLElement, entries: Array<ManualTestEntry> ): void {
 			return;
 		}
 
-		if ( target.closest( '.pkg__favorites-clear' ) ) {
+		const favoriteActionButton = target.closest<HTMLButtonElement>( '.pkg__favorite, .pkg__favorites-clear' );
+
+		if ( !favoriteActionButton ) {
+			return;
+		}
+
+		const favoriteId = favoriteActionButton.dataset.favoriteId;
+		const shouldRestoreFocus = document.activeElement == favoriteActionButton;
+
+		if ( favoriteId ) {
+			toggleFavoriteId( favoriteIds, favoriteId );
+		} else {
 			favoriteIds.clear();
-			saveFavoriteIds( favoriteIds );
-			render( searchInput.value );
-
-			return;
 		}
 
-		const favoriteButton = target.closest<HTMLButtonElement>( '.pkg__favorite' );
-		const favoriteId = favoriteButton?.dataset.favoriteId;
-
-		if ( !favoriteId ) {
-			return;
-		}
-
-		toggleFavoriteId( favoriteIds, favoriteId );
 		saveFavoriteIds( favoriteIds );
 		render( searchInput.value );
+
+		if ( !shouldRestoreFocus ) {
+			return;
+		}
+
+		if ( favoriteId ) {
+			focusFavoriteButton( listElement, favoriteId );
+		} else {
+			searchInput.focus();
+		}
 	} );
 
 	clearSearchButton.addEventListener( 'click', () => {
@@ -113,6 +122,16 @@ function renderApp( root: HTMLElement, entries: Array<ManualTestEntry> ): void {
 	} );
 
 	setQuery( getSearchQueryFromUrl() );
+}
+
+/**
+ * Focuses the re-rendered favorite control in its package card.
+ */
+function focusFavoriteButton( root: HTMLElement, favoriteId: string ): void {
+	const favoriteButton = [ ...root.querySelectorAll<HTMLButtonElement>( '.pkg:not(.pkg--favorites) .pkg__favorite' ) ]
+		.find( button => button.dataset.favoriteId == favoriteId );
+
+	favoriteButton?.focus();
 }
 
 /**
