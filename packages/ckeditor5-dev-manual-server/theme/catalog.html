@@ -8,6 +8,12 @@
 	<script type="module" src="./catalog.ts"></script>
 </head>
 <body>
+	<svg class="app__svg-definition" aria-hidden="true">
+		<defs>
+			<path id="manual-favorite-icon" d="M8 1.5l1.94 3.93 4.34.63-3.14 3.06.74 4.32L8 11.4l-3.88 2.04.74-4.32-3.14-3.06 4.34-.63L8 1.5z"/>
+		</defs>
+	</svg>
+
 	<template id="manual-index-template">
 		<main class="app">
 			<header class="app__header">
@@ -15,12 +21,17 @@
 					<h1 class="app__title">CKEditor 5 manual tests</h1>
 					<p class="app__subtitle"></p>
 				</div>
-				<label class="app__search">
+				<div class="app__search" role="search">
 					<svg class="app__search-icon" viewBox="0 0 16 16" aria-hidden="true" width="16" height="16">
 						<path fill="currentColor" d="M7 2a5 5 0 103.546 8.546l3.204 3.204a.75.75 0 101.06-1.06l-3.204-3.204A5 5 0 007 2zM3.5 7a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
 					</svg>
 					<input type="search" class="app__search-input" placeholder="Filter by package or test name…" autocomplete="off" autofocus>
-				</label>
+					<button type="button" class="app__search-clear" aria-label="Clear search">
+						<svg viewBox="0 0 16 16" aria-hidden="true" width="16" height="16">
+							<path fill="currentColor" d="M3.22 3.22a.75.75 0 011.06 0L8 6.94l3.72-3.72a.75.75 0 111.06 1.06L9.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L8 9.06l-3.72 3.72a.75.75 0 01-1.06-1.06L6.94 8 3.22 4.28a.75.75 0 010-1.06z"/>
+						</svg>
+					</button>
+				</div>
 			</header>
 			<div class="app__list" role="list"></div>
 		</main>
@@ -43,11 +54,38 @@
 		</section>
 	</template>
 
+	<template id="manual-favorites-template">
+		<section class="pkg pkg--favorites" role="listitem">
+			<header class="pkg__header">
+				<svg class="pkg__favorites-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+					<use href="#manual-favorite-icon"/>
+				</svg>
+				<span class="pkg__name">Favorites</span>
+				<button type="button" class="pkg__favorites-clear" aria-label="Clear all favorites" title="Clear all favorites" hidden>
+					<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+						<path fill="currentColor" d="M5.5 2.5h5l.5 1H14V5H2V3.5h3l.5-1zM3.5 6h9l-.65 8h-7.7L3.5 6zm2.25 1.5v5h1.5v-5h-1.5zm3 0v5h1.5v-5h-1.5z"/>
+					</svg>
+				</button>
+				<span class="pkg__count"></span>
+			</header>
+			<ul class="pkg__list"></ul>
+		</section>
+	</template>
+
+	<template id="manual-favorites-empty-template">
+		<li class="pkg__favorites-empty">Star tests to add them here.</li>
+	</template>
+
 	<template id="manual-test-template">
 		<li class="pkg__item">
 			<a class="pkg__link">
 				<span class="pkg__test-name"></span>
 			</a>
+			<button type="button" class="pkg__favorite">
+				<svg class="pkg__favorite-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+					<use href="#manual-favorite-icon"/>
+				</svg>
+			</button>
 		</li>
 	</template>
 
