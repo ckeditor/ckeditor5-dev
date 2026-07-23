@@ -46,4 +46,3 @@ export async function findPackages( options: FindPackagesOptions ): Promise<Map<
 		.map<[ string, string ]>( ( { name, version } ) => [ name, version ] )
 		.then( entries => new Map( entries.sort( ( [ a ], [ b ] ) => a.localeCompare( b ) ) ) );
 }
-

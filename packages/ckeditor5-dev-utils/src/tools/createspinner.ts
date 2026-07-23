@@ -145,4 +145,3 @@ export default function createSpinner( title: string, options: CreateSpinnerOpti
 		readline.cursorTo( process.stdout, 0 );
 	}
 }
-

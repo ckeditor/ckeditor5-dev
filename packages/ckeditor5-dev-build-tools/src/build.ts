@@ -263,6 +263,6 @@ export async function build(
 			`;
 		}
 
-		throw new Error( removeWhitespace( message ) );
+		throw new Error( removeWhitespace( message ), { cause: error } );
 	}
 }
