@@ -18,6 +18,30 @@ export function getFavoriteId( entry: FavoritableEntry ): string {
 }
 
 /**
+ * Returns the accessible label for a favorite toggle action.
+ */
+export function getFavoriteActionLabel( isFavorite: boolean ): string {
+	return isFavorite ? 'Remove from favorites' : 'Add to favorites';
+}
+
+/**
+ * Updates a favorite button from the current favorite identifier set.
+ */
+export function updateFavoriteButtonState(
+	button: HTMLButtonElement,
+	favoriteIds: Set<string>,
+	favoriteId: string
+): void {
+	const isFavorite = favoriteIds.has( favoriteId );
+	const label = getFavoriteActionLabel( isFavorite );
+
+	button.title = label;
+	button.setAttribute( 'aria-label', label );
+	button.setAttribute( 'aria-pressed', String( isFavorite ) );
+	button.classList.toggle( 'favorite--active', isFavorite );
+}
+
+/**
  * Returns favorite entries in their original order.
  */
 export function filterFavoriteEntries<T extends FavoritableEntry>( entries: Array<T>, favoriteIds: Set<string> ): Array<T> {

@@ -8,12 +8,6 @@
 	<script type="module" src="./catalog.ts"></script>
 </head>
 <body>
-	<svg class="app__svg-definition" aria-hidden="true">
-		<defs>
-			<path id="manual-favorite-icon" d="M8 1.5l1.94 3.93 4.34.63-3.14 3.06.74 4.32L8 11.4l-3.88 2.04.74-4.32-3.14-3.06 4.34-.63L8 1.5z"/>
-		</defs>
-	</svg>
-
 	<template id="manual-index-template">
 		<main class="app">
 			<header class="app__header">
@@ -59,9 +53,6 @@
 	<template id="manual-favorites-template">
 		<section class="pkg pkg--favorites" role="listitem">
 			<header class="pkg__header">
-				<svg class="pkg__favorites-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-					<use href="#manual-favorite-icon"/>
-				</svg>
 				<span class="pkg__name">Favorites</span>
 				<button type="button" class="pkg__favorites-clear" aria-label="Clear all favorites" title="Clear all favorites" hidden>
 					<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
@@ -83,11 +74,7 @@
 			<a class="pkg__link">
 				<span class="pkg__test-name"></span>
 			</a>
-			<button type="button" class="pkg__favorite">
-				<svg class="pkg__favorite-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-					<use href="#manual-favorite-icon"/>
-				</svg>
-			</button>
+			<button type="button" class="pkg__favorite"></button>
 		</li>
 	</template>
 

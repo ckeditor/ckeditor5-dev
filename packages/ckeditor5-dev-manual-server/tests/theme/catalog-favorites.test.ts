@@ -6,10 +6,12 @@
 import { describe, expect, test, vi } from 'vitest';
 import {
 	filterFavoriteEntries,
+	getFavoriteActionLabel,
 	getFavoriteId,
 	loadFavoriteIds,
 	saveFavoriteIds,
-	toggleFavoriteId
+	toggleFavoriteId,
+	updateFavoriteButtonState
 } from '../../theme/catalog-favorites.js';
 
 const FAVORITES_STORAGE_KEY = 'ckeditor5-manual-test-favorites';
@@ -20,6 +22,38 @@ describe( 'getFavoriteId()', () => {
 			packageName: 'ckeditor5-foo',
 			slug: 'nested/advanced'
 		} ) ).to.equal( 'ckeditor5-foo/nested/advanced' );
+	} );
+} );
+
+describe( 'getFavoriteActionLabel()', () => {
+	test( 'returns the add action label for a test that is not a favorite', () => {
+		expect( getFavoriteActionLabel( false ) ).to.equal( 'Add to favorites' );
+	} );
+
+	test( 'returns the remove action label for a favorite test', () => {
+		expect( getFavoriteActionLabel( true ) ).to.equal( 'Remove from favorites' );
+	} );
+} );
+
+describe( 'updateFavoriteButtonState()', () => {
+	test.each( [
+		{ favoriteIds: new Set<string>(), label: 'Add to favorites', isFavorite: false },
+		{ favoriteIds: new Set( [ 'ckeditor5-foo/basic' ] ), label: 'Remove from favorites', isFavorite: true }
+	] )( 'updates the button from the favorite identifier set', ( { favoriteIds, label, isFavorite } ) => {
+		const setAttribute = vi.fn();
+		const toggle = vi.fn();
+		const button = {
+			title: '',
+			setAttribute,
+			classList: { toggle }
+		} as unknown as HTMLButtonElement;
+
+		updateFavoriteButtonState( button, favoriteIds, 'ckeditor5-foo/basic' );
+
+		expect( button.title ).to.equal( label );
+		expect( setAttribute ).toHaveBeenCalledWith( 'aria-label', label );
+		expect( setAttribute ).toHaveBeenCalledWith( 'aria-pressed', String( isFavorite ) );
+		expect( toggle ).toHaveBeenCalledWith( 'favorite--active', isFavorite );
 	} );
 } );
 

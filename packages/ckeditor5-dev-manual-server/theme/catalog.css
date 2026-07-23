@@ -52,10 +52,6 @@ a {
 	padding: 0 24px 80px;
 }
 
-.app__svg-definition {
-	display: none;
-}
-
 .app__header {
 	position: sticky;
 	top: 0;
@@ -263,16 +259,16 @@ a {
 	flex-shrink: 0;
 }
 
-.pkg__favorites-icon use,
-.pkg__favorite-icon use {
+.pkg__favorites-icon path,
+.pkg__favorite-icon path {
 	fill: none;
 	stroke: currentColor;
 	stroke-linejoin: round;
 	stroke-width: 1.5px;
 }
 
-.pkg__favorites-icon use,
-.pkg__favorite--active .pkg__favorite-icon use {
+.pkg__favorites-icon path,
+.favorite--active .pkg__favorite-icon path {
 	fill: currentColor;
 }
 
@@ -343,7 +339,7 @@ a {
 	background: var(--surface-hover);
 }
 
-.pkg__favorite--active {
+.pkg__favorite.favorite--active {
 	color: var(--search-match-text);
 }
 

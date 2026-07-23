@@ -10,9 +10,11 @@ import {
 	getFavoriteId,
 	loadFavoriteIds,
 	saveFavoriteIds,
-	toggleFavoriteId
+	toggleFavoriteId,
+	updateFavoriteButtonState
 } from './catalog-favorites.js';
 import { filterEntries, findMatchOffsets } from './catalog-search.js';
+import { createFavoriteIcon } from './favorite-icon.js';
 
 import './catalog.css';
 
@@ -242,6 +244,7 @@ function renderFavoritesCard( entries: Array<ManualTestEntry>, favoriteIds: Set<
 	const list = favoritesCard.querySelector<HTMLElement>( '.pkg__list' )!;
 	const clearButton = favoritesCard.querySelector<HTMLButtonElement>( '.pkg__favorites-clear' )!;
 
+	favoritesCard.querySelector<HTMLElement>( '.pkg__header' )!.prepend( createFavoriteIcon( 'pkg__favorites-icon' ) );
 	favoritesCard.querySelector<HTMLElement>( '.pkg__count' )!.textContent = String( favoriteEntries.length );
 	clearButton.hidden = !favoriteEntries.length;
 
@@ -262,17 +265,15 @@ function renderTestItem( entry: ManualTestEntry, favoriteIds: Set<string>, showP
 	const link = testItem.querySelector<HTMLAnchorElement>( '.pkg__link' )!;
 	const favoriteButton = testItem.querySelector<HTMLButtonElement>( '.pkg__favorite' )!;
 	const favoriteId = getFavoriteId( entry );
-	const isFavorite = favoriteIds.has( favoriteId );
-	const favoriteButtonLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
 
 	link.href = entry.href;
 
 	testItem.querySelector<HTMLElement>( '.pkg__test-name' )!.textContent = showPackageName ? favoriteId : entry.slug;
 
 	favoriteButton.dataset.favoriteId = favoriteId;
-	favoriteButton.title = favoriteButtonLabel;
-	favoriteButton.setAttribute( 'aria-label', favoriteButtonLabel );
-	favoriteButton.classList.toggle( 'pkg__favorite--active', isFavorite );
+	favoriteButton.append( createFavoriteIcon( 'pkg__favorite-icon' ) );
+
+	updateFavoriteButtonState( favoriteButton, favoriteIds, favoriteId );
 
 	return testItem;
 }
