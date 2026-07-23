@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import './second.css';
+import './index-content.css';

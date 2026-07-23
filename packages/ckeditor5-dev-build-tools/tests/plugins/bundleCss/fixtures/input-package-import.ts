@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import './package-import.css';
+import './package-import/index-editor.css';

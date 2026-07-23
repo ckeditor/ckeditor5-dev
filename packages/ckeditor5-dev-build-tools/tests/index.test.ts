@@ -13,6 +13,5 @@ test( 'exports the public build tools API', () => {
 	expect( buildTools.declarationFiles ).toBeTypeOf( 'function' );
 	expect( buildTools.loadSourcemaps ).toBeTypeOf( 'function' );
 	expect( buildTools.rawImport ).toBeTypeOf( 'function' );
-	expect( buildTools.splitCss ).toBeTypeOf( 'function' );
 	expect( buildTools.translations ).toBeTypeOf( 'function' );
 } );

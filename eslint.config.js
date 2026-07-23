@@ -24,10 +24,7 @@ export default defineConfig( [
 			'**/tests/**/fixtures/**',
 			'**/dist/*',
 			'**/coverage/**',
-			'**/release/**',
-
-			// TypeScript added support for import attributes in 5.3.0. We can remove this ignore when we upgrade to it.
-			'packages/ckeditor5-dev-build-tools/tests/build/fixtures/src/input.ts'
+			'**/release/**'
 		]
 	},
 	{
