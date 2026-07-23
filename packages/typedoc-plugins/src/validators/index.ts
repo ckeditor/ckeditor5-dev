@@ -62,4 +62,3 @@ export type ValidatorOptions = {
 export type ValidatorErrorCallbackArg = [ error: string, node: TypeScript.Declaration | null ];
 
 export type ValidatorErrorCallback = ( ...args: ValidatorErrorCallbackArg ) => void;
-

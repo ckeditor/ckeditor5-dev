@@ -55,4 +55,3 @@ function saveChangelog( content: string, cwd: string ) {
 
 	fs.writeFileSync( changelogFile, content, 'utf-8' );
 }
-

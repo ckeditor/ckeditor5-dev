@@ -30,4 +30,3 @@ export default function validateConfig( config ) {
 
 	throw new Error( `Missing configuration options: ${ missingFields.join( ', ' ) }.` );
 }
-
