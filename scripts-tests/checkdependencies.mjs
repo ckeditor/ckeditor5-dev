@@ -15,7 +15,7 @@ import { ESLint } from 'eslint';
  * A clean tree proves only that the current manifests pass, so each test plants a defect in
  * a real file (restored afterwards), runs the relevant check in a subprocess, and asserts
  * that the defect is reported. This guards against silent configuration regressions in
- * `knip.ts`, `.syncpackrc.mjs`, and the ESLint setup.
+ * `scripts/knip/dependencies.ts`, `.syncpackrc.mjs`, and the ESLint setup.
  */
 
 const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..' );
@@ -54,7 +54,8 @@ afterEach( () => {
 // because command launchers (`pnpm` included) are `.cmd` files on Windows, which Node.js
 // refuses to spawn directly. The command string is static, so shell quoting is not a concern.
 function runKnip( { production = false } = {} ) {
-	const command = `pnpm exec knip --dependencies --no-config-hints${ production ? ' --production --strict' : '' }`;
+	const command = 'pnpm exec knip --config ./scripts/knip/dependencies.ts --dependencies --no-config-hints' +
+		( production ? ' --production --strict' : '' );
 
 	return spawnSync( command, {
 		cwd: ROOT_DIRECTORY,

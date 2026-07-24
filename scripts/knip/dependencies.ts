@@ -6,10 +6,11 @@
 import type { KnipConfig } from 'knip';
 
 /**
- * Configuration for the dependency checks (`pnpm run check-dependencies`), executed as:
+ * Configuration for the dependency checks (`pnpm run check-dependencies`), which runs Knip
+ * with this configuration twice:
  *
- *   knip --dependencies                        (unused and unlisted packages)
- *   knip --dependencies --production --strict  (misplaced `dependencies` vs `devDependencies`)
+ *   --dependencies                        (unused and unlisted packages)
+ *   --dependencies --production --strict  (misplaced `dependencies` vs `devDependencies`)
  *
  * Patterns marked with the `!` suffix describe production code. They must match the folders
  * that end up in the published packages (`lib`, `src`, `bin`, `theme`).
@@ -33,7 +34,7 @@ const packageFiles = [
 	'scripts/**/*.{js,mjs,cjs,ts}'
 ];
 
-const rootFiles = [ 'scripts/**/*.{js,mjs,cjs}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ];
+const rootFiles = [ 'scripts/**/*.{js,mjs,cjs,ts}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ];
 
 const packageWorkspace = ( ignoreDependencies: Array<string> = [] ) => ( {
 	// Test fixtures reference intentionally non-existent packages.
