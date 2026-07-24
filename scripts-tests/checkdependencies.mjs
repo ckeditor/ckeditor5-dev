@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import upath from 'upath';
+import { ESLint } from 'eslint';
 
 /**
  * Regression tests for the dependency checks (`check-dependencies` and `check-versions-match`).
@@ -49,25 +50,17 @@ afterEach( () => {
 	originalContents.clear();
 } );
 
-function runBinary( binaryName, args ) {
-	return spawnSync(
-		upath.join( ROOT_DIRECTORY, 'node_modules', '.bin', binaryName ),
-		args,
-		{
-			cwd: ROOT_DIRECTORY,
-			encoding: 'utf-8'
-		}
-	);
-}
-
+// Knip runs through `pnpm exec`, the same way CI invokes it. The command needs a shell,
+// because command launchers (`pnpm` included) are `.cmd` files on Windows, which Node.js
+// refuses to spawn directly. The command string is static, so shell quoting is not a concern.
 function runKnip( { production = false } = {} ) {
-	const args = [ '--dependencies', '--no-config-hints' ];
+	const command = `pnpm exec knip --dependencies --no-config-hints${ production ? ' --production --strict' : '' }`;
 
-	if ( production ) {
-		args.push( '--production', '--strict' );
-	}
-
-	return runBinary( 'knip', args );
+	return spawnSync( command, {
+		cwd: ROOT_DIRECTORY,
+		encoding: 'utf-8',
+		shell: true
+	} );
 }
 
 function runVersionsMatch( { fix = false } = {} ) {
@@ -172,15 +165,16 @@ describe( 'check-dependencies', () => {
 } );
 
 describe( 'self-import check (ESLint)', () => {
-	it( 'reports an import from a package into itself', { timeout: KNIP_TIMEOUT }, () => {
+	it( 'reports an import from a package into itself', { timeout: KNIP_TIMEOUT }, async () => {
 		mutateFile( PATHS.devUtilsIndex, content => {
 			return content + '\nimport \'@ckeditor/ckeditor5-dev-utils\';\n';
 		} );
 
-		const { status, stdout } = runBinary( 'eslint', [ '--no-cache', PATHS.devUtilsIndex ] );
+		const eslint = new ESLint( { cwd: ROOT_DIRECTORY, cache: false } );
+		const [ result ] = await eslint.lintFiles( [ PATHS.devUtilsIndex ] );
+		const ruleIds = result.messages.map( message => message.ruleId );
 
-		expect( status ).not.toEqual( 0 );
-		expect( stdout ).toContain( 'ckeditor5-rules/no-scoped-imports-within-package' );
+		expect( ruleIds ).toContain( 'ckeditor5-rules/no-scoped-imports-within-package' );
 	} );
 } );
 
