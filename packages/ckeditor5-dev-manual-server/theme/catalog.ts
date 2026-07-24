@@ -48,7 +48,7 @@ function renderApp( root: HTMLElement, entries: Array<ManualTestEntry> ): void {
 		const normalizedQuery = query.trim().toLowerCase();
 		const renderedGroups = renderGroups( filterEntries( entries, normalizedQuery ), favoriteIds );
 
-		if ( !normalizedQuery ) {
+		if ( !normalizedQuery && entries.length ) {
 			renderedGroups.unshift( renderFavoritesCard( entries, favoriteIds ) );
 		}
 
