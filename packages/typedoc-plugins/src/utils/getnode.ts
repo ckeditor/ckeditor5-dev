@@ -9,7 +9,7 @@ import type { Context, DeclarationReflection, SignatureReflection, TypeScript } 
  * Returns the TypeScript node from the reflection.
  */
 export function getNode( context: Context, reflection: DeclarationReflection | SignatureReflection ): TypeScript.Declaration | null {
-	let symbol = null;
+	let symbol;
 	let declarationIndex = 0;
 
 	if ( reflection.isSignature() ) {

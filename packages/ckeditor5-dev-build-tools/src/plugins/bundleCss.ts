@@ -5,15 +5,16 @@
 
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
-import { basename, dirname, isAbsolute, resolve } from 'node:path';
+import { basename, dirname } from 'node:path';
 import { bundleAsync, Features, type Warning as LightningCssWarning } from 'lightningcss';
-import type { OutputBundle, OutputChunk, Plugin, PluginContext, NormalizedOutputOptions } from 'rolldown';
+import type { OutputBundle, OutputChunk, Plugin, PluginContext } from 'rolldown';
 import upath from 'upath';
 
 export interface RollupBundleCssOptions {
 
 	/**
-	 * Name or path of the generated CSS bundle.
+	 * Name or path of the generated combined CSS bundle. Editor and content bundle names
+	 * are derived by adding `-editor` and `-content` before the extension.
 	 */
 	fileName: string;
 
@@ -36,11 +37,13 @@ const CSS_ID_REGEXP = /\.css(?:[?#].*)?$/;
 
 const VIRTUAL_ENTRY_ID = '/__cke5_bundle_css__.css';
 
+const EDITOR_ENTRY_FILE_NAME = 'index-editor.css';
+
+const CONTENT_ENTRY_FILE_NAME = 'index-content.css';
+
 const QUERY_AND_HASH_REGEXP = /[#?].*$/;
 
-const URL_PROTOCOL_REGEXP = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
-
-const PROTOCOL_RELATIVE_URL_REGEXP = /^\/\//;
+const RAW_QUERY_REGEXP = /[?&]raw\b/;
 
 /**
  * Removes query strings and hash fragments from the module id.
@@ -50,45 +53,29 @@ function normalizeId( id: string ): string {
 }
 
 /**
- * Builds virtual stylesheet entry containing imports in the provided order.
- */
-function createVirtualEntry( filePaths: Array<string> ): { content: string; imports: Map<string, string> } {
-	const imports = new Map<string, string>();
-
-	const content = filePaths
-		.map( ( filePath, index ) => {
-			const importId = `__rolldown_bundle_css_${ index }__`;
-
-			imports.set( importId, filePath );
-
-			return `@import ${ JSON.stringify( importId ) };`;
-		} )
-		.join( '\n' );
-
-	return {
-		content,
-		imports
-	};
-}
-
-/**
- * Returns whether the module id points to a CSS file.
+ * Returns whether the module id points to a CSS file. Imports with the `?raw` query
+ * only embed the file text in JavaScript, so they do not feed the CSS bundles.
  */
 function isCssModule( id: string ): boolean {
-	return CSS_ID_REGEXP.test( id );
+	return CSS_ID_REGEXP.test( id ) && !RAW_QUERY_REGEXP.test( id );
 }
 
 /**
  * Returns whether the import specifier references an external resource.
  */
 function isExternalImport( specifier: string ): boolean {
-	return URL_PROTOCOL_REGEXP.test( specifier ) || PROTOCOL_RELATIVE_URL_REGEXP.test( specifier );
+	return URL.canParse( specifier ) || specifier.startsWith( '//' );
 }
 
 /**
  * Emits warning diagnostics returned by Lightning CSS.
  */
-function emitLightningCssWarnings( context: PluginContext, warnings: Array<LightningCssWarning>, outputFileName: string ): void {
+function emitLightningCssWarnings(
+	context: PluginContext,
+	warnings: Array<LightningCssWarning>,
+	outputFileName: string,
+	emittedWarnings: Set<string>
+): void {
 	for ( const warning of warnings ) {
 		const warningFileName = warning.loc.filename === VIRTUAL_ENTRY_ID ?
 			outputFileName :
@@ -96,10 +83,51 @@ function emitLightningCssWarnings( context: PluginContext, warnings: Array<Light
 		const warningLocation = `${ warningFileName }:${ warning.loc.line }:${ warning.loc.column + 1 }`;
 		const warningType = warning.type ? ` (${ warning.type })` : '';
 
-		context.warn(
-			`Lightning CSS warning in ${ warningLocation }${ warningType }: ${ warning.message }`
-		);
+		const warningKey = `${ warning.loc.filename }:${ warning.loc.line }:${ warning.loc.column }:${ warning.type }:${ warning.message }`;
+
+		if ( emittedWarnings.has( warningKey ) ) {
+			continue;
+		}
+
+		emittedWarnings.add( warningKey );
+		context.warn( `Lightning CSS warning in ${ warningLocation }${ warningType }: ${ warning.message }` );
 	}
+}
+
+/**
+ * Returns the chunk modules to use as starting points when collecting CSS imports.
+ *
+ * Walking the import graph from every module of the chunk works, but is very slow for large
+ * bundles. Walking from the facade (entry) module alone gives the same result: it reaches every
+ * CSS file, and since it is returned as the last root, it also decides the final CSS order
+ * after the keep-last deduplication in `getOrderedCssModules()`.
+ *
+ * Two special cases: the walk follows only static imports, so targets of inlined dynamic imports
+ * are kept as extra starting points, and chunks without a facade module use every module.
+ */
+function getTraversalRoots( chunk: OutputChunk, getModuleInfo: PluginContext[ 'getModuleInfo' ] ): Array<string> {
+	const moduleIds = Object.keys( chunk.modules );
+
+	if ( !chunk.facadeModuleId || !( chunk.facadeModuleId in chunk.modules ) ) {
+		return moduleIds;
+	}
+
+	const dynamicImportTargets = new Set<string>();
+
+	for ( const moduleId of moduleIds ) {
+		for ( const importedId of getModuleInfo( moduleId )?.dynamicallyImportedIds || [] ) {
+			if ( importedId in chunk.modules ) {
+				dynamicImportTargets.add( importedId );
+			}
+		}
+	}
+
+	// The facade module goes last regardless of the chunk module order, so its CSS order
+	// wins the keep-last deduplication over the inlined dynamic import targets.
+	return [
+		...moduleIds.filter( moduleId => moduleId !== chunk.facadeModuleId && dynamicImportTargets.has( moduleId ) ),
+		chunk.facadeModuleId
+	];
 }
 
 /**
@@ -112,7 +140,7 @@ function getChunkCssImports(
 ): Array<string> {
 	const ids: Array<string> = [];
 
-	for ( const moduleId of Object.keys( chunk.modules ) ) {
+	for ( const moduleId of getTraversalRoots( chunk, getModuleInfo ) ) {
 		const cachedCssImports = moduleCssImports.get( moduleId );
 
 		if ( cachedCssImports ) {
@@ -161,38 +189,13 @@ function getChunkCssImports(
 /**
  * Returns unique CSS modules ordered like they were emitted by `rollup-plugin-styles`.
  */
-function getOrderedCssModules(
-	bundle: OutputBundle,
-	outputOptions: NormalizedOutputOptions,
-	getModuleInfo: PluginContext[ 'getModuleInfo' ]
-): Array<string> {
+function getOrderedCssModules( bundle: OutputBundle, getModuleInfo: PluginContext[ 'getModuleInfo' ] ): Array<string> {
 	const moduleCssImports = new Map<string, Array<string>>();
-	const chunks = Object.values( bundle ).filter( ( output ): output is OutputChunk => output.type === 'chunk' );
-	const manualChunks = chunks.filter( chunk => !chunk.facadeModuleId );
-	const emittedChunks = outputOptions.preserveModules ?
-		chunks :
-		chunks.filter( chunk => chunk.isEntry || chunk.isDynamicEntry );
+	const chunks = Object.values( bundle ).filter( ( output ): output is OutputChunk => {
+		return output.type === 'chunk' && ( output.isEntry || output.isDynamicEntry );
+	} );
 
-	const ids: Array<string> = [];
-	const moved = new Set<string>();
-
-	// Rolldown may move modules from entry chunks to manual chunks.
-	// Process manual chunks first to preserve their priority.
-	for ( const chunk of manualChunks ) {
-		const chunkIds = getChunkCssImports( chunk, getModuleInfo, moduleCssImports );
-
-		chunkIds.forEach( id => moved.add( id ) );
-
-		ids.push( ...chunkIds );
-	}
-
-	// Entry/dynamic chunks can still reference modules already moved above.
-	// Skipping them here keeps ordering stable and prevents duplicates.
-	for ( const chunk of emittedChunks ) {
-		const chunkIds = getChunkCssImports( chunk, getModuleInfo, moduleCssImports );
-
-		ids.push( ...chunkIds.filter( id => !moved.has( id ) ) );
-	}
+	const ids = chunks.flatMap( chunk => getChunkCssImports( chunk, getModuleInfo, moduleCssImports ) );
 
 	// Keep the last occurrence of each id.
 	return [ ...new Set( ids.reverse() ) ].reverse();
@@ -204,158 +207,166 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 		sourceMap: false,
 		...pluginOptions
 	};
-
-	const styles = new Map<string, string>();
+	const baseFileName = options.fileName.endsWith( '.css' ) ? options.fileName.slice( 0, -4 ) : options.fileName;
+	const editorFileName = `${ baseFileName }-editor.css`;
+	const contentFileName = `${ baseFileName }-content.css`;
+	type Stylesheet = { css: string; sourceMap?: string };
 
 	return {
 		name: 'cke5-bundle-css',
 
-		buildStart() {
-			styles.clear();
-		},
-
+		// Register CSS files as empty JavaScript modules. Their content is read
+		// from the file system during bundling in the `generateBundle()` hook.
 		load: {
 			filter: {
 				id: CSS_ID_REGEXP
 			},
 
 			handler( id: string ) {
-				const normalizedId = normalizeId( id );
-
-				this.addWatchFile( normalizedId );
+				// Leave raw imports to the `rawImport` plugin regardless of the plugin order.
+				if ( RAW_QUERY_REGEXP.test( id ) ) {
+					return;
+				}
 
 				return {
-					code: fs.readFileSync( normalizedId, 'utf-8' ),
+					code: '',
 					moduleType: 'js'
 				};
 			}
 		},
 
-		transform: {
-			filter: {
-				id: CSS_ID_REGEXP
-			},
-
-			handler( code: string, id: string ): string | undefined {
-				styles.set( normalizeId( id ), code );
-
-				return '';
-			}
-		},
-
 		async generateBundle( outputOptions, bundle ) {
-			const orderedCssModules = getOrderedCssModules( bundle, outputOptions, this.getModuleInfo );
+			const emittedWarnings = new Set<string>();
+			const orderedCssModules = getOrderedCssModules( bundle, this.getModuleInfo );
+			const editorEntries: Array<string> = [];
+			const contentEntries: Array<string> = [];
+			const invalidCssModules: Array<string> = [];
 
-			if ( !orderedCssModules.length ) {
-				this.emitFile( {
-					type: 'asset',
-					fileName: options.fileName,
-					source: '\n'
-				} );
+			for ( const id of orderedCssModules ) {
+				const fileName = basename( normalizeId( id ) );
 
-				return;
+				if ( fileName === EDITOR_ENTRY_FILE_NAME ) {
+					editorEntries.push( id );
+				} else if ( fileName === CONTENT_ENTRY_FILE_NAME ) {
+					contentEntries.push( id );
+				} else {
+					invalidCssModules.push( id );
+				}
 			}
 
-			// Lightning CSS bundles from a single entry file, so create a virtual one
-			// that imports CSS modules in the desired order.
-			const virtualEntry = createVirtualEntry( orderedCssModules );
+			if ( invalidCssModules.length ) {
+				this.error(
+					'CSS must be imported through an "index-editor.css" or "index-content.css" entry point. Found:\n' +
+					invalidCssModules.map( id => ` - ${ normalizeId( id ) }` ).join( '\n' )
+				);
+			}
+
 			const projectRoot = outputOptions.file ? dirname( outputOptions.file ) : outputOptions.dir || process.cwd();
 
-			const result = await bundleAsync( {
-				projectRoot,
-				filename: VIRTUAL_ENTRY_ID,
-				minify: options.minify,
-				sourceMap: options.sourceMap,
-				include: Features.Nesting,
-				resolver: {
-					read: ( filePath ): string => {
-						if ( filePath === VIRTUAL_ENTRY_ID ) {
-							return virtualEntry.content;
-						}
+			const createEmptyStylesheet = ( fileName: string ): Stylesheet => ( {
+				css: '\n',
+				sourceMap: options.sourceMap ? JSON.stringify( {
+					version: 3,
+					file: fileName,
+					sources: [],
+					sourcesContent: [],
+					names: [],
+					mappings: ''
+				} ) : undefined
+			} );
 
-						const normalizedPath = normalizeId( filePath );
-						const transformedStyles = styles.get( normalizedPath );
+			const bundleStylesheet = async ( entries: Array<string>, fileName: string ): Promise<Stylesheet> => {
+				if ( !entries.length ) {
+					return createEmptyStylesheet( fileName );
+				}
 
-						// Prefer styles transformed by earlier Rolldown plugins.
-						if ( transformedStyles !== undefined ) {
-							return transformedStyles;
-						}
-
-						// Fallback to raw filesystem reads when transform() did not run.
-						this.addWatchFile( normalizedPath );
-
-						return fs.readFileSync( normalizedPath, 'utf-8' );
-					},
-
-					resolve: async ( specifier, originatingFile ): Promise<string> => {
-						if ( originatingFile === VIRTUAL_ENTRY_ID ) {
-							// Virtual entry imports map 1:1 to collected module paths.
-							const virtualImportPath = virtualEntry.imports.get( specifier );
-
-							if ( !virtualImportPath ) {
-								this.error( `Cannot resolve generated stylesheet entry import: ${ specifier }.` );
+				// Lightning CSS bundles from a single entry file, so create a virtual one
+				// that imports CSS modules in the desired order.
+				const virtualEntry = entries.map( entry => `@import ${ JSON.stringify( normalizeId( entry ) ) };` ).join( '\n' );
+				const result = await bundleAsync( {
+					projectRoot,
+					filename: VIRTUAL_ENTRY_ID,
+					minify: options.minify,
+					sourceMap: options.sourceMap,
+					include: Features.Nesting,
+					resolver: {
+						read: ( filePath ): string => {
+							if ( filePath === VIRTUAL_ENTRY_ID ) {
+								return virtualEntry;
 							}
 
-							return virtualImportPath!;
-						}
+							const normalizedPath = normalizeId( filePath );
 
-						const normalizedOrigin = normalizeId( originatingFile );
+							this.addWatchFile( normalizedPath );
 
-						if ( isExternalImport( specifier ) ) {
-							this.error( `External CSS imports are not supported. Found ${ specifier } in ${ normalizedOrigin }.` );
-						}
+							return fs.readFileSync( normalizedPath, 'utf-8' );
+						},
 
-						// Ask Rolldown first so aliases/custom resolvers stay in effect.
-						const resolvedByRolldown = await this.resolve( specifier, normalizedOrigin, { skipSelf: true } );
+						resolve: async ( specifier, originatingFile ): Promise<string> => {
+							if ( originatingFile === VIRTUAL_ENTRY_ID ) {
+								return specifier;
+							}
 
-						if ( resolvedByRolldown ) {
-							if ( resolvedByRolldown.external ) {
+							const normalizedOrigin = normalizeId( originatingFile );
+
+							if ( isExternalImport( specifier ) ) {
 								this.error( `External CSS imports are not supported. Found ${ specifier } in ${ normalizedOrigin }.` );
 							}
 
-							return normalizeId( resolvedByRolldown.id );
-						}
+							// Ask Rolldown so aliases/custom resolvers stay in effect.
+							const resolvedByRolldown = await this.resolve( specifier, normalizedOrigin, { skipSelf: true } );
 
-						if ( isAbsolute( specifier ) ) {
-							return specifier;
-						}
+							if ( !resolvedByRolldown ) {
+								this.error( `Unable to resolve CSS import ${ specifier } in ${ normalizedOrigin }.` );
+							}
 
-						if ( specifier.startsWith( '.' ) ) {
-							return resolve( dirname( normalizedOrigin ), specifier );
-						}
+							if ( resolvedByRolldown!.external ) {
+								this.error( `External CSS imports are not supported. Found ${ specifier } in ${ normalizedOrigin }.` );
+							}
 
-						this.error( `Unable to resolve CSS import ${ specifier } in ${ normalizedOrigin }.` );
+							return normalizeId( resolvedByRolldown!.id );
+						}
 					}
-				}
-			} );
+				} );
 
-			emitLightningCssWarnings( this, result.warnings, options.fileName );
+				emitLightningCssWarnings( this, result.warnings, fileName, emittedWarnings );
 
-			const sourceMapFileName = `${ options.fileName }.map`;
-			let css = Buffer.from( result.code ).toString();
-
-			if ( options.sourceMap && result.map ) {
-				const sourceMap = JSON.parse( Buffer.from( result.map ).toString() ) as {
-					file?: string;
+				return {
+					css: Buffer.from( result.code ).toString(),
+					sourceMap: result.map ? Buffer.from( result.map ).toString() : undefined
 				};
+			};
 
-				// Ensure emitted map references the emitted stylesheet file name.
-				sourceMap.file ??= options.fileName;
+			const emitStylesheet = ( fileName: string, stylesheet: Stylesheet ): void => {
+				let css = stylesheet.css;
 
-				css += `\n/*# sourceMappingURL=${ basename( sourceMapFileName ) } */`;
+				if ( options.sourceMap && stylesheet.sourceMap ) {
+					const sourceMapFileName = `${ fileName }.map`;
+					const sourceMap = JSON.parse( stylesheet.sourceMap ) as { file?: string };
+
+					sourceMap.file = fileName;
+					css += `\n/*# sourceMappingURL=${ basename( sourceMapFileName ) } */`;
+					this.emitFile( {
+						type: 'asset',
+						fileName: sourceMapFileName,
+						source: JSON.stringify( sourceMap )
+					} );
+				}
 
 				this.emitFile( {
 					type: 'asset',
-					fileName: sourceMapFileName,
-					source: JSON.stringify( sourceMap )
+					fileName,
+					source: css
 				} );
-			}
+			};
 
-			this.emitFile( {
-				type: 'asset',
-				fileName: options.fileName,
-				source: css
-			} );
+			const combinedStylesheet = await bundleStylesheet( orderedCssModules, options.fileName );
+			const editorStylesheet = await bundleStylesheet( editorEntries, editorFileName );
+			const contentStylesheet = await bundleStylesheet( contentEntries, contentFileName );
+
+			emitStylesheet( options.fileName, combinedStylesheet );
+			emitStylesheet( editorFileName, editorStylesheet );
+			emitStylesheet( contentFileName, contentStylesheet );
 		}
 	};
 }

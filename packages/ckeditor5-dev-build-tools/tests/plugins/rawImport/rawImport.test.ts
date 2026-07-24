@@ -33,7 +33,7 @@ test( 'can import raw file content using the `?raw` query parameter', async () =
 	const output = await generateBundle();
 
 	// Content from `dependency.css` file.
-	verifyChunk( output, 'input.js', 'color: red;' );
+	verifyChunk( output, 'input.js', 'color: hsl(0deg 100% 50%);' );
 
 	// Content from `dependency.js` file.
 	verifyChunk( output, 'input.js', 'const test = 123;' );

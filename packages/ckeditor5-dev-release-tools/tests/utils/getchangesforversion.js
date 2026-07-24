@@ -260,4 +260,3 @@ describe( 'getChangesForVersion()', () => {
 		].join( '\n' ) );
 	} );
 } );
-

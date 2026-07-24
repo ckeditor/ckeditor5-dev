@@ -80,7 +80,8 @@ export default async function getOtherWorkflowJobs( options ) {
 			if ( attempt === maxAttempts ) {
 				throw new Error(
 					`CircleCI API seems unstable. Failed to fetch workflow jobs after ${ maxAttempts } attempts. ` +
-					`Last error: ${ error.message } Please verify workflow results manually.`
+					`Last error: ${ error.message } Please verify workflow results manually.`,
+					{ cause: error }
 				);
 			}
 

@@ -24,4 +24,3 @@ export default async function runBuildCommand( packagePath ) {
 		async: true
 	} );
 }
-
