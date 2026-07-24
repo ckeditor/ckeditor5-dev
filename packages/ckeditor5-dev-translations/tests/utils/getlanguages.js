@@ -61,7 +61,7 @@ describe( 'getLanguages()', () => {
 
 		expect( languageChineseSimplified ).toEqual( {
 			localeCode: 'zh@hans',
-			languageCode: 'zh-Hans',
+			languageCode: 'zh',
 			languageFileName: 'zh-hans'
 		} );
 	} );
@@ -72,7 +72,7 @@ describe( 'getLanguages()', () => {
 
 		expect( languageChineseTraditional ).toEqual( {
 			localeCode: 'zh@hant',
-			languageCode: 'zh-Hant',
+			languageCode: 'zh',
 			languageFileName: 'zh-hant'
 		} );
 	} );
