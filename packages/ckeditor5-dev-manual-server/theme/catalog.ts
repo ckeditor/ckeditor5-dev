@@ -166,13 +166,13 @@ function updateSearchQueryInUrl( query: string ): void {
  * Highlights query matches in the currently rendered package and test names.
  */
 function updateSearchHighlights( root: HTMLElement, normalizedQuery: string ): void {
-	if ( typeof CSS == 'undefined' || !( 'highlights' in CSS ) ) {
+	if ( !( 'highlights' in CSS ) ) {
 		return;
 	}
 
 	CSS.highlights.delete( SEARCH_HIGHLIGHT_NAME );
 
-	if ( !normalizedQuery || typeof Highlight == 'undefined' ) {
+	if ( !normalizedQuery ) {
 		return;
 	}
 
@@ -185,7 +185,7 @@ function updateSearchHighlights( root: HTMLElement, normalizedQuery: string ): v
 			continue;
 		}
 
-		for ( const { start, end } of findMatchOffsets( textNode.textContent || '', normalizedQuery ) ) {
+		for ( const { start, end } of findMatchOffsets( textNode.textContent!, normalizedQuery ) ) {
 			const range = new Range();
 
 			range.setStart( textNode, start );

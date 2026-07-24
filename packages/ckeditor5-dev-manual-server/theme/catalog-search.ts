@@ -139,19 +139,13 @@ export function findMatchOffsets( text: string, normalizedQuery: string ): Array
 
 	const normalizedText = text.toLowerCase();
 	const matches: Array<MatchOffset> = [];
-	let start = 0;
+	let matchStart = normalizedText.indexOf( normalizedQuery );
 
-	while ( start < normalizedText.length ) {
-		const matchStart = normalizedText.indexOf( normalizedQuery, start );
-
-		if ( matchStart == -1 ) {
-			break;
-		}
-
+	while ( matchStart != -1 ) {
 		const matchEnd = matchStart + normalizedQuery.length;
 
 		matches.push( { start: matchStart, end: matchEnd } );
-		start = matchEnd;
+		matchStart = normalizedText.indexOf( normalizedQuery, matchEnd );
 	}
 
 	return matches;
