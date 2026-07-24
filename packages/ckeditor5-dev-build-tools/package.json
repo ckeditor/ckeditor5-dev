@@ -30,7 +30,7 @@
     "@rollup/pluginutils": "^5.3.0",
     "es-toolkit": "^1.45.1",
     "glob": "^13.0.6",
-    "lightningcss": "^1.32.0",
+    "lightningcss": "^1.33.0",
     "pofile": "^1.1.4",
     "rolldown": "^1.1.2",
     "source-map": "^0.7.6",
