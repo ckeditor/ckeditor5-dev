@@ -55,14 +55,25 @@ describe( 'getLanguages()', () => {
 		} );
 	} );
 
-	it( 'should use predefined filename if defined', () => {
+	it( 'should return Chinese (Simplified) language', () => {
 		const languages = getLanguages();
-		const languageChineseTaiwan = languages.find( l => l.localeCode === 'zh_TW' );
+		const languageChineseSimplified = languages.find( l => l.localeCode === 'zh@hans' );
 
-		expect( languageChineseTaiwan ).toEqual( {
-			localeCode: 'zh_TW',
+		expect( languageChineseSimplified ).toEqual( {
+			localeCode: 'zh@hans',
 			languageCode: 'zh',
-			languageFileName: 'zh'
+			languageFileName: 'zh-hans'
+		} );
+	} );
+
+	it( 'should return Chinese (Traditional) language', () => {
+		const languages = getLanguages();
+		const languageChineseTraditional = languages.find( l => l.localeCode === 'zh@hant' );
+
+		expect( languageChineseTraditional ).toEqual( {
+			localeCode: 'zh@hant',
+			languageCode: 'zh',
+			languageFileName: 'zh-hant'
 		} );
 	} );
 } );

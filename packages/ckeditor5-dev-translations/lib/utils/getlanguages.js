@@ -17,8 +17,8 @@ const SUPPORTED_LOCALES = [
 	'bs', // Bosnian
 	'bg', // Bulgarian
 	'ca', // Catalan
-	'zh_CN', // Chinese (China)
-	'zh_TW', // Chinese (Taiwan)
+	'zh@hans', // Chinese (Simplified)
+	'zh@hant', // Chinese (Traditional)
 	'hr', // Croatian
 	'cs', // Czech
 	'da', // Danish
@@ -78,12 +78,12 @@ const SUPPORTED_LOCALES = [
 	'uz', // Uzbek
 	'vi' // Vietnamese
 ];
-
 const LOCALES_FILENAME_MAP = {
 	'ne_NP': 'ne',
 	'si_LK': 'si',
 	'sr@latin': 'sr-latn',
-	'zh_TW': 'zh'
+	'zh@hans': 'zh-hans',
+	'zh@hant': 'zh-hant'
 };
 
 /**
