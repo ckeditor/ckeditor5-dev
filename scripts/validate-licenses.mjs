@@ -46,12 +46,6 @@ validateLicenseFiles( {
 			minimistOverride
 		]
 	}, {
-		packageName: '@ckeditor/ckeditor5-dev-dependency-checker',
-		dependencies: [
-			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' },
-			minimistOverride
-		]
-	}, {
 		packageName: '@ckeditor/ckeditor5-dev-docs',
 		dependencies: [
 			{ license: 'Apache-2.0', name: 'typedoc', copyright: 'Copyright (c) TypeStrong contributors.' }

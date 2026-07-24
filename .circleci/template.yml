@@ -82,6 +82,9 @@ jobs:
           name: Validate versions of dependencies
           command: pnpm run check-versions-match
       - run:
+          name: Validate dependencies
+          command: pnpm run check-dependencies
+      - run:
           name: Type check the project
           command: pnpm run typecheck
       - run:

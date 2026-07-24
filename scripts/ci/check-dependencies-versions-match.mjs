@@ -1,34 +1,41 @@
+#!/usr/bin/env node
+
 /**
  * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
+import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import upath from 'upath';
-import { glob } from 'glob';
-import fs from 'fs-extra';
-import { checkVersionMatch } from '../../packages/ckeditor5-dev-dependency-checker/lib/index.js';
 
+/**
+ * Runs `syncpack` (see `.syncpackrc.mjs`) to verify that `dependencies` and `devDependencies`
+ * across the repository use consistent versions.
+ */
 const shouldFix = process.argv[ 2 ] === '--fix';
 
 const ROOT_DIRECTORY = upath.join( import.meta.dirname, '..', '..' );
 
-const PACKAGES_DIRECTORY = upath.join( ROOT_DIRECTORY, 'packages' );
+// The `syncpack` JavaScript entry point is executed through the current Node.js binary,
+// because the extensionless `node_modules/.bin` launcher does not work on Windows.
+const require = createRequire( import.meta.url );
+const syncpackPackagePath = require.resolve( 'syncpack/package.json' );
+const syncpackBin = upath.join( upath.dirname( syncpackPackagePath ), require( 'syncpack/package.json' ).bin.syncpack );
 
-const allPathsToPackageJson = await glob( PACKAGES_DIRECTORY + '/*/package.json', {
-	cwd: ROOT_DIRECTORY,
-	nodir: true,
-	absolute: true
-} );
-
-const allPackageJson = await Promise.all(
-	allPathsToPackageJson.map( pathToPackageJson => fs.readJson( pathToPackageJson ) )
+const { status } = spawnSync(
+	process.execPath,
+	[
+		syncpackBin,
+		shouldFix ? 'fix' : 'lint',
+		'--config', upath.join( ROOT_DIRECTORY, '.syncpackrc.mjs' ),
+		'--dependency-types', 'prod,dev'
+	],
+	{
+		cwd: ROOT_DIRECTORY,
+		stdio: 'inherit'
+	}
 );
 
-const allPackageNames = allPackageJson.map( packageJson => packageJson.name );
-
-checkVersionMatch( {
-	cwd: ROOT_DIRECTORY,
-	fix: shouldFix,
-	allowRanges: true,
-	workspacePackages: allPackageNames
-} );
+// `status` is `null` when `syncpack` failed to start or was killed by a signal.
+process.exit( status ?? 1 );

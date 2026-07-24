@@ -7,6 +7,6 @@
 
 'use strict';
 
-import { generateTemplate } from '@ckeditor/ckeditor5-dev-changelog/dist/template.js';
+import { generateTemplate } from '../dist/template.js';
 
 await generateTemplate();
