@@ -16,7 +16,9 @@ export default defineConfig( {
 		coverage: {
 			provider: 'v8',
 			include: [
-				'src/**'
+				'src/**',
+				'theme/catalog-favorites.ts',
+				'theme/catalog-search.ts'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

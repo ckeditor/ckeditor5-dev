@@ -7,6 +7,14 @@
 // Imported as raw strings so they can be adopted into constructable stylesheets.
 import headerStyles from './manual-header.css?inline';
 import instructionsStyles from './manual-instructions.css?inline';
+import {
+	getFavoriteId,
+	loadFavoriteIds,
+	saveFavoriteIds,
+	toggleFavoriteId,
+	updateFavoriteButtonState
+} from './catalog-favorites.js';
+import { createFavoriteIcon } from './favorite-icon.js';
 
 const MANUAL_HEADER_DATA_META = 'ck-manual-header';
 
@@ -19,6 +27,7 @@ const TEMPLATE = /* html */ `
 		<a class="pill back" title="Back to test index">&larr; All tests</a>
 		<span class="divider" aria-hidden="true"></span>
 		<span class="label">
+			<button type="button" class="pill favorite" data-action="favorite"></button>
 			<span class="label__name" data-field="name"></span>
 			<span class="label__package" data-field="package"></span>
 		</span>
@@ -48,8 +57,8 @@ const TEMPLATE = /* html */ `
 
 /**
  * `<ck-manual-header>` renders the manual test chrome: a fixed header bar with the test
- * name, package name and a back-to-index link, plus a collapsible instructions panel that
- * projects the element's light-DOM children (default slot).
+ * name, package name, back-to-index link and favorite toggle, plus a collapsible instructions
+ * panel that projects the element's light-DOM children (default slot).
  *
  * The manual test server injects a `<meta name="ck-manual-header">` carrying the package
  * name and the base-aware catalog href, and the `<script>` that defines this
@@ -61,6 +70,7 @@ const TEMPLATE = /* html */ `
  */
 class ManualHeaderElement extends HTMLElement {
 	private _panel!: HTMLElement;
+	private _favoriteId!: string;
 
 	constructor() {
 		super();
@@ -69,6 +79,7 @@ class ManualHeaderElement extends HTMLElement {
 
 		shadow.adoptedStyleSheets = [ headerStyleSheet ];
 		shadow.innerHTML = TEMPLATE;
+		shadow.querySelector<HTMLElement>( '[data-action="favorite"]' )!.append( createFavoriteIcon( 'favorite__icon' ) );
 	}
 
 	public connectedCallback(): void {
@@ -82,6 +93,10 @@ class ManualHeaderElement extends HTMLElement {
 		const backLink = shadow.querySelector<HTMLAnchorElement>( '.back' )!;
 
 		backLink.href = data.catalogHref;
+		this._favoriteId = getFavoriteId( {
+			packageName: data.packageName,
+			slug: getSlugFromLocation()
+		} );
 
 		for ( const element of shadow.querySelectorAll<HTMLElement>( '[data-field="name"]' ) ) {
 			element.textContent = this._resolveDisplayName();
@@ -91,6 +106,7 @@ class ManualHeaderElement extends HTMLElement {
 			element.textContent = data.packageName;
 		}
 
+		this._renderFavoriteAction( loadFavoriteIds() );
 		this._setUpInstructions();
 		this._setUpActions( shadow );
 	}
@@ -129,7 +145,9 @@ class ManualHeaderElement extends HTMLElement {
 				return;
 			}
 
-			if ( trigger.dataset.action == 'toggle' ) {
+			if ( trigger.dataset.action == 'favorite' ) {
+				this._toggleFavorite();
+			} else if ( trigger.dataset.action == 'toggle' ) {
 				this._toggleInstructions( !this._panel.classList.contains( 'panel--open' ) );
 			} else if ( trigger.dataset.action == 'close' ) {
 				this._toggleInstructions( false );
@@ -141,6 +159,20 @@ class ManualHeaderElement extends HTMLElement {
 				this._toggleInstructions( false );
 			}
 		} );
+	}
+
+	private _toggleFavorite(): void {
+		const favoriteIds = loadFavoriteIds();
+
+		toggleFavoriteId( favoriteIds, this._favoriteId );
+		saveFavoriteIds( favoriteIds );
+		this._renderFavoriteAction( favoriteIds );
+	}
+
+	private _renderFavoriteAction( favoriteIds: Set<string> ): void {
+		const trigger = this.shadowRoot!.querySelector<HTMLButtonElement>( '[data-action="favorite"]' )!;
+
+		updateFavoriteButtonState( trigger, favoriteIds, this._favoriteId );
 	}
 
 	private _toggleInstructions( isOpen: boolean ): void {
