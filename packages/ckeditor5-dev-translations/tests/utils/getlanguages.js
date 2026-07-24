@@ -57,10 +57,10 @@ describe( 'getLanguages()', () => {
 
 	it( 'should return Chinese (Simplified) language', () => {
 		const languages = getLanguages();
-		const languageChineseSimplified = languages.find( l => l.localeCode === 'zh@hans' );
+		const languageChineseSimplified = languages.find( l => l.localeCode === 'zh_CN' );
 
 		expect( languageChineseSimplified ).toEqual( {
-			localeCode: 'zh@hans',
+			localeCode: 'zh_CN',
 			languageCode: 'zh',
 			languageFileName: 'zh-hans'
 		} );
@@ -68,10 +68,10 @@ describe( 'getLanguages()', () => {
 
 	it( 'should return Chinese (Traditional) language', () => {
 		const languages = getLanguages();
-		const languageChineseTraditional = languages.find( l => l.localeCode === 'zh@hant' );
+		const languageChineseTraditional = languages.find( l => l.localeCode === 'zh_TW' );
 
 		expect( languageChineseTraditional ).toEqual( {
-			localeCode: 'zh@hant',
+			localeCode: 'zh_TW',
 			languageCode: 'zh',
 			languageFileName: 'zh-hant'
 		} );
