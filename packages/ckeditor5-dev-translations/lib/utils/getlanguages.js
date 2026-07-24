@@ -17,8 +17,8 @@ const SUPPORTED_LOCALES = [
 	'bs', // Bosnian
 	'bg', // Bulgarian
 	'ca', // Catalan
-	'zh_Hans', // Chinese (Simplified)
-	'zh_Hant', // Chinese (Traditional)
+	'zh@hans', // Chinese (Simplified)
+	'zh@hant', // Chinese (Traditional)
 	'hr', // Croatian
 	'cs', // Czech
 	'da', // Danish
@@ -81,12 +81,9 @@ const SUPPORTED_LOCALES = [
 const LOCALES_FILENAME_MAP = {
 	'ne_NP': 'ne',
 	'si_LK': 'si',
-	'sr@latin': 'sr-latn'
-};
-
-const LOCALES_LANGUAGE_CODE_MAP = {
-	'zh_Hans': 'zh-Hans',
-	'zh_Hant': 'zh-Hant'
+	'sr@latin': 'sr-latn',
+	'zh@hans': 'zh-hans',
+	'zh@hant': 'zh-hant'
 };
 
 /**
@@ -94,7 +91,7 @@ const LOCALES_LANGUAGE_CODE_MAP = {
  */
 export default function getLanguages() {
 	return SUPPORTED_LOCALES.map( localeCode => {
-		const languageCode = LOCALES_LANGUAGE_CODE_MAP[ localeCode ] || localeCode.split( /[-_@]/ )[ 0 ];
+		const languageCode = localeCode.split( /[-_@]/ )[ 0 ];
 		const languageFileName = LOCALES_FILENAME_MAP[ localeCode ] || localeCode.toLowerCase().replace( /[^a-z0-9]+/, '-' );
 
 		return {

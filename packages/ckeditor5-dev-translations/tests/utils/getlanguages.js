@@ -57,12 +57,12 @@ describe( 'getLanguages()', () => {
 
 	it( 'should use predefined filename if defined', () => {
 		const languages = getLanguages();
-		const languageChineseTaiwan = languages.find( l => l.localeCode === 'zh_TW' );
+		const languageChineseTaiwan = languages.find( l => l.localeCode === 'zh@hans' );
 
 		expect( languageChineseTaiwan ).toEqual( {
-			localeCode: 'zh_TW',
+			localeCode: 'zh@hans',
 			languageCode: 'zh',
-			languageFileName: 'zh-tw'
+			languageFileName: 'zh-hans'
 		} );
 	} );
 } );
