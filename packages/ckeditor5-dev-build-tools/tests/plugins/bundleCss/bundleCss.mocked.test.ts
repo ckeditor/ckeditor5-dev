@@ -4,8 +4,7 @@
  */
 
 import { Buffer } from 'node:buffer';
-import { resolve } from 'node:path';
-import { expect, test, vi } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import type { ModuleInfo, NormalizedOutputOptions, OutputBundle, OutputChunk, PartialResolvedId } from 'rolldown';
 
 const bundleAsyncMock = vi.hoisted( () => vi.fn() );
@@ -14,7 +13,11 @@ vi.mock( 'lightningcss', () => ( {
 	Features: {
 		Nesting: 1
 	},
-	bundleAsync: bundleAsyncMock
+	bundleAsync: bundleAsyncMock,
+	transform: vi.fn( () => ( {
+		code: Buffer.from( '' ),
+		warnings: []
+	} ) )
 } ) );
 
 import { bundleCss } from '../../../src/plugins/bundleCss.js';
@@ -52,9 +55,16 @@ function createChunk( name: string, moduleIds: Array<string>, options: Partial<O
 
 function createCssBundle(): OutputBundle {
 	return {
-		'main.js': createChunk( 'main', [ '/styles/main.css' ] )
+		'main.js': createChunk( 'main', [ '/styles/index-editor.css' ] )
 	};
 }
+
+beforeEach( () => {
+	bundleAsyncMock.mockResolvedValue( {
+		code: Buffer.from( '.ck {}' ),
+		warnings: []
+	} );
+} );
 
 async function runGenerateBundle(
 	plugin: ReturnType<typeof bundleCss>,
@@ -68,7 +78,7 @@ async function runGenerateBundle(
 }
 
 function createContext( options: {
-	moduleInfo?: Record<string, Pick<ModuleInfo, 'importedIds'>>;
+	moduleInfo?: Record<string, Pick<ModuleInfo, 'importedIds'> & Partial<Pick<ModuleInfo, 'dynamicallyImportedIds'>>>;
 	resolve?: ( specifier: string, importer: string ) => Promise<PartialResolvedId | null> | PartialResolvedId | null;
 } = {} ) {
 	const emittedFiles: Array<any> = [];
@@ -88,15 +98,12 @@ function createContext( options: {
 	};
 }
 
-test( 'Processes CSS collected from manual chunks before entry chunks', async () => {
+test( 'Orders CSS modules by the JavaScript import order of the entry chunk', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
 		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
-		const resolvedImports = await Promise.all(
-			specifiers.map( specifier => options.resolver.resolve( specifier, '/__cke5_bundle_css__.css' ) )
-		);
 
-		expect( resolvedImports ).toEqual( [ '/styles/shared.css', '/styles/main.css' ] );
+		expect( specifiers ).toEqual( [ '/styles/main/index-editor.css', '/styles/shared/index-editor.css' ] );
 
 		return {
 			code: Buffer.from( '.ck {}' ),
@@ -110,15 +117,13 @@ test( 'Processes CSS collected from manual chunks before entry chunks', async ()
 	} );
 	const context = createContext( {
 		moduleInfo: {
-			'/src/shared.ts': { importedIds: [ '/styles/shared.css' ] },
-			'/src/main.ts': { importedIds: [ '/styles/main.css', '/styles/shared.css' ] }
+			'/src/shared.ts': { importedIds: [ '/styles/shared/index-editor.css' ] },
+			'/src/main.ts': {
+				importedIds: [ '/styles/main/index-editor.css', '/styles/shared/index-editor.css' ]
+			}
 		}
 	} );
 	const bundle: OutputBundle = {
-		'shared.js': createChunk( 'shared', [ '/src/shared.ts' ], {
-			facadeModuleId: null,
-			isEntry: false
-		} ),
 		'main.js': createChunk( 'main', [ '/src/shared.ts', '/src/main.ts' ] )
 	};
 
@@ -127,19 +132,23 @@ test( 'Processes CSS collected from manual chunks before entry chunks', async ()
 		preserveModules: false
 	} as NormalizedOutputOptions, bundle );
 
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+
 	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
 		fileName: 'styles.css',
 		type: 'asset'
 	} ) );
 } );
 
-test( 'Throws when a generated virtual stylesheet import cannot be resolved', async () => {
+test( 'Collects CSS imports of modules reachable only through an inlined dynamic import', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
-		await expect( options.resolver.resolve( '__missing__', '/__cke5_bundle_css__.css' ) )
-			.rejects.toThrow( 'Cannot resolve generated stylesheet entry import: __missing__.' );
+		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
+		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
+
+		expect( specifiers ).toEqual( [ '/styles/lazy/index-editor.css', '/styles/main/index-editor.css' ] );
 
 		return {
-			code: Buffer.from( '' ),
+			code: Buffer.from( '.ck {}' ),
 			warnings: []
 		};
 	} );
@@ -148,11 +157,124 @@ test( 'Throws when a generated virtual stylesheet import cannot be resolved', as
 		fileName: 'styles.css',
 		sourceMap: true
 	} );
+	const context = createContext( {
+		moduleInfo: {
+			'/src/lazy.ts': { importedIds: [ '/styles/lazy/index-editor.css' ] },
+			'/src/main.ts': {
+				importedIds: [ '/styles/main/index-editor.css' ],
 
-	await runGenerateBundle( plugin, createContext(), {
+				// The `/src/split.ts` module is not part of the chunk, so it must not become a traversal root.
+				dynamicallyImportedIds: [ '/src/lazy.ts', '/src/split.ts' ]
+			}
+		}
+	} );
+	const bundle: OutputBundle = {
+		'main.js': createChunk( 'main', [ '/src/lazy.ts', '/src/main.ts' ] )
+	};
+
+	await runGenerateBundle( plugin, context, {
 		file: '/dist/main.js',
 		preserveModules: false
-	} as NormalizedOutputOptions, createCssBundle() );
+	} as NormalizedOutputOptions, bundle );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+
+	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
+		fileName: 'styles.css',
+		type: 'asset'
+	} ) );
+} );
+
+test( 'Lets the facade module decide the CSS order regardless of the chunk module order', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
+		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
+
+		// The facade and the dynamic import target both import the shared CSS entry point. The facade
+		// must be processed last, so its import order wins the keep-last deduplication.
+		expect( specifiers ).toEqual( [
+			'/styles/lazy/index-editor.css',
+			'/styles/shared/index-editor.css',
+			'/styles/main/index-editor.css'
+		] );
+
+		return {
+			code: Buffer.from( '.ck {}' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+	const context = createContext( {
+		moduleInfo: {
+			'/src/lazy.ts': { importedIds: [ '/styles/lazy/index-editor.css', '/styles/shared/index-editor.css' ] },
+			'/src/main.ts': {
+				importedIds: [ '/styles/shared/index-editor.css', '/styles/main/index-editor.css' ],
+				dynamicallyImportedIds: [ '/src/lazy.ts' ]
+			}
+		}
+	} );
+	const bundle: OutputBundle = {
+		// The facade module is intentionally listed before the dynamic import target.
+		'main.js': createChunk( 'main', [ '/src/main.ts', '/src/lazy.ts' ] )
+	};
+
+	await runGenerateBundle( plugin, context, {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, bundle );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+} );
+
+test( 'Traverses every module of entry and dynamic entry chunks without a facade module and caches shared results', async () => {
+	bundleAsyncMock.mockImplementationOnce( async options => {
+		const virtualEntry = options.resolver.read( '/__cke5_bundle_css__.css' );
+		const specifiers = [ ...virtualEntry.matchAll( /"([^"]+)"/g ) ].map( match => match[ 1 ] );
+
+		expect( specifiers ).toEqual( [ '/styles/shared/index-editor.css', '/styles/second/index-editor.css' ] );
+
+		return {
+			code: Buffer.from( '.ck {}' ),
+			warnings: []
+		};
+	} );
+
+	const plugin = bundleCss( {
+		fileName: 'styles.css',
+		sourceMap: true
+	} );
+	const context = createContext( {
+		moduleInfo: {
+			'/src/shared.ts': { importedIds: [ '/styles/shared/index-editor.css' ] },
+			'/src/second.ts': { importedIds: [ '/styles/second/index-editor.css' ] }
+		}
+	} );
+	const bundle: OutputBundle = {
+		'first.js': createChunk( 'first', [ '/src/shared.ts' ], { facadeModuleId: null } ),
+
+		// The `/src/no-module-info.ts` module has no module info registered, so it ends the traversal.
+		'second.js': createChunk( 'second', [ '/src/shared.ts', '/src/second.ts', '/src/no-module-info.ts' ], {
+			facadeModuleId: null,
+			isEntry: false,
+			isDynamicEntry: true
+		} )
+	};
+
+	await runGenerateBundle( plugin, context, {
+		file: '/dist/main.js',
+		preserveModules: false
+	} as NormalizedOutputOptions, bundle );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
+
+	expect( context.emittedFiles ).toContainEqual( expect.objectContaining( {
+		fileName: 'styles.css',
+		type: 'asset'
+	} ) );
 } );
 
 test( 'Throws when Rolldown resolves a CSS import as external', async () => {
@@ -181,30 +303,8 @@ test( 'Throws when Rolldown resolves a CSS import as external', async () => {
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
-} );
 
-test( 'Resolves absolute and relative CSS imports without Rolldown results', async () => {
-	bundleAsyncMock.mockImplementationOnce( async options => {
-		expect( await options.resolver.resolve( '/styles/absolute.css', '/src/components/source.css' ) )
-			.toBe( '/styles/absolute.css' );
-		expect( await options.resolver.resolve( './nested/local.css', '/src/components/source.css?inline' ) )
-			.toBe( resolve( '/src/components', './nested/local.css' ) );
-
-		return {
-			code: Buffer.from( '' ),
-			warnings: []
-		};
-	} );
-
-	const plugin = bundleCss( {
-		fileName: 'styles.css',
-		sourceMap: true
-	} );
-
-	await runGenerateBundle( plugin, createContext(), {
-		file: '/dist/main.js',
-		preserveModules: false
-	} as NormalizedOutputOptions, createCssBundle() );
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
 test( 'Uses the current working directory as the project root when output location is not specified', async () => {
@@ -225,43 +325,16 @@ test( 'Uses the current working directory as the project root when output locati
 	await runGenerateBundle( plugin, createContext(), {
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
-test( 'Reads transformed CSS using normalized path separators', async () => {
-	bundleAsyncMock.mockImplementationOnce( async options => {
-		expect( options.resolver.read( 'D:\\src\\components\\nested\\local.css?inline' ) )
-			.toBe( '.transformed {}' );
-
-		return {
-			code: Buffer.from( '' ),
-			warnings: []
-		};
-	} );
-
-	const plugin = bundleCss( {
-		fileName: 'styles.css',
-		sourceMap: true
-	} );
-
-	const transform = typeof plugin.transform == 'function' ? plugin.transform : plugin.transform!.handler;
-
-	transform.call(
-		createContext() as any,
-		'.transformed {}',
-		'D:/src/components/nested/local.css?inline',
-		{ moduleType: 'js' }
-	);
-
-	await runGenerateBundle( plugin, createContext(), {
-		file: '/dist/main.js',
-		preserveModules: false
-	} as NormalizedOutputOptions, createCssBundle() );
-} );
-
-test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
+test( 'Throws when a CSS import cannot be resolved by Rolldown', async () => {
 	bundleAsyncMock.mockImplementationOnce( async options => {
 		await expect( options.resolver.resolve( 'package/theme.css', '/src/source.css' ) )
 			.rejects.toThrow( 'Unable to resolve CSS import package/theme.css in /src/source.css.' );
+		await expect( options.resolver.resolve( './missing/local.css', '/src/source.css' ) )
+			.rejects.toThrow( 'Unable to resolve CSS import ./missing/local.css in /src/source.css.' );
 
 		return {
 			code: Buffer.from( '' ),
@@ -278,6 +351,8 @@ test( 'Throws when a non-relative CSS import cannot be resolved', async () => {
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 } );
 
 test( 'Emits warnings for virtual entry diagnostics without a warning type', async () => {
@@ -303,6 +378,8 @@ test( 'Emits warnings for virtual entry diagnostics without a warning type', asy
 		file: '/dist/main.js',
 		preserveModules: false
 	} as NormalizedOutputOptions, createCssBundle() );
+
+	expect( bundleAsyncMock ).toHaveBeenCalledTimes( 2 );
 
 	expect( context.warn ).toHaveBeenCalledWith(
 		'Lightning CSS warning in styles.css:3:5: Virtual entry warning'

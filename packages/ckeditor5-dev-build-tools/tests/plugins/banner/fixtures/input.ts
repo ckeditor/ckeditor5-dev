@@ -3,6 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import './input.css';
+import './index-editor.css';
 
 export const test = 123;

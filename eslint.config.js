@@ -17,12 +17,14 @@ const projectPackages = readdirSync( upath.join( import.meta.dirname, 'packages'
 export default defineConfig( [
 	{
 		ignores: [
+			// Manual-server theme is dev-tool UI / vendored CSS (not editor styles); not part of the stylelint→eslint migration (#4267).
+			'packages/ckeditor5-dev-manual-server/theme/**/*.css',
+
+			// Test fixtures are sample inputs (incl. CSS) and must not be linted.
+			'**/tests/**/fixtures/**',
 			'**/dist/*',
 			'**/coverage/**',
-			'**/release/**',
-
-			// TypeScript added support for import attributes in 5.3.0. We can remove this ignore when we upgrade to it.
-			'packages/ckeditor5-dev-build-tools/tests/build/fixtures/src/input.ts'
+			'**/release/**'
 		]
 	},
 	{

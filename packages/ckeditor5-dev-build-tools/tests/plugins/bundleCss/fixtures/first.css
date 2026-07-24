@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 .order-one {
-	color: red;
+	color: hsl(0deg 100% 50%);
 }

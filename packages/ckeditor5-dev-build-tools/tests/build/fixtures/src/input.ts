@@ -10,8 +10,9 @@ import settings from './settings.json' assert { type: 'json' };
 // @ts-ignore
 import plus from '../theme/plus.svg';
 
-// Test importing CSS.
-import './styles.css';
+// Test importing CSS entry points.
+import './index-editor.css';
+import './index-content.css';
 
 // Test importing and bundling external dependencies.
 export * from 'es-toolkit';

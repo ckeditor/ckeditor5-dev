@@ -1,0 +1,13 @@
+/**
+ * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+@import url("bundle-css-test-package/style.css");
+
+/* @import "commented-package/style.css"; */
+
+.package-import-local {
+	color: hsl(120deg 100% 25%);
+	content: '@import "string-package/style.css";';
+}
