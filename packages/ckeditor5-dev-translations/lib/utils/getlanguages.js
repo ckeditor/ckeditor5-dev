@@ -51,7 +51,6 @@ const SUPPORTED_LOCALES = [
 	'ms', // Malay
 	'ne_NP', // Nepali (Nepal)
 	'no', // Norwegian
-	'nb', // Norwegian Bokmål
 	'oc', // Occitan (post 1500)
 	'fa', // Persian
 	'pl', // Polish
