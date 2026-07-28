@@ -8,12 +8,12 @@ import { basename } from 'node:path';
 import { toPosixPath, toPublicSpecifier } from '../utils.js';
 import type { ManualPageEntry } from './types.js';
 
-const MANUAL_TESTS_DIRECTORY = 'tests/manual/';
+const MANUAL_TESTS_DIRECTORY = 'manual/';
 const MANUAL_TEST_SUFFIX = '.manual.html';
 
 /**
  * Discovers manual test pages. A manual test is a single full HTML document named
- * `<slug>.manual.html` located under a package's `tests/manual/` directory. Plain `.html`
+ * `<slug>.manual.html` located under a package's `manual/` directory. Plain `.html`
  * files are treated as static fixtures and are never collected here.
  *
  * The `patterns` are package root globs, for example `packages/*`.

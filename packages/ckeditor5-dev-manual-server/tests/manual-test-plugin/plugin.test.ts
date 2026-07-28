@@ -79,8 +79,8 @@ describe( 'manualTestsPlugin()', () => {
 
 	test( 'uses provided package root globs for page entries', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' )
 		] );
 
 		server = await createManualTestServer( {
@@ -88,14 +88,14 @@ describe( 'manualTestsPlugin()', () => {
 		} );
 		const input = server.config.build.rolldownOptions.input as Array<string>;
 
-		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ) );
-		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' ) );
+		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ) );
+		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' ) );
 	} );
 
 	test( 'exposes entries collected from provided package root globs', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' )
 		] );
 
 		server = await createManualTestServer( {
@@ -104,14 +104,14 @@ describe( 'manualTestsPlugin()', () => {
 		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
-		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.manual.html' );
-		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.manual.html' );
+		expect( source ).to.contain( '/packages/ckeditor5-foo/manual/foo.manual.html' );
+		expect( source ).not.to.contain( '/packages/ckeditor5-bar/manual/bar.manual.html' );
 	} );
 
 	test( 'ignores plain .html fixtures next to manual tests', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/fixture.html' )
 		] );
 
 		server = await createManualTestServer( {
@@ -119,14 +119,14 @@ describe( 'manualTestsPlugin()', () => {
 		} );
 		const input = server.config.build.rolldownOptions.input as Array<string>;
 
-		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ) );
-		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/fixture.html' ) );
+		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ) );
+		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-foo/manual/fixture.html' ) );
 	} );
 
 	test( 'filters build inputs and catalog entries using included full package names', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' )
 		] );
 
 		server = await createManualTestServer( {
@@ -137,16 +137,16 @@ describe( 'manualTestsPlugin()', () => {
 		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
-		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' ) );
-		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ) );
-		expect( source ).to.contain( '/packages/ckeditor5-bar/tests/manual/bar.manual.html' );
-		expect( source ).not.to.contain( '/packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		expect( input ).to.include( join( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' ) );
+		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ) );
+		expect( source ).to.contain( '/packages/ckeditor5-bar/manual/bar.manual.html' );
+		expect( source ).not.to.contain( '/packages/ckeditor5-foo/manual/foo.manual.html' );
 	} );
 
 	test( 'filters manual tests using included short package names', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' )
 		] );
 
 		server = await createManualTestServer( {
@@ -156,28 +156,28 @@ describe( 'manualTestsPlugin()', () => {
 		const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
-		expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.manual.html' );
-		expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.manual.html' );
+		expect( source ).to.contain( '/packages/ckeditor5-foo/manual/foo.manual.html' );
+		expect( source ).not.to.contain( '/packages/ckeditor5-bar/manual/bar.manual.html' );
 	} );
 
 	test( 'exposes entry links relative to the catalog when using relative Vite base', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' );
 
 		const source = loadEntries( { paths: [ 'packages/*' ] }, './' );
 
-		expect( source ).to.contain( './packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		expect( source ).to.contain( './packages/ckeditor5-foo/manual/foo.manual.html' );
 	} );
 
 	test( 'exposes entry links prefixed with the configured Vite base', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' );
 
 		const source = loadEntries( { paths: [ 'packages/*' ] }, '/manual/' );
 
-		expect( source ).to.contain( '/manual/packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		expect( source ).to.contain( '/manual/packages/ckeditor5-foo/manual/foo.manual.html' );
 	} );
 
 	test( 'injects the bootstrap, header script and data when the page opts in via <ck-manual-header>', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html', HEADER_PAGE );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', HEADER_PAGE );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
@@ -186,7 +186,7 @@ describe( 'manualTestsPlugin()', () => {
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './', build: config.build } );
 
 		const result = transformIndexHtml.handler( HEADER_PAGE, {
-			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' )
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' )
 		} ) as { html: string; tags: Array<HtmlTagDescriptor> };
 
 		const meta = result.tags.find( tag => tag.tag == 'meta' )!;
@@ -194,7 +194,7 @@ describe( 'manualTestsPlugin()', () => {
 
 		expect( result.html ).to.equal( HEADER_PAGE );
 		expect( meta.attrs ).to.deep.include( { 'name': 'ck-manual-header', 'data-package-name': 'ckeditor5-foo' } );
-		expect( meta.attrs![ 'data-catalog-href' ] ).to.equal( '../../../../index.html' );
+		expect( meta.attrs![ 'data-catalog-href' ] ).to.equal( '../../../index.html' );
 		expect( meta.injectTo ).to.equal( 'head' );
 		expect( scripts.map( script => String( script.attrs!.src ) ).join() ).to.contain( 'manual-bootstrap.ts' );
 		expect( scripts.map( script => String( script.attrs!.src ) ).join() ).to.contain( 'manual-header.ts' );
@@ -211,7 +211,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'uses the configured base as the catalog href for a non-relative base', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html', HEADER_PAGE );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', HEADER_PAGE );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
@@ -220,7 +220,7 @@ describe( 'manualTestsPlugin()', () => {
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: '/manual/', build: config.build } );
 
 		const result = transformIndexHtml.handler( HEADER_PAGE, {
-			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' )
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' )
 		} ) as { html: string; tags: Array<HtmlTagDescriptor> };
 		const meta = result.tags.find( tag => tag.tag == 'meta' )!;
 
@@ -228,7 +228,7 @@ describe( 'manualTestsPlugin()', () => {
 	} );
 
 	test( 'injects only the bootstrap script for manual pages without <ck-manual-header>', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html', '<p>No chrome</p>' );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', '<p>No chrome</p>' );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
@@ -237,7 +237,7 @@ describe( 'manualTestsPlugin()', () => {
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './', build: config.build } );
 
 		const result = transformIndexHtml.handler( '<p>No chrome</p>', {
-			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' )
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' )
 		} ) as { html: string; tags: Array<HtmlTagDescriptor> };
 
 		expect( result.html ).to.equal( '<p>No chrome</p>' );
@@ -250,51 +250,51 @@ describe( 'manualTestsPlugin()', () => {
 
 	test( 'appends the package theme entry import to manual test entry scripts', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
 		const result = transform.handler( 'console.log( 1 );\n', scriptFilePath );
 
 		expect( transform.order ).to.equal( 'pre' );
-		expect( result!.code ).to.equal( 'console.log( 1 );\n\nimport \'../../theme/index.css\';\n' );
+		expect( result!.code ).to.equal( 'console.log( 1 );\n\nimport \'../theme/index.css\';\n' );
 		expect( result!.map ).to.equal( null );
 	} );
 
 	test( 'appends the theme entry import to nested and TypeScript manual test entry scripts', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/nested/bar.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/nested/bar.ts', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.ts', 'console.log( 1 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/nested/bar.ts' );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.ts' );
 		const result = transform.handler( 'console.log( 1 );\n', scriptFilePath );
-
-		expect( result!.code ).to.contain( 'import \'../../../theme/index.css\';' );
-	} );
-
-	test( 'ignores the query string when matching transformed manual test scripts', async () => {
-		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
-		] );
-
-		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
-		const result = transform.handler( 'console.log( 1 );\n', `${ scriptFilePath }?v=123` );
 
 		expect( result!.code ).to.contain( 'import \'../../theme/index.css\';' );
 	} );
 
+	test( 'ignores the query string when matching transformed manual test scripts', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+		] );
+
+		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
+		const result = transform.handler( 'console.log( 1 );\n', `${ scriptFilePath }?v=123` );
+
+		expect( result!.code ).to.contain( 'import \'../theme/index.css\';' );
+	} );
+
 	test( 'does not transform non-script modules', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css', '.ck {}' )
 		] );
 
@@ -306,57 +306,57 @@ describe( 'manualTestsPlugin()', () => {
 
 	test( 'transforms every manual test entry script of the same package', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.js', 'console.log( 2 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/bar.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/bar.js', 'console.log( 2 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const fooFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
-		const barFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/bar.js' );
+		const fooFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
+		const barFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/bar.js' );
 		const fooResult = transform.handler( 'console.log( 1 );\n', fooFilePath );
 		const barResult = transform.handler( 'console.log( 2 );\n', barFilePath );
 
-		expect( fooResult!.code ).to.contain( 'import \'../../theme/index.css\';' );
-		expect( barResult!.code ).to.contain( 'import \'../../theme/index.css\';' );
+		expect( fooResult!.code ).to.contain( 'import \'../theme/index.css\';' );
+		expect( barResult!.code ).to.contain( 'import \'../theme/index.css\';' );
 	} );
 
 	test( 'does not transform helper modules without a sibling manual page', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/_utils/helper.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js', 'console.log( 1 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/_utils/helper.js' );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js' );
 
 		expect( transform.handler( 'console.log( 1 );\n', scriptFilePath ) ).to.equal( undefined );
 	} );
 
 	test( 'does not transform entry scripts of packages without a theme entry stylesheet', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
 
 		expect( transform.handler( 'console.log( 1 );\n', scriptFilePath ) ).to.equal( undefined );
 	} );
 
 	test( 'does not transform manual test scripts excluded from the run', async () => {
 		await Promise.all( [
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ], include: [ 'bar' ] } );
-		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.js' );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
 
 		expect( transform.handler( 'console.log( 1 );\n', scriptFilePath ) ).to.equal( undefined );
 	} );
@@ -377,29 +377,29 @@ describe( 'manualTestsPlugin()', () => {
 			vi.spyOn( process, 'cwd' ).mockReturnValue( currentWorkingDirectory );
 
 			await Promise.all( [
-				createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' ),
-				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/tests/manual/bar.manual.html' )
+				createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+				createFile( currentWorkingDirectory, 'packages/ckeditor5-bar/manual/bar.manual.html' )
 			] );
 
 			server = await createManualTestServer( { paths: [ 'packages/*' ] } );
 			const resolvedId = await server.pluginContainer.resolveId( 'virtual:ckeditor5-manual-entries' );
 			const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
 
-			expect( source ).to.contain( '/packages/ckeditor5-foo/tests/manual/foo.manual.html' );
-			expect( source ).not.to.contain( '/packages/ckeditor5-bar/tests/manual/bar.manual.html' );
+			expect( source ).to.contain( '/packages/ckeditor5-foo/manual/foo.manual.html' );
+			expect( source ).not.to.contain( '/packages/ckeditor5-bar/manual/bar.manual.html' );
 		} finally {
 			await removeDirectory( currentWorkingDirectory );
 		}
 	} );
 
 	test( 'uses current working directory for initial build inputs', async () => {
-		await createFile( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' );
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
 		const config = ( plugin.config as ConfigHook )();
 
 		expect( config.build.rolldownOptions.input ).to.include(
-			join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/foo.manual.html' )
+			join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' )
 		);
 	} );
 
@@ -521,13 +521,13 @@ describe( 'manualTestsPlugin()', () => {
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
 		expect( transformIndexHtml.handler( '<p>Sample</p>', {
-			filename: join( workspaceRoot, 'packages/ckeditor5-foo/tests/manual/missing.manual.html' )
+			filename: join( workspaceRoot, 'packages/ckeditor5-foo/manual/missing.manual.html' )
 		} ) ).to.be.undefined;
 	} );
 
 	describe( 'bundled dev HTML source freshness', () => {
-		const RELATIVE_PATH = 'packages/ckeditor5-foo/tests/manual/foo.manual.html';
-		const MEMORY_KEY = 'packages/ckeditor5-foo/tests/manual/foo.manual.html';
+		const RELATIVE_PATH = 'packages/ckeditor5-foo/manual/foo.manual.html';
+		const MEMORY_KEY = 'packages/ckeditor5-foo/manual/foo.manual.html';
 		const SOURCE_HTML = '<!DOCTYPE html><head><title>Foo</title></head>\n<div id="editor"><h2>OLD</h2></div>';
 
 		// Mirrors the in-memory bundle Vite serves: the built <head> carries injected/asset tags,

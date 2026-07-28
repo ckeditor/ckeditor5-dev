@@ -26,7 +26,7 @@ export interface ManualTestsPluginOptions {
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const MANUAL_TEST_SUFFIX = '.manual.html';
-const MANUAL_TESTS_DIRECTORY = '/tests/manual/';
+const MANUAL_TESTS_DIRECTORY = '/manual/';
 const THEME_ENTRY_FILE_PATH = 'theme/index.css';
 const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';

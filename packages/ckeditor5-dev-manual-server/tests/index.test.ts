@@ -6,7 +6,6 @@
 import { describe, expect, test } from 'vitest';
 import {
 	ckDebugPlugin,
-	manualStaticAssetsPlugin,
 	manualTestsPlugin,
 	rawSvgPlugin,
 	refreshPlugin,
@@ -16,7 +15,6 @@ import {
 describe( 'package entry point', () => {
 	test( 'exports public plugin factories and utilities', () => {
 		expect( ckDebugPlugin ).to.be.a( 'function' );
-		expect( manualStaticAssetsPlugin ).to.be.a( 'function' );
 		expect( manualTestsPlugin ).to.be.a( 'function' );
 		expect( rawSvgPlugin ).to.be.a( 'function' );
 		expect( refreshPlugin ).to.be.a( 'function' );
