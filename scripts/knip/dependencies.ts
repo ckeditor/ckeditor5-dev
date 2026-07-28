@@ -36,25 +36,12 @@ const packageFiles = [
 
 const rootFiles = [ 'scripts/**/*.{js,mjs,cjs,ts}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ];
 
-const packageWorkspace = ( ignoreDependencies: Array<string> = [] ) => ( {
+const packageWorkspace = () => ( {
 	// Test fixtures reference intentionally non-existent packages.
 	ignore: [ 'tests/**/fixtures/**' ],
 	entry: packageFiles,
-	project: packageFiles,
-	ignoreDependencies
+	project: packageFiles
 } );
-
-/**
- * Type packages imported by production code live in `dependencies`, because type-only imports
- * that are part of a package's public API must resolve in consumer projects, for example under
- * Yarn PnP. See https://github.com/ckeditor/ckeditor5/issues/17213.
- *
- * Knip expects the opposite (type-only imports in `devDependencies`) and its strict production
- * mode would report such packages as unused, so they are ignored there (the `!` suffix scopes
- * the ignore to production mode). See https://github.com/webpro-nl/knip/issues/248.
- */
-const typeDependencyWorkspace = ( ignoreDependencies: Array<string> ) =>
-	packageWorkspace( ignoreDependencies.map( dependency => `${ dependency }!` ) );
 
 const config: KnipConfig = {
 	compilers: {
@@ -73,15 +60,6 @@ const config: KnipConfig = {
 				'syncpack'
 			]
 		},
-		'packages/ckeditor5-dev-manual-server': packageWorkspace( [
-			// The package exports Vite plugins and imports `vite` only in type positions,
-			// but it deliberately ships `vite` as a runtime dependency for its consumers,
-			// which run the manual test server.
-			'vite'
-		] ),
-		'packages/ckeditor5-dev-build-tools': typeDependencyWorkspace( [ 'type-fest' ] ),
-		'packages/ckeditor5-dev-changelog': typeDependencyWorkspace( [ '@types/semver' ] ),
-		'packages/ckeditor5-dev-utils': typeDependencyWorkspace( [ '@types/pacote' ] ),
 		'packages/*': packageWorkspace()
 	}
 };
