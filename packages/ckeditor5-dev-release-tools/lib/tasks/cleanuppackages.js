@@ -55,6 +55,8 @@ export default async function cleanUpPackages( options ) {
  * @returns {object}
  */
 function parseOptions( options ) {
+	// The `depcheckIgnore` field was used by the removed `@ckeditor/ckeditor5-dev-dependency-checker` package.
+	// It is still stripped here because repositories that have not migrated to `knip` yet may carry it.
 	const defaultPackageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ];
 	const packageJsonFieldsToRemove = typeof options.packageJsonFieldsToRemove === 'function' ?
 		options.packageJsonFieldsToRemove( defaultPackageJsonFieldsToRemove ) :

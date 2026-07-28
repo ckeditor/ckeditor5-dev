@@ -63,7 +63,8 @@ export default defineConfig( [
 				{
 					extensions: [ '.ts', '.js', '.json' ]
 				}
-			]
+			],
+			'ckeditor5-rules/no-scoped-imports-within-package': 'error'
 		}
 	},
 	{
