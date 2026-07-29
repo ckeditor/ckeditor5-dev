@@ -35,6 +35,7 @@ overrides:
   'tar@^7': '^7.5.21'
   'uuid@^8': '^14.0.0'
   'ws@^8': '^8.21.1'
+  'immutable@^5': '^5.1.8'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
