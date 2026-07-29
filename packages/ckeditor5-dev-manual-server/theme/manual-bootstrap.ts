@@ -23,6 +23,8 @@ const globalTarget = window as any;
  *
  * - sets the global license key so tests do not have to pass `licenseKey` explicitly;
  * - resets the `window.editor` named DOM property and auto-attaches the CKEditor inspector;
+ * - offsets the editor viewport below the fixed `<ck-manual-header>` bar (if the page has one),
+ *   so sticky toolbars, menu bars, and balloons are not covered by the test chrome when scrolling;
  * - renders the "source changed" refresh prompt driven by the dev server (`refreshPlugin`).
  *
  * The refresh prompt is part of the dev-server contract, not test chrome, so it belongs here.
@@ -53,12 +55,42 @@ function autoAttachInspector(): void {
 
 			if ( editor ) {
 				CKEditorInspector.attach( editor );
+				offsetViewportBelowManualHeader( editor );
 			}
 		},
 		get() {
 			return editor;
 		}
 	} );
+}
+
+const viewportOffsetEditors = new WeakSet<object>();
+
+/**
+ * Pushes the editor's viewport offset below the fixed `<ck-manual-header>` bar so sticky
+ * toolbars, menu bars, and balloon panels are not covered by the test chrome when the page
+ * is scrolled. Pages without the header chrome are left untouched, and an offset configured
+ * by the test itself is preserved (the header height is added on top of it).
+ */
+function offsetViewportBelowManualHeader( editor: any ): void {
+	const header = document.querySelector( 'ck-manual-header' );
+
+	if ( !header || !editor.ui || viewportOffsetEditors.has( editor ) ) {
+		return;
+	}
+
+	viewportOffsetEditors.add( editor );
+
+	// The visible chrome is the fixed `.bar` in the shadow DOM; the host itself has no height.
+	const headerHeight = header.shadowRoot?.querySelector( '.bar' )?.getBoundingClientRect().height ||
+		parseFloat( getComputedStyle( header ).getPropertyValue( '--ck-manual-header-height' ) ) ||
+		44;
+	const viewportOffset = editor.ui.viewportOffset || {};
+
+	editor.ui.viewportOffset = {
+		...viewportOffset,
+		top: ( viewportOffset.top || 0 ) + headerHeight
+	};
 }
 
 /**

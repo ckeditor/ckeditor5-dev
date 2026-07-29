@@ -27,7 +27,7 @@ export interface ManualTestsPluginOptions {
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const MANUAL_TEST_SUFFIX = '.manual.html';
 const MANUAL_TESTS_DIRECTORY = '/manual/';
-const THEME_ENTRY_FILE_PATH = 'theme/index.css';
+const THEME_ENTRY_FILE_PATHS = [ 'theme/index-editor.css', 'theme/index-content.css' ];
 const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
@@ -53,12 +53,14 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 		return htmlSpecifier == scriptSpecifier ? undefined : getManualPages().get( htmlSpecifier );
 	};
-	const packageThemeEntryCache = new Map<string, boolean>();
-	const hasPackageThemeEntry = ( packageRootSpecifier: string ): boolean => {
+	const packageThemeEntryCache = new Map<string, Array<string>>();
+	const getPackageThemeEntries = ( packageRootSpecifier: string ): Array<string> => {
 		if ( !packageThemeEntryCache.has( packageRootSpecifier ) ) {
-			const themeEntryFilePath = resolve( workspaceRoot, stripLeadingSlash( packageRootSpecifier ), THEME_ENTRY_FILE_PATH );
+			const themeEntries = THEME_ENTRY_FILE_PATHS.filter( themeEntryFilePath =>
+				existsSync( resolve( workspaceRoot, stripLeadingSlash( packageRootSpecifier ), themeEntryFilePath ) )
+			);
 
-			packageThemeEntryCache.set( packageRootSpecifier, existsSync( themeEntryFilePath ) );
+			packageThemeEntryCache.set( packageRootSpecifier, themeEntries );
 		}
 
 		return packageThemeEntryCache.get( packageRootSpecifier )!;
@@ -142,7 +144,8 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		transform: {
 			order: 'pre',
 
-			// Loads the package theme entry stylesheet (`theme/index.css`) in manual tests.
+			// Loads the package theme entry stylesheets (`theme/index-editor.css` and
+			// `theme/index-content.css`) in manual tests.
 			// Package stylesheets are imported by the package entry module (`src/index.ts`), not by
 			// individual source modules, and manual tests import source modules directly - without
 			// this they would render without the package's own styles. Stylesheets of other packages
@@ -162,18 +165,23 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				}
 
 				const packageRootSpecifier = entry.htmlFilePath.slice( 0, entry.htmlFilePath.indexOf( MANUAL_TESTS_DIRECTORY ) );
+				const themeEntries = getPackageThemeEntries( packageRootSpecifier );
 
-				if ( !hasPackageThemeEntry( packageRootSpecifier ) ) {
+				if ( !themeEntries.length ) {
 					return;
 				}
 
-				const themeEntrySpecifier = posix.relative(
-					posix.dirname( scriptSpecifier ),
-					`${ packageRootSpecifier }/${ THEME_ENTRY_FILE_PATH }`
-				);
+				const themeEntryImports = themeEntries.map( themeEntryFilePath => {
+					const themeEntrySpecifier = posix.relative(
+						posix.dirname( scriptSpecifier ),
+						`${ packageRootSpecifier }/${ themeEntryFilePath }`
+					);
+
+					return `import '${ themeEntrySpecifier }';`;
+				} );
 
 				return {
-					code: `${ code }\nimport '${ themeEntrySpecifier }';\n`,
+					code: `${ code }\n${ themeEntryImports.join( '\n' ) }\n`,
 					map: null
 				};
 			}
