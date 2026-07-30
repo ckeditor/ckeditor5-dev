@@ -56,8 +56,8 @@ const TEMPLATE = /* html */ `
 /* eslint-enable @stylistic/max-len */
 
 /**
- * `<ck-manual-header>` renders the manual test chrome: a fixed header bar with the test
- * name, package name, back-to-index link and favorite toggle, plus a collapsible instructions
+ * `<ck-manual-header>` renders the manual test chrome: a header bar with the test name,
+ * package name, back-to-index link and favorite toggle, plus a collapsible instructions
  * panel that projects the element's light-DOM children (default slot).
  *
  * The manual test server injects a `<meta name="ck-manual-header">` carrying the package
