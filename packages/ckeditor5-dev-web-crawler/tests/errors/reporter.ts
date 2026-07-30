@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ERROR_TYPES } from '../../src/constants.js';
 import type { ErrorStore } from '../../src/errors/error-store.js';
 import { logErrors } from '../../src/errors/reporter.js';
@@ -15,14 +15,14 @@ describe( 'logErrors()', () => {
 		vi.spyOn( console, 'groupEnd' ).mockImplementation( () => {} );
 	} );
 
-	test( 'prints success message when no errors were found', () => {
+	it( 'prints success message when no errors were found', () => {
 		logErrors( new Map() );
 
 		expect( console.log ).toHaveBeenCalledWith( expect.stringContaining( 'No errors have been found' ) );
 		expect( console.group ).not.toHaveBeenCalled();
 	} );
 
-	test( 'prints grouped error details when errors are present', () => {
+	it( 'prints grouped error details when errors are present', () => {
 		const errors: ErrorStore = new Map( [
 			[ ERROR_TYPES.CONSOLE_ERROR, new Map( [
 				[ 'Unhandled exception', {

@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Cluster } from 'puppeteer-cluster';
 import { runCrawler } from '../../src/crawler/run-crawler.js';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
@@ -49,7 +49,7 @@ describe( 'runCrawler()', () => {
 		vi.spyOn( console, 'log' ).mockImplementation( () => {} );
 	} );
 
-	test( 'uses default options and exits with code 0 when no errors are collected', async () => {
+	it( 'uses default options and exits with code 0 when no errors are collected', async () => {
 		const cluster = createClusterMock();
 
 		vi.mocked( createCrawlerCluster ).mockResolvedValue( cluster as unknown as Cluster<QueueData, void> );
@@ -83,7 +83,7 @@ describe( 'runCrawler()', () => {
 		expect( process.exit ).toHaveBeenCalledWith( 0 );
 	} );
 
-	test( 'passes provided options and exits with code 1 when errors were collected', async () => {
+	it( 'passes provided options and exits with code 1 when errors were collected', async () => {
 		const cluster = createClusterMock();
 
 		vi.mocked( createCrawlerCluster ).mockImplementation( async options => {

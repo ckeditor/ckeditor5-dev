@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ViteDevServer } from 'vite';
 import { rawSvgPlugin } from '../../src/svg-plugin/plugin.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
@@ -24,11 +24,11 @@ describe( 'rawSvgPlugin()', () => {
 		await removeDirectory( temporaryDirectory );
 	} );
 
-	test( 'runs before Vite built-in asset handling', () => {
+	it( 'runs before Vite built-in asset handling', () => {
 		expect( rawSvgPlugin().enforce ).to.equal( 'pre' );
 	} );
 
-	test( 'loads SVG files as raw strings', async () => {
+	it( 'loads SVG files as raw strings', async () => {
 		const filePath = await createFile( temporaryDirectory, 'icon.svg', '<svg><path d="M0 0" /></svg>' );
 
 		server = await createSvgTestServer();
@@ -38,7 +38,7 @@ describe( 'rawSvgPlugin()', () => {
 		expect( getCode( loaded ) ).to.equal( 'export default "<svg><path d=\\"M0 0\\" /></svg>";' );
 	} );
 
-	test( 'preserves the SVG viewBox attribute', async () => {
+	it( 'preserves the SVG viewBox attribute', async () => {
 		const filePath = await createFile(
 			temporaryDirectory,
 			'icon.svg',
@@ -52,7 +52,7 @@ describe( 'rawSvgPlugin()', () => {
 		expect( getCode( loaded ) ).to.contain( 'viewBox=\\"0 0 20 20\\"' );
 	} );
 
-	test( 'ignores files with unsupported extensions', async () => {
+	it( 'ignores files with unsupported extensions', async () => {
 		const filePath = await createFile( temporaryDirectory, 'script.js', 'export default 1;' );
 
 		server = await createSvgTestServer();

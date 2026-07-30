@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Cluster } from 'puppeteer-cluster';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, ERROR_TYPES } from '../../src/constants.js';
@@ -31,7 +31,7 @@ function createClusterMock(): MockCluster {
 }
 
 describe( 'createCrawlerCluster()', () => {
-	test( 'launches cluster with configured options', async () => {
+	it( 'launches cluster with configured options', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 
@@ -64,7 +64,7 @@ describe( 'createCrawlerCluster()', () => {
 		expect( options.puppeteerOptions.args ).toContain( '--disable-setuid-sandbox' );
 	} );
 
-	test( 'logs retry information and skips error reporting while retrying', async () => {
+	it( 'logs retry information and skips error reporting while retrying', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 		const consoleLogSpy = vi.spyOn( console, 'log' ).mockImplementation( () => {} );
@@ -86,7 +86,7 @@ describe( 'createCrawlerCluster()', () => {
 		expect( onError ).not.toHaveBeenCalled();
 	} );
 
-	test( 'forwards crawler errors from a retryable error object', async () => {
+	it( 'forwards crawler errors from a retryable error object', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 
@@ -113,7 +113,7 @@ describe( 'createCrawlerCluster()', () => {
 		expect( onError ).toHaveBeenCalledWith( crawlerErrors[ 1 ]! );
 	} );
 
-	test( 'reports page crash for generic task errors', async () => {
+	it( 'reports page crash for generic task errors', async () => {
 		const cluster = createClusterMock();
 		const onError = vi.fn();
 

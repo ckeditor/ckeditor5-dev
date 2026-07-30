@@ -3,14 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Page } from 'puppeteer';
 import { DATA_ATTRIBUTE_NAME } from '../../src/constants.js';
 import { getLinksFromPage } from '../../src/crawler/get-links-from-page.js';
 import { getAllLinks } from '../../src/page/get-all-links.js';
 
 describe( 'getLinksFromPage()', () => {
-	test( 'filters out external, discovered and excluded links', async () => {
+	it( 'filters out external, discovered and excluded links', async () => {
 		const evaluate = vi.fn().mockResolvedValue( [
 			'https://ckeditor.com/docs/start',
 			'https://ckeditor.com/docs/new',
@@ -33,7 +33,7 @@ describe( 'getLinksFromPage()', () => {
 		expect( links ).toEqual( [ 'https://ckeditor.com/docs/new' ] );
 	} );
 
-	test( 'returns an empty array if all links are filtered out', async () => {
+	it( 'returns an empty array if all links are filtered out', async () => {
 		const page = {
 			evaluate: vi.fn().mockResolvedValue( [
 				'https://ckeditor.com/docs/start',

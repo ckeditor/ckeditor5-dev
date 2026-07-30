@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Page } from 'puppeteer';
 import { ERROR_TYPES, IGNORE_ALL_ERRORS_WILDCARD, type ErrorType } from '../../src/constants.js';
 import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../../src/errors/ignore-patterns.js';
@@ -22,19 +22,19 @@ function createPageMock( content: string | null, hasMetaTag = true ): Page {
 }
 
 describe( 'getErrorIgnorePatternsFromPage()', () => {
-	test( 'returns empty map when meta tag is missing', async () => {
+	it( 'returns empty map when meta tag is missing', async () => {
 		const page = createPageMock( null, false );
 
 		expect( await getErrorIgnorePatternsFromPage( page ) ).toEqual( new Map() );
 	} );
 
-	test( 'returns empty map when content is invalid JSON', async () => {
+	it( 'returns empty map when content is invalid JSON', async () => {
 		const page = createPageMock( 'not-json' );
 
 		expect( await getErrorIgnorePatternsFromPage( page ) ).toEqual( new Map() );
 	} );
 
-	test( 'maps valid patterns and ignores invalid entries', async () => {
+	it( 'maps valid patterns and ignores invalid entries', async () => {
 		const page = createPageMock( JSON.stringify( {
 			'request-failure': [ 'cdn', '', 123, 'missing.css' ],
 			'navigation-error': IGNORE_ALL_ERRORS_WILDCARD,
@@ -51,7 +51,7 @@ describe( 'getErrorIgnorePatternsFromPage()', () => {
 } );
 
 describe( 'markErrorsAsIgnored()', () => {
-	test( 'marks errors using wildcard, message pattern and failed resource URL', () => {
+	it( 'marks errors using wildcard, message pattern and failed resource URL', () => {
 		const errors: Array<CrawlerError> = [
 			{
 				pageUrl: 'https://ckeditor.com/docs/guide',

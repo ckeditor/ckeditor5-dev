@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { HotPayload } from 'vite';
 import { refreshPlugin, MANUAL_REFRESH_EVENT_NAME } from '../../src/refresh-plugin/plugin.js';
 
@@ -12,11 +12,11 @@ function configureServer( server: unknown ): void {
 }
 
 describe( 'refreshPlugin()', () => {
-	test( 'applies only in the dev server', () => {
+	it( 'applies only in the dev server', () => {
 		expect( refreshPlugin().apply ).to.equal( 'serve' );
 	} );
 
-	test( 'replaces bundled dev JavaScript HMR updates sent directly to clients with the manual refresh prompt', () => {
+	it( 'replaces bundled dev JavaScript HMR updates sent directly to clients with the manual refresh prompt', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -39,7 +39,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'keeps bundled dev CSS HMR updates sent directly to clients', () => {
+	it( 'keeps bundled dev CSS HMR updates sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -60,7 +60,7 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads[ 0 ]!.type ).to.equal( 'update' );
 	} );
 
-	test( 'keeps bundled dev CSS patches sent as JavaScript HMR updates directly to clients', () => {
+	it( 'keeps bundled dev CSS patches sent as JavaScript HMR updates directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -81,7 +81,7 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [ payload ] );
 	} );
 
-	test( 'drops bundled dev empty HMR updates sent to clients unaffected by a change', () => {
+	it( 'drops bundled dev empty HMR updates sent to clients unaffected by a change', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -96,7 +96,7 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [] );
 	} );
 
-	test( 'keeps non-update payloads sent directly to clients', () => {
+	it( 'keeps non-update payloads sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -108,7 +108,7 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [ { type: 'full-reload' } ] );
 	} );
 
-	test( 'does not wrap the same bundled dev client more than once', () => {
+	it( 'does not wrap the same bundled dev client more than once', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -132,7 +132,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'replaces bundled dev JavaScript full reloads with the manual refresh prompt', () => {
+	it( 'replaces bundled dev JavaScript full reloads with the manual refresh prompt', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
 		const server = createBundledDevServer( handledFullReloads );
@@ -149,7 +149,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'still shows the manual refresh prompt when refreshing the build output fails', async () => {
+	it( 'still shows the manual refresh prompt when refreshing the build output fails', async () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -169,7 +169,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'sends bundled dev HTML full reloads only to the affected client', async () => {
+	it( 'sends bundled dev HTML full reloads only to the affected client', async () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const otherClientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
@@ -192,7 +192,7 @@ describe( 'refreshPlugin()', () => {
 		expect( otherClientPayloads ).to.deep.equal( [] );
 	} );
 
-	test( 'sends bundled dev CSS full reloads only to the affected client', async () => {
+	it( 'sends bundled dev CSS full reloads only to the affected client', async () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const handledFullReloads: Array<Array<string>> = [];
 		const server = createBundledDevServer( handledFullReloads );
@@ -211,7 +211,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'reloads the affected client when refreshing the build output fails', async () => {
+	it( 'reloads the affected client when refreshing the build output fails', async () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -229,7 +229,7 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	test( 'keeps bundled dev output other than full reloads', () => {
+	it( 'keeps bundled dev output other than full reloads', () => {
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( [] );
 		const handleHmrOutput = server.environments.client.bundledDev.handleHmrOutput;
@@ -257,7 +257,7 @@ describe( 'refreshPlugin()', () => {
 		);
 	} );
 
-	test( 'does not crash when the bundled dev helper is unavailable', () => {
+	it( 'does not crash when the bundled dev helper is unavailable', () => {
 		const server = createBundledDevServer();
 
 		delete ( server.environments.client as Partial<typeof server.environments.client> ).bundledDev;
@@ -265,7 +265,7 @@ describe( 'refreshPlugin()', () => {
 		expect( () => configureServer( server ) ).not.to.throw();
 	} );
 
-	test( 'does not crash when bundled dev clients are unavailable', () => {
+	it( 'does not crash when bundled dev clients are unavailable', () => {
 		const server = createBundledDevServer();
 
 		delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).clients;
@@ -273,7 +273,7 @@ describe( 'refreshPlugin()', () => {
 		expect( () => configureServer( server ) ).not.to.throw();
 	} );
 
-	test( 'does not crash when bundled dev HMR handling is unavailable', () => {
+	it( 'does not crash when bundled dev HMR handling is unavailable', () => {
 		const server = createBundledDevServer();
 
 		delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).handleHmrOutput;

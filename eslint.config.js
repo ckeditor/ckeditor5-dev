@@ -9,6 +9,7 @@ import globals from 'globals';
 import { defineConfig } from 'eslint/config';
 import ckeditor5Rules from 'eslint-plugin-ckeditor5-rules';
 import ckeditor5Config from 'eslint-config-ckeditor5';
+import vitest from '@vitest/eslint-plugin';
 
 const projectPackages = readdirSync( upath.join( import.meta.dirname, 'packages' ), { withFileTypes: true } )
 	.filter( dirent => dirent.isDirectory() )
@@ -49,7 +50,6 @@ export default defineConfig( [
 
 		rules: {
 			'no-console': 'off',
-			'mocha/no-global-tests': 'off',
 			'ckeditor5-rules/license-header': [ 'error', {
 				headerLines: [
 					'/**',
@@ -64,6 +64,18 @@ export default defineConfig( [
 					extensions: [ '.ts', '.js', '.json' ]
 				}
 			]
+		}
+	},
+	{
+		files: [ 'packages/*/tests/**', 'scripts-tests/**' ],
+
+		plugins: {
+			vitest
+		},
+
+		rules: {
+			'vitest/consistent-test-it': [ 'error', { fn: 'it' } ],
+			'vitest/require-top-level-describe': 'error'
 		}
 	},
 	{

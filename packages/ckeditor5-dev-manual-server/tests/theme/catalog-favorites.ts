@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
 	filterFavoriteEntries,
 	getFavoriteActionLabel,
@@ -17,7 +17,7 @@ import {
 const FAVORITES_STORAGE_KEY = 'ckeditor5-manual-test-favorites';
 
 describe( 'getFavoriteId()', () => {
-	test( 'combines the package name and nested slug', () => {
+	it( 'combines the package name and nested slug', () => {
 		expect( getFavoriteId( {
 			packageName: 'ckeditor5-foo',
 			slug: 'nested/advanced'
@@ -26,17 +26,17 @@ describe( 'getFavoriteId()', () => {
 } );
 
 describe( 'getFavoriteActionLabel()', () => {
-	test( 'returns the add action label for a test that is not a favorite', () => {
+	it( 'returns the add action label for a test that is not a favorite', () => {
 		expect( getFavoriteActionLabel( false ) ).to.equal( 'Add to favorites' );
 	} );
 
-	test( 'returns the remove action label for a favorite test', () => {
+	it( 'returns the remove action label for a favorite test', () => {
 		expect( getFavoriteActionLabel( true ) ).to.equal( 'Remove from favorites' );
 	} );
 } );
 
 describe( 'updateFavoriteButtonState()', () => {
-	test.each( [
+	it.each( [
 		{ favoriteIds: new Set<string>(), label: 'Add to favorites', isFavorite: false },
 		{ favoriteIds: new Set( [ 'ckeditor5-foo/basic' ] ), label: 'Remove from favorites', isFavorite: true }
 	] )( 'updates the button from the favorite identifier set', ( { favoriteIds, label, isFavorite } ) => {
@@ -58,7 +58,7 @@ describe( 'updateFavoriteButtonState()', () => {
 } );
 
 describe( 'filterFavoriteEntries()', () => {
-	test( 'returns matching entry objects in their original order and ignores stale identifiers', () => {
+	it( 'returns matching entry objects in their original order and ignores stale identifiers', () => {
 		const entries = [
 			{ packageName: 'ckeditor5-foo', slug: 'basic', href: '/foo/basic' },
 			{ packageName: 'ckeditor5-bar', slug: 'basic', href: '/bar/basic' },
@@ -78,7 +78,7 @@ describe( 'filterFavoriteEntries()', () => {
 } );
 
 describe( 'toggleFavoriteId()', () => {
-	test( 'adds an identifier that is not a favorite', () => {
+	it( 'adds an identifier that is not a favorite', () => {
 		const favoriteIds = new Set( [ 'ckeditor5-foo/basic' ] );
 
 		toggleFavoriteId( favoriteIds, 'ckeditor5-bar/basic' );
@@ -86,7 +86,7 @@ describe( 'toggleFavoriteId()', () => {
 		expect( [ ...favoriteIds ] ).to.deep.equal( [ 'ckeditor5-foo/basic', 'ckeditor5-bar/basic' ] );
 	} );
 
-	test( 'removes an identifier that is already a favorite', () => {
+	it( 'removes an identifier that is already a favorite', () => {
 		const favoriteIds = new Set( [ 'ckeditor5-foo/basic', 'ckeditor5-bar/basic' ] );
 
 		toggleFavoriteId( favoriteIds, 'ckeditor5-foo/basic' );
@@ -96,7 +96,7 @@ describe( 'toggleFavoriteId()', () => {
 } );
 
 describe( 'loadFavoriteIds()', () => {
-	test( 'loads favorite identifiers from local storage', () => {
+	it( 'loads favorite identifiers from local storage', () => {
 		const getItem = vi.fn().mockReturnValue( '["foo/bar","baz/qux","foo/bar"]' );
 
 		vi.stubGlobal( 'localStorage', { getItem } );
@@ -105,13 +105,13 @@ describe( 'loadFavoriteIds()', () => {
 		expect( getItem ).toHaveBeenCalledWith( FAVORITES_STORAGE_KEY );
 	} );
 
-	test( 'returns an empty set when no favorites are stored', () => {
+	it( 'returns an empty set when no favorites are stored', () => {
 		vi.stubGlobal( 'localStorage', { getItem: vi.fn().mockReturnValue( null ) } );
 
 		expect( [ ...loadFavoriteIds() ] ).to.deep.equal( [] );
 	} );
 
-	test.each( [
+	it.each( [
 		'{broken',
 		'{}',
 		'["foo/bar",42]'
@@ -121,7 +121,7 @@ describe( 'loadFavoriteIds()', () => {
 		expect( [ ...loadFavoriteIds() ] ).to.deep.equal( [] );
 	} );
 
-	test( 'returns an empty set when local storage is unavailable', () => {
+	it( 'returns an empty set when local storage is unavailable', () => {
 		vi.stubGlobal( 'localStorage', {
 			getItem: vi.fn( () => {
 				throw new Error( 'Storage is unavailable.' );
@@ -133,7 +133,7 @@ describe( 'loadFavoriteIds()', () => {
 } );
 
 describe( 'saveFavoriteIds()', () => {
-	test( 'persists favorite identifiers in local storage', () => {
+	it( 'persists favorite identifiers in local storage', () => {
 		const setItem = vi.fn();
 
 		vi.stubGlobal( 'localStorage', { setItem } );
@@ -142,7 +142,7 @@ describe( 'saveFavoriteIds()', () => {
 		expect( setItem ).toHaveBeenCalledWith( FAVORITES_STORAGE_KEY, '["foo/bar","baz/qux"]' );
 	} );
 
-	test( 'ignores local storage write failures', () => {
+	it( 'ignores local storage write failures', () => {
 		vi.stubGlobal( 'localStorage', {
 			setItem: vi.fn( () => {
 				throw new Error( 'Storage is unavailable.' );

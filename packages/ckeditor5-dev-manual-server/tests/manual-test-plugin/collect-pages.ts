@@ -4,7 +4,7 @@
  */
 
 import { basename } from 'node:path';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { collectManualPages } from '../../src/manual-test-plugin/collect-pages.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
@@ -19,7 +19,7 @@ describe( 'collectManualPages()', () => {
 		await removeDirectory( workspaceRoot );
 	} );
 
-	test( 'collects sorted manual page entries from package root globs', async () => {
+	it( 'collects sorted manual page entries from package root globs', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-zeta/manual/nested/demo-case.manual.html' ),
 			createFile( workspaceRoot, 'external/ckeditor5/packages/ckeditor5-alpha/manual/sample.manual.html' )
@@ -44,7 +44,7 @@ describe( 'collectManualPages()', () => {
 		] );
 	} );
 
-	test( 'ignores plain .html fixtures and files outside manual', async () => {
+	it( 'ignores plain .html fixtures and files outside manual', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/fixture.html' ),
@@ -56,7 +56,7 @@ describe( 'collectManualPages()', () => {
 		expect( collectManualPages( [ 'packages/*' ], workspaceRoot ) ).to.deep.equal( new Map() );
 	} );
 
-	test( 'collects manual pages from any package tree location matched by the patterns', async () => {
+	it( 'collects manual pages from any package tree location matched by the patterns', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'custom/tree/ckeditor5-custom/manual/sample.manual.html' ),
 			createFile( workspaceRoot, 'ckeditor5-top-level/manual/sample.manual.html' )
@@ -81,7 +81,7 @@ describe( 'collectManualPages()', () => {
 		] );
 	} );
 
-	test( 'includes files under _utils/ (no exclusion — the suffix is the opt-in)', async () => {
+	it( 'includes files under _utils/ (no exclusion — the suffix is the opt-in)', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/shared.manual.html' );
 
 		const pages = collectManualPages( [ 'packages/*' ], workspaceRoot );
@@ -89,7 +89,7 @@ describe( 'collectManualPages()', () => {
 		expect( pages.has( '/packages/ckeditor5-foo/manual/_utils/shared.manual.html' ) ).to.equal( true );
 	} );
 
-	test( 'sorts manual pages by slug within the same package', async () => {
+	it( 'sorts manual pages by slug within the same package', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/zeta.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/alpha.manual.html' )
@@ -100,7 +100,7 @@ describe( 'collectManualPages()', () => {
 		expect( [ ...pages.values() ].map( entry => entry.slug ) ).to.deep.equal( [ 'alpha', 'zeta' ] );
 	} );
 
-	test( 'accepts the workspace root itself as a package root pattern', async () => {
+	it( 'accepts the workspace root itself as a package root pattern', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'manual/sample.manual.html' ),
 			createFile( workspaceRoot, 'manual/nested/demo-case.manual.html' )
@@ -122,7 +122,7 @@ describe( 'collectManualPages()', () => {
 		] );
 	} );
 
-	test( 'accepts package root patterns with a trailing slash', async () => {
+	it( 'accepts package root patterns with a trailing slash', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/sample.manual.html' );
 
 		const pages = collectManualPages( [ 'packages/*/' ], workspaceRoot );
