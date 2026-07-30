@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getAllLinks } from '../../src/page/get-all-links.js';
 
 interface LinkMock {
@@ -39,7 +39,7 @@ function createLink( {
 }
 
 describe( 'getAllLinks()', () => {
-	test( 'returns unique absolute HTTP links and filters unsupported anchors', () => {
+	it( 'returns unique absolute HTTP links and filters unsupported anchors', () => {
 		Object.defineProperty( globalThis, 'document', {
 			value: {
 				links: [

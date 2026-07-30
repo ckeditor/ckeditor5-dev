@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { cacheValue, stringifyValues, toPublicFilePath, toPublicSpecifier } from '../src/utils.js';
 
 describe( 'cacheValue()', () => {
-	test( 'computes the value once until invalidated', () => {
+	it( 'computes the value once until invalidated', () => {
 		const compute = vi.fn( () => ( {} ) );
 		const cache = cacheValue( compute );
 		const initialValue = cache.get();
@@ -25,7 +25,7 @@ describe( 'cacheValue()', () => {
 } );
 
 describe( 'stringifyValues()', () => {
-	test( 'JSON-stringifies object values', () => {
+	it( 'JSON-stringifies object values', () => {
 		expect( stringifyValues( {
 			array: [ 'foo' ],
 			boolean: true,
@@ -41,17 +41,17 @@ describe( 'stringifyValues()', () => {
 } );
 
 describe( 'public path utilities', () => {
-	test( 'returns a public path for files inside the workspace', () => {
+	it( 'returns a public path for files inside the workspace', () => {
 		expect( toPublicFilePath( '/workspace/packages/foo/manual.html', '/workspace' ) )
 			.to.equal( '/packages/foo/manual.html' );
 	} );
 
-	test( 'returns a Vite file-system path for files outside the workspace', () => {
+	it( 'returns a Vite file-system path for files outside the workspace', () => {
 		expect( toPublicFilePath( '/external/theme/shell.ts', '/workspace' ) )
 			.to.equal( '/@fs//external/theme/shell.ts' );
 	} );
 
-	test( 'normalizes public specifiers', () => {
+	it( 'normalizes public specifiers', () => {
 		expect( toPublicSpecifier( '\\packages\\foo\\manual.html' ) ).to.equal( '/packages/foo/manual.html' );
 	} );
 } );

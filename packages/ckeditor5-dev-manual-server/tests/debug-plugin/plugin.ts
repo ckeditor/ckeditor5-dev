@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Plugin } from 'vite';
 import { ckDebugPlugin } from '../../src/debug-plugin/plugin.js';
 
@@ -17,11 +17,11 @@ type TransformHook = {
 };
 
 describe( 'ckDebugPlugin()', () => {
-	test( 'runs before regular transforms', () => {
+	it( 'runs before regular transforms', () => {
 		expect( ckDebugPlugin().enforce ).to.equal( 'pre' );
 	} );
 
-	test( 'filters transform hook calls to JavaScript and TypeScript files', () => {
+	it( 'filters transform hook calls to JavaScript and TypeScript files', () => {
 		vi.stubEnv( 'CK_DEBUG', 'true' );
 
 		const transform = getTransformHook( ckDebugPlugin() );
@@ -32,14 +32,14 @@ describe( 'ckDebugPlugin()', () => {
 		expect( transform.filter.id.include.test( '/path/manual.css' ) ).to.equal( false );
 	} );
 
-	test( 'does not register the transform hook when the debug flag is disabled', () => {
+	it( 'does not register the transform hook when the debug flag is disabled', () => {
 		vi.stubEnv( 'CK_DEBUG', 'false' );
 
 		expect( ckDebugPlugin().transform ).to.equal( undefined );
 		expect( transformCode( 'const value = 1;\n// @if CK_DEBUG // console.log( value );' ) ).to.equal( null );
 	} );
 
-	test( 'enables the base debug flag by default when CK_DEBUG is not set', () => {
+	it( 'enables the base debug flag by default when CK_DEBUG is not set', () => {
 		vi.stubEnv( 'CK_DEBUG', undefined );
 
 		expect( transformCode( '// @if CK_DEBUG // console.log( "debug" );' ) ).to.equal(
@@ -48,7 +48,7 @@ describe( 'ckDebugPlugin()', () => {
 		expect( transformCode( '// @if CK_DEBUG_ENGINE // console.log( "engine" );' ) ).to.equal( null );
 	} );
 
-	test( 'transforms debug comments when the global debug flag is enabled', () => {
+	it( 'transforms debug comments when the global debug flag is enabled', () => {
 		vi.stubEnv( 'CK_DEBUG', 'true' );
 
 		expect( transformCode( 'const value = 1;\n\t// @if CK_DEBUG // console.log( value );' ) ).to.equal(
@@ -56,13 +56,13 @@ describe( 'ckDebugPlugin()', () => {
 		);
 	} );
 
-	test( 'does not run debug replacement when source has no debug comments', () => {
+	it( 'does not run debug replacement when source has no debug comments', () => {
 		vi.stubEnv( 'CK_DEBUG', 'true' );
 
 		expect( transformCode( 'const value = 1;\nconsole.log( value );' ) ).to.equal( null );
 	} );
 
-	test( 'transforms debug comments for selected debug namespaces', () => {
+	it( 'transforms debug comments for selected debug namespaces', () => {
 		vi.stubEnv( 'CK_DEBUG', 'engine, ui' );
 
 		expect( transformCode( '// @if CK_DEBUG_ENGINE // console.log( "engine" );' ) ).to.equal(

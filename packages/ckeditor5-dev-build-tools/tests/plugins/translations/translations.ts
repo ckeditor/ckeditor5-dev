@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { test } from 'vitest';
+import { describe, it } from 'vitest';
 import { rolldown, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
 
@@ -40,50 +40,52 @@ async function generateBundle( options?: RollupTranslationsOptions ): Promise<Ro
 	return output;
 }
 
-/**
- * Test how the plugin behaves when no custom options are passed.
- */
-test( 'default options', async () => {
-	const output = await generateBundle();
+describe( 'translations()', () => {
+	/**
+	 * Test how the plugin behaves when no custom options are passed.
+	 */
+	it( 'default options', async () => {
+		const output = await generateBundle();
 
-	verifyChunk( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
-	verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
-} );
-
-/**
- * Ensure that changing the `source` option affects which translation files are loaded.
- */
-test( 'source', async () => {
-	const output = await generateBundle( {
-		source: upath.join( import.meta.dirname, '/fixtures/*.po' )
+		verifyChunk( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
+		verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+		verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 	} );
 
-	verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
-	verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
-} );
+	/**
+	 * Ensure that changing the `source` option affects which translation files are loaded.
+	 */
+	it( 'source', async () => {
+		const output = await generateBundle( {
+			source: upath.join( import.meta.dirname, '/fixtures/*.po' )
+		} );
 
-/**
- * Ensure that changing the `destination` option affects where the output translation files are placed.
- */
-test( 'destination', async () => {
-	const output = await generateBundle( {
-		destination: 'languages'
+		verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
+		verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+		verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 	} );
 
-	verifyChunk( output, 'languages/pl.js', ALL_POLISH_TRANSLATIONS );
-	verifyChunk( output, 'languages/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyChunk( output, 'languages/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
-} );
+	/**
+	 * Ensure that changing the `destination` option affects where the output translation files are placed.
+	 */
+	it( 'destination', async () => {
+		const output = await generateBundle( {
+			destination: 'languages'
+		} );
 
-/**
- * Ensure that the typings are generated and that the `Translations` type is imported from `@ckeditor/ckeditor5-utils`.
- */
-test( 'typings', async () => {
-	const output = await generateBundle( {
-		destination: 'languages'
+		verifyChunk( output, 'languages/pl.js', ALL_POLISH_TRANSLATIONS );
+		verifyChunk( output, 'languages/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+		verifyChunk( output, 'languages/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 	} );
 
-	verifyChunk( output, 'languages/en.d.ts', 'import type { Translations } from \'@ckeditor/ckeditor5-utils\'' );
+	/**
+	 * Ensure that the typings are generated and that the `Translations` type is imported from `@ckeditor/ckeditor5-utils`.
+	 */
+	it( 'typings', async () => {
+		const output = await generateBundle( {
+			destination: 'languages'
+		} );
+
+		verifyChunk( output, 'languages/en.d.ts', 'import type { Translations } from \'@ckeditor/ckeditor5-utils\'' );
+	} );
 } );

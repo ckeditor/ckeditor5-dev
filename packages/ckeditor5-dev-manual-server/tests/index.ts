@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
 	ckDebugPlugin,
 	manualTestsPlugin,
@@ -13,7 +13,7 @@ import {
 } from '../src/index.js';
 
 describe( 'package entry point', () => {
-	test( 'exports public plugin factories and utilities', () => {
+	it( 'exports public plugin factories and utilities', () => {
 		expect( ckDebugPlugin ).to.be.a( 'function' );
 		expect( manualTestsPlugin ).to.be.a( 'function' );
 		expect( rawSvgPlugin ).to.be.a( 'function' );

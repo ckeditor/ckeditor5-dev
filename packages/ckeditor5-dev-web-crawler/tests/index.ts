@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import * as api from '../src/index.js';
 
 describe( 'index exports', () => {
-	test( 're-exports the public API', () => {
+	it( 're-exports the public API', () => {
 		expect( typeof api.runCrawler ).toBe( 'function' );
 		expect( typeof api.getBaseUrl ).toBe( 'function' );
 		expect( typeof api.isUrlValid ).toBe( 'function' );

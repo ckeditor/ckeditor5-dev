@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Page } from 'puppeteer';
 import type { Cluster } from 'puppeteer-cluster';
 import { processPage } from '../../src/crawler/process-page.js';
@@ -58,7 +58,7 @@ describe( 'processPage()', () => {
 		vi.mocked( getLinksFromPage ).mockResolvedValue( [] );
 	} );
 
-	test( 'queues newly discovered links when depth is greater than 0', async () => {
+	it( 'queues newly discovered links when depth is greater than 0', async () => {
 		const page = createPageMock();
 		const cluster = createClusterMock();
 		const discoveredLinks = new Set( [ 'https://ckeditor.com/docs/start' ] );
@@ -103,7 +103,7 @@ describe( 'processPage()', () => {
 		expect( vi.mocked( getErrorIgnorePatternsFromPage ) ).not.toHaveBeenCalled();
 	} );
 
-	test( 'does not collect links when depth limit is reached', async () => {
+	it( 'does not collect links when depth limit is reached', async () => {
 		const page = createPageMock();
 		const cluster = createClusterMock();
 
@@ -120,7 +120,7 @@ describe( 'processPage()', () => {
 		expect( cluster.queue ).not.toHaveBeenCalled();
 	} );
 
-	test( 'uses shorter wait strategy for API pages', async () => {
+	it( 'uses shorter wait strategy for API pages', async () => {
 		const page = createPageMock();
 
 		await processPage( {
@@ -135,7 +135,7 @@ describe( 'processPage()', () => {
 		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/api/module', { waitUntil: 'load' } );
 	} );
 
-	test( 'throws retryable error when page errors remain after filtering', async () => {
+	it( 'throws retryable error when page errors remain after filtering', async () => {
 		const detach = vi.fn();
 		const page = createPageMock();
 
@@ -173,7 +173,7 @@ describe( 'processPage()', () => {
 		expect( detach ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	test( 'does not add navigation error when matching request failure already exists', async () => {
+	it( 'does not add navigation error when matching request failure already exists', async () => {
 		const page = createPageMock( () => Promise.reject( new Error( 'Navigation failed' ) ) );
 
 		vi.mocked( attachPageEventHandlers ).mockImplementation( ( { data, pageErrors }: {
@@ -203,7 +203,7 @@ describe( 'processPage()', () => {
 		expect( thrownError.crawlerErrors[ 0 ]!.type ).toBe( ERROR_TYPES.REQUEST_FAILURE );
 	} );
 
-	test( 'resolves when all discovered errors are marked as ignored', async () => {
+	it( 'resolves when all discovered errors are marked as ignored', async () => {
 		vi.mocked( attachPageEventHandlers ).mockImplementation( ( { data, pageErrors }: {
 			data: QueueData;
 			pageErrors: Array<CrawlerError>;
