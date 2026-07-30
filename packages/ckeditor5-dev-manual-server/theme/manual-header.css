@@ -7,15 +7,9 @@
 
 :host {
 	display: block;
-	--ck-manual-header-height: 44px;
 }
 
 .bar {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 99999;
 	display: flex;
 	align-items: stretch;
 	box-sizing: border-box;
@@ -142,7 +136,7 @@
 	--panel-transition-duration: 0.18s;
 
 	position: fixed;
-	top: var(--ck-manual-header-height);
+	top: 0;
 	right: 0;
 	bottom: 0;
 	z-index: 99998;
