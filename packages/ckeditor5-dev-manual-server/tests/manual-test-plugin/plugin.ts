@@ -248,11 +248,12 @@ describe( 'manualTestsPlugin()', () => {
 		expect( result.tags[ 0 ]!.injectTo ).to.equal( 'head-prepend' );
 	} );
 
-	it( 'appends the package theme entry import to manual test entry scripts', async () => {
+	it( 'appends the package theme entry imports to manual test entry scripts', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-content.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
@@ -260,46 +261,65 @@ describe( 'manualTestsPlugin()', () => {
 		const result = transform.handler( 'console.log( 1 );\n', scriptFilePath );
 
 		expect( transform.order ).to.equal( 'pre' );
-		expect( result!.code ).to.equal( 'console.log( 1 );\n\nimport \'../theme/index.css\';\n' );
+		expect( result!.code ).to.equal(
+			'console.log( 1 );\n\nimport \'../theme/index-editor.css\';\nimport \'../theme/index-content.css\';\n'
+		);
 		expect( result!.map ).to.equal( null );
 	} );
 
-	it( 'appends the theme entry import to nested and TypeScript manual test entry scripts', async () => {
+	it( 'appends only the theme entry stylesheets that exist in the package', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
+		] );
+
+		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
+		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
+		const result = transform.handler( 'console.log( 1 );\n', scriptFilePath );
+
+		expect( result!.code ).to.contain( 'import \'../theme/index-editor.css\';' );
+		expect( result!.code ).to.not.contain( 'index-content.css' );
+	} );
+
+	it( 'appends the theme entry imports to nested and TypeScript manual test entry scripts', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.ts', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-content.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
 		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/nested/bar.ts' );
 		const result = transform.handler( 'console.log( 1 );\n', scriptFilePath );
 
-		expect( result!.code ).to.contain( 'import \'../../theme/index.css\';' );
+		expect( result!.code ).to.contain( 'import \'../../theme/index-editor.css\';' );
+		expect( result!.code ).to.contain( 'import \'../../theme/index-content.css\';' );
 	} );
 
 	it( 'ignores the query string when matching transformed manual test scripts', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
 		const scriptFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
 		const result = transform.handler( 'console.log( 1 );\n', `${ scriptFilePath }?v=123` );
 
-		expect( result!.code ).to.contain( 'import \'../theme/index.css\';' );
+		expect( result!.code ).to.contain( 'import \'../theme/index-editor.css\';' );
 	} );
 
 	it( 'does not transform non-script modules', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css', '.ck {}' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css', '.ck {}' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
-		const styleFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' );
+		const styleFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' );
 
 		expect( transform.handler( '.ck {}', styleFilePath ) ).to.equal( undefined );
 	} );
@@ -310,7 +330,7 @@ describe( 'manualTestsPlugin()', () => {
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/bar.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/bar.js', 'console.log( 2 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
@@ -319,15 +339,15 @@ describe( 'manualTestsPlugin()', () => {
 		const fooResult = transform.handler( 'console.log( 1 );\n', fooFilePath );
 		const barResult = transform.handler( 'console.log( 2 );\n', barFilePath );
 
-		expect( fooResult!.code ).to.contain( 'import \'../theme/index.css\';' );
-		expect( barResult!.code ).to.contain( 'import \'../theme/index.css\';' );
+		expect( fooResult!.code ).to.contain( 'import \'../theme/index-editor.css\';' );
+		expect( barResult!.code ).to.contain( 'import \'../theme/index-editor.css\';' );
 	} );
 
 	it( 'does not transform helper modules without a sibling manual page', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ] } );
@@ -352,7 +372,7 @@ describe( 'manualTestsPlugin()', () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
-			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index.css' )
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
 		] );
 
 		const transform = createConfiguredTransformHook( { paths: [ 'packages/*' ], include: [ 'bar' ] } );
