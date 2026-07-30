@@ -9,18 +9,19 @@ allowBuilds:
   'snyk': true
 
 overrides:
+  '@puppeteer/browsers@^2': '^3.0.6'
   'diff@^7': '^8.0.3'
   'lodash@^4': '^4.18.0'
   'serialize-javascript@6': '^7.0.3'
-  'uuid@^8': '^14.0.0'
   'js-yaml@^3': '^4.3.0'
   'js-yaml@^4': '^4.3.0'
   'brace-expansion@^1': '^1.1.16'
   'brace-expansion@^2': '^2.1.2'
-  'brace-expansion@^5': '^5.0.7'
-  'postcss-selector-parser@^7': '^7.1.2'
+  'brace-expansion@^5': '^5.0.8'
+  'ip-address@^10': '^10.2.1'
+  'postcss@^8': '^8.5.18'
   'pacote@^21': '^21.5.1'
-  'tar@^7': '^7.5.19'
+  'tar@^7': '^7.5.21'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
