@@ -5,6 +5,7 @@
 
 import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
 
+import { setUpStartupProfiler } from './manual-profiler.js';
 import promptStyles from './manual-bootstrap.css?inline';
 
 declare const LICENSE_KEY: string;
@@ -23,6 +24,7 @@ const globalTarget = window as any;
  *
  * - sets the global license key so tests do not have to pass `licenseKey` explicitly;
  * - resets the `window.editor` named DOM property and auto-attaches the CKEditor inspector;
+ * - installs the startup profiler, which reports the initialization timings of every editor;
  * - renders the "source changed" refresh prompt driven by the dev server (`refreshPlugin`).
  *
  * The refresh prompt is part of the dev-server contract, not test chrome, so it belongs here.
@@ -41,6 +43,9 @@ if ( typeof LICENSE_KEY != 'undefined' ) {
 }
 
 autoAttachInspector();
+
+setUpStartupProfiler();
+
 setUpRefreshPrompt();
 
 function autoAttachInspector(): void {
