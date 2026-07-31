@@ -18,9 +18,6 @@ const projectPackages = readdirSync( upath.join( import.meta.dirname, 'packages'
 export default defineConfig( [
 	{
 		ignores: [
-			// Manual-server theme is dev-tool UI / vendored CSS (not editor styles); not part of the stylelint→eslint migration (#4267).
-			'packages/ckeditor5-dev-manual-server/theme/**/*.css',
-
 			// Test fixtures are sample inputs (incl. CSS) and must not be linted.
 			'**/tests/**/fixtures/**',
 			'**/dist/*',
@@ -64,6 +61,24 @@ export default defineConfig( [
 					extensions: [ '.ts', '.js', '.json' ]
 				}
 			]
+		}
+	},
+	{
+		// Manual-server theme styles the dev tool's own chrome (shadow DOM of `<ck-manual-header>`, the catalog
+		// page, the refresh prompt). It is not editor theme styling and never ships to a browser we do not
+		// control, so the rules guarding themeability and cross-browser reach do not apply.
+		files: [ 'packages/ckeditor5-dev-manual-server/theme/**/*.css' ],
+
+		rules: {
+			'ckeditor5-rules/no-disallowed-color-formats': 'off',
+
+			// Runs in the developer's own modern browser only, so `::highlight`, `backdrop-filter`
+			// and `ui-monospace` need no baseline guarantee.
+			'css/use-baseline': 'off',
+
+			// TODO (RTL): off pending a migration of physical properties/values to logical, the same way
+			// the `ckeditor5` repository defers it.
+			'css/prefer-logical-properties': 'off'
 		}
 	},
 	{
