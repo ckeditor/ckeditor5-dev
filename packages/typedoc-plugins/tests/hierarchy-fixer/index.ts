@@ -98,6 +98,13 @@ describe( 'typedoc-plugins/hierarchy-fixer', () => {
 		expect( getReferenceNames( nestedEditor.implementedTypes ) ).to.have.members( [ 'ElementApi', 'Emitter' ] );
 	} );
 
+	it( 'should not duplicate a base class or an interface repeated in the base type', () => {
+		const doubleEmitterEditor = getReflection( 'DoubleEmitterEditor' );
+
+		expect( getReferenceNames( doubleEmitterEditor.extendedTypes ) ).to.deep.equal( [ 'Editor' ] );
+		expect( getReferenceNames( doubleEmitterEditor.implementedTypes ) ).to.deep.equal( [ 'Emitter' ] );
+	} );
+
 	it( 'should not duplicate an interface that the extending class already implements explicitly', () => {
 		const manualEditor = getReflection( 'ManualEditor' );
 
@@ -147,12 +154,15 @@ describe( 'typedoc-plugins/hierarchy-fixer (clean-up after removing reflections)
 		typeDocRestoreProgramAfterConversion( typeDoc );
 		typeDocHierarchyFixer( typeDoc );
 
-		// Simulate the `typedoc-plugin-purge-private-api-docs` plugin removing a private class after fixing the hierarchy.
+		// Simulate the `typedoc-plugin-purge-private-api-docs` plugin removing private classes after fixing the hierarchy.
+		// Removing all classes implementing the `ElementApi` interface empties its `implementedBy` collection entirely.
 		typeDoc.converter.on( Converter.EVENT_END, ( context: Context ) => {
-			const nestedEditor = context.project.getReflectionsByKind( ReflectionKind.Class )
-				.find( reflection => reflection.name === 'NestedEditor' )!;
+			const classesToRemove = context.project.getReflectionsByKind( ReflectionKind.Class )
+				.filter( reflection => [ 'ClassicEditor', 'NestedEditor', 'ManualEditor' ].includes( reflection.name ) );
 
-			context.project.removeReflection( nestedEditor );
+			for ( const reflection of classesToRemove ) {
+				context.project.removeReflection( reflection );
+			}
 		}, getPluginPriority( 'typeDocPurgePrivateApiDocs' ) );
 
 		conversionResult = ( await typeDoc.convert() )!;
@@ -171,11 +181,17 @@ describe( 'typedoc-plugins/hierarchy-fixer (clean-up after removing reflections)
 
 	it( 'should remove references to removed reflections from the "extendedBy" and "implementedBy" collections', () => {
 		const editor = getReflection( 'Editor' );
+
+		for ( const reference of editor.extendedBy! ) {
+			expect( reference.reflection, `expected the "${ reference.name }" reference to be resolved` ).to.not.be.undefined;
+		}
+
+		expect( editor.extendedBy!.map( reference => reference.name ) ).to.deep.equal( [ 'DoubleEmitterEditor' ] );
+	} );
+
+	it( 'should remove the "extendedBy" and "implementedBy" collections when all their references point to removed reflections', () => {
 		const elementApi = getReflection( 'ElementApi', ReflectionKind.Interface );
 
-		for ( const reference of [ ...editor.extendedBy!, ...elementApi.implementedBy! ] ) {
-			expect( reference.reflection, `expected the "${ reference.name }" reference to be resolved` ).to.not.be.undefined;
-			expect( reference.name ).to.not.equal( 'NestedEditor' );
-		}
+		expect( elementApi.implementedBy ).to.be.undefined;
 	} );
 } );

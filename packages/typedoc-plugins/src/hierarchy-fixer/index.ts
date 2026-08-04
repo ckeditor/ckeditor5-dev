@@ -10,7 +10,8 @@ import {
 	type Application,
 	type Context,
 	type DeclarationReflection,
-	type SomeType
+	type SomeType,
+	type TypeScript
 } from 'typedoc';
 import { getPluginPriority } from '../utils/getpluginpriority.js';
 
@@ -65,19 +66,12 @@ function onEventEnd( context: Context ) {
 			continue;
 		}
 
-		const fixedTypes = reflection.extendedTypes.flatMap( type => {
-			if ( !isBrokenReference( type ) ) {
-				return [ type ];
-			}
-
-			return baseClasses.map( baseClass => {
-				return ReferenceType.createResolvedReference( baseClass.name, baseClass, context.project );
-			} );
-		} );
-
+		// A class always has a single `extends` entry, so the broken reference can be replaced with the entire collection.
 		// A mixin does not have to extend any class, e.g. `class Editor extends ObservableMixin()`. In such a case the broken
 		// reference is removed without a replacement, and the class becomes a root of its own hierarchy.
-		reflection.extendedTypes = fixedTypes.length ? fixedTypes : undefined;
+		reflection.extendedTypes = baseClasses.length ?
+			baseClasses.map( baseClass => ReferenceType.createResolvedReference( baseClass.name, baseClass, context.project ) ) :
+			undefined;
 
 		for ( const baseClass of baseClasses ) {
 			addBackReference( context, baseClass, 'extendedBy', reflection );
@@ -124,37 +118,37 @@ function onEventEndCleanUp( context: Context ) {
  * Members that are not documented in the project (e.g. native types) are ignored.
  */
 function getDocumentedBaseReflections( context: Context, reflection: DeclarationReflection ) {
-	const baseClasses: Array<DeclarationReflection> = [];
-	const baseInterfaces: Array<DeclarationReflection> = [];
-	const symbol = context.getSymbolFromReflection( reflection );
+	const baseClasses = new Set<DeclarationReflection>();
+	const baseInterfaces = new Set<DeclarationReflection>();
 
-	if ( symbol ) {
-		const instanceType = context.checker.getDeclaredTypeOfSymbol( symbol );
-		const baseTypes = instanceType.isClassOrInterface() ? context.checker.getBaseTypes( instanceType ) : [];
+	// Class reflections always originate from a symbol, and the declared type of a class symbol is always an interface type.
+	const symbol = context.getSymbolFromReflection( reflection )!;
+	const instanceType = context.checker.getDeclaredTypeOfSymbol( symbol ) as TypeScript.InterfaceType;
 
-		for ( const baseType of baseTypes ) {
-			const baseTypeParts = baseType.isIntersection() ? baseType.types : [ baseType ];
+	for ( const baseType of context.checker.getBaseTypes( instanceType ) ) {
+		const baseTypeParts = baseType.isIntersection() ? baseType.types : [ baseType ];
 
-			for ( const baseTypePart of baseTypeParts ) {
-				const partSymbol = baseTypePart.getSymbol();
-				const target = partSymbol ?
-					context.getReflectionFromSymbol( partSymbol ) as DeclarationReflection | undefined :
-					undefined;
+		for ( const baseTypePart of baseTypeParts ) {
+			const partSymbol = baseTypePart.getSymbol();
+			const target = partSymbol ?
+				context.getReflectionFromSymbol( partSymbol ) as DeclarationReflection | undefined :
+				undefined;
 
-				if ( !target || target === reflection ) {
-					continue;
-				}
+			if ( !target ) {
+				continue;
+			}
 
-				if ( target.kindOf( ReflectionKind.Class ) && !baseClasses.includes( target ) ) {
-					baseClasses.push( target );
-				} else if ( target.kindOf( ReflectionKind.Interface ) && !baseInterfaces.includes( target ) ) {
-					baseInterfaces.push( target );
-				}
+			if ( target.kindOf( ReflectionKind.Class ) ) {
+				baseClasses.add( target );
+			}
+
+			if ( target.kindOf( ReflectionKind.Interface ) ) {
+				baseInterfaces.add( target );
 			}
 		}
 	}
 
-	return { baseClasses, baseInterfaces };
+	return { baseClasses: [ ...baseClasses ], baseInterfaces: [ ...baseInterfaces ] };
 }
 
 /**
