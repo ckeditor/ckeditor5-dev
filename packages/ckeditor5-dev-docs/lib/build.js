@@ -81,6 +81,7 @@ export default async function build( config ) {
 	plugins.typeDocTagObservable( app );
 	plugins.typeDocEventParamFixer( app );
 	plugins.typeDocEventInheritanceFixer( app );
+	plugins.typeDocHierarchyFixer( app );
 	plugins.typeDocInterfaceAugmentationFixer( app );
 	plugins.typeDocPurgePrivateApiDocs( app );
 	plugins.typeDocReferenceFixer( app );

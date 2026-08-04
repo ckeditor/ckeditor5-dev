@@ -15,11 +15,27 @@ describe( 'getPluginPriority', () => {
 		expect( getPluginPriority( 'typeDocModuleFixer' ) ).toBe( -1 );
 	} );
 
-	it( 'should return -5 for validators', () => {
-		expect( getPluginPriority( 'validators' ) ).toBe( -5 );
+	it( 'should return -3 for event-inheritance-fixer', () => {
+		expect( getPluginPriority( 'typeDocEventInheritanceFixer' ) ).toBe( -3 );
 	} );
 
-	it( 'should return -6 for an unknown plugin', () => {
-		expect( getPluginPriority( 'unknown-plugin' ) ).toBe( -6 );
+	it( 'should return -4 for hierarchy-fixer', () => {
+		expect( getPluginPriority( 'typeDocHierarchyFixer' ) ).toBe( -4 );
+	} );
+
+	it( 'should return -5 for purge-private-api-docs', () => {
+		expect( getPluginPriority( 'typeDocPurgePrivateApiDocs' ) ).toBe( -5 );
+	} );
+
+	it( 'should return -6 for the hierarchy-fixer cleanup', () => {
+		expect( getPluginPriority( 'typeDocHierarchyFixerCleanUp' ) ).toBe( -6 );
+	} );
+
+	it( 'should return -7 for validators', () => {
+		expect( getPluginPriority( 'validators' ) ).toBe( -7 );
+	} );
+
+	it( 'should return -8 for an unknown plugin', () => {
+		expect( getPluginPriority( 'unknown-plugin' ) ).toBe( -8 );
 	} );
 } );
