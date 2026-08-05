@@ -95,6 +95,22 @@ const conversionResult = await typeDoc.convert();
 
   Adds support for creating CKEditor 5 events from properties marked as `@observable`.
 
+- **Restore program after conversion** &mdash; `typeDocRestoreProgramAfterConversion()`
+
+  The plugin restores the TypeScript program used for the source conversion. TypeDoc deletes the `context.program` property once the conversion is finished, which prevents other plugins listening to the `EVENT_END` event from using the TypeScript API.
+
+- **Reference fixer** &mdash; `typeDocReferenceFixer()`
+
+  The plugin fixes reflections that are re-exported from another file as a default export. In such a case TypeDoc adds the reflection declaration to the file containing the re-export, while the actual source file contains only a reference. The plugin moves the declarations back to their source locations.
+
+- **Output clean-up** &mdash; `typeDocOutputCleanUp()`
+
+  The plugin removes unnecessary properties from reflections to decrease the size of the generated output.
+
+- **Validators** &mdash; `validate()`
+
+  Validates the CKEditor 5 documentation. It verifies the `@see` and `@link` references and the events specified in the `@fires` annotation. Optionally, when the `enableOverloadValidator` option is enabled, it also verifies whether overloaded signatures use the `@label` annotation.
+
 ------------------------------------------------------------------------------------
 
 ## Changelog
