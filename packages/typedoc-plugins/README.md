@@ -71,6 +71,12 @@ const conversionResult = await typeDoc.convert();
 
   The plugin takes care of inheriting events, which are created manually via the [`@eventName`](#tag-eventname) annotation.
 
+- **Hierarchy fixer** &mdash; `typeDocHierarchyFixer()`
+
+  The plugin restores the class hierarchy broken by extending an intermediate mixin constant, e.g. `const ClassicEditorBase = ElementApiMixin( Editor )`. It replaces the unresolvable base class reference with the actual base class, restores the "Subclasses" relation on the base class, and lists the mixin interfaces as implemented by the extending class. It also removes references pointing to reflections purged from private packages.
+
+  The plugin must be executed after `typeDocEventInheritanceFixer()`, because inheriting events resolves the original (broken) references replaced by this plugin.
+
 - **Purge private API** &mdash; `typeDocPurgePrivateApiDocs()`
 
   The plugin removes reflections collected from private packages (marked as `"private": true` in their `package.json`). To disable the mechanism, add the `@publicApi` annotation at the beginning of a file.
