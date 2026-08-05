@@ -10,6 +10,7 @@ export { typeDocTagEvent } from './tag-event/index.js';
 export { typeDocTagObservable } from './tag-observable/index.js';
 export { typeDocEventParamFixer } from './event-param-fixer/index.js';
 export { typeDocEventInheritanceFixer } from './event-inheritance-fixer/index.js';
+export { typeDocHierarchyFixer } from './hierarchy-fixer/index.js';
 export { typeDocInterfaceAugmentationFixer } from './interface-augmentation-fixer/index.js';
 export { typeDocPurgePrivateApiDocs } from './purge-private-api-docs/index.js';
 export { typeDocRestoreProgramAfterConversion } from './restore-program-after-conversion/index.js';

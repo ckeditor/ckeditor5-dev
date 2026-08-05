@@ -24,7 +24,16 @@ const pluginGroups = [
 		'typeDocInterfaceAugmentationFixer'
 	],
 	[
+		// Must run after the event inheritance fixer, because inheriting events resolves the original (broken)
+		// references to the mixin base classes that are replaced by this plugin.
+		'typeDocHierarchyFixer'
+	],
+	[
 		'typeDocPurgePrivateApiDocs'
+	],
+	[
+		// Must run after purging the private API docs to clean up references to the removed reflections.
+		'typeDocHierarchyFixerCleanUp'
 	],
 	[
 		'validators'
