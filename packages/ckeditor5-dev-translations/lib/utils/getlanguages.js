@@ -51,7 +51,6 @@ const SUPPORTED_LOCALES = [
 	'ms', // Malay
 	'ne_NP', // Nepali (Nepal)
 	'no', // Norwegian
-	'nb', // Norwegian Bokmål
 	'oc', // Occitan (post 1500)
 	'fa', // Persian
 	'pl', // Polish
@@ -78,12 +77,12 @@ const SUPPORTED_LOCALES = [
 	'uz', // Uzbek
 	'vi' // Vietnamese
 ];
-
 const LOCALES_FILENAME_MAP = {
 	'ne_NP': 'ne',
 	'si_LK': 'si',
 	'sr@latin': 'sr-latn',
-	'zh_TW': 'zh'
+	'zh_CN': 'zh-hans',
+	'zh_TW': 'zh-hant'
 };
 
 /**
