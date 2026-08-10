@@ -4,22 +4,20 @@
  */
 
 import upath from 'upath';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { rolldown, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
 
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
 
 // eslint-disable-next-line @stylistic/max-len
-const ALL_POLISH_TRANSLATIONS = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+const ALL_POLISH_TRANSLATIONS = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]}';
 
-// eslint-disable-next-line @stylistic/max-len
-const POLISH_TRANSLATIONS_FROM_ROOT = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie"},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+const POLISH_TRANSLATIONS_FROM_ROOT = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie"}';
 
-// eslint-disable-next-line @stylistic/max-len
-const GERMAN_TRANSLATIONS_FROM_ROOT = 'export default {"de":{"dictionary":{"Hello world":"Hallo Welt"},getPluralForm(n){return (n != 1);}}}';
+const GERMAN_TRANSLATIONS_FROM_ROOT = 'export default {"de":{"dictionary":{"Hello world":"Hallo Welt"}';
 
-const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hello world":"Hello world"},"getPluralForm":null}}';
+const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hello world":"Hello world"}}}';
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
@@ -48,8 +46,10 @@ describe( 'translations()', () => {
 		const output = await generateBundle();
 
 		verifyChunk( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
+		verifyChunk( output, 'translations/pl.js', '"getPluralForm":' );
 		verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
 		verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
+		expect( output ).not.toEqual( expect.arrayContaining( [ expect.objectContaining( { fileName: 'translations/ignored.js' } ) ] ) );
 	} );
 
 	/**
@@ -57,10 +57,11 @@ describe( 'translations()', () => {
 	 */
 	it( 'source', async () => {
 		const output = await generateBundle( {
-			source: upath.join( import.meta.dirname, '/fixtures/*.po' )
+			source: upath.join( import.meta.dirname, '/fixtures/translations/*.ts' )
 		} );
 
 		verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
+		verifyChunk( output, 'translations/pl.js', '"getPluralForm":' );
 		verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
 		verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 	} );
@@ -87,5 +88,11 @@ describe( 'translations()', () => {
 		} );
 
 		verifyChunk( output, 'languages/en.d.ts', 'import type { Translations } from \'@ckeditor/ckeditor5-utils\'' );
+	} );
+
+	it( 'does not overwrite an existing plural function with a dictionary-only UMD translation', async () => {
+		const output = await generateBundle();
+
+		verifyChunk( output, 'translations/en.umd.js', 'if ( translations.getPluralForm )' );
 	} );
 } );

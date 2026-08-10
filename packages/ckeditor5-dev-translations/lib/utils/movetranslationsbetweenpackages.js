@@ -5,34 +5,31 @@
 
 import fs from 'node:fs';
 import upath from 'upath';
-import PO from 'pofile';
 import { glob } from 'glob';
+import { getFormula } from 'plural-forms';
 import { TRANSLATION_FILES_PATH } from './constants.js';
-import cleanTranslationFileContent from './cleantranslationfilecontent.js';
+import getLanguages from './getlanguages.js';
+import { readTranslationFile, serializeTranslationFile } from './translationfile.js';
 
 /**
  * @param {object} options
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
  */
-export default function moveTranslationsBetweenPackages( { packageContexts, config } ) {
-	// For each message to move:
+export default async function moveTranslationsBetweenPackages( { packageContexts, config } ) {
 	for ( const { source, destination, messageId } of config ) {
-		// (1) Skip the message if its source and destination package is the same.
 		if ( source === destination ) {
 			continue;
 		}
 
-		// (2) Move translation context from source package to destination package.
 		const sourcePackageContext = packageContexts.find( context => context.packagePath === source );
 		const destinationPackageContext = packageContexts.find( context => context.packagePath === destination );
+		const messageContext = sourcePackageContext.contextContent[ messageId ];
 
-		destinationPackageContext.contextContent[ messageId ] = sourcePackageContext.contextContent[ messageId ];
+		destinationPackageContext.contextContent[ messageId ] = messageContext;
 		delete sourcePackageContext.contextContent[ messageId ];
 
-		// (3) Prepare the list of paths to translation files ("*.po" files) in source and destination packages.
-		// The source package defines the list of files for both packages.
-		const translationFilesPattern = upath.join( source, TRANSLATION_FILES_PATH, '*.po' );
+		const translationFilesPattern = upath.join( source, TRANSLATION_FILES_PATH, '*.ts' );
 		const translationFilePaths = glob.sync( translationFilesPattern )
 			.map( filePath => upath.basename( filePath ) )
 			.map( fileName => ( {
@@ -40,49 +37,47 @@ export default function moveTranslationsBetweenPackages( { packageContexts, conf
 				destinationTranslationFilePath: upath.join( destination, TRANSLATION_FILES_PATH, fileName )
 			} ) );
 
-		// Then, for each translation file:
 		for ( const { sourceTranslationFilePath, destinationTranslationFilePath } of translationFilePaths ) {
-			// (3.1) Read the source translation file.
-			const sourceTranslationFile = fs.readFileSync( sourceTranslationFilePath, 'utf-8' );
-			const sourceTranslations = PO.parse( sourceTranslationFile );
+			const sourceTranslations = await readTranslationFile( sourceTranslationFilePath );
+			const destinationTranslations = fs.existsSync( destinationTranslationFilePath ) ?
+				await readTranslationFile( destinationTranslationFilePath ) :
+				{ language: sourceTranslations.language, dictionary: {} };
+			const value = sourceTranslations.dictionary[ messageId ];
 
-			// (3.2) Read the destination translation file.
-			// If the destination file does not exist, use the source file as a base and remove all translations.
-			const destinationTranslationFile = fs.existsSync( destinationTranslationFilePath ) ?
-				fs.readFileSync( destinationTranslationFilePath, 'utf-8' ) :
-				null;
-			const destinationTranslations = PO.parse( destinationTranslationFile || sourceTranslationFile );
+			delete sourceTranslations.dictionary[ messageId ];
+			destinationTranslations.dictionary[ messageId ] = value;
 
-			if ( !destinationTranslationFile ) {
-				destinationTranslations.items = [];
-			}
-
-			// (3.3) Move the translation from source file to destination file.
-			const sourceMessage = sourceTranslations.items.find( item => item.msgid === messageId );
-			sourceTranslations.items = sourceTranslations.items.filter( item => item.msgid !== messageId );
-
-			destinationTranslations.items = destinationTranslations.items.filter( item => item.msgid !== messageId );
-			destinationTranslations.items.push( sourceMessage );
-
-			fs.mkdirSync( upath.dirname( sourceTranslationFilePath ), { recursive: true } );
-			fs.mkdirSync( upath.dirname( destinationTranslationFilePath ), { recursive: true } );
-			fs.writeFileSync( sourceTranslationFilePath, cleanTranslationFileContent( sourceTranslations ).toString(), 'utf-8' );
-			fs.writeFileSync( destinationTranslationFilePath, cleanTranslationFileContent( destinationTranslations ).toString(), 'utf-8' );
+			writePackageTranslation( source, sourceTranslationFilePath, sourceTranslations, sourcePackageContext.contextContent );
+			writePackageTranslation(
+				destination,
+				destinationTranslationFilePath,
+				destinationTranslations,
+				destinationPackageContext.contextContent
+			);
 		}
 
 		fs.mkdirSync( upath.dirname( sourcePackageContext.contextFilePath ), { recursive: true } );
 		fs.mkdirSync( upath.dirname( destinationPackageContext.contextFilePath ), { recursive: true } );
-
 		fs.writeFileSync(
 			sourcePackageContext.contextFilePath,
 			JSON.stringify( sourcePackageContext.contextContent, null, '\t' ),
 			'utf-8'
 		);
-
-		fs.writeFileSync(
-			destinationPackageContext.contextFilePath,
-			JSON.stringify( destinationPackageContext.contextContent, null, '\t' ),
-			'utf-8'
-		);
+		fs.writeFileSync( destinationPackageContext.contextFilePath,
+			JSON.stringify( destinationPackageContext.contextContent, null, '\t' ), 'utf-8' );
 	}
+}
+
+function writePackageTranslation( packagePath, filePath, translations, contexts ) {
+	const language = getLanguages().find( item => item.languageFileName === translations.language );
+	const pluralFunction = upath.basename( packagePath ) === 'ckeditor5-core' ? getFormula( language.languageCode ) : null;
+	const content = serializeTranslationFile( {
+		language: translations.language,
+		dictionary: translations.dictionary,
+		contexts,
+		pluralFunction
+	} );
+
+	fs.mkdirSync( upath.dirname( filePath ), { recursive: true } );
+	fs.writeFileSync( filePath, content, 'utf-8' );
 }

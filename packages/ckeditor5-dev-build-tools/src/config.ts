@@ -157,7 +157,7 @@ export async function getRolldownConfig( options: BuildOptions ): Promise<Rolldo
 			} ),
 
 			/**
-			 * Builds translation from the `.po` files.
+			 * Builds translations from generated TypeScript translation files.
 			 */
 			getOptionalPlugin(
 				translations,

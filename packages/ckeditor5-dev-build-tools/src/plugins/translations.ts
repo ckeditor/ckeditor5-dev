@@ -4,10 +4,8 @@
  */
 
 import { parse } from 'node:path';
-import { readFileSync } from 'node:fs';
-
+import { pathToFileURL } from 'node:url';
 import path from 'upath';
-import PO from 'pofile';
 import { groupBy, merge } from 'es-toolkit/compat';
 import { glob } from 'glob';
 import type { Plugin } from 'rolldown';
@@ -23,9 +21,9 @@ const TYPINGS = removeWhitespace( `
 export interface RollupTranslationsOptions {
 
 	/**
-	 * The [glob](https://github.com/isaacs/node-glob) compatible path to the `.po` files.
+	 * The [glob](https://github.com/isaacs/node-glob) compatible path to the TypeScript translation files.
 	 *
-	 * @default '**\/*.po'
+	 * @default '**\/translations\/*.ts'
 	 */
 	source?: string;
 
@@ -39,41 +37,17 @@ export interface RollupTranslationsOptions {
 
 interface Translation {
 	dictionary: Record<string, string | Array<string>>;
-	getPluralForm: string | null;
-}
-
-/**
- * Returns translations dictionary from the PO file.
- */
-function getDictionary( content: PO ): Translation['dictionary'] {
-	const dictionary: Translation['dictionary'] = {};
-
-	for ( const { msgid, msgstr } of content.items ) {
-		dictionary[ msgid ] = msgstr.length === 1 ? msgstr[ 0 ]! : msgstr;
-	}
-
-	return dictionary;
-}
-
-/**
- * Returns stringified pluralization function from the PO file.
- */
-function getPluralFunction( content: PO ): string | null {
-	return content.headers[ 'Plural-Forms' ]?.split( 'plural=' )?.[ 1 ] ?? null;
+	getPluralForm?: ( n: number ) => number | boolean;
 }
 
 /**
  * Returns the code of the translations.
  */
 function getCode( language: string, translation: Translation ): string {
-	const translations = JSON.stringify( {
-		[ language ]: translation
-	} );
+	const dictionary = JSON.stringify( translation.dictionary );
+	const pluralFunction = translation.getPluralForm ? `,"getPluralForm":${ translation.getPluralForm.toString() }` : '';
 
-	return translations.replace(
-		/"getPluralForm":"(.*)"/,
-		'getPluralForm(n){return $1}'
-	);
+	return `{${ JSON.stringify( language ) }:{"dictionary":${ dictionary }${ pluralFunction }}}`;
 }
 
 /**
@@ -89,21 +63,24 @@ function getEsmCode( code: string ): string {
 function getUmdCode( language: string, code: string ): string {
 	return removeWhitespace( `
 		( e => {
-			const { [ '${ language }' ]: { dictionary, getPluralForm } } = ${ code };
+			const { [ '${ language }' ]: translations } = ${ code };
 
 			e[ '${ language }' ] ||= { dictionary: {}, getPluralForm: null };
-			e[ '${ language }' ].dictionary = Object.assign( e[ '${ language }' ].dictionary, dictionary );
-			e[ '${ language }' ].getPluralForm = getPluralForm;
+			e[ '${ language }' ].dictionary = Object.assign( e[ '${ language }' ].dictionary, translations.dictionary );
+
+			if ( translations.getPluralForm ) {
+				e[ '${ language }' ].getPluralForm = translations.getPluralForm;
+			}
 		} )( window.CKEDITOR_TRANSLATIONS ||= {} );
 	` );
 }
 
 /**
- * Generates translation files from the `.po` files.
+ * Generates distributable translation files from TypeScript translation sources.
  */
 export function translations( pluginOptions?: RollupTranslationsOptions ): Plugin {
 	const options: Required<RollupTranslationsOptions> = Object.assign( {
-		source: '**/*.po',
+		source: '**/translations/*.ts',
 		destination: 'translations'
 	}, pluginOptions || {} );
 
@@ -111,10 +88,14 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 		name: 'cke5-translations',
 
 		async generateBundle() {
-			// Get the paths to the PO files based on provided pattern.
-			const filePaths = await glob( options.source, {
+			// Get the paths to the translation files based on provided pattern.
+			const filePaths = ( await glob( options.source, {
 				cwd: process.cwd(),
-				ignore: 'node_modules/**'
+				ignore: [ 'node_modules/**', '**/dist/**', '**/*.d.ts' ]
+			} ) ).filter( filePath => {
+				const pathSegments = filePath.split( /[/\\]/ );
+
+				return !filePath.endsWith( '.d.ts' ) && !pathSegments.includes( 'dist' ) && !pathSegments.includes( 'node_modules' );
 			} );
 
 			// Group the translation files by the language code.
@@ -122,19 +103,14 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 
 			for ( const [ language, paths ] of Object.entries( grouped ) ) {
 				// Gather all translations for the given language.
-				const translations: Array<Translation> = paths
+				const translations: Array<Translation> = await Promise.all( paths
 					// Resolve relative paths to absolute paths.
 					.map( filePath => path.isAbsolute( filePath ) ? filePath : path.join( process.cwd(), filePath ) )
-					// Load files by path.
-					.map( filePath => readFileSync( filePath, 'utf-8' ) )
-					// Process `.po` files.
-					.map( PO.parse )
-					// Filter out empty files.
-					.filter( Boolean )
-					// Map files to desired structure.
-					.map( content => ( {
-						dictionary: getDictionary( content ),
-						getPluralForm: getPluralFunction( content )
+					// Load TypeScript modules and select the translation matching the file name.
+					.map( async filePath => {
+						const translationModule = await import( pathToFileURL( filePath ).href );
+
+						return translationModule.default[ language ] as Translation;
 					} ) );
 
 				// Merge all translations into a single object.

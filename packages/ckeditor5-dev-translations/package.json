@@ -27,7 +27,6 @@
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "glob": "^13.0.6",
     "plural-forms": "^0.5.5",
-    "pofile": "^1.1.4",
     "typescript": "5.5.4",
     "upath": "^2.0.1"
   },

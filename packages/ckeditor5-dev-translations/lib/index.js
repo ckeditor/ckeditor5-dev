@@ -6,3 +6,4 @@
 export { default as findMessages } from './findmessages.js';
 export { default as synchronizeTranslations } from './synchronizetranslations.js';
 export { default as moveTranslations } from './movetranslations.js';
+export { readTranslationFile, serializeTranslationFile } from './utils/translationfile.js';

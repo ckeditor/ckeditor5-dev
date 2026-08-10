@@ -14,14 +14,15 @@ import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslatio
  * Synchronizes translations in provided packages by performing the following steps:
  * * Collect all i18n messages from all provided packages by finding `t()` calls in source files.
  * * Detect if translation context is valid, i.e. whether there is no missing, unused or duplicated context.
- * * If there are no validation errors, update all translation files ("*.po" files) to be in sync with the context file:
+ * * If there are no validation errors, update all translation files ("*.ts" files) to be in sync with the context file:
  *   * unused translation entries are removed,
  *   * missing translation entries are added with empty string as the message translation,
- *   * missing translation files are created for languages that do not have own "*.po" file yet.
+ *   * missing translation files are created for languages that do not have own "*.ts" file yet.
  *
  * @param {SynchronizeTranslationsOptions} options
+ * @returns {Promise<void>}
  */
-export default function synchronizeTranslations( options ) {
+export default async function synchronizeTranslations( options ) {
 	const {
 		cwd,
 		sourceFiles,
@@ -65,7 +66,7 @@ export default function synchronizeTranslations( options ) {
 	}
 
 	log.info( '📍 Synchronizing translations files...' );
-	synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } );
+	await synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } );
 
 	log.info( '✨ Done.' );
 }

@@ -88,7 +88,7 @@ export const banner =
 
 Glob-compliant path to the translation files. This option can be ignored if the plugin doesn't provide translations.
 
-**Example value:** `**/*.po`
+**Example value:** `**/translations/*.ts`
 
 #### `declarations` / `--declarations`
 
