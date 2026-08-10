@@ -126,7 +126,8 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
-			skipLicenseHeader: false
+			skipLicenseHeader: false,
+			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
@@ -141,10 +142,24 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
-			skipLicenseHeader: true
+			skipLicenseHeader: true,
+			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
+	} );
+
+	it( 'should synchronize translations files with a custom translations type import source', async () => {
+		defaultOptions.translationsTypeImportSource = 'ckeditor5';
+
+		await synchronizeTranslations( defaultOptions );
+
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
+			packageContexts: [],
+			sourceMessages: [],
+			skipLicenseHeader: false,
+			translationsTypeImportSource: 'ckeditor5'
+		} );
 	} );
 
 	it( 'should not synchronize translations files when validation mode is enabled', async () => {

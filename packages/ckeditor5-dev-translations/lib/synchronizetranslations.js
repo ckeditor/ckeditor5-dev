@@ -30,7 +30,8 @@ export default async function synchronizeTranslations( options ) {
 		corePackagePath,
 		ignoreUnusedCorePackageContexts,
 		validateOnly,
-		skipLicenseHeader
+		skipLicenseHeader,
+		translationsTypeImportSource
 	} = normalizeOptions( options );
 
 	const errors = [];
@@ -66,7 +67,12 @@ export default async function synchronizeTranslations( options ) {
 	}
 
 	log.info( '📍 Synchronizing translations files...' );
-	await synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } );
+	await synchronizeTranslationsBasedOnContext( {
+		packageContexts,
+		sourceMessages,
+		skipLicenseHeader,
+		translationsTypeImportSource
+	} );
 
 	log.info( '✨ Done.' );
 }
@@ -181,7 +187,8 @@ function normalizeOptions( options ) {
 		corePackagePath,
 		ignoreUnusedCorePackageContexts = false,
 		validateOnly = false,
-		skipLicenseHeader = false
+		skipLicenseHeader = false,
+		translationsTypeImportSource = '@ckeditor/ckeditor5-utils'
 	} = options;
 
 	const cwd = options.cwd || process.cwd();
@@ -194,7 +201,8 @@ function normalizeOptions( options ) {
 		corePackagePath: toAbsolute( corePackagePath ),
 		ignoreUnusedCorePackageContexts,
 		validateOnly,
-		skipLicenseHeader
+		skipLicenseHeader,
+		translationsTypeImportSource
 	};
 }
 
@@ -213,4 +221,6 @@ function normalizeOptions( options ) {
  * @property {boolean} [validateOnly=false] If set, only validates the translations contexts against the source messages without
  * synchronizing the translations.
  * @property {boolean} [skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
+ * @property {string} [translationsTypeImportSource='@ckeditor/ckeditor5-utils'] Module from which generated translation files import
+ * the `Translations` type.
  */

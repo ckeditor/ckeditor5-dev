@@ -18,8 +18,14 @@ import { readTranslationFile, serializeTranslationFile } from './translationfile
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
+ * @param {string} options.translationsTypeImportSource Module from which generated translation files import the `Translations` type.
  */
-export default async function synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } ) {
+export default async function synchronizeTranslationsBasedOnContext( {
+	packageContexts,
+	sourceMessages,
+	skipLicenseHeader,
+	translationsTypeImportSource
+} ) {
 	const languages = getLanguages();
 
 	for ( const { packagePath, contextContent } of packageContexts ) {
@@ -27,7 +33,12 @@ export default async function synchronizeTranslationsBasedOnContext( { packageCo
 			continue;
 		}
 
-		createMissingPackageTranslations( { packagePath, contexts: contextContent, skipLicenseHeader } );
+		createMissingPackageTranslations( {
+			packagePath,
+			contexts: contextContent,
+			skipLicenseHeader,
+			translationsTypeImportSource
+		} );
 
 		const sourceMessagesForPackage = Object.keys( contextContent )
 			.map( messageId => sourceMessages.find( message => message.id === messageId ) )
@@ -80,7 +91,8 @@ export default async function synchronizeTranslationsBasedOnContext( { packageCo
 				dictionary: synchronizedDictionary,
 				contexts: contextContent,
 				pluralFunction: isCorePackage ? getFormula( languageCode ) : null,
-				skipLicenseHeader
+				skipLicenseHeader,
+				translationsTypeImportSource
 			} );
 
 			if ( originalFile !== updatedFile ) {

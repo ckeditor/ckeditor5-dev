@@ -29,11 +29,23 @@ describe( 'translation file utilities', () => {
 		fs.writeFileSync( filePath, content );
 
 		expect( content.indexOf( '\'First\':' ) ).toBeLessThan( content.indexOf( '\'Second\':' ) );
+		expect( content ).toContain( 'import type { Translations } from \'@ckeditor/ckeditor5-utils\';' );
 		expect( content ).toContain( 'const translations: Translations =' );
 		expect( ( await readTranslationFile( filePath ) ).dictionary ).toEqual( {
 			First: 'pierwsze',
 			Second: [ 'dwa', 'drugie' ]
 		} );
 		expect( ( await readTranslationFile( filePath ) ).getPluralForm( 2 ) ).toBe( 1 );
+	} );
+
+	it( 'serializes a custom translations type import source', () => {
+		const content = serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Example: 'Example' },
+			contexts: { Example: 'An example.' },
+			translationsTypeImportSource: 'ckeditor5'
+		} );
+
+		expect( content ).toContain( 'import type { Translations } from \'ckeditor5\';' );
 	} );
 } );

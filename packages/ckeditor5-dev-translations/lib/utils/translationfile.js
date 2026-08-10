@@ -39,9 +39,17 @@ export async function readTranslationFile( filePath ) {
  * @param {Record<string, string>} options.contexts
  * @param {string|null} [options.pluralFunction]
  * @param {boolean} [options.skipLicenseHeader]
+ * @param {string} [options.translationsTypeImportSource]
  * @returns {string}
  */
-export function serializeTranslationFile( { language, dictionary, contexts, pluralFunction = null, skipLicenseHeader = false } ) {
+export function serializeTranslationFile( {
+	language,
+	dictionary,
+	contexts,
+	pluralFunction = null,
+	skipLicenseHeader = false,
+	translationsTypeImportSource = '@ckeditor/ckeditor5-utils'
+} ) {
 	const lines = [];
 
 	if ( !skipLicenseHeader ) {
@@ -49,7 +57,7 @@ export function serializeTranslationFile( { language, dictionary, contexts, plur
 	}
 
 	lines.push(
-		'import type { Translations } from \'@ckeditor/ckeditor5-utils\';',
+		`import type { Translations } from ${ quote( translationsTypeImportSource ) };`,
 		'',
 		'const translations: Translations = {',
 		`\t${ quote( language ) }: {`,
