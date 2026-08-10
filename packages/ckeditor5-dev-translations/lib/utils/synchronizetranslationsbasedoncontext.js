@@ -50,7 +50,11 @@ export default async function synchronizeTranslationsBasedOnContext( { packageCo
 
 				if ( !message ) {
 					if ( Object.hasOwn( dictionary, messageId ) ) {
-						synchronizedDictionary[ messageId ] = dictionary[ messageId ];
+						const value = dictionary[ messageId ];
+
+						synchronizedDictionary[ messageId ] = Array.isArray( value ) ?
+							Array.from( { length: numberOfPluralForms }, ( unused, index ) => value[ index ] || '' ) :
+							value;
 					}
 
 					continue;
