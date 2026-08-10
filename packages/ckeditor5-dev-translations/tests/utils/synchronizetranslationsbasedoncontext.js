@@ -25,10 +25,20 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	it( 'synchronizes dictionaries in context order and aligns plural forms', async () => {
 		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
 		const translationsPath = upath.join( packagePath, 'translations' );
-		const contexts = { Changed: 'Changed context.', Plural: 'Plural context.' };
+		const contexts = { Changed: 'Changed context.', Plural: 'Plural context.', ContextOnly: 'Context-only context.' };
 		fs.mkdirSync( translationsPath, { recursive: true } );
-		write( 'en', { Changed: 'Old English', Plural: [ '%0 item', '%0 items' ], Stale: 'Stale' } );
-		write( 'pl', { Changed: 'Stare tłumaczenie', Plural: [ '%0 rzecz' ], Stale: 'Nieaktualne' } );
+		write( 'en', {
+			Changed: 'Old English',
+			Plural: [ '%0 item', '%0 items' ],
+			ContextOnly: 'Context only',
+			Stale: 'Stale'
+		} );
+		write( 'pl', {
+			Changed: 'Stare tłumaczenie',
+			Plural: [ '%0 rzecz' ],
+			ContextOnly: 'Tylko kontekst',
+			Stale: 'Nieaktualne'
+		} );
 
 		await synchronizeTranslationsBasedOnContext( {
 			packageContexts: [ { packagePath, contextContent: contexts } ],
@@ -46,13 +56,17 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		} );
 		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'en',
-			dictionary: { Changed: 'New English', Plural: [ '%0 item', '%0 items' ] },
+			dictionary: {
+				Changed: 'New English',
+				Plural: [ '%0 item', '%0 items' ],
+				ContextOnly: 'Context only'
+			},
 			contexts,
 			skipLicenseHeader: true
 		} ) );
 		expect( fs.readFileSync( upath.join( translationsPath, 'pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'pl',
-			dictionary: { Changed: '', Plural: [ '%0 rzecz', '', '' ] },
+			dictionary: { Changed: '', Plural: [ '%0 rzecz', '', '' ], ContextOnly: 'Tylko kontekst' },
 			contexts,
 			skipLicenseHeader: true
 		} ) );

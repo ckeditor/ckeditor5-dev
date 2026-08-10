@@ -45,7 +45,17 @@ export default async function synchronizeTranslationsBasedOnContext( { packageCo
 			const numberOfPluralForms = getNPlurals( languageCode );
 			const synchronizedDictionary = {};
 
-			for ( const message of sourceMessagesForPackage ) {
+			for ( const messageId of Object.keys( contextContent ) ) {
+				const message = sourceMessagesForPackage.find( message => message.id === messageId );
+
+				if ( !message ) {
+					if ( Object.hasOwn( dictionary, messageId ) ) {
+						synchronizedDictionary[ messageId ] = dictionary[ messageId ];
+					}
+
+					continue;
+				}
+
 				let value = dictionary[ message.id ];
 
 				if ( changedEnglishTranslations.includes( message.id ) || value === undefined ) {
