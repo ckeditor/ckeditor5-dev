@@ -51,6 +51,7 @@ export default async function synchronizeTranslationsBasedOnContext( {
 
 		for ( const translationFilePath of translationFilePaths ) {
 			const originalFile = fs.readFileSync( translationFilePath, 'utf-8' );
+			const hasLicenseHeader = originalFile.startsWith( '/**\n * @license' );
 			const { language, dictionary } = await readTranslationFile( translationFilePath );
 			const { languageCode } = languages.find( item => item.languageFileName === language );
 			const numberOfPluralForms = getNPlurals( languageCode );
@@ -91,7 +92,7 @@ export default async function synchronizeTranslationsBasedOnContext( {
 				dictionary: synchronizedDictionary,
 				contexts: contextContent,
 				pluralFunction: isCorePackage ? getFormula( languageCode ) : null,
-				skipLicenseHeader,
+				skipLicenseHeader: !hasLicenseHeader,
 				translationsTypeImportSource
 			} );
 

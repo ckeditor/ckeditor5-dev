@@ -93,4 +93,33 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			} ) );
 		}
 	} );
+
+	it.each( [
+		{ hasLicenseHeader: true, skipLicenseHeader: true },
+		{ hasLicenseHeader: false, skipLicenseHeader: false }
+	] )( 'preserves the existing license header state when skipLicenseHeader is $skipLicenseHeader', async ( {
+		hasLicenseHeader,
+		skipLicenseHeader
+	} ) => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		const originalFile = serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: 'Message' },
+			contexts,
+			skipLicenseHeader: !hasLicenseHeader
+		} );
+
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), originalFile );
+
+		await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			skipLicenseHeader
+		} );
+
+		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( originalFile );
+	} );
 } );

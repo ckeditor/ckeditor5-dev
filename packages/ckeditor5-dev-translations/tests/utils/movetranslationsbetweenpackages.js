@@ -47,6 +47,34 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		} ) );
 		expect( destinationContext.contextContent.Move ).toBe( 'Move this.' );
 	} );
+
+	it( 'preserves the translations type import source when moving translations', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'ckeditor5-source' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, { Move: 'Move this.' } );
+		const destinationContext = createPackageContext( destination, { Existing: 'Existing.' } );
+		write( source, 'en', { Move: 'Move' }, sourceContext.contextContent, 'ckeditor5' );
+		write( destination, 'en', { Existing: 'Existing' }, destinationContext.contextContent, 'custom-package' );
+
+		await moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [ { source, destination, messageId: 'Move' } ]
+		} );
+
+		expect( fs.readFileSync( upath.join( source, 'lang/translations/en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+			language: 'en',
+			dictionary: {},
+			contexts: sourceContext.contextContent,
+			translationsTypeImportSource: 'ckeditor5'
+		} ) );
+		expect( fs.readFileSync( upath.join( destination, 'lang/translations/en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Existing: 'Existing', Move: 'Move' },
+			contexts: destinationContext.contextContent,
+			translationsTypeImportSource: 'custom-package'
+		} ) );
+	} );
 } );
 
 function createPackageContext( packagePath, contextContent ) {
@@ -57,13 +85,14 @@ function createPackageContext( packagePath, contextContent ) {
 	return { packagePath, contextContent, contextFilePath };
 }
 
-function write( packagePath, language, dictionary, contexts ) {
+function write( packagePath, language, dictionary, contexts, translationsTypeImportSource ) {
 	const filePath = upath.join( packagePath, `lang/translations/${ language }.ts` );
 	fs.mkdirSync( upath.dirname( filePath ), { recursive: true } );
 	fs.writeFileSync( filePath, serializeTranslationFile( {
 		language,
 		dictionary,
 		contexts,
-		skipLicenseHeader: true
+		skipLicenseHeader: true,
+		translationsTypeImportSource
 	} ) );
 }
