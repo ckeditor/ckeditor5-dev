@@ -45,7 +45,8 @@ interface Translation {
  */
 function getCode( language: string, translation: Translation ): string {
 	const dictionary = JSON.stringify( translation.dictionary );
-	const pluralFunction = translation.getPluralForm ? `,"getPluralForm":${ translation.getPluralForm.toString() }` : '';
+	const pluralFunction = translation.getPluralForm ?
+		`,"getPluralForm":${ translation.getPluralForm.toString().replaceAll( /\s+/g, ' ' ) }` : '';
 
 	return `{${ JSON.stringify( language ) }:{"dictionary":${ dictionary }${ pluralFunction }}}`;
 }

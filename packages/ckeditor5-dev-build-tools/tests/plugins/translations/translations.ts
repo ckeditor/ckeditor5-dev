@@ -90,6 +90,14 @@ describe( 'translations()', () => {
 		verifyChunk( output, 'languages/en.d.ts', 'import type { Translations } from \'@ckeditor/ckeditor5-utils\'' );
 	} );
 
+	it( 'normalizes whitespace in the plural function', async () => {
+		const output = await generateBundle( {
+			source: upath.join( import.meta.dirname, '/fixtures/padded/lang/translations/*.mjs' )
+		} );
+
+		verifyChunk( output, 'translations/de.js', '"getPluralForm":( n ) => n !== 1' );
+	} );
+
 	it( 'does not overwrite an existing plural function with a dictionary-only UMD translation', async () => {
 		const output = await generateBundle();
 
