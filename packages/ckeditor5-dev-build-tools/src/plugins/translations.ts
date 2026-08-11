@@ -80,23 +80,21 @@ function getUmdCode( language: string, code: string ): string {
  * Generates distributable translation files from TypeScript translation sources.
  */
 export function translations( pluginOptions?: RollupTranslationsOptions ): Plugin {
-	const options: Required<RollupTranslationsOptions> = Object.assign( {
+	const options: Required<RollupTranslationsOptions> = {
 		source: '**/lang/translations/*.ts',
-		destination: 'translations'
-	}, pluginOptions || {} );
+		destination: 'translations',
+		...pluginOptions
+	};
 
 	return {
 		name: 'cke5-translations',
 
 		async generateBundle() {
 			// Get the paths to the translation files based on provided pattern.
-			const filePaths = ( await glob( options.source, {
+			const filePaths = await glob( options.source, {
 				cwd: process.cwd(),
-				ignore: [ 'node_modules/**', '**/dist/**', '**/*.d.ts' ]
-			} ) ).filter( filePath => {
-				const pathSegments = filePath.split( /[/\\]/ );
-
-				return !filePath.endsWith( '.d.ts' ) && !pathSegments.includes( 'dist' ) && !pathSegments.includes( 'node_modules' );
+				absolute: true,
+				ignore: [ '**/node_modules/**', '**/dist/**', '**/*.d.ts' ]
 			} );
 
 			// Group the translation files by the language code.
@@ -104,15 +102,11 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 
 			for ( const [ language, paths ] of Object.entries( grouped ) ) {
 				// Gather all translations for the given language.
-				const translations: Array<Translation> = await Promise.all( paths
-					// Resolve relative paths to absolute paths.
-					.map( filePath => path.isAbsolute( filePath ) ? filePath : path.join( process.cwd(), filePath ) )
-					// Load TypeScript modules and select the translation matching the file name.
-					.map( async filePath => {
-						const translationModule = await import( pathToFileURL( filePath ).href );
+				const translations: Array<Translation> = await Promise.all( paths.map( async filePath => {
+					const translationModule = await import( pathToFileURL( filePath ).href );
 
-						return translationModule.default[ language ] as Translation;
-					} ) );
+					return translationModule.default[ language ] as Translation;
+				} ) );
 
 				// Merge all translations into a single object.
 				const translation = merge( {}, ...translations );
