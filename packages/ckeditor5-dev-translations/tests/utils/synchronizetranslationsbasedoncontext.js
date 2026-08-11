@@ -24,7 +24,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 	it( 'synchronizes dictionaries in context order and aligns plural forms', async () => {
 		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
-		const translationsPath = upath.join( packagePath, 'translations' );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
 		const contexts = {
 			Changed: 'Changed context.',
 			Plural: 'Plural context.',

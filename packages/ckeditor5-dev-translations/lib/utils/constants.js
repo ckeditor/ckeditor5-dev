@@ -4,4 +4,4 @@
  */
 
 export const CONTEXT_FILE_PATH = 'lang/contexts.json';
-export const TRANSLATION_FILES_PATH = 'translations';
+export const TRANSLATION_FILES_PATH = 'lang/translations';

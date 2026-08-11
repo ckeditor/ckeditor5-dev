@@ -188,7 +188,7 @@ describe( 'getRolldownConfig()', () => {
 	it( '--translations', async () => {
 		const withoutTranslations = await getConfig();
 		const withTranslations = await getConfig( {
-			translations: '**/translations/*.ts'
+			translations: '**/lang/translations/*.ts'
 		} );
 
 		expect( ( withoutTranslations.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );

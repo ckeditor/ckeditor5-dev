@@ -325,7 +325,7 @@ describe( 'build()', () => {
 	it( 'Translations', async () => {
 		const { output } = await build( {
 			input: 'src/input.ts',
-			translations: '**/translations/*.ts'
+			translations: '**/lang/translations/*.ts'
 		} );
 
 		expect( ( output[ 1 ] as Rolldown.OutputChunk ).code ).toContain( 'Hello world' );

@@ -23,7 +23,7 @@ export interface RollupTranslationsOptions {
 	/**
 	 * The [glob](https://github.com/isaacs/node-glob) compatible path to the TypeScript translation files.
 	 *
-	 * @default '**\/translations\/*.ts'
+	 * @default '**\/lang\/translations\/*.ts'
 	 */
 	source?: string;
 
@@ -80,7 +80,7 @@ function getUmdCode( language: string, code: string ): string {
  */
 export function translations( pluginOptions?: RollupTranslationsOptions ): Plugin {
 	const options: Required<RollupTranslationsOptions> = Object.assign( {
-		source: '**/translations/*.ts',
+		source: '**/lang/translations/*.ts',
 		destination: 'translations'
 	}, pluginOptions || {} );
 

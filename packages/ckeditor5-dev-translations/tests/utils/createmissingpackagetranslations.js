@@ -21,7 +21,7 @@ describe( 'createMissingPackageTranslations()', () => {
 
 	it( 'creates generated TypeScript files without overwriting existing translations', async () => {
 		temporaryDirectory = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translations-' ) );
-		const translationsDirectory = upath.join( temporaryDirectory, 'translations' );
+		const translationsDirectory = upath.join( temporaryDirectory, 'lang', 'translations' );
 		fs.mkdirSync( translationsDirectory, { recursive: true } );
 		fs.writeFileSync( upath.join( translationsDirectory, 'en.ts' ),
 			'export default { en: { dictionary: { Existing: \'Existing\' } } };\n' );

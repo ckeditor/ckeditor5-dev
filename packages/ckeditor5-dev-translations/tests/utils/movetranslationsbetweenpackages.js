@@ -35,12 +35,12 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 			config: [ { source, destination, messageId: 'Move' } ]
 		} );
 
-		expect( fs.readFileSync( upath.join( source, 'translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+		expect( fs.readFileSync( upath.join( source, 'lang/translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'pl',
 			dictionary: { Stay: 'Zostań' },
 			contexts: sourceContext.contextContent
 		} ) );
-		expect( fs.readFileSync( upath.join( destination, 'translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+		expect( fs.readFileSync( upath.join( destination, 'lang/translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'pl',
 			dictionary: { Existing: 'Istniejące', Move: 'Przenieś' },
 			contexts: destinationContext.contextContent
@@ -58,7 +58,7 @@ function createPackageContext( packagePath, contextContent ) {
 }
 
 function write( packagePath, language, dictionary, contexts ) {
-	const filePath = upath.join( packagePath, `translations/${ language }.ts` );
+	const filePath = upath.join( packagePath, `lang/translations/${ language }.ts` );
 	fs.mkdirSync( upath.dirname( filePath ), { recursive: true } );
 	fs.writeFileSync( filePath, serializeTranslationFile( {
 		language,

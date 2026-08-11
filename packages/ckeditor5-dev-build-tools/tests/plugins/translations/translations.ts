@@ -57,7 +57,7 @@ describe( 'translations()', () => {
 	 */
 	it( 'source', async () => {
 		const output = await generateBundle( {
-			source: upath.join( import.meta.dirname, '/fixtures/translations/*.ts' )
+			source: upath.join( import.meta.dirname, '/fixtures/lang/translations/*.ts' )
 		} );
 
 		verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
