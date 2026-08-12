@@ -5,7 +5,7 @@
 
 // Why monkey-patch instead of using the documented `hotUpdate` plugin hook?
 //
-// Spike result (2026-07-02, Vite 8.1.0): under `experimental.bundledDev`, Vite's
+// Spike result (2026-08-12, Vite 8.2): under `experimental.bundledDev`, Vite's
 // `handleHMRUpdate()` early-returns on `config.experimental.bundledDev` BEFORE it
 // ever reaches the plugin hook loop, so `hotUpdate`/`handleHotUpdate` are never
 // invoked. Bundled dev HMR instead runs entirely on a separate rolldown dev-engine
@@ -15,7 +15,7 @@
 // this file only needs to reach for undocumented internals because `bundledDev`
 // must stay enabled.
 //
-// This plugin targets the Vite 8.1+ internals: the `BundledDev` helper exposed as
+// This plugin targets the Vite 8.2 internals: the `BundledDev` helper exposed as
 // `server.environments.client.bundledDev`, carrying `clients`, `handleHmrOutput`
 // and `devEngine`. Because these internals are undocumented, they move without
 // notice — in Vite 8.0.x the very same members lived directly on the client
@@ -35,7 +35,7 @@ const isManualRefreshWrappedClient = Symbol( 'isManualRefreshWrappedClient' );
 
 /**
  * The undocumented `BundledDev` internals this plugin patches, exposed as
- * `server.environments.client.bundledDev` in Vite 8.1+.
+ * `server.environments.client.bundledDev` in Vite 8.2.
  */
 interface BundledDevInternals {
 	clients?: {
@@ -47,8 +47,7 @@ interface BundledDevInternals {
 	handleHmrOutput?(
 		client: BundledDevClient,
 		files: Array<string>,
-		hmrOutput: BundledDevHmrOutput,
-		invalidateInformation?: unknown
+		hmrOutput: BundledDevHmrOutput
 	): unknown;
 }
 
@@ -112,9 +111,9 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRo
 
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
 
-	bundledDev.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
+	bundledDev.handleHmrOutput = ( client, files, hmrOutput ) => {
 		if ( hmrOutput.type != 'FullReload' ) {
-			return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
+			return handleHmrOutput( client, files, hmrOutput );
 		}
 
 		if ( !shouldShowManualRefreshPromptForFiles( files ) ) {
@@ -167,7 +166,7 @@ function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
 }
 
 function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayload ) => void ): void {
-	if ( payload.type == 'update' && !payload.updates.length ) {
+	if ( payload.type == 'bundled-dev-update' && !payload.changedIds.length ) {
 		return;
 	}
 
@@ -184,17 +183,11 @@ function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayl
 }
 
 function shouldShowManualRefreshPrompt( payload: HotPayload ): boolean {
-	if ( payload.type == 'update' ) {
-		return !isCssUpdatePayload( payload );
-	}
-
-	return false;
+	return payload.type == 'bundled-dev-update' && payload.changedIds.some( filePath => !isCssFile( filePath ) );
 }
 
-function isCssUpdatePayload( payload: HotPayload ): boolean {
-	return payload.type == 'update' && payload.updates.length > 0 && payload.updates.every( update => {
-		return update.type == 'css-update' || ( update.type == 'js-update' && update.acceptedPath.endsWith( '.css' ) );
-	} );
+function isCssFile( filePath: string ): boolean {
+	return filePath.split( '?', 1 )[ 0 ]!.endsWith( '.css' );
 }
 
 function shouldShowManualRefreshPromptForFiles( files: Array<string> ): boolean {

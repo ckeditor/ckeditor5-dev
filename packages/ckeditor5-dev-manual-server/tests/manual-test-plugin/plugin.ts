@@ -60,6 +60,7 @@ type TestServer = {
 
 const HEADER_PAGE = '<!DOCTYPE html><html><head><title>Foo</title></head>' +
 	'<body><ck-manual-header><p>Steps</p></ck-manual-header></body></html>';
+const MANUAL_TRANSLATIONS_VIRTUAL_ID = 'virtual:ckeditor5-manual-translations';
 
 describe( 'manualTestsPlugin()', () => {
 	let server: ViteDevServer | undefined;
@@ -265,6 +266,82 @@ describe( 'manualTestsPlugin()', () => {
 			'console.log( 1 );\n\nimport \'../theme/index-editor.css\';\nimport \'../theme/index-content.css\';\n'
 		);
 		expect( result!.map ).to.equal( null );
+	} );
+
+	it( 'injects the translations module only into discovered manual test entry scripts', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js', 'console.log( 2 );\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/theme/index-editor.css' )
+		] );
+
+		const transform = createConfiguredTransformHook( {
+			paths: [ 'packages/*' ],
+			language: 'pl'
+		} );
+		const entryFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js' );
+		const helperFilePath = join( workspaceRoot, 'packages/ckeditor5-foo/manual/_utils/helper.js' );
+
+		expect( transform.handler( 'console.log( 1 );\n', entryFilePath )!.code )
+			.to.contain( `import '${ MANUAL_TRANSLATIONS_VIRTUAL_ID }';` );
+		expect( transform.handler( 'console.log( 2 );\n', helperFilePath ) ).to.equal( undefined );
+	} );
+
+	it( 'generates the translations module for the selected language and configured package roots', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/lang/translations/pl.ts',
+				'export default { pl: { dictionary: { Cancel: \'Anuluj\' } } };\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-bar/lang/translations/pl.ts',
+				'export default { pl: { dictionary: { Cancel: \'Annulla\' } } };\n' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/lang/translations/en.ts',
+				'export default { en: { dictionary: { Cancel: \'Cancel\' } } };\n' )
+		] );
+
+		server = await createManualTestServer( {
+			paths: [ 'packages/ckeditor5-foo' ],
+			language: 'pl'
+		} );
+		const resolvedId = await server.pluginContainer.resolveId( MANUAL_TRANSLATIONS_VIRTUAL_ID );
+		const source = getCode( await server.pluginContainer.load( resolvedId!.id ) );
+
+		expect( source ).to.contain( 'lang/translations/pl.ts' );
+		expect( source ).to.contain( 'packages/ckeditor5-foo' );
+		expect( source ).not.to.contain( 'packages/ckeditor5-bar' );
+		expect( source ).not.to.contain( 'lang/translations/en.ts' );
+	} );
+
+	it( 'expands the selected translation files through Vite', async () => {
+		await Promise.all( [
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/lang/translations/pl.ts',
+				'export default { pl: { dictionary: { Cancel: \'Anuluj\' } } };\n' ),
+			createFile( workspaceRoot, 'stubs/core.ts', 'export class Context {}\nexport class Editor {}\n' ),
+			createFile( workspaceRoot, 'stubs/utils.ts', 'export function add() {}\n' )
+		] );
+
+		server = await createTestServer( {
+			root: workspaceRoot,
+			appType: 'mpa',
+			resolve: {
+				alias: {
+					'@ckeditor/ckeditor5-core': join( workspaceRoot, 'stubs/core.ts' ),
+					'@ckeditor/ckeditor5-utils': join( workspaceRoot, 'stubs/utils.ts' )
+				}
+			},
+			plugins: [
+				manualTestsPlugin( {
+					paths: [ 'packages/ckeditor5-foo' ],
+					language: 'pl'
+				} )
+			]
+		} );
+		const resolvedId = await server.pluginContainer.resolveId( MANUAL_TRANSLATIONS_VIRTUAL_ID );
+		const transformed = await server.transformRequest( resolvedId!.id );
+
+		expect( transformed!.code ).to.contain( '/packages/ckeditor5-foo/lang/translations/pl.ts' );
+		expect( transformed!.code ).not.to.contain( 'import.meta.glob' );
 	} );
 
 	it( 'appends only the theme entry stylesheets that exist in the package', async () => {

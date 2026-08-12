@@ -16,7 +16,7 @@ describe( 'refreshPlugin()', () => {
 		expect( refreshPlugin().apply ).to.equal( 'serve' );
 	} );
 
-	it( 'replaces bundled dev JavaScript HMR updates sent directly to clients with the manual refresh prompt', () => {
+	it( 'replaces bundled dev translation updates with the manual refresh prompt', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -24,13 +24,10 @@ describe( 'refreshPlugin()', () => {
 		configureServer( server );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: '/assets/article.js',
-				acceptedPath: '/assets/article.js',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/lang/translations/pl.ts' ],
+			url: '/assets/virtual-translations.js',
+			seq: 1
 		} );
 
 		expect( clientPayloads ).to.deep.equal( [ {
@@ -39,39 +36,15 @@ describe( 'refreshPlugin()', () => {
 		} ] );
 	} );
 
-	it( 'keeps bundled dev CSS HMR updates sent directly to clients', () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const server = createBundledDevServer();
-		const client = createBundledDevClient( clientPayloads );
-
-		configureServer( server );
-		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
-		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'css-update',
-				path: '/styles.css',
-				acceptedPath: '/styles.css',
-				timestamp: Date.now()
-			} ]
-		} );
-
-		expect( clientPayloads ).to.have.length( 1 );
-		expect( clientPayloads[ 0 ]!.type ).to.equal( 'update' );
-	} );
-
-	it( 'keeps bundled dev CSS patches sent as JavaScript HMR updates directly to clients', () => {
+	it( 'keeps bundled dev CSS updates sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
 		const payload: HotPayload = {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: 'packages/foo/theme/foo.css',
-				acceptedPath: 'packages/foo/theme/foo.css',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/theme/foo.css?direct' ],
+			url: '/assets/foo.js',
+			seq: 1
 		};
 
 		configureServer( server );
@@ -81,7 +54,7 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [ payload ] );
 	} );
 
-	it( 'drops bundled dev empty HMR updates sent to clients unaffected by a change', () => {
+	it( 'drops bundled dev empty update notifications sent to clients unaffected by a change', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -89,8 +62,10 @@ describe( 'refreshPlugin()', () => {
 		configureServer( server );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: []
+			type: 'bundled-dev-update',
+			changedIds: [],
+			url: '/assets/noop.js',
+			seq: 1
 		} );
 
 		expect( clientPayloads ).to.deep.equal( [] );
@@ -117,13 +92,10 @@ describe( 'refreshPlugin()', () => {
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: '/assets/article.js',
-				acceptedPath: '/assets/article.js',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/assets/article.js' ],
+			url: '/assets/article.js',
+			seq: 1
 		} );
 
 		expect( clientPayloads ).to.deep.equal( [ {
@@ -234,26 +206,18 @@ describe( 'refreshPlugin()', () => {
 		const client = createBundledDevClient( [] );
 		const handleHmrOutput = server.environments.client.bundledDev.handleHmrOutput;
 		const hmrOutput = { type: 'Patch' };
-		const invalidateInformation = {};
 
 		configureServer( server );
-		( server.environments.client.bundledDev.handleHmrOutput as (
-			client: unknown,
-			files: Array<string>,
-			hmrOutput: unknown,
-			invalidateInformation?: unknown
-		) => void )(
+		server.environments.client.bundledDev.handleHmrOutput(
 			client,
 			[ '/workspace/article.css' ],
-			hmrOutput,
-			invalidateInformation
+			hmrOutput
 		);
 
 		expect( handleHmrOutput ).toHaveBeenCalledExactlyOnceWith(
 			client,
 			[ '/workspace/article.css' ],
-			hmrOutput,
-			invalidateInformation
+			hmrOutput
 		);
 	} );
 
@@ -281,7 +245,7 @@ describe( 'refreshPlugin()', () => {
 		expect( () => configureServer( server ) ).not.to.throw();
 	} );
 
-	// Mirrors the Vite 8.1+ layout: the patched internals live on the `BundledDev` helper
+	// Mirrors the Vite 8.2 layout: the patched internals live on the `BundledDev` helper
 	// exposed as `server.environments.client.bundledDev`.
 	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
 		return {

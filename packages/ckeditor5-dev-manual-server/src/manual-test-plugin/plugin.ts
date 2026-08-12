@@ -7,6 +7,11 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
+import {
+	createManualTranslationsModule,
+	MANUAL_TRANSLATIONS_VIRTUAL_ID,
+	RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID
+} from './translations.js';
 import { cacheValue, createPackageNameFilter, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
@@ -20,6 +25,7 @@ interface ManualTestClientEntry {
 export interface ManualTestsPluginOptions {
 	paths: Array<string>;
 	include?: Array<string>;
+	language?: string;
 }
 
 // The custom element that opts a page into the test chrome. The component script and its data
@@ -81,6 +87,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		slug: entry.slug
 	} ) );
 	const getManualEntriesJson = () => JSON.stringify( getClientEntries(), null, 2 );
+	const translationsModuleCode = options.language ? createManualTranslationsModule( options.paths, options.language ) : null;
 
 	return {
 		name: 'ckeditor5-manual-tests',
@@ -122,6 +129,10 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				return resolvedVirtualModuleId;
 			}
 
+			if ( source == MANUAL_TRANSLATIONS_VIRTUAL_ID && translationsModuleCode ) {
+				return RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID;
+			}
+
 			if ( isManualCatalogBuildInputSpecifier( source, getManualCatalogBuildInputFilePath(), workspaceRoot ) ) {
 				return getManualCatalogBuildInputFilePath();
 			}
@@ -132,6 +143,10 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		load( id ) {
 			if ( id == resolvedVirtualModuleId ) {
 				return `export const manualTestEntries = ${ getManualEntriesJson() };`;
+			}
+
+			if ( id == RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID ) {
+				return translationsModuleCode;
 			}
 
 			if ( toPosixPath( id ) == toPosixPath( getManualCatalogBuildInputFilePath() ) ) {
@@ -166,12 +181,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 				const packageRootSpecifier = entry.htmlFilePath.slice( 0, entry.htmlFilePath.indexOf( MANUAL_TESTS_DIRECTORY ) );
 				const themeEntries = getPackageThemeEntries( packageRootSpecifier );
-
-				if ( !themeEntries.length ) {
-					return;
-				}
-
-				const themeEntryImports = themeEntries.map( themeEntryFilePath => {
+				const imports = themeEntries.map( themeEntryFilePath => {
 					const themeEntrySpecifier = posix.relative(
 						posix.dirname( scriptSpecifier ),
 						`${ packageRootSpecifier }/${ themeEntryFilePath }`
@@ -180,8 +190,16 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 					return `import '${ themeEntrySpecifier }';`;
 				} );
 
+				if ( options.language ) {
+					imports.push( `import '${ MANUAL_TRANSLATIONS_VIRTUAL_ID }';` );
+				}
+
+				if ( !imports.length ) {
+					return;
+				}
+
 				return {
-					code: `${ code }\n${ themeEntryImports.join( '\n' ) }\n`,
+					code: `${ code }\n${ imports.join( '\n' ) }\n`,
 					map: null
 				};
 			}
@@ -246,7 +264,7 @@ interface BundledDevClientEnvironment {
  * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
  * build and never regenerates it when the source `.html` changes: its bundle state reports no
  * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
- * forced full build leaves the HTML memory file untouched (verified against Vite 8.1.0). A `.html`
+ * forced full build leaves the HTML memory file untouched (verified against Vite 8.2). A `.html`
  * edit still triggers a full page reload, so without this the browser reloads into the same stale
  * HTML until the server is restarted.
  *
