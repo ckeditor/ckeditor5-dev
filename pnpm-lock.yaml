@@ -347,18 +347,18 @@ importers:
 
   packages/ckeditor5-dev-translations:
     dependencies:
-      '@babel/parser':
-        specifier: ^7.29.2
-        version: 7.29.7
-      '@babel/traverse':
-        specifier: ^7.29.0
-        version: 7.29.7
       '@ckeditor/ckeditor5-dev-utils':
         specifier: workspace:*
         version: link:../ckeditor5-dev-utils
       glob:
         specifier: ^13.0.6
         version: 13.0.6
+      oxc-parser:
+        specifier: ^0.72.3
+        version: 0.72.3
+      oxc-walker:
+        specifier: ^0.3.0
+        version: 0.3.0(oxc-parser@0.72.3)
       plural-forms:
         specifier: ^0.5.5
         version: 0.5.5

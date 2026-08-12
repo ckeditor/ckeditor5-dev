@@ -38,15 +38,15 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 			} ) );
 
 		for ( const { sourceTranslationFilePath, destinationTranslationFilePath } of translationFilePaths ) {
-			const sourceTranslationsTypeImportSource = getTranslationsTypeImportSource( sourceTranslationFilePath );
 			const destinationTranslationFileExists = fs.existsSync( destinationTranslationFilePath );
 			const sourceTranslations = await readTranslationFile( sourceTranslationFilePath );
 			const destinationTranslations = destinationTranslationFileExists ?
 				await readTranslationFile( destinationTranslationFilePath ) :
-				{ language: sourceTranslations.language, dictionary: {} };
-			const destinationTranslationsTypeImportSource = destinationTranslationFileExists ?
-				getTranslationsTypeImportSource( destinationTranslationFilePath ) :
-				sourceTranslationsTypeImportSource;
+				{
+					language: sourceTranslations.language,
+					dictionary: {},
+					translationsTypeImportSource: sourceTranslations.translationsTypeImportSource
+				};
 			const value = sourceTranslations.dictionary[ messageId ];
 
 			delete sourceTranslations.dictionary[ messageId ];
@@ -56,15 +56,13 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 				source,
 				sourceTranslationFilePath,
 				sourceTranslations,
-				sourcePackageContext.contextContent,
-				sourceTranslationsTypeImportSource
+				sourcePackageContext.contextContent
 			);
 			writePackageTranslation(
 				destination,
 				destinationTranslationFilePath,
 				destinationTranslations,
-				destinationPackageContext.contextContent,
-				destinationTranslationsTypeImportSource
+				destinationPackageContext.contextContent
 			);
 		}
 
@@ -80,7 +78,7 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 	}
 }
 
-function writePackageTranslation( packagePath, filePath, translations, contexts, translationsTypeImportSource ) {
+function writePackageTranslation( packagePath, filePath, translations, contexts ) {
 	const language = getLanguages().find( item => item.languageFileName === translations.language );
 	const pluralFunction = upath.basename( packagePath ) === 'ckeditor5-core' ? getFormula( language.languageCode ) : null;
 	const content = serializeTranslationFile( {
@@ -88,16 +86,10 @@ function writePackageTranslation( packagePath, filePath, translations, contexts,
 		dictionary: translations.dictionary,
 		contexts,
 		pluralFunction,
-		translationsTypeImportSource
+		preamble: translations.preamble,
+		translationsTypeImportSource: translations.translationsTypeImportSource
 	} );
 
 	fs.mkdirSync( upath.dirname( filePath ), { recursive: true } );
 	fs.writeFileSync( filePath, content, 'utf-8' );
-}
-
-function getTranslationsTypeImportSource( filePath ) {
-	const content = fs.readFileSync( filePath, 'utf-8' );
-	const match = content.match( /^import type \{\s*Translations\s*\} from ['"]([^'"]+)['"];?$/m );
-
-	return match?.[ 1 ];
 }

@@ -3,14 +3,23 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import traverse from '@babel/traverse';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe( 'findMessages', () => {
 	let findMessages;
 
 	beforeEach( async () => {
 		findMessages = ( await import( '../lib/findmessages.js' ) ).default;
+	} );
+
+	afterEach( () => {
+		vi.resetModules();
+		vi.doUnmock( 'oxc-parser' );
+		vi.doUnmock( 'oxc-walker' );
+	} );
+
+	it( 'should throw an error when the source cannot be parsed', () => {
+		expect( () => findMessages( 'function x(', 'foo.js', () => {}, () => {} ) ).to.throw();
 	} );
 
 	it( 'should parse provided code and find messages from `t()` function calls on string literals', () => {
@@ -106,6 +115,7 @@ describe( 'findMessages', () => {
 		findMessages(
 			`function x() {
                 const t = this.t;
+                t( { [\`ignored\`]: 'ignored', string: 'Image' } );
                 t( { 'string': 'Image' } );
                 t( { 'string': 'Image', 'id': 'AN_IMAGE' } );
                 t( { 'string': 'Image', 'plural': 'Images' } );
@@ -117,10 +127,34 @@ describe( 'findMessages', () => {
 
 		expect( messages ).to.deep.equal( [
 			{ id: 'Image', string: 'Image' },
+			{ id: 'Image', string: 'Image' },
 			{ id: 'AN_IMAGE', string: 'Image' },
 			{ id: 'Image', string: 'Image', plural: 'Images' },
 			{ id: 'AN_IMAGE', string: 'Image', plural: 'Images' }
 		] );
+	} );
+
+	it( 'should handle object expressions without properties', async () => {
+		vi.resetModules();
+		vi.doMock( 'oxc-parser', () => ( {
+			parseSync: () => ( { errors: [], program: {} } )
+		} ) );
+		vi.doMock( 'oxc-walker', () => ( {
+			walk: ( _program, { enter } ) => {
+				enter( {
+					type: 'CallExpression',
+					callee: { type: 'Identifier', name: 't' },
+					arguments: [ { type: 'ObjectExpression', properties: null } ]
+				} );
+			}
+		} ) );
+
+		findMessages = ( await import( '../lib/findmessages.js' ) ).default;
+		const errors = [];
+
+		findMessages( '', 'foo.js', () => {}, error => errors.push( error ) );
+
+		expect( errors ).to.have.length( 1 );
 	} );
 
 	it( 'should parse provided code and find messages inside the `t()` function calls on simple conditional expressions', () => {
@@ -212,38 +246,5 @@ describe( 'findMessages', () => {
 		expect( errors ).to.deep.equal( [
 			'First t() call argument should be a string literal or an object literal (foo.js).'
 		] );
-	} );
-
-	describe( 'a non-type=module project support', () => {
-		beforeEach( async () => {
-			vi.resetAllMocks();
-			vi.clearAllMocks();
-			vi.resetModules();
-
-			vi.doMock( '@babel/traverse', () => ( {
-				default: {
-					default: traverse
-				}
-			} ) );
-
-			findMessages = ( await import( '../lib/findmessages.js' ) ).default;
-		} );
-
-		it( 'should parse provided code and find messages from `t()` function calls on string literals', () => {
-			const messages = [];
-
-			findMessages(
-				`function x() {
-                const t = this.t;
-                t( 'Image' );
-                t( 'CKEditor' );
-                g( 'Some other function' );
-			}`,
-				'foo.js',
-				message => messages.push( message )
-			);
-
-			expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
-		} );
 	} );
 } );

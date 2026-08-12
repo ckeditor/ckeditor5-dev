@@ -38,12 +38,14 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		expect( fs.readFileSync( upath.join( source, 'lang/translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'pl',
 			dictionary: { Stay: 'Zostań' },
-			contexts: sourceContext.contextContent
+			contexts: sourceContext.contextContent,
+			skipLicenseHeader: true
 		} ) );
 		expect( fs.readFileSync( upath.join( destination, 'lang/translations/pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'pl',
 			dictionary: { Existing: 'Istniejące', Move: 'Przenieś' },
-			contexts: destinationContext.contextContent
+			contexts: destinationContext.contextContent,
+			skipLicenseHeader: true
 		} ) );
 		expect( destinationContext.contextContent.Move ).toBe( 'Move this.' );
 	} );
@@ -66,14 +68,50 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 			language: 'en',
 			dictionary: {},
 			contexts: sourceContext.contextContent,
+			skipLicenseHeader: true,
 			translationsTypeImportSource: 'ckeditor5'
 		} ) );
 		expect( fs.readFileSync( upath.join( destination, 'lang/translations/en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'en',
 			dictionary: { Existing: 'Existing', Move: 'Move' },
 			contexts: destinationContext.contextContent,
+			skipLicenseHeader: true,
 			translationsTypeImportSource: 'custom-package'
 		} ) );
+	} );
+
+	it( 'skips entries whose source and destination packages are identical', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const packagePath = upath.join( rootPath, 'ckeditor5-source' );
+		const packageContext = createPackageContext( packagePath, { Move: 'Move this.' } );
+		write( packagePath, 'en', { Move: 'Move' }, packageContext.contextContent );
+		const originalContext = JSON.stringify( packageContext.contextContent );
+		const originalTranslation = fs.readFileSync( upath.join( packagePath, 'lang/translations/en.ts' ), 'utf-8' );
+
+		await moveTranslationsBetweenPackages( {
+			packageContexts: [ packageContext ],
+			config: [ { source: packagePath, destination: packagePath, messageId: 'Move' } ]
+		} );
+
+		expect( packageContext.contextContent ).toEqual( JSON.parse( originalContext ) );
+		expect( fs.readFileSync( upath.join( packagePath, 'lang/translations/en.ts' ), 'utf-8' ) ).toBe( originalTranslation );
+	} );
+
+	it( 'creates a missing destination file and adds plural forms for the core source package', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'ckeditor5-core' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, { Move: 'Move this.' } );
+		const destinationContext = createPackageContext( destination, {} );
+		write( source, 'en', { Move: 'Move' }, sourceContext.contextContent );
+
+		await moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [ { source, destination, messageId: 'Move' } ]
+		} );
+
+		expect( fs.readFileSync( upath.join( source, 'lang/translations/en.ts' ), 'utf-8' ) ).toContain( 'getPluralForm:' );
+		expect( fs.readFileSync( upath.join( destination, 'lang/translations/en.ts' ), 'utf-8' ) ).toContain( '\'Move\': \'Move\'' );
 	} );
 } );
 

@@ -3,7 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { parseSync } from 'oxc-parser';
 
 const LICENSE_HEADER = `/**
  * @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
@@ -14,9 +16,17 @@ const LICENSE_HEADER = `/**
  * Loads a generated TypeScript translation file.
  *
  * @param {string} filePath
- * @returns {Promise<{ language: string, dictionary: Record<string, string|Array<string>>, getPluralForm?: Function }>}
+ * @returns {Promise<{
+ * language: string,
+ * dictionary: Record<string, string|Array<string>>,
+ * getPluralForm?: Function,
+ * preamble: string,
+ * translationsTypeImportSource: string
+ * }>}
  */
 export async function readTranslationFile( filePath ) {
+	const content = fs.readFileSync( filePath, 'utf-8' );
+	const { preamble, translationsTypeImportSource } = readTranslationFileMetadata( filePath, content );
 	const { default: translations } = await import( pathToFileURL( filePath ).href );
 	const languages = Object.keys( translations );
 
@@ -27,7 +37,7 @@ export async function readTranslationFile( filePath ) {
 	const language = languages[ 0 ];
 	const { dictionary, getPluralForm } = translations[ language ];
 
-	return { language, dictionary, getPluralForm };
+	return { language, dictionary, getPluralForm, preamble, translationsTypeImportSource };
 }
 
 /**
@@ -40,6 +50,7 @@ export async function readTranslationFile( filePath ) {
  * @param {string|null} [options.pluralFunction]
  * @param {boolean} [options.skipLicenseHeader]
  * @param {string} [options.translationsTypeImportSource]
+ * @param {string} [options.preamble] Existing source preamble to preserve verbatim.
  * @returns {string}
  */
 export function serializeTranslationFile( {
@@ -48,13 +59,10 @@ export function serializeTranslationFile( {
 	contexts,
 	pluralFunction = null,
 	skipLicenseHeader = false,
-	translationsTypeImportSource = '@ckeditor/ckeditor5-utils'
+	translationsTypeImportSource = '@ckeditor/ckeditor5-utils',
+	preamble
 } ) {
 	const lines = [];
-
-	if ( !skipLicenseHeader ) {
-		lines.push( LICENSE_HEADER, '' );
-	}
 
 	lines.push(
 		`import type { Translations } from ${ quote( translationsTypeImportSource ) };`,
@@ -87,7 +95,36 @@ export function serializeTranslationFile( {
 
 	lines.push( '\t}', '};', '', 'export default translations;', '' );
 
-	return lines.join( '\n' );
+	let filePreamble = preamble;
+
+	if ( filePreamble === undefined ) {
+		filePreamble = skipLicenseHeader ? '' : `${ LICENSE_HEADER }\n\n`;
+	}
+
+	return filePreamble + lines.join( '\n' );
+}
+
+function readTranslationFileMetadata( filePath, content ) {
+	const { errors, module } = parseSync( filePath, content );
+
+	if ( errors.length ) {
+		throw new Error( `Could not parse translation file: ${ filePath }.` );
+	}
+
+	const translationsImport = module.staticImports.find( declaration => declaration.entries.some( entry => {
+		return entry.isType &&
+			entry.importName.kind === 'Name' &&
+			entry.importName.name === 'Translations';
+	} ) );
+
+	if ( !translationsImport ) {
+		throw new Error( `Missing Translations type import in translation file: ${ filePath }.` );
+	}
+
+	return {
+		preamble: content.slice( 0, translationsImport.start ),
+		translationsTypeImportSource: translationsImport.moduleRequest.value
+	};
 }
 
 function serializeValue( value ) {

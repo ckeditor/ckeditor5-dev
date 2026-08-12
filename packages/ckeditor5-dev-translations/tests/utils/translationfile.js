@@ -48,4 +48,53 @@ describe( 'translation file utilities', () => {
 
 		expect( content ).toContain( 'import type { Translations } from \'ckeditor5\';' );
 	} );
+
+	it( 'reads the translations type import source and preserves the file preamble', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		const preamble = '// Keep this comment.\n\n';
+		const content = serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Example: 'Example' },
+			contexts: { Example: 'An example.' },
+			preamble,
+			translationsTypeImportSource: 'ckeditor5'
+		} ).replace(
+			'import type { Translations } from \'ckeditor5\';',
+			'import type {\n\tTranslations\n} from "ckeditor5";'
+		);
+		fs.writeFileSync( filePath, content );
+
+		expect( await readTranslationFile( filePath ) ).toMatchObject( {
+			preamble,
+			translationsTypeImportSource: 'ckeditor5'
+		} );
+	} );
+
+	it( 'rejects files without a Translations type import', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		fs.writeFileSync( filePath, 'export default { en: { dictionary: {} } };\n' );
+
+		await expect( readTranslationFile( filePath ) ).rejects.toThrow(
+			`Missing Translations type import in translation file: ${ filePath }.`
+		);
+	} );
+
+	it( 'rejects files with invalid TypeScript', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		fs.writeFileSync( filePath, 'import type { Translations } from \'ckeditor5\';\nexport default {' );
+
+		await expect( readTranslationFile( filePath ) ).rejects.toThrow(
+			`Could not parse translation file: ${ filePath }.`
+		);
+	} );
+
+	it( 'rejects files containing more than one language', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		fs.writeFileSync( filePath, `import type { Translations } from 'ckeditor5';
+export default { en: { dictionary: {} }, pl: { dictionary: {} } };` );
+
+		await expect( readTranslationFile( filePath ) ).rejects.toThrow(
+			`Expected exactly one language in translation file: ${ filePath }.`
+		);
+	} );
 } );

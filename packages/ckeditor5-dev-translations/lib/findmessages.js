@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import parser from '@babel/parser';
-import { default as traverse } from '@babel/traverse';
+import { parseSync } from 'oxc-parser';
+import { walk } from 'oxc-walker';
 
 /**
  * Parses source and finds messages from the first argument of `t()` calls.
@@ -16,19 +16,21 @@ import { default as traverse } from '@babel/traverse';
  * @returns {string} Transformed source.
  */
 export default function findMessages( source, sourceFile, onMessageFound, onErrorFound ) {
-	const ast = parser.parse( source, {
-		sourceType: 'module',
-		ranges: true,
-		plugins: [
-			'typescript'
-		]
+	const { errors, program } = parseSync( sourceFile, source, {
+		lang: 'ts',
+		sourceType: 'module'
 	} );
 
-	// Support for a non-`type=module` project.
-	const traverseCallable = typeof traverse === 'function' ? traverse : traverse.default;
+	if ( errors.length ) {
+		throw new Error( errors.map( error => error.message ).join( '\n' ) );
+	}
 
-	traverseCallable( ast, {
-		CallExpression: ( { node } ) => {
+	walk( program, {
+		enter: node => {
+			if ( node.type !== 'CallExpression' ) {
+				return;
+			}
+
 			try {
 				findMessagesInNode( node );
 			} catch ( err ) {
@@ -91,7 +93,7 @@ export default function findMessages( source, sourceFile, onMessageFound, onErro
 		}
 
 		// Matches t( 'foo' )
-		if ( node.type === 'StringLiteral' ) {
+		if ( node.type === 'Literal' && typeof node.value === 'string' ) {
 			onMessageFound( {
 				string: node.value,
 				id: node.value
@@ -122,7 +124,7 @@ function getProperty( properties, propertyName ) {
 			return property.key.name === propertyName;
 		}
 
-		if ( property.key.type === 'StringLiteral' ) {
+		if ( property.key.type === 'Literal' ) {
 			return property.key.value === propertyName;
 		}
 	} );
