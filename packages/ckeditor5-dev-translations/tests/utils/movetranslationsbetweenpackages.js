@@ -111,7 +111,12 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		} );
 
 		expect( fs.readFileSync( upath.join( source, 'lang/translations/en.ts' ), 'utf-8' ) ).toContain( 'getPluralForm:' );
-		expect( fs.readFileSync( upath.join( destination, 'lang/translations/en.ts' ), 'utf-8' ) ).toContain( '\'Move\': \'Move\'' );
+		expect( fs.readFileSync( upath.join( destination, 'lang/translations/en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Move: 'Move' },
+			contexts: destinationContext.contextContent,
+			skipLicenseHeader: true
+		} ) );
 	} );
 } );
 

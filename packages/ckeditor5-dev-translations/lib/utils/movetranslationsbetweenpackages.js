@@ -45,6 +45,7 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 				{
 					language: sourceTranslations.language,
 					dictionary: {},
+					preamble: sourceTranslations.preamble,
 					translationsTypeImportSource: sourceTranslations.translationsTypeImportSource
 				};
 			const value = sourceTranslations.dictionary[ messageId ];
