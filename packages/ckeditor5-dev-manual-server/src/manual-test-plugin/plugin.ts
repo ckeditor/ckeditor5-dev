@@ -92,13 +92,11 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	return {
 		name: 'ckeditor5-manual-tests',
 
-		config() {
+		config( config = {} ) {
+			workspaceRoot = resolve( config.root || process.cwd() );
+
 			return {
-				build: {
-					rolldownOptions: {
-						input: getManualBuildInputs()
-					}
-				}
+				input: getManualBuildInputs()
 			};
 		},
 
@@ -108,8 +106,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 			manualPagesCache.invalidate();
 			packageThemeEntryCache.clear();
-
-			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
 
 		configureServer( server ) {
@@ -119,9 +115,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				next();
 			} );
 
-			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
-
-			keepManualHtmlSourceFresh( clientEnvironment.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
+			keepManualHtmlSourceFresh( server.environments.client.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
 		},
 
 		resolveId( source ) {
@@ -251,12 +245,6 @@ interface ManualMemoryFiles {
 	get( filePath: string ): ManualMemoryFile | undefined;
 }
 
-interface BundledDevClientEnvironment {
-	bundledDev?: {
-		memoryFiles?: ManualMemoryFiles;
-	};
-}
-
 /**
  * Keeps the served manual test HTML in sync with the source file while the dev server runs.
  *
@@ -264,7 +252,7 @@ interface BundledDevClientEnvironment {
  * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
  * build and never regenerates it when the source `.html` changes: its bundle state reports no
  * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
- * forced full build leaves the HTML memory file untouched (verified against Vite 8.2). A `.html`
+ * forced full build leaves the HTML memory file untouched (verified against Vite 8.2.1). A `.html`
  * edit still triggers a full page reload, so without this the browser reloads into the same stale
  * HTML until the server is restarted.
  *
