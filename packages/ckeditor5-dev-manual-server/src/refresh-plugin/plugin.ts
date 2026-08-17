@@ -3,67 +3,46 @@
  * For licensing, see LICENSE.md.
  */
 
-// Why monkey-patch instead of using the documented `hotUpdate` plugin hook?
+// Under `experimental.bundledDev` (Vite 8.2.1), HMR runs on the rolldown dev-engine
+// path (`onHmrUpdates` → `handleHmrOutput` → `client.send`): the server ships a patch,
+// the client walks its module graph, and on a missing HMR boundary (manual tests accept
+// no JS updates) it requests a rebuild and auto-reloads. This plugin turns that
+// auto-reload into the refresh prompt for JS/TS changes, while CSS updates pass through
+// (hot-update in place) and HTML updates pass through (auto-reload; the reloaded body
+// is kept fresh by the manual test plugin's HTML splicing).
 //
-// Spike result (2026-07-02, Vite 8.1.0): under `experimental.bundledDev`, Vite's
-// `handleHMRUpdate()` early-returns on `config.experimental.bundledDev` BEFORE it
-// ever reaches the plugin hook loop, so `hotUpdate`/`handleHotUpdate` are never
-// invoked. Bundled dev HMR instead runs entirely on a separate rolldown dev-engine
-// path (`onHmrUpdates` → `handleHmrOutput` → `client.send`) that has no plugin
-// extension point today. A control run with `bundledDev` disabled confirmed the
-// documented `hotUpdate` hook + suppression + custom events all work fine there —
-// this file only needs to reach for undocumented internals because `bundledDev`
-// must stay enabled.
+// The documented `hotUpdate` hook cannot implement the prompt: suppressing an update
+// there skips the engine's module re-fetch (stale output after the prompt's reload),
+// and letting it through auto-reloads (losing editor state). Hence the monkey-patch of
+// the last mile, the per-client `client.send`. `hotUpdate` is still used to force-ship
+// manual HTML edits, which the engine would otherwise drop as unchanged.
 //
-// This plugin targets the Vite 8.1+ internals: the `BundledDev` helper exposed as
-// `server.environments.client.bundledDev`, carrying `clients`, `handleHmrOutput`
-// and `devEngine`. Because these internals are undocumented, they move without
-// notice — in Vite 8.0.x the very same members lived directly on the client
-// environment. When a Vite upgrade relocates them again, the patches below turn
-// into no-ops and manual tests regress to full page reloads on every JS edit
-// (losing editor state) instead of showing the refresh prompt.
-//
-// Revisit this plugin (and delete the patches below) once Vite exposes HMR plugin
-// hooks for bundled dev.
+// The patched internals (`server.environments.client.bundledDev` with `clients`,
+// `handleHmrOutput`, `devEngine`) are undocumented and move without notice; when a Vite
+// upgrade relocates them, `configureServer` throws at server startup — update this
+// plugin together with Vite. Delete the patches once Vite exposes an HMR plugin
+// extension point for the bundled dev client payloads.
 
-import type { Plugin, HotPayload } from 'vite';
+import type { Plugin, HotPayload, HotChannelClient } from 'vite';
 import { toPublicFilePath } from '../utils.js';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
-const isManualRefreshWrappedClient = Symbol( 'isManualRefreshWrappedClient' );
-
 /**
- * The undocumented `BundledDev` internals this plugin patches, exposed as
- * `server.environments.client.bundledDev` in Vite 8.1+.
+ * The `BundledDev` members this plugin patches. They exist at runtime but are declared
+ * `private` in Vite's published types, so they are re-declared structurally here.
  */
 interface BundledDevInternals {
-	clients?: {
-		setupIfNeeded( client: BundledDevClient, clientId: string ): unknown;
+	clients: {
+		setupIfNeeded( client: HotChannelClient, clientId: string ): unknown;
 	};
-	devEngine?: {
+	devEngine: {
 		ensureLatestBuildOutput(): Promise<unknown>;
 	};
-	handleHmrOutput?(
-		client: BundledDevClient,
-		files: Array<string>,
-		hmrOutput: BundledDevHmrOutput,
-		invalidateInformation?: unknown
-	): unknown;
+	handleHmrOutput( client: HotChannelClient, files: Array<string>, hmrOutput: { type: string } ): unknown;
 }
 
-interface BundledDevClientEnvironment {
-	bundledDev?: BundledDevInternals;
-}
-
-interface BundledDevClient {
-	send( payload: HotPayload ): void;
-	[ isManualRefreshWrappedClient ]?: boolean;
-}
-
-interface BundledDevHmrOutput {
-	type: string;
-}
+const wrappedClients = new WeakSet<HotChannelClient>();
 
 export function refreshPlugin(): Plugin {
 	return {
@@ -71,34 +50,35 @@ export function refreshPlugin(): Plugin {
 		apply: 'serve',
 
 		configureServer( server ) {
-			const clientEnvironment = server.environments.client as unknown as BundledDevClientEnvironment;
-			const bundledDev = clientEnvironment.bundledDev;
+			const { bundledDev } = server.environments.client as unknown as { bundledDev: BundledDevInternals };
 
-			if ( !bundledDev ) {
-				return;
-			}
-
-			wrapBundledDevClientSend( bundledDev.clients );
+			wrapBundledDevClientSend( bundledDev );
 			wrapBundledDevFullReloads( bundledDev, server.config.root );
+		},
+
+		// The page body is not part of the HTML module's JS render, so body-only edits render
+		// byte-identical and the dev engine drops them without notifying any client. Returning
+		// the affected modules force-ships them, which ends in an automatic full reload.
+		hotUpdate( { file, modules } ) {
+			if ( file.endsWith( '.manual.html' ) ) {
+				return modules;
+			}
 		}
 	};
 }
 
-function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): void {
-	if ( !clients || typeof clients.setupIfNeeded != 'function' ) {
-		return;
-	}
-
+function wrapBundledDevClientSend( bundledDev: BundledDevInternals ): void {
+	const clients = bundledDev.clients;
 	const setupIfNeeded = clients.setupIfNeeded.bind( clients );
 
-	clients.setupIfNeeded = ( client: BundledDevClient, clientId: string ) => {
-		if ( !client[ isManualRefreshWrappedClient ] ) {
+	clients.setupIfNeeded = ( client, clientId ) => {
+		if ( !wrappedClients.has( client ) ) {
 			const send = client.send.bind( client );
 
-			client.send = ( payload: HotPayload ) => {
-				sendManualRefreshPayload( payload, send );
+			client.send = payload => {
+				sendManualRefreshPayload( bundledDev, payload, send );
 			};
-			client[ isManualRefreshWrappedClient ] = true;
+			wrappedClients.add( client );
 		}
 
 		return setupIfNeeded( client, clientId );
@@ -106,18 +86,14 @@ function wrapBundledDevClientSend( clients: BundledDevInternals[ 'clients' ] ): 
 }
 
 function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRoot: string ): void {
-	if ( typeof bundledDev.handleHmrOutput != 'function' ) {
-		return;
-	}
-
 	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
 
-	bundledDev.handleHmrOutput = ( client, files, hmrOutput, invalidateInformation ) => {
+	bundledDev.handleHmrOutput = ( client, files, hmrOutput ) => {
 		if ( hmrOutput.type != 'FullReload' ) {
-			return handleHmrOutput( client, files, hmrOutput, invalidateInformation );
+			return handleHmrOutput( client, files, hmrOutput );
 		}
 
-		if ( !shouldShowManualRefreshPromptForFiles( files ) ) {
+		if ( !shouldShowManualRefreshPrompt( files ) ) {
 			// Vite invokes this synchronous handler without awaiting its result.
 			reloadClientAfterLatestBuildOutput( bundledDev, client, files, workspaceRoot );
 
@@ -135,43 +111,52 @@ function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRo
 
 async function reloadClientAfterLatestBuildOutput(
 	bundledDev: BundledDevInternals,
-	client: BundledDevClient,
+	client: HotChannelClient,
 	files: Array<string>,
 	workspaceRoot: string
 ): Promise<void> {
 	try {
-		await bundledDev.devEngine?.ensureLatestBuildOutput();
+		await bundledDev.devEngine.ensureLatestBuildOutput();
 	} catch {
 		// Reload using the best output available instead of leaving the page stale.
 	}
 
+	const htmlFile = files.find( file => isHtmlFile( file ) );
+
 	client.send( {
 		type: 'full-reload',
-		path: getChangedHtmlPublicPath( files, workspaceRoot )
+		path: htmlFile ? toPublicFilePath( htmlFile, workspaceRoot ) : undefined
 	} );
-}
-
-function getChangedHtmlPublicPath( files: Array<string>, workspaceRoot: string ): string | undefined {
-	const htmlFile = files.find( file => file.endsWith( '.html' ) );
-
-	return htmlFile ? toPublicFilePath( htmlFile, workspaceRoot ) : undefined;
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
 	try {
-		bundledDev.devEngine?.ensureLatestBuildOutput().catch( () => {} );
+		bundledDev.devEngine.ensureLatestBuildOutput().catch( () => {} );
 	} catch {
 		// The `devEngine` getter throws until initialized. An HMR update arriving before
 		// that is unlikely, but do not let it break the update handling.
 	}
 }
 
-function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayload ) => void ): void {
-	if ( payload.type == 'update' && !payload.updates.length ) {
-		return;
-	}
+function sendManualRefreshPayload(
+	bundledDev: BundledDevInternals,
+	payload: HotPayload,
+	send: ( payload: HotPayload ) => void
+): void {
+	if ( payload.type == 'bundled-dev-update' && shouldShowManualRefreshPrompt( payload.changedIds ) ) {
+		// The client never sees the changed ids, so it never requests the rebuild it would
+		// normally trigger — refresh the bundle output up front so the prompt's reload is fresh.
+		ensureLatestBuildOutput( bundledDev );
 
-	if ( shouldShowManualRefreshPrompt( payload ) ) {
+		// Forward the update neutralized (no changed ids) instead of dropping it: the client
+		// no-ops on it but still records its `seq`. A dropped update would trip the client's
+		// sequence-gap safety on the next passed-through update (e.g. a CSS hot update) and
+		// force a full reload, losing the editor state the prompt exists to protect.
+		send( {
+			...payload,
+			changedIds: []
+		} );
+
 		send( {
 			type: 'custom',
 			event: MANUAL_REFRESH_EVENT_NAME
@@ -183,20 +168,16 @@ function sendManualRefreshPayload( payload: HotPayload, send: ( payload: HotPayl
 	send( payload );
 }
 
-function shouldShowManualRefreshPrompt( payload: HotPayload ): boolean {
-	if ( payload.type == 'update' ) {
-		return !isCssUpdatePayload( payload );
-	}
-
-	return false;
+// CSS updates hot-update in place and HTML updates auto-reload through the client's
+// boundary walk, so only JS/TS changes are turned into the refresh prompt.
+function shouldShowManualRefreshPrompt( filePaths: Array<string> ): boolean {
+	return filePaths.some( filePath => !isCssFile( filePath ) && !isHtmlFile( filePath ) );
 }
 
-function isCssUpdatePayload( payload: HotPayload ): boolean {
-	return payload.type == 'update' && payload.updates.length > 0 && payload.updates.every( update => {
-		return update.type == 'css-update' || ( update.type == 'js-update' && update.acceptedPath.endsWith( '.css' ) );
-	} );
+function isCssFile( filePath: string ): boolean {
+	return filePath.split( '?', 1 )[ 0 ]!.endsWith( '.css' );
 }
 
-function shouldShowManualRefreshPromptForFiles( files: Array<string> ): boolean {
-	return files.some( file => !file.endsWith( '.css' ) && !file.endsWith( '.html' ) );
+function isHtmlFile( filePath: string ): boolean {
+	return filePath.split( '?', 1 )[ 0 ]!.endsWith( '.html' );
 }

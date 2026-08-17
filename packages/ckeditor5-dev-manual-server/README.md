@@ -8,6 +8,21 @@ Used to extend Vite to create a manual test server for CKEditor 5.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
+## Loading translations
+
+Pass a language code to `manualTestsPlugin()` to load and combine that language's TypeScript translation files from the configured
+package paths. The selected language becomes the default UI and content language for editors and contexts created by manual tests.
+An explicit language in an editor or context configuration still takes precedence.
+
+```ts
+manualTestsPlugin( {
+	paths: [ 'packages/*' ],
+	language: process.env.CK_LANGUAGE || 'en'
+} )
+```
+
+For example, start the manual test server in Polish using `CK_LANGUAGE=pl pnpm manual`.
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-manual-server/CHANGELOG.md) file.

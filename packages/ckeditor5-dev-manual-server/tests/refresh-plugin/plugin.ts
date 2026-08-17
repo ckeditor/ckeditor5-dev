@@ -16,7 +16,7 @@ describe( 'refreshPlugin()', () => {
 		expect( refreshPlugin().apply ).to.equal( 'serve' );
 	} );
 
-	it( 'replaces bundled dev JavaScript HMR updates sent directly to clients with the manual refresh prompt', () => {
+	it( 'replaces bundled dev translation updates with the manual refresh prompt', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
@@ -24,54 +24,51 @@ describe( 'refreshPlugin()', () => {
 		configureServer( server );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: '/assets/article.js',
-				acceptedPath: '/assets/article.js',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/lang/translations/pl.ts' ],
+			url: '/assets/virtual-translations.js',
+			seq: 1
 		} );
 
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'custom',
-			event: MANUAL_REFRESH_EVENT_NAME
-		} ] );
+		expect( clientPayloads ).to.deep.equal( [
+			{
+				type: 'bundled-dev-update',
+				changedIds: [],
+				url: '/assets/virtual-translations.js',
+				seq: 1
+			},
+			{
+				type: 'custom',
+				event: MANUAL_REFRESH_EVENT_NAME
+			}
+		] );
 	} );
 
-	it( 'keeps bundled dev CSS HMR updates sent directly to clients', () => {
-		const clientPayloads: Array<HotPayload> = [];
+	it( 'refreshes the bundle output when showing the manual refresh prompt', () => {
 		const server = createBundledDevServer();
-		const client = createBundledDevClient( clientPayloads );
+		const client = createBundledDevClient( [] );
 
 		configureServer( server );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'css-update',
-				path: '/styles.css',
-				acceptedPath: '/styles.css',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/src/foo.ts' ],
+			url: '/assets/foo.js',
+			seq: 1
 		} );
 
-		expect( clientPayloads ).to.have.length( 1 );
-		expect( clientPayloads[ 0 ]!.type ).to.equal( 'update' );
+		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
 	} );
 
-	it( 'keeps bundled dev CSS patches sent as JavaScript HMR updates directly to clients', () => {
+	it( 'keeps bundled dev HTML updates sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
 		const payload: HotPayload = {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: 'packages/foo/theme/foo.css',
-				acceptedPath: 'packages/foo/theme/foo.css',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ 'packages/ckeditor5-foo/manual/foo.manual.html' ],
+			url: '/assets/foo.manual.js',
+			seq: 1
 		};
 
 		configureServer( server );
@@ -81,19 +78,42 @@ describe( 'refreshPlugin()', () => {
 		expect( clientPayloads ).to.deep.equal( [ payload ] );
 	} );
 
-	it( 'drops bundled dev empty HMR updates sent to clients unaffected by a change', () => {
+	it( 'keeps bundled dev CSS updates sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
 		const client = createBundledDevClient( clientPayloads );
+		const payload: HotPayload = {
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/theme/foo.css?direct' ],
+			url: '/assets/foo.js',
+			seq: 1
+		};
 
 		configureServer( server );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
-		client.send( {
-			type: 'update',
-			updates: []
-		} );
+		client.send( payload );
 
-		expect( clientPayloads ).to.deep.equal( [] );
+		expect( clientPayloads ).to.deep.equal( [ payload ] );
+	} );
+
+	// Empty updates keep the client's update sequence numbering intact and no-op there,
+	// so they must pass through without triggering the refresh prompt.
+	it( 'keeps bundled dev empty update notifications sent to clients unaffected by a change', () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+		const payload: HotPayload = {
+			type: 'bundled-dev-update',
+			changedIds: [],
+			url: '/assets/noop.js',
+			seq: 1
+		};
+
+		configureServer( server );
+		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
+		client.send( payload );
+
+		expect( clientPayloads ).to.deep.equal( [ payload ] );
 	} );
 
 	it( 'keeps non-update payloads sent directly to clients', () => {
@@ -117,19 +137,24 @@ describe( 'refreshPlugin()', () => {
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
 		client.send( {
-			type: 'update',
-			updates: [ {
-				type: 'js-update',
-				path: '/assets/article.js',
-				acceptedPath: '/assets/article.js',
-				timestamp: Date.now()
-			} ]
+			type: 'bundled-dev-update',
+			changedIds: [ '/assets/article.js' ],
+			url: '/assets/article.js',
+			seq: 1
 		} );
 
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'custom',
-			event: MANUAL_REFRESH_EVENT_NAME
-		} ] );
+		expect( clientPayloads ).to.deep.equal( [
+			{
+				type: 'bundled-dev-update',
+				changedIds: [],
+				url: '/assets/article.js',
+				seq: 1
+			},
+			{
+				type: 'custom',
+				event: MANUAL_REFRESH_EVENT_NAME
+			}
+		] );
 	} );
 
 	it( 'replaces bundled dev JavaScript full reloads with the manual refresh prompt', () => {
@@ -234,54 +259,44 @@ describe( 'refreshPlugin()', () => {
 		const client = createBundledDevClient( [] );
 		const handleHmrOutput = server.environments.client.bundledDev.handleHmrOutput;
 		const hmrOutput = { type: 'Patch' };
-		const invalidateInformation = {};
 
 		configureServer( server );
-		( server.environments.client.bundledDev.handleHmrOutput as (
-			client: unknown,
-			files: Array<string>,
-			hmrOutput: unknown,
-			invalidateInformation?: unknown
-		) => void )(
+		server.environments.client.bundledDev.handleHmrOutput(
 			client,
 			[ '/workspace/article.css' ],
-			hmrOutput,
-			invalidateInformation
+			hmrOutput
 		);
 
 		expect( handleHmrOutput ).toHaveBeenCalledExactlyOnceWith(
 			client,
 			[ '/workspace/article.css' ],
-			hmrOutput,
-			invalidateInformation
+			hmrOutput
 		);
 	} );
 
-	it( 'does not crash when the bundled dev helper is unavailable', () => {
-		const server = createBundledDevServer();
+	it( 'force-ships manual test HTML modules from the hotUpdate hook', () => {
+		const modules = [ { id: 'packages/ckeditor5-foo/manual/foo.manual.html' } ];
 
-		delete ( server.environments.client as Partial<typeof server.environments.client> ).bundledDev;
-
-		expect( () => configureServer( server ) ).not.to.throw();
+		expect( callHotUpdate( '/workspace/packages/ckeditor5-foo/manual/foo.manual.html', modules ) )
+			.to.equal( modules );
 	} );
 
-	it( 'does not crash when bundled dev clients are unavailable', () => {
-		const server = createBundledDevServer();
-
-		delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).clients;
-
-		expect( () => configureServer( server ) ).not.to.throw();
+	it( 'keeps the default hotUpdate behavior for files other than manual test HTML', () => {
+		expect( callHotUpdate( '/workspace/packages/ckeditor5-foo/src/foo.ts', [ {} ] ) )
+			.to.equal( undefined );
+		expect( callHotUpdate( '/workspace/packages/ckeditor5-foo/manual/fixture.html', [ {} ] ) )
+			.to.equal( undefined );
 	} );
 
-	it( 'does not crash when bundled dev HMR handling is unavailable', () => {
-		const server = createBundledDevServer();
+	function callHotUpdate( file: string, modules: Array<unknown> ): Array<unknown> | undefined {
+		const hotUpdate = refreshPlugin().hotUpdate as unknown as (
+			options: { file: string; modules: Array<unknown> }
+		) => Array<unknown> | undefined;
 
-		delete ( server.environments.client.bundledDev as Partial<typeof server.environments.client.bundledDev> ).handleHmrOutput;
+		return hotUpdate( { file, modules } );
+	}
 
-		expect( () => configureServer( server ) ).not.to.throw();
-	} );
-
-	// Mirrors the Vite 8.1+ layout: the patched internals live on the `BundledDev` helper
+	// Mirrors the Vite 8.2.1 layout: the patched internals live on the `BundledDev` helper
 	// exposed as `server.environments.client.bundledDev`.
 	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
 		return {
