@@ -15,8 +15,9 @@ import { readTranslationFile, serializeTranslationFile } from './translationfile
  * @param {object} options
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslationMoveEntry>} options.config Configuration that defines the messages to move.
+ * @param {string} [options.corePackagePath] Path to the core package. If omitted, the package basename is used for backwards compatibility.
  */
-export default async function moveTranslationsBetweenPackages( { packageContexts, config } ) {
+export default async function moveTranslationsBetweenPackages( { packageContexts, config, corePackagePath } ) {
 	for ( const { source, destination, messageId } of config ) {
 		if ( source === destination ) {
 			continue;
@@ -82,13 +83,15 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 				source,
 				sourceTranslationFilePath,
 				sourceTranslations,
-				sourcePackageContext.contextContent
+				sourcePackageContext.contextContent,
+				corePackagePath
 			);
 			writePackageTranslation(
 				destination,
 				destinationTranslationFilePath,
 				destinationTranslations,
-				destinationPackageContext.contextContent
+				destinationPackageContext.contextContent,
+				corePackagePath
 			);
 		}
 
@@ -104,9 +107,10 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 	}
 }
 
-function writePackageTranslation( packagePath, filePath, translations, contexts ) {
+function writePackageTranslation( packagePath, filePath, translations, contexts, corePackagePath ) {
 	const language = getTranslationLanguage( filePath, translations );
-	const pluralFunction = upath.basename( packagePath ) === 'ckeditor5-core' ? getFormula( language.languageCode ) : null;
+	const isCorePackage = corePackagePath ? packagePath === corePackagePath : upath.basename( packagePath ) === 'ckeditor5-core';
+	const pluralFunction = isCorePackage ? getFormula( language.languageCode ) : null;
 	const content = serializeTranslationFile( {
 		language: translations.language,
 		dictionary: translations.dictionary,

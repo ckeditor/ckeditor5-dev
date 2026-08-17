@@ -120,6 +120,16 @@ describe( 'moveTranslations()', () => {
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Moving translations between packages...' );
 	} );
 
+	it( 'should pass a custom core package path', async () => {
+		defaultOptions.corePackagePath = 'packages/custom-core';
+
+		await moveTranslations( defaultOptions );
+
+		expect( moveTranslationsBetweenPackages ).toHaveBeenCalledWith( expect.objectContaining( {
+			corePackagePath: '/absolute/path/to/packages/custom-core'
+		} ) );
+	} );
+
 	describe( 'validation', () => {
 		describe( 'unique move entries', () => {
 			it( 'should return no error if there are unique entries (one entry, no duplicates)', async () => {

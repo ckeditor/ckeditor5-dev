@@ -22,7 +22,7 @@ import moveTranslationsBetweenPackages from './utils/movetranslationsbetweenpack
  * @returns {Promise<void>}
  */
 export default async function moveTranslations( options ) {
-	const { config } = normalizeOptions( options );
+	const { config, corePackagePath } = normalizeOptions( options );
 
 	const log = logger();
 
@@ -52,7 +52,11 @@ export default async function moveTranslations( options ) {
 	}
 
 	log.info( '📍 Moving translations between packages...' );
-	await moveTranslationsBetweenPackages( { packageContexts, config } );
+	await moveTranslationsBetweenPackages( {
+		packageContexts,
+		config,
+		...( corePackagePath ? { corePackagePath } : {} )
+	} );
 
 	log.info( '✨ Done.' );
 }
@@ -129,7 +133,8 @@ function normalizeOptions( options ) {
 			entry.destination = toAbsolute( entry.destination );
 
 			return entry;
-		} )
+		} ),
+		corePackagePath: options.corePackagePath ? toAbsolute( options.corePackagePath ) : undefined
 	};
 }
 
@@ -148,4 +153,5 @@ function normalizeOptions( options ) {
  *
  * @property {Array.<TranslationMoveEntry>} config Configuration that defines the messages to move.
  * @property {string} [cwd=process.cwd()] Current working directory used to resolve paths to packages.
+ * @property {string} [corePackagePath] Path to the core package. Relative paths are resolved using `cwd`.
  */

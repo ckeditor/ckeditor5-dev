@@ -143,12 +143,18 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 			skipLicenseHeader: true
 		} );
 
-		expect( ( await import( upath.join( translationsPath, 'en.ts' ) ) ).default.en.dictionary ).toEqual( {
-			Message: [ '%0 new message', '%0 new messages' ]
-		} );
-		expect( ( await import( upath.join( translationsPath, 'pl.ts' ) ) ).default.pl.dictionary ).toEqual( {
-			Message: [ '', '', '' ]
-		} );
+		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: [ '%0 new message', '%0 new messages' ] },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+		expect( fs.readFileSync( upath.join( translationsPath, 'pl.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
+			language: 'pl',
+			dictionary: { Message: [ '', '', '' ] },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
 	} );
 
 	it( 'uses the core package plural function when synchronizing', async () => {

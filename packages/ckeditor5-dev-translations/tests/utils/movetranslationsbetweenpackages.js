@@ -119,6 +119,23 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 		} ) );
 	} );
 
+	it( 'uses a configured core package path when its basename differs', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'custom-core' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, { Move: 'Move this.' } );
+		const destinationContext = createPackageContext( destination, {} );
+		write( source, 'en', { Move: 'Move' }, sourceContext.contextContent );
+
+		await moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [ { source, destination, messageId: 'Move' } ],
+			corePackagePath: source
+		} );
+
+		expect( fs.readFileSync( upath.join( source, 'lang/translations/en.ts' ), 'utf-8' ) ).toContain( 'getPluralForm:' );
+	} );
+
 	it( 'moves multiple entries and overwrites existing destination values', async () => {
 		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
 		const source = upath.join( rootPath, 'ckeditor5-source' );
