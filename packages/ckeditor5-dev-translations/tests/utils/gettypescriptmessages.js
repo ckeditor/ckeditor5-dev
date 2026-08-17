@@ -13,6 +13,8 @@ describe( 'getTypeScriptMessages()', () => {
 	const sourceFilePath = upath.join( packagePath, 'src', 'messages.ts' );
 	const advancedSourceFilePath = upath.join( packagePath, 'src', 'advanced-messages.ts' );
 	const fallbackSourceFilePath = upath.join( fixturesPath, 'fallback-package', 'src', 'messages.ts' );
+	const interfaceLocaleTranslateFixturesPath = upath.join( fixturesPath, 'interface-locale-translate' );
+	const interfaceLocaleTranslateSourceFilePath = upath.join( interfaceLocaleTranslateFixturesPath, 'src', 'messages.ts' );
 	const missingLocaleTranslateFixturesPath = upath.join( fixturesPath, 'missing-locale-translate' );
 	const missingLocaleTranslateSourceFilePath = upath.join( missingLocaleTranslateFixturesPath, 'src', 'messages.ts' );
 	const invalidTsconfigFixturesPath = upath.join( fixturesPath, 'invalid-tsconfig' );
@@ -131,5 +133,18 @@ describe( 'getTypeScriptMessages()', () => {
 			sourceFiles: [ missingLocaleTranslateSourceFilePath ],
 			onErrorCallback: () => {}
 		} ) ).to.equal( null );
+	} );
+
+	it( 'should find messages when LocaleTranslate is an interface', () => {
+		const result = getTypeScriptMessages( {
+			cwd: interfaceLocaleTranslateFixturesPath,
+			sourceFiles: [ interfaceLocaleTranslateSourceFilePath ],
+			onErrorCallback: () => {}
+		} );
+
+		expect( result ).toEqual( new Map( [ [
+			interfaceLocaleTranslateSourceFilePath,
+			[ { id: 'Interface LocaleTranslate translation', string: 'Interface LocaleTranslate translation' } ]
+		] ] ) );
 	} );
 } );

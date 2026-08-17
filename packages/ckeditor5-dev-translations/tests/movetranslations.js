@@ -67,8 +67,8 @@ describe( 'moveTranslations()', () => {
 		expect( moveTranslations ).toBeInstanceOf( Function );
 	} );
 
-	it( 'should load translations contexts', () => {
-		moveTranslations( defaultOptions );
+	it( 'should load translations contexts', async () => {
+		await moveTranslations( defaultOptions );
 
 		expect( getPackageContext ).toHaveBeenCalledTimes( 2 );
 		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/absolute/path/to/packages/ckeditor5-foo' } );
@@ -77,18 +77,18 @@ describe( 'moveTranslations()', () => {
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Loading translations contexts...' );
 	} );
 
-	it( 'should resolve paths to packages using custom cwd', () => {
+	it( 'should resolve paths to packages using custom cwd', async () => {
 		defaultOptions.cwd = '/another/workspace';
 
-		moveTranslations( defaultOptions );
+		await moveTranslations( defaultOptions );
 
 		expect( getPackageContext ).toHaveBeenCalledTimes( 2 );
 		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/another/workspace/packages/ckeditor5-foo' } );
 		expect( getPackageContext ).toHaveBeenCalledWith( { packagePath: '/another/workspace/packages/ckeditor5-bar' } );
 	} );
 
-	it( 'should move translations between packages', () => {
-		moveTranslations( defaultOptions );
+	it( 'should move translations between packages', async () => {
+		await moveTranslations( defaultOptions );
 
 		expect( moveTranslationsBetweenPackages ).toHaveBeenCalledTimes( 1 );
 		expect( moveTranslationsBetweenPackages ).toHaveBeenCalledWith( {
@@ -120,15 +120,25 @@ describe( 'moveTranslations()', () => {
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Moving translations between packages...' );
 	} );
 
+	it( 'should pass a custom core package path', async () => {
+		defaultOptions.corePackagePath = 'packages/custom-core';
+
+		await moveTranslations( defaultOptions );
+
+		expect( moveTranslationsBetweenPackages ).toHaveBeenCalledWith( expect.objectContaining( {
+			corePackagePath: '/absolute/path/to/packages/custom-core'
+		} ) );
+	} );
+
 	describe( 'validation', () => {
 		describe( 'unique move entries', () => {
-			it( 'should return no error if there are unique entries (one entry, no duplicates)', () => {
-				moveTranslations( defaultOptions );
+			it( 'should return no error if there are unique entries (one entry, no duplicates)', async () => {
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated entry' ) );
 			} );
 
-			it( 'should return no error if there are unique entries (many entries, no duplicates)', () => {
+			it( 'should return no error if there are unique entries (many entries, no duplicates)', async () => {
 				defaultOptions = {
 					config: [
 						{
@@ -144,12 +154,12 @@ describe( 'moveTranslations()', () => {
 					]
 				};
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated entry' ) );
 			} );
 
-			it( 'should return error if there are duplicated entries (many entries, one duplicated entry)', () => {
+			it( 'should return error if there are duplicated entries (many entries, one duplicated entry)', async () => {
 				defaultOptions = {
 					config: [
 						{
@@ -165,7 +175,7 @@ describe( 'moveTranslations()', () => {
 					]
 				};
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Duplicated entry: the "id1" message is configured to be moved multiple times.'
@@ -174,7 +184,7 @@ describe( 'moveTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error once for each duplicated entry (many entries, many repeated duplicated entries)', () => {
+			it( 'should return error once for each duplicated entry (many entries, many repeated duplicated entries)', async () => {
 				defaultOptions = {
 					config: [
 						{
@@ -195,7 +205,7 @@ describe( 'moveTranslations()', () => {
 					]
 				};
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Duplicated entry: the "id1" message is configured to be moved multiple times.'
@@ -214,18 +224,18 @@ describe( 'moveTranslations()', () => {
 		} );
 
 		describe( 'packages exist', () => {
-			it( 'should return no error if there is no missing package', () => {
-				moveTranslations( defaultOptions );
+			it( 'should return no error if there is no missing package', async () => {
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing package' ) );
 			} );
 
-			it( 'should return error if there is missing package (missing source package)', () => {
+			it( 'should return error if there is missing package (missing source package)', async () => {
 				vi.mocked( fs.existsSync ).mockImplementation( path => {
 					return path !== '/absolute/path/to/packages/ckeditor5-foo';
 				} );
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-foo" package does not exist.'
@@ -234,12 +244,12 @@ describe( 'moveTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is missing package (missing destination package)', () => {
+			it( 'should return error if there is missing package (missing destination package)', async () => {
 				vi.mocked( fs.existsSync ).mockImplementation( path => {
 					return path !== '/absolute/path/to/packages/ckeditor5-bar';
 				} );
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-bar" package does not exist.'
@@ -248,10 +258,10 @@ describe( 'moveTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is missing package (missing source and destination packages)', () => {
+			it( 'should return error if there is missing package (missing source and destination packages)', async () => {
 				vi.mocked( fs.existsSync ).mockReturnValue( false );
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing package: the "/absolute/path/to/packages/ckeditor5-foo" package does not exist.'
@@ -266,13 +276,13 @@ describe( 'moveTranslations()', () => {
 		} );
 
 		describe( 'context exists', () => {
-			it( 'should return no error if there is no missing context', () => {
-				moveTranslations( defaultOptions );
+			it( 'should return no error if there is no missing context', async () => {
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return error if there is missing context (message id does not exist)', () => {
+			it( 'should return error if there is missing context (message id does not exist)', async () => {
 				defaultOptions.config = [
 					{
 						source: 'packages/ckeditor5-foo',
@@ -281,7 +291,7 @@ describe( 'moveTranslations()', () => {
 					}
 				];
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing context: the "id100" message does not exist in "/absolute/path/to/packages/ckeditor5-foo" package.'
@@ -290,7 +300,7 @@ describe( 'moveTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is missing context (message id exists only in destination package)', () => {
+			it( 'should return error if there is missing context (message id exists only in destination package)', async () => {
 				defaultOptions.config = [
 					{
 						source: 'packages/ckeditor5-foo',
@@ -299,7 +309,7 @@ describe( 'moveTranslations()', () => {
 					}
 				];
 
-				moveTranslations( defaultOptions );
+				await moveTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing context: the "id2" message does not exist in "/absolute/path/to/packages/ckeditor5-foo" package.'

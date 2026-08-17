@@ -177,10 +177,10 @@ describe( 'build() (arguments)', () => {
 	it( '--translations', async () => {
 		const spy = getConfigMock();
 
-		mockCliArgs( '--translations=translations/**/*.po' );
+		mockCliArgs( '--translations=lang/translations/**/*.ts' );
 		await build();
 
-		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'translations/**/*.po' ) } ) );
+		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'lang/translations/**/*.ts' ) } ) );
 	} );
 
 	it( '--source-map', async () => {
@@ -290,9 +290,9 @@ describe( 'build() (arguments)', () => {
 	it( '.translations', async () => {
 		const spy = getConfigMock();
 
-		await build( { translations: 'translations/**/*.po' } );
+		await build( { translations: 'lang/translations/**/*.ts' } );
 
-		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'translations/**/*.po' ) } ) );
+		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( 'lang/translations/**/*.ts' ) } ) );
 	} );
 
 	it( '.sourceMap', async () => {

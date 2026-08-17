@@ -3,114 +3,58 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
-import PO from 'pofile';
-import cleanTranslationFileContent from '../../lib/utils/cleantranslationfilecontent.js';
-import getLanguages from '../../lib/utils/getlanguages.js';
-import getHeaders from '../../lib/utils/getheaders.js';
+import os from 'node:os';
+import upath from 'upath';
+import { afterEach, describe, expect, it } from 'vitest';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
-
-vi.mock( 'node:fs' );
-vi.mock( 'pofile' );
-vi.mock( '../../lib/utils/cleantranslationfilecontent.js' );
-vi.mock( '../../lib/utils/getlanguages.js' );
-vi.mock( '../../lib/utils/getheaders.js' );
+import { readTranslationFile, serializeTranslationFile } from '../../lib/utils/translationfile.js';
 
 describe( 'createMissingPackageTranslations()', () => {
-	let translations, defaultOptions;
+	let temporaryDirectory;
 
-	beforeEach( () => {
-		translations = {
-			headers: {}
-		};
+	afterEach( () => {
+		if ( temporaryDirectory ) {
+			fs.rmSync( temporaryDirectory, { recursive: true, force: true } );
+		}
+	} );
 
-		defaultOptions = {
-			packagePath: '/absolute/path/to/packages/ckeditor5-foo',
-			skipLicenseHeader: false
-		};
+	it( 'creates generated TypeScript files without overwriting existing translations', async () => {
+		temporaryDirectory = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translations-' ) );
+		const translationsDirectory = upath.join( temporaryDirectory, 'lang', 'translations' );
+		fs.mkdirSync( translationsDirectory, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsDirectory, 'en.ts' ), serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Existing: 'Existing' },
+			contexts: { Existing: 'An existing message.' },
+			skipLicenseHeader: true
+		} ) );
 
-		vi.mocked( PO.parse ).mockReturnValue( translations );
-
-		vi.mocked( getLanguages ).mockReturnValue( [
-			{ localeCode: 'en', languageCode: 'en', languageFileName: 'en' },
-			{ localeCode: 'zh_TW', languageCode: 'zh', languageFileName: 'zh-tw' }
-		] );
-
-		vi.mocked( getHeaders ).mockImplementation( ( languageCode, localeCode ) => {
-			return {
-				Language: localeCode,
-				'Plural-Forms': 'nplurals=4; plural=example plural formula;',
-				'Content-Type': 'text/plain; charset=UTF-8'
-			};
+		createMissingPackageTranslations( {
+			packagePath: temporaryDirectory,
+			contexts: { Message: 'A message context.' },
+			skipLicenseHeader: true
 		} );
 
-		vi.mocked( cleanTranslationFileContent ).mockReturnValue( {
-			toString: () => 'Clean PO file content.'
+		expect( ( await readTranslationFile( upath.join( translationsDirectory, 'en.ts' ) ) ).dictionary ).toEqual( {
+			Existing: 'Existing'
+		} );
+		expect( ( await readTranslationFile( upath.join( translationsDirectory, 'pl.ts' ) ) ).dictionary ).toEqual( {} );
+	} );
+
+	it( 'adds plural forms to files created for the core package', async () => {
+		temporaryDirectory = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translations-' ) );
+		const packagePath = upath.join( temporaryDirectory, 'ckeditor5-core' );
+
+		createMissingPackageTranslations( {
+			packagePath,
+			contexts: {},
+			skipLicenseHeader: true
 		} );
 
-		vi.mocked( fs.existsSync ).mockImplementation( path => {
-			if ( path === '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po' ) {
-				return true;
-			}
+		const translation = await readTranslationFile( upath.join( packagePath, 'lang/translations/en.ts' ) );
 
-			return false;
-		} );
-
-		vi.mocked( fs.readFileSync ).mockReturnValue( [
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.`,
-			'',
-			'# Example translation file header.',
-			''
-		].join( '\n' ) );
-	} );
-
-	it( 'should be a function', () => {
-		expect( createMissingPackageTranslations ).toBeInstanceOf( Function );
-	} );
-
-	it( 'should check if translation files exist for each language', () => {
-		createMissingPackageTranslations( defaultOptions );
-
-		expect( fs.existsSync ).toHaveBeenCalledTimes( 2 );
-		expect( fs.existsSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/en.po' );
-		expect( fs.existsSync ).toHaveBeenCalledWith( '/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po' );
-	} );
-
-	it( 'should create missing translation files from the template', () => {
-		createMissingPackageTranslations( defaultOptions );
-
-		expect( fs.readFileSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.readFileSync ).toHaveBeenCalledWith(
-			expect.stringMatching( 'ckeditor5-dev-translations/lib/templates/translation.po' ),
-			'utf-8'
-		);
-
-		expect( getHeaders ).toHaveBeenCalledWith( 'zh', 'zh_TW' );
-
-		expect( translations.headers.Language ).toEqual( 'zh_TW' );
-		expect( translations.headers[ 'Plural-Forms' ] ).toEqual( 'nplurals=4; plural=example plural formula;' );
-		expect( translations.headers[ 'Content-Type' ] ).toEqual( 'text/plain; charset=UTF-8' );
-	} );
-
-	it( 'should not read the template if `skipLicenseHeader` flag is set', () => {
-		defaultOptions.skipLicenseHeader = true;
-
-		createMissingPackageTranslations( defaultOptions );
-
-		expect( fs.readFileSync ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should save missing translation files on filesystem after cleaning the content', () => {
-		createMissingPackageTranslations( defaultOptions );
-
-		expect( cleanTranslationFileContent ).toHaveBeenCalledTimes( 1 );
-
-		expect( fs.writeFileSync ).toHaveBeenCalledTimes( 1 );
-		expect( fs.writeFileSync ).toHaveBeenCalledWith(
-			'/absolute/path/to/packages/ckeditor5-foo/lang/translations/zh-tw.po',
-			'Clean PO file content.',
-			'utf-8'
-		);
+		expect( translation.getPluralForm ).toBeTypeOf( 'function' );
+		expect( translation.getPluralForm( 1 ) ).toBeDefined();
 	} );
 } );

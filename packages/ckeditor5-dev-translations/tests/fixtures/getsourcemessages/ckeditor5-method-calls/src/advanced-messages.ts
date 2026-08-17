@@ -8,6 +8,10 @@ import type { Locale, LocaleTranslate } from '@ckeditor/ckeditor5-utils';
 type IndexedTranslate = Locale[ 't' ];
 type LocalFunction = ( message: string ) => string;
 
+function externalTranslate( message: string ): string {
+	return message;
+}
+
 export function collectAdvancedMessages( locale: Locale ): void {
 	const t = locale.t;
 	const dynamicPropertyName = 'string';
@@ -15,6 +19,7 @@ export function collectAdvancedMessages( locale: Locale ): void {
 	const localFunction: LocalFunction = message => message;
 	const indexedObject: { t: IndexedTranslate } = { t: locale.t };
 	const localObject: { t: LocalFunction } = { t: localFunction };
+	const functionObject: { t: typeof externalTranslate } = { t: externalTranslate };
 	const unionObject: { t: LocaleTranslate | LocalFunction } = { t: locale.t };
 	const intersectionObject: { t: LocaleTranslate & { extra: true } } = {
 		t: Object.assign( locale.t, { extra: true as const } )
@@ -33,6 +38,7 @@ export function collectAdvancedMessages( locale: Locale ): void {
 	intersectionObject.t( 'Intersection type translation' );
 
 	localObject.t( 'Ignored local function translation' );
+	functionObject.t( 'Ignored function declaration translation' );
 
 	t( {
 		'string': 'Quoted string property translation',

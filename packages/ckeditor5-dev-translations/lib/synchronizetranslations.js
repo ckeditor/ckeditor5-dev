@@ -14,14 +14,15 @@ import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslatio
  * Synchronizes translations in provided packages by performing the following steps:
  * * Collect all i18n messages from all provided packages by finding `t()` calls in source files.
  * * Detect if translation context is valid, i.e. whether there is no missing, unused or duplicated context.
- * * If there are no validation errors, update all translation files ("*.po" files) to be in sync with the context file:
+ * * If there are no validation errors, update all translation files ("*.ts" files) to be in sync with the context file:
  *   * unused translation entries are removed,
  *   * missing translation entries are added with empty string as the message translation,
- *   * missing translation files are created for languages that do not have own "*.po" file yet.
+ *   * missing translation files are created for languages that do not have own "*.ts" file yet.
  *
  * @param {SynchronizeTranslationsOptions} options
+ * @returns {Promise<void>}
  */
-export default function synchronizeTranslations( options ) {
+export default async function synchronizeTranslations( options ) {
 	const {
 		cwd,
 		sourceFiles,
@@ -29,7 +30,8 @@ export default function synchronizeTranslations( options ) {
 		corePackagePath,
 		ignoreUnusedCorePackageContexts,
 		validateOnly,
-		skipLicenseHeader
+		skipLicenseHeader,
+		translationsTypeImportSource
 	} = normalizeOptions( options );
 
 	const errors = [];
@@ -65,7 +67,13 @@ export default function synchronizeTranslations( options ) {
 	}
 
 	log.info( '📍 Synchronizing translations files...' );
-	synchronizeTranslationsBasedOnContext( { packageContexts, sourceMessages, skipLicenseHeader } );
+	await synchronizeTranslationsBasedOnContext( {
+		packageContexts,
+		sourceMessages,
+		corePackagePath,
+		skipLicenseHeader,
+		translationsTypeImportSource
+	} );
 
 	log.info( '✨ Done.' );
 }
@@ -180,7 +188,8 @@ function normalizeOptions( options ) {
 		corePackagePath,
 		ignoreUnusedCorePackageContexts = false,
 		validateOnly = false,
-		skipLicenseHeader = false
+		skipLicenseHeader = false,
+		translationsTypeImportSource = '@ckeditor/ckeditor5-utils'
 	} = options;
 
 	const cwd = options.cwd || process.cwd();
@@ -193,7 +202,8 @@ function normalizeOptions( options ) {
 		corePackagePath: toAbsolute( corePackagePath ),
 		ignoreUnusedCorePackageContexts,
 		validateOnly,
-		skipLicenseHeader
+		skipLicenseHeader,
+		translationsTypeImportSource
 	};
 }
 
@@ -212,4 +222,6 @@ function normalizeOptions( options ) {
  * @property {boolean} [validateOnly=false] If set, only validates the translations contexts against the source messages without
  * synchronizing the translations.
  * @property {boolean} [skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
+ * @property {string} [translationsTypeImportSource='@ckeditor/ckeditor5-utils'] Module from which generated translation files import
+ * the `Translations` type.
  */
