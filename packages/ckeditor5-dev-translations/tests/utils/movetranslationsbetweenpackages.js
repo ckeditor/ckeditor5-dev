@@ -8,7 +8,7 @@ import os from 'node:os';
 import upath from 'upath';
 import { afterEach, describe, expect, it } from 'vitest';
 import moveTranslationsBetweenPackages from '../../lib/utils/movetranslationsbetweenpackages.js';
-import { serializeTranslationFile } from '../../lib/utils/translationfile.js';
+import { readTranslationFile, serializeTranslationFile } from '../../lib/utils/translationfile.js';
 
 describe( 'moveTranslationsBetweenPackages()', () => {
 	let rootPath;
@@ -117,6 +117,69 @@ describe( 'moveTranslationsBetweenPackages()', () => {
 			contexts: destinationContext.contextContent,
 			skipLicenseHeader: true
 		} ) );
+	} );
+
+	it( 'moves multiple entries and overwrites existing destination values', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'ckeditor5-source' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, {
+			First: 'First context.',
+			Second: 'Second context.'
+		} );
+		const destinationContext = createPackageContext( destination, {
+			Second: 'Destination context.'
+		} );
+		write( source, 'en', { First: 'First', Second: 'Second' }, sourceContext.contextContent );
+		write( destination, 'en', { Second: 'Old second' }, destinationContext.contextContent );
+
+		await moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [
+				{ source, destination, messageId: 'First' },
+				{ source, destination, messageId: 'Second' }
+			]
+		} );
+
+		expect( ( await readTranslationFile( upath.join( source, 'lang/translations/en.ts' ) ) ).dictionary ).toEqual( {} );
+		expect( ( await readTranslationFile( upath.join( destination, 'lang/translations/en.ts' ) ) ).dictionary ).toEqual( {
+			First: 'First',
+			Second: 'Second'
+		} );
+	} );
+
+	it( 'rejects a move when the source translation is missing', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'ckeditor5-source' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, { Move: 'Move this.' } );
+		const destinationContext = createPackageContext( destination, {} );
+		write( source, 'en', {}, sourceContext.contextContent );
+
+		await expect( moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [ { source, destination, messageId: 'Move' } ]
+		} ) ).rejects.toThrow( /Missing translation "Move" in source file/ );
+
+		expect( sourceContext.contextContent ).toEqual( { Move: 'Move this.' } );
+		expect( destinationContext.contextContent ).toEqual( {} );
+	} );
+
+	it( 'rejects unsupported translation languages before changing contexts', async () => {
+		rootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-move-translations-' ) );
+		const source = upath.join( rootPath, 'ckeditor5-source' );
+		const destination = upath.join( rootPath, 'ckeditor5-destination' );
+		const sourceContext = createPackageContext( source, { Move: 'Move this.' } );
+		const destinationContext = createPackageContext( destination, {} );
+		write( source, 'xx', { Move: 'Move' }, sourceContext.contextContent );
+
+		await expect( moveTranslationsBetweenPackages( {
+			packageContexts: [ sourceContext, destinationContext ],
+			config: [ { source, destination, messageId: 'Move' } ]
+		} ) ).rejects.toThrow( /Unsupported translation language "xx".*xx\.ts/ );
+
+		expect( sourceContext.contextContent ).toEqual( { Move: 'Move this.' } );
+		expect( destinationContext.contextContent ).toEqual( {} );
 	} );
 } );
 

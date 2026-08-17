@@ -26,9 +26,6 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 		const destinationPackageContext = packageContexts.find( context => context.packagePath === destination );
 		const messageContext = sourcePackageContext.contextContent[ messageId ];
 
-		destinationPackageContext.contextContent[ messageId ] = messageContext;
-		delete sourcePackageContext.contextContent[ messageId ];
-
 		const translationFilesPattern = upath.join( source, TRANSLATION_FILES_PATH, '*.ts' );
 		const translationFilePaths = glob.sync( translationFilesPattern )
 			.map( filePath => upath.basename( filePath ) )
@@ -37,9 +34,17 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 				destinationTranslationFilePath: upath.join( destination, TRANSLATION_FILES_PATH, fileName )
 			} ) );
 
+		const translationsToMove = [];
+
 		for ( const { sourceTranslationFilePath, destinationTranslationFilePath } of translationFilePaths ) {
 			const destinationTranslationFileExists = fs.existsSync( destinationTranslationFilePath );
 			const sourceTranslations = await readTranslationFile( sourceTranslationFilePath );
+			getTranslationLanguage( sourceTranslationFilePath, sourceTranslations );
+
+			if ( !Object.hasOwn( sourceTranslations.dictionary, messageId ) ) {
+				throw new Error( `Missing translation "${ messageId }" in source file "${ sourceTranslationFilePath }".` );
+			}
+
 			const destinationTranslations = destinationTranslationFileExists ?
 				await readTranslationFile( destinationTranslationFilePath ) :
 				{
@@ -48,6 +53,26 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 					preamble: sourceTranslations.preamble,
 					translationsTypeImportSource: sourceTranslations.translationsTypeImportSource
 				};
+
+			getTranslationLanguage( destinationTranslationFilePath, destinationTranslations );
+
+			translationsToMove.push( {
+				destinationTranslationFilePath,
+				sourceTranslationFilePath,
+				sourceTranslations,
+				destinationTranslations
+			} );
+		}
+
+		destinationPackageContext.contextContent[ messageId ] = messageContext;
+		delete sourcePackageContext.contextContent[ messageId ];
+
+		for ( const {
+			destinationTranslationFilePath,
+			sourceTranslationFilePath,
+			sourceTranslations,
+			destinationTranslations
+		} of translationsToMove ) {
 			const value = sourceTranslations.dictionary[ messageId ];
 
 			delete sourceTranslations.dictionary[ messageId ];
@@ -80,7 +105,7 @@ export default async function moveTranslationsBetweenPackages( { packageContexts
 }
 
 function writePackageTranslation( packagePath, filePath, translations, contexts ) {
-	const language = getLanguages().find( item => item.languageFileName === translations.language );
+	const language = getTranslationLanguage( filePath, translations );
 	const pluralFunction = upath.basename( packagePath ) === 'ckeditor5-core' ? getFormula( language.languageCode ) : null;
 	const content = serializeTranslationFile( {
 		language: translations.language,
@@ -93,4 +118,14 @@ function writePackageTranslation( packagePath, filePath, translations, contexts 
 
 	fs.mkdirSync( upath.dirname( filePath ), { recursive: true } );
 	fs.writeFileSync( filePath, content, 'utf-8' );
+}
+
+function getTranslationLanguage( filePath, translations ) {
+	const language = getLanguages().find( item => item.languageFileName === translations.language );
+
+	if ( !language ) {
+		throw new Error( `Unsupported translation language "${ translations.language }" in file "${ filePath }".` );
+	}
+
+	return language;
 }

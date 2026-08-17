@@ -126,6 +126,7 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
 			skipLicenseHeader: false,
 			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
@@ -142,6 +143,7 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
 			skipLicenseHeader: true,
 			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
@@ -157,6 +159,7 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
 			skipLicenseHeader: false,
 			translationsTypeImportSource: 'ckeditor5'
 		} );

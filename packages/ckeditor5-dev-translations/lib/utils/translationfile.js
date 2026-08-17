@@ -28,7 +28,7 @@ export async function readTranslationFile( filePath ) {
 	const content = fs.readFileSync( filePath, 'utf-8' );
 	const { preamble, translationsTypeImportSource } = readTranslationFileMetadata( filePath, content );
 	const { default: translations } = await import( pathToFileURL( filePath ).href );
-	const languages = Object.keys( translations );
+	const languages = translations ? Object.keys( translations ) : [];
 
 	if ( languages.length !== 1 ) {
 		throw new Error( `Expected exactly one language in translation file: ${ filePath }.` );

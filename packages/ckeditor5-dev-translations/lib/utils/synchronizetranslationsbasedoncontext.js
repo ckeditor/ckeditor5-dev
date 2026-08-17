@@ -17,12 +17,14 @@ import { readTranslationFile, serializeTranslationFile } from './translationfile
  * @param {object} options
  * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
  * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
+ * @param {string} [options.corePackagePath] Path to the core package. If omitted, the package basename is used for backwards compatibility.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  * @param {string} options.translationsTypeImportSource Module from which generated translation files import the `Translations` type.
  */
 export default async function synchronizeTranslationsBasedOnContext( {
 	packageContexts,
 	sourceMessages,
+	corePackagePath,
 	skipLicenseHeader,
 	translationsTypeImportSource
 } ) {
@@ -36,6 +38,7 @@ export default async function synchronizeTranslationsBasedOnContext( {
 		createMissingPackageTranslations( {
 			packagePath,
 			contexts: contextContent,
+			corePackagePath,
 			skipLicenseHeader,
 			translationsTypeImportSource
 		} );
@@ -47,12 +50,18 @@ export default async function synchronizeTranslationsBasedOnContext( {
 		const englishTranslationFilePath = translationFilePaths.find( filePath => filePath.endsWith( 'en.ts' ) );
 		const { dictionary: englishTranslations } = await readTranslationFile( englishTranslationFilePath );
 		const changedEnglishTranslations = getChangedEnglishTranslations( englishTranslations, sourceMessagesForPackage );
-		const isCorePackage = upath.basename( packagePath ) === 'ckeditor5-core';
+		const isCorePackage = corePackagePath ? packagePath === corePackagePath : upath.basename( packagePath ) === 'ckeditor5-core';
 
 		for ( const translationFilePath of translationFilePaths ) {
 			const originalFile = fs.readFileSync( translationFilePath, 'utf-8' );
 			const { language, dictionary, preamble } = await readTranslationFile( translationFilePath );
-			const { languageCode } = languages.find( item => item.languageFileName === language );
+			const languageInfo = languages.find( item => item.languageFileName === language );
+
+			if ( !languageInfo ) {
+				throw new Error( `Unsupported translation language "${ language }" in file "${ translationFilePath }".` );
+			}
+
+			const { languageCode } = languageInfo;
 			const numberOfPluralForms = getNPlurals( languageCode );
 			const synchronizedDictionary = {};
 

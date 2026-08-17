@@ -119,6 +119,38 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		}
 	} );
 
+	it( 'resets translations when an English plural form changes', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: [ '%0 old message', '%0 old messages' ] },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+		fs.writeFileSync( upath.join( translationsPath, 'pl.ts' ), serializeTranslationFile( {
+			language: 'pl',
+			dictionary: { Message: [ '%0 wiadomość', '%0 wiadomości', '%0 wiadomości' ] },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+
+		await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: '%0 new message', plural: '%0 new messages' } ],
+			skipLicenseHeader: true
+		} );
+
+		expect( ( await import( upath.join( translationsPath, 'en.ts' ) ) ).default.en.dictionary ).toEqual( {
+			Message: [ '%0 new message', '%0 new messages' ]
+		} );
+		expect( ( await import( upath.join( translationsPath, 'pl.ts' ) ) ).default.pl.dictionary ).toEqual( {
+			Message: [ '', '', '' ]
+		} );
+	} );
+
 	it( 'uses the core package plural function when synchronizing', async () => {
 		coreRootPath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-core-' ) );
 		packagePath = upath.join( coreRootPath, 'ckeditor5-core' );
@@ -141,6 +173,78 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toContain( 'getPluralForm:' );
 	} );
 
+	it( 'uses the configured core package path when its basename differs', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-custom-core-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: 'Message' },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+
+		await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			corePackagePath: packagePath,
+			skipLicenseHeader: true
+		} );
+
+		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toContain( 'getPluralForm:' );
+	} );
+
+	it( 'passes a custom translations type import source to generated files', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: 'Message' },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+
+		await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			skipLicenseHeader: true,
+			translationsTypeImportSource: 'custom-package'
+		} );
+
+		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( expect.objectContaining( {
+			packagePath,
+			translationsTypeImportSource: 'custom-package'
+		} ) );
+		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toContain(
+			'import type { Translations } from \'custom-package\';'
+		);
+	} );
+
+	it( 'rejects translation files with unsupported languages', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		fs.mkdirSync( translationsPath, { recursive: true } );
+
+		for ( const language of [ 'en', 'xx' ] ) {
+			fs.writeFileSync( upath.join( translationsPath, language + '.ts' ), serializeTranslationFile( {
+				language,
+				dictionary: { Message: 'Message' },
+				contexts,
+				skipLicenseHeader: true
+			} ) );
+		}
+
+		await expect( synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			skipLicenseHeader: true
+		} ) ).rejects.toThrow( /Unsupported translation language "xx".*xx\.ts/ );
+	} );
+
 	it.each( [
 		{ hasLicenseHeader: true, skipLicenseHeader: true },
 		{ hasLicenseHeader: false, skipLicenseHeader: false }
@@ -160,6 +264,7 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		fs.mkdirSync( translationsPath, { recursive: true } );
 		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), originalFile );
+		const writeFileSpy = vi.spyOn( fs, 'writeFileSync' );
 
 		await synchronizeTranslationsBasedOnContext( {
 			packageContexts: [ { packagePath, contextContent: contexts } ],
@@ -168,5 +273,6 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		} );
 
 		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( originalFile );
+		expect( writeFileSpy ).not.toHaveBeenCalled();
 	} );
 } );

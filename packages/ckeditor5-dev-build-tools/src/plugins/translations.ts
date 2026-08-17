@@ -105,6 +105,10 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				const translations: Array<Translation> = await Promise.all( paths.map( async filePath => {
 					const translationModule = await import( pathToFileURL( filePath ).href );
 
+					if ( !translationModule.default?.[ language ] ) {
+						this.error( `Translation file "${ filePath }" does not export translations for language "${ language }".` );
+					}
+
 					return translationModule.default[ language ] as Translation;
 				} ) );
 

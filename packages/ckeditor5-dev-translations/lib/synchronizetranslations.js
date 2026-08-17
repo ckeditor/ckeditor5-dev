@@ -70,6 +70,7 @@ export default async function synchronizeTranslations( options ) {
 	await synchronizeTranslationsBasedOnContext( {
 		packageContexts,
 		sourceMessages,
+		corePackagePath,
 		skipLicenseHeader,
 		translationsTypeImportSource
 	} );

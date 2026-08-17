@@ -70,6 +70,25 @@ describe( 'translation file utilities', () => {
 		} );
 	} );
 
+	it( 'escapes dictionary keys and values', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		const key = 'A key\\\'s \\nwith a newline';
+		const value = 'A value\\\'s \\nwith a newline';
+		const dictionary = {
+			[ key ]: [ value, 'A value with a \u2028 line separator' ]
+		};
+		const contexts = { [ key ]: 'A context.' };
+
+		fs.writeFileSync( filePath, serializeTranslationFile( {
+			language: 'en',
+			dictionary,
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+
+		expect( ( await readTranslationFile( filePath ) ).dictionary ).toEqual( dictionary );
+	} );
+
 	it( 'rejects files without a Translations type import', async () => {
 		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
 		fs.writeFileSync( filePath, 'export default { en: { dictionary: {} } };\n' );
@@ -85,6 +104,15 @@ describe( 'translation file utilities', () => {
 
 		await expect( readTranslationFile( filePath ) ).rejects.toThrow(
 			`Could not parse translation file: ${ filePath }.`
+		);
+	} );
+
+	it( 'rejects files without a default export', async () => {
+		filePath = upath.join( fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translation-file-' ) ), 'en.ts' );
+		fs.writeFileSync( filePath, 'import type { Translations } from \'ckeditor5\';\nexport const translations = {};\n' );
+
+		await expect( readTranslationFile( filePath ) ).rejects.toThrow(
+			`Expected exactly one language in translation file: ${ filePath }.`
 		);
 	} );
 

@@ -49,7 +49,7 @@ describe( 'translations()', () => {
 		verifyChunk( output, 'translations/pl.js', '"getPluralForm":' );
 		verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
 		verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
-		expect( output ).not.toEqual( expect.arrayContaining( [ expect.objectContaining( { fileName: 'translations/ignored.js' } ) ] ) );
+		expect( output ).not.toEqual( expect.arrayContaining( [ expect.objectContaining( { fileName: 'translations/ignored.d.js' } ) ] ) );
 	} );
 
 	/**
@@ -102,5 +102,11 @@ describe( 'translations()', () => {
 		const output = await generateBundle();
 
 		verifyChunk( output, 'translations/en.umd.js', 'if ( translations.getPluralForm )' );
+	} );
+
+	it( 'rejects translation files whose language key does not match the file name', async () => {
+		await expect( generateBundle( {
+			source: upath.join( import.meta.dirname, '/fixtures/invalid-translations/*.ts' )
+		} ) ).rejects.toThrow( /invalid-translations\/de\.ts.*language "de"/ );
 	} );
 } );
