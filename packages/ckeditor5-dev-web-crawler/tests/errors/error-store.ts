@@ -3,18 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { ERROR_TYPES } from '../../src/constants.js';
 import { createErrorCollector, createErrorStore } from '../../src/errors/error-store.js';
 
 describe( 'createErrorStore()', () => {
-	test( 'returns an empty map', () => {
+	it( 'returns an empty map', () => {
 		expect( createErrorStore() ).toEqual( new Map() );
 	} );
 } );
 
 describe( 'createErrorCollector()', () => {
-	test( 'groups errors by type and first message line', () => {
+	it( 'groups errors by type and first message line', () => {
 		const store = createErrorStore();
 		const collect = createErrorCollector( store );
 
@@ -41,7 +41,7 @@ describe( 'createErrorCollector()', () => {
 		expect( groupedError.details ).toBe( 'Stack trace #1' );
 	} );
 
-	test( 'stores each page only once', () => {
+	it( 'stores each page only once', () => {
 		const store = createErrorStore();
 		const collect = createErrorCollector( store );
 
@@ -62,7 +62,7 @@ describe( 'createErrorCollector()', () => {
 		expect( groupedError.pages ).toEqual( new Set( [ 'https://ckeditor.com/docs/guide' ] ) );
 	} );
 
-	test( 'creates separate groups for different types and messages', () => {
+	it( 'creates separate groups for different types and messages', () => {
 		const store = createErrorStore();
 		const collect = createErrorCollector( store );
 

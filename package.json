@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "58.0.0",
+  "version": "60.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -20,9 +20,10 @@
     "@inquirer/prompts": "^7.10.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.22",
     "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/eslint-plugin": "^1.6.24",
     "eslint": "^10.0.0",
-    "eslint-config-ckeditor5": "^19.0.0",
-    "eslint-plugin-ckeditor5-rules": "^19.0.0",
+    "eslint-config-ckeditor5": "^20.0.0",
+    "eslint-plugin-ckeditor5-rules": "^20.0.0",
     "fs-extra": "^11.3.4",
     "glob": "^13.0.6",
     "globals": "^16.5.0",
@@ -35,7 +36,7 @@
     "syncpack": "^15.3.2",
     "typescript": "5.5.4",
     "upath": "^2.0.1",
-    "vite": "^8.1.0",
+    "vite": "^8.2.1",
     "vitest": "^4.1.2"
   },
   "scripts": {
@@ -45,6 +46,7 @@
     "test:scripts": "vitest --config ./scripts-tests/vitest.config.mjs --run",
     "coverage": "node ./scripts/runtest.js --coverage",
     "check-versions-match": "node scripts/ci/check-dependencies-versions-match.mjs",
+    "check-test-conventions": "node scripts/ci/check-test-file-conventions.mjs",
     "release:prepare-changelog": "node ./scripts/preparechangelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",

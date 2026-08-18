@@ -32,6 +32,7 @@ export class ViewLike {
 
 		const t = locale.t;
 		t( { string: 'Direct t alias translation', plural: 'Direct t alias translations' } );
+		locale.t();
 
 		// Intentionally hidden alias, used to reuse translations from other packages.
 		const translateVariableKey = locale.t;

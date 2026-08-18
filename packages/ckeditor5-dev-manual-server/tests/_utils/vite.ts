@@ -4,18 +4,20 @@
  */
 
 import { expect, vi } from 'vitest';
-import { createServer, type AppType, type HotPayload, type Plugin, type ViteDevServer } from 'vite';
+import { createServer, type AppType, type HotPayload, type Plugin, type UserConfig, type ViteDevServer } from 'vite';
 import { createFile } from './files.js';
 
 export interface CreateTestServerOptions {
 	appType?: AppType;
 	plugins: Array<Plugin>;
+	resolve?: UserConfig[ 'resolve' ];
 	root: string;
 }
 
 export async function createTestServer( {
 	appType,
 	plugins,
+	resolve,
 	root
 }: CreateTestServerOptions ): Promise<ViteDevServer> {
 	return createServer( {
@@ -26,6 +28,7 @@ export async function createTestServer( {
 		server: {
 			middlewareMode: true
 		},
+		resolve,
 		plugins
 	} );
 }

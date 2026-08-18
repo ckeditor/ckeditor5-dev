@@ -4,7 +4,7 @@
  */
 
 import type { ConsoleMessage, Dialog, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ERROR_TYPES } from '../../src/constants.js';
 import { REQUEST_ABORT_REASON, shouldAbortRequest } from '../../src/page/request-policy.js';
 import type { CrawlerError, QueueData } from '../../src/types.js';
@@ -74,7 +74,7 @@ describe( 'attachPageEventHandlers()', () => {
 		vi.mocked( shouldAbortRequest ).mockReturnValue( false );
 	} );
 
-	test( 'handles request and dialog events and detaches listeners', async () => {
+	it( 'handles request and dialog events and detaches listeners', async () => {
 		const pageErrors: Array<CrawlerError> = [];
 		const page = createPageMock();
 		const detach = attachPageEventHandlers( { page, data, pageErrors } );
@@ -113,7 +113,7 @@ describe( 'attachPageEventHandlers()', () => {
 		expect( page.offSpy ).toHaveBeenCalledTimes( 7 );
 	} );
 
-	test( 'collects page crash and uncaught exception errors', async () => {
+	it( 'collects page crash and uncaught exception errors', async () => {
 		const pageErrors: Array<CrawlerError> = [];
 		const page = createPageMock();
 
@@ -134,7 +134,7 @@ describe( 'attachPageEventHandlers()', () => {
 		] );
 	} );
 
-	test( 'collects request and response failures and skips known false positives', async () => {
+	it( 'collects request and response failures and skips known false positives', async () => {
 		const pageErrors: Array<CrawlerError> = [];
 		const page = createPageMock();
 
@@ -187,7 +187,7 @@ describe( 'attachPageEventHandlers()', () => {
 		expect( pageErrors[ 1 ]!.pageUrl ).toBe( data.url );
 	} );
 
-	test( 'collects console errors and skips unsupported console messages', async () => {
+	it( 'collects console errors and skips unsupported console messages', async () => {
 		const pageErrors: Array<CrawlerError> = [];
 		const page = createPageMock();
 

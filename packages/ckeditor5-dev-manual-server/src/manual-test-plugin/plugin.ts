@@ -7,6 +7,11 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { posix, resolve, relative } from 'node:path';
 import { collectManualPages } from './collect-pages.js';
+import {
+	createManualTranslationsModule,
+	MANUAL_TRANSLATIONS_VIRTUAL_ID,
+	RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID
+} from './translations.js';
 import { cacheValue, createPackageNameFilter, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
 import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
@@ -20,14 +25,15 @@ interface ManualTestClientEntry {
 export interface ManualTestsPluginOptions {
 	paths: Array<string>;
 	include?: Array<string>;
+	language?: string;
 }
 
 // The custom element that opts a page into the test chrome. The component script and its data
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const MANUAL_TEST_SUFFIX = '.manual.html';
-const MANUAL_TESTS_DIRECTORY = '/tests/manual/';
-const THEME_ENTRY_FILE_PATH = 'theme/index.css';
+const MANUAL_TESTS_DIRECTORY = '/manual/';
+const THEME_ENTRY_FILE_PATHS = [ 'theme/index-editor.css', 'theme/index-content.css' ];
 const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
@@ -53,12 +59,14 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 		return htmlSpecifier == scriptSpecifier ? undefined : getManualPages().get( htmlSpecifier );
 	};
-	const packageThemeEntryCache = new Map<string, boolean>();
-	const hasPackageThemeEntry = ( packageRootSpecifier: string ): boolean => {
+	const packageThemeEntryCache = new Map<string, Array<string>>();
+	const getPackageThemeEntries = ( packageRootSpecifier: string ): Array<string> => {
 		if ( !packageThemeEntryCache.has( packageRootSpecifier ) ) {
-			const themeEntryFilePath = resolve( workspaceRoot, stripLeadingSlash( packageRootSpecifier ), THEME_ENTRY_FILE_PATH );
+			const themeEntries = THEME_ENTRY_FILE_PATHS.filter( themeEntryFilePath =>
+				existsSync( resolve( workspaceRoot, stripLeadingSlash( packageRootSpecifier ), themeEntryFilePath ) )
+			);
 
-			packageThemeEntryCache.set( packageRootSpecifier, existsSync( themeEntryFilePath ) );
+			packageThemeEntryCache.set( packageRootSpecifier, themeEntries );
 		}
 
 		return packageThemeEntryCache.get( packageRootSpecifier )!;
@@ -79,17 +87,16 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		slug: entry.slug
 	} ) );
 	const getManualEntriesJson = () => JSON.stringify( getClientEntries(), null, 2 );
+	const translationsModuleCode = options.language ? createManualTranslationsModule( options.paths, options.language ) : null;
 
 	return {
 		name: 'ckeditor5-manual-tests',
 
-		config() {
+		config( config = {} ) {
+			workspaceRoot = resolve( config.root || process.cwd() );
+
 			return {
-				build: {
-					rolldownOptions: {
-						input: getManualBuildInputs()
-					}
-				}
+				input: getManualBuildInputs()
 			};
 		},
 
@@ -99,8 +106,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 			manualPagesCache.invalidate();
 			packageThemeEntryCache.clear();
-
-			config.build.rolldownOptions.input = getManualBuildInputs();
 		},
 
 		configureServer( server ) {
@@ -110,14 +115,16 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				next();
 			} );
 
-			const clientEnvironment = server.environments.client as typeof server.environments.client & BundledDevClientEnvironment;
-
-			keepManualHtmlSourceFresh( clientEnvironment.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
+			keepManualHtmlSourceFresh( server.environments.client.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
 		},
 
 		resolveId( source ) {
 			if ( source == MANUAL_ENTRIES_VIRTUAL_ID ) {
 				return resolvedVirtualModuleId;
+			}
+
+			if ( source == MANUAL_TRANSLATIONS_VIRTUAL_ID && translationsModuleCode ) {
+				return RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID;
 			}
 
 			if ( isManualCatalogBuildInputSpecifier( source, getManualCatalogBuildInputFilePath(), workspaceRoot ) ) {
@@ -132,6 +139,10 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				return `export const manualTestEntries = ${ getManualEntriesJson() };`;
 			}
 
+			if ( id == RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID ) {
+				return translationsModuleCode;
+			}
+
 			if ( toPosixPath( id ) == toPosixPath( getManualCatalogBuildInputFilePath() ) ) {
 				return readFileSync( MANUAL_CATALOG_FILE_PATH, 'utf8' );
 			}
@@ -142,7 +153,8 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		transform: {
 			order: 'pre',
 
-			// Loads the package theme entry stylesheet (`theme/index.css`) in manual tests.
+			// Loads the package theme entry stylesheets (`theme/index-editor.css` and
+			// `theme/index-content.css`) in manual tests.
 			// Package stylesheets are imported by the package entry module (`src/index.ts`), not by
 			// individual source modules, and manual tests import source modules directly - without
 			// this they would render without the package's own styles. Stylesheets of other packages
@@ -162,18 +174,26 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				}
 
 				const packageRootSpecifier = entry.htmlFilePath.slice( 0, entry.htmlFilePath.indexOf( MANUAL_TESTS_DIRECTORY ) );
+				const themeEntries = getPackageThemeEntries( packageRootSpecifier );
+				const imports = themeEntries.map( themeEntryFilePath => {
+					const themeEntrySpecifier = posix.relative(
+						posix.dirname( scriptSpecifier ),
+						`${ packageRootSpecifier }/${ themeEntryFilePath }`
+					);
 
-				if ( !hasPackageThemeEntry( packageRootSpecifier ) ) {
+					return `import '${ themeEntrySpecifier }';`;
+				} );
+
+				if ( options.language ) {
+					imports.push( `import '${ MANUAL_TRANSLATIONS_VIRTUAL_ID }';` );
+				}
+
+				if ( !imports.length ) {
 					return;
 				}
 
-				const themeEntrySpecifier = posix.relative(
-					posix.dirname( scriptSpecifier ),
-					`${ packageRootSpecifier }/${ THEME_ENTRY_FILE_PATH }`
-				);
-
 				return {
-					code: `${ code }\nimport '${ themeEntrySpecifier }';\n`,
+					code: `${ code }\n${ imports.join( '\n' ) }\n`,
 					map: null
 				};
 			}
@@ -225,12 +245,6 @@ interface ManualMemoryFiles {
 	get( filePath: string ): ManualMemoryFile | undefined;
 }
 
-interface BundledDevClientEnvironment {
-	bundledDev?: {
-		memoryFiles?: ManualMemoryFiles;
-	};
-}
-
 /**
  * Keeps the served manual test HTML in sync with the source file while the dev server runs.
  *
@@ -238,7 +252,7 @@ interface BundledDevClientEnvironment {
  * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
  * build and never regenerates it when the source `.html` changes: its bundle state reports no
  * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
- * forced full build leaves the HTML memory file untouched (verified against Vite 8.1.0). A `.html`
+ * forced full build leaves the HTML memory file untouched (verified against Vite 8.2.1). A `.html`
  * edit still triggers a full page reload, so without this the browser reloads into the same stale
  * HTML until the server is restarted.
  *

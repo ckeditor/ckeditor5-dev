@@ -55,8 +55,8 @@ describe( 'synchronizeTranslations()', () => {
 		expect( synchronizeTranslations ).toBeInstanceOf( Function );
 	} );
 
-	it( 'should load translations contexts', () => {
-		synchronizeTranslations( defaultOptions );
+	it( 'should load translations contexts', async () => {
+		await synchronizeTranslations( defaultOptions );
 
 		expect( getPackageContexts ).toHaveBeenCalledTimes( 1 );
 		expect( getPackageContexts ).toHaveBeenCalledWith( {
@@ -70,10 +70,10 @@ describe( 'synchronizeTranslations()', () => {
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Loading translations contexts...' );
 	} );
 
-	it( 'should resolve paths to packages using custom cwd', () => {
+	it( 'should resolve paths to packages using custom cwd', async () => {
 		defaultOptions.cwd = '/another/workspace';
 
-		synchronizeTranslations( defaultOptions );
+		await synchronizeTranslations( defaultOptions );
 
 		expect( getPackageContexts ).toHaveBeenCalledTimes( 1 );
 		expect( getPackageContexts ).toHaveBeenCalledWith( {
@@ -85,8 +85,8 @@ describe( 'synchronizeTranslations()', () => {
 		} );
 	} );
 
-	it( 'should load messages from source files', () => {
-		synchronizeTranslations( defaultOptions );
+	it( 'should load messages from source files', async () => {
+		await synchronizeTranslations( defaultOptions );
 
 		expect( getSourceMessages ).toHaveBeenCalledTimes( 1 );
 		expect( getSourceMessages ).toHaveBeenCalledWith( {
@@ -105,51 +105,69 @@ describe( 'synchronizeTranslations()', () => {
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Loading messages from source files...' );
 	} );
 
-	it( 'should collect errors when loading messages from source files failed', () => {
+	it( 'should collect errors when loading messages from source files failed', async () => {
 		vi.mocked( getSourceMessages ).mockImplementation( ( { onErrorCallback } ) => {
 			onErrorCallback( 'Example error when loading messages from source files.' );
 
 			return [];
 		} );
 
-		synchronizeTranslations( defaultOptions );
+		await synchronizeTranslations( defaultOptions );
 
 		expect( stubs.logger.error ).toHaveBeenCalledWith( '🔥 The following errors have been found:' );
 		expect( stubs.logger.error ).toHaveBeenCalledWith( '   - Example error when loading messages from source files.' );
 		expect( process.exit ).toHaveBeenCalledWith( 1 );
 	} );
 
-	it( 'should synchronize translations files', () => {
-		synchronizeTranslations( defaultOptions );
+	it( 'should synchronize translations files', async () => {
+		await synchronizeTranslations( defaultOptions );
 
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledTimes( 1 );
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
-			skipLicenseHeader: false
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
+			skipLicenseHeader: false,
+			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
 	} );
 
-	it( 'should synchronize translations files with skipping the license header', () => {
+	it( 'should synchronize translations files with skipping the license header', async () => {
 		defaultOptions.skipLicenseHeader = true;
 
-		synchronizeTranslations( defaultOptions );
+		await synchronizeTranslations( defaultOptions );
 
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledTimes( 1 );
 		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
 			packageContexts: [],
 			sourceMessages: [],
-			skipLicenseHeader: true
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
+			skipLicenseHeader: true,
+			translationsTypeImportSource: '@ckeditor/ckeditor5-utils'
 		} );
 
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
 	} );
 
-	it( 'should not synchronize translations files when validation mode is enabled', () => {
+	it( 'should synchronize translations files with a custom translations type import source', async () => {
+		defaultOptions.translationsTypeImportSource = 'ckeditor5';
+
+		await synchronizeTranslations( defaultOptions );
+
+		expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
+			packageContexts: [],
+			sourceMessages: [],
+			corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
+			skipLicenseHeader: false,
+			translationsTypeImportSource: 'ckeditor5'
+		} );
+	} );
+
+	it( 'should not synchronize translations files when validation mode is enabled', async () => {
 		defaultOptions.validateOnly = true;
-		synchronizeTranslations( defaultOptions );
+		await synchronizeTranslations( defaultOptions );
 
 		expect( synchronizeTranslationsBasedOnContext ).not.toHaveBeenCalled();
 		expect( stubs.logger.info ).toHaveBeenCalledWith( '✨ No errors found.' );
@@ -157,7 +175,7 @@ describe( 'synchronizeTranslations()', () => {
 
 	describe( 'validation', () => {
 		describe( 'missing context', () => {
-			it( 'should return no error if there is no missing context (no context, no message)', () => {
+			it( 'should return no error if there is no missing context (no context, no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -173,12 +191,12 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "foo", no message)', () => {
+			it( 'should return no error if there is no missing context (context in "foo", no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -196,12 +214,12 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "core", no message)', () => {
+			it( 'should return no error if there is no missing context (context in "core", no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-core',
@@ -214,12 +232,12 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "foo", message in "foo")', () => {
+			it( 'should return no error if there is no missing context (context in "foo", message in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -243,12 +261,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "core", message in "foo")', () => {
+			it( 'should return no error if there is no missing context (context in "core", message in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -272,12 +290,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "core", message in "core")', () => {
+			it( 'should return no error if there is no missing context (context in "core", message in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -301,12 +319,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return no error if there is no missing context (context in "foo" and "core", messages in "foo")', () => {
+			it( 'should return no error if there is no missing context (context in "foo" and "core", messages in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -337,12 +355,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Missing context' ) );
 			} );
 
-			it( 'should return error if there is missing context (no context, message in "foo")', () => {
+			it( 'should return error if there is missing context (no context, message in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -364,7 +382,7 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing context "id1" in "/absolute/path/to/packages/ckeditor5-foo/src/utils/file.ts".'
@@ -373,7 +391,7 @@ describe( 'synchronizeTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is missing context (context in "foo", message in "bar")', () => {
+			it( 'should return error if there is missing context (context in "foo", message in "bar")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -402,7 +420,7 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing context "id1" in "/absolute/path/to/packages/ckeditor5-bar/src/utils/file.ts".'
@@ -411,7 +429,7 @@ describe( 'synchronizeTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is missing context (context in "foo", message in "core")', () => {
+			it( 'should return error if there is missing context (context in "foo", message in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -435,7 +453,7 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Missing context "id1" in "/absolute/path/to/packages/ckeditor5-core/src/utils/file.ts".'
@@ -446,7 +464,7 @@ describe( 'synchronizeTranslations()', () => {
 		} );
 
 		describe( 'all context used', () => {
-			it( 'should return no error if all context is used (no context, no message)', () => {
+			it( 'should return no error if all context is used (no context, no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -462,12 +480,12 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return no error if all context is used (context in "foo", message in "foo")', () => {
+			it( 'should return no error if all context is used (context in "foo", message in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -491,12 +509,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return no error if all context is used (context in "core", message in "foo")', () => {
+			it( 'should return no error if all context is used (context in "core", message in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -520,12 +538,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return no error if all context is used (context in "core", message in "core")', () => {
+			it( 'should return no error if all context is used (context in "core", message in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-core',
@@ -544,12 +562,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return no error if all context is used (context in "foo" and "core", messages in "foo")', () => {
+			it( 'should return no error if all context is used (context in "foo" and "core", messages in "foo")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -580,12 +598,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return no error if all context is used (context in "core", no message, ignore core)', () => {
+			it( 'should return no error if all context is used (context in "core", no message, ignore core)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-core',
@@ -600,12 +618,12 @@ describe( 'synchronizeTranslations()', () => {
 
 				defaultOptions.ignoreUnusedCorePackageContexts = true;
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Unused context' ) );
 			} );
 
-			it( 'should return error if there is unused context (context in "foo", no message)', () => {
+			it( 'should return error if there is unused context (context in "foo", no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -623,7 +641,7 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
@@ -632,7 +650,7 @@ describe( 'synchronizeTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is unused context (context in "foo", message in "bar")', () => {
+			it( 'should return error if there is unused context (context in "foo", message in "bar")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -661,7 +679,7 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
@@ -670,7 +688,7 @@ describe( 'synchronizeTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is unused context (context in "foo", message in "core")', () => {
+			it( 'should return error if there is unused context (context in "foo", message in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -694,7 +712,7 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-foo/lang/contexts.json".'
@@ -703,7 +721,7 @@ describe( 'synchronizeTranslations()', () => {
 				expect( process.exit ).toHaveBeenCalledWith( 1 );
 			} );
 
-			it( 'should return error if there is unused context (context in "core", no message)', () => {
+			it( 'should return error if there is unused context (context in "core", no message)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-core',
@@ -716,7 +734,7 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Unused context "id1" in "/absolute/path/to/packages/ckeditor5-core/lang/contexts.json".'
@@ -727,7 +745,7 @@ describe( 'synchronizeTranslations()', () => {
 		} );
 
 		describe( 'duplicated context', () => {
-			it( 'should return no error if there is no duplicated context (no context)', () => {
+			it( 'should return no error if there is no duplicated context (no context)', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -741,12 +759,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated context' ) );
 			} );
 
-			it( 'should return no error if there is no duplicated context (no context in "foo", context in "core")', () => {
+			it( 'should return no error if there is no duplicated context (no context in "foo", context in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -762,12 +780,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated context' ) );
 			} );
 
-			it( 'should return no error if there is no duplicated context (context in "foo", another context in "core")', () => {
+			it( 'should return no error if there is no duplicated context (context in "foo", another context in "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -785,12 +803,12 @@ describe( 'synchronizeTranslations()', () => {
 					}
 				] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).not.toHaveBeenCalledWith( expect.stringContaining( 'Duplicated context' ) );
 			} );
 
-			it( 'should return error if there is duplicated context (the same context in "foo" and "core")', () => {
+			it( 'should return error if there is duplicated context (the same context in "foo" and "core")', async () => {
 				vi.mocked( getPackageContexts ).mockReturnValue( [
 					{
 						packagePath: '/absolute/path/to/packages/ckeditor5-foo',
@@ -810,7 +828,7 @@ describe( 'synchronizeTranslations()', () => {
 
 				vi.mocked( getSourceMessages ).mockReturnValue( [] );
 
-				synchronizeTranslations( defaultOptions );
+				await synchronizeTranslations( defaultOptions );
 
 				expect( stubs.logger.error ).toHaveBeenCalledWith(
 					'   - Duplicated context "id1" in ' +

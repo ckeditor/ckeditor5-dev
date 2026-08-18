@@ -13,10 +13,18 @@ export default defineConfig( {
 		mockReset: true,
 		unstubEnvs: true,
 		unstubGlobals: true,
+		include: [
+			'tests/**/*.ts'
+		],
+		exclude: [
+			'tests/_utils/**/*.ts'
+		],
 		coverage: {
 			provider: 'v8',
 			include: [
-				'src/**'
+				'src/**',
+				'theme/catalog-favorites.ts',
+				'theme/catalog-search.ts'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

@@ -14,9 +14,12 @@ import {
 	typeDocTagObservable,
 	typeDocEventParamFixer,
 	typeDocEventInheritanceFixer,
+	typeDocHierarchyFixer,
 	typeDocInterfaceAugmentationFixer,
 	typeDocPurgePrivateApiDocs,
+	typeDocReferenceFixer,
 	typeDocRestoreProgramAfterConversion,
+	typeDocOutputCleanUp,
 	validate
 } from '@ckeditor/typedoc-plugins';
 
@@ -145,9 +148,12 @@ describe( 'lib/build()', () => {
 			typeDocTagObservable,
 			typeDocEventParamFixer,
 			typeDocEventInheritanceFixer,
+			typeDocHierarchyFixer,
 			typeDocInterfaceAugmentationFixer,
 			typeDocPurgePrivateApiDocs,
-			typeDocRestoreProgramAfterConversion
+			typeDocReferenceFixer,
+			typeDocRestoreProgramAfterConversion,
+			typeDocOutputCleanUp
 		];
 
 		plugins.forEach( plugin => {
