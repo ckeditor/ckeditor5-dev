@@ -34,6 +34,7 @@ import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import provideToken from '../lib/utils/providetoken.js';
+import validateGithubToken from '../lib/utils/validategithubtoken.js';
 
 import * as index from '../lib/index.js';
 
@@ -53,6 +54,7 @@ vi.mock( '../lib/utils/changelog' );
 vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
 vi.mock( '../lib/utils/providetoken' );
+vi.mock( '../lib/utils/validategithubtoken' );
 
 describe( 'dev-release-tools/index', () => {
 	describe( 'updateDependencies()', () => {
@@ -241,6 +243,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( provideToken ).to.be.a( 'function' );
 			expect( index.provideToken ).to.equal( provideToken );
+		} );
+	} );
+
+	describe( 'validateGithubToken()', () => {
+		it( 'should be a function', () => {
+			expect( validateGithubToken ).to.be.a( 'function' );
+			expect( index.validateGithubToken ).to.equal( validateGithubToken );
 		} );
 	} );
 

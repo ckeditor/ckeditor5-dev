@@ -24,10 +24,15 @@ describe( 'scripts/publishpackages', () => {
 		vi.mocked( releaseTools.getLastFromChangelog ).mockReturnValue( '1.0.0' );
 		vi.mocked( releaseTools.getChangesForVersion ).mockReturnValue( 'Changes.' );
 		vi.mocked( releaseTools.getNpmTagFromVersion ).mockReturnValue( 'latest' );
+		vi.mocked( releaseTools.validateGithubToken ).mockResolvedValue( 'github-token' );
 
 		await import( '../scripts/publishpackages.js' );
 
 		listrTasks = vi.mocked( Listr ).mock.calls[ 0 ][ 0 ];
+	} );
+
+	it( 'validates the GitHub token before running release tasks', () => {
+		expect( releaseTools.validateGithubToken ).toHaveBeenCalledExactlyOnceWith( 'github-token' );
 	} );
 
 	describe( 'Publishing packages.', () => {
