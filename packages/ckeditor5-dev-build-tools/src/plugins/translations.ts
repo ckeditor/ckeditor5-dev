@@ -94,7 +94,10 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 			const filePaths = await glob( options.source, {
 				cwd: process.cwd(),
 				absolute: true,
-				ignore: [ '**/node_modules/**', '**/dist/**', '**/*.d.ts' ]
+				ignore: {
+					ignored: path => path.name.endsWith( '.d.ts' ),
+					childrenIgnored: path => path.isNamed( 'node_modules' ) || path.isNamed( 'dist' )
+				}
 			} );
 
 			// Group the translation files by the language code.
