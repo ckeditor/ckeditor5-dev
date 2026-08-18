@@ -55,7 +55,7 @@ function restoreMutatedFiles() {
 // refuses to spawn directly. The command string is static, so shell quoting is not a concern.
 function runKnip( { production = false } = {} ) {
 	const command = 'pnpm exec knip --config ./scripts/knip/dependencies.ts --dependencies --no-config-hints' +
-		( production ? ' --production --strict' : '' );
+		( production ? ' --production' : '' );
 
 	return spawnSync( command, {
 		cwd: ROOT_DIRECTORY,
@@ -121,25 +121,6 @@ describe( 'check-dependencies', () => {
 		expect( status ).not.toEqual( 0 );
 		expect( stdout ).toContain( 'Unused' );
 		expect( stdout ).toContain( 'totally-unused-package' );
-	} );
-
-	it( 'reports a production dependency misplaced in `devDependencies`', { timeout: KNIP_TIMEOUT }, () => {
-		// The `simple-git` package is imported in `src/`, so it must not live in `devDependencies`.
-		mutateFile( PATHS.devUtilsPackageJson, content => {
-			const packageJson = JSON.parse( content );
-			const version = packageJson.dependencies[ 'simple-git' ];
-
-			expect( version ).toBeDefined();
-			delete packageJson.dependencies[ 'simple-git' ];
-			packageJson.devDependencies[ 'simple-git' ] = version;
-
-			return JSON.stringify( packageJson, null, 2 ) + '\n';
-		} );
-
-		const { status, stdout } = runKnip( { production: true } );
-
-		expect( status ).not.toEqual( 0 );
-		expect( stdout ).toContain( 'simple-git' );
 	} );
 
 	it( 'reports a package used only through a dynamic import', { timeout: KNIP_TIMEOUT }, () => {

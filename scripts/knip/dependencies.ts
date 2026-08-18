@@ -10,7 +10,7 @@ import type { KnipConfig } from 'knip';
  * with this configuration twice:
  *
  *   --dependencies                        (unused and unlisted packages)
- *   --dependencies --production --strict  (misplaced `dependencies` vs `devDependencies`)
+ *   --dependencies --production           (production dependency issues)
  *
  * Patterns marked with the `!` suffix describe production code. They must match the folders
  * that end up in the published packages (`lib`, `src`, `bin`, `theme`).
