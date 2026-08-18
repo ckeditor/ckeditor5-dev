@@ -42,13 +42,13 @@ function mutateFile( filePath, callback ) {
 	fs.writeFileSync( filePath, callback( content ) );
 }
 
-afterEach( () => {
+function restoreMutatedFiles() {
 	for ( const [ filePath, content ] of originalContents ) {
 		fs.writeFileSync( filePath, content );
 	}
 
 	originalContents.clear();
-} );
+}
 
 // Knip runs through `pnpm exec`, the same way CI invokes it. The command needs a shell,
 // because command launchers (`pnpm` included) are `.cmd` files on Windows, which Node.js
@@ -79,6 +79,8 @@ function runVersionsMatch( { fix = false } = {} ) {
 }
 
 describe( 'check-dependencies', () => {
+	afterEach( restoreMutatedFiles );
+
 	it( 'passes on a clean tree in both modes', { timeout: KNIP_TIMEOUT * 2 }, () => {
 		const defaultResult = runKnip();
 		const productionResult = runKnip( { production: true } );
@@ -166,6 +168,8 @@ describe( 'check-dependencies', () => {
 } );
 
 describe( 'self-import check (ESLint)', () => {
+	afterEach( restoreMutatedFiles );
+
 	it( 'reports an import from a package into itself', { timeout: KNIP_TIMEOUT }, async () => {
 		mutateFile( PATHS.devUtilsIndex, content => {
 			return content + '\nimport \'@ckeditor/ckeditor5-dev-utils\';\n';
@@ -180,6 +184,8 @@ describe( 'self-import check (ESLint)', () => {
 } );
 
 describe( 'check-versions-match', () => {
+	afterEach( restoreMutatedFiles );
+
 	it( 'reports and fixes a workspace package version mismatch', { timeout: KNIP_TIMEOUT }, () => {
 		mutateFile( PATHS.changelogPackageJson, content => {
 			const packageJson = JSON.parse( content );

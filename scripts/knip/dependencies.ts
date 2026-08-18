@@ -36,13 +36,6 @@ const packageFiles = [
 
 const rootFiles = [ 'scripts/**/*.{js,mjs,cjs,ts}', 'scripts-tests/**/*.{js,mjs}', '*.{js,mjs,ts}' ];
 
-const packageWorkspace = () => ( {
-	// Test fixtures reference intentionally non-existent packages.
-	ignore: [ 'tests/**/fixtures/**' ],
-	entry: packageFiles,
-	project: packageFiles
-} );
-
 const config: KnipConfig = {
 	compilers: {
 		// Extracts `@import` statements from plain CSS files, so packages imported in `theme/`
@@ -55,12 +48,17 @@ const config: KnipConfig = {
 			entry: rootFiles,
 			project: rootFiles,
 			ignoreDependencies: [
-				// Spawned via an explicit `node_modules/.bin` path in
+				// Resolved and spawned dynamically by
 				// `scripts/ci/check-dependencies-versions-match.mjs`, invisible to static analysis.
 				'syncpack'
 			]
 		},
-		'packages/*': packageWorkspace()
+		'packages/*': {
+			// Test fixtures reference intentionally non-existent packages.
+			ignore: [ 'tests/**/fixtures/**' ],
+			entry: packageFiles,
+			project: packageFiles
+		}
 	}
 };
 

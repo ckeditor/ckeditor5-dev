@@ -96,6 +96,7 @@ jobs:
       - run:
           name: Validate dependencies
           command: pnpm run check-dependencies
+      - run:
           name: Validate naming and location of test files
           command: pnpm run check-test-conventions
       - run:
