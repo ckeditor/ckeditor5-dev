@@ -4,6 +4,8 @@
  */
 
 import upath from 'upath';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
 import { rolldown, type RolldownOutput } from 'rolldown';
 import { verifyChunk } from '../../_utils/utils.js';
@@ -109,4 +111,41 @@ describe( 'translations()', () => {
 			source: upath.join( import.meta.dirname, '/fixtures/invalid-translations/*.ts' )
 		} ) ).rejects.toThrow( /invalid-translations\/de\.ts.*language "de"/ );
 	} );
+
+	it( 'ignores declarations and translation files in dependency and build directories', async () => {
+		const temporaryDirectory = await mkdtemp( upath.join( tmpdir(), 'ckeditor5-translations-' ) );
+
+		try {
+			await writeTranslationFile( temporaryDirectory, 'package/lang/translations/en.ts', 'Included translation' );
+			await writeTranslationFile(
+				temporaryDirectory,
+				'package/node_modules/dependency/lang/translations/en.ts',
+				'Ignored dependency translation'
+			);
+			await writeTranslationFile(
+				temporaryDirectory,
+				'package/dist/lang/translations/en.ts',
+				'Ignored build translation'
+			);
+			await writeTranslationFile( temporaryDirectory, 'package/lang/translations/en.d.ts', 'Ignored declaration' );
+
+			const output = await generateBundle( {
+				source: upath.join( temporaryDirectory, '**/lang/translations/*.ts' )
+			} );
+
+			verifyChunk( output, 'translations/en.js', 'Included translation' );
+			expect( output ).not.toEqual( expect.arrayContaining( [
+				expect.objectContaining( { code: expect.stringContaining( 'Ignored' ) } )
+			] ) );
+		} finally {
+			await rm( temporaryDirectory, { recursive: true, force: true } );
+		}
+	} );
 } );
+
+async function writeTranslationFile( rootPath: string, relativePath: string, message: string ): Promise<void> {
+	const filePath = upath.join( rootPath, relativePath );
+
+	await mkdir( upath.dirname( filePath ), { recursive: true } );
+	await writeFile( filePath, `export default { en: { dictionary: { '${ message }': '${ message }' } } };` );
+}
