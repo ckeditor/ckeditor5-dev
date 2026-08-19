@@ -10,7 +10,10 @@ import type { KnipConfig } from 'knip';
  * with this configuration twice:
  *
  *   --dependencies                        (unused and unlisted packages)
- *   --dependencies --production           (production dependency issues)
+ *   --dependencies --production --strict  (misplaced `dependencies` vs `devDependencies`)
+ *
+ * Strict isolation is limited to production code. Development tooling can still use dependencies
+ * declared in the root workspace during the default pass.
  *
  * Patterns marked with the `!` suffix describe production code. They must match the folders
  * that end up in the published packages (`lib`, `src`, `bin`, `theme`).
