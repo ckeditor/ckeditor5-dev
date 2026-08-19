@@ -23,6 +23,7 @@
     "dist"
   ],
   "dependencies": {
+    "@types/pacote": "^11.1.8",
     "@types/shelljs": "^0.10.0",
     "@types/through2": "^2.0.41",
     "cli-cursor": "^5.0.0",
@@ -36,7 +37,6 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@types/pacote": "^11.1.8",
     "@vitest/coverage-v8": "^4.1.2",
     "jest-extended": "^5.0.3",
     "rolldown": "^1.1.2",

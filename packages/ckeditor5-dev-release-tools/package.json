@@ -41,8 +41,5 @@
   "scripts": {
     "test": "vitest run --config vitest.config.js",
     "coverage": "vitest run --config vitest.config.js --coverage"
-  },
-  "depcheckIgnore": [
-    "virtual:parallelworker-integration-module"
-  ]
+  }
 }
