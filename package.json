@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "60.0.0",
+  "version": "61.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -16,7 +16,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-changelog": "workspace:*",
+    "@ckeditor/ckeditor5-dev-changelog": "^61.0.0",
     "@inquirer/prompts": "^7.10.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.22",
     "@vitest/coverage-v8": "^4.1.2",
