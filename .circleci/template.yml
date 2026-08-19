@@ -132,6 +132,16 @@ jobs:
           name: Check if packages are ready to be released
           command: pnpm run release:prepare-packages --verbose --compile-only
 
+  validate_release_token:
+    docker:
+      - image: cimg/node:24.11.0
+    steps:
+      - checkout
+      - bootstrap_repository_command
+      - run:
+          name: Validate the GitHub release token without running release tasks
+          command: node scripts/ci/validate-release-token.js
+
   trigger_release_process:
     docker:
       - image: cimg/node:24.11.0
@@ -244,6 +254,11 @@ workflows:
     jobs:
       - validate_and_tests
       - release_prepare
+      - validate_release_token:
+          filters:
+            branches:
+              only:
+                - ck/20214-circleci-token-smoke
       - upload_snyk_snapshots:
           filters:
             branches:
