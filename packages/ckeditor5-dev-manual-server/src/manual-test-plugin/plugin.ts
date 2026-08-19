@@ -96,7 +96,15 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			workspaceRoot = resolve( config.root || process.cwd() );
 
 			return {
-				input: getManualBuildInputs()
+				input: getManualBuildInputs(),
+				build: {
+					rolldownOptions: {
+						output: {
+							// Keep CSS side effects in source order when bundled dev splits them across chunks.
+							strictExecutionOrder: true
+						}
+					}
+				}
 			};
 		},
 

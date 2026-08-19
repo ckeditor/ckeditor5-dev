@@ -84,6 +84,13 @@ describe( 'manualTestsPlugin()', () => {
 		expect( input ).not.to.include( join( workspaceRoot, 'packages/ckeditor5-bar/manual/bar.manual.html' ) );
 	} );
 
+	it( 'preserves module execution order when serving manual tests', async () => {
+		server = await createManualTestServer( { paths: [] } );
+		const output = server.config.build.rolldownOptions.output as { strictExecutionOrder: boolean };
+
+		expect( output.strictExecutionOrder ).to.be.true;
+	} );
+
 	it( 'exposes entries collected from provided package root globs', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),
