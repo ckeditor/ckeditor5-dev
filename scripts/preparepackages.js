@@ -125,6 +125,7 @@ const tasks = new Listr( [
 			return releaseTools.updateDependencies( {
 				version: '^' + latestVersion,
 				packagesDirectory: RELEASE_DIRECTORY,
+				includeCwd: false,
 				shouldUpdateVersionCallback: packageName => {
 					return CKEDITOR5_DEV_PACKAGES.includes( packageName.split( '/' )[ 1 ] );
 				}
