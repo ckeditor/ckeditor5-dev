@@ -24,7 +24,7 @@ importers:
   .:
     devDependencies:
       '@ckeditor/ckeditor5-dev-changelog':
-        specifier: workspace:*
+        specifier: ^61.0.0
         version: link:packages/ckeditor5-dev-changelog
       '@inquirer/prompts':
         specifier: ^7.10.1
