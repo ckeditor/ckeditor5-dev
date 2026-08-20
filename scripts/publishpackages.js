@@ -81,7 +81,7 @@ tasks.run()
  */
 async function getGitHubToken() {
 	if ( process.env.CKE5_RELEASE_TOKEN ) {
-		return process.env.CKE5_RELEASE_TOKEN;
+		return releaseTools.validateGithubToken( process.env.CKE5_RELEASE_TOKEN, { cwd: process.cwd() } );
 	}
 
 	return releaseTools.provideToken();

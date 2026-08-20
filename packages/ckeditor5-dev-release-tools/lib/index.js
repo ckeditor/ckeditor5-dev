@@ -32,3 +32,4 @@ export { default as executeInParallel } from './utils/executeinparallel.js';
 export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
 export { default as provideToken } from './utils/providetoken.js';
+export { default as validateGithubToken } from './utils/validategithubtoken.js';
