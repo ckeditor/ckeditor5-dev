@@ -56,7 +56,7 @@ describe( 'validateGithubToken()', () => {
 	} );
 
 	it( 'rejects an empty token without calling GitHub', async () => {
-		await expect( validateGithubToken( '   ' ) ).rejects.toThrow( 'The token cannot be empty.' );
+		await expect( validateGithubToken( '   ', { cwd: '/workspace' } ) ).rejects.toThrow( 'The token cannot be empty.' );
 
 		expect( stubs.constructor ).not.toHaveBeenCalled();
 	} );
@@ -71,7 +71,7 @@ describe( 'validateGithubToken()', () => {
 			}
 		} );
 
-		await expect( validateGithubToken( 'github-token' ) )
+		await expect( validateGithubToken( 'github-token', { cwd: '/workspace' } ) )
 			.rejects.toThrow(
 				'GitHub API request for the "ckeditor/ckeditor5-dev" repository failed with HTTP 401: Bad credentials'
 			);
@@ -87,7 +87,7 @@ describe( 'validateGithubToken()', () => {
 			}
 		} );
 
-		await expect( validateGithubToken( 'github-token' ) )
+		await expect( validateGithubToken( 'github-token', { cwd: '/workspace' } ) )
 			.rejects.toThrow(
 				'GitHub API request for the "ckeditor/ckeditor5-dev" repository failed with HTTP 404: Not Found'
 			);
@@ -103,7 +103,7 @@ describe( 'validateGithubToken()', () => {
 			}
 		} );
 
-		await expect( validateGithubToken( 'github-token' ) )
+		await expect( validateGithubToken( 'github-token', { cwd: '/workspace' } ) )
 			.rejects.toThrow(
 				'GitHub API request for the "ckeditor/ckeditor5-dev" repository failed with HTTP 403: ' +
 				'Resource not accessible by personal access token'
@@ -113,7 +113,7 @@ describe( 'validateGithubToken()', () => {
 	it( 'reports unexpected errors returned by GitHub', async () => {
 		stubs.getRepository.mockRejectedValue( new Error( 'Network unavailable.' ) );
 
-		await expect( validateGithubToken( 'github-token' ) )
+		await expect( validateGithubToken( 'github-token', { cwd: '/workspace' } ) )
 			.rejects.toThrow(
 				'Could not verify the token for the "ckeditor/ckeditor5-dev" repository: Network unavailable.'
 			);

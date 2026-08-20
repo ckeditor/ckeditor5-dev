@@ -13,14 +13,14 @@ import validateGithubToken from './validategithubtoken.js';
  * @param {string} [options.cwd=process.cwd()] Current working directory from which the repository will be resolved.
  * @returns {Promise.<string>}
  */
-export default async function provideToken( options ) {
+export default async function provideToken( { cwd = process.cwd() } = {} ) {
 	const tokenQuestion = {
 		type: 'password',
 		name: 'token',
 		message: 'Provide the GitHub token:',
 		async validate( input ) {
 			try {
-				await validateGithubToken( input, options );
+				await validateGithubToken( input, { cwd } );
 
 				return true;
 			} catch ( error ) {

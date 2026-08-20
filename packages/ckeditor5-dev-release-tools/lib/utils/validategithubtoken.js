@@ -12,11 +12,11 @@ const VALIDATION_TAG_NAME = 'ckeditor5-dev-release-tools-token-validation';
  * Verifies that a GitHub token can create a release in the current repository.
  *
  * @param {string} token Token used to authenticate with GitHub.
- * @param {object} [options]
- * @param {string} [options.cwd=process.cwd()] Current working directory from which the repository will be resolved.
+ * @param {object} options
+ * @param {string} options.cwd=process.cwd() Current working directory from which the repository will be resolved.
  * @returns {Promise.<string>} The normalized token.
  */
-export default async function validateGithubToken( token, { cwd = process.cwd() } = {} ) {
+export default async function validateGithubToken( token, { cwd } ) {
 	const normalizedToken = token.trim();
 
 	if ( !normalizedToken ) {

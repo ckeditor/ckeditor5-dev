@@ -52,6 +52,18 @@ describe( 'provideToken()', () => {
 		expect( validateGithubToken ).toHaveBeenCalledExactlyOnceWith( 'github-token', { cwd: '/workspace' } );
 	} );
 
+	it( 'uses the current working directory by default', async () => {
+		await provideToken();
+
+		const [ firstCall ] = vi.mocked( inquirer ).prompt.mock.calls;
+		const [ firstArgument ] = firstCall;
+		const [ firstQuestion ] = firstArgument;
+
+		await firstQuestion.validate( 'github-token' );
+
+		expect( validateGithubToken ).toHaveBeenCalledExactlyOnceWith( 'github-token', { cwd: process.cwd() } );
+	} );
+
 	it( 'shows a validation error returned by GitHub', async () => {
 		vi.mocked( validateGithubToken ).mockRejectedValue( new Error( 'GitHub API request failed with HTTP 401: Bad credentials' ) );
 

@@ -32,7 +32,7 @@ describe( 'scripts/publishpackages', () => {
 	} );
 
 	it( 'validates the GitHub token before running release tasks', () => {
-		expect( releaseTools.validateGithubToken ).toHaveBeenCalledExactlyOnceWith( 'github-token' );
+		expect( releaseTools.validateGithubToken ).toHaveBeenCalledExactlyOnceWith( 'github-token', { cwd: process.cwd() } );
 	} );
 
 	describe( 'Publishing packages.', () => {
