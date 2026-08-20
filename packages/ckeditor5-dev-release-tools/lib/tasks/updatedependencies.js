@@ -26,6 +26,7 @@ const { normalizeTrim } = upath;
  * for a dependency. It receives a package name as an argument and should return a boolean value.
  * @param {UpdateDependenciesPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing
  * filtering out directories/packages that should not be touched by the task.
+ * @param {boolean} [options.includeCwd=true] Whether to update dependencies in the package located directly in `options.cwd`.
  * @param {string} [options.packagesDirectory] Relative path to a location of packages to update their dependencies. If not specified,
  * only the root package is checked.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
@@ -37,6 +38,7 @@ export default async function updateDependencies( options ) {
 		packagesDirectory,
 		shouldUpdateVersionCallback,
 		packagesDirectoryFilter = null,
+		includeCwd = true,
 		cwd = process.cwd()
 	} = options;
 
@@ -45,7 +47,7 @@ export default async function updateDependencies( options ) {
 		packagesDirectory ? normalizeTrim( packagesDirectory ) : null,
 		{
 			includePackageJson: true,
-			includeCwd: true,
+			includeCwd,
 			packagesDirectoryFilter
 		}
 	);

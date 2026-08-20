@@ -6,6 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Listr } from 'listr2';
 import fs from 'fs-extra';
+import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 
 vi.mock( './utils/parsearguments.js' );
 vi.mock( '@ckeditor/ckeditor5-dev-release-tools' );
@@ -59,6 +60,22 @@ describe( 'scripts/preparepackages', () => {
 			} catch ( err ) {
 				expect( err ).toEqual( 'Release directory is empty, aborting.' );
 			}
+		} );
+	} );
+
+	describe( 'Updating dependencies.', () => {
+		it( 'does not update dependencies in the root package', async () => {
+			const task = listrTasks.find( ( { title } ) => title === 'Updating dependencies.' ).task;
+
+			expect( task ).toBeInstanceOf( Function );
+
+			await task();
+
+			expect( vi.mocked( releaseTools.updateDependencies ) ).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining( {
+					includeCwd: false
+				} )
+			);
 		} );
 	} );
 } );

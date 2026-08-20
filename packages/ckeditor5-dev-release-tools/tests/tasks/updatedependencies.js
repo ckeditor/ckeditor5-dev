@@ -69,6 +69,18 @@ describe( 'updateDependencies()', () => {
 			);
 		} );
 
+		it( 'should not include a package included in the "cwd" when `includeCwd` is false', async () => {
+			await updateDependencies( { includeCwd: false } );
+
+			expect( vi.mocked( workspaces.findPathsToPackages ) ).toHaveBeenCalledExactlyOnceWith(
+				expect.anything(),
+				null,
+				expect.objectContaining( {
+					includeCwd: false
+				} )
+			);
+		} );
+
 		it( 'should use the `packagesDirectory` option for searching for packages in `cwd`', () => {
 			updateDependencies( {
 				packagesDirectory: 'packages'

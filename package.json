@@ -16,7 +16,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-changelog": "^61.0.0",
+    "@ckeditor/ckeditor5-dev-changelog": "workspace:*",
     "@inquirer/prompts": "^7.10.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.22",
     "@vitest/coverage-v8": "^4.1.2",
