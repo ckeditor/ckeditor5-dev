@@ -3,9 +3,12 @@ Changelog
 
 ## [61.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v61.0.0...v61.1.0) (August 21, 2026)
 
-### Bug fixes
+### Features
 
 * **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: Added a Vite plugin that preserves CSS import order in production builds.
+
+### Bug fixes
+
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The GitHub token used by the release workflow is now verified against the target repository instead of being required to contain 40 characters.
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `updateDependencies()` release helper now allows excluding the package in the working directory.
 
