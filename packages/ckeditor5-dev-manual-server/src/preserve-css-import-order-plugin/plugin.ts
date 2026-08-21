@@ -7,7 +7,6 @@ import { createHash } from 'node:crypto';
 import type { Plugin } from 'vite';
 
 const INJECTED_CSS_VIRTUAL_ID_PREFIX = '\0virtual:ckeditor5-preserve-css-import-order:';
-const INJECTED_CSS_VIRTUAL_ID_REGEXP = /^\0virtual:ckeditor5-preserve-css-import-order:/;
 const INJECTED_CSS_VIRTUAL_ID_SUFFIX = '.js';
 const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
 
@@ -79,7 +78,7 @@ export function preserveCssImportOrderPlugin(): Plugin {
 
 		load: {
 			filter: {
-				id: INJECTED_CSS_VIRTUAL_ID_REGEXP
+				id: new RegExp( `^${ INJECTED_CSS_VIRTUAL_ID_PREFIX }` )
 			},
 
 			handler( id ) {
