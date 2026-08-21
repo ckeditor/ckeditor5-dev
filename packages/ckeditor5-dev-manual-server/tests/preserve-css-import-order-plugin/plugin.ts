@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PluginContextResolveOptions, ResolveIdExtraOptions } from 'rolldown';
 import { build, type HtmlTagDescriptor, type Plugin } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
 import { preserveCssImportOrderPlugin } from '../../src/preserve-css-import-order-plugin/plugin.js';
@@ -29,21 +30,38 @@ type TransformIndexHtmlHook = {
 	): string | undefined | { html: string; tags: Array<HtmlTagDescriptor> };
 };
 type ResolveIdHook = {
+	filter: { id: RegExp };
 	handler(
 		this: ResolveIdContext,
 		source: string,
-		importer: string | undefined
+		importer: string | undefined,
+		options: ResolveIdExtraOptions
 	): Promise<string | null> | null;
 };
 type ResolveIdContext = {
 	resolve(
 		source: string,
 		importer: string | undefined,
-		options: { skipSelf: boolean }
+		options: PluginContextResolveOptions
 	): Promise<{ id: string; external?: boolean } | null>;
 };
-type LoadHook = ( id: string ) => { code: string; moduleSideEffects: true } | null;
-type BuildStartHook = () => void;
+type LoadHook = {
+	filter: { id: RegExp };
+	handler( id: string ): {
+		code: string;
+		moduleSideEffects: true;
+	} | null;
+};
+
+const IMPORT_OPTIONS: ResolveIdExtraOptions = {
+	custom: {
+		fixture: {
+			preserve: true
+		}
+	},
+	isEntry: false,
+	kind: 'import-statement'
+};
 
 describe( 'preserveCssImportOrderPlugin()', () => {
 	let workspaceRoot: string;
@@ -66,22 +84,24 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		}
 	} );
 
-	it( 'lets Vite handle CSS imports during development', () => {
+	it( 'filters module hooks to plain CSS imports and its own virtual modules', () => {
+		const plugin = preserveCssImportOrderPlugin();
+		const resolveId = plugin.resolveId as ResolveIdHook;
+		const load = plugin.load as LoadHook;
+
+		expect( resolveId.filter.id.test( './theme.css' ) ).to.be.true;
+		expect( resolveId.filter.id.test( './theme.css?inline' ) ).to.be.false;
+		expect( resolveId.filter.id.test( './module.js' ) ).to.be.false;
+		expect( load.filter.id.test( '\0virtual:ckeditor5-preserve-css-import-order:hash.js' ) ).to.be.true;
+		expect( load.filter.id.test( '/theme.css' ) ).to.be.false;
+	} );
+
+	it( 'lets Vite handle CSS imports during development', async () => {
 		const plugin = createConfiguredPlugin( 'serve' );
 		const resolveId = plugin.resolveId as ResolveIdHook;
 		const context = { resolve: vi.fn() } as unknown as ResolveIdContext;
 
-		expect( resolveId.handler.call( context, './theme.css', '/entry.js' ) ).to.be.null;
-		expect( context.resolve ).not.toHaveBeenCalled();
-	} );
-
-	it( 'ignores imports other than plain CSS files', () => {
-		const plugin = createConfiguredPlugin();
-		const resolveId = plugin.resolveId as ResolveIdHook;
-		const context = { resolve: vi.fn() } as unknown as ResolveIdContext;
-
-		expect( resolveId.handler.call( context, './module.js', undefined ) ).to.be.null;
-		expect( resolveId.handler.call( context, './theme.css?inline', undefined ) ).to.be.null;
+		expect( await resolveId.handler.call( context, './theme.css', '/entry.js', IMPORT_OPTIONS ) ).to.be.null;
 		expect( context.resolve ).not.toHaveBeenCalled();
 	} );
 
@@ -94,32 +114,36 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 				.mockResolvedValueOnce( { id: '/external.css', external: true } )
 		};
 
-		expect( await resolveId.handler.call( context, './missing.css', '/entry.js' ) ).to.be.null;
-		expect( await resolveId.handler.call( context, './external.css', '/entry.js' ) ).to.be.null;
-		expect( context.resolve ).toHaveBeenCalledWith( './missing.css', '/entry.js', { skipSelf: true } );
-		expect( context.resolve ).toHaveBeenCalledWith( './external.css', '/entry.js', { skipSelf: true } );
+		expect( await resolveId.handler.call( context, './missing.css', '/entry.js', IMPORT_OPTIONS ) ).to.be.null;
+		expect( await resolveId.handler.call( context, './external.css', '/entry.js', IMPORT_OPTIONS ) ).to.be.null;
+		expect( context.resolve ).toHaveBeenCalledWith( './missing.css', '/entry.js', {
+			...IMPORT_OPTIONS,
+			skipSelf: true
+		} );
+		expect( context.resolve ).toHaveBeenCalledWith( './external.css', '/entry.js', {
+			...IMPORT_OPTIONS,
+			skipSelf: true
+		} );
 	} );
 
-	it( 'reuses virtual IDs and resets its caches between builds', async () => {
+	it( 'creates deterministic virtual modules that inject CSS as JavaScript side effects', async () => {
 		const plugin = createConfiguredPlugin();
 		const resolveId = plugin.resolveId as ResolveIdHook;
 		const load = plugin.load as LoadHook;
 		const context: ResolveIdContext = {
-			resolve: vi.fn().mockResolvedValue( { id: '/theme.css?variant=dark#layer' } )
+			resolve: vi.fn().mockResolvedValue( { id: '/theme.css' } )
 		};
 
-		const firstId = await resolveId.handler.call( context, './theme.css', '/entry.js' );
-		const secondId = await resolveId.handler.call( context, './theme.css', '/entry.js' );
-		const loadedModule = load( firstId! );
+		const firstId = await resolveId.handler.call( context, './theme.css', '/entry.js', IMPORT_OPTIONS );
+		const secondId = await resolveId.handler.call( context, './theme.css', '/entry.js', IMPORT_OPTIONS );
+		const loadedModule = load.handler( firstId! );
 
 		expect( secondId ).to.equal( firstId );
-		expect( load( 'unrelated' ) ).to.be.null;
-		expect( loadedModule!.code ).to.contain( '"/theme.css?variant=dark&inline#layer"' );
+		expect( firstId ).to.match( /^\0virtual:ckeditor5-preserve-css-import-order:[a-f\d]{64}\.js$/ );
+		expect( load.handler( 'unrelated' ) ).to.be.null;
+		expect( load.handler( '\0virtual:ckeditor5-preserve-css-import-order:unknown.js' ) ).to.be.null;
+		expect( loadedModule!.code ).to.contain( '"/theme.css?inline"' );
 		expect( loadedModule!.moduleSideEffects ).to.be.true;
-
-		( plugin.buildStart as BuildStartHook )();
-
-		expect( load( firstId! ) ).to.be.null;
 	} );
 
 	it( 'injects production CSS in module execution order', async () => {

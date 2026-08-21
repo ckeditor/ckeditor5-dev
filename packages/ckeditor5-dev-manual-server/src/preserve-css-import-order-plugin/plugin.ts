@@ -3,13 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
+import { createHash } from 'node:crypto';
 import type { Plugin } from 'vite';
 
 const INJECTED_CSS_VIRTUAL_ID_PREFIX = '\0virtual:ckeditor5-preserve-css-import-order:';
+const INJECTED_CSS_VIRTUAL_ID_REGEXP = /^\0virtual:ckeditor5-preserve-css-import-order:/;
+const INJECTED_CSS_VIRTUAL_ID_SUFFIX = '.js';
 const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
 
 /**
- * Preserves the source execution order of CSS imports in production builds.
+ * Preserves the source execution order of CSS imports in manual development and production builds.
  *
  * Vite extracts imported CSS into assets and orders those assets by the generated chunk graph.
  * In a multi-page build that order may differ from the source module execution order, changing
@@ -25,15 +28,14 @@ const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
  * Query-bearing CSS imports retain their explicit Vite semantics and pass through unchanged.
  */
 export function preserveCssImportOrderPlugin(): Plugin {
-	let injectCss = false;
+	let rewriteCssImports = false;
 	const cssFilePaths = new Map<string, string>();
-	const cssVirtualIds = new Map<string, string>();
 
 	return {
 		name: 'ckeditor5-preserve-css-import-order',
 
 		config( _config, { command } ) {
-			injectCss = command == 'build';
+			rewriteCssImports = command == 'build';
 
 			return {
 				build: {
@@ -46,59 +48,59 @@ export function preserveCssImportOrderPlugin(): Plugin {
 			};
 		},
 
-		buildStart() {
-			cssFilePaths.clear();
-			cssVirtualIds.clear();
-		},
-
 		resolveId: {
 			order: 'pre',
+			filter: {
+				id: CSS_FILE_REGEXP
+			},
 
-			handler( source, importer ) {
-				if ( !injectCss || !CSS_FILE_REGEXP.test( source ) ) {
+			async handler( source, importer, options ) {
+				if ( !rewriteCssImports ) {
 					return null;
 				}
 
-				return this.resolve( source, importer, { skipSelf: true } ).then( resolved => {
-					if ( !resolved || resolved.external ) {
-						return null;
-					}
-
-					const cachedVirtualId = cssVirtualIds.get( resolved.id );
-
-					if ( cachedVirtualId ) {
-						return cachedVirtualId;
-					}
-
-					const virtualId = `${ INJECTED_CSS_VIRTUAL_ID_PREFIX }${ cssVirtualIds.size }`;
-
-					cssFilePaths.set( virtualId, resolved.id );
-					cssVirtualIds.set( resolved.id, virtualId );
-
-					return virtualId;
+				const resolved = await this.resolve( source, importer, {
+					...options,
+					skipSelf: true
 				} );
+
+				if ( !resolved || resolved.external ) {
+					return null;
+				}
+
+				const cssIdHash = createHash( 'sha256' ).update( resolved.id ).digest( 'hex' );
+				const virtualId = `${ INJECTED_CSS_VIRTUAL_ID_PREFIX }${ cssIdHash }${ INJECTED_CSS_VIRTUAL_ID_SUFFIX }`;
+
+				cssFilePaths.set( virtualId, resolved.id );
+
+				return virtualId;
 			}
 		},
 
-		load( id ) {
-			const cssFilePath = cssFilePaths.get( id );
+		load: {
+			filter: {
+				id: INJECTED_CSS_VIRTUAL_ID_REGEXP
+			},
 
-			return cssFilePath ? {
-				code: createCssInjectionModule( cssFilePath ),
-				moduleSideEffects: true
-			} : null;
+			handler( id ) {
+				const cssFilePath = cssFilePaths.get( id );
+
+				if ( !cssFilePath ) {
+					return null;
+				}
+
+				return {
+					code: createCssInjectionModule( cssFilePath ),
+					moduleSideEffects: true
+				};
+			}
 		}
 	};
 }
 
 function createCssInjectionModule( cssFilePath: string ): string {
-	const hashIndex = cssFilePath.indexOf( '#' );
-	const pathAndQuery = hashIndex == -1 ? cssFilePath : cssFilePath.slice( 0, hashIndex );
-	const hash = hashIndex == -1 ? '' : cssFilePath.slice( hashIndex );
-	const inlineCssFilePath = `${ pathAndQuery }${ pathAndQuery.includes( '?' ) ? '&' : '?' }inline${ hash }`;
-
 	return `
-import css from ${ JSON.stringify( inlineCssFilePath ) };
+import css from ${ JSON.stringify( `${ cssFilePath }?inline` ) };
 
 const style = document.createElement( 'style' );
 style.textContent = css;

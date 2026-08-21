@@ -44,7 +44,7 @@ export default defineConfig( {
 } );
 ```
 
-The plugin enables Rolldown's strict execution order in development and production. During production builds, it additionally loads CSS through JavaScript side effects so those effects follow the source import order.
+The plugin enables Rolldown's strict module execution order in development and production, which can increase the generated bundle size. During production builds, it additionally rewrites plain CSS imports into ordered JavaScript side effects.
 
 ## Changelog
 
