@@ -11,7 +11,7 @@ import type { PluginContextResolveOptions, ResolveIdExtraOptions } from 'rolldow
 import { build, type HtmlTagDescriptor, type Plugin } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
 import { preserveCssImportOrderPlugin } from '../../src/preserve-css-import-order-plugin/plugin.js';
-import { stripLeadingSlash } from '../../src/utils.js';
+import { stripLeadingSlash, toPosixPath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
 type ConfigHook = ( config: unknown, environment: { command: 'build' | 'serve' } ) => {
@@ -185,7 +185,7 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		manualPlugin.transformIndexHtml = {
 			order: 'pre',
 			handler( html, context ) {
-				if ( context.filename == resolve( workspaceRoot, 'index.html' ) ) {
+				if ( toPosixPath( context.filename ) == toPosixPath( resolve( workspaceRoot, 'index.html' ) ) ) {
 					return transformIndexHtml.handler( html, context );
 				}
 			}
