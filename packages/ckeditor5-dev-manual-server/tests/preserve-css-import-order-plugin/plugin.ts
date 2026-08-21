@@ -28,6 +28,22 @@ type TransformIndexHtmlHook = {
 		context: { filename: string }
 	): string | undefined | { html: string; tags: Array<HtmlTagDescriptor> };
 };
+type ResolveIdHook = {
+	handler(
+		this: ResolveIdContext,
+		source: string,
+		importer: string | undefined
+	): Promise<string | null> | null;
+};
+type ResolveIdContext = {
+	resolve(
+		source: string,
+		importer: string | undefined,
+		options: { skipSelf: boolean }
+	): Promise<{ id: string; external?: boolean } | null>;
+};
+type LoadHook = ( id: string ) => { code: string; moduleSideEffects: true } | null;
+type BuildStartHook = () => void;
 
 describe( 'preserveCssImportOrderPlugin()', () => {
 	let workspaceRoot: string;
@@ -52,6 +68,53 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		const config = ( plugin.config as ConfigHook )();
 
 		expect( config.build.rolldownOptions.output.strictExecutionOrder ).to.be.true;
+	} );
+
+	it( 'ignores imports other than plain CSS files', () => {
+		const plugin = preserveCssImportOrderPlugin();
+		const resolveId = plugin.resolveId as ResolveIdHook;
+		const context = { resolve: vi.fn() } as unknown as ResolveIdContext;
+
+		expect( resolveId.handler.call( context, './module.js', undefined ) ).to.be.null;
+		expect( resolveId.handler.call( context, './theme.css?inline', undefined ) ).to.be.null;
+		expect( context.resolve ).not.toHaveBeenCalled();
+	} );
+
+	it( 'ignores unresolved and external CSS files', async () => {
+		const plugin = preserveCssImportOrderPlugin();
+		const resolveId = plugin.resolveId as ResolveIdHook;
+		const context: ResolveIdContext = {
+			resolve: vi.fn()
+				.mockResolvedValueOnce( null )
+				.mockResolvedValueOnce( { id: '/external.css', external: true } )
+		};
+
+		expect( await resolveId.handler.call( context, './missing.css', '/entry.js' ) ).to.be.null;
+		expect( await resolveId.handler.call( context, './external.css', '/entry.js' ) ).to.be.null;
+		expect( context.resolve ).toHaveBeenCalledWith( './missing.css', '/entry.js', { skipSelf: true } );
+		expect( context.resolve ).toHaveBeenCalledWith( './external.css', '/entry.js', { skipSelf: true } );
+	} );
+
+	it( 'reuses virtual IDs and resets its caches between builds', async () => {
+		const plugin = preserveCssImportOrderPlugin();
+		const resolveId = plugin.resolveId as ResolveIdHook;
+		const load = plugin.load as LoadHook;
+		const context: ResolveIdContext = {
+			resolve: vi.fn().mockResolvedValue( { id: '/theme.css?variant=dark#layer' } )
+		};
+
+		const firstId = await resolveId.handler.call( context, './theme.css', '/entry.js' );
+		const secondId = await resolveId.handler.call( context, './theme.css', '/entry.js' );
+		const loadedModule = load( firstId! );
+
+		expect( secondId ).to.equal( firstId );
+		expect( load( 'unrelated' ) ).to.be.null;
+		expect( loadedModule!.code ).to.contain( '"/theme.css?variant=dark&inline#layer"' );
+		expect( loadedModule!.moduleSideEffects ).to.be.true;
+
+		( plugin.buildStart as BuildStartHook )();
+
+		expect( load( firstId! ) ).to.be.null;
 	} );
 
 	it( 'injects production CSS in module execution order', async () => {
