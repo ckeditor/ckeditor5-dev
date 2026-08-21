@@ -44,7 +44,7 @@ export default defineConfig( {
 } );
 ```
 
-The plugin runs only during production builds. It loads CSS through JavaScript side effects and enables Rolldown's strict execution order so those effects follow the source import order.
+The plugin enables Rolldown's strict execution order in development and production. During production builds, it additionally loads CSS through JavaScript side effects so those effects follow the source import order.
 
 ## Changelog
 

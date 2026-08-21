@@ -17,22 +17,24 @@ const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
  * https://github.com/vitejs/vite/issues/4890.
  *
  * Until Vite handles this natively (https://github.com/vitejs/vite/pull/22541), plain CSS imports
- * are replaced with virtual JavaScript modules. Each module loads the processed CSS through Vite's
- * `?inline` query and appends it as a `<style>` side effect. Rolldown's `strictExecutionOrder` then
- * keeps those effects in source order, matching the ordering model used by bundled development
- * builds.
+ * in production builds are replaced with virtual JavaScript modules. Each module loads the
+ * processed CSS through Vite's `?inline` query and appends it as a `<style>` side effect.
+ * Rolldown's `strictExecutionOrder` keeps both these production effects and Vite's native bundled
+ * development CSS effects in source order.
  *
  * Query-bearing CSS imports retain their explicit Vite semantics and pass through unchanged.
  */
 export function preserveCssImportOrderPlugin(): Plugin {
+	let injectCss = false;
 	const cssFilePaths = new Map<string, string>();
 	const cssVirtualIds = new Map<string, string>();
 
 	return {
 		name: 'ckeditor5-preserve-css-import-order',
-		apply: 'build',
 
-		config() {
+		config( _config, { command } ) {
+			injectCss = command == 'build';
+
 			return {
 				build: {
 					rolldownOptions: {
@@ -53,7 +55,7 @@ export function preserveCssImportOrderPlugin(): Plugin {
 			order: 'pre',
 
 			handler( source, importer ) {
-				if ( !CSS_FILE_REGEXP.test( source ) ) {
+				if ( !injectCss || !CSS_FILE_REGEXP.test( source ) ) {
 					return null;
 				}
 

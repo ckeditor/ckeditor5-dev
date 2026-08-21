@@ -7,13 +7,13 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { build, type HtmlTagDescriptor } from 'vite';
+import { build, type HtmlTagDescriptor, type Plugin } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
 import { preserveCssImportOrderPlugin } from '../../src/preserve-css-import-order-plugin/plugin.js';
 import { stripLeadingSlash } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
-type ConfigHook = () => {
+type ConfigHook = ( config: unknown, environment: { command: 'build' | 'serve' } ) => {
 	build: {
 		rolldownOptions: {
 			output: {
@@ -57,21 +57,26 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		await removeDirectory( workspaceRoot );
 	} );
 
-	it( 'runs only during builds', () => {
-		const plugin = preserveCssImportOrderPlugin();
+	it( 'enables strict module execution order in development and production', () => {
+		for ( const command of [ 'serve', 'build' ] as const ) {
+			const plugin = preserveCssImportOrderPlugin();
+			const config = ( plugin.config as ConfigHook )( {}, { command } );
 
-		expect( plugin.apply ).to.equal( 'build' );
+			expect( config.build.rolldownOptions.output.strictExecutionOrder ).to.be.true;
+		}
 	} );
 
-	it( 'enables strict module execution order', () => {
-		const plugin = preserveCssImportOrderPlugin();
-		const config = ( plugin.config as ConfigHook )();
+	it( 'lets Vite handle CSS imports during development', () => {
+		const plugin = createConfiguredPlugin( 'serve' );
+		const resolveId = plugin.resolveId as ResolveIdHook;
+		const context = { resolve: vi.fn() } as unknown as ResolveIdContext;
 
-		expect( config.build.rolldownOptions.output.strictExecutionOrder ).to.be.true;
+		expect( resolveId.handler.call( context, './theme.css', '/entry.js' ) ).to.be.null;
+		expect( context.resolve ).not.toHaveBeenCalled();
 	} );
 
 	it( 'ignores imports other than plain CSS files', () => {
-		const plugin = preserveCssImportOrderPlugin();
+		const plugin = createConfiguredPlugin();
 		const resolveId = plugin.resolveId as ResolveIdHook;
 		const context = { resolve: vi.fn() } as unknown as ResolveIdContext;
 
@@ -81,7 +86,7 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 	} );
 
 	it( 'ignores unresolved and external CSS files', async () => {
-		const plugin = preserveCssImportOrderPlugin();
+		const plugin = createConfiguredPlugin();
 		const resolveId = plugin.resolveId as ResolveIdHook;
 		const context: ResolveIdContext = {
 			resolve: vi.fn()
@@ -96,7 +101,7 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 	} );
 
 	it( 'reuses virtual IDs and resets its caches between builds', async () => {
-		const plugin = preserveCssImportOrderPlugin();
+		const plugin = createConfiguredPlugin();
 		const resolveId = plugin.resolveId as ResolveIdHook;
 		const load = plugin.load as LoadHook;
 		const context: ResolveIdContext = {
@@ -200,3 +205,11 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		expect( injectedStyles[ 2 ] ).to.contain( '.order-theme' );
 	} );
 } );
+
+function createConfiguredPlugin( command: 'build' | 'serve' = 'build' ): Plugin {
+	const plugin = preserveCssImportOrderPlugin();
+
+	( plugin.config as ConfigHook )( {}, { command } );
+
+	return plugin;
+}
