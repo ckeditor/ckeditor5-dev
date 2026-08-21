@@ -4,6 +4,7 @@
  */
 
 export { manualTestsPlugin, type ManualTestsPluginOptions } from './manual-test-plugin/plugin.js';
+export { productionCssOrderPlugin } from './production-css-order-plugin/plugin.js';
 export { ckDebugPlugin } from './debug-plugin/plugin.js';
 export { refreshPlugin } from './refresh-plugin/plugin.js';
 export { rawSvgPlugin } from './svg-plugin/plugin.js';
