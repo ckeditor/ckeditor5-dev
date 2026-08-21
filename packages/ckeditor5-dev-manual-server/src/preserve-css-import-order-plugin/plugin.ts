@@ -5,7 +5,7 @@
 
 import type { Plugin } from 'vite';
 
-const INJECTED_CSS_VIRTUAL_ID_PREFIX = '\0virtual:ckeditor5-production-css-order:';
+const INJECTED_CSS_VIRTUAL_ID_PREFIX = '\0virtual:ckeditor5-preserve-css-import-order:';
 const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
 
 /**
@@ -24,12 +24,12 @@ const CSS_FILE_REGEXP = /^[^?#]+\.css$/;
  *
  * Query-bearing CSS imports retain their explicit Vite semantics and pass through unchanged.
  */
-export function productionCssOrderPlugin(): Plugin {
+export function preserveCssImportOrderPlugin(): Plugin {
 	const cssFilePaths = new Map<string, string>();
 	const cssVirtualIds = new Map<string, string>();
 
 	return {
-		name: 'ckeditor5-production-css-order',
+		name: 'ckeditor5-preserve-css-import-order',
 		apply: 'build',
 
 		config() {

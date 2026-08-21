@@ -9,7 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { build, type HtmlTagDescriptor } from 'vite';
 import { manualTestsPlugin } from '../../src/manual-test-plugin/plugin.js';
-import { productionCssOrderPlugin } from '../../src/production-css-order-plugin/plugin.js';
+import { preserveCssImportOrderPlugin } from '../../src/preserve-css-import-order-plugin/plugin.js';
 import { stripLeadingSlash } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 
@@ -29,11 +29,11 @@ type TransformIndexHtmlHook = {
 	): string | undefined | { html: string; tags: Array<HtmlTagDescriptor> };
 };
 
-describe( 'productionCssOrderPlugin()', () => {
+describe( 'preserveCssImportOrderPlugin()', () => {
 	let workspaceRoot: string;
 
 	beforeEach( async () => {
-		workspaceRoot = await createTemporaryDirectory( 'ckeditor5-production-css-order-plugin-' );
+		workspaceRoot = await createTemporaryDirectory( 'ckeditor5-preserve-css-import-order-plugin-' );
 		vi.spyOn( process, 'cwd' ).mockReturnValue( workspaceRoot );
 	} );
 
@@ -42,13 +42,13 @@ describe( 'productionCssOrderPlugin()', () => {
 	} );
 
 	it( 'runs only during builds', () => {
-		const plugin = productionCssOrderPlugin();
+		const plugin = preserveCssImportOrderPlugin();
 
 		expect( plugin.apply ).to.equal( 'build' );
 	} );
 
 	it( 'enables strict module execution order', () => {
-		const plugin = productionCssOrderPlugin();
+		const plugin = preserveCssImportOrderPlugin();
 		const config = ( plugin.config as ConfigHook )();
 
 		expect( config.build.rolldownOptions.output.strictExecutionOrder ).to.be.true;
@@ -105,7 +105,7 @@ describe( 'productionCssOrderPlugin()', () => {
 			configFile: false,
 			logLevel: 'silent',
 			plugins: [
-				productionCssOrderPlugin(),
+				preserveCssImportOrderPlugin(),
 				manualPlugin
 			],
 			build: {

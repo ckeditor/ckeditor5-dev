@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	ckDebugPlugin,
 	manualTestsPlugin,
-	productionCssOrderPlugin,
+	preserveCssImportOrderPlugin,
 	rawSvgPlugin,
 	refreshPlugin,
 	stringifyValues
@@ -17,7 +17,7 @@ describe( 'package entry point', () => {
 	it( 'exports public plugin factories and utilities', () => {
 		expect( ckDebugPlugin ).to.be.a( 'function' );
 		expect( manualTestsPlugin ).to.be.a( 'function' );
-		expect( productionCssOrderPlugin ).to.be.a( 'function' );
+		expect( preserveCssImportOrderPlugin ).to.be.a( 'function' );
 		expect( rawSvgPlugin ).to.be.a( 'function' );
 		expect( refreshPlugin ).to.be.a( 'function' );
 		expect( stringifyValues ).to.be.a( 'function' );

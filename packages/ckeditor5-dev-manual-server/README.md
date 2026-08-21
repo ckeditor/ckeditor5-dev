@@ -25,18 +25,18 @@ For example, start the manual test server in Polish using `CK_LANGUAGE=pl pnpm m
 
 ## Preserving production CSS order
 
-Vite may order extracted stylesheets differently from their source imports in multi-page production builds. Add `productionCssOrderPlugin()` to keep the CSS cascade consistent with the bundled development server:
+Vite may order extracted stylesheets differently from their source imports in multi-page production builds. Add `preserveCssImportOrderPlugin()` to keep the CSS cascade consistent with the bundled development server:
 
 ```ts
 import { defineConfig } from 'vite';
 import {
 	manualTestsPlugin,
-	productionCssOrderPlugin
+	preserveCssImportOrderPlugin
 } from '@ckeditor/ckeditor5-dev-manual-server';
 
 export default defineConfig( {
 	plugins: [
-		productionCssOrderPlugin(),
+		preserveCssImportOrderPlugin(),
 		manualTestsPlugin( {
 			paths: [ 'packages/*' ]
 		} )
