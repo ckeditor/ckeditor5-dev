@@ -10,8 +10,8 @@ More information about development tools packages can be found at the following 
 
 ## Loading translations
 
-Pass a language code to `manualTestsPlugin()` to load and combine that language's TypeScript translation files from the configured
-package paths. The selected language becomes the default UI and content language for editors and contexts created by manual tests.
+Pass a language code to `manualTestsPlugin()` to load and combine that language's TypeScript translation files from the configured package paths. The selected language becomes the default UI and content language for editors and contexts created by manual tests.
+
 An explicit language in an editor or context configuration still takes precedence.
 
 ```ts
@@ -22,6 +22,29 @@ manualTestsPlugin( {
 ```
 
 For example, start the manual test server in Polish using `CK_LANGUAGE=pl pnpm manual`.
+
+## Preserving production CSS order
+
+Vite may order extracted stylesheets differently from their source imports in multi-page production builds. Add `preserveCssImportOrderPlugin()` to keep the CSS cascade consistent with the bundled development server:
+
+```ts
+import { defineConfig } from 'vite';
+import {
+	manualTestsPlugin,
+	preserveCssImportOrderPlugin
+} from '@ckeditor/ckeditor5-dev-manual-server';
+
+export default defineConfig( {
+	plugins: [
+		preserveCssImportOrderPlugin(),
+		manualTestsPlugin( {
+			paths: [ 'packages/*' ]
+		} )
+	]
+} );
+```
+
+The plugin enables Rolldown's strict module execution order in development and production, which can increase the generated bundle size. During production builds, it additionally rewrites plain CSS imports into ordered JavaScript side effects.
 
 ## Changelog
 
