@@ -39,7 +39,7 @@
     "snyk": "^1.1303.2"
   },
   "devDependencies": {
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

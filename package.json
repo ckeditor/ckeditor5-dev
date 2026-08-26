@@ -19,7 +19,7 @@
     "@ckeditor/ckeditor5-dev-changelog": "workspace:*",
     "@inquirer/prompts": "^7.10.1",
     "@listr2/prompt-adapter-inquirer": "^2.0.22",
-    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vitest/eslint-plugin": "^1.6.24",
     "eslint": "^10.0.0",
     "eslint-config-ckeditor5": "^20.0.0",
@@ -37,7 +37,7 @@
     "typescript": "5.5.4",
     "upath": "^2.0.1",
     "vite": "^8.2.1",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "nice": "ckeditor5-dev-changelog-create-entry",
