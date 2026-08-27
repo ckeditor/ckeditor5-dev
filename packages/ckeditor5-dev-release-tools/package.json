@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "jest-extended": "^5.0.3",
     "mock-fs": "^5.5.0",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",

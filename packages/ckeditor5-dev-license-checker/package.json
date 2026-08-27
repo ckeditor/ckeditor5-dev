@@ -27,9 +27,9 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.11",
     "rolldown": "^1.1.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
