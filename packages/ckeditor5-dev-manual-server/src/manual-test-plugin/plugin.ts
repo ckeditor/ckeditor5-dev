@@ -34,7 +34,6 @@ const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
 const MANUAL_TEST_SUFFIX = '.manual.html';
 const MANUAL_TESTS_DIRECTORY = '/manual/';
 const THEME_ENTRY_FILE_PATHS = [ 'theme/index-editor.css', 'theme/index-content.css' ];
-const HEAD_CLOSE_TAG = '</head>';
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';
 const MANUAL_THEME_ROOT = realpathSync( fileURLToPath( import.meta.resolve( '@ckeditor/ckeditor5-dev-manual-server/theme' ) ) );
 const MANUAL_CATALOG_FILE_PATH = resolve( MANUAL_THEME_ROOT, 'catalog.html' );
@@ -114,8 +113,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 
 				next();
 			} );
-
-			keepManualHtmlSourceFresh( server.environments.client.bundledDev?.memoryFiles, getManualPages, workspaceRoot );
 		},
 
 		resolveId( source ) {
@@ -235,118 +232,6 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			}
 		}
 	};
-}
-
-interface ManualMemoryFile {
-	source: string | Uint8Array;
-}
-
-interface ManualMemoryFiles {
-	get( filePath: string ): ManualMemoryFile | undefined;
-}
-
-/**
- * Keeps the served manual test HTML in sync with the source file while the dev server runs.
- *
- * Under `experimental.bundledDev`, Vite serves each manual test's HTML from an in-memory bundle
- * produced by the rolldown dev engine. That engine emits the HTML output only during the initial
- * build and never regenerates it when the source `.html` changes: its bundle state reports no
- * stale output for HTML entries, `devEngine.invalidate()` throws on a non-JS module, and even a
- * forced full build leaves the HTML memory file untouched (verified against Vite 8.2.1). A `.html`
- * edit still triggers a full page reload, so without this the browser reloads into the same stale
- * HTML until the server is restarted.
- *
- * The built-in-memory HTML rewrites the entry script, injects the asset tags and manual chrome,
- * and copies the source `<head>` — all inside `<head>`. The markup after `</head>` is a verbatim
- * copy of the source. So on every request we keep the freshly built `<head>` and splice in the
- * current post-`</head>` markup read from disk. Splicing unconditionally (rather than only after a
- * detected change) also covers sources that changed between the initial build and the first request
- * for the page, and it is idempotent for unchanged sources. This reflects edits to the test body
- * without re-running Vite's HTML transform or parsing the document. Any edit that would change
- * what belongs in `<head>` is not picked up this way and still needs a server restart, because
- * reproducing it would require re-running the build pipeline the dev engine refuses to run for HTML
- * entries. That covers edits confined to the `<head>` (styles, meta, extra scripts) as well as
- * adding or removing `<ck-manual-header>` in the body: toggling it changes the injected header
- * chrome (`<meta>` and the component script) in `<head>`, so the chrome only updates after a
- * restart even though the body splice already reflects the element itself.
- *
- * When `bundledDev` is not enabled the store is absent and this is a no-op: Vite's normal dev
- * pipeline already serves fresh HTML on every request.
- */
-function keepManualHtmlSourceFresh(
-	memoryFiles: ManualMemoryFiles | undefined,
-	getManualPages: () => Map<string, ManualPageEntry>,
-	workspaceRoot: string
-): void {
-	if ( !memoryFiles ) {
-		return;
-	}
-
-	const getBundledFile = memoryFiles.get.bind( memoryFiles );
-
-	memoryFiles.get = ( filePath: string ) => {
-		const file = getBundledFile( filePath );
-
-		// Only discovered `.manual.html` entries are refreshed; asset memory files pass through.
-		if ( !file || !getManualPages().has( toPublicSpecifier( filePath ) ) ) {
-			return file;
-		}
-
-		try {
-			const sourceFilePath = resolve( workspaceRoot, stripLeadingSlash( filePath ) );
-
-			// HTML entry outputs are always emitted as strings.
-			const freshHtml = composeFreshManualHtml( file.source as string, readFileSync( sourceFilePath, 'utf8' ) );
-
-			return freshHtml == null ? file : { source: freshHtml };
-		} catch {
-			// Reading or splicing the source must never break serving the page; fall back to the
-			// built memory file if anything goes wrong (e.g. the file was removed by a branch switch).
-			return file;
-		}
-	};
-}
-
-/**
- * Combines the freshly built `<head>` (asset tags and injected manual chrome) with the current
- * post-`</head>` markup from the source file. Returns `null` when either document is missing a
- * `</head>`, so the caller can fall back to the built output.
- */
-function composeFreshManualHtml( builtHtml: string, sourceHtml: string ): string | null {
-	const builtHeadEnd = findHeadCloseTagIndex( builtHtml );
-	const sourceHeadEnd = findHeadCloseTagIndex( sourceHtml );
-
-	if ( builtHeadEnd == -1 || sourceHeadEnd == -1 ) {
-		return null;
-	}
-
-	return builtHtml.slice( 0, builtHeadEnd + HEAD_CLOSE_TAG.length ) + sourceHtml.slice( sourceHeadEnd + HEAD_CLOSE_TAG.length );
-}
-
-/**
- * Finds the index of the `</head>` closing tag, or `-1` when the document has none. A `</head>`
- * literal may also appear earlier inside a `<head>` comment or an inline script string, so of all
- * the occurrences preceding the `<body>` tag the last one is taken. Without a `<body>` tag (or
- * when every occurrence follows it) the first occurrence wins, matching the pre-heuristic
- * behavior for such malformed documents.
- */
-function findHeadCloseTagIndex( html: string ): number {
-	const firstHeadCloseIndex = /<\/head>/i.exec( html )?.index ?? -1;
-	const bodyMatch = /<body[\s>]/i.exec( html );
-
-	if ( !bodyMatch ) {
-		return firstHeadCloseIndex;
-	}
-
-	const headClosePattern = /<\/head>/gi;
-	let lastHeadCloseIndex = -1;
-	let match;
-
-	while ( ( match = headClosePattern.exec( html ) ) && match.index < bodyMatch.index ) {
-		lastHeadCloseIndex = match.index;
-	}
-
-	return lastHeadCloseIndex == -1 ? firstHeadCloseIndex : lastHeadCloseIndex;
 }
 
 /**

@@ -3,13 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-// Under `experimental.bundledDev` (Vite 8.2.1), HMR runs on the rolldown dev-engine
+// Under `experimental.bundledDev` (Vite 8.2.2), HMR runs on the rolldown dev-engine
 // path (`onHmrUpdates` → `handleHmrOutput` → `client.send`): the server ships a patch,
 // the client walks its module graph, and on a missing HMR boundary (manual tests accept
 // no JS updates) it requests a rebuild and auto-reloads. This plugin turns that
 // auto-reload into the refresh prompt for JS/TS changes, while CSS updates pass through
-// (hot-update in place) and HTML updates pass through (auto-reload; the reloaded body
-// is kept fresh by the manual test plugin's HTML splicing).
+// (hot-update in place) and HTML updates pass through (auto-reload with freshly emitted HTML).
 //
 // The documented `hotUpdate` hook cannot implement the prompt: suppressing an update
 // there skips the engine's module re-fetch (stale output after the prompt's reload),
@@ -17,14 +16,13 @@
 // the last mile, the per-client `client.send`. `hotUpdate` is still used to force-ship
 // manual HTML edits, which the engine would otherwise drop as unchanged.
 //
-// The patched internals (`server.environments.client.bundledDev` with `clients`,
-// `handleHmrOutput`, `devEngine`) are undocumented and move without notice; when a Vite
-// upgrade relocates them, `configureServer` throws at server startup — update this
-// plugin together with Vite. Delete the patches once Vite exposes an HMR plugin
-// extension point for the bundled dev client payloads.
+// The patched internals (`server.environments.client.bundledDev` with `clients` and
+// `devEngine`) are undocumented and move without notice; when a Vite upgrade relocates
+// them, `configureServer` throws at server startup — update this plugin together with
+// Vite. Delete the patch once Vite exposes an HMR plugin extension point for the
+// bundled dev client payloads.
 
 import type { Plugin, HotPayload, HotChannelClient } from 'vite';
-import { toPublicFilePath } from '../utils.js';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
 
@@ -39,7 +37,6 @@ interface BundledDevInternals {
 	devEngine: {
 		ensureLatestBuildOutput(): Promise<unknown>;
 	};
-	handleHmrOutput( client: HotChannelClient, files: Array<string>, hmrOutput: { type: string } ): unknown;
 }
 
 const wrappedClients = new WeakSet<HotChannelClient>();
@@ -53,7 +50,6 @@ export function refreshPlugin(): Plugin {
 			const { bundledDev } = server.environments.client as unknown as { bundledDev: BundledDevInternals };
 
 			wrapBundledDevClientSend( bundledDev );
-			wrapBundledDevFullReloads( bundledDev, server.config.root );
 		},
 
 		// The page body is not part of the HTML module's JS render, so body-only edits render
@@ -83,50 +79,6 @@ function wrapBundledDevClientSend( bundledDev: BundledDevInternals ): void {
 
 		return setupIfNeeded( client, clientId );
 	};
-}
-
-function wrapBundledDevFullReloads( bundledDev: BundledDevInternals, workspaceRoot: string ): void {
-	const handleHmrOutput = bundledDev.handleHmrOutput.bind( bundledDev );
-
-	bundledDev.handleHmrOutput = ( client, files, hmrOutput ) => {
-		if ( hmrOutput.type != 'FullReload' ) {
-			return handleHmrOutput( client, files, hmrOutput );
-		}
-
-		if ( !shouldShowManualRefreshPrompt( files ) ) {
-			// Vite invokes this synchronous handler without awaiting its result.
-			reloadClientAfterLatestBuildOutput( bundledDev, client, files, workspaceRoot );
-
-			return;
-		}
-
-		ensureLatestBuildOutput( bundledDev );
-
-		client.send( {
-			type: 'custom',
-			event: MANUAL_REFRESH_EVENT_NAME
-		} );
-	};
-}
-
-async function reloadClientAfterLatestBuildOutput(
-	bundledDev: BundledDevInternals,
-	client: HotChannelClient,
-	files: Array<string>,
-	workspaceRoot: string
-): Promise<void> {
-	try {
-		await bundledDev.devEngine.ensureLatestBuildOutput();
-	} catch {
-		// Reload using the best output available instead of leaving the page stale.
-	}
-
-	const htmlFile = files.find( file => isHtmlFile( file ) );
-
-	client.send( {
-		type: 'full-reload',
-		path: htmlFile ? toPublicFilePath( htmlFile, workspaceRoot ) : undefined
-	} );
 }
 
 function ensureLatestBuildOutput( bundledDev: BundledDevInternals ): void {
