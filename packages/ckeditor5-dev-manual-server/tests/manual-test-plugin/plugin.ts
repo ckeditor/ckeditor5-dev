@@ -648,6 +648,53 @@ describe( 'manualTestsPlugin()', () => {
 		}, { timeout: 5000 } );
 	} );
 
+	it( 'regenerates bundled HTML after only the manual page body changes', async () => {
+		const relativePath = 'packages/ckeditor5-foo/manual/foo.manual.html';
+		const oldHtml = '<!DOCTYPE html><head><title>OLD</title>' +
+			'<script type="module" src="./foo.js"></script></head><body><h2>OLD</h2></body>';
+		const newHtml = oldHtml.replace( '<h2>OLD</h2>', '<h2>NEW</h2>' );
+
+		await Promise.all( [
+			createFile( workspaceRoot, relativePath, oldHtml ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );' )
+		] );
+
+		server = await createServer( {
+			root: workspaceRoot,
+			appType: 'mpa',
+			configFile: false,
+			logLevel: 'silent',
+			experimental: {
+				bundledDev: true
+			},
+			server: {
+				port: 0
+			},
+			plugins: [
+				manualTestsPlugin( { paths: [ 'packages/*' ] } )
+			]
+		} );
+
+		await server.listen();
+
+		const pageUrl = new URL( relativePath, server.resolvedUrls!.local[ 0 ]! );
+
+		await vi.waitFor( async () => {
+			expect( await fetchHtml( pageUrl ) ).to.contain( '<h2>OLD</h2>' );
+		}, { timeout: 5000 } );
+
+		const filePath = await createFile( workspaceRoot, relativePath, newHtml );
+
+		server.watcher.emit( 'change', filePath );
+
+		await vi.waitFor( async () => {
+			const freshHtml = await fetchHtml( pageUrl );
+
+			expect( freshHtml ).to.contain( '<title>OLD</title>' );
+			expect( freshHtml ).to.contain( '<h2>NEW</h2>' );
+		}, { timeout: 5000 } );
+	} );
+
 	function loadEntries( options: ManualTestsPluginOptions, base: string ): string {
 		const plugin = manualTestsPlugin( options );
 		( plugin.config as ConfigHook )();
