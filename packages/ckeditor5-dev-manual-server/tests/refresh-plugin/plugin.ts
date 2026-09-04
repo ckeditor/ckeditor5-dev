@@ -60,6 +60,32 @@ describe( 'refreshPlugin()', () => {
 		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
 	} );
 
+	it( 'still shows the manual refresh prompt when refreshing the bundle output fails', async () => {
+		const clientPayloads: Array<HotPayload> = [];
+		const server = createBundledDevServer();
+		const client = createBundledDevClient( clientPayloads );
+
+		server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput =
+			vi.fn().mockRejectedValue( new Error( 'build output unavailable' ) );
+
+		configureServer( server );
+		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
+		client.send( {
+			type: 'bundled-dev-update',
+			changedIds: [ '/packages/ckeditor5-foo/src/foo.ts' ],
+			url: '/assets/foo.js',
+			seq: 1
+		} );
+
+		// The rejection must be swallowed; an unhandled rejection would fail the test run.
+		await new Promise( resolve => setTimeout( resolve ) );
+
+		expect( clientPayloads.at( -1 ) ).to.deep.equal( {
+			type: 'custom',
+			event: MANUAL_REFRESH_EVENT_NAME
+		} );
+	} );
+
 	it( 'keeps bundled dev HTML updates sent directly to clients', () => {
 		const clientPayloads: Array<HotPayload> = [];
 		const server = createBundledDevServer();
@@ -157,123 +183,6 @@ describe( 'refreshPlugin()', () => {
 		] );
 	} );
 
-	it( 'replaces bundled dev JavaScript full reloads with the manual refresh prompt', () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const handledFullReloads: Array<Array<string>> = [];
-		const server = createBundledDevServer( handledFullReloads );
-		const client = createBundledDevClient( clientPayloads );
-
-		configureServer( server );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.js' ], { type: 'FullReload' } );
-
-		expect( handledFullReloads ).to.deep.equal( [] );
-		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'custom',
-			event: MANUAL_REFRESH_EVENT_NAME
-		} ] );
-	} );
-
-	it( 'still shows the manual refresh prompt when refreshing the build output fails', async () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const server = createBundledDevServer();
-		const client = createBundledDevClient( clientPayloads );
-
-		server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput =
-			vi.fn().mockRejectedValue( new Error( 'build output unavailable' ) );
-
-		configureServer( server );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.js' ], { type: 'FullReload' } );
-
-		// The rejection must be swallowed; an unhandled rejection would fail the test run.
-		await new Promise( resolve => setTimeout( resolve ) );
-
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'custom',
-			event: MANUAL_REFRESH_EVENT_NAME
-		} ] );
-	} );
-
-	it( 'sends bundled dev HTML full reloads only to the affected client', async () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const otherClientPayloads: Array<HotPayload> = [];
-		const handledFullReloads: Array<Array<string>> = [];
-		const server = createBundledDevServer( handledFullReloads );
-		const client = createBundledDevClient( clientPayloads );
-		const otherClient = createBundledDevClient( otherClientPayloads );
-
-		configureServer( server );
-		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
-		server.environments.client.bundledDev.clients.setupIfNeeded( otherClient, 'client-2' );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
-		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
-
-		expect( handledFullReloads ).to.deep.equal( [] );
-		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'full-reload',
-			path: '/article.html'
-		} ] );
-		expect( otherClientPayloads ).to.deep.equal( [] );
-	} );
-
-	it( 'sends bundled dev CSS full reloads only to the affected client', async () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const handledFullReloads: Array<Array<string>> = [];
-		const server = createBundledDevServer( handledFullReloads );
-		const client = createBundledDevClient( clientPayloads );
-
-		configureServer( server );
-		server.environments.client.bundledDev.clients.setupIfNeeded( client, 'client-1' );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/styles.css' ], { type: 'FullReload' } );
-		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
-
-		expect( handledFullReloads ).to.deep.equal( [] );
-		expect( server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput ).toHaveBeenCalledOnce();
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'full-reload',
-			path: undefined
-		} ] );
-	} );
-
-	it( 'reloads the affected client when refreshing the build output fails', async () => {
-		const clientPayloads: Array<HotPayload> = [];
-		const server = createBundledDevServer();
-		const client = createBundledDevClient( clientPayloads );
-
-		server.environments.client.bundledDev.devEngine.ensureLatestBuildOutput =
-			vi.fn().mockRejectedValue( new Error( 'build output unavailable' ) );
-
-		configureServer( server );
-		server.environments.client.bundledDev.handleHmrOutput( client, [ '/workspace/article.html' ], { type: 'FullReload' } );
-		await vi.waitFor( () => expect( clientPayloads ).to.have.length( 1 ) );
-
-		expect( clientPayloads ).to.deep.equal( [ {
-			type: 'full-reload',
-			path: '/article.html'
-		} ] );
-	} );
-
-	it( 'keeps bundled dev output other than full reloads', () => {
-		const server = createBundledDevServer();
-		const client = createBundledDevClient( [] );
-		const handleHmrOutput = server.environments.client.bundledDev.handleHmrOutput;
-		const hmrOutput = { type: 'Patch' };
-
-		configureServer( server );
-		server.environments.client.bundledDev.handleHmrOutput(
-			client,
-			[ '/workspace/article.css' ],
-			hmrOutput
-		);
-
-		expect( handleHmrOutput ).toHaveBeenCalledExactlyOnceWith(
-			client,
-			[ '/workspace/article.css' ],
-			hmrOutput
-		);
-	} );
-
 	it( 'force-ships manual test HTML modules from the hotUpdate hook', () => {
 		const modules = [ { id: 'packages/ckeditor5-foo/manual/foo.manual.html' } ];
 
@@ -296,13 +205,10 @@ describe( 'refreshPlugin()', () => {
 		return hotUpdate( { file, modules } );
 	}
 
-	// Mirrors the Vite 8.2.1 layout: the patched internals live on the `BundledDev` helper
+	// Mirrors the Vite 8.2.2 layout: the patched internals live on the `BundledDev` helper
 	// exposed as `server.environments.client.bundledDev`.
-	function createBundledDevServer( handledFullReloads: Array<Array<string>> = [] ) {
+	function createBundledDevServer() {
 		return {
-			config: {
-				root: '/workspace'
-			},
 			environments: {
 				client: {
 					bundledDev: {
@@ -311,13 +217,7 @@ describe( 'refreshPlugin()', () => {
 						},
 						devEngine: {
 							ensureLatestBuildOutput: vi.fn().mockResolvedValue( undefined )
-						},
-						handleHmrOutput: vi.fn<( client: unknown, files: Array<string>, hmrOutput: unknown ) => void>(
-							( _client, files ) => {
-								handledFullReloads.push( files );
-							}
-						),
-						initialBuildCompleted: true
+						}
 					}
 				}
 			}

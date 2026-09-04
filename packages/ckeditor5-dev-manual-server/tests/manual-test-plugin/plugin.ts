@@ -3,10 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { type HtmlTagDescriptor, type ViteDevServer } from 'vite';
+import { createServer, type HtmlTagDescriptor, type ViteDevServer } from 'vite';
 import { manualTestsPlugin, type ManualTestsPluginOptions } from '../../src/manual-test-plugin/plugin.js';
 import { stripLeadingSlash, toPublicFilePath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
@@ -30,22 +29,12 @@ type TransformHook = {
 };
 type LoadHook = ( id: string ) => string | null;
 type ResolveIdHook = ( id: string ) => string | null;
-interface MemoryFile {
-	source: string | Uint8Array;
-}
-interface MemoryFilesLike {
-	get( filePath: string ): MemoryFile | undefined;
-}
 type TestServer = {
 	middlewares: {
 		use: ReturnType<typeof vi.fn>;
 	};
 	environments: {
-		client: {
-			bundledDev?: {
-				memoryFiles?: MemoryFilesLike;
-			};
-		};
+		client: Record<string, never>;
 	};
 };
 
@@ -612,153 +601,98 @@ describe( 'manualTestsPlugin()', () => {
 		} ) ).to.be.undefined;
 	} );
 
-	describe( 'bundled dev HTML source freshness', () => {
-		const RELATIVE_PATH = 'packages/ckeditor5-foo/manual/foo.manual.html';
-		const MEMORY_KEY = 'packages/ckeditor5-foo/manual/foo.manual.html';
-		const SOURCE_HTML = '<!DOCTYPE html><head><title>Foo</title></head>\n<div id="editor"><h2>OLD</h2></div>';
+	it( 'regenerates the complete bundled HTML after a manual page changes', async () => {
+		const relativePath = 'packages/ckeditor5-foo/manual/foo.manual.html';
+		const oldHtml = '<!DOCTYPE html><head><title>OLD</title>' +
+			'<script type="module" src="./foo.js"></script></head><body><h2>OLD</h2></body>';
+		const newHtml = oldHtml.replaceAll( 'OLD', 'NEW' );
 
-		// Mirrors the in-memory bundle Vite serves: the built <head> carries injected/asset tags,
-		// while the post-</head> markup is a verbatim copy of the (initial) source.
-		const BUILT_HTML = '<!DOCTYPE html><head><title>Foo</title>' +
-			'<script type="module" src="/assets/foo.manual.js"></script></head>\n<div id="editor"><h2>OLD</h2></div>';
+		await Promise.all( [
+			createFile( workspaceRoot, relativePath, oldHtml ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );' )
+		] );
 
-		it( 'serves fresh post-<head> markup after the source changes', async () => {
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
-
-			configureFreshness( memoryFiles );
-
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
-
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML.replace( 'OLD', 'NEW' ) );
-
-			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
-
-			expect( fresh ).to.contain( '<h2>NEW</h2>' );
-			expect( fresh ).not.to.contain( '<h2>OLD</h2>' );
-			// The built <head> (asset tags) is preserved; only the post-</head> markup is refreshed.
-			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
+		server = await createServer( {
+			root: workspaceRoot,
+			appType: 'mpa',
+			configFile: false,
+			logLevel: 'silent',
+			experimental: {
+				bundledDev: true
+			},
+			server: {
+				port: 0
+			},
+			plugins: [
+				manualTestsPlugin( { paths: [ 'packages/*' ] } )
+			]
 		} );
 
-		it( 'serves fresh markup on the first request when the source changed after the build', async () => {
-			// The source was edited between the initial build and the first request for the page.
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML.replace( 'OLD', 'NEW' ) );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+		await server.listen();
 
-			configureFreshness( memoryFiles );
+		const pageUrl = new URL( relativePath, server.resolvedUrls!.local[ 0 ]! );
 
-			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
+		await vi.waitFor( async () => {
+			expect( await fetchHtml( pageUrl ) ).to.contain( '<title>OLD</title>' );
+		}, { timeout: 5000 } );
 
-			expect( fresh ).to.contain( '<h2>NEW</h2>' );
-			expect( fresh ).not.to.contain( '<h2>OLD</h2>' );
-			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
+		const filePath = await createFile( workspaceRoot, relativePath, newHtml );
+
+		server.watcher.emit( 'change', filePath );
+
+		await vi.waitFor( async () => {
+			const freshHtml = await fetchHtml( pageUrl );
+
+			expect( freshHtml ).to.contain( '<title>NEW</title>' );
+			expect( freshHtml ).to.contain( '<h2>NEW</h2>' );
+		}, { timeout: 5000 } );
+	} );
+
+	it( 'regenerates bundled HTML after only the manual page body changes', async () => {
+		const relativePath = 'packages/ckeditor5-foo/manual/foo.manual.html';
+		const oldHtml = '<!DOCTYPE html><head><title>OLD</title>' +
+			'<script type="module" src="./foo.js"></script></head><body><h2>OLD</h2></body>';
+		const newHtml = oldHtml.replace( '<h2>OLD</h2>', '<h2>NEW</h2>' );
+
+		await Promise.all( [
+			createFile( workspaceRoot, relativePath, oldHtml ),
+			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.js', 'console.log( 1 );' )
+		] );
+
+		server = await createServer( {
+			root: workspaceRoot,
+			appType: 'mpa',
+			configFile: false,
+			logLevel: 'silent',
+			experimental: {
+				bundledDev: true
+			},
+			server: {
+				port: 0
+			},
+			plugins: [
+				manualTestsPlugin( { paths: [ 'packages/*' ] } )
+			]
 		} );
 
-		it( 'keeps serving the built output while the source is unchanged', async () => {
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
+		await server.listen();
 
-			configureFreshness( memoryFiles );
+		const pageUrl = new URL( relativePath, server.resolvedUrls!.local[ 0 ]! );
 
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
-		} );
+		await vi.waitFor( async () => {
+			expect( await fetchHtml( pageUrl ) ).to.contain( '<h2>OLD</h2>' );
+		}, { timeout: 5000 } );
 
-		it( 'passes memory files that are not manual pages through unchanged', async () => {
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
-			const asset = { source: 'console.log( 1 );' };
-			const memoryFiles = createMemoryFiles( { 'assets/foo.manual.js': asset.source } );
+		const filePath = await createFile( workspaceRoot, relativePath, newHtml );
 
-			configureFreshness( memoryFiles );
+		server.watcher.emit( 'change', filePath );
 
-			expect( memoryFiles.get( 'assets/foo.manual.js' )!.source ).to.equal( asset.source );
-		} );
+		await vi.waitFor( async () => {
+			const freshHtml = await fetchHtml( pageUrl );
 
-		it( 'splices at the real </head> when a head script contains a </head> literal', async () => {
-			const trickyHead = '<!DOCTYPE html><html><head><title>Foo</title>' +
-				'<script>const marker = \'</head>\';</script>';
-			const trickySource = `${ trickyHead }</head>` +
-				'<body><div id="editor"><h2>OLD</h2></div></body></html>';
-			// The asset tags injected at the end of the built <head> sit after the false match,
-			// so a splice at the literal would drop them.
-			const trickyBuilt = `${ trickyHead }` +
-				'<script type="module" src="/assets/foo.manual.js"></script></head>' +
-				'<body><div id="editor"><h2>OLD</h2></div></body></html>';
-
-			await createFile( workspaceRoot, RELATIVE_PATH, trickySource.replace( 'OLD', 'NEW' ) );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: trickyBuilt } );
-
-			configureFreshness( memoryFiles );
-
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( trickyBuilt.replace( 'OLD', 'NEW' ) );
-		} );
-
-		it( 'matches the </head> tag case-insensitively', async () => {
-			const upperCaseSource = SOURCE_HTML.replace( '</head>', '</HEAD>' ).replace( 'OLD', 'NEW' );
-
-			await createFile( workspaceRoot, RELATIVE_PATH, upperCaseSource );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
-
-			configureFreshness( memoryFiles );
-
-			const fresh = memoryFiles.get( MEMORY_KEY )!.source as string;
-
-			expect( fresh ).to.contain( '<h2>NEW</h2>' );
-			expect( fresh ).to.contain( '<script type="module" src="/assets/foo.manual.js"></script>' );
-		} );
-
-		it( 'falls back to the built output when the source has no </head>', async () => {
-			await createFile( workspaceRoot, RELATIVE_PATH, '<div id="editor"><h2>NEW</h2></div>' );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
-
-			configureFreshness( memoryFiles );
-
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
-		} );
-
-		it( 'falls back to the built output when the built HTML has no </head>', async () => {
-			const headlessBuiltHtml = '<div id="editor"><h2>OLD</h2></div>';
-
-			await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: headlessBuiltHtml } );
-
-			configureFreshness( memoryFiles );
-
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( headlessBuiltHtml );
-		} );
-
-		it( 'falls back to the built output when the source file disappears', async () => {
-			const sourceFilePath = await createFile( workspaceRoot, RELATIVE_PATH, SOURCE_HTML );
-			const memoryFiles = createMemoryFiles( { [ MEMORY_KEY ]: BUILT_HTML } );
-
-			configureFreshness( memoryFiles );
-
-			// E.g. a branch switch removed the source; serving must not break.
-			rmSync( sourceFilePath );
-
-			expect( memoryFiles.get( MEMORY_KEY )!.source ).to.equal( BUILT_HTML );
-		} );
-
-		it( 'does not wrap memory files when bundled dev is unavailable', () => {
-			const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-			( plugin.config as ConfigHook )();
-			const server = createMiddlewareServer();
-
-			( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
-
-			expect( () => ( plugin.configureServer as unknown as ServerHook )( server ) ).not.to.throw();
-		} );
-
-		function configureFreshness( memoryFiles: MemoryFilesLike ): void {
-			const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-			( plugin.config as ConfigHook )();
-			const server = createMiddlewareServer();
-
-			server.environments.client.bundledDev = { memoryFiles };
-
-			( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
-			( plugin.configureServer as unknown as ServerHook )( server );
-		}
+			expect( freshHtml ).to.contain( '<title>OLD</title>' );
+			expect( freshHtml ).to.contain( '<h2>NEW</h2>' );
+		}, { timeout: 5000 } );
 	} );
 
 	function loadEntries( options: ManualTestsPluginOptions, base: string ): string {
@@ -792,12 +726,6 @@ function createMiddlewareServer(): TestServer {
 	};
 }
 
-function createMemoryFiles( entries: Record<string, string> ): MemoryFilesLike {
-	const files = new Map<string, MemoryFile>(
-		Object.entries( entries ).map( ( [ key, source ] ) => [ key, { source } ] )
-	);
-
-	return {
-		get: ( filePath: string ) => files.get( filePath )
-	};
+async function fetchHtml( url: URL ): Promise<string> {
+	return ( await fetch( url ) ).text();
 }

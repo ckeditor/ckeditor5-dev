@@ -32,11 +32,11 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-inspector": "^5.0.1",
-    "vite": "^8.2.1"
+    "vite": "^8.2.2"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.11",
-    "rolldown": "^1.1.2",
+    "rolldown": "^1.2.6",
     "vitest": "^4.1.11"
   }
 }
