@@ -18,12 +18,12 @@ const externals = [
 	...Object.keys( packageJson.peerDependencies || {} )
 ];
 
-const sharedConfig = defineConfig( {
+const sharedConfig: RolldownOptions = defineConfig( {
 	platform: 'node',
 	external: id => isBuiltin( id ) || externals.some( name => id.startsWith( name ) )
-} ) as RolldownOptions;
+} );
 
-export default defineConfig( [
+const config: Array<RolldownOptions> = defineConfig( [
 	{
 		input: 'src/index.ts',
 		output: {
@@ -51,3 +51,5 @@ export default defineConfig( [
 		...sharedConfig
 	}
 ] );
+
+export default config;

@@ -138,6 +138,14 @@ describe( 'bundleCss()', () => {
 		}
 	} );
 
+	it( 'keeps native CSS nesting in the output instead of flattening it', async () => {
+		const output = await generateBundle( { fileName: 'styles.css' }, './fixtures/input-nesting.ts' );
+		const editor = getAsset( output, 'styles-editor.css' ).source.toString();
+
+		expect( editor ).toContain( '& .nesting-child' );
+		expect( editor ).not.toContain( '.nesting-parent .nesting-child' );
+	} );
+
 	it( 'emits source maps for all three assets, including empty outputs', async () => {
 		const output = await generateBundle( { fileName: 'styles.css', sourceMap: true } );
 
