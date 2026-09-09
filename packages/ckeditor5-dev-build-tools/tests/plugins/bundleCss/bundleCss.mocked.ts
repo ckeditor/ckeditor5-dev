@@ -10,9 +10,6 @@ import type { ModuleInfo, NormalizedOutputOptions, OutputBundle, OutputChunk, Pa
 const bundleAsyncMock = vi.hoisted( () => vi.fn() );
 
 vi.mock( 'lightningcss', () => ( {
-	Features: {
-		Nesting: 1
-	},
 	bundleAsync: bundleAsyncMock,
 	transform: vi.fn( () => ( {
 		code: Buffer.from( '' ),

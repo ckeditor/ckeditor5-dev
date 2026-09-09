@@ -21,7 +21,6 @@ const MANUAL_TEST_SUFFIX = '.manual.html';
 export function collectManualPages( patterns: Array<string>, workspaceRoot: string ): Map<string, ManualPageEntry> {
 	const manualPages: Array<[ string, ManualPageEntry ]> = matchManualPageFiles( patterns, workspaceRoot )
 		.map( ( relativeFilePath: string ) => toManualPageEntry( relativeFilePath, workspaceRoot ) )
-		// @ts-expect-error Remove when we upgrade TypeScript and bump `target`.
 		.toSorted( ( a, b ) => a.packageName.localeCompare( b.packageName ) || a.slug.localeCompare( b.slug ) )
 		.map( ( entry: ManualPageEntry ) => [ entry.htmlFilePath, entry ] );
 

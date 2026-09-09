@@ -18,7 +18,7 @@ const externals = [
 	...Object.keys( packageJson.peerDependencies || {} )
 ];
 
-export default defineConfig( {
+const config: RolldownOptions = defineConfig( {
 	input: 'src/index.ts',
 	platform: 'node',
 	output: {
@@ -33,4 +33,6 @@ export default defineConfig( {
 		} )
 	],
 	external: id => isBuiltin( id ) || externals.some( name => id.startsWith( name ) )
-} ) as RolldownOptions;
+} );
+
+export default config;

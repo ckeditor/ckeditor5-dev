@@ -6,7 +6,7 @@
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import { basename, dirname } from 'node:path';
-import { bundleAsync, Features, type Warning as LightningCssWarning } from 'lightningcss';
+import { bundleAsync, type Warning as LightningCssWarning } from 'lightningcss';
 import type { OutputBundle, OutputChunk, Plugin, PluginContext } from 'rolldown';
 import upath from 'upath';
 
@@ -288,7 +288,6 @@ export function bundleCss( pluginOptions: RollupBundleCssOptions ): Plugin {
 					filename: VIRTUAL_ENTRY_ID,
 					minify: options.minify,
 					sourceMap: options.sourceMap,
-					include: Features.Nesting,
 					resolver: {
 						read: ( filePath ): string => {
 							if ( filePath === VIRTUAL_ENTRY_ID ) {
