@@ -24,7 +24,7 @@ commands:
       - run:
           name: Install pnpm
           command: |
-            sudo npm i -g pnpm@^11
+            sudo npm i -g pnpm@11.14.0
             pnpm --version
       - run:
           name: Install dependencies
@@ -47,7 +47,7 @@ commands:
     steps:
       - run:
           name: Install npm with CircleCI OIDC support
-          command: sudo npm i -g npm@^11.11.0
+          command: sudo npm i -g npm@11.19.1
       - run:
           name: Get npm OIDC token
           command: |
