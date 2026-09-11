@@ -3,7 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-:root {
+:root,
+:host {
 	color-scheme: light;
 	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	line-height: 1.5;
