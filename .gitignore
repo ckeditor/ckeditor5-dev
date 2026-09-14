@@ -12,6 +12,9 @@ executeinparallel-integration.log
 # Prepared files to publish to npm.
 /release/
 
+# Temporary worker modules created by `executeInParallel()`.
+/build/
+
 # Compiled TS.
 packages/*/dist
 

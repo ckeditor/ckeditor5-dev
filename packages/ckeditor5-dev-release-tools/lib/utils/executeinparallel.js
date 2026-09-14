@@ -31,6 +31,9 @@ const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
  * @param {ExecuteInParallelPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
  * directories/packages that should not be touched by the task.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {string} [options.workerDirectory='build'] A directory, relative to `options.cwd`, where temporary worker modules are stored.
+ * It must be inside the project so workers can resolve dependencies from `node_modules`.The default `build` directory is usually ignored
+ * by git, preventing leftover files from polluting the working tree.
  * @param {number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
@@ -43,6 +46,7 @@ export default async function executeInParallel( options ) {
 		taskOptions = null,
 		packagesDirectoryFilter = null,
 		cwd = process.cwd(),
+		workerDirectory = 'build',
 		concurrency = os.cpus().length / 2
 	} = options;
 
@@ -53,7 +57,10 @@ export default async function executeInParallel( options ) {
 
 	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrencyAsInteger );
 
-	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.mjs' );
+	const callbackModuleDirectory = upath.join( cwd, workerDirectory );
+	const callbackModule = upath.join( callbackModuleDirectory, crypto.randomUUID() + '.mjs' );
+
+	await fs.mkdir( callbackModuleDirectory, { recursive: true } );
 	await fs.writeFile( callbackModule, `export default ${ taskToExecute };`, 'utf-8' );
 
 	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );
