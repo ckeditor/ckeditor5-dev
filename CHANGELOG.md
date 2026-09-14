@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [62.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v61.2.0...v62.0.0) (September 9, 2026)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: The `bundleCss()` plugin no longer flattens CSS nesting. Bundled stylesheets now ship native `&` nesting for the browser to resolve.
+
+  Lightning CSS was previously configured to always compile nesting away, regardless of targets. Nesting is now Baseline widely available, so the output keeps it. Integrators post-processing the bundled CSS with tooling that predates native nesting may need to add a nesting transform.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/62.0.0): v61.2.0 => v62.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.0.0): v61.2.0 => v62.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.0.0): v61.2.0 => v62.0.0
+</details>
+
+
 ## [61.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v61.1.0...v61.2.0) (September 4, 2026)
 
 ### Bug fixes
@@ -153,41 +189,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/60.0.0): v59.1.0 => v60.0.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/60.0.0): v59.1.0 => v60.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/60.0.0): v59.1.0 => v60.0.0
-</details>
-
-
-## [59.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v59.0.0...v59.1.0) (August 13, 2026)
-
-### Features
-
-* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Added the `typedoc-plugin-hierarchy-fixer` plugin that restores the class hierarchy in the generated API documentation data for classes extending an intermediate mixin constant, for example `const ClassicEditorBase = ElementApiMixin( Editor )`. The plugin replaces the unresolvable base class reference with the actual base class, restores the "Subclasses" relation on the base class page, and lists the mixin interfaces in the "Implements" section. It also prevents references to reflections removed by the private API purge mechanism from leaking into the documentation output.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/59.1.0): v59.0.0 => v59.1.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/59.1.0): v59.0.0 => v59.1.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/59.1.0): v59.0.0 => v59.1.0
 </details>
 
 ---

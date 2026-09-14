@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "61.2.0",
+  "version": "62.0.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -22,8 +22,8 @@
     "@vitest/coverage-v8": "^4.1.11",
     "@vitest/eslint-plugin": "^1.6.24",
     "eslint": "^10.0.0",
-    "eslint-config-ckeditor5": "^20.0.0",
-    "eslint-plugin-ckeditor5-rules": "^20.0.0",
+    "eslint-config-ckeditor5": "^21.0.0",
+    "eslint-plugin-ckeditor5-rules": "^21.0.0",
     "fs-extra": "^11.3.4",
     "glob": "^13.0.6",
     "globals": "^16.5.0",
