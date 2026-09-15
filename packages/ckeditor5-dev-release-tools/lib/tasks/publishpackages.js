@@ -54,6 +54,8 @@ import { workspaces, npm } from '@ckeditor/ckeditor5-dev-utils';
  * @param {Array.<string>} [options.optionalEntryPointPackages=[]] If the entry point validator is enabled (`requireEntryPoint=true`),
  * this array contains a list of packages that will not be checked. In other words, they do not have to define the entry point.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {string} [options.workerDirectory='build'] A directory, relative to `options.cwd`, where temporary worker modules are stored.
+ * See `executeInParallel()` for details.
  * @param {number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @param {number} [options.attempts=3] Number of attempts. After reaching 0, it won't be publishing packages again.
  * @returns {Promise}
@@ -72,6 +74,7 @@ export default async function publishPackages( options ) {
 		requireEntryPoint = false,
 		optionalEntryPointPackages = [],
 		cwd = process.cwd(),
+		workerDirectory = 'build',
 		concurrency = 2,
 		attempts = 5
 	} = options;
@@ -127,7 +130,8 @@ export default async function publishPackages( options ) {
 			npmTag
 		},
 		signal,
-		concurrency
+		concurrency,
+		workerDirectory
 	} );
 
 	listrTask.output = 'Let\'s give an npm a moment for taking a breath (~10 sec)...';
