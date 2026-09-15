@@ -32,7 +32,7 @@ const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
  * directories/packages that should not be touched by the task.
  * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {string} [options.workerDirectory='build'] A directory, relative to `options.cwd`, where temporary worker modules are stored.
- * It must be inside the project so workers can resolve dependencies from `node_modules`.The default `build` directory is usually ignored
+ * It must be inside the project so workers can resolve dependencies from `node_modules`. The default `build` directory is usually ignored
  * by git, preventing leftover files from polluting the working tree.
  * @param {number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
