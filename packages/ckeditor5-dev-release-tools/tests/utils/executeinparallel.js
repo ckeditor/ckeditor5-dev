@@ -98,18 +98,19 @@ describe( 'executeInParallel()', () => {
 			expect.any( Object )
 		);
 
+		expect( fs.mkdir ).toHaveBeenCalledExactlyOnceWith( '/home/ckeditor/build', { recursive: true } );
 		expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFile ).toHaveBeenCalledWith(
-			'/home/ckeditor/uuid-4.mjs',
+			'/home/ckeditor/build/uuid-4.mjs',
 			'export default packagePath => console.log( \'pwd\', packagePath );',
 			'utf-8'
 		);
 		expect( firstWorker.workerData ).toBeInstanceOf( Object );
-		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/build/uuid-4.mjs' );
 		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 		expect( secondWorker.workerData ).toBeInstanceOf( Object );
-		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///home/ckeditor/build/uuid-4.mjs' );
 		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 		// Workers did not emit an error.
@@ -181,6 +182,34 @@ describe( 'executeInParallel()', () => {
 		await promise;
 	} );
 
+	it( 'should create the temporary module in the specified `workerDirectory` resolved from `cwd`', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			cwd: '/custom/cwd',
+			workerDirectory: 'tmp/workers'
+		} );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( fs.mkdir ).toHaveBeenCalledExactlyOnceWith( '/custom/cwd/tmp/workers', { recursive: true } );
+		expect( fs.writeFile ).toHaveBeenCalledExactlyOnceWith(
+			'/custom/cwd/tmp/workers/uuid-4.mjs',
+			'export default packagePath => console.log( \'pwd\', packagePath );',
+			'utf-8'
+		);
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///custom/cwd/tmp/workers/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file:///custom/cwd/tmp/workers/uuid-4.mjs' );
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+	} );
+
 	it( 'should pass task options to all workers', async () => {
 		const taskOptions = {
 			property: 'Example of the property.',
@@ -222,9 +251,10 @@ describe( 'executeInParallel()', () => {
 		const promise = executeInParallel( defaultOptions );
 		await delay( 0 );
 
+		expect( fs.mkdir ).toHaveBeenCalledExactlyOnceWith( 'C:/Users/ckeditor/build', { recursive: true } );
 		expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
 		expect( fs.writeFile ).toHaveBeenCalledWith(
-			'C:/Users/ckeditor/uuid-4.mjs',
+			'C:/Users/ckeditor/build/uuid-4.mjs',
 			'export default packagePath => console.log( \'pwd\', packagePath );',
 			'utf-8'
 		);
@@ -235,11 +265,11 @@ describe( 'executeInParallel()', () => {
 		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
 		expect( firstWorker.workerData ).toBeInstanceOf( Object );
-		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/build/uuid-4.mjs' );
 		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 		expect( secondWorker.workerData ).toBeInstanceOf( Object );
-		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'file://C:/Users/ckeditor/build/uuid-4.mjs' );
 		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 		// Workers did not emit an error.
@@ -427,7 +457,7 @@ describe( 'executeInParallel()', () => {
 		await promise;
 
 		expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/build/uuid-4.mjs' );
 	} );
 
 	it( 'should remove the temporary module if the process is aborted', async () => {
@@ -445,7 +475,7 @@ describe( 'executeInParallel()', () => {
 		await promise;
 
 		expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/build/uuid-4.mjs' );
 	} );
 
 	it( 'should remove the temporary module if the promise rejected', async () => {
@@ -464,7 +494,7 @@ describe( 'executeInParallel()', () => {
 				},
 				() => {
 					expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-					expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+					expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/build/uuid-4.mjs' );
 				}
 			);
 	} );

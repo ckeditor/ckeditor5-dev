@@ -420,6 +420,19 @@ describe( 'publishPackages()', () => {
 			} ) );
 		} );
 
+		it( 'should use the `build` worker directory by default when publishing packages', async () => {
+			const promise = publishPackages( {
+				listrTask: {}
+			} );
+
+			await vi.advanceTimersToNextTimerAsync();
+			await promise;
+
+			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+				workerDirectory: 'build'
+			} ) );
+		} );
+
 		it( 'should pass parameters for publishing packages', async () => {
 			const listrTask = {};
 			const abortController = new AbortController();
@@ -431,7 +444,8 @@ describe( 'publishPackages()', () => {
 				listrTask,
 				signal: abortController.signal,
 				concurrency: 3,
-				cwd: '/home/cwd'
+				cwd: '/home/cwd',
+				workerDirectory: 'tmp/workers'
 			} );
 
 			await vi.advanceTimersToNextTimerAsync();
@@ -444,7 +458,8 @@ describe( 'publishPackages()', () => {
 				taskOptions: { npmTag: 'nightly' },
 				signal: abortController.signal,
 				concurrency: 3,
-				cwd: '/home/cwd'
+				cwd: '/home/cwd',
+				workerDirectory: 'tmp/workers'
 			} );
 		} );
 
