@@ -38,3 +38,8 @@ shamefullyHoist: true
 preferFrozenLockfile: true
 linkWorkspacePackages: true
 verifyDepsBeforeRun: false
+
+# `ckeditor5-dev-translations` and `ckeditor5-dev-utils` depend on each other, so their `postinstall`
+# tasks form a cycle. pnpm 11 only warned about it; pnpm 12 fails `pnpm run -r` with
+# `ERR_PNPM_TASK_CYCLE`, so the cycle has to be declared deliberate for the tasks to run at all.
+ignoreWorkspaceCycles: true
