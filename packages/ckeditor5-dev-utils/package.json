@@ -30,7 +30,7 @@
     "cli-spinners": "^3.4.0",
     "glob": "^13.0.6",
     "is-interactive": "^2.0.0",
-    "pacote": "^21.5.0",
+    "pacote": "^21.5.1",
     "shelljs": "^0.10.0",
     "simple-git": "^3.36.0",
     "through2": "^4.0.2",
