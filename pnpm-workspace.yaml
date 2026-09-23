@@ -40,4 +40,9 @@ shellEmulator: true
 shamefullyHoist: true
 preferFrozenLockfile: true
 linkWorkspacePackages: true
+# `ckeditor5-dev-utils` and `ckeditor5-dev-translations` depend on each other. Since pnpm 11.25
+# a task cycle fails the whole run instead of being scheduled in topological chunks. In that pair
+# only `ckeditor5-dev-utils` has a `build` script and `ckeditor5-dev-translations` ships a committed
+# `lib/`, so the order the two run in relative to each other makes no difference.
+ignoreWorkspaceCycles: true
 verifyDepsBeforeRun: false
