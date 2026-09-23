@@ -217,6 +217,11 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				// `window.editor` inspector setter first. The header chrome is opt-in via
 				// `<ck-manual-header>` in the source.
 				const tags: Array<HtmlTagDescriptor> = [
+					{
+						tag: 'link',
+						attrs: { rel: 'icon', href: 'data:image/png;base64,iVBORw0KGgo=' },
+						injectTo: 'head-prepend'
+					},
 					createModuleScriptTag( getManualBootstrapScriptPublicPath(), 'head-prepend' )
 				];
 

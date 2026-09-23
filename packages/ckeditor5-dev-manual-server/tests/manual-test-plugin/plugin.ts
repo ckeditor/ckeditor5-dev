@@ -174,6 +174,11 @@ describe( 'manualTestsPlugin()', () => {
 		const scripts = result.tags.filter( tag => tag.tag == 'script' );
 
 		expect( result.html ).to.equal( HEADER_PAGE );
+		expect( result.tags ).to.deep.include( {
+			tag: 'link',
+			attrs: { rel: 'icon', href: 'data:image/png;base64,iVBORw0KGgo=' },
+			injectTo: 'head-prepend'
+		} );
 		expect( meta.attrs ).to.deep.include( { 'name': 'ck-manual-header', 'data-package-name': 'ckeditor5-foo' } );
 		expect( meta.attrs![ 'data-catalog-href' ] ).to.equal( '../../../index.html' );
 		expect( meta.injectTo ).to.equal( 'head' );
@@ -208,7 +213,7 @@ describe( 'manualTestsPlugin()', () => {
 		expect( meta.attrs![ 'data-catalog-href' ] ).to.equal( '/manual/' );
 	} );
 
-	it( 'injects only the bootstrap script for manual pages without <ck-manual-header>', async () => {
+	it( 'injects the favicon and bootstrap for manual pages without <ck-manual-header>', async () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', '<p>No chrome</p>' );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
@@ -222,11 +227,16 @@ describe( 'manualTestsPlugin()', () => {
 		} ) as { html: string; tags: Array<HtmlTagDescriptor> };
 
 		expect( result.html ).to.equal( '<p>No chrome</p>' );
-		expect( result.tags ).to.have.lengthOf( 1 );
-		expect( result.tags[ 0 ]!.tag ).to.equal( 'script' );
-		expect( String( result.tags[ 0 ]!.attrs!.src ) ).to.contain( 'manual-bootstrap.ts' );
-		expect( result.tags[ 0 ]!.attrs!.type ).to.equal( 'module' );
-		expect( result.tags[ 0 ]!.injectTo ).to.equal( 'head-prepend' );
+		expect( result.tags ).to.have.lengthOf( 2 );
+		expect( result.tags[ 0 ] ).to.deep.equal( {
+			tag: 'link',
+			attrs: { rel: 'icon', href: 'data:image/png;base64,iVBORw0KGgo=' },
+			injectTo: 'head-prepend'
+		} );
+		expect( result.tags[ 1 ]!.tag ).to.equal( 'script' );
+		expect( String( result.tags[ 1 ]!.attrs!.src ) ).to.contain( 'manual-bootstrap.ts' );
+		expect( result.tags[ 1 ]!.attrs!.type ).to.equal( 'module' );
+		expect( result.tags[ 1 ]!.injectTo ).to.equal( 'head-prepend' );
 	} );
 
 	it( 'appends the package theme entry imports to manual test entry scripts', async () => {
