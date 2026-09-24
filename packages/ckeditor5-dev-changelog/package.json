@@ -40,10 +40,10 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
     "@types/semver": "^7.7.0",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.11",
     "rollup": "^4.9.5",
     "typescript": "5.3.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit",
