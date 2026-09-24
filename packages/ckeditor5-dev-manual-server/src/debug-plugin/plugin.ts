@@ -43,7 +43,11 @@ export function ckDebugPlugin(): Plugin {
 					}
 				);
 
-				return transformedCode === code ? null : transformedCode;
+				// The replacement preserves line and column positions. Explicitly preserve the source map chain.
+				return transformedCode === code ? null : {
+					code: transformedCode,
+					map: null
+				};
 			}
 		}
 	};
