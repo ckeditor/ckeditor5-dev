@@ -234,8 +234,9 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				// `window.editor` inspector setter first. The header chrome is opt-in via
 				// `<ck-manual-header>` in the source.
 				const tags: Array<HtmlTagDescriptor> = [
-					// Chrome otherwise requests /favicon.ico, whose 404 makes the crawler retry the page.
-					// This PNG-signature data URL suppresses the request without adding an asset.
+					// This intentionally contains only the PNG signature, with the image/png MIME type.
+					// It serves as an empty favicon placeholder, suppressing Chrome's automatic /favicon.ico
+					// request and the resulting 404 errors and crawler retries.
 					{
 						tag: 'link',
 						attrs: { rel: 'icon', href: 'data:image/png;base64,iVBORw0KGgo=' },
