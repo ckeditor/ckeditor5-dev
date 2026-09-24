@@ -91,11 +91,28 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 	return {
 		name: 'ckeditor5-manual-tests',
 
-		config( config = {} ) {
+		config( config = {}, { command } ) {
 			workspaceRoot = resolve( config.root || process.cwd() );
 
 			return {
-				input: getManualBuildInputs()
+				input: getManualBuildInputs(),
+				// Shared chunks speed up crawling built pages, but slow down bundled development.
+				build: command == 'build' ? {
+					rolldownOptions: {
+						// Keep non-recursive grouping safe independently of other plugins and Vite defaults.
+						preserveEntrySignatures: false,
+						output: {
+							strictExecutionOrder: true,
+							codeSplitting: {
+								groups: [ {
+									name: 'manual-shared',
+									minShareCount: 100,
+									includeDependenciesRecursively: false
+								} ]
+							}
+						}
+					}
+				} : undefined
 			};
 		},
 
@@ -217,6 +234,8 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				// `window.editor` inspector setter first. The header chrome is opt-in via
 				// `<ck-manual-header>` in the source.
 				const tags: Array<HtmlTagDescriptor> = [
+					// Chrome otherwise requests /favicon.ico, whose 404 makes the crawler retry the page.
+					// This PNG-signature data URL suppresses the request without adding an asset.
 					{
 						tag: 'link',
 						attrs: { rel: 'icon', href: 'data:image/png;base64,iVBORw0KGgo=' },

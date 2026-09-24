@@ -5,14 +5,14 @@
 
 import { join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createServer, type HtmlTagDescriptor, type ViteDevServer } from 'vite';
+import { createServer, resolveConfig, type HtmlTagDescriptor, type ViteDevServer } from 'vite';
 import { manualTestsPlugin, type ManualTestsPluginOptions } from '../../src/manual-test-plugin/plugin.js';
 import { stripLeadingSlash, toPublicFilePath } from '../../src/utils.js';
 import { createFile, createTemporaryDirectory, removeDirectory } from '../_utils/files.js';
 import { createTestServer, getCode } from '../_utils/vite.js';
 
 type ServerHook = ( server: TestServer ) => void;
-type ConfigHook = ( config?: { root?: string } ) => {
+type ConfigHook = ( config: { root?: string }, environment: { command: 'build' | 'serve' } ) => {
 	input: Array<string>;
 };
 type ConfigResolvedHook = ( config: {
@@ -56,6 +56,51 @@ describe( 'manualTestsPlugin()', () => {
 		server = undefined;
 
 		await removeDirectory( workspaceRoot );
+	} );
+
+	it( 'configures safe shared chunks for builds without the CSS ordering plugin', async () => {
+		const config = await resolveConfig( {
+			configFile: false,
+			root: workspaceRoot,
+			plugins: [ manualTestsPlugin( { paths: [ 'packages/*' ] } ) ],
+			build: {
+				minify: false,
+				rolldownOptions: {
+					preserveEntrySignatures: 'strict',
+					output: { strictExecutionOrder: false }
+				}
+			}
+		}, 'build' );
+
+		expect( config.build.rolldownOptions ).toMatchObject( {
+			preserveEntrySignatures: false,
+			output: {
+				strictExecutionOrder: true,
+				codeSplitting: {
+					groups: [ {
+						name: 'manual-shared',
+						minShareCount: 100,
+						includeDependenciesRecursively: false
+					} ]
+				}
+			}
+		} );
+		expect( config.build.minify ).to.be.false;
+	} );
+
+	it( 'preserves the configured chunking and execution options in development', async () => {
+		const rolldownOptions = {
+			preserveEntrySignatures: 'strict' as const,
+			output: { strictExecutionOrder: false, codeSplitting: true }
+		};
+		const config = await resolveConfig( {
+			configFile: false,
+			root: workspaceRoot,
+			plugins: [ manualTestsPlugin( { paths: [ 'packages/*' ] } ) ],
+			build: { rolldownOptions }
+		}, 'serve' );
+
+		expect( config.build.rolldownOptions ).toMatchObject( rolldownOptions );
 	} );
 
 	it( 'uses provided package root globs for page entries', async () => {
@@ -161,7 +206,7 @@ describe( 'manualTestsPlugin()', () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', HEADER_PAGE );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
@@ -200,7 +245,7 @@ describe( 'manualTestsPlugin()', () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', HEADER_PAGE );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: '/manual/' } );
@@ -217,7 +262,7 @@ describe( 'manualTestsPlugin()', () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html', '<p>No chrome</p>' );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
@@ -450,7 +495,7 @@ describe( 'manualTestsPlugin()', () => {
 
 	function createConfiguredTransformHook( options: ManualTestsPluginOptions ): TransformHook {
 		const plugin = manualTestsPlugin( options );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
 
@@ -486,7 +531,7 @@ describe( 'manualTestsPlugin()', () => {
 		await createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' );
 
 		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ] } );
-		const config = ( plugin.config as ConfigHook )();
+		const config = ( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 
 		expect( config.input ).to.include( join( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ) );
 	} );
@@ -514,7 +559,7 @@ describe( 'manualTestsPlugin()', () => {
 
 	it( 'registers the catalog HTML as the build index page', () => {
 		const plugin = manualTestsPlugin( { paths: [] } );
-		const config = ( plugin.config as ConfigHook )();
+		const config = ( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 		const catalogInputFilePath = join( workspaceRoot, 'index.html' );
 
 		expect( config.input ).to.include( catalogInputFilePath );
@@ -588,7 +633,7 @@ describe( 'manualTestsPlugin()', () => {
 
 	it( 'rewrites the catalog script for the synthetic build index page', () => {
 		const plugin = manualTestsPlugin( { paths: [] } );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 		const transformIndexHtml = plugin.transformIndexHtml as TransformIndexHtmlHook;
 		const catalogScriptFilePath = resolve( import.meta.dirname, '../../theme/catalog.ts' ).replace( /\\/g, '/' );
 
@@ -707,7 +752,7 @@ describe( 'manualTestsPlugin()', () => {
 
 	function loadEntries( options: ManualTestsPluginOptions, base: string ): string {
 		const plugin = manualTestsPlugin( options );
-		( plugin.config as ConfigHook )();
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
 
 		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base } );
 
