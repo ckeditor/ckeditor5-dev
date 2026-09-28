@@ -1,6 +1,51 @@
 Changelog
 =========
 
+## [62.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v62.0.0...v62.1.0) (September 28, 2026)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `executeInParallel()` function now stores the temporary worker module inside the project instead of in its root directory. The location is configurable via the new `workerDirectory` option, which is resolved from `cwd` and defaults to `build`. Closes [ckeditor/ckeditor5#18939](https://github.com/ckeditor/ckeditor5/issues/18939).
+
+  The module must stay inside the project so that `import()` calls in the executed callback resolve dependencies from the project's `node_modules`. Storing it in a directory Git ignores prevents a leftover module from polluting the working tree if the process is aborted or fails.
+
+### Bug fixes
+
+* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: Manual test pages no longer request a missing `/favicon.ico`, preventing spurious 404 errors during verification.
+* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: Fixed missing source files and unavailable breakpoints in browser developer tools when the manual test server enables debug statements.
+
+### Other changes
+
+* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: Manual test builds now group widely shared modules to reduce chunk requests and improve crawling performance. Bundled development retains automatic chunking.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/62.1.0): v62.0.0 => v62.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.1.0): v62.0.0 => v62.1.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.1.0): v62.0.0 => v62.1.0
+</details>
+
+
 ## [62.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v61.2.0...v62.0.0) (September 9, 2026)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
@@ -140,55 +185,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/61.0.0): v60.0.0 => v61.0.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/61.0.0): v60.0.0 => v61.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/61.0.0): v60.0.0 => v61.0.0
-</details>
-
-
-## [60.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v59.1.0...v60.0.0) (August 17, 2026)
-
-### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Replaced PO translation file support with generated TypeScript translation modules. The build tools now collect TypeScript translation sources from `**/lang/translations/*.ts` by default and load them through native `import()`. Each module must default-export translations keyed by the language code matching its filename, for example `en.ts` must export an `en` key.
-
-  Dictionary-only sources no longer emit a `getPluralForm` property (or `"getPluralForm": null`) in ESM output, and a dictionary-only UMD source does not overwrite an already registered plural function.
-* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Replaced PO translation file support with generated TypeScript translation modules. The translation management utilities now read, create, synchronize, and move TypeScript translation sources.
-
-  The `synchronizeTranslations()` and `moveTranslations()` functions are now asynchronous and must be awaited. The new `readTranslationFile()` function is asynchronous and must be awaited, while `serializeTranslationFile()` serializes a translation dictionary synchronously.
-
-  The `synchronizeTranslations()` function now accepts `translationsTypeImportSource` to select the package from which generated files import the `Translations` type. It defaults to `@ckeditor/ckeditor5-utils`.
-
-### Features
-
-* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: Added support for loading TypeScript translation sources and selecting the default editor language in the Vite manual test server.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Major releases (contain major breaking changes):
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/60.0.0): v59.1.0 => v60.0.0
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/60.0.0): v59.1.0 => v60.0.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/60.0.0): v59.1.0 => v60.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/60.0.0): v59.1.0 => v60.0.0
 </details>
 
 ---
