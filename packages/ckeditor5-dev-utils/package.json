@@ -37,10 +37,10 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "jest-extended": "^5.0.3",
     "rolldown": "^1.2.6",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
