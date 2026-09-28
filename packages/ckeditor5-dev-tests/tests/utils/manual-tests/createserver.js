@@ -30,6 +30,11 @@ describe( 'createManualTestServer()', () => {
 			info: loggerStub
 		} );
 
+		// On Windows the server also creates a `readline` interface (see the SIGINT handling in the implementation).
+		vi.mocked( readline ).createInterface.mockReturnValue( {
+			on: vi.fn()
+		} );
+
 		vi.spyOn( http, 'createServer' ).mockImplementation( ( ...theArgs ) => {
 			server = createServer( ...theArgs );
 
