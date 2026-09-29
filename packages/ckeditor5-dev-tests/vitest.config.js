@@ -29,7 +29,7 @@ export default defineConfig( {
 				'lib/**'
 			],
 			exclude: [
-				'*.html'
+				'**/*.html'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

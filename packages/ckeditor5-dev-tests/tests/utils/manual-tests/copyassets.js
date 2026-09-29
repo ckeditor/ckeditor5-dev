@@ -31,7 +31,7 @@ describe( 'copyAssets()', () => {
 		const buildDir = '/build';
 		copyAssets( buildDir );
 
-		expect( mkdirSync ).toHaveBeenCalledWith( buildDir + '/assets', expect.any( Object ) );
+		expect( mkdirSync ).toHaveBeenCalledWith( path.join( buildDir, 'assets' ), expect.any( Object ) );
 		expect( copyFileSync ).toHaveBeenCalledTimes( ASSETS.length + 1 );
 
 		const scriptPath = path.resolve( import.meta.dirname, '..', '..', '..', 'lib', 'utils', 'manual-tests' );
@@ -40,7 +40,7 @@ describe( 'copyAssets()', () => {
 			expect( copyFileSync ).toHaveBeenNthCalledWith(
 				index + 1,
 				path.resolve( scriptPath, assetPath ),
-				path.resolve( buildDir, 'assets', path.basename( assetPath ) )
+				path.join( buildDir, 'assets', path.basename( assetPath ) )
 			);
 		}
 	} );
