@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "type-fest": "^4.41.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",

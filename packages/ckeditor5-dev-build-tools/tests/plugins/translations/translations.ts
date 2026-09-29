@@ -109,7 +109,7 @@ describe( 'translations()', () => {
 	it( 'rejects translation files whose language key does not match the file name', async () => {
 		await expect( generateBundle( {
 			source: upath.join( import.meta.dirname, '/fixtures/invalid-translations/*.ts' )
-		} ) ).rejects.toThrow( /invalid-translations\/de\.ts.*language "de"/ );
+		} ) ).rejects.toThrow( /invalid-translations[\\/]de\.ts.*language "de"/ );
 	} );
 
 	it( 'ignores declarations and translation files in dependency and build directories', async () => {

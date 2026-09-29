@@ -22,7 +22,7 @@ export default defineConfig( {
 				'lib/**'
 			],
 			exclude: [
-				'*.graphql'
+				'**/*.graphql'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}
