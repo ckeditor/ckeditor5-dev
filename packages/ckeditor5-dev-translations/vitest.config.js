@@ -22,7 +22,7 @@ export default defineConfig( {
 				'lib/**'
 			],
 			exclude: [
-				'*.po'
+				'**/*.po'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

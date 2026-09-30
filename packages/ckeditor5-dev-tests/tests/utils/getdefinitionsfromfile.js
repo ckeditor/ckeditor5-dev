@@ -59,7 +59,7 @@ describe( 'getDefinitionsFromFile()', () => {
 
 	it( 'should not throw an error and return empty object if stringifies the identity file has failed', () => {
 		const consoleStub = vi.spyOn( console, 'error' ).mockImplementation( () => {} );
-		vi.spyOn( JSON, 'stringify' ).mockImplementation( () => {
+		const stringifyStub = vi.spyOn( JSON, 'stringify' ).mockImplementation( () => {
 			throw new Error( 'Example error.' );
 		} );
 
@@ -71,5 +71,9 @@ describe( 'getDefinitionsFromFile()', () => {
 
 		expect( consoleStub ).toHaveBeenCalledExactlyOnceWith( 'Example error.' );
 		expect( definitions ).to.deep.equal( {} );
+
+		// The coverage provider serializes the collected data with `JSON.stringify()` once the last test in the file finishes,
+		// so the mock must be restored.
+		stringifyStub.mockRestore();
 	} );
 } );
