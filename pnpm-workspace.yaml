@@ -34,6 +34,7 @@ minimumReleaseAgeExclude:
 shellEmulator: true
 shamefullyHoist: true
 preferFrozenLockfile: true
+autoDedupe: true
 linkWorkspacePackages: true
 verifyDepsBeforeRun: false
 # Only registry tarballs may enter the tree as subdependencies. Direct git/tarball

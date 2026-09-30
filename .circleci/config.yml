@@ -68,7 +68,7 @@ jobs:
       - run:
           name: Install pnpm
           command: |
-            sudo npm i -g pnpm@12.3.4
+            sudo npm i -g pnpm@12.6.0
             pnpm --version
       - run:
           name: Install dependencies
