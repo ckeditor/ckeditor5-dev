@@ -125,7 +125,13 @@ export async function fixUnit( runner: FixUnitOptions, record: UnitRun, actionab
 			const findings = await step( 'Judging the fixed unit', () => runner.judge( candidate.unit, fragment ) );
 			const before = candidate.current!.findings!;
 			const known = new Set( before.filter( finding => !runner.isRejected( finding ) ).map( finding => finding.fingerprint ) );
-			const introduced = findings.filter( finding => !known.has( finding.fingerprint ) && !runner.isRejected( finding ) );
+
+			// A decision holds only for the content it was made about, and the fix changes that content. A finding rejected
+			// before the fix is not introduced by it, so it does not discard the fix.
+			const rejected = new Set( before.filter( finding => runner.isRejected( finding ) ).map( finding => finding.fingerprint ) );
+			const introduced = findings.filter( finding => {
+				return !known.has( finding.fingerprint ) && !rejected.has( finding.fingerprint ) && !runner.isRejected( finding );
+			} );
 
 			if ( introduced.length ) {
 				throw new Error( `The fix introduced new findings: ${ introduced.map( finding => finding.ruleId ).join( ', ' ) }.` );

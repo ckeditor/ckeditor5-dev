@@ -823,6 +823,23 @@ describe( 'runTask()', () => {
 			expect( summary ).toMatchObject( { fixed: 1, problems: [] } );
 		} );
 
+		it( 'keeps a fix that changes a unit whose other finding a human rejected', async () => {
+			// The decision rejects R2 for the content before the fix. The fix resolves R1 only, so R2 is still there
+			// after it, for the changed content.
+			await writeFiles( root, { 'docs/b.md': 'This is BAD and UGLY.\n' } );
+			git( root, 'commit', '--quiet', '--all', '--message', 'Both.' );
+			await writeFiles( statePath, {
+				'decisions/r2.yml': `unit: docs/b.md\nrule: R2\nfragment: ${ fileHash( 'This is BAD and UGLY.\n' ) }\nreason: Ugly is fine.\n`
+			} );
+
+			const summary = await run( createFixingTask() );
+
+			expect( summary ).toMatchObject( { newFindings: 1, rejected: 1, fixed: 1, discarded: 0, problems: [] } );
+			expect( await readText( upath.join( root, 'docs/b.md' ) ) ).toBe( 'This is GOOD and UGLY.\n' );
+			expect( ( await readOpen() ).map( finding => [ finding.ruleId, Boolean( finding.fix ) ] ) ).toEqual( [ [ 'R1', true ] ] );
+			expect( ( await readBaseline() )[ 'docs/b.md' ] ).toBe( fileHash( 'This is GOOD and UGLY.\n' ) );
+		} );
+
 		it( 'keeps a partial fix and marks only the resolved findings as fixed', async () => {
 			await writeFiles( root, { 'docs/b.md': 'This is BAD and UGLY.\n' } );
 			git( root, 'commit', '--quiet', '--all', '--message', 'Both.' );
