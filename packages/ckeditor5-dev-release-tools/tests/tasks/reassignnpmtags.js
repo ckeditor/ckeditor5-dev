@@ -60,6 +60,21 @@ describe( 'reassignNpmTags()', () => {
 		expect( stubs.exec ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should verify npm authorization using the provided npm account', async () => {
+		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [] } );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'authorized-user', { useOidc: false } );
+	} );
+
+	it( 'should pass the `useOidc` option to the npm authorization assertion', async () => {
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+
+		await reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( undefined, { useOidc: true } );
+		expect( stubs.exec ).toHaveBeenCalledExactlyOnceWith( 'npm dist-tag add package1@1.0.1 latest' );
+	} );
+
 	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
 		vi.mocked( columns ).mockReturnValue( 'package1 | package2' );
 		stubs.exec.mockRejectedValue( new Error( 'is already set to version' ) );
