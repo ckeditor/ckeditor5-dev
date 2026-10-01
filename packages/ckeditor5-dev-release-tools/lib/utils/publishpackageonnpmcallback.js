@@ -13,22 +13,19 @@
  * @returns {Promise}
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
+	const { execFile } = await import( 'node:child_process' );
 	const { rm } = await import( 'node:fs/promises' );
 
 	try {
-		if ( taskOptions.useOidc ) {
-			const { default: getNpmIdToken } = await import( './getnpmidtoken.js' );
+		// The token is passed only to this npm process. The environment of the worker thread does not change.
+		const env = taskOptions.useOidc ?
+			{ ...process.env, NPM_ID_TOKEN: await ( await import( './getnpmidtoken.js' ) ).default() } :
+			process.env;
 
-			// The callback runs in a worker thread that publishes its packages one by one.
-			// Each worker thread has its own copy of `process.env`, so it does not affect other workers.
-			process.env.NPM_ID_TOKEN = await getNpmIdToken();
-		}
+		await new Promise( ( resolve, reject ) => {
+			const args = [ 'publish', '--access=public', '--tag', taskOptions.npmTag ];
 
-		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
-			cwd: packagePath,
-			async: true,
-			verbosity: 'silent'
+			execFile( 'npm', args, { cwd: packagePath, env }, error => error ? reject( error ) : resolve() );
 		} );
 
 		await rm( packagePath, { recursive: true, force: true } );

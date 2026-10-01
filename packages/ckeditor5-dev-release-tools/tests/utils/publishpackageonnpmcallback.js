@@ -5,111 +5,85 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { execFile } from 'node:child_process';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 
 vi.mock( 'node:fs/promises' );
-vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'node:child_process' );
 vi.mock( '../../lib/utils/getnpmidtoken.js' );
+
+const PACKAGE_PATH = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
 describe( 'publishPackageOnNpmCallback()', () => {
 	beforeEach( () => {
-		vi.mocked( tools.shExec ).mockResolvedValue();
+		vi.mocked( execFile ).mockImplementation( ( file, args, options, callback ) => callback( null, '', '' ) );
 		vi.mocked( fs.rm ).mockResolvedValue();
 	} );
 
-	it( 'should publish package on npm with provided npm tag', () => {
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
+	it( 'should publish package on npm with provided npm tag', async () => {
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then( () => {
-				expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-				expect( tools.shExec ).toHaveBeenCalledWith(
-					'npm publish --access=public --tag nightly',
-					expect.objectContaining( {
-						cwd: packagePath
-					} )
-				);
-			} );
+		expect( execFile ).toHaveBeenCalledExactlyOnceWith(
+			'npm',
+			[ 'publish', '--access=public', '--tag', 'nightly' ],
+			expect.objectContaining( { cwd: PACKAGE_PATH } ),
+			expect.any( Function )
+		);
 	} );
 
-	it( 'should publish packages on npm asynchronously', () => {
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
+	it( 'should pass the npm tag as a separate argument without using a shell', async () => {
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'next; rm -rf /' } );
 
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then( () => {
-				expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-				expect( tools.shExec ).toHaveBeenCalledWith(
-					expect.anything(),
-					expect.objectContaining( {
-						async: true
-					} )
-				);
-			} );
+		const [ , args, options ] = vi.mocked( execFile ).mock.calls[ 0 ];
+
+		expect( args ).toEqual( [ 'publish', '--access=public', '--tag', 'next; rm -rf /' ] );
+		expect( options ).not.toHaveProperty( 'shell' );
 	} );
 
-	it( 'should set the verbosity level to "silent" during publishing packages', () => {
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
+	it( 'should remove package directory after publishing on npm', async () => {
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then( () => {
-				expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
-				expect( tools.shExec ).toHaveBeenCalledWith(
-					expect.anything(),
-					expect.objectContaining( {
-						verbosity: 'silent'
-					} )
-				);
-			} );
-	} );
-
-	it( 'should remove package directory after publishing on npm', () => {
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
-
-		return publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
-			.then( () => {
-				expect( fs.rm ).toHaveBeenCalledTimes( 1 );
-				expect( fs.rm ).toHaveBeenCalledWith( packagePath, expect.anything() );
-			} );
+		expect( fs.rm ).toHaveBeenCalledExactlyOnceWith( PACKAGE_PATH, { recursive: true, force: true } );
 	} );
 
 	it( 'should not remove a package directory and not throw error when publishing on npm failed with code 409', async () => {
-		vi.mocked( tools.shExec ).mockRejectedValue( new Error( 'code E409' ) );
+		vi.mocked( execFile ).mockImplementation( ( file, args, options, callback ) => callback( new Error( 'code E409' ) ) );
 
-		const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
-
-		await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
+		await expect( publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } ) ).resolves.toBeUndefined();
 
 		expect( fs.rm ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should pass the current environment to npm when not using OIDC', async () => {
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
+
+		const [ , , options ] = vi.mocked( execFile ).mock.calls[ 0 ];
+
+		expect( options.env ).toBe( process.env );
+		expect( getNpmIdToken ).not.toHaveBeenCalled();
+	} );
+
 	describe( 'npm Trusted Publishing (`useOidc=true`)', () => {
-		it( 'should set a fresh OIDC token right before publishing', async () => {
+		it( 'should pass a fresh OIDC token only to the npm process', async () => {
 			vi.stubEnv( 'NPM_ID_TOKEN', 'old-token' );
 			vi.mocked( getNpmIdToken ).mockResolvedValue( 'fresh-token' );
-			vi.mocked( tools.shExec ).mockImplementation( async () => {
-				expect( process.env.NPM_ID_TOKEN ).toEqual( 'fresh-token' );
-			} );
 
-			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly', useOidc: true } );
+			await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly', useOidc: true } );
+
+			const [ , , options ] = vi.mocked( execFile ).mock.calls[ 0 ];
 
 			expect( getNpmIdToken ).toHaveBeenCalledOnce();
-			expect( tools.shExec ).toHaveBeenCalledOnce();
-		} );
-
-		it( 'should not request an OIDC token when not using OIDC', async () => {
-			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly' } );
-
-			expect( getNpmIdToken ).not.toHaveBeenCalled();
+			expect( options.env ).toEqual( expect.objectContaining( { NPM_ID_TOKEN: 'fresh-token' } ) );
+			expect( process.env.NPM_ID_TOKEN ).toEqual( 'old-token' );
 		} );
 
 		it( 'should not publish the package when an OIDC token cannot be requested', async () => {
 			vi.mocked( getNpmIdToken ).mockRejectedValue( new Error( 'circleci: not found' ) );
 
-			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly', useOidc: true } );
+			await expect( publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly', useOidc: true } ) ).resolves.toBeUndefined();
 
-			expect( tools.shExec ).not.toHaveBeenCalled();
+			expect( execFile ).not.toHaveBeenCalled();
 			expect( fs.rm ).not.toHaveBeenCalled();
 		} );
 	} );
