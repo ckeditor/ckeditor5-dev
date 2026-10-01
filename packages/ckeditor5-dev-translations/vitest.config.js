@@ -22,7 +22,7 @@ export default defineConfig( {
 				'lib/**'
 			],
 			exclude: [
-				'*.ts'
+				'**/*.ts'
 			],
 			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}

@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "62.0.0",
+  "version": "62.2.0",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -30,17 +30,17 @@
     "cli-spinners": "^3.4.0",
     "glob": "^13.0.6",
     "is-interactive": "^2.0.0",
-    "pacote": "^21.5.0",
+    "pacote": "^21.5.1",
     "shelljs": "^0.10.0",
     "simple-git": "^3.36.0",
     "through2": "^4.0.2",
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "jest-extended": "^5.0.3",
     "rolldown": "^1.2.6",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",

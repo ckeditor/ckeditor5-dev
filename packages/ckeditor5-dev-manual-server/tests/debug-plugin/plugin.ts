@@ -4,6 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { rolldown } from 'rolldown';
 import type { Plugin } from 'vite';
 import { ckDebugPlugin } from '../../src/debug-plugin/plugin.js';
 
@@ -60,6 +61,37 @@ describe( 'ckDebugPlugin()', () => {
 		vi.stubEnv( 'CK_DEBUG', 'true' );
 
 		expect( transformCode( 'const value = 1;\nconsole.log( value );' ) ).to.equal( null );
+	} );
+
+	it( 'preserves source maps when bundling modules with enabled debug comments', async () => {
+		vi.stubEnv( 'CK_DEBUG', undefined );
+
+		const code = 'export const value: number = 1;\n// @if CK_DEBUG // console.log( value );';
+		const onwarn = vi.fn();
+		const bundle = await rolldown( {
+			input: '/manual-debug.ts',
+			onwarn,
+			plugins: [
+				{
+					name: 'test-source',
+					resolveId: () => '/manual-debug.ts',
+					load: () => code
+				},
+				ckDebugPlugin()
+			]
+		} );
+
+		try {
+			const { output } = await bundle.generate( { format: 'esm', sourcemap: true } );
+			const chunk = output.find( item => item.type === 'chunk' )!;
+
+			expect( chunk.code ).to.contain( 'console.log(' );
+			expect( chunk.map!.sourcesContent ).to.contain( code );
+			expect( chunk.map!.mappings ).not.to.equal( '' );
+			expect( onwarn ).not.toHaveBeenCalled();
+		} finally {
+			await bundle.close();
+		}
 	} );
 
 	it( 'transforms debug comments for selected debug namespaces', () => {

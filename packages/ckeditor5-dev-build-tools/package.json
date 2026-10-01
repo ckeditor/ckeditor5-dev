@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-build-tools",
-  "version": "62.0.0",
+  "version": "62.2.0",
   "description": "Rolldown-based tools used to build CKEditor 5 packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "type-fest": "^4.41.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
