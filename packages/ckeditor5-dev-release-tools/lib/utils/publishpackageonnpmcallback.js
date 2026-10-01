@@ -25,10 +25,10 @@ export default async function publishPackageOnNpmCallback( packagePath, taskOpti
 			throw new Error( `Invalid npm tag: "${ taskOptions.npmTag }".` );
 		}
 
+		const command = `npm publish --access=public --tag ${ taskOptions.npmTag }`;
+
 		await new Promise( ( resolve, reject ) => {
-			exec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, { cwd: packagePath, env }, error => {
-				return error ? reject( error ) : resolve();
-			} );
+			exec( command, { cwd: packagePath, env }, error => error ? reject( error ) : resolve() );
 		} );
 
 		await rm( packagePath, { recursive: true, force: true } );

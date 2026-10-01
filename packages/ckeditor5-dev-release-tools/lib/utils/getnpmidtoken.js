@@ -47,12 +47,11 @@ export default async function getNpmIdToken() {
  * @returns {Promise<string|null>}
  */
 async function requestCircleciToken() {
+	const args = [ 'run', 'oidc', 'get', '--claims', JSON.stringify( { aud: NPM_OIDC_AUDIENCE } ) ];
 	let stdout;
 
 	try {
 		stdout = await new Promise( ( resolve, reject ) => {
-			const args = [ 'run', 'oidc', 'get', '--claims', JSON.stringify( { aud: NPM_OIDC_AUDIENCE } ) ];
-
 			execFile( 'circleci', args, ( error, output ) => error ? reject( error ) : resolve( output ) );
 		} );
 	} catch ( error ) {
