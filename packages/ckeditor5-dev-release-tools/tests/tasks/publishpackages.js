@@ -421,7 +421,7 @@ describe( 'publishPackages()', () => {
 				packagesDirectory: 'packages',
 				listrTask,
 				taskToExecute: publishPackageOnNpmCallback,
-				taskOptions: { npmTag: 'nightly' },
+				taskOptions: { npmTag: 'nightly', useOidc: false },
 				signal: abortController.signal,
 				concurrency: 3,
 				cwd: '/home/cwd',

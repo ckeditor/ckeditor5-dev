@@ -10,6 +10,7 @@ import { styleText, promisify } from 'node:util';
 import columns from 'cli-columns';
 import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
+import getNpmIdToken from '../utils/getnpmidtoken.js';
 import { exec } from 'node:child_process';
 
 const execPromise = promisify( exec );
@@ -52,7 +53,14 @@ export default async function reassignNpmTags( options ) {
 
 	const updateTagPromises = packages.map( async packageName => {
 		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`;
-		const updateLatestTagRetryable = retry( () => execPromise( command ) );
+		const updateLatestTagRetryable = retry( async () => {
+			if ( !useOidc ) {
+				return execPromise( command );
+			}
+
+			// The calls run in parallel, so the fresh token is passed only to this npm process.
+			return execPromise( command, { env: { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() } } );
+		} );
 		await updateLatestTagRetryable()
 			.then( response => {
 				if ( response.stdout ) {
