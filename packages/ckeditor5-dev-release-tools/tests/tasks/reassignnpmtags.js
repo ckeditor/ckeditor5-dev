@@ -60,6 +60,42 @@ describe( 'reassignNpmTags()', () => {
 		expect( stubs.exec ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should not verify npm authorization when using OIDC (`useOidc=true`)', async () => {
+		vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+
+		await reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+		expect( stubs.exec ).toHaveBeenCalledExactlyOnceWith( 'npm dist-tag add package1@1.0.1 latest' );
+	} );
+
+	it( 'should throw when using OIDC while the "NPM_ID_TOKEN" environment variable is not set', async () => {
+		vi.stubEnv( 'NPM_ID_TOKEN', undefined );
+
+		await expect( reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } ) )
+			.rejects.toThrow( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw when using OIDC while the "NPM_ID_TOKEN" environment variable is empty', async () => {
+		vi.stubEnv( 'NPM_ID_TOKEN', '' );
+
+		await expect( reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } ) )
+			.rejects.toThrow( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should verify npm authorization when the `useOidc` option is disabled explicitly', async () => {
+		await reassignNpmTags( { npmOwner: 'authorized-user', useOidc: false, version: '1.0.1', packages: [] } );
+
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'authorized-user' );
+	} );
+
 	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
 		vi.mocked( columns ).mockReturnValue( 'package1 | package2' );
 		stubs.exec.mockRejectedValue( new Error( 'is already set to version' ) );
