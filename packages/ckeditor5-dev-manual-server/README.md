@@ -2,7 +2,7 @@ CKEditor 5 manual server
 =======================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-manual-server.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v61)
 
 Used to extend Vite to create a manual test server for CKEditor 5.
 

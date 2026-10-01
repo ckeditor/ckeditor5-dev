@@ -50,5 +50,49 @@ describe( 'scripts/publishpackages', () => {
 			expect( options ).toHaveProperty( 'useOidc', true );
 			expect( options ).not.toHaveProperty( 'npmOwner' );
 		} );
+
+		it( 'publishes stable versions on the `latest-v61` npm tag instead of `latest`', async () => {
+			const { task } = listrTasks.find( ( { title } ) => title === 'Publishing packages.' );
+
+			await task( {}, {} );
+
+			const [ options ] = vi.mocked( releaseTools.publishPackages ).mock.calls[ 0 ];
+
+			expect( options ).toHaveProperty( 'npmTag', 'latest-v61' );
+			expect( options ).toHaveProperty( 'disallowLatestNpmTag', true );
+		} );
+
+		it( 'keeps a non-latest npm tag resolved from the version', async () => {
+			vi.resetModules();
+			vi.mocked( Listr ).mockClear();
+			vi.mocked( releaseTools.getNpmTagFromVersion ).mockReturnValue( 'alpha' );
+
+			await import( '../scripts/publishpackages.js' );
+
+			const { task } = vi.mocked( Listr ).mock.calls[ 0 ][ 0 ].find( ( { title } ) => title === 'Publishing packages.' );
+
+			await task( {}, {} );
+
+			const [ options ] = vi.mocked( releaseTools.publishPackages ).mock.calls[ 0 ];
+
+			expect( options ).toHaveProperty( 'npmTag', 'alpha' );
+		} );
+	} );
+
+	describe( 'Creating the release page.', () => {
+		it( 'does not mark the GitHub release as the latest one', async () => {
+			vi.mocked( releaseTools.createGithubRelease ).mockResolvedValue( 'https://github.com/ckeditor/ckeditor5-dev/releases' );
+
+			const { task } = listrTasks.find( ( { title } ) => title === 'Creating the release page.' );
+
+			await task( {}, {} );
+
+			expect( releaseTools.createGithubRelease ).toHaveBeenCalledExactlyOnceWith( {
+				token: 'github-token',
+				version: '1.0.0',
+				description: 'Changes.',
+				isLatest: false
+			} );
+		} );
 	} );
 } );
