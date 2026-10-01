@@ -19,8 +19,14 @@ const execPromise = promisify( exec );
  * It supports built-in tags (e.g. `latest`, `staging`, `next`) and custom tags (e.g. `latest-v{X}`).
  * Each operation will be retried up to 3 times in case of failure.
  *
+ * When using npm Trusted Publishing (`useOidc`), the `npm whoami` check is replaced by verifying that the `NPM_ID_TOKEN`
+ * environment variable is set, as `npm whoami` does not reflect OIDC authentication. It requires npm 11.21.0 or newer
+ * and a trusted publisher that allows the `npm dist-tag` command.
+ *
  * @param {object} options
- * @param {string} options.npmOwner User that is authorized to release packages.
+ * @param {string} [options.npmOwner] User that is authorized to release packages. Required unless `useOidc` is enabled.
+ * @param {boolean} [options.useOidc=false] Whether to authorize using npm Trusted Publishing (OIDC). When enabled,
+ * the `npm whoami` authorization check is skipped and the `NPM_ID_TOKEN` environment variable must be set instead.
  * @param {string} options.version Specifies the version of packages to reassign the tags for.
  * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
  * @param {string} [options.npmTag='latest'] Npm dist-tag to assign.
@@ -29,6 +35,7 @@ const execPromise = promisify( exec );
 export default async function reassignNpmTags( options ) {
 	const {
 		npmOwner,
+		useOidc = false,
 		version,
 		packages,
 		npmTag = 'latest'
@@ -38,7 +45,7 @@ export default async function reassignNpmTags( options ) {
 	const packagesSkipped = [];
 	const packagesUpdated = [];
 
-	await assertNpmAuthorization( npmOwner );
+	await assertNpmAuthorization( npmOwner, { useOidc } );
 
 	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
 	counter.start();
