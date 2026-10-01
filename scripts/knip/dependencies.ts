@@ -46,6 +46,13 @@ const config: KnipConfig = {
 		css: ( text: string ) => [ ...text.matchAll( /(?<=@)import[^;]+/g ) ].join( '\n' )
 	},
 
+	// Not npm packages. They are provided by the environment where the code runs.
+	ignoreBinaries: [
+		// The CircleCI CLI, available in every CircleCI job. `getNpmIdToken()` in the release tools uses it
+		// to request an OIDC token for npm Trusted Publishing.
+		'circleci'
+	],
+
 	workspaces: {
 		'.': {
 			entry: rootFiles,
