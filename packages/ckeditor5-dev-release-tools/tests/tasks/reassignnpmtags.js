@@ -8,6 +8,7 @@ import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
+import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 import reassignNpmTags from '../../lib/tasks/reassignnpmtags.js';
 
 const stubs = vi.hoisted( () => {
@@ -43,6 +44,7 @@ vi.mock( 'shell-escape' );
 vi.mock( 'cli-columns' );
 vi.mock( 'shell-escape' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
+vi.mock( '../../lib/utils/getnpmidtoken.js' );
 
 describe( 'reassignNpmTags()', () => {
 	beforeEach( () => {
@@ -67,11 +69,52 @@ describe( 'reassignNpmTags()', () => {
 	} );
 
 	it( 'should pass the `useOidc` option to the npm authorization assertion', async () => {
+		vi.mocked( getNpmIdToken ).mockResolvedValue( 'fresh-token' );
 		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
 
 		await reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } );
 
 		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( undefined, { useOidc: true } );
+	} );
+
+	it( 'should pass a fresh OIDC token only to the npm process when using OIDC', async () => {
+		vi.mocked( getNpmIdToken )
+			.mockResolvedValueOnce( 'token-1' )
+			.mockResolvedValueOnce( 'token-2' );
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+
+		await reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1', 'package2' ] } );
+
+		expect( getNpmIdToken ).toHaveBeenCalledTimes( 2 );
+		expect( stubs.exec ).toHaveBeenCalledWith(
+			'npm dist-tag add package1@1.0.1 latest',
+			{ env: expect.objectContaining( { NPM_ID_TOKEN: 'token-1' } ) }
+		);
+		expect( stubs.exec ).toHaveBeenCalledWith(
+			'npm dist-tag add package2@1.0.1 latest',
+			{ env: expect.objectContaining( { NPM_ID_TOKEN: 'token-2' } ) }
+		);
+		expect( process.env.NPM_ID_TOKEN ).not.toEqual( 'token-2' );
+	} );
+
+	it( 'should request a fresh OIDC token for each retry', async () => {
+		vi.mocked( getNpmIdToken ).mockResolvedValue( 'fresh-token' );
+		stubs.exec
+			.mockRejectedValueOnce( new Error( 'E401' ) )
+			.mockResolvedValueOnce( { stdout: '+latest' } );
+
+		await reassignNpmTags( { useOidc: true, version: '1.0.1', packages: [ 'package1' ] } );
+
+		expect( getNpmIdToken ).toHaveBeenCalledTimes( 2 );
+		expect( stubs.exec ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	it( 'should not request an OIDC token when not using OIDC', async () => {
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+
+		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
+
+		expect( getNpmIdToken ).not.toHaveBeenCalled();
 		expect( stubs.exec ).toHaveBeenCalledExactlyOnceWith( 'npm dist-tag add package1@1.0.1 latest' );
 	} );
 
