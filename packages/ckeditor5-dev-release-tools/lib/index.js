@@ -33,3 +33,4 @@ export { default as validateRepositoryToRelease } from './utils/validatereposito
 export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
 export { default as provideToken } from './utils/providetoken.js';
 export { default as validateGithubToken } from './utils/validategithubtoken.js';
+export { default as getNpmIdToken } from './utils/getnpmidtoken.js';
