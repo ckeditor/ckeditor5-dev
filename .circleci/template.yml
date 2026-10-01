@@ -24,7 +24,7 @@ commands:
       - run:
           name: Install pnpm
           command: |
-            sudo npm i -g pnpm@12.6.0
+            sudo npm i -g pnpm@12.8.2
             pnpm --version
       - run:
           name: Install dependencies
