@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import upath from 'upath';
+import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
@@ -17,17 +18,19 @@ import { pathToFileURL } from 'node:url';
 // `npm` commands, and checks that each `npm publish` receives a fresh OIDC token.
 //
 // The working directory must be inside this repository, so the generated module can resolve
-// `@ckeditor/ckeditor5-dev-release-tools` from `node_modules`.
+// `@ckeditor/ckeditor5-dev-release-tools` from `node_modules`. It is placed in `node_modules/.cache/`, which git ignores,
+// so nothing is left in `git status` even when the test fails before the cleanup.
 //
 // `executeInParallel()` runs in a separate Node.js process. Vitest rewrites dynamic imports in the modules it loads,
 // and a serialized callback with such code cannot run in a worker thread.
 const PACKAGE_ROOT = upath.join( import.meta.dirname, '..', '..' );
 
-describe( 'publishPackageOnNpmCallback() in a worker thread (integration)', () => {
+// The fake `npm` and `circleci` commands are shell scripts. On Windows, `cmd.exe` would find the real `npm.cmd` instead.
+describe.skipIf( process.platform === 'win32' )( 'publishPackageOnNpmCallback() in a worker thread (integration)', () => {
 	let workspace, binDirectory, logFile;
 
 	beforeEach( async () => {
-		workspace = upath.join( 'build', `integration-${ crypto.randomUUID() }` );
+		workspace = upath.join( 'node_modules', '.cache', `oidc-integration-${ crypto.randomUUID() }` );
 		binDirectory = upath.join( PACKAGE_ROOT, workspace, 'bin' );
 		logFile = upath.join( PACKAGE_ROOT, workspace, 'calls.log' );
 
@@ -49,10 +52,12 @@ describe( 'publishPackageOnNpmCallback() in a worker thread (integration)', () =
 			const packagePath = upath.join( PACKAGE_ROOT, workspace, 'packages', name );
 
 			await fs.mkdir( packagePath, { recursive: true } );
-			await fs.writeFile( upath.join( packagePath, 'package.json' ), JSON.stringify( { name, version: '1.0.0' } ) );
+			// `private: true` makes the real npm refuse to publish (`EPRIVATE`) before it sends anything to the registry,
+			// in case the fake `npm` command is not used.
+			await fs.writeFile( upath.join( packagePath, 'package.json' ), JSON.stringify( { name, version: '1.0.0', private: true } ) );
 		}
 
-		vi.stubEnv( 'PATH', `${ binDirectory }:${ process.env.PATH }` );
+		vi.stubEnv( 'PATH', `${ binDirectory }${ path.delimiter }${ process.env.PATH }` );
 		vi.stubEnv( 'CIRCLECI', 'true' );
 		vi.stubEnv( 'NPM_ID_TOKEN', 'stale-token' );
 	} );
@@ -79,7 +84,10 @@ describe( 'publishPackageOnNpmCallback() in a worker thread (integration)', () =
 		].join( '\n' ) );
 
 		await new Promise( ( resolve, reject ) => {
-			execFile( process.execPath, [ runner ], { cwd: PACKAGE_ROOT, env: process.env }, error => error ? reject( error ) : resolve() );
+			// A second safety layer: even if the real npm runs, it cannot reach a registry.
+			const env = { ...process.env, npm_config_registry: 'http://127.0.0.1:1' };
+
+			execFile( process.execPath, [ runner ], { cwd: PACKAGE_ROOT, env }, error => error ? reject( error ) : resolve() );
 		} );
 
 		const calls = ( await fs.readFile( logFile, 'utf-8' ) ).trim().split( '\n' );

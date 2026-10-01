@@ -34,17 +34,15 @@ describe( 'publishPackageOnNpmCallback()', () => {
 		);
 	} );
 
-	// `exec()` runs the command through a shell. It is required on Windows, where npm uses the `npm.cmd` launcher.
-	it( 'should run npm through a shell (Windows support)', async () => {
-		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'win32' );
-
+	// `exec()` runs the command through a shell (`/bin/sh` or `cmd.exe`). It is required on Windows, where npm uses the `npm.cmd`
+	// launcher, which `execFile()` cannot run directly.
+	it( 'should run npm as a shell command, so the `npm.cmd` launcher works on Windows', async () => {
 		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		expect( exec ).toHaveBeenCalledExactlyOnceWith(
-			'npm publish --access=public --tag nightly',
-			expect.any( Object ),
-			expect.any( Function )
-		);
+		const [ command, options ] = vi.mocked( exec ).mock.calls[ 0 ];
+
+		expect( command ).toEqual( 'npm publish --access=public --tag nightly' );
+		expect( options ).not.toHaveProperty( 'shell', false );
 	} );
 
 	it( 'should accept npm tags that contain dots, dashes and underscores', async () => {
