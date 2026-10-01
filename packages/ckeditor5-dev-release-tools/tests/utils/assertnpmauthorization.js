@@ -43,5 +43,48 @@ describe( 'assertNpmAuthorization()', () => {
 		await expect( assertNpmAuthorization( 'pepe' ) )
 			.rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
 	} );
-} )
-;
+
+	it( 'should verify the npm account when the `useOidc` option is disabled explicitly', async () => {
+		vi.mocked( tools ).shExec.mockResolvedValue( 'pepe' );
+
+		await assertNpmAuthorization( 'pepe', { useOidc: false } );
+
+		expect( vi.mocked( tools ).shExec ).toHaveBeenCalledExactlyOnceWith( 'npm whoami', expect.any( Object ) );
+	} );
+
+	describe( 'npm Trusted Publishing (`useOidc=true`)', () => {
+		it( 'should not call `npm whoami` when the "NPM_ID_TOKEN" environment variable is set', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
+
+			await assertNpmAuthorization( undefined, { useOidc: true } );
+
+			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should throw when the "NPM_ID_TOKEN" environment variable is not set', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', undefined );
+
+			await expect( assertNpmAuthorization( undefined, { useOidc: true } ) )
+				.rejects.toThrow( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+
+			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should throw when the "NPM_ID_TOKEN" environment variable is empty', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', '' );
+
+			await expect( assertNpmAuthorization( undefined, { useOidc: true } ) )
+				.rejects.toThrow( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+
+			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should ignore the provided npm account name', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
+
+			await assertNpmAuthorization( 'pepe', { useOidc: true } );
+
+			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
+		} );
+	} );
+} );

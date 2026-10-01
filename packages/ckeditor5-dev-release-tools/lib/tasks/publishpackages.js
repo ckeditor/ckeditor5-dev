@@ -76,15 +76,7 @@ export default async function publishPackages( options ) {
 		attempts = 5
 	} = options;
 
-	if ( useOidc ) {
-		// npm exchanges the OIDC token only during supported operations, such as `npm publish`, and `npm whoami`
-		// does not reflect Trusted Publishing authentication. Hence, only the token presence can be verified upfront.
-		if ( !process.env.NPM_ID_TOKEN ) {
-			throw new Error( 'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).' );
-		}
-	} else {
-		await assertNpmAuthorization( npmOwner );
-	}
+	await assertNpmAuthorization( npmOwner, { useOidc } );
 
 	// Find packages that would be published...
 	const packagePaths = await workspaces.findPathsToPackages( cwd, packagesDirectory );
