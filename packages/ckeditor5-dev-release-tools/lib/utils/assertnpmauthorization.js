@@ -8,10 +8,25 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
 /**
  * Checks whether a user is logged to npm as the provided account name.
  *
- * @param {string} npmOwner Expected npm account name that should be logged into npm.
+ * When using npm Trusted Publishing (`useOidc`), the check verifies that the `NPM_ID_TOKEN` environment variable is set
+ * instead. npm exchanges the OIDC token only during supported operations, such as `npm publish` or `npm dist-tag`,
+ * and `npm whoami` does not reflect Trusted Publishing authentication.
+ *
+ * @param {string} [npmOwner] Expected npm account name that should be logged into npm. Required unless `useOidc` is enabled.
+ * @param {object} [options={}]
+ * @param {boolean} [options.useOidc=false] Whether to verify the npm Trusted Publishing (OIDC) setup instead of the npm account.
  * @returns {Promise}
  */
-export default async function assertNpmAuthorization( npmOwner ) {
+export default async function assertNpmAuthorization( npmOwner, { useOidc = false } = {} ) {
+	if ( useOidc ) {
+		// Only the token presence can be verified upfront.
+		if ( !process.env.NPM_ID_TOKEN ) {
+			throw new Error( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+		}
+
+		return;
+	}
+
 	return tools.shExec( 'npm whoami', { verbosity: 'error', async: true } )
 		.then( npmCurrentUser => {
 			if ( npmOwner !== npmCurrentUser.trim() ) {
