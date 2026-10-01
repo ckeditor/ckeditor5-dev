@@ -1,7 +1,7 @@
 CKEditor 5 development tools packages
 =====================================
 
-[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master-v61)
 [![Coverage Status](https://codecov.io/github/ckeditor/ckeditor5-dev/graph/badge.svg)](https://codecov.io/github/ckeditor/ckeditor5-dev)
 
 ## Packages
