@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
 
@@ -53,6 +53,10 @@ describe( 'assertNpmAuthorization()', () => {
 	} );
 
 	describe( 'npm Trusted Publishing (`useOidc=true`)', () => {
+		beforeEach( () => {
+			vi.stubEnv( 'CIRCLECI', '' );
+		} );
+
 		it( 'should not call `npm whoami` when the "NPM_ID_TOKEN" environment variable is set', async () => {
 			vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
 
@@ -75,6 +79,15 @@ describe( 'assertNpmAuthorization()', () => {
 
 			await expect( assertNpmAuthorization( undefined, { useOidc: true } ) )
 				.rejects.toThrow( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
+
+			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should not require the "NPM_ID_TOKEN" environment variable on CircleCI', async () => {
+			vi.stubEnv( 'CIRCLECI', 'true' );
+			vi.stubEnv( 'NPM_ID_TOKEN', '' );
+
+			await assertNpmAuthorization( undefined, { useOidc: true } );
 
 			expect( vi.mocked( tools ).shExec ).not.toHaveBeenCalled();
 		} );

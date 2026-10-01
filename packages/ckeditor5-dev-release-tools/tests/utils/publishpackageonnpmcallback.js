@@ -7,9 +7,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
+import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 
 vi.mock( 'node:fs/promises' );
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../lib/utils/getnpmidtoken.js' );
 
 describe( 'publishPackageOnNpmCallback()', () => {
 	beforeEach( () => {
@@ -80,5 +82,35 @@ describe( 'publishPackageOnNpmCallback()', () => {
 		await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
 
 		expect( fs.rm ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'npm Trusted Publishing (`useOidc=true`)', () => {
+		it( 'should set a fresh OIDC token right before publishing', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', 'old-token' );
+			vi.mocked( getNpmIdToken ).mockResolvedValue( 'fresh-token' );
+			vi.mocked( tools.shExec ).mockImplementation( async () => {
+				expect( process.env.NPM_ID_TOKEN ).toEqual( 'fresh-token' );
+			} );
+
+			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly', useOidc: true } );
+
+			expect( getNpmIdToken ).toHaveBeenCalledOnce();
+			expect( tools.shExec ).toHaveBeenCalledOnce();
+		} );
+
+		it( 'should not request an OIDC token when not using OIDC', async () => {
+			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly' } );
+
+			expect( getNpmIdToken ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should not publish the package when an OIDC token cannot be requested', async () => {
+			vi.mocked( getNpmIdToken ).mockRejectedValue( new Error( 'circleci: not found' ) );
+
+			await publishPackageOnNpmCallback( '/workspace/ckeditor5/packages/ckeditor5-foo', { npmTag: 'nightly', useOidc: true } );
+
+			expect( tools.shExec ).not.toHaveBeenCalled();
+			expect( fs.rm ).not.toHaveBeenCalled();
+		} );
 	} );
 } );

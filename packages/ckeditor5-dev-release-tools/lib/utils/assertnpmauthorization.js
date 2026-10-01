@@ -19,8 +19,9 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
  */
 export default async function assertNpmAuthorization( npmOwner, { useOidc = false } = {} ) {
 	if ( useOidc ) {
-		// Only the token presence can be verified upfront.
-		if ( !process.env.NPM_ID_TOKEN ) {
+		// On CircleCI, a fresh OIDC token is requested before each npm command (see `getNpmIdToken()`).
+		// Elsewhere, only the token presence can be verified upfront.
+		if ( !process.env.CIRCLECI && !process.env.NPM_ID_TOKEN ) {
 			throw new Error( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
 		}
 

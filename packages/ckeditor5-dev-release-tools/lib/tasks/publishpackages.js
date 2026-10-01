@@ -119,7 +119,8 @@ export default async function publishPackages( options ) {
 		listrTask,
 		taskToExecute: publishPackageOnNpmCallback,
 		taskOptions: {
-			npmTag
+			npmTag,
+			useOidc
 		},
 		signal,
 		concurrency,
