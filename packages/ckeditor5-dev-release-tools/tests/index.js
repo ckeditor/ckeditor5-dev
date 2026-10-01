@@ -34,6 +34,7 @@ import validateRepositoryToRelease from '../lib/utils/validaterepositorytoreleas
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import provideToken from '../lib/utils/providetoken.js';
 import validateGithubToken from '../lib/utils/validategithubtoken.js';
+import getNpmIdToken from '../lib/utils/getnpmidtoken.js';
 
 import * as index from '../lib/index.js';
 
@@ -249,6 +250,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( validateGithubToken ).to.be.a( 'function' );
 			expect( index.validateGithubToken ).to.equal( validateGithubToken );
+		} );
+	} );
+
+	describe( 'getNpmIdToken()', () => {
+		it( 'should be a function', () => {
+			expect( getNpmIdToken ).to.be.a( 'function' );
+			expect( index.getNpmIdToken ).to.equal( getNpmIdToken );
 		} );
 	} );
 } );

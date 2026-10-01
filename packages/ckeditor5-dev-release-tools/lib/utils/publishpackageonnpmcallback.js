@@ -17,10 +17,16 @@ export default async function publishPackageOnNpmCallback( packagePath, taskOpti
 	const { rm } = await import( 'node:fs/promises' );
 
 	try {
-		// The token is passed only to this npm process. The environment of the worker thread does not change.
-		const env = taskOptions.useOidc ?
-			{ ...process.env, NPM_ID_TOKEN: await ( await import( './getnpmidtoken.js' ) ).default() } :
-			process.env;
+		let env = process.env;
+
+		if ( taskOptions.useOidc ) {
+			// `executeInParallel()` copies this callback to a temporary module in the project, so it cannot import
+			// the helper using a relative path. The package name resolves from the project's `node_modules`.
+			const { getNpmIdToken } = await import( '@ckeditor/ckeditor5-dev-release-tools' );
+
+			// The token is passed only to this npm process. The environment of the worker thread does not change.
+			env = { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() };
+		}
 
 		await new Promise( ( resolve, reject ) => {
 			const args = [ 'publish', '--access=public', '--tag', taskOptions.npmTag ];

@@ -7,11 +7,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
-import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 
 vi.mock( 'node:fs/promises' );
 vi.mock( 'node:child_process' );
-vi.mock( '../../lib/utils/getnpmidtoken.js' );
+
+// The callback imports the helper using the package name (see the comment in the callback).
+const { getNpmIdToken } = vi.hoisted( () => ( { getNpmIdToken: vi.fn() } ) );
+
+vi.mock( '@ckeditor/ckeditor5-dev-release-tools', () => ( { getNpmIdToken } ) );
 
 const PACKAGE_PATH = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
