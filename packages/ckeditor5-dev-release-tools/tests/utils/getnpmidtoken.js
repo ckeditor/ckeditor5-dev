@@ -52,6 +52,23 @@ describe( 'getNpmIdToken()', () => {
 			await expect( getNpmIdToken() ).rejects.toThrow( 'The `circleci run oidc get` command returned an empty OIDC token.' );
 		} );
 
+		it( 'should use the "NPM_ID_TOKEN" environment variable when the CircleCI CLI is not installed', async () => {
+			vi.stubEnv( 'NPM_ID_TOKEN', 'env-token' );
+			vi.mocked( execFile ).mockImplementation( ( file, args, callback ) => {
+				callback( Object.assign( new Error( 'spawn circleci ENOENT' ), { code: 'ENOENT' } ) );
+			} );
+
+			await expect( getNpmIdToken() ).resolves.toEqual( 'env-token' );
+		} );
+
+		it( 'should throw when the CircleCI CLI is not installed and the "NPM_ID_TOKEN" environment variable is not set', async () => {
+			vi.mocked( execFile ).mockImplementation( ( file, args, callback ) => {
+				callback( Object.assign( new Error( 'spawn circleci ENOENT' ), { code: 'ENOENT' } ) );
+			} );
+
+			await expect( getNpmIdToken() ).rejects.toThrow( 'Cannot get an OIDC token for npm Trusted Publishing (OIDC).' );
+		} );
+
 		it( 'should pass an error from the CircleCI CLI', async () => {
 			vi.mocked( execFile ).mockImplementation( ( file, args, callback ) => callback( new Error( 'circleci: not found' ) ) );
 

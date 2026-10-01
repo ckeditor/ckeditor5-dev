@@ -13,7 +13,7 @@
  * @returns {Promise}
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const { execFile } = await import( 'node:child_process' );
+	const { exec } = await import( 'node:child_process' );
 	const { rm } = await import( 'node:fs/promises' );
 
 	try {
@@ -28,10 +28,16 @@ export default async function publishPackageOnNpmCallback( packagePath, taskOpti
 			env = { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() };
 		}
 
-		await new Promise( ( resolve, reject ) => {
-			const args = [ 'publish', '--access=public', '--tag', taskOptions.npmTag ];
+		// The npm tag is a part of a shell command, so only characters allowed in an npm tag are accepted.
+		if ( !/^[a-z0-9][a-z0-9._-]*$/i.test( taskOptions.npmTag ) ) {
+			throw new Error( `Invalid npm tag: "${ taskOptions.npmTag }".` );
+		}
 
-			execFile( 'npm', args, { cwd: packagePath, env }, error => error ? reject( error ) : resolve() );
+		// npm runs through a shell, so the `npm.cmd` launcher works on Windows.
+		await new Promise( ( resolve, reject ) => {
+			exec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, { cwd: packagePath, env }, error => {
+				return error ? reject( error ) : resolve();
+			} );
 		} );
 
 		await rm( packagePath, { recursive: true, force: true } );

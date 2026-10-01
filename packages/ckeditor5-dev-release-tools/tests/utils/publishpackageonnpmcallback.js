@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs/promises';
-import { execFile } from 'node:child_process';
+import { exec } from 'node:child_process';
 import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
 
 vi.mock( 'node:fs/promises' );
@@ -20,28 +20,48 @@ const PACKAGE_PATH = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
 describe( 'publishPackageOnNpmCallback()', () => {
 	beforeEach( () => {
-		vi.mocked( execFile ).mockImplementation( ( file, args, options, callback ) => callback( null, '', '' ) );
+		vi.mocked( exec ).mockImplementation( ( command, options, callback ) => callback( null, '', '' ) );
 		vi.mocked( fs.rm ).mockResolvedValue();
 	} );
 
 	it( 'should publish package on npm with provided npm tag', async () => {
 		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		expect( execFile ).toHaveBeenCalledExactlyOnceWith(
-			'npm',
-			[ 'publish', '--access=public', '--tag', 'nightly' ],
+		expect( exec ).toHaveBeenCalledExactlyOnceWith(
+			'npm publish --access=public --tag nightly',
 			expect.objectContaining( { cwd: PACKAGE_PATH } ),
 			expect.any( Function )
 		);
 	} );
 
-	it( 'should pass the npm tag as a separate argument without using a shell', async () => {
-		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'next; rm -rf /' } );
+	// `exec()` runs the command through a shell. It is required on Windows, where npm uses the `npm.cmd` launcher.
+	it( 'should run npm through a shell (Windows support)', async () => {
+		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'win32' );
 
-		const [ , args, options ] = vi.mocked( execFile ).mock.calls[ 0 ];
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		expect( args ).toEqual( [ 'publish', '--access=public', '--tag', 'next; rm -rf /' ] );
-		expect( options ).not.toHaveProperty( 'shell' );
+		expect( exec ).toHaveBeenCalledExactlyOnceWith(
+			'npm publish --access=public --tag nightly',
+			expect.any( Object ),
+			expect.any( Function )
+		);
+	} );
+
+	it( 'should accept npm tags that contain dots, dashes and underscores', async () => {
+		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'latest-v47.x_1' } );
+
+		expect( exec ).toHaveBeenCalledExactlyOnceWith(
+			'npm publish --access=public --tag latest-v47.x_1',
+			expect.any( Object ),
+			expect.any( Function )
+		);
+	} );
+
+	it( 'should not publish the package when the npm tag contains characters that are not allowed in an npm tag', async () => {
+		await expect( publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'next; rm -rf /' } ) ).resolves.toBeUndefined();
+
+		expect( exec ).not.toHaveBeenCalled();
+		expect( fs.rm ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should remove package directory after publishing on npm', async () => {
@@ -51,7 +71,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 	} );
 
 	it( 'should not remove a package directory and not throw error when publishing on npm failed with code 409', async () => {
-		vi.mocked( execFile ).mockImplementation( ( file, args, options, callback ) => callback( new Error( 'code E409' ) ) );
+		vi.mocked( exec ).mockImplementation( ( command, options, callback ) => callback( new Error( 'code E409' ) ) );
 
 		await expect( publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } ) ).resolves.toBeUndefined();
 
@@ -61,7 +81,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 	it( 'should pass the current environment to npm when not using OIDC', async () => {
 		await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly' } );
 
-		const [ , , options ] = vi.mocked( execFile ).mock.calls[ 0 ];
+		const [ , options ] = vi.mocked( exec ).mock.calls[ 0 ];
 
 		expect( options.env ).toBe( process.env );
 		expect( getNpmIdToken ).not.toHaveBeenCalled();
@@ -74,7 +94,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 
 			await publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly', useOidc: true } );
 
-			const [ , , options ] = vi.mocked( execFile ).mock.calls[ 0 ];
+			const [ , options ] = vi.mocked( exec ).mock.calls[ 0 ];
 
 			expect( getNpmIdToken ).toHaveBeenCalledOnce();
 			expect( options.env ).toEqual( expect.objectContaining( { NPM_ID_TOKEN: 'fresh-token' } ) );
@@ -86,7 +106,7 @@ describe( 'publishPackageOnNpmCallback()', () => {
 
 			await expect( publishPackageOnNpmCallback( PACKAGE_PATH, { npmTag: 'nightly', useOidc: true } ) ).resolves.toBeUndefined();
 
-			expect( execFile ).not.toHaveBeenCalled();
+			expect( exec ).not.toHaveBeenCalled();
 			expect( fs.rm ).not.toHaveBeenCalled();
 		} );
 	} );
