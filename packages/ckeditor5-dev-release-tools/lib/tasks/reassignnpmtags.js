@@ -45,15 +45,7 @@ export default async function reassignNpmTags( options ) {
 	const packagesSkipped = [];
 	const packagesUpdated = [];
 
-	if ( useOidc ) {
-		// npm exchanges the OIDC token only during supported operations, such as `npm dist-tag`, and `npm whoami`
-		// does not reflect Trusted Publishing authentication. Hence, only the token presence can be verified upfront.
-		if ( !process.env.NPM_ID_TOKEN ) {
-			throw new Error( 'The "NPM_ID_TOKEN" environment variable is required when using npm Trusted Publishing (OIDC).' );
-		}
-	} else {
-		await assertNpmAuthorization( npmOwner );
-	}
+	await assertNpmAuthorization( npmOwner, { useOidc } );
 
 	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
 	counter.start();
