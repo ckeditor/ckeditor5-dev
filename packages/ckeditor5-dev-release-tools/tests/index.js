@@ -34,6 +34,7 @@ import executeInParallel from '../lib/utils/executeinparallel.js';
 import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import provideToken from '../lib/utils/providetoken.js';
+import getNpmIdToken from '../lib/utils/getnpmidtoken.js';
 
 import * as index from '../lib/index.js';
 
@@ -305,6 +306,13 @@ describe( 'dev-release-tools/index', () => {
 					code: 'DEP0003'
 				} )
 			);
+		} );
+	} );
+
+	describe( 'getNpmIdToken()', () => {
+		it( 'should be a function', () => {
+			expect( getNpmIdToken ).to.be.a( 'function' );
+			expect( index.getNpmIdToken ).to.equal( getNpmIdToken );
 		} );
 	} );
 } );
