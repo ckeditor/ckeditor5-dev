@@ -41,7 +41,7 @@ shamefullyHoist: true
 preferFrozenLockfile: true
 autoDedupe: true
 linkWorkspacePackages: true
-# `ckeditor5-dev-utils` and `ckeditor5-dev-translations` depend on each other. pnpm 12.8.2 fails
+# `ckeditor5-dev-utils` and `ckeditor5-dev-translations` depend on each other. pnpm fails
 # the whole run on a task cycle instead of scheduling it in topological chunks. In that pair
 # only `ckeditor5-dev-utils` has a `build` script and `ckeditor5-dev-translations` ships a committed
 # `lib/`, so the order the two run in relative to each other makes no difference.
