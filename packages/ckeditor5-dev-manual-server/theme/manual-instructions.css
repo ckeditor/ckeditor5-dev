@@ -28,6 +28,7 @@
 	margin: 0;
 	min-height: 100vh;
 	padding-inline: var(--ck-page-padding);
+	font-family: var(--ck-font-face, var(--ck-font-family));
 }
 
 /*
