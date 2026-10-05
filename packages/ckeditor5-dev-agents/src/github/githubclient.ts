@@ -6,7 +6,7 @@
 const API_URL = 'https://api.github.com';
 
 // The version of the GitHub REST API the requests are written against.
-const API_VERSION = '2022-11-28';
+const API_VERSION = '2026-03-10';
 
 // How long one request may take, in milliseconds.
 const REQUEST_TIMEOUT = 30_000;
