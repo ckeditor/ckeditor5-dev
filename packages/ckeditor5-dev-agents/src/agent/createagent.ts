@@ -58,6 +58,15 @@ const RESULT_TOOL_NAME = 'submit_result';
 // Pi keeps a global configuration directory. The harness never reads or writes the one of the user (`~/.pi`).
 const AGENT_DIRECTORY = upath.join( tmpdir(), 'ckeditor5-dev-agents' );
 
+// How long one `agent.run()` may take, in seconds, when the task does not set `agent.timeout`.
+const DEFAULT_TIMEOUT = 30 * 60;
+
+// How many times a failed request to the model is retried.
+const MAX_RETRIES = 3;
+
+// The longest summary of tool call arguments in the log, including the ellipsis.
+const MAX_ARGUMENTS_LENGTH = 120;
+
 // One runtime per provider and API key, so tasks with different keys for the same provider do not share credentials.
 const modelRuntimes = new Map<string, Promise<ModelRuntime>>();
 
@@ -125,7 +134,7 @@ export function createAgent( options: CreateAgentOptions ): Agent {
 				sessionManager: SessionManager.inMemory( cwd ),
 				settingsManager: SettingsManager.inMemory( {
 					enableInstallTelemetry: false,
-					retry: { enabled: true, maxRetries: 3 }
+					retry: { enabled: true, maxRetries: MAX_RETRIES }
 				} ),
 				resourceLoader: await ( resources ??= loadResources( config ) )
 			} );
@@ -136,7 +145,7 @@ export function createAgent( options: CreateAgentOptions ): Agent {
 				}
 			} );
 
-			const timeout = config.timeout ?? 30 * 60;
+			const timeout = config.timeout ?? DEFAULT_TIMEOUT;
 
 			let hasTimedOut = false;
 
@@ -264,5 +273,5 @@ function createResourceLoader( { systemPrompt, skills }: { systemPrompt: string 
 function summarizeArguments( args: unknown ): string {
 	const text = String( JSON.stringify( args ) );
 
-	return text.length > 120 ? `${ text.slice( 0, 117 ) }...` : text;
+	return text.length > MAX_ARGUMENTS_LENGTH ? `${ text.slice( 0, MAX_ARGUMENTS_LENGTH - 3 ) }...` : text;
 }

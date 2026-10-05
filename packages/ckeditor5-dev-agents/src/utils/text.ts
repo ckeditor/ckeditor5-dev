@@ -5,6 +5,9 @@
 
 import { hash as hashText } from 'node:crypto';
 
+// The length of a short hash: the `id` of a finding and the hashes stored in the baseline and the decision files.
+const HASH_LENGTH = 12;
+
 const NAMED_ENTITIES: Record<string, string> = {
 	amp: '&',
 	lt: '<',
@@ -61,7 +64,7 @@ export function normalise( text: string ): string {
  * Returns a short, stable hash of a text. It is what the baseline and the decision files store.
  */
 export function hash( text: string ): string {
-	return hashText( 'sha256', text, 'hex' ).slice( 0, 12 );
+	return hashText( 'sha256', text, 'hex' ).slice( 0, HASH_LENGTH );
 }
 
 function decodeEntity( entity: string, name: string ): string {

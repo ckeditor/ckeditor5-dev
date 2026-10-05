@@ -9,6 +9,9 @@ import { importDefaultExports } from './importmodules.js';
 import type { LoadedTask } from './loadtasks.js';
 import type { Target, TargetConfig, TargetTaskConfig, TaskInstance } from '../types.js';
 
+// How many changed units one run judges at most, when neither the task nor the target sets `maxUnits`.
+const DEFAULT_MAX_UNITS = 100;
+
 /**
  * Loads every target from `<targetsPath>/<name>.{js,mjs,ts,mts}`. Adding a repository means adding a file.
  */
@@ -73,7 +76,7 @@ function resolveInstance( instanceId: string, entry: TargetTaskConfig, { task, d
 			title: instanceId === task.id ? task.title : `${ task.title } (${ instanceId })`,
 			include: entry.include ?? task.include ?? [],
 			exclude: entry.exclude ?? task.exclude ?? [],
-			maxUnits: entry.maxUnits ?? task.maxUnits ?? 100,
+			maxUnits: entry.maxUnits ?? task.maxUnits ?? DEFAULT_MAX_UNITS,
 			options: { ...task.defaultOptions, ...entry.options }
 		},
 		directory,

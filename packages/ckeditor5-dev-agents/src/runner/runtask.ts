@@ -17,6 +17,9 @@ import { fixUnit, type UnitOperations, type UnitRun } from './fixunit.js';
 import { validateFindings } from './validatefindings.js';
 import type { Finding, Target, TaskInstance, TaskSummary, TaskUnit } from '../types.js';
 
+// How many units are judged at the same time, when the task does not set `concurrency`.
+const DEFAULT_CONCURRENCY = 1;
+
 export type RunTaskOptions = {
 	instance: TaskInstance;
 	target: Target;
@@ -162,7 +165,7 @@ export async function runTask( runOptions: RunTaskOptions ): Promise<RunTaskResu
 	// one at a time, after every unit is judged.
 	const queue = [ ...takenUnits ];
 
-	await Promise.all( Array.from( { length: task.concurrency ?? 1 }, async () => {
+	await Promise.all( Array.from( { length: task.concurrency ?? DEFAULT_CONCURRENCY }, async () => {
 		for ( let record = queue.shift(); record; record = queue.shift() ) {
 			try {
 				record.judged = await operations.judge( record.unit, record.current!.fragment );

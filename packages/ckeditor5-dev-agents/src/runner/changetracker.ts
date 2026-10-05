@@ -9,6 +9,9 @@ import { promisify } from 'node:util';
 import upath from 'upath';
 import { readIfExists } from '../utils/files.js';
 
+// The largest output of a git command, in bytes. Listing every file of a big repository needs more than the default.
+const MAX_GIT_OUTPUT_SIZE = 256 * 1024 * 1024;
+
 /**
  * The state before a fix: `HEAD`, the whole working tree as a git tree, and the exact Git index, so staged changes
  * can be restored too.
@@ -128,7 +131,7 @@ async function git( cwd: string, args: Array<string>, env: Record<string, string
 		cwd,
 		env: { ...process.env, ...env },
 		encoding: 'utf8',
-		maxBuffer: 256 * 1024 * 1024
+		maxBuffer: MAX_GIT_OUTPUT_SIZE
 	} );
 
 	return stdout;

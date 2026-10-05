@@ -5,6 +5,12 @@
 
 const API_URL = 'https://api.github.com';
 
+// The version of the GitHub REST API the requests are written against.
+const API_VERSION = '2022-11-28';
+
+// How long one request may take, in milliseconds.
+const REQUEST_TIMEOUT = 30_000;
+
 export type PullRequest = {
 	number: number;
 	html_url: string;
@@ -28,11 +34,11 @@ export function createGitHubClient( token: string ): GitHubClient {
 	async function request<T>( method: string, path: string, body?: unknown ): Promise<T> {
 		const response = await fetch( `${ API_URL }${ path }`, {
 			method,
-			signal: AbortSignal.timeout( 30_000 ),
+			signal: AbortSignal.timeout( REQUEST_TIMEOUT ),
 			headers: {
 				'Accept': 'application/vnd.github+json',
 				'Authorization': `Bearer ${ token }`,
-				'X-GitHub-Api-Version': '2022-11-28',
+				'X-GitHub-Api-Version': API_VERSION,
 				...( body ? { 'Content-Type': 'application/json' } : {} )
 			},
 			body: body ? JSON.stringify( body ) : undefined
