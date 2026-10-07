@@ -78,7 +78,7 @@ commands:
 jobs:
   validate_and_tests:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     resource_class: large
     steps:
       - checkout
@@ -113,7 +113,7 @@ jobs:
 
   release_prepare:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     resource_class: large
     steps:
       - checkout
@@ -124,7 +124,7 @@ jobs:
 
   trigger_release_process:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     steps:
       - checkout
       - bootstrap_repository_command
@@ -156,7 +156,7 @@ jobs:
 
   release_project:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     resource_class: large
     steps:
       - checkout
@@ -216,7 +216,7 @@ jobs:
 
   upload_snyk_snapshots:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     steps:
       - checkout
       - bootstrap_repository_command
