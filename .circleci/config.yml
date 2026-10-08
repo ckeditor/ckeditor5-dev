@@ -63,9 +63,6 @@ jobs:
             fi
       - install_ssh_keys_command
       - run:
-          name: Disable Corepack
-          command: sudo corepack disable
-      - run:
           name: Install pnpm
           command: |
             sudo npm i -g pnpm@^11
