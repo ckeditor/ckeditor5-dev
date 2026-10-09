@@ -182,16 +182,29 @@ describe( 'resolveFinding()', () => {
 			expect( await read( '.ai-tasks/t/report.md' ) ).toContain( '# Task t' );
 		} );
 
-		it( 'throws and changes nothing when the fix is already committed', async () => {
+		it( 'resolves it without reverting anything when the fix is already committed', async () => {
 			git( root, 'add', '--all' );
 			git( root, 'commit', '--quiet', '--message', 'Commit the fixes.' );
 
-			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: root } ) ).rejects.toThrow(
-				`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] is already committed, so restoring its files from HEAD would change nothing. ` +
-				'Check out the report branch by its name, or resolve the findings of a local run before committing its fixes.'
-			);
-			expect( await readOpen() ).toHaveLength( 1 );
-			expect( git( root, 'status', '--porcelain' ).trim() ).toBe( '' );
+			const result = await resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: root } );
+
+			expect( result ).toMatchObject( { revertedFiles: [], unrevertedFiles: [ 'docs/a.md', 'log.md' ] } );
+			expect( await read( 'docs/a.md' ) ).toBe( 'This is GOOD.\n' );
+			expect( await readOpen() ).toEqual( [] );
+		} );
+
+		it( 'rejects it when the files of the fix were already restored by hand', async () => {
+			git( root, 'checkout', '--', 'docs/a.md', 'log.md' );
+
+			const result = await resolve( { action: 'reject', id: idOf( 'docs/a.md', 'R1' ), reason: 'Bad is fine here.', configPath, cwd: root } );
+
+			expect( result ).toMatchObject( {
+				decisionFile: '.ai-tasks/t/decisions/r1-docs-a.yml',
+				revertedFiles: [],
+				unrevertedFiles: [ 'docs/a.md', 'log.md' ]
+			} );
+			expect( await readOpen() ).toEqual( [] );
+			expect( await readBaseline() ).not.toHaveProperty( 'docs/a.md' );
 		} );
 
 		it( 'deletes a file the fix created', async () => {
@@ -381,12 +394,13 @@ describe( 'resolveFinding()', () => {
 			expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is LOCAL.\n' );
 		} );
 
-		it( 'throws and changes nothing when the report branch is checked out as a detached HEAD', async () => {
+		it( 'reverts nothing and says so when the report branch is checked out as a detached HEAD', async () => {
 			git( checkout, 'checkout', '--quiet', '--detach' );
 
-			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: checkout } ) )
-				.rejects.toThrow( `The fix of [${ idOf( 'docs/a.md', 'R1' ) }] is already committed` );
-			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			const result = await resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: checkout } );
+
+			expect( result ).toMatchObject( { revertedFiles: [], unrevertedFiles: [ 'docs/a.md', 'log.md' ] } );
+			expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
 		} );
 
 		it( 'throws and changes nothing when the report branch belongs to another task or target', async () => {
@@ -530,6 +544,7 @@ describe( 'renderResolvedFinding()', () => {
 		finding: finding(),
 		decisionFile: '.ai-tasks/t/decisions/r1-docs-a.yml',
 		revertedFiles: [ 'docs/a.md', 'log.md' ],
+		unrevertedFiles: [],
 		reopened: [],
 		...overrides
 	} );
@@ -553,6 +568,12 @@ describe( 'renderResolvedFinding()', () => {
 			'',
 			'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.'
 		].join( '\n' ) );
+	} );
+
+	it( 'warns when the files of the fix had no uncommitted changes to revert', () => {
+		expect( renderResolvedFinding( result( { revertedFiles: [], unrevertedFiles: [ 'docs/a.md', 'log.md' ] } ) ) ).toContain(
+			'  Reverted  nothing: docs/a.md, log.md had no uncommitted changes. If the fix is committed, revert it by hand.'
+		);
 	} );
 
 	it( 'lists the reopened findings and shows discriminators', () => {

@@ -210,6 +210,7 @@ describe( 'runCli()', () => {
 				fingerprint: 't|a|R1|', id: 'abc123', task: 't', unit: 'a', ruleId: 'R1', discriminator: '', detail: 'Bad.', fragment: 'x'
 			},
 			revertedFiles: [],
+			unrevertedFiles: [],
 			reopened: []
 		};
 

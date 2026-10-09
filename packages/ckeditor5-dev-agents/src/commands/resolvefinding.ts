@@ -70,6 +70,11 @@ export type ResolvedFinding = {
 	revertedFiles: Array<string>;
 
 	/**
+	 * The files of the fix that were not restored, because they had no uncommitted changes to revert.
+	 */
+	unrevertedFiles: Array<string>;
+
+	/**
 	 * Other findings whose fixes were undone. They stay open, and the next run judges and fixes them again.
 	 */
 	reopened: Array<Finding>;
@@ -144,16 +149,13 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 	// On a report branch, the fix is a change against its base branch, which the report links to. Anywhere else
 	// (a local run), the fix is not committed, so `HEAD` has the content from before it.
 	const baseBranch = reportBranch?.base;
-	const revertedFiles = [ ...new Set( affected.flatMap( item => item.files ) ) ].sort();
+	const fixFiles = [ ...new Set( affected.flatMap( item => item.files ) ) ].sort();
 
-	// Restoring from `HEAD` reverts nothing when the fix is already committed, for example in a report branch checked
-	// out as a detached `HEAD`, or after committing the fixes of a local run.
-	if ( revertedFiles.length && !baseBranch && !( await workspace.hasChanges( revertedFiles ) ) ) {
-		throw new Error(
-			`The fix of [${ finding.id }] is already committed, so restoring its files from HEAD would change nothing. ` +
-			'Check out the report branch by its name, or resolve the findings of a local run before committing its fixes.'
-		);
-	}
+	// Restoring from `HEAD` reverts nothing when the files have no uncommitted changes: the fix was undone by hand,
+	// or it is committed, for example in a report branch checked out as a detached `HEAD`. The finding is still resolved,
+	// and the result says that nothing was reverted.
+	const canRestore = !fixFiles.length || Boolean( baseBranch ) || await workspace.hasChanges( fixFiles );
+	const revertedFiles = canRestore ? fixFiles : [];
 
 	if ( revertedFiles.length ) {
 		await workspace.restore( revertedFiles, baseBranch ? await getRestoreRef( workspace, baseBranch ) : 'HEAD' );
@@ -180,6 +182,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		finding,
 		decisionFile,
 		revertedFiles,
+		unrevertedFiles: canRestore ? [] : fixFiles,
 		reopened: others.map( item => item.finding )
 	};
 }
@@ -196,7 +199,16 @@ export function renderResolvedFinding( result: ResolvedFinding ): string {
 		lines.push( `  Decision  ${ result.decisionFile }` );
 	}
 
-	lines.push( `  Reverted  ${ result.revertedFiles.length ? result.revertedFiles.join( ', ' ) : 'nothing (the finding had no fix)' }` );
+	if ( result.unrevertedFiles.length ) {
+		lines.push(
+			`  Reverted  nothing: ${ result.unrevertedFiles.join( ', ' ) } had no uncommitted changes. ` +
+			'If the fix is committed, revert it by hand.'
+		);
+	} else if ( result.revertedFiles.length ) {
+		lines.push( `  Reverted  ${ result.revertedFiles.join( ', ' ) }` );
+	} else {
+		lines.push( '  Reverted  nothing (the finding had no fix)' );
+	}
 
 	for ( const item of result.reopened ) {
 		lines.push( `  Reopened  [${ item.id }] ${ describe( item ) } (${ item.task }), fixed again on the next run` );

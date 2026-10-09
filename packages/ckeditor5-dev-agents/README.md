@@ -283,7 +283,7 @@ Every finding in `report.md` has a short ID, for example `[3fdb55a802c1]`. Longe
 
 A fix may share files with other fixes, for example when the fixes of two units changed the same file. Restoring those files undoes the other fixes too, so the command stops, lists them, and asks to re-run with `--force`. With `--force`, every affected fix is undone completely: its findings stay open, and the next run judges and fixes them again.
 
-The commands also work after a local run. There, they restore the files from `HEAD`. Both accept `--config`, `--cwd`, `--target` and `--task`, and neither commits anything.
+The commands also work after a local run. There, they restore the files from `HEAD`. When the files of the fix have no uncommitted changes, for example because the fix was already undone by hand, they restore nothing and say so. Both accept `--config`, `--cwd`, `--target` and `--task`, and neither commits anything.
 
 Reverting a fix by hand, without rejecting the finding, means the task finds the problem and fixes it again on a later run. Merge the pull request to record the state on the base branch.
 
