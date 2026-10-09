@@ -4,33 +4,34 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'node:fs/promises';
 import upath from 'upath';
 import { glob } from 'glob';
-import mockFs from 'mock-fs';
-import { workspaces } from '@ckeditor/ckeditor5-dev-utils';
+import { fs as memfs, vol } from 'memfs';
 
 describe( 'cleanUpPackages()', () => {
 	let cleanUpPackages, stubs;
 
 	beforeEach( async () => {
-		// Calls to `fs` and `glob` are stubbed, but they are passed through to the real implementation because we want to test the
-		// real behavior of the script. The whole filesystem is mocked by the `mock-fs` util for testing purposes. A virtual project is
-		// prepared in tests on this mocked filesystem.
+		// Calls to `fs` and `glob` are stubbed, but they are passed through to real implementations because we want to test the
+		// real behavior of the script. The file system itself is an in-memory volume from `memfs`: `fs/promises` resolves to its
+		// promise API and `glob` searches it through the `fs` option. `findPathsToPackages()` is re-implemented on top of the same
+		// volume, because the real one runs its own `glob` inside `@ckeditor/ckeditor5-dev-utils`, where this test cannot reach.
+		// Each test builds its virtual project on the volume with `vol.fromNestedJSON()` in `process.cwd()`. The volume is emptied
+		// after each test.
 		vi.doMock( 'glob', () => ( {
-			glob: vi.fn().mockImplementation( glob )
+			glob: vi.fn().mockImplementation( ( pattern, options = {} ) => glob( pattern, { ...options, fs: memfs } ) )
 		} ) );
 		vi.doMock( 'fs/promises', () => ( {
 			default: {
-				readFile: vi.fn().mockImplementation( fs.readFile ),
-				writeFile: vi.fn().mockImplementation( fs.writeFile ),
-				rm: vi.fn().mockImplementation( fs.rm ),
-				readdir: vi.fn().mockImplementation( fs.readdir )
+				readFile: vi.fn().mockImplementation( ( ...args ) => memfs.promises.readFile( ...args ) ),
+				writeFile: vi.fn().mockImplementation( ( ...args ) => memfs.promises.writeFile( ...args ) ),
+				rm: vi.fn().mockImplementation( ( ...args ) => memfs.promises.rm( ...args ) ),
+				readdir: vi.fn().mockImplementation( ( ...args ) => memfs.promises.readdir( ...args ) )
 			}
 		} ) );
 		vi.doMock( '@ckeditor/ckeditor5-dev-utils', () => ( {
 			workspaces: {
-				findPathsToPackages: vi.fn().mockImplementation( workspaces.findPathsToPackages )
+				findPathsToPackages: vi.fn().mockImplementation( findPathsToPackages )
 			}
 		} ) );
 
@@ -45,14 +46,10 @@ describe( 'cleanUpPackages()', () => {
 
 	afterEach( () => {
 		vi.resetModules();
-		mockFs.restore();
+		vol.reset();
 	} );
 
 	describe( 'preparing options', () => {
-		beforeEach( () => {
-			mockFs( {} );
-		} );
-
 		it( 'should use provided `cwd` to search for packages', async () => {
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -83,7 +80,7 @@ describe( 'cleanUpPackages()', () => {
 
 	describe( 'cleaning package directory', () => {
 		it( 'should remove empty directories', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -93,7 +90,7 @@ describe( 'cleanUpPackages()', () => {
 						'src': {}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -111,7 +108,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove `node_modules`', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -128,7 +125,7 @@ describe( 'cleanUpPackages()', () => {
 						}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -146,7 +143,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should not remove any file if `files` field is not set', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -155,7 +152,7 @@ describe( 'cleanUpPackages()', () => {
 						'ckeditor5-metadata.json': ''
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -173,7 +170,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should not remove mandatory files', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -192,7 +189,7 @@ describe( 'cleanUpPackages()', () => {
 						}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -214,7 +211,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove not matched dot files and dot directories', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'.github': {
@@ -237,7 +234,7 @@ describe( 'cleanUpPackages()', () => {
 						}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -260,7 +257,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove not matched files, empty directories and `node_modules` - pattern without globs', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -311,7 +308,7 @@ describe( 'cleanUpPackages()', () => {
 						}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -339,7 +336,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove not matched files, empty directories and `node_modules` - pattern with globs', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -400,7 +397,7 @@ describe( 'cleanUpPackages()', () => {
 						}
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -430,7 +427,7 @@ describe( 'cleanUpPackages()', () => {
 
 	describe( 'cleaning `package.json`', () => {
 		it( 'should read and write `package.json` from each found package', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -443,41 +440,37 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
 			} );
 
+			// The order of the found packages depends on the file system, so the calls are checked regardless of their order.
+			const fooPackageJsonPath = getPathTo( 'release/ckeditor5-foo/package.json' );
+			const barPackageJsonPath = getPathTo( 'release/ckeditor5-bar/package.json' );
+
 			// Reading `package.json`.
 			expect( stubs.readFile ).toHaveBeenCalledTimes( 2 );
 
-			let input = stubs.readFile.mock.calls[ 0 ];
-			let call = stubs.readFile.mock.results[ 0 ];
+			const readCalls = await Promise.all( stubs.readFile.mock.calls.map( async ( [ path ], index ) => {
+				return [ upath.normalize( path ), await stubs.readFile.mock.results[ index ].value ];
+			} ) );
 
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-foo' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-
-			input = stubs.readFile.mock.calls[ 1 ];
-			call = stubs.readFile.mock.results[ 1 ];
-
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-bar' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( readCalls ).toContainEqual( [ fooPackageJsonPath, JSON.stringify( { name: 'ckeditor5-foo' } ) ] );
+			expect( readCalls ).toContainEqual( [ barPackageJsonPath, JSON.stringify( { name: 'ckeditor5-bar' } ) ] );
 
 			// Writing `package.json`.
 			expect( stubs.writeFile ).toHaveBeenCalledTimes( 2 );
 
-			input = stubs.writeFile.mock.calls[ 0 ];
+			const writtenPaths = stubs.writeFile.mock.calls.map( ( [ path ] ) => upath.normalize( path ) );
 
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-
-			input = stubs.writeFile.mock.calls[ 1 ];
-
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( writtenPaths ).toContain( fooPackageJsonPath );
+			expect( writtenPaths ).toContain( barPackageJsonPath );
 		} );
 
 		it( 'should not remove any field from `package.json` if all of them are mandatory', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -491,7 +484,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -514,7 +507,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove default unnecessary fields from `package.json`', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -539,7 +532,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release'
@@ -562,7 +555,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove provided unnecessary fields from `package.json`', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -587,7 +580,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -621,7 +614,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should remove deeply nested unnecessary fields from `package.json`', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -633,7 +626,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -650,7 +643,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should keep nested field if it does not exist or it targets non-object field', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -662,7 +655,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -681,7 +674,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -693,7 +686,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -709,7 +702,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should not remove scripts unless it is explicitly specified in packageJsonFieldsToRemove', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -722,7 +715,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -744,7 +737,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should not crash when scripts are not set but preservePostInstallHook is set to true', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -752,7 +745,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -767,7 +760,7 @@ describe( 'cleanUpPackages()', () => {
 		} );
 
 		it( 'should accept a callback for packageJsonFieldsToRemove', async () => {
-			mockFs( {
+			vol.fromNestedJSON( {
 				'release': {
 					'ckeditor5-foo': {
 						'package.json': JSON.stringify( {
@@ -793,7 +786,7 @@ describe( 'cleanUpPackages()', () => {
 						} )
 					}
 				}
-			} );
+			}, process.cwd() );
 
 			await cleanUpPackages( {
 				packagesDirectory: 'release',
@@ -818,6 +811,26 @@ describe( 'cleanUpPackages()', () => {
 	} );
 } );
 
+/**
+ * Mirrors `workspaces.findPathsToPackages()` from `@ckeditor/ckeditor5-dev-utils` for the options used by the task, but searches
+ * the in-memory file system.
+ *
+ * @param {string} cwd
+ * @param {string} packagesDirectory
+ * @param {object} options
+ * @returns {Promise.<Array.<string>>}
+ */
+async function findPathsToPackages( cwd, packagesDirectory, options ) {
+	const paths = await glob( options.includePackageJson ? '*/package.json' : '*/', {
+		cwd: upath.join( cwd, packagesDirectory ),
+		absolute: true,
+		nodir: Boolean( options.includePackageJson ),
+		fs: memfs
+	} );
+
+	return paths.map( path => upath.normalize( path ) );
+}
+
 function getPathTo( path ) {
 	return upath.join( process.cwd(), path );
 }
@@ -825,6 +838,7 @@ function getPathTo( path ) {
 async function getAllPaths() {
 	return ( await glob( '**', {
 		absolute: true,
-		dot: true
+		dot: true,
+		fs: memfs
 	} ) ).map( upath.normalize );
 }
