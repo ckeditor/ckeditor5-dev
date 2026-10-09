@@ -95,6 +95,9 @@ describe( 'validateTask()', () => {
 	it.each( [
 		[ 'no default export', undefined, 'the module must export by default a task whose `id` matches the directory name ("t").' ],
 		[ 'a wrong id', { ...valid, id: 'x' }, 'the module must export by default a task whose `id` matches the directory name ("t").' ],
+		[ 'no rules', { ...valid, ruleIds: undefined }, '`ruleIds` must be an array of rule IDs.' ],
+		[ 'rules that are not an array', { ...valid, ruleIds: 'R1' }, '`ruleIds` must be an array of rule IDs.' ],
+		[ 'a rule that is not a string', { ...valid, ruleIds: [ 1 ] }, 'every rule ID must be a non-empty string without "|".' ],
 		[ 'an empty rule', { ...valid, ruleIds: [ '' ] }, 'every rule ID must be a non-empty string without "|".' ],
 		[ 'a rule with a pipe', { ...valid, ruleIds: [ 'a|b' ] }, 'every rule ID must be a non-empty string without "|".' ],
 		[ 'duplicated rules', { ...valid, ruleIds: [ 'R1', 'R1' ] }, '`ruleIds` must be unique.' ],
@@ -118,6 +121,7 @@ describe( 'validateTask()', () => {
 		[ 'a zero `concurrency`', { ...valid, concurrency: 0 }, '`concurrency` must be an integer of 1 or more.' ],
 		[ 'a negative `concurrency`', { ...valid, concurrency: -1 }, '`concurrency` must be an integer of 1 or more.' ]
 	] )( 'rejects a task with %s', ( _name, task, message ) => {
-		expect( () => validateTask( task, 't' ) ).toThrow( `The "t" task is invalid: ${ message }` );
+		// Some tasks break the types on purpose, as a plain JavaScript module can.
+		expect( () => validateTask( task as Task | undefined, 't' ) ).toThrow( `The "t" task is invalid: ${ message }` );
 	} );
 } );

@@ -47,7 +47,12 @@ export function validateTask( task: Task | undefined, id: string ): void {
 		throw invalid( `the module must export by default a task whose \`id\` matches the directory name ("${ id }").` );
 	}
 
-	if ( task.ruleIds.some( ruleId => ruleId === '' || ruleId.includes( '|' ) ) ) {
+	// Tasks may be plain JavaScript modules, which no type check covers.
+	if ( !Array.isArray( task.ruleIds ) ) {
+		throw invalid( '`ruleIds` must be an array of rule IDs.' );
+	}
+
+	if ( task.ruleIds.some( ruleId => typeof ruleId !== 'string' || ruleId === '' || ruleId.includes( '|' ) ) ) {
 		throw invalid( 'every rule ID must be a non-empty string without "|".' );
 	}
 

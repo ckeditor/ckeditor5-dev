@@ -255,8 +255,7 @@ export async function runTask( runOptions: RunTaskOptions ): Promise<RunTaskResu
 		finding.fix = { ...record.fixes.get( finding.fingerprint )!, fragment: record.current!.fragment };
 	}
 
-	// Written even when nothing was judged: the baseline may have lost units, fixed findings may have been pruned,
-	// or someone may have edited `open.json` by hand.
+	// Written even when nothing was judged: the baseline may have lost units, or fixed findings may have been pruned.
 	await writeTaskState( statePath, { baseline, open, report: renderReport( { task, target, branch, open } ) } );
 
 	const errors = [ ...unitRuns.values() ]

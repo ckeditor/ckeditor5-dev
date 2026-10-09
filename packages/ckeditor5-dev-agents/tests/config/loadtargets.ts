@@ -188,6 +188,8 @@ describe( 'targets', () => {
 			[ 'no default export', undefined, 'the module must export by default a target with a `slug` like "owner/repository".' ],
 			[ 'a wrong slug', { ...valid, slug: 'repo' }, 'the module must export by default a target with a `slug` like "owner/repository".' ],
 			[ 'an absolute root', { ...valid, root: '/abs' }, '`root` must be a path inside the repository.' ],
+			[ 'no tasks', { ...valid, tasks: undefined }, '`tasks` must be an object that maps task names to their settings.' ],
+			[ 'tasks that are a list', { ...valid, tasks: [ 'meta' ] }, '`tasks` must be an object that maps task names to their settings.' ],
 			[ 'a root outside the repository', { ...valid, root: '../x' }, '`root` must be a path inside the repository.' ],
 			[ 'an unknown task', { ...valid, tasks: { other: {} } }, 'the "other" task does not exist.' ],
 			[ 'an instance of an unknown task', { ...valid, tasks: { mine: { task: 'other' } } }, 'the "other" task does not exist.' ],
@@ -199,7 +201,8 @@ describe( 'targets', () => {
 				'The "files" task is invalid: it needs `scope()`, or `include` to work on the matching files.' ],
 			[ 'an invalid `maxUnits`', { ...valid, tasks: { mine: { task: 'meta', maxUnits: 0 } } }, 'The "mine" task is invalid: `maxUnits` must be an integer of 1 or more.' ]
 		] )( 'rejects a target with %s', ( _name, config, message ) => {
-			expect( () => normalizeTarget( config, options ) ).toThrow( `The "x" target is invalid: ${ message }` );
+			// Some configs break the types on purpose, as a plain JavaScript module can.
+			expect( () => normalizeTarget( config as TargetConfig | undefined, options ) ).toThrow( `The "x" target is invalid: ${ message }` );
 		} );
 	} );
 } );

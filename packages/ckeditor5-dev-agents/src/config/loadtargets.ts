@@ -51,6 +51,11 @@ export function normalizeTarget(
 		throw invalid( '`root` must be a path inside the repository.' );
 	}
 
+	// Targets may be plain JavaScript modules, which no type check covers.
+	if ( typeof config.tasks !== 'object' || config.tasks === null || Array.isArray( config.tasks ) ) {
+		throw invalid( '`tasks` must be an object that maps task names to their settings.' );
+	}
+
 	const instances = new Map<string, TaskInstance>();
 
 	for ( const [ instanceId, entry ] of Object.entries( config.tasks ) ) {
