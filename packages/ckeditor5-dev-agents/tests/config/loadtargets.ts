@@ -64,13 +64,13 @@ describe( 'targets', () => {
 	describe( 'loadTargets()', () => {
 		it( 'loads `.js`, `.mjs`, `.ts` and `.mts` targets', async () => {
 			const configPath = await createTempDirectory();
-			const module = `export default ${ JSON.stringify( valid ) };\n`;
+			const module = ( root: string ) => `export default ${ JSON.stringify( { ...valid, root } ) };\n`;
 
 			await writeFiles( configPath, {
-				'targets/a.js': module,
-				'targets/b.mjs': module,
-				'targets/c.ts': module,
-				'targets/d.mts': module,
+				'targets/a.js': module( '.' ),
+				'targets/b.mjs': module( 'b' ),
+				'targets/c.ts': module( 'c' ),
+				'targets/d.mts': module( 'd' ),
 				'targets/notes.md': 'ignored'
 			} );
 
@@ -93,6 +93,32 @@ describe( 'targets', () => {
 
 			await expect( loadTargets( upath.join( configPath, 'targets' ), tasks ) )
 				.rejects.toThrow( 'The "a" target is defined in more than one file.' );
+		} );
+
+		it( 'throws when two targets keep the state of a task in the same directory of a repository', async () => {
+			const configPath = await createTempDirectory();
+
+			await writeFiles( configPath, {
+				'targets/a.js': `export default ${ JSON.stringify( { ...valid, root: 'docs' } ) };\n`,
+				'targets/b.js': `export default ${ JSON.stringify( { ...valid, root: './docs/', tasks: { other: { task: 'meta' }, meta: {} } } ) };\n`
+			} );
+
+			await expect( loadTargets( upath.join( configPath, 'targets' ), tasks ) ).rejects.toThrow(
+				'The "a" and "b" targets keep the state of the "meta" task in the same directory of owner/repo: "docs/.ai-tasks/meta". ' +
+				'Give them different roots, or name the task differently in one of them.'
+			);
+		} );
+
+		it( 'accepts targets that share a root in different repositories, or run differently named tasks in it', async () => {
+			const configPath = await createTempDirectory();
+
+			await writeFiles( configPath, {
+				'targets/a.js': `export default ${ JSON.stringify( valid ) };\n`,
+				'targets/b.js': `export default ${ JSON.stringify( { ...valid, slug: 'owner/other' } ) };\n`,
+				'targets/c.js': `export default ${ JSON.stringify( { ...valid, tasks: { other: { task: 'meta' } } } ) };\n`
+			} );
+
+			expect( [ ...( await loadTargets( upath.join( configPath, 'targets' ), tasks ) ).keys() ] ).toEqual( [ 'a', 'b', 'c' ] );
 		} );
 	} );
 

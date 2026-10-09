@@ -2,14 +2,14 @@ packages:
   - packages/*
 
 allowBuilds:
-  # Dependencies of Pi (`@ckeditor/ckeditor5-dev-agents`). Their install scripts are not needed to run it.
-  '@google/genai': false
   '@parcel/watcher': true
   '@swc/core': true
   'esbuild': true
-  'protobufjs': false
   'puppeteer': true
   'snyk': true
+  # Dependencies of Pi (`@ckeditor/ckeditor5-dev-agents`). Their install scripts are not needed to run it.
+  '@google/genai': false
+  'protobufjs': false
 
 overrides:
   '@puppeteer/browsers@^2': '^3.0.6'

@@ -46,7 +46,8 @@ export function renderReport( { task, target, branch, open }: {
 		'* Reject it: check out the report branch and run `ckeditor5-dev-agents reject <id> --reason "…"`. It records why ' +
 			`the finding is wrong in \`${ upath.join( target.root, taskStatePath ) }/decisions/\`, removes it from \`open.json\`, ` +
 			'and reverts its fix. The decision holds until the judged content changes. Commit and push the result.',
-		'* Dismiss it: `ckeditor5-dev-agents dismiss <id>` does the same without a decision, so it may be reported again.',
+		'* Dismiss it: `ckeditor5-dev-agents dismiss <id>` does the same without a decision, so it may be reported again once the judged ' +
+			'content changes.',
 		'',
 		'Reverting a fix by hand, without rejecting the finding, means the task finds the problem and fixes it again on a later run.',
 		''

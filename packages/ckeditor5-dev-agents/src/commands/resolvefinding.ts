@@ -21,7 +21,8 @@ export type ResolveFindingOptions = {
 
 	/**
 	 * `reject`: the finding is wrong. A decision records why, so it is not reported again while the content stays
-	 * the same. `dismiss`: the finding is dropped without a decision, so it may be reported again.
+	 * the same. `dismiss`: the finding is dropped without a decision, so it may be reported again once the judged content
+	 * changes, for example when its fix is reverted.
 	 */
 	action: 'reject' | 'dismiss';
 

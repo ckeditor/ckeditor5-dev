@@ -4,6 +4,7 @@
  */
 
 import upath from 'upath';
+import { STATE_DIRECTORY } from '../constants.js';
 import { isOutside } from '../utils/files.js';
 import { getErrorMessage } from '../utils/strings.js';
 import { importDefaultExports } from './importmodules.js';
@@ -28,6 +29,8 @@ export async function loadTargets( targetsPath: string, tasks: Map<string, Loade
 
 		targets.set( name, normalizeTarget( value as TargetConfig | undefined, { name, tasks } ) );
 	}
+
+	assertSeparateStates( [ ...targets.values() ] );
 
 	return targets;
 }
@@ -74,6 +77,32 @@ export function normalizeTarget(
 	}
 
 	return { name, slug: config.slug, root, tasks: instances };
+}
+
+/**
+ * Throws when two targets would keep the state of a task in the same directory of the same repository. Each run would
+ * then drop the baseline and the findings of the other target.
+ */
+function assertSeparateStates( targets: Array<Target> ): void {
+	const owners = new Map<string, string>();
+
+	for ( const target of targets ) {
+		for ( const instanceId of target.tasks.keys() ) {
+			const statePath = upath.join( target.root, STATE_DIRECTORY, instanceId );
+			const key = `${ target.slug }:${ statePath }`;
+			const owner = owners.get( key );
+
+			if ( owner ) {
+				throw new Error(
+					`The "${ owner }" and "${ target.name }" targets keep the state of the "${ instanceId }" task in the same ` +
+					`directory of ${ target.slug }: "${ statePath }". ` +
+					'Give them different roots, or name the task differently in one of them.'
+				);
+			}
+
+			owners.set( key, target.name );
+		}
+	}
 }
 
 /**

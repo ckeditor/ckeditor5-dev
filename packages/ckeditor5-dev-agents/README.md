@@ -279,7 +279,7 @@ Every finding in `report.md` has a short ID, for example `[3fdb55a802c1]`. Longe
   ```
 
   It writes a decision file to `.ai-tasks/<task>/decisions/`, removes the finding from `open.json`, restores every file of its fix from the base branch, and regenerates `report.md`. Commit and push the result. The decision holds for as long as the unit hashes to its `fragment`, and expires by itself when the judged content changes. If the finding comes back then, the report shows the previous claim and the answer. Every decision about a unit is also passed to `judge()`.
-* **Dismiss the finding**: `ckeditor5-dev-agents dismiss 3fdb55a802c1` does the same, without a decision. The finding may be reported again.
+* **Dismiss the finding**: `ckeditor5-dev-agents dismiss 3fdb55a802c1` does the same, without a decision. The finding may be reported again once the judged content changes. Reverting its fix changes the content, so the next run judges and fixes a dismissed finding with a fix again.
 
 A fix may share files with other fixes, for example when the fixes of two units changed the same file. Restoring those files undoes the other fixes too, so the command stops, lists them, and asks to re-run with `--force`. With `--force`, every affected fix is undone completely: its findings stay open, and the next run judges and fixes them again.
 
