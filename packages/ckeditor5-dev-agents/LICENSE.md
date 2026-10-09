@@ -22,6 +22,7 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 
 * @earendil-works/pi-ai - Copyright (c) 2025 Mario Zechner.
 * @earendil-works/pi-coding-agent - Copyright (c) 2025 Mario Zechner.
+* @octokit/rest - Copyright (c) 2012 Cloud9 IDE, Inc. (Mike de Boer) and Copyright (c) 2017-2018 Octokit contributors.
 * simple-git - Copyright (c) 2022 Steve King.
 * upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
 

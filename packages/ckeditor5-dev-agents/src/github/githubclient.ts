@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-const API_URL = 'https://api.github.com';
+import { Octokit } from '@octokit/rest';
 
 // The version of the GitHub REST API the requests are written against.
 const API_VERSION = '2026-03-10';
@@ -32,47 +32,57 @@ export type GitHubClient = {
  * Creates a minimal client of the GitHub REST API with the calls that report pull requests need.
  */
 export function createGitHubClient( token: string ): GitHubClient {
-	async function request<T>( method: string, path: string, body?: unknown ): Promise<T> {
-		const response = await fetch( `${ API_URL }${ path }`, {
-			method,
-			signal: AbortSignal.timeout( REQUEST_TIMEOUT ),
-			headers: {
-				'Accept': 'application/vnd.github+json',
-				'Authorization': `Bearer ${ token }`,
-				'X-GitHub-Api-Version': API_VERSION,
-				...( body ? { 'Content-Type': 'application/json' } : {} )
-			},
-			body: body ? JSON.stringify( body ) : undefined
-		} );
+	const octokit = new Octokit( { auth: token } );
 
-		if ( !response.ok ) {
-			const text = await response.text();
+	octokit.hook.before( 'request', options => {
+		options.headers[ 'x-github-api-version' ] = API_VERSION;
+		options.request = { ...options.request, signal: AbortSignal.timeout( REQUEST_TIMEOUT ) };
+	} );
 
-			throw new Error( `GitHub API request "${ method } ${ path }" failed with status ${ response.status }: ${ text }` );
+	// The message of Octokit does not say which request failed. Octokit adds the request to the error of a request that
+	// failed, including one that timed out, but not to an aborted one.
+	octokit.hook.error( 'request', error => {
+		const { status, request } = error as Partial<{ status: number; request: { method: string; url: string } }>;
+
+		if ( !status || !request ) {
+			throw error;
 		}
 
-		return response.json() as Promise<T>;
-	}
+		const message = `GitHub API request "${ request.method } ${ request.url }" failed with status ${ status }: ${ error.message }`;
+
+		throw new Error( message, { cause: error } );
+	} );
 
 	return {
 		async findOpenPullRequest( { slug, head } ) {
-			const [ owner ] = slug.split( '/' );
-			const query = new URLSearchParams( { state: 'open', head: `${ owner }:${ head }` } );
-			const pullRequests = await request<Array<PullRequest>>( 'GET', `/repos/${ slug }/pulls?${ query }` );
+			const [ owner, repo ] = splitSlug( slug );
+			const { data } = await octokit.pulls.list( { owner, repo, state: 'open', head: `${ owner }:${ head }` } );
 
-			return pullRequests[ 0 ] ?? null;
+			return data[ 0 ] ?? null;
 		},
 
-		createPullRequest( { slug, head, base, title, body } ) {
-			return request( 'POST', `/repos/${ slug }/pulls`, { head, base, title, body } );
+		async createPullRequest( { slug, head, base, title, body } ) {
+			const [ owner, repo ] = splitSlug( slug );
+
+			return ( await octokit.pulls.create( { owner, repo, head, base, title, body } ) ).data;
 		},
 
-		updatePullRequest( { slug, number, body } ) {
-			return request( 'PATCH', `/repos/${ slug }/pulls/${ number }`, { body } );
+		async updatePullRequest( { slug, number, body } ) {
+			const [ owner, repo ] = splitSlug( slug );
+
+			return ( await octokit.pulls.update( { owner, repo, pull_number: number, body } ) ).data;
 		},
 
-		createComment( { slug, number, body } ) {
-			return request( 'POST', `/repos/${ slug }/issues/${ number }/comments`, { body } );
+		async createComment( { slug, number, body } ) {
+			const [ owner, repo ] = splitSlug( slug );
+
+			return ( await octokit.issues.createComment( { owner, repo, issue_number: number, body } ) ).data;
 		}
 	};
+}
+
+function splitSlug( slug: string ): [ owner: string, repo: string ] {
+	const [ owner, repo ] = slug.split( '/' );
+
+	return [ owner!, repo! ];
 }

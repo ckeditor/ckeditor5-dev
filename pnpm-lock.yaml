@@ -91,6 +91,9 @@ importers:
       '@earendil-works/pi-coding-agent':
         specifier: 0.87.1
         version: 0.87.1(ws@8.21.1)(zod@4.4.3)
+      '@octokit/rest':
+        specifier: ^22.0.1
+        version: 22.0.1
       entities:
         specifier: ^8.1.0
         version: 8.1.0
