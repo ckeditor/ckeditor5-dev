@@ -19,6 +19,14 @@ commands:
     description: "Disable Corepack, install pnpm and project dependencies"
     steps:
       - run:
+          # The Node.js 24 images ship Corepack, whose shims would shadow the pnpm installed below.
+          # The Node.js 26 images do not have Corepack, so the step is skipped there.
+          name: Disable Corepack
+          command: |
+            if command -v corepack > /dev/null; then
+              sudo corepack disable
+            fi
+      - run:
           name: Install pnpm
           command: |
             sudo npm i -g pnpm@^11
@@ -74,8 +82,12 @@ commands:
 
 jobs:
   validate_and_tests:
+    parameters:
+      node_image:
+        type: string
+        default: cimg/node:26.10.0
     docker:
-      - image: cimg/node:26.10.0
+      - image: << parameters.node_image >>
     resource_class: large
     steps:
       - checkout
@@ -230,6 +242,9 @@ workflows:
         - equal: [ false, << pipeline.parameters.isRelease >> ]
     jobs:
       - validate_and_tests
+      - validate_and_tests:
+          name: validate_and_tests_node_24
+          node_image: cimg/node:24.11.0
       - release_prepare
       - upload_snyk_snapshots:
           filters:
@@ -239,6 +254,7 @@ workflows:
       - trigger_release_process:
           requires:
             - validate_and_tests
+            - validate_and_tests_node_24
             - release_prepare
           filters:
             branches:
@@ -264,3 +280,6 @@ workflows:
         - equal: [ false, << pipeline.parameters.isRelease >> ]
     jobs:
       - validate_and_tests
+      - validate_and_tests:
+          name: validate_and_tests_node_24
+          node_image: cimg/node:24.11.0

@@ -446,31 +446,27 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
+			// The order of the found packages depends on the file system, so the calls are checked regardless of their order.
+			const fooPackageJsonPath = getPathTo( 'release/ckeditor5-foo/package.json' );
+			const barPackageJsonPath = getPathTo( 'release/ckeditor5-bar/package.json' );
+
 			// Reading `package.json`.
 			expect( stubs.readFile ).toHaveBeenCalledTimes( 2 );
 
-			let input = stubs.readFile.mock.calls[ 0 ];
-			let call = stubs.readFile.mock.results[ 0 ];
+			const readCalls = await Promise.all( stubs.readFile.mock.calls.map( async ( [ path ], index ) => {
+				return [ upath.normalize( path ), await stubs.readFile.mock.results[ index ].value ];
+			} ) );
 
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-foo' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-
-			input = stubs.readFile.mock.calls[ 1 ];
-			call = stubs.readFile.mock.results[ 1 ];
-
-			expect( await call.value ).to.equal( JSON.stringify( { name: 'ckeditor5-bar' } ) );
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( readCalls ).toContainEqual( [ fooPackageJsonPath, JSON.stringify( { name: 'ckeditor5-foo' } ) ] );
+			expect( readCalls ).toContainEqual( [ barPackageJsonPath, JSON.stringify( { name: 'ckeditor5-bar' } ) ] );
 
 			// Writing `package.json`.
 			expect( stubs.writeFile ).toHaveBeenCalledTimes( 2 );
 
-			input = stubs.writeFile.mock.calls[ 0 ];
+			const writtenPaths = stubs.writeFile.mock.calls.map( ( [ path ] ) => upath.normalize( path ) );
 
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
-
-			input = stubs.writeFile.mock.calls[ 1 ];
-
-			expect( upath.normalize( input[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
+			expect( writtenPaths ).toContain( fooPackageJsonPath );
+			expect( writtenPaths ).toContain( barPackageJsonPath );
 		} );
 
 		it( 'should not remove any field from `package.json` if all of them are mandatory', async () => {
