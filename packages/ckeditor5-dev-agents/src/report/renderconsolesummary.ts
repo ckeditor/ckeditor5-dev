@@ -69,11 +69,14 @@ function row( label: string, value: string ): string {
 }
 
 function formatDuration( milliseconds: number ): string {
-	const seconds = milliseconds / 1000;
+	// Rounded before splitting, so a duration just below a full minute does not show as "60 s".
+	const tenths = Math.round( milliseconds / 100 );
 
-	if ( seconds < 60 ) {
-		return `${ seconds.toFixed( 1 ) } s`;
+	if ( tenths < 600 ) {
+		return `${ ( tenths / 10 ).toFixed( 1 ) } s`;
 	}
 
-	return `${ Math.floor( seconds / 60 ) } min ${ Math.round( seconds % 60 ) } s`;
+	const seconds = Math.round( milliseconds / 1000 );
+
+	return `${ Math.floor( seconds / 60 ) } min ${ seconds % 60 } s`;
 }

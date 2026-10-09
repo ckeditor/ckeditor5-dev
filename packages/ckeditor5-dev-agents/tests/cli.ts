@@ -167,6 +167,23 @@ describe( 'runCli()', () => {
 		expect( console.error ).not.toHaveBeenCalled();
 	} );
 
+	it( 'drops a `--` separator that comes after the arguments of a run script', async () => {
+		vi.mocked( runTasks ).mockResolvedValue( { ok: true, targets: [] } );
+
+		expect( await runCli( [ '--config', 'cfg', '--', '--task', 'meta' ] ) ).toBe( 0 );
+		expect( runTasks ).toHaveBeenCalledWith( expect.objectContaining( {
+			configPath: expect.stringMatching( /\/cfg$/ ),
+			tasks: [ 'meta' ]
+		} ) );
+	} );
+
+	it( 'prints a thrown value that is not an error', async () => {
+		vi.mocked( runTasks ).mockRejectedValue( 'Broken config.' );
+
+		expect( await runCli( [] ) ).toBe( 1 );
+		expect( console.error ).toHaveBeenCalledWith( 'Broken config.' );
+	} );
+
 	it( 'returns 1 when the run is not ok', async () => {
 		vi.mocked( runTasks ).mockResolvedValue( { ok: false, targets: [] } );
 
@@ -212,6 +229,13 @@ describe( 'runCli()', () => {
 
 			expect( await runCli( [ '--', 'dismiss', 'f3a9c1' ] ) ).toBe( 0 );
 			expect( resolveFinding ).toHaveBeenCalledWith( expect.objectContaining( { action: 'dismiss', id: 'f3a9c1' } ) );
+		} );
+
+		it( 'accepts a `--` separator after the arguments of a run script', async () => {
+			vi.mocked( resolveFinding ).mockResolvedValue( result );
+
+			expect( await runCli( [ 'dismiss', 'f3a9c1', '--', '--force' ] ) ).toBe( 0 );
+			expect( resolveFinding ).toHaveBeenCalledWith( expect.objectContaining( { action: 'dismiss', id: 'f3a9c1', force: true } ) );
 		} );
 
 		it( 'prints the error and returns 1 when resolving fails', async () => {

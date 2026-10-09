@@ -6,6 +6,7 @@
 /* eslint-disable @stylistic/max-len */
 
 import { afterEach, describe, it, expect } from 'vitest';
+import { symlink } from 'node:fs/promises';
 import upath from 'upath';
 import { findDecisions, getDecisionFileName, getPriorDecisions, loadDecisions, renderDecision } from '../../src/state/decisions.js';
 import { createTempDirectory, removeTempDirectories, writeFiles } from '../_utils/files.js';
@@ -64,6 +65,24 @@ describe( 'loadDecisions()', () => {
 			'The "decisions/5-blank.yml" decision file was skipped: The "reason" field must be a non-empty string.',
 			'The "decisions/6-nested.yml" decision file was skipped: The "finding" field must be a string.',
 			'The "decisions/7-nested-required.yml" decision file was skipped: The "unit" field must be a non-empty string.'
+		] );
+	} );
+
+	it( 'skips files that cannot be read and loads the others', async () => {
+		const root = await createTempDirectory();
+
+		await writeFiles( root, {
+			'a-directory.yml/file.txt': 'Not a decision.\n',
+			'b-valid.yml': 'unit: a\nrule: R1\nfragment: abc\nreason: x\n'
+		} );
+		await symlink( upath.join( root, 'missing.yml' ), upath.join( root, 'c-dangling.yml' ) );
+
+		const { decisions, warnings } = await loadDecisions( root );
+
+		expect( decisions ).toEqual( [ expect.objectContaining( { file: 'b-valid.yml', unit: 'a' } ) ] );
+		expect( warnings ).toEqual( [
+			expect.stringMatching( /^The "decisions\/a-directory.yml" decision file was skipped: EISDIR/ ),
+			expect.stringMatching( /^The "decisions\/c-dangling.yml" decision file was skipped: ENOENT/ )
 		] );
 	} );
 } );

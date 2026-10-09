@@ -35,9 +35,18 @@ describe( 'targets', () => {
 		defaultOptions: { limit: 60, strict: true }
 	};
 
+	// A task whose units are the files matching `include`.
+	const files: Task = {
+		...task,
+		id: 'files',
+		scope: undefined,
+		include: [ 'docs/**/*.md' ]
+	};
+
 	const tasks = new Map<string, LoadedTask>( [
 		[ 'meta', { task, directory: '/tasks/meta' } ],
-		[ 'bluf', { task: configured, directory: '/tasks/bluf' } ]
+		[ 'bluf', { task: configured, directory: '/tasks/bluf' } ],
+		[ 'files', { task: files, directory: '/tasks/files' } ]
 	] );
 
 	const valid: TargetConfig = {
@@ -159,7 +168,10 @@ describe( 'targets', () => {
 			[ 'an empty instance name', { ...valid, tasks: { '': { task: 'meta' } } }, 'the "" task name may not be empty or contain "|", "/" or "\\".' ],
 			[ 'an instance name with a pipe', { ...valid, tasks: { 'a|b': { task: 'meta' } } }, 'the "a|b" task name may not be empty or contain "|", "/" or "\\".' ],
 			[ 'an instance name with a slash', { ...valid, tasks: { 'a/b': { task: 'meta' } } }, 'the "a/b" task name may not be empty or contain "|", "/" or "\\".' ],
-			[ 'an instance name with a backslash', { ...valid, tasks: { 'a\\b': { task: 'meta' } } }, 'the "a\\b" task name may not be empty or contain "|", "/" or "\\".' ]
+			[ 'an instance name with a backslash', { ...valid, tasks: { 'a\\b': { task: 'meta' } } }, 'the "a\\b" task name may not be empty or contain "|", "/" or "\\".' ],
+			[ 'an empty `include` of a task without `scope()`', { ...valid, tasks: { files: { include: [] } } },
+				'The "files" task is invalid: it needs `scope()`, or `include` to work on the matching files.' ],
+			[ 'an invalid `maxUnits`', { ...valid, tasks: { mine: { task: 'meta', maxUnits: 0 } } }, 'The "mine" task is invalid: `maxUnits` must be an integer of 1 or more.' ]
 		] )( 'rejects a target with %s', ( _name, config, message ) => {
 			expect( () => normalizeTarget( config, options ) ).toThrow( `The "x" target is invalid: ${ message }` );
 		} );

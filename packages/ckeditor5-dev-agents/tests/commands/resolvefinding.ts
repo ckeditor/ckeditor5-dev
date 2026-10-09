@@ -182,6 +182,18 @@ describe( 'resolveFinding()', () => {
 			expect( await read( '.ai-tasks/t/report.md' ) ).toContain( '# Task t' );
 		} );
 
+		it( 'throws and changes nothing when the fix is already committed', async () => {
+			git( root, 'add', '--all' );
+			git( root, 'commit', '--quiet', '--message', 'Commit the fixes.' );
+
+			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: root } ) ).rejects.toThrow(
+				`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] is already committed, so restoring its files from HEAD would change nothing. ` +
+				'Check out the report branch by its name, or resolve the findings of a local run before committing its fixes.'
+			);
+			expect( await readOpen() ).toHaveLength( 1 );
+			expect( git( root, 'status', '--porcelain' ).trim() ).toBe( '' );
+		} );
+
 		it( 'deletes a file the fix created', async () => {
 			await resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: root } );
 			await useConfig( {
@@ -369,6 +381,29 @@ describe( 'resolveFinding()', () => {
 			expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is LOCAL.\n' );
 		} );
 
+		it( 'throws and changes nothing when the report branch is checked out as a detached HEAD', async () => {
+			git( checkout, 'checkout', '--quiet', '--detach' );
+
+			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: checkout } ) )
+				.rejects.toThrow( `The fix of [${ idOf( 'docs/a.md', 'R1' ) }] is already committed` );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+		} );
+
+		it( 'throws and changes nothing when the report branch belongs to another task or target', async () => {
+			git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/u/repo/stable' );
+
+			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: checkout } ) ).rejects.toThrow(
+				`The [${ idOf( 'docs/a.md', 'R1' ) }] finding belongs to the "t" task in the "repo" target, ` +
+				'but the "ai-tasks/u/repo/stable" report branch is checked out. Check out "ai-tasks/t/repo/stable" first.'
+			);
+
+			git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/t/other/stable' );
+
+			await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), configPath, cwd: checkout } ) )
+				.rejects.toThrow( 'but the "ai-tasks/t/other/stable" report branch is checked out.' );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+		} );
+
 		it( 'throws when the base branch does not exist at all', async () => {
 			git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/t/repo/gone' );
 
@@ -507,7 +542,7 @@ describe( 'renderResolvedFinding()', () => {
 			'  Decision  .ai-tasks/t/decisions/r1-docs-a.yml',
 			'  Reverted  docs/a.md, log.md',
 			'',
-			'Nothing was committed. Review the changes with "git diff", then commit them.'
+			'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.'
 		].join( '\n' ) );
 	} );
 
@@ -516,7 +551,7 @@ describe( 'renderResolvedFinding()', () => {
 			`Dismissed [${ id }] R1 in docs/a.md (t, repo).`,
 			'  Reverted  nothing (the finding had no fix)',
 			'',
-			'Nothing was committed. Review the changes with "git diff", then commit them.'
+			'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.'
 		].join( '\n' ) );
 	} );
 

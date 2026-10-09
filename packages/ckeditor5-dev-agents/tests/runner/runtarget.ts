@@ -57,6 +57,9 @@ const tasks = new Map<string, LoadedTask>( [
 	[ 'broken', { task: createTask( 'broken', { scope: () => {
 		throw new Error( 'Broken scope.' );
 	} } ), directory: '/tasks/broken' } ],
+	[ 'throwing', { task: createTask( 'throwing', { prepare: () => {
+		throw 'The token is missing.';
+	} } ), directory: '/tasks/throwing' } ],
 	// Without `scope()`, so its instances choose the files with `include`.
 	[ 'files', { task: createTask( 'files', { scope: undefined } ), directory: '/tasks/files' } ]
 ] );
@@ -242,6 +245,14 @@ describe( 'runTarget()', () => {
 			expect( log ).toHaveBeenCalledWith( '  The "broken" task failed: Broken scope.' );
 			expect( log ).toHaveBeenCalledWith( 'Running the "plain" task...' );
 		} );
+
+		it( 'records a task that throws something other than an error as failed', async () => {
+			const results = await runTarget( baseOptions( createTarget( [ [ 'throwing', true ] ] ) ) );
+
+			expect( results ).toEqual( [
+				{ task: 'throwing', title: 'Task throwing', failure: 'The token is missing.', durationMs: expect.any( Number ) }
+			] );
+		} );
 	} );
 
 	describe( 'published run', () => {
@@ -305,7 +316,7 @@ describe( 'runTarget()', () => {
 			expect( JSON.parse( readRemote( 'ai-tasks/plain/x/stable', '.ai-tasks/plain/open.json' ) ) ).toHaveLength( 1 );
 			expect( () => readRemote( 'ai-tasks/plain/x/stable', '.ai-tasks/meta/open.json' ) ).toThrow();
 
-			expect( github.findOpenPullRequest ).toHaveBeenCalledWith( { slug: 'owner/repo', head: 'ai-tasks/meta/x/stable', base: 'stable' } );
+			expect( github.findOpenPullRequest ).toHaveBeenCalledWith( { slug: 'owner/repo', head: 'ai-tasks/meta/x/stable' } );
 			expect( github.createPullRequest ).toHaveBeenCalledWith( expect.objectContaining( {
 				slug: 'owner/repo',
 				head: 'ai-tasks/meta/x/stable',

@@ -10,7 +10,7 @@ import type { Target } from '../types.js';
 
 /**
  * Loads the targets of the config directory, with their tasks. A directory without tasks or targets is almost always
- * the wrong one, so it throws instead of running nothing.
+ * the wrong one, so it throws.
  */
 export async function loadConfig( configPath: string ): Promise<Map<string, Target>> {
 	const tasks = await loadTasks( upath.join( configPath, 'tasks' ) );

@@ -101,6 +101,14 @@ describe( 'task contexts', () => {
 			expect( ( error as Error ).message.length ).toBeLessThan( 4200 );
 		} );
 
+		it( 'exec() keeps a character whole when it is split between two chunks of the output', async () => {
+			const root = await createTempDirectory();
+			const ctx = createWritableTaskContext( { root, phase: 'verify', options: {}, agent, log } );
+			const script = 'process.stdout.write( Buffer.from( [ 0xe2, 0x80 ] ) ); setTimeout( () => process.stdout.write( Buffer.from( [ 0x94 ] ) ), 50 );';
+
+			expect( ( await ctx.exec( process.execPath, [ '-e', script ] ) ).output ).toBe( '—' );
+		} );
+
 		it( 'exec() throws when the command takes longer than the timeout', async () => {
 			const root = await createTempDirectory();
 			const ctx = createWritableTaskContext( { root, phase: 'verify', options: {}, agent, log } );

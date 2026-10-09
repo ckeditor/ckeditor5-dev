@@ -13,6 +13,7 @@ import { openWorkspace, type GitWorkspace } from '../git/gitworkspace.js';
 import { renderReport } from '../report/renderreport.js';
 import { getDecisionFileName, renderDecision } from '../state/decisions.js';
 import { readTaskState, writeTaskState, type TaskState } from '../state/statestore.js';
+import { getReportBranch } from '../runner/runtarget.js';
 import { getFindingId } from '../runner/validatefindings.js';
 import type { Finding, Target, Task } from '../types.js';
 
@@ -101,7 +102,7 @@ type AffectedFix = {
  *    lists them. With `force`, all their files are restored as well, their findings lose the fix, and their units are
  *    judged and fixed again by the next run.
  * 3. The finding leaves `open.json`. When rejecting, a decision file records the reason.
- * 4. `report.md` is regenerated. Nothing is committed.
+ * 4. `report.md` is regenerated. The changes stay in the working tree for a human to review and commit.
  */
 export async function resolveFinding( options: ResolveFindingOptions ): Promise<ResolvedFinding> {
 	const { tasks: taskIds } = options;
@@ -113,6 +114,18 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 	const candidates = entries.filter( entry => selectedTargets.includes( entry.target ) &&
 		( !taskIds.length || taskIds.includes( entry.task.id ) ) );
 	const { entry, finding } = findFinding( candidates, options.id );
+	const reportBranch = parseReportBranch( workspace.branch );
+
+	// A report branch holds the fixes of one task in one target. Reverting the fix of another one there would restore
+	// files that the branch does not change, and would write the state of that task into the wrong pull request.
+	if ( reportBranch && ( reportBranch.task !== entry.task.id || reportBranch.target !== entry.target.name ) ) {
+		throw new Error(
+			`The [${ finding.id }] finding belongs to the "${ entry.task.id }" task in the "${ entry.target.name }" target, ` +
+			`but the "${ workspace.branch }" report branch is checked out. ` +
+			`Check out "${ getReportBranch( entry.task.id, entry.target, reportBranch.base ) }" first.`
+		);
+	}
+
 	const affected = getAffectedFixes( entries, finding );
 	const others = affected.filter( item => item.finding !== finding );
 
@@ -129,8 +142,17 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 
 	// On a report branch, the fix is a change against its base branch, which the report links to. Anywhere else
 	// (a local run), the fix is not committed, so `HEAD` has the content from before it.
-	const baseBranch = getBaseBranch( workspace.branch );
+	const baseBranch = reportBranch?.base;
 	const revertedFiles = [ ...new Set( affected.flatMap( item => item.files ) ) ].sort();
+
+	// Restoring from `HEAD` reverts nothing when the fix is already committed, for example in a report branch checked
+	// out as a detached `HEAD`, or after committing the fixes of a local run.
+	if ( revertedFiles.length && !baseBranch && !( await workspace.hasChanges( revertedFiles ) ) ) {
+		throw new Error(
+			`The fix of [${ finding.id }] is already committed, so restoring its files from HEAD would change nothing. ` +
+			'Check out the report branch by its name, or resolve the findings of a local run before committing its fixes.'
+		);
+	}
 
 	if ( revertedFiles.length ) {
 		await workspace.restore( revertedFiles, baseBranch ? await getRestoreRef( workspace, baseBranch ) : 'HEAD' );
@@ -179,7 +201,7 @@ export function renderResolvedFinding( result: ResolvedFinding ): string {
 		lines.push( `  Reopened  [${ item.id }] ${ describe( item ) } (${ item.task }), fixed again on the next run` );
 	}
 
-	lines.push( '', 'Nothing was committed. Review the changes with "git diff", then commit them.' );
+	lines.push( '', 'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.' );
 
 	return lines.join( '\n' );
 }
@@ -220,8 +242,10 @@ function findFinding( entries: Array<TaskStateEntry>, id: string ): { entry: Tas
 	return matches[ 0 ]!;
 }
 
-// The fix of the finding, and every other fix that shares a file with the ones found so far. Restoring a shared file
-// undoes all of them, so each of them is undone completely, not partly.
+/**
+ * Returns the fix of the finding, and every other fix that shares a file with the ones found so far. Restoring a shared
+ * file undoes all of them, so each of them is undone completely.
+ */
 function getAffectedFixes( entries: Array<TaskStateEntry>, finding: Finding ): Array<AffectedFix> {
 	const fixed = entries.flatMap( entry => entry.state.open
 		.filter( item => item.fix )
@@ -248,9 +272,13 @@ function getAffectedFixes( entries: Array<TaskStateEntry>, finding: Finding ): A
 	return affected;
 }
 
-// Report branches are named `ai-tasks/<task>/<target>/<base branch>`.
-function getBaseBranch( branch: string ): string | undefined {
-	return branch.startsWith( `${ REPORT_BRANCH_PREFIX }/` ) ? branch.split( '/' ).slice( 3 ).join( '/' ) : undefined;
+/**
+ * Splits the name of a report branch, `ai-tasks/<task>/<target>/<base branch>`, into its parts.
+ */
+function parseReportBranch( branch: string ): { task: string; target: string; base: string } | undefined {
+	const [ prefix, task, target, ...base ] = branch.split( '/' );
+
+	return prefix === REPORT_BRANCH_PREFIX && task && target && base.length ? { task, target, base: base.join( '/' ) } : undefined;
 }
 
 async function getRestoreRef( workspace: GitWorkspace, baseBranch: string ): Promise<string> {

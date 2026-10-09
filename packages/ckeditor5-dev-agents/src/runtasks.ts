@@ -3,11 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
+import upath from 'upath';
 import { loadConfig } from './config/loadconfig.js';
 import { selectTargets } from './config/selecttargets.js';
+import { STATE_DIRECTORY } from './constants.js';
 import { openWorkspace } from './git/gitworkspace.js';
 import { createGitHubClient } from './github/githubclient.js';
 import { runTarget, type TaskResult } from './runner/runtarget.js';
+import { getErrorMessage } from './utils/strings.js';
 
 export type RunTasksOptions = {
 
@@ -47,7 +50,7 @@ export type RunTasksOptions = {
 
 	/**
 	 * Receives the progress of the run, the tool calls of the agent, and the messages of `log()` in the hooks.
-	 * Default: `console.log`. The final summary is not logged.
+	 * Default: `console.log`. The final summary is returned in the result instead.
 	 */
 	log?: ( message: string ) => void;
 };
@@ -80,7 +83,9 @@ export async function runTasks( options: RunTasksOptions ): Promise<{ ok: boolea
 	const results: Array<TargetResult> = [];
 
 	if ( publish ) {
-		await workspace.assertPublishable();
+		await workspace.assertPublishable( selectedTargets.flatMap( target => [ ...target.tasks.keys() ].map( taskId => {
+			return upath.join( target.root, STATE_DIRECTORY, taskId, 'open.json' );
+		} ) ) );
 	}
 
 	for ( const target of selectedTargets ) {
@@ -102,8 +107,8 @@ export async function runTasks( options: RunTasksOptions ): Promise<{ ok: boolea
 				} )
 			} );
 		} catch ( error ) {
-			log( `  Running "${ target.name }" failed: ${ ( error as Error ).message }` );
-			results.push( { ...targetResult, results: [], error: ( error as Error ).message } );
+			log( `  Running "${ target.name }" failed: ${ getErrorMessage( error ) }` );
+			results.push( { ...targetResult, results: [], error: getErrorMessage( error ) } );
 		}
 	}
 

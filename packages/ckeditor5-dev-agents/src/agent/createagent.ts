@@ -55,7 +55,7 @@ export type CreateAgentOptions = {
 // The name of the tool through which an agent returns a structured result.
 const RESULT_TOOL_NAME = 'submit_result';
 
-// Pi keeps a global configuration directory. The harness never reads or writes the one of the user (`~/.pi`).
+// The global configuration directory of Pi: a temporary one of the harness, in place of the one of the user (`~/.pi`).
 const AGENT_DIRECTORY = upath.join( tmpdir(), 'ckeditor5-dev-agents' );
 
 // How long one `agent.run()` may take, in seconds, when the task does not set `agent.timeout`.
@@ -71,9 +71,9 @@ const MAX_ARGUMENTS_LENGTH = 120;
 const modelRuntimes = new Map<string, Promise<ModelRuntime>>();
 
 /**
- * Creates the `agent` of one phase of a task. Every `run()` starts a new Pi session that is configured only by
- * the task: its instructions, skills, tools and model. Nothing is discovered from the machine that runs it, and nothing
- * is persisted. The API key comes from the task config (`agent.apiKey`), never from the environment of the process.
+ * Creates the `agent` of one phase of a task. Every `run()` starts a new in-memory Pi session that is configured only
+ * by the task: its instructions, skills, tools and model. The API key comes from the task config (`agent.apiKey`),
+ * never from the environment of the process.
  */
 export function createAgent( options: CreateAgentOptions ): Agent {
 	const { taskId, config, taskDirectory, cwd, tools, usage, log, warn } = options;
@@ -252,8 +252,10 @@ function getSkills( config: TaskAgentConfig, taskDirectory: string, warn: ( mess
 	} );
 }
 
-// Everything the agent knows comes from the task. User and project resources (`AGENTS.md`, `~/.pi`,
-// extensions, prompt templates) are not discovered, so a run behaves the same on every machine.
+/**
+ * Gives the agent only the system prompt and the skills of the task, so a run behaves the same on every machine,
+ * whatever user and project resources (`AGENTS.md`, `~/.pi`, extensions, prompt templates) it has.
+ */
 function createResourceLoader( { systemPrompt, skills }: { systemPrompt: string | undefined; skills: Array<Skill> } ): ResourceLoader {
 	return {
 		getExtensions: () => ( { extensions: [], errors: [], runtime: createExtensionRuntime() } ),

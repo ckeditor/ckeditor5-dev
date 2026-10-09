@@ -22,9 +22,9 @@ export async function loadDecisions( decisionsPath: string ): Promise<{ decision
 	const warnings: Array<string> = [];
 
 	for ( const file of files.sort() ) {
-		const content = await readFile( upath.join( decisionsPath, file ), 'utf8' );
-
 		try {
+			const content = await readFile( upath.join( decisionsPath, file ), 'utf8' );
+
 			decisions.push( { file, ...parseDecision( content ) } );
 		} catch ( error ) {
 			warnings.push( `The "decisions/${ file }" decision file was skipped: ${ ( error as Error ).message.split( '\n' )[ 0 ] }` );

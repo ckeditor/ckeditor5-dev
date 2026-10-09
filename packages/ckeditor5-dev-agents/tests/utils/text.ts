@@ -11,24 +11,28 @@ describe( 'normalise()', () => {
 		expect( normalise( '  Foo \n\t bar  ' ) ).toBe( 'Foo bar' );
 	} );
 
-	it( 'decodes named entities, case-insensitively', () => {
-		expect( normalise( 'A&nbsp;&amp;&NBSP;B &lt;&gt;&quot;&apos;' ) ).toBe( 'A & B <>"\'' );
+	it( 'decodes named entities', () => {
+		expect( normalise( 'A&nbsp;&amp;&nbsp;B &lt;&gt;&quot;&apos; &copy;' ) ).toBe( 'A & B <>"\' ©' );
+	} );
+
+	it( 'decodes named entities case-sensitively, as HTML does', () => {
+		expect( normalise( '&NBSP;&Amp;' ) ).toBe( '&NBSP;&Amp;' );
 	} );
 
 	it( 'folds typographic entities', () => {
 		expect( normalise( '&mdash;&ndash;&minus;&hellip;&lsquo;&rsquo;&ldquo;&rdquo;' ) ).toBe( '---...\'\'""' );
 	} );
 
-	it( 'leaves unknown entities as they are', () => {
-		expect( normalise( '&unknown; &copy;' ) ).toBe( '&unknown; &copy;' );
+	it( 'leaves unknown entities and entities without a semicolon as they are', () => {
+		expect( normalise( '&unknown; &copy &constructor; &toString;' ) ).toBe( '&unknown; &copy &constructor; &toString;' );
 	} );
 
 	it( 'decodes decimal and hexadecimal entities', () => {
 		expect( normalise( '&#65;&#x42;&#X43;' ) ).toBe( 'ABC' );
 	} );
 
-	it( 'leaves numeric entities outside of the Unicode range as they are', () => {
-		expect( normalise( '&#x110000;' ) ).toBe( '&#x110000;' );
+	it( 'decodes numeric entities outside of the Unicode range to the replacement character, as HTML does', () => {
+		expect( normalise( '&#x110000;' ) ).toBe( '\uFFFD' );
 	} );
 
 	it( 'folds typographic quotes, dashes and ellipses', () => {

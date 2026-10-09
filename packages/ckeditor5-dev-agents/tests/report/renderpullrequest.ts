@@ -62,6 +62,16 @@ describe( 'pull request rendering', () => {
 		expect( comment ).toContain( '* A warning.' );
 	} );
 
+	it( 'renderRunComment() joins multi-line problems into one line, so they do not break the list', () => {
+		const comment = renderRunComment( {
+			today: '2026-09-29',
+			summary: { ...summary, problems: [ { unit: 'docs/c.md', message: '"npm test" exited with code 1:\n  Line 1\n\nLine 2\n' }, { message: 'A\nwarning.' } ] }
+		} );
+
+		expect( comment ).toContain( '* `docs/c.md`: "npm test" exited with code 1: Line 1 Line 2\n' );
+		expect( comment ).toContain( '* A warning.\n' );
+	} );
+
 	it( 'renderRunComment() without problems', () => {
 		const comment = renderRunComment( {
 			today: '2026-09-29',

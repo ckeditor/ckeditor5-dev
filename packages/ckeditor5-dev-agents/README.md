@@ -65,8 +65,9 @@ The report pull requests of a published run target the checked-out branch. Publi
 * `HEAD` is detached: check out the base branch.
 * The working tree has uncommitted changes: publishing switches branches.
 * The checkout is shallow: merging the base branch into an open report branch needs the history. Configure the checkout in CI to fetch the whole history.
+* A `.gitignore` file ignores the state of a task in `<target root>/.ai-tasks/`: publishing commits it.
 
-To undo a local run, reset the working tree: `git checkout -- .` and `git clean -fd .ai-tasks`.
+To undo a local run, reset the working tree from the repository root: `git checkout -- .`, and `git clean -fd -- <root>/.ai-tasks` for the `root` of every target.
 
 The package runs only from the command line. What it exports is for task and target modules: `defineTask()`, `defineTarget()`, `findingSchema()` and their types.
 
@@ -97,7 +98,8 @@ import { defineTask, findingSchema } from '@ckeditor/ckeditor5-dev-agents';
 const RULE_IDS = [ 'R1' ];
 
 export default defineTask( {
-	// Must match the directory name. It is part of every fingerprint, so do not rename it.
+	// Must match the directory name. Targets run the task under this name unless they name the instance otherwise,
+	// and that name is part of every fingerprint, so do not rename it.
 	id: 'my-task',
 	title: 'My task',
 
@@ -157,7 +159,7 @@ export default defineTask( {
 | --- | --- |
 | `id`, `title`, `ruleIds` | Required. |
 | `include`, `exclude` | The globs of the files the task works on, relative to the target root. Required without `scope()`. |
-| `maxUnits` | Optional. How many changed units one run initially selects. Fix validation may judge additional affected units. Default: 100. |
+| `maxUnits` | Optional. How many changed units one run initially selects, as an integer of 1 or more. Fix validation may judge additional affected units. Default: 100. |
 | `defaultOptions` | Optional. The options the hooks receive as `options`. |
 | `prepare( tools )` | Optional. Runs once. What it returns is passed to every other hook as `shared`. |
 | `scope( { shared, include, exclude, …tools } )` | Optional. Returns the units, when they are not files: `[ { key, path?, … } ]`. `key` must be unique and stable. `path` makes reports link to the file. |
@@ -166,8 +168,8 @@ export default defineTask( {
 | `judge( { shared, unit, payload, priorDecisions, …tools } )` | Returns the findings: `[ { ruleId, detail, discriminator?, … } ]`. `priorDecisions` are the human decisions about the unit, each marked as `expired` when the content has changed since. |
 | `fix( { shared, unit, findings, …writable tools } )` | Optional, requires `writes`. Changes the files so the `findings` (those no decision rejects) no longer apply. |
 | `verify( { shared, unit, …writable tools } )` | Optional, requires `fix()`. Throws when the fixed unit is broken, for example when the tests fail. |
-| `writes` | Optional. Globs of the files `fix()` may change, relative to the target root. A fix may change several of them, for example the unit and the files that refer to it. |
-| `concurrency` | Optional. How many units are judged at the same time. Default: 1. Fixes always run one unit at a time, after every unit is judged. |
+| `writes` | Optional. Globs of the files `fix()` may change, relative to the target root and without a leading `./`. A fix may change several of them, for example the unit and the files that refer to it. |
+| `concurrency` | Optional. How many units are judged at the same time, as an integer of 1 or more. Default: 1. Fixes always run one unit at a time, after every unit is judged. |
 | `agent` | Optional. See below. |
 
 ### A target
@@ -246,7 +248,7 @@ The framework is not tied to a provider. Every task chooses its own model and pr
 | `instructions`, `instructionsPath` | The system prompt, as text or as a path relative to the task directory. |
 | `skills` | Directories with skills, relative to the task directory. The agent reads a skill only when it needs it. Every `agent.run()` is a new session, so put rules needed for every unit in the instructions instead: they cost no extra step and are cached by the provider. |
 | `judgeTools` | The tools while judging. Only read-only tools are allowed. Default: `read`, `grep`, `find`, `ls`. |
-| `fixTools` | The tools while fixing. Default: the read-only tools, `edit` and `write`. Add `bash` if the fix must run commands. |
+| `fixTools` | The tools while fixing. Default: the read-only tools, `edit` and `write`. Add `bash` if the fix must run commands. Unknown tool names are rejected when the task is loaded. |
 
 The agent works in the target root. Instructions and the skill inventory are loaded once per task phase and reused across its sessions. Usage includes sessions that fail or time out.
 

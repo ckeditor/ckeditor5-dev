@@ -4,7 +4,7 @@
  */
 
 import upath from 'upath';
-import { READ_ONLY_TOOLS } from '../constants.js';
+import { AGENT_TOOLS, READ_ONLY_TOOLS } from '../constants.js';
 import { importDefaultExports } from './importmodules.js';
 import type { Task } from '../types.js';
 
@@ -69,6 +69,29 @@ export function validateTask( task: Task | undefined, id: string ): void {
 
 	if ( task.verify && !task.fix ) {
 		throw invalid( '`verify()` checks a fix, so it requires `fix()`.' );
+	}
+
+	// The changed files are matched as paths relative to the target root, which never start with "./", "../" or "/".
+	const unmatchablePatterns = ( task.writes ?? [] ).filter( pattern => /^\.{0,2}\//.test( pattern ) );
+
+	if ( unmatchablePatterns.length ) {
+		throw invalid( '`writes` must be globs relative to the target root, without a leading "./", "../" or "/". ' +
+			`Fix: ${ unmatchablePatterns.join( ', ' ) }.` );
+	}
+
+	for ( const field of [ 'maxUnits', 'concurrency' ] as const ) {
+		const value = task[ field ];
+
+		if ( value !== undefined && !( Number.isInteger( value ) && value >= 1 ) ) {
+			throw invalid( `\`${ field }\` must be an integer of 1 or more.` );
+		}
+	}
+
+	const unknownTools = [ ...task.agent?.judgeTools ?? [], ...task.agent?.fixTools ?? [] ].filter( tool => !AGENT_TOOLS.includes( tool ) );
+
+	if ( unknownTools.length ) {
+		throw invalid( `the agent has no such tools: ${ [ ...new Set( unknownTools ) ].join( ', ' ) }. ` +
+			`The available tools are: ${ AGENT_TOOLS.join( ', ' ) }.` );
 	}
 
 	const writingTools = ( task.agent?.judgeTools ?? [] ).filter( tool => !READ_ONLY_TOOLS.includes( tool ) );

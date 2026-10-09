@@ -8,7 +8,15 @@ import { isBuiltin } from 'node:module';
 import { declarationFiles } from '../ckeditor5-dev-build-tools/src/plugins/declarations.js';
 import pkg from './package.json' with { type: 'json' };
 
-const externals = Object.keys( pkg.dependencies );
+const packageJson = pkg as {
+	dependencies?: Record<string, string>;
+	peerDependencies?: Record<string, string>;
+};
+
+const externals = [
+	...Object.keys( packageJson.dependencies || {} ),
+	...Object.keys( packageJson.peerDependencies || {} )
+];
 
 const config: RolldownOptions = defineConfig( {
 	input: {

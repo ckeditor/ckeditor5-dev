@@ -124,8 +124,10 @@ export async function createChangeTracker( root: string ): Promise<ChangeTracker
 	};
 }
 
-// It runs git directly, because simple-git does not accept a custom environment together with the `GIT_CONFIG_*`
-// variables that may be set for the process.
+/**
+ * Runs git directly, because simple-git rejects a custom environment together with the `GIT_CONFIG_*` variables that
+ * may be set for the process.
+ */
 async function git( cwd: string, args: Array<string>, env: Record<string, string> = {} ): Promise<string> {
 	const { stdout } = await execFileAsync( 'git', args, {
 		cwd,

@@ -16,15 +16,15 @@ describe( 'createGitHubClient()', () => {
 
 	const client = createGitHubClient( 'secret' );
 
-	it( 'findOpenPullRequest() queries open pull requests from the branch of the owner into the base', async () => {
+	it( 'findOpenPullRequest() queries open pull requests from the branch of the owner, into any base', async () => {
 		fetchMock.mockResolvedValueOnce( new Response( JSON.stringify( [ { number: 7, html_url: 'https://pr/7' } ] ) ) );
 
-		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable', base: 'stable' } ) )
+		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) )
 			.toEqual( { number: 7, html_url: 'https://pr/7' } );
 
 		const [ url, init ] = fetchMock.mock.calls[ 0 ]!;
 
-		expect( url ).toBe( 'https://api.github.com/repos/owner/repo/pulls?state=open&head=owner%3Aai-tasks%2Ft%2Fx%2Fstable&base=stable' );
+		expect( url ).toBe( 'https://api.github.com/repos/owner/repo/pulls?state=open&head=owner%3Aai-tasks%2Ft%2Fx%2Fstable' );
 		expect( init ).toEqual( {
 			method: 'GET',
 			signal: expect.any( AbortSignal ),
@@ -40,7 +40,7 @@ describe( 'createGitHubClient()', () => {
 	it( 'findOpenPullRequest() returns `null` when there is none', async () => {
 		fetchMock.mockResolvedValueOnce( new Response( '[]' ) );
 
-		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'h', base: 'b' } ) ).toBeNull();
+		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'h' } ) ).toBeNull();
 	} );
 
 	it( 'createPullRequest() posts the pull request', async () => {

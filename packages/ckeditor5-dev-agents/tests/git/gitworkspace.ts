@@ -72,13 +72,14 @@ describe( 'openWorkspace()', () => {
 
 	describe( 'assertPublishable()', () => {
 		it( 'passes for a clean, full checkout of a branch', async () => {
-			await expect( ( await open() ).assertPublishable() ).resolves.toBeUndefined();
+			await expect( ( await open() ).assertPublishable( [ 'projects/cs/.ai-tasks/t/open.json' ] ) ).resolves.toBeUndefined();
+			await expect( ( await open() ).assertPublishable( [] ) ).resolves.toBeUndefined();
 		} );
 
 		it( 'throws for a detached HEAD', async () => {
 			git( path, 'checkout', '--quiet', '--detach' );
 
-			await expect( ( await open() ).assertPublishable() ).rejects.toThrow(
+			await expect( ( await open() ).assertPublishable( [] ) ).rejects.toThrow(
 				'Publishing needs a checked-out branch, but HEAD is detached. Check out the base branch first.'
 			);
 		} );
@@ -88,7 +89,7 @@ describe( 'openWorkspace()', () => {
 
 			const shallow = await createCheckout( `file://${ remote }`, '--depth', '1' );
 
-			await expect( ( await open( shallow ) ).assertPublishable() ).rejects.toThrow(
+			await expect( ( await open( shallow ) ).assertPublishable( [] ) ).rejects.toThrow(
 				'Publishing needs the full history of the checkout, but it is shallow. Configure the checkout in CI to fetch the whole history.'
 			);
 		} );
@@ -96,9 +97,27 @@ describe( 'openWorkspace()', () => {
 		it( 'throws for uncommitted changes', async () => {
 			await writeFiles( path, { 'README.md': 'Local change\n' } );
 
-			await expect( ( await open() ).assertPublishable() ).rejects.toThrow(
+			await expect( ( await open() ).assertPublishable( [] ) ).rejects.toThrow(
 				'Publishing needs a clean working tree, but it has uncommitted changes. Commit or remove them first.'
 			);
+		} );
+
+		it( 'throws for ignored paths that the run must commit', async () => {
+			await pushFiles( seed, { '.gitignore': '.*\n!.gitignore\n' } );
+			git( path, 'pull', '--quiet' );
+
+			await expect( ( await open() ).assertPublishable( [ 'projects/cs/.ai-tasks/t/open.json', 'projects/cs/docs/a.md' ] ) ).rejects.toThrow(
+				'Publishing commits the state of the tasks, but a `.gitignore` file ignores it: projects/cs/.ai-tasks/t/open.json. ' +
+				'Stop ignoring these paths first.'
+			);
+		} );
+
+		it( 'does not report ignored paths that are already tracked', async () => {
+			await pushFiles( seed, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await pushFiles( seed, { '.gitignore': '.*\n!.gitignore\n' } );
+			git( path, 'pull', '--quiet' );
+
+			await expect( ( await open() ).assertPublishable( [ 'projects/cs/.ai-tasks/t/open.json' ] ) ).resolves.toBeUndefined();
 		} );
 	} );
 
@@ -117,6 +136,20 @@ describe( 'openWorkspace()', () => {
 		expect( git( remote, 'log', '--format=%s|%an|%ae', reportBranch ).trim().split( '\n' )[ 0 ] ).toBe( 'Task: 1 unit judged.|Bot|bot@example.com' );
 		expect( git( remote, 'show', '--name-only', '--format=', reportBranch ).trim().split( '\n' ) )
 			.toEqual( [ 'projects/cs/.ai-tasks/t/open.json', 'projects/cs/docs/a.md' ] );
+	} );
+
+	it( 'does not commit files staged outside of the given paths', async () => {
+		const workspace = await open();
+
+		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n', 'README.md': 'Staged\n' } );
+		git( path, 'add', 'README.md' );
+
+		expect( await workspace.commit( [ 'projects/cs/docs/a.md' ], 'Nothing.' ) ).toBe( false );
+		expect( await workspace.commit( [ 'projects/cs/.ai-tasks/t' ], 'State.' ) ).toBe( true );
+
+		expect( git( path, 'show', '--name-only', '--format=', 'HEAD' ).trim() ).toBe( 'projects/cs/.ai-tasks/t/open.json' );
+		expect( git( path, 'status', '--porcelain' ).trim() ).toBe( 'M  README.md' );
 	} );
 
 	it( 'continues an existing report branch, merges the base branch into it, and pushes without force', async () => {
@@ -242,6 +275,22 @@ describe( 'openWorkspace()', () => {
 			expect( await workspace.refExists( git( path, 'rev-parse', 'HEAD' ).trim() ) ).toBe( true );
 			expect( await workspace.refExists( 'missing' ) ).toBe( false );
 			expect( await workspace.refExists( 'origin/missing' ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'hasChanges()', () => {
+		it( 'tells whether any of the files is changed, staged or untracked', async () => {
+			const workspace = await open();
+
+			expect( await workspace.hasChanges( [ 'projects/cs/docs/a.md', 'README.md' ] ) ).toBe( false );
+
+			await writeFiles( path, { 'projects/cs/docs/a.md': 'Changed\n', 'projects/cs/docs/new.md': 'New\n', 'README.md': 'Staged\n' } );
+			git( path, 'add', 'README.md' );
+
+			expect( await workspace.hasChanges( [ 'projects/cs/docs/a.md' ] ) ).toBe( true );
+			expect( await workspace.hasChanges( [ 'projects/cs/docs/new.md' ] ) ).toBe( true );
+			expect( await workspace.hasChanges( [ 'README.md' ] ) ).toBe( true );
+			expect( await workspace.hasChanges( [ 'projects/cs/docs/missing.md' ] ) ).toBe( false );
 		} );
 	} );
 

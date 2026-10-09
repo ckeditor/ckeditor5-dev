@@ -19,9 +19,10 @@ export type PullRequest = {
 export type GitHubClient = {
 
 	/**
-	 * Returns the open pull request from the branch into the base branch, or `null`.
+	 * Returns the open pull request from the branch, or `null`. The base branch is not a criterion: a human may change
+	 * it in the pull request.
 	 */
-	findOpenPullRequest( options: { slug: string; head: string; base: string } ): Promise<PullRequest | null>;
+	findOpenPullRequest( options: { slug: string; head: string } ): Promise<PullRequest | null>;
 	createPullRequest( options: { slug: string; head: string; base: string; title: string; body: string } ): Promise<PullRequest>;
 	updatePullRequest( options: { slug: string; number: number; body: string } ): Promise<PullRequest>;
 	createComment( options: { slug: string; number: number; body: string } ): Promise<unknown>;
@@ -54,9 +55,9 @@ export function createGitHubClient( token: string ): GitHubClient {
 	}
 
 	return {
-		async findOpenPullRequest( { slug, head, base } ) {
+		async findOpenPullRequest( { slug, head } ) {
 			const [ owner ] = slug.split( '/' );
-			const query = new URLSearchParams( { state: 'open', head: `${ owner }:${ head }`, base } );
+			const query = new URLSearchParams( { state: 'open', head: `${ owner }:${ head }` } );
 			const pullRequests = await request<Array<PullRequest>>( 'GET', `/repos/${ slug }/pulls?${ query }` );
 
 			return pullRequests[ 0 ] ?? null;

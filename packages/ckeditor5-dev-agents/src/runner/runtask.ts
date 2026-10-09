@@ -10,7 +10,7 @@ import { createAgent, type AgentUsage } from '../agent/createagent.js';
 import { findDecisions, getPriorDecisions } from '../state/decisions.js';
 import { readTaskState, writeTaskState } from '../state/statestore.js';
 import { renderReport } from '../report/renderreport.js';
-import { compare } from '../utils/strings.js';
+import { compare, getErrorMessage } from '../utils/strings.js';
 import { createTaskContext, createWritableTaskContext } from './createcontext.js';
 import { createChangeTracker } from './changetracker.js';
 import { fixUnit, type UnitOperations, type UnitRun } from './fixunit.js';
@@ -140,7 +140,7 @@ export async function runTask( runOptions: RunTaskOptions ): Promise<RunTaskResu
 		try {
 			record.current = { fragment: await operations.contentHash( record.unit ) };
 		} catch ( error ) {
-			record.error = `contentHash() failed: ${ ( error as Error ).message }`;
+			record.error = `contentHash() failed: ${ getErrorMessage( error ) }`;
 		}
 	}
 
@@ -171,7 +171,7 @@ export async function runTask( runOptions: RunTaskOptions ): Promise<RunTaskResu
 				record.judged = await operations.judge( record.unit, record.current!.fragment );
 				record.current!.findings = record.judged;
 			} catch ( error ) {
-				record.error = ( error as Error ).message;
+				record.error = getErrorMessage( error );
 			}
 		}
 	} ) );

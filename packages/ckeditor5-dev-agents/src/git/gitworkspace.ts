@@ -25,10 +25,11 @@ export type GitWorkspace = {
 	originSlug: string | undefined;
 
 	/**
-	 * Throws when the checkout cannot be published from: a detached `HEAD`, uncommitted changes, or a shallow history.
-	 * The framework does not fix any of them. The environment that runs it must be prepared correctly.
+	 * Throws when the checkout cannot be published from: a detached `HEAD`, uncommitted changes, a shallow history,
+	 * or ignored `paths` (relative to the repository root) that the run must commit. The environment that runs
+	 * the framework must prepare the checkout correctly.
 	 */
-	assertPublishable(): Promise<void>;
+	assertPublishable( paths: Array<string> ): Promise<void>;
 
 	/**
 	 * Checks out the report branch of a task.
@@ -61,6 +62,11 @@ export type GitWorkspace = {
 	refExists( ref: string ): Promise<boolean>;
 
 	/**
+	 * Whether any of the files (relative to the repository root) has uncommitted changes, or is untracked.
+	 */
+	hasChanges( paths: Array<string> ): Promise<boolean>;
+
+	/**
 	 * Restores the files (relative to the repository root) to their content at the ref. A file that does not exist
 	 * at the ref is deleted.
 	 */
@@ -69,8 +75,7 @@ export type GitWorkspace = {
 
 /**
  * Opens the checkout that contains `cwd`. The checkout is prepared by whoever runs the framework: cloned, with
- * the dependencies installed, and with the base branch checked out. The framework never clones anything.
- * The `author` is needed only to commit.
+ * the dependencies installed, and with the base branch checked out. The `author` is needed only to commit.
  */
 export async function openWorkspace( { cwd, author }: { cwd: string; author?: { name: string; email: string } } ): Promise<GitWorkspace> {
 	const gitOptions = {
@@ -102,7 +107,7 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 		branch,
 		originSlug: await getOriginSlug( git ),
 
-		async assertPublishable() {
+		async assertPublishable( paths ) {
 			if ( branch === 'HEAD' ) {
 				throw new Error( 'Publishing needs a checked-out branch, but HEAD is detached. Check out the base branch first.' );
 			}
@@ -116,6 +121,16 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 
 			if ( ( await git.raw( [ 'status', '--porcelain' ] ) ).trim() ) {
 				throw new Error( 'Publishing needs a clean working tree, but it has uncommitted changes. Commit or remove them first.' );
+			}
+
+			// Without it, `git add` fails only after every task has run. Tracked paths are never reported as ignored.
+			const ignored = paths.length ? ( await git.raw( [ 'check-ignore', '--', ...paths ] ) ).trim() : '';
+
+			if ( ignored ) {
+				throw new Error(
+					'Publishing commits the state of the tasks, but a `.gitignore` file ignores it: ' +
+					`${ ignored.split( '\n' ).join( ', ' ) }. Stop ignoring these paths first.`
+				);
 			}
 		},
 
@@ -154,11 +169,12 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 		async commit( paths, message ) {
 			await git.add( [ '--all', '--', ...paths ] );
 
-			if ( !( await git.diff( [ '--cached', '--name-only' ] ) ).trim() ) {
+			// Limited to the paths, so a file that a hook of a task staged by itself is not committed.
+			if ( !( await git.diff( [ '--cached', '--name-only', '--', ...paths ] ) ).trim() ) {
 				return false;
 			}
 
-			await git.commit( message );
+			await git.raw( [ 'commit', '--quiet', '-m', message, '--', ...paths ] );
 
 			return true;
 		},
@@ -180,6 +196,10 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 			return succeeds( () => git.raw( [ 'rev-parse', '--verify', `${ ref }^{commit}` ] ) );
 		},
 
+		async hasChanges( paths ) {
+			return Boolean( ( await git.raw( [ 'status', '--porcelain', '--', ...paths ] ) ).trim() );
+		},
+
 		async restore( paths, ref ) {
 			for ( const file of paths ) {
 				if ( await succeeds( () => git.raw( [ 'cat-file', '-e', `${ ref }:${ file }` ] ) ) ) {
@@ -193,7 +213,10 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 	};
 }
 
-// Supports the SSH (`git@github.com:owner/repo.git`) and the HTTPS (`https://github.com/owner/repo`) forms.
+/**
+ * Returns the GitHub slug of `origin`. Supports the SSH (`git@github.com:owner/repo.git`) and the HTTPS
+ * (`https://github.com/owner/repo`) forms.
+ */
 async function getOriginSlug( git: SimpleGit ): Promise<string | undefined> {
 	const remotes = await git.getRemotes( true );
 	const url = remotes.find( remote => remote.name === 'origin' )?.refs.fetch ?? '';

@@ -426,6 +426,28 @@ describe( 'runTask()', () => {
 			expect( await readBaseline() ).toEqual( {} );
 		} );
 
+		it( 'records the failures of hooks that throw something other than an error', async () => {
+			const summary = await run( createTask( {
+				contentHash: async ( { repo, hash: hashText, unit } ) => {
+					if ( unit.key === 'docs/c.md' ) {
+						throw 'No hash.';
+					}
+
+					return hashText( await repo.read( unit.path! ) );
+				},
+				judge: () => {
+					throw { toString: () => 'Cannot judge.' };
+				}
+			} ) );
+
+			expect( summary.errors ).toBe( 3 );
+			expect( summary.problems ).toEqual( [
+				{ unit: 'docs/a.md', message: 'Cannot judge.' },
+				{ unit: 'docs/b.md', message: 'Cannot judge.' },
+				{ unit: 'docs/c.md', message: 'contentHash() failed: No hash.' }
+			] );
+		} );
+
 		it( 'lists a `contentHash()` that throws as an error', async () => {
 			const summary = await run( createTask( {
 				contentHash: () => {
@@ -773,7 +795,7 @@ describe( 'runTask()', () => {
 
 						return hashText( content );
 					}
-				} ), /^Judging the fixed unit failed: No hash\.$/ );
+				} ), /^Judging the fixed unit failed: `contentHash\(\)` of "docs\/b\.md" failed: No hash\.$/ );
 			} );
 
 			it( 'when the fix introduces a new finding', async () => {
@@ -807,6 +829,22 @@ describe( 'runTask()', () => {
 					}
 				} ), /^The fix changed files outside `writes`: `other\.txt`\.$/ );
 			} );
+		} );
+
+		it( 'keeps a fix when hashing another unit failed before the fix', async () => {
+			const summary = await run( createFixingTask( {
+				async contentHash( { repo, hash: hashText, unit } ) {
+					if ( unit.key === 'docs/c.md' ) {
+						throw new Error( 'No hash.' );
+					}
+
+					return hashText( await repo.read( unit.path! ) );
+				}
+			} ) );
+
+			expect( summary ).toMatchObject( { fixed: 1, discarded: 0, errors: 1 } );
+			expect( summary.problems ).toEqual( [ { unit: 'docs/c.md', message: 'contentHash() failed: No hash.' } ] );
+			expect( await readText( upath.join( root, 'docs/b.md' ) ) ).toBe( 'This is GOOD.\n' );
 		} );
 
 		it( 'keeps a fix when a new finding is rejected by a decision about the fixed content', async () => {
@@ -1077,15 +1115,17 @@ describe( 'runTask()', () => {
 		} );
 
 		it( 'passes the actionable findings to `fix()` in the fix phase', async () => {
-			const fix = vi.fn( async ( { phase, repo, findings }: FixInput ) => {
-				expect( phase ).toBe( 'fix' );
-				expect( repo.root ).toBe( upath.normalize( realpathSync( root ) ) );
-				expect( findings.map( finding => finding.fingerprint ) ).toEqual( [ 't|docs/b.md|R1|' ] );
-			} );
+			const fix = vi.fn<( input: FixInput ) => Promise<void>>( async () => {} );
 
 			await run( createFixingTask( { fix } ) );
 
 			expect( fix ).toHaveBeenCalledOnce();
+
+			const [ { phase, repo, findings } ] = fix.mock.calls[ 0 ]!;
+
+			expect( phase ).toBe( 'fix' );
+			expect( repo.root ).toBe( upath.normalize( realpathSync( root ) ) );
+			expect( findings.map( finding => finding.fingerprint ) ).toEqual( [ 't|docs/b.md|R1|' ] );
 		} );
 	} );
 } );

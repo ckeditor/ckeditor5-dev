@@ -6,6 +6,7 @@
 import { posix } from 'node:path';
 import upath from 'upath';
 import { isOutside } from '../utils/files.js';
+import { getErrorMessage } from '../utils/strings.js';
 import type { ChangeTracker } from './changetracker.js';
 import type { AppliedFix, Finding, Task, TaskUnit, WritableTaskContext } from '../types.js';
 
@@ -84,10 +85,15 @@ export async function fixUnit( runner: FixUnitOptions, record: UnitRun, actionab
 		const affected = await step( 'Judging the fixed unit', async () => {
 			// `contentHash()` defines what a unit depends on, which may include files outside its `path`. Every unit
 			// whose hash changed is affected by the fix and is checked, even one that this run did not take or judge.
+			// A unit whose hash failed before the fix has nothing to compare with, and its error is already reported.
 			const fragments = new Map<UnitRun, string>();
 
 			for ( const candidate of runner.units.values() ) {
-				const fragment = await runner.contentHash( candidate.unit );
+				if ( candidate !== record && !candidate.current ) {
+					continue;
+				}
+
+				const fragment = await step( `\`contentHash()\` of "${ candidate.unit.key }"`, () => runner.contentHash( candidate.unit ) );
 
 				if ( candidate === record || fragment !== candidate.current?.fragment ) {
 					fragments.set( candidate, fragment );
@@ -157,17 +163,19 @@ export async function fixUnit( runner: FixUnitOptions, record: UnitRun, actionab
 		// later units must not be judged or fixed in a working tree in an unknown state.
 		await tracker.restore( snapshot, ( await tracker.collect( snapshot ) ).changed );
 
-		return { status: 'discarded', message: ( error as Error ).message, findings: actionable.length };
+		return { status: 'discarded', message: getErrorMessage( error ), findings: actionable.length };
 	}
 }
 
-// Prepends the step to the message when it fails. The checks of the harness throw outside of a step, because their
-// messages are complete on their own.
+/**
+ * Prepends the step to the message when it fails. The checks of the harness throw outside of a step, because their
+ * messages are complete on their own.
+ */
 async function step<T>( label: string, callback: () => T | Promise<T> ): Promise<T> {
 	try {
 		return await callback();
 	} catch ( error ) {
-		throw new Error( `${ label } failed: ${ ( error as Error ).message }`, { cause: error } );
+		throw new Error( `${ label } failed: ${ getErrorMessage( error ) }`, { cause: error } );
 	}
 }
 

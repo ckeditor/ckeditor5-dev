@@ -5,8 +5,9 @@
 
 import upath from 'upath';
 import { isOutside } from '../utils/files.js';
+import { getErrorMessage } from '../utils/strings.js';
 import { importDefaultExports } from './importmodules.js';
-import type { LoadedTask } from './loadtasks.js';
+import { validateTask, type LoadedTask } from './loadtasks.js';
 import type { Target, TargetConfig, TargetTaskConfig, TaskInstance } from '../types.js';
 
 // How many changed units one run judges at most, when neither the task nor the target sets `maxUnits`.
@@ -60,14 +61,25 @@ export function normalizeTarget(
 			throw invalid( `the "${ entry.task ?? instanceId }" task does not exist.` );
 		}
 
-		instances.set( instanceId, resolveInstance( instanceId, entry, loaded ) );
+		const instance = resolveInstance( instanceId, entry, loaded );
+
+		// The overrides of the target may break the rules of the task, for example with an empty `include`.
+		try {
+			validateTask( instance.task, instanceId );
+		} catch ( error ) {
+			throw invalid( getErrorMessage( error ) );
+		}
+
+		instances.set( instanceId, instance );
 	}
 
 	return { name, slug: config.slug, root, tasks: instances };
 }
 
-// Puts the task under the name of the instance and applies the overrides of the target. An instance that runs a task
-// under another name says so in its title, so its report pull request can be told apart from the one of the task.
+/**
+ * Puts the task under the name of the instance and applies the overrides of the target. An instance that runs a task
+ * under another name says so in its title, so its report pull request can be told apart from the one of the task.
+ */
 function resolveInstance( instanceId: string, entry: TargetTaskConfig, { task, directory }: LoadedTask ): TaskInstance {
 	return {
 		task: {

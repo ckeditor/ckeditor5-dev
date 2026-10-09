@@ -109,12 +109,13 @@ function execute( { command, args, cwd, timeout }: {
 
 		let output = '';
 
-		const append = ( data: Buffer ) => {
-			output = ( output + data.toString() ).slice( -MAX_OUTPUT_LENGTH );
+		const append = ( data: string ) => {
+			output = ( output + data ).slice( -MAX_OUTPUT_LENGTH );
 		};
 
-		child.stdout.on( 'data', append );
-		child.stderr.on( 'data', append );
+		// Decodes across chunks, so a character split between two of them stays whole.
+		child.stdout.setEncoding( 'utf8' ).on( 'data', append );
+		child.stderr.setEncoding( 'utf8' ).on( 'data', append );
 		child.on( 'error', reject );
 		child.on( 'close', ( code, signal ) => {
 			if ( code === 0 ) {

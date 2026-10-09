@@ -21,6 +21,13 @@ export function inline( text: string ): string {
 	return text.replace( /\s*\n\s*/g, ' ' ).trim();
 }
 
+/**
+ * Returns the message of a thrown value. Hooks of a task may throw anything, for example a string.
+ */
+export function getErrorMessage( error: unknown ): string {
+	return error instanceof Error ? error.message : String( error );
+}
+
 export function plural( count: number, word: string ): string {
 	return count === 1 ? word : `${ word }s`;
 }

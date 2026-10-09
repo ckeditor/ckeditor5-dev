@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import upath from 'upath';
 import { REPORT_BRANCH_PREFIX, STATE_DIRECTORY } from '../constants.js';
 import { renderPullRequestBody, renderRunComment } from '../report/renderpullrequest.js';
-import { plural } from '../utils/strings.js';
+import { getErrorMessage, plural } from '../utils/strings.js';
 import { runTask, type RunTaskResult } from './runtask.js';
 import type { GitWorkspace } from '../git/gitworkspace.js';
 import type { GitHubClient } from '../github/githubclient.js';
@@ -96,7 +96,7 @@ export async function runTarget( options: RunTargetOptions ): Promise<Array<Task
 				await publishTask( options, github, root, instance ) :
 				{ summary: ( await executeTask( options, root, instance, false ) ).summary };
 		} catch ( error ) {
-			result = { failure: ( error as Error ).message };
+			result = { failure: getErrorMessage( error ) };
 		}
 
 		if ( result.failure ) {
@@ -129,7 +129,7 @@ async function publishTask(
 	const { task } = instance;
 	const { branch } = workspace;
 	const reportBranch = getReportBranch( task.id, target, branch );
-	let pullRequest = await github.findOpenPullRequest( { slug: target.slug, head: reportBranch, base: branch } );
+	let pullRequest = await github.findOpenPullRequest( { slug: target.slug, head: reportBranch } );
 	let saved: RunTaskResult | undefined;
 	let failure: string | undefined;
 
@@ -177,13 +177,13 @@ async function publishTask(
 			log( '  Nothing new. Nothing was pushed.' );
 		}
 	} catch ( error ) {
-		failure = ( error as Error ).message;
+		failure = getErrorMessage( error );
 	} finally {
 		try {
 			await workspace.returnToBase();
 		} catch ( error ) {
 			// Preserve both failures when cleanup also fails, as well as any completed audit summary.
-			const message = `Returning to the base branch failed: ${ ( error as Error ).message }`;
+			const message = `Returning to the base branch failed: ${ getErrorMessage( error ) }`;
 
 			failure = failure ? `${ failure }\n${ message }` : message;
 		}

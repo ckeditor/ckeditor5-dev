@@ -8,6 +8,7 @@ import upath from 'upath';
 import { runTasks, type RunTasksOptions } from './runtasks.js';
 import { renderConsoleSummary } from './report/renderconsolesummary.js';
 import { renderResolvedFinding, resolveFinding, type ResolveFindingOptions } from './commands/resolvefinding.js';
+import { getErrorMessage } from './utils/strings.js';
 
 // The arguments every command accepts.
 const COMMON_OPTIONS = {
@@ -105,8 +106,8 @@ export function parseResolveArguments(
  * Runs the `ckeditor5-dev-agents` command. Returns the exit code.
  */
 export async function runCli( cliArguments: Array<string> ): Promise<number> {
-	// `pnpm run <script> -- --target cs` passes the separator through.
-	const args = cliArguments[ 0 ] === '--' ? cliArguments.slice( 1 ) : cliArguments;
+	// `pnpm run <script> -- --target cs` passes the separator through, after the arguments of the script, if any.
+	const args = cliArguments.filter( argument => argument !== '--' );
 
 	try {
 		if ( args[ 0 ] === 'reject' || args[ 0 ] === 'dismiss' ) {
@@ -125,7 +126,7 @@ export async function runCli( cliArguments: Array<string> ): Promise<number> {
 
 		return ok ? 0 : 1;
 	} catch ( error ) {
-		console.error( ( error as Error ).message );
+		console.error( getErrorMessage( error ) );
 
 		return 1;
 	}
@@ -143,7 +144,9 @@ function resolveCommonArguments(
 	};
 }
 
-// CI passes pipeline parameters as one string, so `--target=cs,ckbox` means the same as `--target=cs --target=ckbox`.
+/**
+ * CI passes pipeline parameters as one string, so `--target=cs,ckbox` means the same as `--target=cs --target=ckbox`.
+ */
 function splitList( values: Array<string> ): Array<string> {
 	return [ ...new Set( values.flatMap( value => value.split( ',' ) ).map( value => value.trim() ).filter( Boolean ) ) ];
 }

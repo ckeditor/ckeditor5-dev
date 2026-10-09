@@ -5,7 +5,7 @@
 
 import { STATE_DIRECTORY } from '../constants.js';
 import { getBlobUrl } from '../utils/githuburls.js';
-import { plural } from '../utils/strings.js';
+import { inline, plural } from '../utils/strings.js';
 import type { Target, TaskSummary } from '../types.js';
 
 /**
@@ -70,7 +70,9 @@ function renderSummary( summary: TaskSummary ): Array<string> {
 		].join( ' | ' ) + ' |',
 		''
 	];
-	const problems = summary.problems.map( ( { unit, message } ) => unit ? `* \`${ unit }\`: ${ message }` : `* ${ message }` );
+
+	// A message may hold the multi-line output of a command, which would break the list.
+	const problems = summary.problems.map( ( { unit, message } ) => `* ${ unit ? `\`${ unit }\`: ` : '' }${ inline( message ) }` );
 
 	if ( problems.length ) {
 		lines.push( '#### Problems', '', ...problems, '' );

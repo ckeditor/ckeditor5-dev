@@ -113,6 +113,17 @@ describe( 'renderConsoleSummary()', () => {
 		].join( '\n' ) );
 	} );
 
+	it.each( [
+		[ 59_940, '59.9 s' ],
+		[ 59_990, '1 min 0 s' ],
+		[ 119_600, '2 min 0 s' ],
+		[ 119_400, '1 min 59 s' ]
+	] )( 'rounds a duration of %s ms before splitting it into minutes and seconds', ( durationMs, expected ) => {
+		const result = task( { summary: undefined, failure: 'Failed.', durationMs } );
+
+		expect( renderConsoleSummary( [ target( { results: [ result ] } ) ] ) ).toContain( `  Time         ${ expected }` );
+	} );
+
 	it( 'shows a publishing failure alongside the completed audit', () => {
 		const result = task( { failure: 'API unavailable.' } );
 		const text = renderConsoleSummary( [ target( { publish: true, results: [ result ] } ) ] );

@@ -77,6 +77,7 @@ describe( 'runTasks()', () => {
 			push: vi.fn(),
 			returnToBase: vi.fn(),
 			refExists: vi.fn(),
+			hasChanges: vi.fn(),
 			restore: vi.fn()
 		};
 
@@ -157,7 +158,11 @@ describe( 'runTasks()', () => {
 		const output = await run( { token: 'secret', buildUrl: 'https://ci' } );
 
 		expect( output.targets[ 0 ]!.publish ).toBe( true );
-		expect( workspace.assertPublishable ).toHaveBeenCalledOnce();
+		expect( workspace.assertPublishable ).toHaveBeenCalledExactlyOnceWith( [
+			'projects/ckfinder/.ai-tasks/meta/open.json',
+			'projects/ckfinder/.ai-tasks/bluf/open.json',
+			'projects/cs/.ai-tasks/meta/open.json'
+		] );
 		expect( createGitHubClient ).toHaveBeenCalledWith( 'secret' );
 		expect( vi.mocked( runTarget ).mock.calls[ 0 ]![ 0 ] ).toMatchObject( { github: client, buildUrl: 'https://ci' } );
 	} );

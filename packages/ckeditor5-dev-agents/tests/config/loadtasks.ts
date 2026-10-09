@@ -81,7 +81,9 @@ describe( 'validateTask()', () => {
 			...valid,
 			fix: noop,
 			verify: noop,
-			writes: [ 'docs/**' ],
+			writes: [ 'docs/**', '.github/*.md' ],
+			maxUnits: 1,
+			concurrency: 4,
 			agent: { ...agent, judgeTools: [ 'read', 'grep' ], fixTools: [ 'bash' ] }
 		}, 't' ) ).not.toThrow();
 	} );
@@ -104,7 +106,17 @@ describe( 'validateTask()', () => {
 		[ 'fix() with empty writes', { ...valid, fix: noop, writes: [] }, 'a task with `fix()` must define `writes`: the files the fix may change.' ],
 		[ 'verify() without fix()', { ...valid, verify: noop }, '`verify()` checks a fix, so it requires `fix()`.' ],
 		[ 'writing tools while judging', { ...valid, agent: { ...agent, judgeTools: [ 'read', 'bash', 'edit' ] } },
-			'`agent.judgeTools` may contain only read-only tools (read, grep, find, ls). Remove: bash, edit.' ]
+			'`agent.judgeTools` may contain only read-only tools (read, grep, find, ls). Remove: bash, edit.' ],
+		[ 'unknown tools', { ...valid, agent: { ...agent, judgeTools: [ 'raed' ], fixTools: [ 'read', 'wrtie', 'raed' ] } },
+			'the agent has no such tools: raed, wrtie. The available tools are: read, bash, powershell, edit, write, grep, find, ls.' ],
+		[ 'writes starting with "./"', { ...valid, fix: noop, writes: [ 'docs/**', './docs/**/*.md' ] },
+			'`writes` must be globs relative to the target root, without a leading "./", "../" or "/". Fix: ./docs/**/*.md.' ],
+		[ 'writes starting with "../" or "/"', { ...valid, fix: noop, writes: [ '../docs/**', '/docs/**' ] },
+			'`writes` must be globs relative to the target root, without a leading "./", "../" or "/". Fix: ../docs/**, /docs/**.' ],
+		[ 'a zero `maxUnits`', { ...valid, maxUnits: 0 }, '`maxUnits` must be an integer of 1 or more.' ],
+		[ 'a fractional `maxUnits`', { ...valid, maxUnits: 1.5 }, '`maxUnits` must be an integer of 1 or more.' ],
+		[ 'a zero `concurrency`', { ...valid, concurrency: 0 }, '`concurrency` must be an integer of 1 or more.' ],
+		[ 'a negative `concurrency`', { ...valid, concurrency: -1 }, '`concurrency` must be an integer of 1 or more.' ]
 	] )( 'rejects a task with %s', ( _name, task, message ) => {
 		expect( () => validateTask( task, 't' ) ).toThrow( `The "t" task is invalid: ${ message }` );
 	} );

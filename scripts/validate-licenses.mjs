@@ -30,7 +30,6 @@ validateLicenseFiles( {
 			// The packages of Pi do not ship a license file. The license is in their repository.
 			{ license: 'MIT', name: '@earendil-works/pi-ai', copyright: 'Copyright (c) 2025 Mario Zechner.' },
 			{ license: 'MIT', name: '@earendil-works/pi-coding-agent', copyright: 'Copyright (c) 2025 Mario Zechner.' },
-			{ license: 'BlueOak-1.0.0', name: 'glob', copyright: 'Copyright (c) Isaac Z. Schlueter and Contributors.' },
 			simpleGitOverride
 		]
 	}, {
