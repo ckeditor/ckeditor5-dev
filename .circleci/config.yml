@@ -41,7 +41,7 @@ commands:
 jobs:
   generate_configuration:
     docker:
-      - image: cimg/node:24.11.0
+      - image: cimg/node:26.10.0
     steps:
       - checkout
       - run:
@@ -62,9 +62,6 @@ jobs:
               circleci-agent step halt
             fi
       - install_ssh_keys_command
-      - run:
-          name: Disable Corepack
-          command: sudo corepack disable
       - run:
           name: Install pnpm
           command: |
