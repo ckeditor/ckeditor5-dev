@@ -4,14 +4,29 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import getNpmIdToken from './getnpmidtoken.js';
 
 /**
  * Checks whether a user is logged to npm as the provided account name.
  *
- * @param {string} npmOwner Expected npm account name that should be logged into npm.
+ * When using npm Trusted Publishing (`useOidc`), the check verifies that an OIDC token can be obtained instead
+ * (see `getNpmIdToken()`). npm exchanges the OIDC token only during supported operations, such as `npm publish` or `npm dist-tag`,
+ * and `npm whoami` does not reflect Trusted Publishing authentication.
+ *
+ * @param {string} [npmOwner] Expected npm account name that should be logged into npm. Required unless `useOidc` is enabled.
+ * @param {object} [options={}]
+ * @param {boolean} [options.useOidc=false] Whether to verify the npm Trusted Publishing (OIDC) setup instead of the npm account.
  * @returns {Promise}
  */
-export default async function assertNpmAuthorization( npmOwner ) {
+export default async function assertNpmAuthorization( npmOwner, { useOidc = false } = {} ) {
+	if ( useOidc ) {
+		// A token is requested again before each npm command. Requesting one here stops the release before any package
+		// is processed when no token can be obtained (neither from the CircleCI CLI nor from `NPM_ID_TOKEN`).
+		await getNpmIdToken();
+
+		return;
+	}
+
 	return tools.shExec( 'npm whoami', { verbosity: 'error', async: true } )
 		.then( npmCurrentUser => {
 			if ( npmOwner !== npmCurrentUser.trim() ) {

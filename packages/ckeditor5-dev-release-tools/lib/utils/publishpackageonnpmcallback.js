@@ -9,17 +9,26 @@
  * @param {string} packagePath
  * @param {object} taskOptions
  * @param {string} taskOptions.npmTag
+ * @param {boolean} [taskOptions.useOidc=false] Whether to request a fresh OIDC token for npm Trusted Publishing before publishing.
  * @returns {Promise}
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
+	// The callback runs in a worker thread, so dependencies are imported dynamically and resolve from the project root.
+	const { exec } = await import( 'node:child_process' );
 	const { rm } = await import( 'node:fs/promises' );
+	const { getNpmIdToken } = await import( '@ckeditor/ckeditor5-dev-release-tools' );
 
 	try {
-		await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
-			cwd: packagePath,
-			async: true,
-			verbosity: 'silent'
+		const env = taskOptions.useOidc ? { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() } : process.env;
+
+		if ( !/^[a-z0-9][a-z0-9._-]*$/i.test( taskOptions.npmTag ) ) {
+			throw new Error( `Invalid npm tag: "${ taskOptions.npmTag }".` );
+		}
+
+		const command = `npm publish --access=public --tag ${ taskOptions.npmTag }`;
+
+		await new Promise( ( resolve, reject ) => {
+			exec( command, { cwd: packagePath, env }, error => error ? reject( error ) : resolve() );
 		} );
 
 		await rm( packagePath, { recursive: true, force: true } );

@@ -102,7 +102,7 @@ describe( 'publishPackages()', () => {
 				listrTask: {}
 			} );
 
-			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe', { useOidc: false } );
 		} );
 
 		it( 'should throw if npm authorization assertion failed', async () => {
@@ -115,53 +115,19 @@ describe( 'publishPackages()', () => {
 				npmOwner: 'fake-pepe'
 			} ) ).rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
 
-			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'fake-pepe' );
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'fake-pepe', { useOidc: false } );
 		} );
 
-		it( 'should not verify npm authorization when publishing using OIDC (`useOidc=true`)', async () => {
-			vi.stubEnv( 'NPM_ID_TOKEN', 'oidc-token' );
+		it( 'should pass the `useOidc` option to the npm authorization assertion', async () => {
+			vi.mocked( workspaces.findPathsToPackages ).mockReset().mockResolvedValue( [] );
 
-			const promise = publishPackages( {
+			await publishPackages( {
 				packagesDirectory: 'packages',
 				useOidc: true,
 				listrTask: {}
 			} );
 
-			await vi.advanceTimersToNextTimerAsync();
-			await promise;
-
-			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
-			expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
-		} );
-
-		it( 'should throw when publishing using OIDC while the "NPM_ID_TOKEN" environment variable is not set', async () => {
-			vi.stubEnv( 'NPM_ID_TOKEN', undefined );
-
-			await expect( publishPackages( {
-				packagesDirectory: 'packages',
-				useOidc: true,
-				listrTask: {}
-			} ) ).rejects.toThrow(
-				'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).'
-			);
-
-			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
-			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalled();
-		} );
-
-		it( 'should throw when publishing using OIDC while the "NPM_ID_TOKEN" environment variable is empty', async () => {
-			vi.stubEnv( 'NPM_ID_TOKEN', '' );
-
-			await expect( publishPackages( {
-				packagesDirectory: 'packages',
-				useOidc: true,
-				listrTask: {}
-			} ) ).rejects.toThrow(
-				'The "NPM_ID_TOKEN" environment variable is required when publishing using npm Trusted Publishing (OIDC).'
-			);
-
-			expect( vi.mocked( assertNpmAuthorization ) ).not.toHaveBeenCalled();
-			expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalled();
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( undefined, { useOidc: true } );
 		} );
 
 		it( 'should verify npm authorization when the `useOidc` option is disabled explicitly', async () => {
@@ -174,7 +140,7 @@ describe( 'publishPackages()', () => {
 				listrTask: {}
 			} );
 
-			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
+			expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe', { useOidc: false } );
 		} );
 
 		it( 'should assert that each found directory is a package', async () => {
@@ -455,7 +421,7 @@ describe( 'publishPackages()', () => {
 				packagesDirectory: 'packages',
 				listrTask,
 				taskToExecute: publishPackageOnNpmCallback,
-				taskOptions: { npmTag: 'nightly' },
+				taskOptions: { npmTag: 'nightly', useOidc: false },
 				signal: abortController.signal,
 				concurrency: 3,
 				cwd: '/home/cwd',
