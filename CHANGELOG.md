@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [62.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v62.3.0...v62.4.0) (October 12, 2026)
+
+### Features
+
+* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Introduced the `@ckeditor/ckeditor5-dev-agents` package. It runs recurring AI agent tasks against a repository and delivers the results as a pull request. A task judges the units it defines, skips the units whose content has not changed since the last run, and can fix what it finds. A human reviews the findings and the fixes in the pull request.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+New packages:
+
+* [@ckeditor/ckeditor5-dev-agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents/v/62.4.0): v62.4.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.4.0): v62.3.0 => v62.4.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.4.0): v62.3.0 => v62.4.0
+</details>
+
+
 ## [62.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v62.2.1...v62.3.0) (October 2, 2026)
 
 ### Bug fixes
@@ -148,42 +183,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.1.0): v62.0.0 => v62.1.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.1.0): v62.0.0 => v62.1.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.1.0): v62.0.0 => v62.1.0
-</details>
-
-
-## [62.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v61.2.0...v62.0.0) (September 9, 2026)
-
-### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: The `bundleCss()` plugin no longer flattens CSS nesting. Bundled stylesheets now ship native `&` nesting for the browser to resolve.
-
-  Lightning CSS was previously configured to always compile nesting away, regardless of targets. Nesting is now Baseline widely available, so the output keeps it. Integrators post-processing the bundled CSS with tooling that predates native nesting may need to add a nesting transform.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Major releases (contain major breaking changes):
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/62.0.0): v61.2.0 => v62.0.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.0.0): v61.2.0 => v62.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.0.0): v61.2.0 => v62.0.0
 </details>
 
 ---
