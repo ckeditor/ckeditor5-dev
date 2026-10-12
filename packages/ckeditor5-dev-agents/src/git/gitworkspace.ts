@@ -78,7 +78,9 @@ export type GitWorkspace = {
  * the dependencies installed, and with the base branch checked out. The `author` is needed only to commit.
  */
 export async function openWorkspace( { cwd, author }: { cwd: string; author?: { name: string; email: string } } ): Promise<GitWorkspace> {
+	const allowEnvironment = getAllowedEnvironment();
 	const gitOptions = {
+		allowEnvironment,
 		config: [
 			...( author ? [ `user.name=${ author.name }`, `user.email=${ author.email }` ] : [] ),
 			// The commits are made by a bot. They must not depend on a signing setup of whoever runs it.
@@ -89,7 +91,7 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 	let topLevel: string;
 
 	try {
-		topLevel = ( await simpleGit( { baseDir: cwd } ).revparse( [ '--show-toplevel' ] ) ).trim();
+		topLevel = ( await simpleGit( { allowEnvironment, baseDir: cwd } ).revparse( [ '--show-toplevel' ] ) ).trim();
 	} catch ( error ) {
 		throw new Error( `"${ cwd }" is not inside a git repository.`, { cause: error } );
 	}
@@ -211,6 +213,27 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 			}
 		}
 	};
+}
+
+/**
+ * Returns the environment variables that git can get from the process. simple-git 4 removes all other `GIT_*`
+ * variables from the environment of git. `GIT_CONFIG_GLOBAL` and `GIT_CONFIG_NOSYSTEM` select the configuration
+ * files, and the tests use them to isolate git. The other variables give the credentials of the checkout to
+ * `ls-remote`, `fetch` and `push`.
+ */
+function getAllowedEnvironment(): Array<string> {
+	return [
+		'GIT_CONFIG_GLOBAL',
+		'GIT_CONFIG_NOSYSTEM',
+		'GIT_ASKPASS',
+		'SSH_ASKPASS',
+		'GIT_TERMINAL_PROMPT',
+		'GIT_SSH',
+		'GIT_SSH_COMMAND',
+		'GIT_SSH_VARIANT',
+		// The names of `GIT_CONFIG_KEY_<n>` and `GIT_CONFIG_VALUE_<n>` contain a number, so they come from the environment.
+		...Object.keys( process.env ).filter( name => /^GIT_CONFIG_(COUNT|KEY_\d+|VALUE_\d+)$/i.test( name ) )
+	];
 }
 
 /**
