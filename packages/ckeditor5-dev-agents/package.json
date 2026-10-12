@@ -38,7 +38,7 @@
     "@earendil-works/pi-coding-agent": "0.87.1",
     "@octokit/rest": "^22.0.1",
     "entities": "^8.1.0",
-    "simple-git": "^3.36.0",
+    "simple-git": "^4.0.2",
     "upath": "^2.0.1",
     "yaml": "^2.9.0"
   },
