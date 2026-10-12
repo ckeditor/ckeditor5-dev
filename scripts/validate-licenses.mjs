@@ -25,6 +25,14 @@ validateLicenseFiles( {
 	rootDir: upath.resolve( import.meta.dirname, '..' ),
 	projectName: 'CKEditor',
 	copyrightOverrides: [ {
+		packageName: '@ckeditor/ckeditor5-dev-agents',
+		dependencies: [
+			// The packages of Pi do not ship a license file. The license is in their repository.
+			{ license: 'MIT', name: '@earendil-works/pi-ai', copyright: 'Copyright (c) 2025 Mario Zechner.' },
+			{ license: 'MIT', name: '@earendil-works/pi-coding-agent', copyright: 'Copyright (c) 2025 Mario Zechner.' },
+			simpleGitOverride
+		]
+	}, {
 		packageName: '@ckeditor/ckeditor5-dev-build-tools',
 		dependencies: [
 			{
