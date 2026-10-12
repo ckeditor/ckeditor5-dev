@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-agents",
-  "version": "0.0.1",
+  "version": "62.4.0",
   "description": "A framework for running recurring AI agent tasks and reporting the results as pull requests.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
