@@ -7,14 +7,12 @@ allowBuilds:
   'esbuild': true
   'puppeteer': true
   'snyk': true
+  # Dependencies of Pi (`@ckeditor/ckeditor5-dev-agents`). Their install scripts are not needed to run it.
+  '@google/genai': false
+  'protobufjs': false
 
 overrides:
   '@puppeteer/browsers@^2': '^3.0.6'
-  'brace-expansion@^1': '^1.1.18'
-  'brace-expansion@^2': '^2.1.4'
-  'brace-expansion@^5': '^5.0.9'
-  'nanoid@^3': '^3.3.18'
-  'undici@^6': '^6.28.0'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:

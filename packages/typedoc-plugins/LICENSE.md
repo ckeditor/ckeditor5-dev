@@ -11,7 +11,16 @@ Licensed under the terms of the MIT License (see Appendix A):
 Sources of Intellectual Property Included in CKEditor
 -----------------------------------------------------
 
-Where not otherwise indicated, all @ckeditor/typedoc-plugins content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, @ckeditor/typedoc-plugins will incorporate work done by developers outside of CKSource with their express permission.
+Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
+
+The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
+
+* upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
+
+Trademarks
+----------
+
+**CKEditor** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o. All other brand and product names are trademarks, registered trademarks or service marks of their respective holders.
 
 Appendix A: The MIT License
 ---------------------------

@@ -10,6 +10,15 @@ Sources of Intellectual Property Included in CKEditor
 
 Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
 
+The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
+
+* date-fns - Copyright (c) 2021 Sasha Koss and Lesha Koss https://kossnocorp.mit-license.org.
+* graphql - Copyright (c) GraphQL Contributors.
+* graphql-request - Copyright (c) 2022 Jason Kuhrt.
+* minimist - Copyright (c) 2013 James Halliday and contributors.
+* ora - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com).
+* upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
+
 Trademarks
 ----------
 
