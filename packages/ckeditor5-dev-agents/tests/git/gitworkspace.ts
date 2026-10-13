@@ -5,8 +5,9 @@
 
 /* eslint-disable @stylistic/max-len */
 
-import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { existsSync, realpathSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import upath from 'upath';
 import { openWorkspace } from '../../src/git/gitworkspace.js';
 import { createTempDirectory, readText, removeTempDirectories, writeFiles } from '../_utils/files.js';
@@ -318,6 +319,39 @@ describe( 'openWorkspace()', () => {
 			await workspace.restore( [ 'projects/cs/docs/a.md' ], 'origin/stable' );
 
 			expect( await readText( upath.join( path, 'projects/cs/docs/a.md' ) ) ).toBe( 'Newer\n' );
+		} );
+	} );
+
+	describe( 'the environment of git', () => {
+		it( 'ignores the git configuration of the machine', async () => {
+			// `isolateGit()` points `GIT_CONFIG_GLOBAL` to an empty file, so git must not read this one.
+			const home = await createTempDirectory();
+
+			await writeFiles( home, { '.gitconfig': '[status]\n\tshowUntrackedFiles = no\n' } );
+			vi.stubEnv( 'HOME', home );
+			vi.stubEnv( 'XDG_CONFIG_HOME', upath.join( home, '.config' ) );
+			await writeFiles( path, { 'projects/cs/docs/new.md': 'New\n' } );
+
+			expect( await ( await open() ).hasChanges( [ 'projects/cs/docs/new.md' ] ) ).toBe( true );
+		} );
+
+		// The fake `ssh` is a POSIX shell script, and the remote URL takes a POSIX path, so the test does not run on Windows.
+		it.skipIf( process.platform === 'win32' )( 'reaches the remote with the credentials that the environment gives to git', async () => {
+			// A CI job can give the credentials in `GIT_SSH_COMMAND`. This fake `ssh` runs the git command of the remote locally.
+			const ssh = upath.join( await createTempDirectory(), 'ssh' );
+
+			await writeFile( ssh, '#!/bin/sh\nfor last; do :; done\nexec sh -c "$last"\n', { mode: 0o755 } );
+			vi.stubEnv( 'GIT_SSH_COMMAND', ssh );
+			git( path, 'remote', 'set-url', 'origin', `ssh://127.0.0.1:1${ remote }` );
+
+			const workspace = await open();
+
+			await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+			await workspace.push();
+
+			expect( git( remote, 'log', '-1', '--format=%s', reportBranch ).trim() ).toBe( 'State.' );
 		} );
 	} );
 } );

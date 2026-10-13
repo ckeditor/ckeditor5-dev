@@ -10,6 +10,23 @@ Sources of Intellectual Property Included in CKEditor
 
 Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
 
+The following libraries are included in CKEditor under the [BlueOak-1.0.0 license](https://opensource.org/licenses/BlueOak-1.0.0):
+
+* glob - Copyright (c) Isaac Z. Schlueter and Contributors.
+
+The following libraries are included in CKEditor under the [ISC license](https://opensource.org/licenses/ISC):
+
+* semver - Copyright (c) Isaac Z. Schlueter and Contributors.
+
+The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
+
+* @11ty/gray-matter - Copyright (c) 2014-present, Jon Schlinkert.
+* @types/semver - Copyright (c) Microsoft Corporation.
+* cac - Copyright (c) EGOIST <0x142857@gmail.com> (https://github.com/egoist).
+* date-fns - Copyright (c) 2021 Sasha Koss and Lesha Koss https://kossnocorp.mit-license.org.
+* inquirer - Copyright (c) 2025 Simon Boudrias.
+* upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
+
 Trademarks
 ----------
 
