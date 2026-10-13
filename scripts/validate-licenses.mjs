@@ -34,19 +34,7 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-build-tools',
 		dependencies: [
-			{
-				license: 'MIT',
-				name: '@rollup/plugin-terser',
-				copyright: 'Copyright (c) 2019 RollupJS Plugin Contributors (https://github.com/rollup/plugins/graphs/contributors).'
-			},
-			{ license: 'Apache-2.0', name: '@swc/core', copyright: 'Copyright 2024 SWC contributors.' },
-			{
-				license: 'MIT',
-				name: 'cssnano-preset-lite',
-				copyright: 'Copyright (c) Ben Briggs <beneb.info@gmail.com> (http://beneb.info).'
-			},
 			{ license: 'MPL-2.0', name: 'lightningcss', copyright: 'Copyright © 2024 Devon Govett and Parcel Contributors.' },
-			{ license: 'MIT', name: 'rollup-plugin-svg-import', copyright: 'Copyright (c) korywka (https://github.com/korywka).' },
 			globOverride
 		]
 	}, {
@@ -58,11 +46,6 @@ validateLicenseFiles( {
 		packageName: '@ckeditor/ckeditor5-dev-changelog',
 		dependencies: [
 			globOverride
-		]
-	}, {
-		packageName: '@ckeditor/ckeditor5-dev-ci',
-		dependencies: [
-			minimistOverride
 		]
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-docs',
@@ -84,7 +67,6 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-translations',
 		dependencies: [
-			{ license: 'MIT', name: '@babel/parser', copyright: 'Copyright (C) 2012-2014 by various contributors.' },
 			{ license: 'MIT', name: 'oxc-walker', copyright: 'Copyright (c) 2024 Daniel Roe.' },
 			{ license: 'Apache-2.0', name: 'typescript', copyright: 'Copyright (c) Microsoft Corporation. All rights reserved.' },
 			globOverride
