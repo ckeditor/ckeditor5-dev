@@ -16,7 +16,7 @@ orbs:
 
 commands:
   bootstrap_repository_command:
-    description: "Disable Corepack, install pnpm and project dependencies"
+    description: "Install pnpm and project dependencies"
     steps:
       - run:
           name: Install pnpm
