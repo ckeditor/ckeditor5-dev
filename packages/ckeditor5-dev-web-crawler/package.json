@@ -25,16 +25,14 @@
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-web-crawler",
+    "test:dev": "vitest --config ../../vitest.config.js --project ckeditor5-dev-web-crawler"
   },
   "dependencies": {
     "puppeteer": "^24.40.0",
     "puppeteer-cluster": "^0.24.0"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.0",
     "rolldown": "^1.2.6",
     "vitest": "^5.0.0"
   }

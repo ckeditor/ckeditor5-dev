@@ -102,7 +102,7 @@ describe( 'updateVersions()', () => {
 	it( 'should accept `0.0.0-nightly*` version for nightly releases', async () => {
 		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( { version: '1.0.0', name: 'stub-package' } ) );
 
-		await expect( updateVersions( { version: '0.0.0-nightly-20230510.0' } ) ).resolves.toBeNil();
+		await expect( updateVersions( { version: '0.0.0-nightly-20230510.0' } ) ).resolves.toBeUndefined();
 	} );
 
 	it( 'should throw an error when new version is not a valid semver version', async () => {

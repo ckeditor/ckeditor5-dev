@@ -38,8 +38,7 @@
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev"
+    "test": "vitest run --config ../../vitest.config.js --project typedoc-plugins",
+    "test:dev": "vitest --config ../../vitest.config.js --project typedoc-plugins"
   }
 }

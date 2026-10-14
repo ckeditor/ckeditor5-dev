@@ -4,11 +4,14 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import upath from 'upath';
 import { getRolldownConfig } from '../../src/config.js';
 import { mockGetUserDependency } from '../_utils/utils.js';
 import type { OutputOptions, Plugin } from 'rolldown';
 
 type Options = Parameters<typeof getRolldownConfig>[0];
+
+const PACKAGE_ROOT = upath.join( import.meta.dirname, '..', '..' );
 
 const defaults: Options = {
 	input: 'src/index.js',
@@ -43,15 +46,15 @@ describe( 'getRolldownConfig()', () => {
 
 	it( '--tsconfig', async () => {
 		const fileExists = await getConfig( {
-			tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+			tsconfig: PACKAGE_ROOT + '/tests/config/fixtures/tsconfig.fixture.json',
 			declarations: true
 		} );
 		const fileDoesntExist = await getConfig( {
-			tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.non-existing.json',
+			tsconfig: PACKAGE_ROOT + '/tests/config/fixtures/tsconfig.non-existing.json',
 			declarations: true
 		} );
 		const declarationsFalse = await getConfig( {
-			tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+			tsconfig: PACKAGE_ROOT + '/tests/config/fixtures/tsconfig.fixture.json',
 			declarations: false
 		} );
 
@@ -59,9 +62,9 @@ describe( 'getRolldownConfig()', () => {
 		expect( ( fileDoesntExist.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( false );
 		expect( ( declarationsFalse.plugins as Array<Plugin> ).some( plugin => plugin?.name === 'emit-declaration-files' ) ).toBe( false );
 
-		expect( fileExists.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
+		expect( fileExists.tsconfig ).toBe( PACKAGE_ROOT + '/tests/config/fixtures/tsconfig.fixture.json' );
 		expect( fileDoesntExist.tsconfig ).toBe( false );
-		expect( declarationsFalse.tsconfig ).toBe( process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json' );
+		expect( declarationsFalse.tsconfig ).toBe( PACKAGE_ROOT + '/tests/config/fixtures/tsconfig.fixture.json' );
 	} );
 
 	it( '--external', async () => {
