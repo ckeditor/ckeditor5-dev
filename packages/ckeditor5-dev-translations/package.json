@@ -34,7 +34,6 @@
     "vitest": "^5.0.0"
   },
   "scripts": {
-    "test": "vitest run --config vitest.config.js",
-    "coverage": "vitest run --config vitest.config.js --coverage"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-translations"
   }
 }

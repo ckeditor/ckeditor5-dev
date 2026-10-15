@@ -37,16 +37,13 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.0",
-    "jest-extended": "^5.0.3",
     "rolldown": "^1.2.6",
     "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-utils",
+    "test:dev": "vitest --config ../../vitest.config.js --project ckeditor5-dev-utils"
   }
 }

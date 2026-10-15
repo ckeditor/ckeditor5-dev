@@ -43,14 +43,12 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.0",
     "rolldown": "^1.2.6",
     "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-agents"
   }
 }

@@ -26,16 +26,14 @@
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-manual-server",
+    "test:dev": "vitest --config ../../vitest.config.js --project ckeditor5-dev-manual-server"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-inspector": "^5.0.1",
     "vite": "^8.2.2"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.0",
     "rolldown": "^1.2.6",
     "vitest": "^5.0.0"
   }

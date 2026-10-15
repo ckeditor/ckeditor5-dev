@@ -14,8 +14,8 @@ import fs from 'fs-extra';
 const SCRIPT_EXTENSIONS = '@(js|mjs|cjs|jsx|ts|mts|cts|tsx)';
 
 /**
- * Directories holding automated tests. Every `vitest.config.*` in the repository collects tests
- * from its package `tests/` directory, and the internal scripts are covered by `scripts-tests/`.
+ * Directories holding automated tests. The root `vitest.config.js` collects tests from the `tests/`
+ * directory of each package, and the internal scripts are covered by `scripts-tests/`.
  */
 const TEST_DIRECTORIES = [
 	`packages/*/tests/**/*.${ SCRIPT_EXTENSIONS }`,

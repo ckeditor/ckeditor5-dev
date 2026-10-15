@@ -9,6 +9,8 @@ import fs from 'node:fs';
 import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 
+const PACKAGE_ROOT = upath.join( import.meta.dirname, '..', '..' );
+
 /**
  * Mock `rolldown`, so it doesn't try to build anything.
  */
@@ -213,7 +215,7 @@ describe( 'build() (arguments)', () => {
 	it( '--banner', async () => {
 		const spy = getConfigMock();
 
-		mockCliArgs( '--banner=tests/build/fixtures/src/banner.js' );
+		mockCliArgs( `--cwd=${ PACKAGE_ROOT }`, '--banner=tests/build/fixtures/src/banner.js' );
 		await build();
 
 		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
@@ -333,7 +335,7 @@ describe( 'build() (arguments)', () => {
 	it( '.banner', async () => {
 		const spy = getConfigMock();
 
-		await build( { banner: 'tests/build/fixtures/src/banner.js' } );
+		await build( { cwd: PACKAGE_ROOT, banner: 'tests/build/fixtures/src/banner.js' } );
 
 		expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
 	} );

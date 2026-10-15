@@ -37,15 +37,13 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
-    "@vitest/coverage-v8": "^5.0.0",
     "type-fest": "^4.41.0",
     "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
     "dev": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:dev": "vitest dev"
+    "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-build-tools",
+    "test:dev": "vitest --config ../../vitest.config.js --project ckeditor5-dev-build-tools"
   }
 }
