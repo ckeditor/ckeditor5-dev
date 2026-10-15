@@ -20,51 +20,51 @@ export default defineConfig( {
 		unstubEnvs: true,
 		unstubGlobals: true,
 		projects: [
-			defineProject( 'ckeditor5-dev-agents', {
+			definePackageProject( 'ckeditor5-dev-agents', {
 				include: [ 'tests/**/*.ts' ],
 				exclude: [ 'tests/_utils/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-build-tools', {
+			definePackageProject( 'ckeditor5-dev-build-tools', {
 				include: [ 'tests/**/*.ts' ],
 				exclude: [ 'tests/_utils/**/*.ts', 'tests/**/fixtures/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-changelog', {
+			definePackageProject( 'ckeditor5-dev-changelog', {
 				include: [ 'tests/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-ci', {
+			definePackageProject( 'ckeditor5-dev-ci', {
 				include: [ 'tests/**/*.js' ]
 			} ),
-			defineProject( 'ckeditor5-dev-docs', {
+			definePackageProject( 'ckeditor5-dev-docs', {
 				testTimeout: 20000,
 				hookTimeout: 20000,
 				unstubGlobals: false,
 				include: [ 'tests/**/*.js' ]
 			} ),
-			defineProject( 'ckeditor5-dev-license-checker', {
+			definePackageProject( 'ckeditor5-dev-license-checker', {
 				include: [ 'tests/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-manual-server', {
+			definePackageProject( 'ckeditor5-dev-manual-server', {
 				include: [ 'tests/**/*.ts' ],
 				exclude: [ 'tests/_utils/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-release-tools', {
+			definePackageProject( 'ckeditor5-dev-release-tools', {
 				unstubGlobals: false,
 				include: [ 'tests/**/*.js' ]
 			}, [ executeInParallelVirtualModulePlugin() ] ),
-			defineProject( 'ckeditor5-dev-stale-bot', {
+			definePackageProject( 'ckeditor5-dev-stale-bot', {
 				include: [ 'tests/**/*.js' ]
 			} ),
-			defineProject( 'ckeditor5-dev-translations', {
+			definePackageProject( 'ckeditor5-dev-translations', {
 				include: [ 'tests/**/*.js' ]
 			} ),
-			defineProject( 'ckeditor5-dev-utils', {
+			definePackageProject( 'ckeditor5-dev-utils', {
 				unstubGlobals: false,
 				include: [ 'tests/**/*.ts' ]
 			} ),
-			defineProject( 'ckeditor5-dev-web-crawler', {
+			definePackageProject( 'ckeditor5-dev-web-crawler', {
 				include: [ 'tests/**/*.ts' ]
 			} ),
-			defineProject( 'typedoc-plugins', {
+			definePackageProject( 'typedoc-plugins', {
 				testTimeout: 1000 * 60,
 				hookTimeout: 1000 * 60,
 				// The tests create spies in `beforeAll()`, so their recorded calls must survive between tests.
@@ -96,11 +96,11 @@ export default defineConfig( {
 
 /**
  * @param {string} name The package directory name. It is also the project name, so `vitest --project <name>` runs its tests.
- * @param {import('vitest/node').TestProjectInlineConfiguration['test']} test
+ * @param {import('vitest/config').TestProjectInlineConfiguration['test']} test
  * @param {Array.<import('vite').Plugin>} [plugins]
- * @returns {import('vitest/node').TestProjectInlineConfiguration}
+ * @returns {import('vitest/config').TestProjectInlineConfiguration}
  */
-function defineProject( name, test, plugins = [] ) {
+function definePackageProject( name, test, plugins = [] ) {
 	return {
 		root: upath.join( ROOT_DIRECTORY, 'packages', name ),
 		plugins,
