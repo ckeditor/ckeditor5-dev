@@ -117,9 +117,9 @@ describe( 'lib/utils/getOtherWorkflowJobs', () => {
 			.mockResolvedValue( {
 				ok: false,
 				status: 401,
-				json: () => Promise.resolve( {
+				text: () => Promise.resolve( JSON.stringify( {
 					message: 'Unauthorized'
-				} )
+				} ) )
 			} );
 
 		vi.stubGlobal( 'fetch', fetchMock );
@@ -140,7 +140,7 @@ describe( 'lib/utils/getOtherWorkflowJobs', () => {
 			.mockResolvedValue( {
 				ok: false,
 				status: 404,
-				json: () => Promise.reject( new Error( 'Unexpected token < in JSON at position 0' ) )
+				text: () => Promise.resolve( '<html>Not Found</html>' )
 			} );
 		const warnSpy = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
 
@@ -152,7 +152,7 @@ describe( 'lib/utils/getOtherWorkflowJobs', () => {
 			currentJobName: 'notifier',
 			retryDelayMs: 0,
 			maxAttempts: 5
-		} ) ).rejects.toThrow( 'CircleCI API request failed with a non-retryable status (404).' );
+		} ) ).rejects.toThrow( 'CircleCI API request failed with a non-retryable status (404: <html>Not Found</html>).' );
 
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
 		expect( warnSpy ).not.toHaveBeenCalled();

@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import getResponseErrorDetails from './get-response-error-details.js';
+
 const RETRYABLE_STATUSES = new Set( [ 429, 500, 502, 503, 504 ] );
 
 /**
@@ -51,8 +53,7 @@ export default async function getOtherWorkflowJobs( options ) {
 				} );
 
 			if ( !response.ok ) {
-				const responseData = await parseResponseDataSafely( response );
-				const details = getResponseMessage( responseData );
+				const details = await getResponseErrorDetails( response );
 				const statusMessage = details ? `${ response.status }: ${ details }` : String( response.status );
 
 				if ( RETRYABLE_STATUSES.has( response.status ) ) {
@@ -105,34 +106,6 @@ async function parseResponseData( response ) {
 	} catch ( error ) {
 		throw createTransientError( 'CircleCI API returned an invalid JSON response.', error );
 	}
-}
-
-/**
- * @param {Response} response
- * @returns {Promise<object|null>}
- */
-async function parseResponseDataSafely( response ) {
-	try {
-		return await response.json();
-	} catch {
-		return null;
-	}
-}
-
-/**
- * @param {object} responseData
- * @returns {string|null}
- */
-function getResponseMessage( responseData ) {
-	if ( responseData && typeof responseData.message === 'string' ) {
-		return responseData.message;
-	}
-
-	if ( responseData && typeof responseData.error === 'string' ) {
-		return responseData.error;
-	}
-
-	return null;
 }
 
 /**
