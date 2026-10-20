@@ -84,10 +84,10 @@ describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 		await expect( circleUpdateAutoCancelBuilds( options ) ).rejects.toThrow( '(500). ' );
 	} );
 
-	it( 'should reject when CircleCI responds with a JSON error without the "message" field', async () => {
-		fetchMock.mockResolvedValue( createResponse( { ok: false, status: 400, body: '{"error":"x"}' } ) );
+	it( 'should reject when CircleCI responds with a JSON error using the "error" field', async () => {
+		fetchMock.mockResolvedValue( createResponse( { ok: false, status: 400, body: '{"error":"Bad request"}' } ) );
 
-		await expect( circleUpdateAutoCancelBuilds( options ) ).rejects.toThrow( '(400: {"error":"x"})' );
+		await expect( circleUpdateAutoCancelBuilds( options ) ).rejects.toThrow( '(400: Bad request)' );
 	} );
 
 	it( 'should reject when the request fails due to a network error', async () => {

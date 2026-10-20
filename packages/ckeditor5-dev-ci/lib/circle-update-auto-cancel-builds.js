@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import getResponseErrorDetails from './utils/get-response-error-details.js';
+
 /**
  * Updates the "Auto-cancel redundant workflows" option of a CircleCI project.
  *
@@ -42,7 +44,7 @@ export default async function circleUpdateAutoCancelBuilds( options ) {
 	const response = await fetch( settingsUpdateUrl, circleRequestOptions );
 
 	if ( !response.ok ) {
-		const details = await getErrorDetails( response );
+		const details = await getResponseErrorDetails( response );
 		const statusMessage = details ? `${ response.status }: ${ details }` : String( response.status );
 
 		throw new Error(
@@ -53,26 +55,4 @@ export default async function circleUpdateAutoCancelBuilds( options ) {
 	}
 
 	return response.json();
-}
-
-/**
- * Extracts a human-readable error message from a CircleCI error response.
- *
- * @param {Response} response
- * @returns {Promise.<string|null>}
- */
-async function getErrorDetails( response ) {
-	const text = await response.text().catch( () => '' );
-
-	if ( !text ) {
-		return null;
-	}
-
-	try {
-		const data = JSON.parse( text );
-
-		return data.message || text;
-	} catch {
-		return text;
-	}
 }
