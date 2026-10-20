@@ -13,6 +13,7 @@ allowBuilds:
 
 overrides:
   '@puppeteer/browsers@^2': '^3.0.6'
+  'undici@^8': '^8.12.2'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
