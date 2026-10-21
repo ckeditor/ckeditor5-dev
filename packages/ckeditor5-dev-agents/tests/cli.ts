@@ -21,7 +21,7 @@ describe( 'parseArguments()', () => {
 			targets: [],
 			tasks: [],
 			token: undefined,
-			author: { name: 'CKEditor AI Tasks', email: 'ai-tasks@users.noreply.github.com' },
+			author: {},
 			buildUrl: undefined
 		} );
 	} );
@@ -58,12 +58,8 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
-	it( 'reads the key that signs the commits', () => {
-		expect( parseArguments( [], { cwd, env: { AI_TASKS_GIT_SIGNING_KEY: 'ABCDEF0123456789' } } ).author ).toEqual( {
-			name: 'CKEditor AI Tasks',
-			email: 'ai-tasks@users.noreply.github.com',
-			signingKey: 'ABCDEF0123456789'
-		} );
+	it( 'overrides only the parts of the author that the environment sets', () => {
+		expect( parseArguments( [], { cwd, env: { AI_TASKS_GIT_NAME: 'Bot' } } ).author ).toEqual( { name: 'Bot' } );
 	} );
 
 	it( 'does not read the build URL from CI-specific variables', () => {

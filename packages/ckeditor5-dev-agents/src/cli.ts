@@ -49,9 +49,8 @@ export function parseArguments(
 		...resolveCommonArguments( values, cwd ),
 		token: values.publish ? env.AI_TASKS_GITHUB_TOKEN : undefined,
 		author: {
-			name: env.AI_TASKS_GIT_NAME || 'CKEditor AI Tasks',
-			email: env.AI_TASKS_GIT_EMAIL || 'ai-tasks@users.noreply.github.com',
-			...( env.AI_TASKS_GIT_SIGNING_KEY ? { signingKey: env.AI_TASKS_GIT_SIGNING_KEY } : {} )
+			...( env.AI_TASKS_GIT_NAME ? { name: env.AI_TASKS_GIT_NAME } : {} ),
+			...( env.AI_TASKS_GIT_EMAIL ? { email: env.AI_TASKS_GIT_EMAIL } : {} )
 		},
 		buildUrl: env.AI_TASKS_BUILD_URL
 	};

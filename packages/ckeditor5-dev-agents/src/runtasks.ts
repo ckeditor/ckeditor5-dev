@@ -43,9 +43,10 @@ export type RunTasksOptions = {
 	token?: string;
 
 	/**
-	 * The author of the commits of a published run, and the key that signs them, if any.
+	 * Overrides of the author of the commits of a published run. Without them, the git configuration of the checkout
+	 * decides the author and the signing.
 	 */
-	author: CommitAuthor;
+	author?: CommitAuthor;
 
 	/**
 	 * Linked from the comments of published runs.

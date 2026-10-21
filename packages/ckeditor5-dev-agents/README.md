@@ -57,8 +57,7 @@ AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 | Environment variable | Description |
 | --- | --- |
 | `AI_TASKS_GITHUB_TOKEN` | Published runs only. A token that can open pull requests and comment on them. Pushing uses the credentials of the checkout. |
-| `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | The author of the commits of published runs. Default: `CKEditor AI Tasks <ai-tasks@users.noreply.github.com>`. |
-| `AI_TASKS_GIT_SIGNING_KEY` | Optional. The key that signs the commits of published runs, as git's `user.signingkey` takes it. Import the key first, for example to GPG. Without it, the commits are not signed, whatever the git configuration says. |
+| `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | Optional. Override the author of the commits of published runs. By default, the commits use the git configuration of the checkout: its `user.name`, `user.email` and signing setup. |
 | `AI_TASKS_BUILD_URL` | Optional. A link to the CI build, added to the run comments. |
 
 The report pull requests of a published run target the checked-out branch. Publishing fails with a clear message, and does not try to fix it, when:
@@ -66,6 +65,7 @@ The report pull requests of a published run target the checked-out branch. Publi
 * `HEAD` is detached: check out the base branch.
 * The working tree has uncommitted changes: publishing switches branches.
 * The checkout is shallow: merging the base branch into an open report branch needs the history. Configure the checkout in CI to fetch the whole history.
+* The git configuration of the checkout has no `user.name` or `user.email`, and the environment does not override them. Configure the bot in CI, together with commit signing if the repository requires it.
 * A `.gitignore` file ignores the state of a task in `<target root>/.ai-tasks/`: publishing commits it.
 
 To undo a local run, reset the working tree from the repository root: `git checkout -- .`, and `git clean -fd -- <root>/.ai-tasks` for the `root` of every target.

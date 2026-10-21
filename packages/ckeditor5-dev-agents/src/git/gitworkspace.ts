@@ -73,29 +73,26 @@ export type GitWorkspace = {
 	restore( paths: Array<string>, ref: string ): Promise<void>;
 };
 
+/**
+ * Overrides of the commit author. Without them, the commits use the git configuration of the checkout: its author,
+ * and its signing setup.
+ */
 export type CommitAuthor = {
-	name: string;
-	email: string;
-
-	/**
-	 * The key that signs the commits, as git's `user.signingkey` takes it. The key must be available to git, for example
-	 * imported to GPG. Without it, the commits are not signed.
-	 */
-	signingKey?: string;
+	name?: string;
+	email?: string;
 };
 
 /**
  * Opens the checkout that contains `cwd`. The checkout is prepared by whoever runs the framework: cloned, with
- * the dependencies installed, and with the base branch checked out. The `author` is needed only to commit.
+ * the dependencies installed, with the base branch checked out, and with the git configuration of the bot that commits.
  */
-export async function openWorkspace( { cwd, author }: { cwd: string; author?: CommitAuthor } ): Promise<GitWorkspace> {
+export async function openWorkspace( { cwd, author = {} }: { cwd: string; author?: CommitAuthor } ): Promise<GitWorkspace> {
 	const allowEnvironment = getAllowedEnvironment();
 	const gitOptions = {
 		allowEnvironment,
 		config: [
-			...( author ? [ `user.name=${ author.name }`, `user.email=${ author.email }` ] : [] ),
-			// The commits are made by a bot. They are signed only with its own key, never with a signing setup of whoever runs it.
-			...( author?.signingKey ? [ 'commit.gpgsign=true', `user.signingkey=${ author.signingKey }` ] : [ 'commit.gpgsign=false' ] )
+			...( author.name ? [ `user.name=${ author.name }` ] : [] ),
+			...( author.email ? [ `user.email=${ author.email }` ] : [] )
 		]
 	};
 
@@ -130,6 +127,17 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: Co
 					'Publishing needs the full history of the checkout, but it is shallow. ' +
 					'Configure the checkout in CI to fetch the whole history.'
 				);
+			}
+
+			// Without an explicit author, git would make one up from the user and the host name of the machine.
+			for ( const key of [ 'user.name', 'user.email' ] ) {
+				// simple-git resolves a failure without an error message, so a missing key reads as an empty value.
+				if ( !( await git.raw( [ 'config', '--get', key ] ).catch( () => '' ) ).trim() ) {
+					throw new Error(
+						`Publishing needs the author of the commits, but \`${ key }\` is not set in the git configuration. ` +
+						'Configure the git identity of the bot in the checkout, or set "AI_TASKS_GIT_NAME" and "AI_TASKS_GIT_EMAIL".'
+					);
+				}
 			}
 
 			if ( ( await git.raw( [ 'status', '--porcelain' ] ) ).trim() ) {

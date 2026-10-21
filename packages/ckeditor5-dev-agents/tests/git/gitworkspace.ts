@@ -184,7 +184,7 @@ describe( 'openWorkspace()', () => {
 		expect( log ).toContain( 'More changes.' );
 	} );
 
-	describe( 'signing', () => {
+	describe( 'the git configuration of the checkout', () => {
 		let signer: string;
 		let signerLog: string;
 
@@ -204,10 +204,18 @@ describe( 'openWorkspace()', () => {
 			].join( '\n' ), { mode: 0o755 } );
 		} );
 
-		it.skipIf( process.platform === 'win32' )( 'signs the commits and the merges with the key of the author', async () => {
-			const first = await openWorkspace( { cwd: path, author: { ...author, signingKey: 'ABCDEF0123456789' } } );
+		const configureBot = ( checkout: string ) => {
+			git( checkout, 'config', 'user.name', 'CKEditorBot' );
+			git( checkout, 'config', 'user.email', 'bot@ckeditor.com' );
+			git( checkout, 'config', 'user.signingkey', 'ABCDEF0123456789' );
+			git( checkout, 'config', 'commit.gpgsign', 'true' );
+			git( checkout, 'config', 'gpg.program', signer );
+		};
 
-			git( path, 'config', 'gpg.program', signer );
+		it.skipIf( process.platform === 'win32' )( 'commits as its author and signs the commits and the merges', async () => {
+			configureBot( path );
+
+			const first = await openWorkspace( { cwd: path } );
 
 			await first.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
 			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
@@ -218,29 +226,34 @@ describe( 'openWorkspace()', () => {
 
 			const checkout = await createCheckout( remote );
 
-			git( checkout, 'config', 'gpg.program', signer );
+			configureBot( checkout );
 
-			const second = await openWorkspace( { cwd: checkout, author: { ...author, signingKey: 'ABCDEF0123456789' } } );
+			await ( await openWorkspace( { cwd: checkout } ) ).checkoutReportBranch( { name: reportBranch, continueExisting: true } );
 
-			await second.checkoutReportBranch( { name: reportBranch, continueExisting: true } );
-
+			expect( git( checkout, 'log', '-2', '--first-parent', '--format=%an|%ae' ).trim().split( '\n' ) )
+				.toEqual( [ 'CKEditorBot|bot@ckeditor.com', 'CKEditorBot|bot@ckeditor.com' ] );
 			expect( git( checkout, 'cat-file', 'commit', 'HEAD' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
 			expect( git( checkout, 'cat-file', 'commit', 'HEAD^1' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
 			expect( await readText( signerLog ) ).toContain( 'ABCDEF0123456789' );
 		} );
 
-		it.skipIf( process.platform === 'win32' )( 'does not sign without a key, even when the checkout enables signing', async () => {
-			git( path, 'config', 'gpg.program', signer );
-			git( path, 'config', 'commit.gpgsign', 'true' );
+		it( 'lets the given author override the one of the configuration', async () => {
+			git( path, 'config', 'user.name', 'CKEditorBot' );
+			git( path, 'config', 'user.email', 'bot@ckeditor.com' );
 
-			const workspace = await open();
+			const workspace = await openWorkspace( { cwd: path, author: { name: 'Bot' } } );
 
 			await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
 			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
 			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
 
-			expect( git( path, 'cat-file', 'commit', 'HEAD' ) ).not.toContain( 'gpgsig' );
-			expect( existsSync( signerLog ) ).toBe( false );
+			expect( git( path, 'log', '-1', '--format=%an|%ae' ).trim() ).toBe( 'Bot|bot@ckeditor.com' );
+		} );
+
+		it( 'cannot be published from without an author', async () => {
+			await expect( openWorkspace( { cwd: path } ).then( workspace => workspace.assertPublishable( [] ) ) ).rejects.toThrow(
+				'Publishing needs the author of the commits, but `user.name` is not set in the git configuration.'
+			);
 		} );
 	} );
 
