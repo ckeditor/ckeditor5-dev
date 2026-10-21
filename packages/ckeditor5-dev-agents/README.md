@@ -58,6 +58,7 @@ AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 | --- | --- |
 | `AI_TASKS_GITHUB_TOKEN` | Published runs only. A token that can open pull requests and comment on them. Pushing uses the credentials of the checkout. |
 | `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | The author of the commits of published runs. Default: `CKEditor AI Tasks <ai-tasks@users.noreply.github.com>`. |
+| `AI_TASKS_GIT_SIGNING_KEY` | Optional. The key that signs the commits of published runs, as git's `user.signingkey` takes it. Import the key first, for example to GPG. Without it, the commits are not signed, whatever the git configuration says. |
 | `AI_TASKS_BUILD_URL` | Optional. A link to the CI build, added to the run comments. |
 
 The report pull requests of a published run target the checked-out branch. Publishing fails with a clear message, and does not try to fix it, when:

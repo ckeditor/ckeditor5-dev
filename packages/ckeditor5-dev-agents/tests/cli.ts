@@ -58,6 +58,14 @@ describe( 'parseArguments()', () => {
 		} );
 	} );
 
+	it( 'reads the key that signs the commits', () => {
+		expect( parseArguments( [], { cwd, env: { AI_TASKS_GIT_SIGNING_KEY: 'ABCDEF0123456789' } } ).author ).toEqual( {
+			name: 'CKEditor AI Tasks',
+			email: 'ai-tasks@users.noreply.github.com',
+			signingKey: 'ABCDEF0123456789'
+		} );
+	} );
+
 	it( 'does not read the build URL from CI-specific variables', () => {
 		expect( parseArguments( [], { cwd, env: { CIRCLE_BUILD_URL: 'https://circle', GITHUB_RUN_ID: '1' } } ).buildUrl )
 			.toBeUndefined();

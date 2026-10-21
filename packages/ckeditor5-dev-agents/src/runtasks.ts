@@ -7,7 +7,7 @@ import upath from 'upath';
 import { loadConfig } from './config/loadconfig.js';
 import { selectTargets } from './config/selecttargets.js';
 import { STATE_DIRECTORY } from './constants.js';
-import { openWorkspace } from './git/gitworkspace.js';
+import { openWorkspace, type CommitAuthor } from './git/gitworkspace.js';
 import { createGitHubClient } from './github/githubclient.js';
 import { runTarget, type TaskResult } from './runner/runtarget.js';
 import { getErrorMessage } from './utils/strings.js';
@@ -41,7 +41,11 @@ export type RunTasksOptions = {
 	 * everything stays in the working tree. Pushing uses the credentials of the checkout.
 	 */
 	token?: string;
-	author: { name: string; email: string };
+
+	/**
+	 * The author of the commits of a published run, and the key that signs them, if any.
+	 */
+	author: CommitAuthor;
 
 	/**
 	 * Linked from the comments of published runs.

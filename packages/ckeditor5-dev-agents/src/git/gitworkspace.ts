@@ -73,18 +73,29 @@ export type GitWorkspace = {
 	restore( paths: Array<string>, ref: string ): Promise<void>;
 };
 
+export type CommitAuthor = {
+	name: string;
+	email: string;
+
+	/**
+	 * The key that signs the commits, as git's `user.signingkey` takes it. The key must be available to git, for example
+	 * imported to GPG. Without it, the commits are not signed.
+	 */
+	signingKey?: string;
+};
+
 /**
  * Opens the checkout that contains `cwd`. The checkout is prepared by whoever runs the framework: cloned, with
  * the dependencies installed, and with the base branch checked out. The `author` is needed only to commit.
  */
-export async function openWorkspace( { cwd, author }: { cwd: string; author?: { name: string; email: string } } ): Promise<GitWorkspace> {
+export async function openWorkspace( { cwd, author }: { cwd: string; author?: CommitAuthor } ): Promise<GitWorkspace> {
 	const allowEnvironment = getAllowedEnvironment();
 	const gitOptions = {
 		allowEnvironment,
 		config: [
 			...( author ? [ `user.name=${ author.name }`, `user.email=${ author.email }` ] : [] ),
-			// The commits are made by a bot. They must not depend on a signing setup of whoever runs it.
-			'commit.gpgsign=false'
+			// The commits are made by a bot. They are signed only with its own key, never with a signing setup of whoever runs it.
+			...( author?.signingKey ? [ 'commit.gpgsign=true', `user.signingkey=${ author.signingKey }` ] : [ 'commit.gpgsign=false' ] )
 		]
 	};
 

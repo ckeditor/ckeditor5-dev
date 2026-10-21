@@ -184,6 +184,66 @@ describe( 'openWorkspace()', () => {
 		expect( log ).toContain( 'More changes.' );
 	} );
 
+	describe( 'signing', () => {
+		let signer: string;
+		let signerLog: string;
+
+		// A stand-in for GPG: it records its arguments and returns a signature git accepts.
+		beforeEach( async () => {
+			const directory = await createTempDirectory();
+
+			signer = upath.join( directory, 'gpg' );
+			signerLog = upath.join( directory, 'gpg.log' );
+
+			await writeFile( signer, [
+				'#!/bin/sh',
+				`echo "$@" >> "${ signerLog }"`,
+				'cat > /dev/null',
+				'echo "[GNUPG:] SIG_CREATED D 1 8 00 0 FAKE" >&2',
+				'printf -- "-----BEGIN PGP SIGNATURE-----\\n\\nZmFrZQ==\\n-----END PGP SIGNATURE-----\\n"'
+			].join( '\n' ), { mode: 0o755 } );
+		} );
+
+		it.skipIf( process.platform === 'win32' )( 'signs the commits and the merges with the key of the author', async () => {
+			const first = await openWorkspace( { cwd: path, author: { ...author, signingKey: 'ABCDEF0123456789' } } );
+
+			git( path, 'config', 'gpg.program', signer );
+
+			await first.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+			await first.push();
+			await first.returnToBase();
+			await pushFiles( seed, { 'projects/cs/docs/b.md': 'B\n' } );
+
+			const checkout = await createCheckout( remote );
+
+			git( checkout, 'config', 'gpg.program', signer );
+
+			const second = await openWorkspace( { cwd: checkout, author: { ...author, signingKey: 'ABCDEF0123456789' } } );
+
+			await second.checkoutReportBranch( { name: reportBranch, continueExisting: true } );
+
+			expect( git( checkout, 'cat-file', 'commit', 'HEAD' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
+			expect( git( checkout, 'cat-file', 'commit', 'HEAD^1' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
+			expect( await readText( signerLog ) ).toContain( 'ABCDEF0123456789' );
+		} );
+
+		it.skipIf( process.platform === 'win32' )( 'does not sign without a key, even when the checkout enables signing', async () => {
+			git( path, 'config', 'gpg.program', signer );
+			git( path, 'config', 'commit.gpgsign', 'true' );
+
+			const workspace = await open();
+
+			await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+
+			expect( git( path, 'cat-file', 'commit', 'HEAD' ) ).not.toContain( 'gpgsig' );
+			expect( existsSync( signerLog ) ).toBe( false );
+		} );
+	} );
+
 	it( 'starts at the base branch when it should continue a branch that does not exist', async () => {
 		const workspace = await open();
 
