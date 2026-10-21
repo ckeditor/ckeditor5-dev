@@ -10,7 +10,7 @@ import { renderPullRequestBody, renderRunComment } from '../report/renderpullreq
 import { getErrorMessage, plural } from '../utils/strings.js';
 import { runTask, type RunTaskResult } from './runtask.js';
 import type { GitWorkspace } from '../git/gitworkspace.js';
-import type { GitHubClient } from '../github/githubclient.js';
+import type { GitHubClient, OpenPullRequest } from '../github/githubclient.js';
 import type { Target, TaskInstance, TaskSummary } from '../types.js';
 
 export type TaskResult = {
@@ -50,6 +50,13 @@ export type RunTargetOptions = {
 	 * Published run: linked from the run comment.
 	 */
 	buildUrl?: string;
+};
+
+/**
+ * An open report pull request of a task, with its part of the stack.
+ */
+type StackedPullRequest = OpenPullRequest & {
+	part: number;
 };
 
 /**
@@ -109,8 +116,27 @@ export async function runTarget( options: RunTargetOptions ): Promise<Array<Task
 	return results;
 }
 
-export function getReportBranch( taskId: string, target: Pick<Target, 'name'>, branch: string ): string {
-	return `${ REPORT_BRANCH_PREFIX }/${ taskId }/${ target.name }/${ branch }`;
+/**
+ * Returns the report branch of the task in the target for the base branch. The first part of a stack uses it as it is,
+ * the next parts add `--<part>`: `ai-tasks/<task>/<target>/<branch>--2`.
+ */
+export function getReportBranch( taskId: string, target: Pick<Target, 'name'>, branch: string, part = 1 ): string {
+	const name = `${ REPORT_BRANCH_PREFIX }/${ taskId }/${ target.name }/${ branch }`;
+
+	return part > 1 ? `${ name }--${ part }` : name;
+}
+
+/**
+ * Returns the part of the stack that the branch is, or `null` when it is not a part of the stack of the report branch.
+ */
+export function getReportBranchPart( reportBranch: string, branch: string ): number | null {
+	if ( branch === reportBranch ) {
+		return 1;
+	}
+
+	const part = branch.startsWith( `${ reportBranch }--` ) ? branch.slice( reportBranch.length + 2 ) : '';
+
+	return /^[1-9]\d*$/.test( part ) ? Number( part ) : null;
 }
 
 function executeTask( options: RunTargetOptions, root: string, instance: TaskInstance, pruneFixed: boolean ): Promise<RunTaskResult> {
@@ -128,50 +154,50 @@ async function publishTask(
 	const { target, workspace, today, buildUrl, log } = options;
 	const { task } = instance;
 	const { branch } = workspace;
-	const reportBranch = getReportBranch( task.id, target, branch );
-	let pullRequest = await github.findOpenPullRequest( { slug: target.slug, head: reportBranch } );
+	const firstBranch = getReportBranch( task.id, target, branch );
+	let pullRequest: { number: number; html_url: string } | undefined;
 	let saved: RunTaskResult | undefined;
 	let failure: string | undefined;
 
 	try {
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: Boolean( pullRequest ) } );
-		log( pullRequest ?
-			`  Continuing the open report pull request: ${ pullRequest.html_url }` :
+		const stack = await getStack( github, { slug: target.slug, firstBranch, base: branch, log } );
+		const parent = stack.at( -1 );
+		const part = parent ? parent.part + 1 : 1;
+		const reportBranch = getReportBranch( task.id, target, branch, part );
+
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: stack.map( pull => pull.head ) } );
+		log( parent ?
+			`  Stacking the "${ reportBranch }" report branch on the open report pull request: ${ parent.html_url }` :
 			`  Starting the "${ reportBranch }" report branch at "${ branch }".`
 		);
 
-		saved = await executeTask( options, root, instance, !pullRequest );
+		// Findings fixed in a reviewed report pull request are dropped. While a part of the stack is open, they stay.
+		saved = await executeTask( options, root, instance, !parent );
 
 		const paths = [
 			upath.join( target.root, STATE_DIRECTORY, task.id ),
 			...saved.files.map( file => upath.relative( workspace.path, file ) )
 		];
-		const judged = saved.summary.judged;
-		const committed = await workspace.commit( paths, `${ task.title }: ${ judged } ${ plural( judged, 'unit' ) } judged.` );
+		const { summary } = saved;
+		const message = `${ task.title }: ${ summary.judged } ${ plural( summary.judged, 'unit' ) } judged.`;
+		const committed = await workspace.commit( paths, message );
 
 		if ( committed ) {
 			await workspace.push();
 
-			const fixed = saved.open.filter( finding => finding.fix ).length;
-			const body = renderPullRequestBody( { task, target, branch, reportBranch, open: saved.open.length - fixed, fixed } );
-
-			if ( pullRequest ) {
-				await github.updatePullRequest( { slug: target.slug, number: pullRequest.number, body } );
-			} else {
-				pullRequest = await github.createPullRequest( {
-					slug: target.slug,
-					head: reportBranch,
-					base: branch,
-					title: `${ task.title }: ${ target.name } (${ branch })`,
-					body
-				} );
-				log( `  Opened the report pull request: ${ pullRequest.html_url }` );
-			}
+			pullRequest = await github.createPullRequest( {
+				slug: target.slug,
+				head: reportBranch,
+				base: parent?.head ?? branch,
+				title: `${ task.title }: ${ target.name } (${ branch })${ part > 1 ? `, part ${ part }` : '' }`,
+				body: renderPullRequestBody( { task, target, branch, reportBranch, parent, open: summary.open, fixed: summary.fixed } )
+			} );
+			log( `  Opened the report pull request: ${ pullRequest.html_url }` );
 
 			await github.createComment( {
 				slug: target.slug,
 				number: pullRequest.number,
-				body: renderRunComment( { today, buildUrl, summary: saved.summary } )
+				body: renderRunComment( { today, buildUrl, summary } )
 			} );
 		} else {
 			log( '  Nothing new. Nothing was pushed.' );
@@ -190,4 +216,31 @@ async function publishTask(
 	}
 
 	return saved ? { summary: saved.summary, failure, pullRequestUrl: pullRequest?.html_url } : { failure };
+}
+
+/**
+ * Returns the open report pull requests of the task, from the bottom of the stack to the top. Each of them must be
+ * based on the one below it, and the bottom one on the base branch. A pull request whose base changed, for example
+ * because the one below it was merged or closed, is based on the right branch again.
+ */
+async function getStack(
+	github: GitHubClient,
+	{ slug, firstBranch, base, log }: { slug: string; firstBranch: string; base: string; log: ( message: string ) => void }
+): Promise<Array<StackedPullRequest>> {
+	const pulls = ( await github.listOpenPullRequests( { slug, filter: head => getReportBranchPart( firstBranch, head ) !== null } ) )
+		.map( pull => ( { ...pull, part: getReportBranchPart( firstBranch, pull.head )! } ) )
+		.sort( ( a, b ) => a.part - b.part );
+
+	for ( const [ index, pull ] of pulls.entries() ) {
+		const expectedBase = index ? pulls[ index - 1 ]!.head : base;
+
+		if ( pull.base !== expectedBase ) {
+			await github.updatePullRequest( { slug, number: pull.number, base: expectedBase } );
+			log( `  Changed the base of ${ pull.html_url } from "${ pull.base }" to "${ expectedBase }".` );
+
+			pull.base = expectedBase;
+		}
+	}
+
+	return pulls;
 }

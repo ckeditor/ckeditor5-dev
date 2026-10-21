@@ -128,7 +128,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		throw new Error(
 			`The [${ finding.id }] finding belongs to the "${ entry.task.id }" task in the "${ entry.target.name }" target, ` +
 			`but the "${ workspace.branch }" report branch is checked out. ` +
-			`Check out "${ getReportBranch( entry.task.id, entry.target, reportBranch.base ) }" first.`
+			`Check out "${ getReportBranch( entry.task.id, entry.target, reportBranch.base, reportBranch.part ) }" first.`
 		);
 	}
 
@@ -146,10 +146,21 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		].join( '\n' ) );
 	}
 
-	// On a report branch, the fix is a change against its base branch, which the report links to. Anywhere else
-	// (a local run), the fix is not committed, so `HEAD` has the content from before it.
+	// On a report branch, the fix is a change against the branch its pull request is based on: the report branch below it
+	// in the stack, or the base branch, which the report links to. Anywhere else (a local run), the fix is not committed,
+	// so `HEAD` has the content from before it.
 	const baseBranch = reportBranch?.base;
 	const fixFiles = [ ...new Set( affected.flatMap( item => item.files ) ) ].sort();
+	const restoreRef = reportBranch && fixFiles.length ? await getRestoreRef( workspace, entry, reportBranch ) : 'HEAD';
+
+	// A part of the stack also holds the fixed findings of the parts below it. Their fixes are reverted there.
+	if ( reportBranch && reportBranch.part > 1 && fixFiles.length && !await workspace.differsFrom( fixFiles, restoreRef ) ) {
+		throw new Error(
+			`The fix of [${ finding.id }] was made in a pull request below "${ workspace.branch }" in the stack. ` +
+			`Nothing was changed. Check out the report branch of that pull request (it is based on "${ restoreRef }" or below) ` +
+			'and reject the finding there.'
+		);
+	}
 
 	// Restoring from `HEAD` reverts nothing when the files have no uncommitted changes: the fix was undone by hand,
 	// or it is committed, for example in a report branch checked out as a detached `HEAD`. The finding is still resolved,
@@ -158,7 +169,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 	const revertedFiles = canRestore ? fixFiles : [];
 
 	if ( revertedFiles.length ) {
-		await workspace.restore( revertedFiles, baseBranch ? await getRestoreRef( workspace, baseBranch ) : 'HEAD' );
+		await workspace.restore( revertedFiles, restoreRef );
 	}
 
 	for ( const item of affected ) {
@@ -286,15 +297,44 @@ function getAffectedFixes( entries: Array<TaskStateEntry>, finding: Finding ): A
 }
 
 /**
- * Splits the name of a report branch, `ai-tasks/<task>/<target>/<base branch>`, into its parts.
+ * Splits the name of a report branch, `ai-tasks/<task>/<target>/<base branch>`, with an optional `--<part>` of
+ * the stack, into its parts.
  */
-function parseReportBranch( branch: string ): { task: string; target: string; base: string } | undefined {
-	const [ prefix, task, target, ...base ] = branch.split( '/' );
+function parseReportBranch( branch: string ): { task: string; target: string; base: string; part: number } | undefined {
+	const [ prefix, task, target, ...rest ] = branch.split( '/' );
 
-	return prefix === REPORT_BRANCH_PREFIX && task && target && base.length ? { task, target, base: base.join( '/' ) } : undefined;
+	if ( prefix !== REPORT_BRANCH_PREFIX || !task || !target || !rest.length ) {
+		return undefined;
+	}
+
+	const [ , base = rest.join( '/' ), part = '1' ] = rest.join( '/' ).match( /^(.+)--([1-9]\d*)$/ ) ?? [];
+
+	return { task, target, base, part: Number( part ) };
 }
 
-async function getRestoreRef( workspace: GitWorkspace, baseBranch: string ): Promise<string> {
+/**
+ * Returns the branch the pull request of the report branch is based on: the closest part below it in the stack that
+ * is not merged yet, or the base branch.
+ */
+async function getRestoreRef(
+	workspace: GitWorkspace,
+	entry: TaskStateEntry,
+	{ base, part }: { base: string; part: number }
+): Promise<string> {
+	const baseRef = await getBaseRef( workspace, base );
+
+	for ( let below = part - 1; below >= 1; below-- ) {
+		const ref = `origin/${ getReportBranch( entry.task.id, entry.target, base, below ) }`;
+
+		if ( await workspace.refExists( ref ) && !await workspace.isAncestor( ref, baseRef ) ) {
+			return ref;
+		}
+	}
+
+	return baseRef;
+}
+
+async function getBaseRef( workspace: GitWorkspace, baseBranch: string ): Promise<string> {
 	for ( const ref of [ `origin/${ baseBranch }`, baseBranch ] ) {
 		if ( await workspace.refExists( ref ) ) {
 			return ref;

@@ -418,6 +418,46 @@ describe( 'resolveFinding()', () => {
 			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
 		} );
 
+		describe( 'in a stack', () => {
+			const firstPart = 'ai-tasks/t/repo/stable';
+			const secondPart = 'ai-tasks/t/repo/stable--2';
+
+			// The first part is pushed. The second part starts on top of it, the way a published run stacks it.
+			beforeEach( () => {
+				git( checkout, 'update-ref', `refs/remotes/origin/${ firstPart }`, 'HEAD' );
+				git( checkout, 'checkout', '--quiet', '-b', secondPart );
+			} );
+
+			it( 'restores the files of a fix from the part below, while that part is not merged', async () => {
+				await writeFiles( checkout, { 'docs/d.md': 'This is BAD.\n' } );
+				await runIn( checkout );
+				git( checkout, 'add', '--all' );
+				git( checkout, 'commit', '--quiet', '--message', 'Task t: 1 unit judged.' );
+
+				// The fixes of the test task share `log.md`, so the fix of `docs/a.md` in the first part counts as affected.
+				await resolve( { action: 'dismiss', id: idOf( 'docs/d.md', 'R1' ), cwd: checkout, force: true } );
+
+				expect( existsSync( upath.join( checkout, 'docs/d.md' ) ) ).toBe( false );
+				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
+				expect( await readText( upath.join( checkout, 'log.md' ) ) ).toBe( 'Log:\nt docs/a.md\n' );
+			} );
+
+			it( 'throws and changes nothing when the fix was made in a part below', async () => {
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
+					`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] was made in a pull request below "${ secondPart }" in the stack. Nothing was changed.`
+				);
+				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
+				expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			} );
+
+			it( 'names the same part of the stack when another task\'s report branch is checked out', async () => {
+				git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/u/repo/stable--2' );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) )
+					.rejects.toThrow( `Check out "${ secondPart }" first.` );
+			} );
+		} );
+
 		it( 'throws when the base branch does not exist at all', async () => {
 			git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/t/repo/gone' );
 

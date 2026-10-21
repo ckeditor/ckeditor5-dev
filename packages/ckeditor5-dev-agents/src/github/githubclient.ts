@@ -16,15 +16,27 @@ export type PullRequest = {
 	html_url: string;
 };
 
+/**
+ * An open pull request, with the names of its head and base branches.
+ */
+export type OpenPullRequest = PullRequest & {
+	head: string;
+	base: string;
+};
+
 export type GitHubClient = {
 
 	/**
-	 * Returns the open pull request from the branch, or `null`. The base branch is not a criterion: a human may change
-	 * it in the pull request.
+	 * Returns the open pull requests whose head is a branch of the repository itself (not of a fork) that matches
+	 * the filter.
 	 */
-	findOpenPullRequest( options: { slug: string; head: string } ): Promise<PullRequest | null>;
+	listOpenPullRequests( options: { slug: string; filter: ( head: string ) => boolean } ): Promise<Array<OpenPullRequest>>;
 	createPullRequest( options: { slug: string; head: string; base: string; title: string; body: string } ): Promise<PullRequest>;
-	updatePullRequest( options: { slug: string; number: number; body: string } ): Promise<PullRequest>;
+
+	/**
+	 * Changes the description or the base branch of the pull request.
+	 */
+	updatePullRequest( options: { slug: string; number: number; body?: string; base?: string } ): Promise<PullRequest>;
 	createComment( options: { slug: string; number: number; body: string } ): Promise<unknown>;
 };
 
@@ -54,11 +66,13 @@ export function createGitHubClient( token: string ): GitHubClient {
 	} );
 
 	return {
-		async findOpenPullRequest( { slug, head } ) {
+		async listOpenPullRequests( { slug, filter } ) {
 			const [ owner, repo ] = splitSlug( slug );
-			const { data } = await octokit.pulls.list( { owner, repo, state: 'open', head: `${ owner }:${ head }` } );
+			const pulls = await octokit.paginate( octokit.pulls.list, { owner, repo, state: 'open', per_page: 100 } );
 
-			return data[ 0 ] ?? null;
+			return pulls
+				.filter( pull => pull.head.repo?.full_name === slug && filter( pull.head.ref ) )
+				.map( pull => ( { number: pull.number, html_url: pull.html_url, head: pull.head.ref, base: pull.base.ref } ) );
 		},
 
 		async createPullRequest( { slug, head, base, title, body } ) {
@@ -67,10 +81,10 @@ export function createGitHubClient( token: string ): GitHubClient {
 			return ( await octokit.pulls.create( { owner, repo, head, base, title, body } ) ).data;
 		},
 
-		async updatePullRequest( { slug, number, body } ) {
+		async updatePullRequest( { slug, number, body, base } ) {
 			const [ owner, repo ] = splitSlug( slug );
 
-			return ( await octokit.pulls.update( { owner, repo, pull_number: number, body } ) ).data;
+			return ( await octokit.pulls.update( { owner, repo, pull_number: number, body, base } ) ).data;
 		},
 
 		async createComment( { slug, number, body } ) {

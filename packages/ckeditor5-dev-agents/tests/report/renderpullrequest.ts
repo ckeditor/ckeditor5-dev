@@ -45,8 +45,19 @@ describe( 'pull request rendering', () => {
 		expect( body ).toContain( '**1** open finding, **2** fixed in this pull request.' );
 		expect( body ).toContain( 'See [report.md](https://github.com/owner/repo/blob/ai-tasks/meta/cs/stable/projects/cs/.ai-tasks/meta/report.md) ' +
 			'for the findings and how to review them.' );
-		expect( body ).toContain( 'Merge this pull request to record the state on `stable`.' );
+		expect( body ).toContain( 'Merge this pull request, with a merge commit, to record the state on `stable`.' );
+		expect( body ).toContain( 'every run that finds something new opens another pull request on top of it' );
 		expect( renderPullRequestBody( { task, target, branch: 'stable', reportBranch: 'x', open: 3, fixed: 0 } ) ).toContain( '**3** open findings' );
+	} );
+
+	it( 'renderPullRequestBody() says which pull request a stacked one is based on', () => {
+		const body = renderPullRequestBody( {
+			task, target, branch: 'stable', reportBranch: 'ai-tasks/meta/cs/stable--2', parent: { number: 7 }, open: 1, fixed: 1
+		} );
+
+		expect( body ).toContain( 'It is stacked on #7, so it shows only the changes of this run. Merge #7 first, with a merge commit. ' +
+			'GitHub then bases this pull request on `stable`.' );
+		expect( body ).not.toContain( 'to record the state on' );
 	} );
 
 	it( 'renderRunComment() renders the summary table and the problems', () => {

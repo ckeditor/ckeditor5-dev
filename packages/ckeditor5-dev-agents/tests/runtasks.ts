@@ -77,6 +77,8 @@ describe( 'runTasks()', () => {
 			push: vi.fn(),
 			returnToBase: vi.fn(),
 			refExists: vi.fn(),
+			isAncestor: vi.fn(),
+			differsFrom: vi.fn(),
 			hasChanges: vi.fn(),
 			restore: vi.fn()
 		};
@@ -147,7 +149,7 @@ describe( 'runTasks()', () => {
 
 	it( 'checks the checkout and creates the GitHub client for a published run', async () => {
 		const client: GitHubClient = {
-			findOpenPullRequest: vi.fn(),
+			listOpenPullRequests: vi.fn(),
 			createPullRequest: vi.fn(),
 			updatePullRequest: vi.fn(),
 			createComment: vi.fn()
