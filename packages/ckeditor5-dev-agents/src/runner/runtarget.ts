@@ -6,7 +6,8 @@
 import { existsSync } from 'node:fs';
 import upath from 'upath';
 import { REPORT_BRANCH_PREFIX, STATE_DIRECTORY } from '../constants.js';
-import { renderPullRequestBody, renderRunComment } from '../report/renderpullrequest.js';
+import { renderPullRequestBody, renderRunComment, renderSlackMessage } from '../report/renderpullrequest.js';
+import { postSlackMessage } from '../notify/postslackmessage.js';
 import { getErrorMessage, plural } from '../utils/strings.js';
 import { runTask, type RunTaskResult } from './runtask.js';
 import type { GitWorkspace } from '../git/gitworkspace.js';
@@ -50,6 +51,11 @@ export type RunTargetOptions = {
 	 * Published run: linked from the run comment.
 	 */
 	buildUrl?: string;
+
+	/**
+	 * Published run: a Slack incoming webhook that is told about every new report pull request.
+	 */
+	slackWebhookUrl?: string;
 };
 
 /**
@@ -151,7 +157,7 @@ async function publishTask(
 	root: string,
 	instance: TaskInstance
 ): Promise<Omit<TaskResult, 'task' | 'title' | 'durationMs'>> {
-	const { target, workspace, today, buildUrl, log } = options;
+	const { target, workspace, today, buildUrl, slackWebhookUrl, log } = options;
 	const { task } = instance;
 	const { branch } = workspace;
 	const firstBranch = getReportBranch( task.id, target, branch );
@@ -199,6 +205,16 @@ async function publishTask(
 				number: pullRequest.number,
 				body: renderRunComment( { today, buildUrl, summary } )
 			} );
+
+			// A missed notification does not undo the pull request, so it is reported as a problem, not as a failure.
+			if ( slackWebhookUrl ) {
+				try {
+					await postSlackMessage( slackWebhookUrl, renderSlackMessage( { task, target, branch, pullRequest, summary } ) );
+				} catch ( error ) {
+					summary.problems.push( { message: `Notifying Slack failed: ${ getErrorMessage( error ) }` } );
+					log( `  Notifying Slack failed: ${ getErrorMessage( error ) }` );
+				}
+			}
 		} else {
 			log( '  Nothing new. Nothing was pushed.' );
 		}

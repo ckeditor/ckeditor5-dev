@@ -16,7 +16,7 @@ For every target and every task enabled in it:
 4. **Check.** Only files matching `writes` may change. `verify()`, if defined, runs first and must pass. The harness then hashes all units and judges every affected unit again. This must not introduce findings or undo an earlier accepted fix, and at least one finding of the fixed unit must be gone. Otherwise, the harness restores the files and Git staging state from before the fix. An affected unit skipped by the baseline or deferred by `maxUnits` is judged before and after the fix; these extra checks do not advance its baseline.
 5. Findings that are already open, or rejected by a human decision that still holds, are dropped. The rest are recorded, and the state is written to `<target root>/.ai-tasks/<task>/`.
 
-Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on a new report branch per task: it commits and pushes once, opens a report pull request stacked on the ones still open, comments with a summary, and checks out the base branch again. A run that finds nothing new pushes nothing.
+Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on a new report branch per task: it commits and pushes once, opens a report pull request stacked on the ones still open, comments with a summary, tells Slack if configured, and checks out the base branch again. A run that finds nothing new pushes nothing.
 
 A human is involved only in the pull request, after everything was judged, fixed and checked. Findings never fail a run. A run fails when a task or a unit could not be processed, or publishing failed. A publishing failure preserves the task summary and does not stop the remaining tasks.
 
@@ -59,6 +59,7 @@ AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 | `AI_TASKS_GITHUB_TOKEN` | Published runs only. A token that can open pull requests and comment on them. Pushing uses the credentials of the checkout. |
 | `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | Optional. Override the author of the commits of published runs. By default, the commits use the git configuration of the checkout: its `user.name`, `user.email` and signing setup. |
 | `AI_TASKS_BUILD_URL` | Optional. A link to the CI build, added to the run comments. |
+| `AI_TASKS_SLACK_WEBHOOK_URL` | Optional, published runs only. A Slack incoming webhook. Every new report pull request is posted there, with its numbers. A failed notification is reported as a problem and does not fail the run. |
 
 The report pull requests of a published run target the checked-out branch. Publishing fails with a clear message, and does not try to fix it, when:
 

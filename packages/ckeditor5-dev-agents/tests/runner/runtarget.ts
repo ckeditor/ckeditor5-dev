@@ -438,6 +438,42 @@ describe( 'runTarget()', () => {
 			} ) );
 		} );
 
+		it( 'tells Slack about a new report pull request', async () => {
+			const fetchMock = vi.fn( async () => new Response( 'ok' ) );
+
+			vi.stubGlobal( 'fetch', fetchMock );
+
+			const results = await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			const [ url, init ] = fetchMock.mock.calls[ 0 ] as unknown as [ string, RequestInit ];
+
+			expect( url ).toBe( 'https://hooks.slack/x' );
+			expect( JSON.parse( init.body as string ) ).toEqual( {
+				text: '*Task meta* (x, `stable`) opened <https://pr/ai-tasks/meta/x/stable|#1>: 1 new finding, 1 fixed, 0 open.'
+			} );
+			expect( results[ 0 ]!.summary!.problems ).toEqual( [] );
+		} );
+
+		it( 'reports a failed Slack notification as a problem, not as a failure', async () => {
+			vi.stubGlobal( 'fetch', vi.fn( async () => new Response( 'invalid_token', { status: 403 } ) ) );
+
+			const results = await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			expect( results[ 0 ]!.failure ).toBeUndefined();
+			expect( results[ 0 ]!.summary!.problems ).toEqual( [
+				{ message: 'Notifying Slack failed: The Slack webhook responded with status 403: invalid_token' }
+			] );
+			expect( log ).toHaveBeenCalledWith( '  Notifying Slack failed: The Slack webhook responded with status 403: invalid_token' );
+		} );
+
 		it( 'prunes the fixed findings when a new report branch starts after a merge', async () => {
 			await publish( [ [ 'meta', true ] ] );
 

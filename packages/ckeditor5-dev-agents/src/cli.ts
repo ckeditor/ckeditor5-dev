@@ -52,7 +52,8 @@ export function parseArguments(
 			...( env.AI_TASKS_GIT_NAME ? { name: env.AI_TASKS_GIT_NAME } : {} ),
 			...( env.AI_TASKS_GIT_EMAIL ? { email: env.AI_TASKS_GIT_EMAIL } : {} )
 		},
-		buildUrl: env.AI_TASKS_BUILD_URL
+		buildUrl: env.AI_TASKS_BUILD_URL,
+		slackWebhookUrl: values.publish ? env.AI_TASKS_SLACK_WEBHOOK_URL : undefined
 	};
 }
 

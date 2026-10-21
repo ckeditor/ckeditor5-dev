@@ -57,6 +57,28 @@ export function renderRunComment( { today, summary, buildUrl }: {
 	return [ heading, '', ...renderSummary( summary ) ].join( '\n' );
 }
 
+/**
+ * Renders the Slack message about a new report pull request, in the `mrkdwn` formatting of Slack.
+ */
+export function renderSlackMessage( { task, target, branch, pullRequest, summary }: {
+	task: { title: string };
+	target: Pick<Target, 'name'>;
+	branch: string;
+	pullRequest: { number: number; html_url: string };
+	summary: TaskSummary;
+} ): string {
+	const { newFindings, fixed, open } = summary;
+
+	return `*${ escapeSlack( task.title ) }* (${ escapeSlack( target.name ) }, \`${ escapeSlack( branch ) }\`) opened ` +
+		`<${ pullRequest.html_url }|#${ pullRequest.number }>: ${ newFindings } new ${ plural( newFindings, 'finding' ) }, ` +
+		`${ fixed } fixed, ${ open } open.`;
+}
+
+// Slack reads `&`, `<` and `>` as the start of a control sequence.
+function escapeSlack( text: string ): string {
+	return text.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+}
+
 function renderSummary( summary: TaskSummary ): Array<string> {
 	const lines = [
 		'| Units | Changed | Judged | Left | New findings | Already open | Rejected | Fixed | Discarded | Files changed | Errors | ' +

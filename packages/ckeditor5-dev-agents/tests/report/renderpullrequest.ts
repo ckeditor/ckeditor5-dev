@@ -6,7 +6,7 @@
 /* eslint-disable @stylistic/max-len */
 
 import { describe, it, expect } from 'vitest';
-import { renderPullRequestBody, renderRunComment } from '../../src/report/renderpullrequest.js';
+import { renderPullRequestBody, renderRunComment, renderSlackMessage } from '../../src/report/renderpullrequest.js';
 import type { TaskSummary } from '../../src/types.js';
 
 describe( 'pull request rendering', () => {
@@ -58,6 +58,18 @@ describe( 'pull request rendering', () => {
 		expect( body ).toContain( 'It is stacked on #7, so it shows only the changes of this run. Merge #7 first, with a merge commit. ' +
 			'GitHub then bases this pull request on `stable`.' );
 		expect( body ).not.toContain( 'to record the state on' );
+	} );
+
+	it( 'renderSlackMessage() links the pull request and escapes the names', () => {
+		const message = renderSlackMessage( {
+			task: { title: 'Docs <BLUF> & more' },
+			target,
+			branch: 'stable',
+			pullRequest: { number: 12, html_url: 'https://pr/12' },
+			summary: { ...summary, newFindings: 1, fixed: 0, open: 3 }
+		} );
+
+		expect( message ).toBe( '*Docs &lt;BLUF&gt; &amp; more* (cs, `stable`) opened <https://pr/12|#12>: 1 new finding, 0 fixed, 3 open.' );
 	} );
 
 	it( 'renderRunComment() renders the summary table and the problems', () => {

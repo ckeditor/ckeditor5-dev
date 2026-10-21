@@ -54,6 +54,11 @@ export type RunTasksOptions = {
 	buildUrl?: string;
 
 	/**
+	 * Published run: a Slack incoming webhook that is told about every new report pull request.
+	 */
+	slackWebhookUrl?: string;
+
+	/**
 	 * Receives the progress of the run, the tool calls of the agent, and the messages of `log()` in the hooks.
 	 * Default: `console.log`. The final summary is returned in the result instead.
 	 */
@@ -108,6 +113,7 @@ export async function runTasks( options: RunTasksOptions ): Promise<{ ok: boolea
 					github,
 					today,
 					buildUrl: options.buildUrl,
+					slackWebhookUrl: options.slackWebhookUrl,
 					log: message => log( `  ${ message }` )
 				} )
 			} );

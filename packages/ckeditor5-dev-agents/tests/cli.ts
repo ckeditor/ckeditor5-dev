@@ -22,7 +22,8 @@ describe( 'parseArguments()', () => {
 			tasks: [],
 			token: undefined,
 			author: {},
-			buildUrl: undefined
+			buildUrl: undefined,
+			slackWebhookUrl: undefined
 		} );
 	} );
 
@@ -56,6 +57,13 @@ describe( 'parseArguments()', () => {
 			author: { name: 'Bot', email: 'bot@example.com' },
 			buildUrl: 'https://ci.example.com/build/1'
 		} );
+	} );
+
+	it( 'reads the Slack webhook for a published run only', () => {
+		const env = { AI_TASKS_GITHUB_TOKEN: 'secret', AI_TASKS_SLACK_WEBHOOK_URL: 'https://hooks.slack/x' };
+
+		expect( parseArguments( [ '--publish' ], { cwd, env } ).slackWebhookUrl ).toBe( 'https://hooks.slack/x' );
+		expect( parseArguments( [], { cwd, env } ).slackWebhookUrl ).toBeUndefined();
 	} );
 
 	it( 'overrides only the parts of the author that the environment sets', () => {
