@@ -34,6 +34,11 @@ export type GitHubClient = {
 	createPullRequest( options: { slug: string; head: string; base: string; title: string; body: string } ): Promise<PullRequest>;
 
 	/**
+	 * Whether a pull request from the branch of the repository was merged.
+	 */
+	wasMerged( options: { slug: string; head: string } ): Promise<boolean>;
+
+	/**
 	 * Changes the description or the base branch of the pull request.
 	 */
 	updatePullRequest( options: { slug: string; number: number; body?: string; base?: string } ): Promise<PullRequest>;
@@ -74,6 +79,14 @@ export function createGitHubClient( token: string ): GitHubClient {
 				// By the ID, not the name: the slug of a target may differ from the one on GitHub in case.
 				.filter( pull => pull.head.repo?.id === pull.base.repo.id && filter( pull.head.ref ) )
 				.map( pull => ( { number: pull.number, html_url: pull.html_url, head: pull.head.ref, base: pull.base.ref } ) );
+		},
+
+		async wasMerged( { slug, head } ) {
+			const [ owner, repo ] = splitSlug( slug );
+			const query = { owner, repo, state: 'closed' as const, head: `${ owner }:${ head }`, per_page: 100 };
+			const pulls = await octokit.paginate( octokit.pulls.list, query );
+
+			return pulls.some( pull => pull.merged_at );
 		},
 
 		async createPullRequest( { slug, head, base, title, body } ) {

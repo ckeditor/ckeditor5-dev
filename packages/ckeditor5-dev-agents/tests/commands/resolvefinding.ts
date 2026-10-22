@@ -456,8 +456,9 @@ describe( 'resolveFinding()', () => {
 				prepare();
 
 				// The fixes of the test task share `log.md`, so the fix of `docs/a.md` in the first part counts as affected.
-				await resolve( { action: 'dismiss', id: idOf( 'docs/d.md', 'R1' ), cwd: checkout, force: true } );
+				const resolved = await resolve( { action: 'dismiss', id: idOf( 'docs/d.md', 'R1' ), cwd: checkout, force: true } );
 
+				expect( resolved.restoredFrom ).toBe( `origin/${ firstPart }` );
 				expect( existsSync( upath.join( checkout, 'docs/d.md' ) ) ).toBe( false );
 				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
 				expect( await readText( upath.join( checkout, 'log.md' ) ) ).toBe( 'Log:\nt docs/a.md\n' );
@@ -643,6 +644,11 @@ describe( 'renderResolvedFinding()', () => {
 			'',
 			'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.'
 		].join( '\n' ) );
+	} );
+
+	it( 'says which ref the files were restored from', () => {
+		expect( renderResolvedFinding( result( { restoredFrom: 'origin/ai-tasks/t/repo/stable' } ) ) )
+			.toContain( '  Reverted  docs/a.md, log.md (from origin/ai-tasks/t/repo/stable)' );
 	} );
 
 	it( 'renders a dismissal of a finding without a fix', () => {

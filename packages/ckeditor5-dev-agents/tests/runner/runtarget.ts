@@ -282,6 +282,7 @@ describe( 'runTarget()', () => {
 		beforeEach( () => {
 			github = {
 				listOpenPullRequests: vi.fn( async () => [] ),
+				wasMerged: vi.fn( async () => true ),
 				createPullRequest: vi.fn( async ( { head }: { head: string } ) => ( { number: head.includes( 'meta' ) ? 1 : 2, html_url: `https://pr/${ head }` } ) ),
 				updatePullRequest: vi.fn( async () => ( {} ) ),
 				createComment: vi.fn( async () => ( {} ) )
@@ -443,7 +444,7 @@ describe( 'runTarget()', () => {
 		it( 'bases a stacked pull request on the one below it again when that one was merged', async () => {
 			await publish( [ [ 'meta', true ] ] );
 
-			// Part 1 was merged and its branch deleted. Part 2 is still open.
+			// Part 1 was merged. Part 2 is still open.
 			git( remote, 'branch', 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' );
 			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
 			await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
@@ -451,6 +452,7 @@ describe( 'runTarget()', () => {
 
 			await publish( [ [ 'meta', true ] ] );
 
+			expect( github.wasMerged ).toHaveBeenCalledExactlyOnceWith( { slug: 'owner/repo', head: 'ai-tasks/meta/x/stable' } );
 			expect( github.updatePullRequest ).toHaveBeenCalledExactlyOnceWith( { slug: 'owner/repo', number: 5, base: 'stable' } );
 			expect( log ).toHaveBeenCalledWith( '  Changed the base of https://pr/5 from "ai-tasks/meta/x/stable" to "stable".' );
 			expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( {
@@ -458,6 +460,21 @@ describe( 'runTarget()', () => {
 				base: 'ai-tasks/meta/x/stable--2',
 				title: 'Task meta: x (stable), part 3'
 			} ) );
+		} );
+
+		it( 'fails the task, and changes nothing, when a part is based on a part closed without merging', async () => {
+			github.wasMerged.mockResolvedValue( false );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ]!.failure ).toBe(
+				'The report pull request https://pr/5 is based on "ai-tasks/meta/x/stable", whose pull request was closed without merging. ' +
+				'Merging https://pr/5 would land its changes too. Close https://pr/5 as well, or change its base by hand.'
+			);
+			expect( github.updatePullRequest ).not.toHaveBeenCalled();
+			expect( github.createPullRequest ).not.toHaveBeenCalled();
+			expectBackOnTheBase();
 		} );
 
 		it( 'tells Slack about a new report pull request', async () => {

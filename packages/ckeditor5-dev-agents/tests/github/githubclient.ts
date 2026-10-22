@@ -49,6 +49,19 @@ describe( 'createGitHubClient()', () => {
 		} );
 	} );
 
+	it( 'wasMerged() tells whether a closed pull request from the branch was merged', async () => {
+		fetchMock.mockResolvedValueOnce( jsonResponse( [ { merged_at: null }, { merged_at: '2026-10-21T10:00:00Z' } ] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( true );
+		expect( fetchMock.mock.calls[ 0 ]![ 0 ] ).toBe(
+			'https://api.github.com/repos/owner/repo/pulls?state=closed&head=owner%3Aai-tasks%2Ft%2Fx%2Fstable&per_page=100'
+		);
+
+		fetchMock.mockResolvedValueOnce( jsonResponse( [ { merged_at: null } ] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( false );
+	} );
+
 	it( 'createPullRequest() posts the pull request', async () => {
 		expect( await client.createPullRequest( { slug: 'owner/repo', head: 'h', base: 'b', title: 'T', body: 'B' } ) )
 			.toEqual( { number: 1, html_url: 'https://pr' } );

@@ -262,10 +262,23 @@ async function getStack(
 		.map( pull => ( { ...pull, part: getReportBranchPart( firstBranch, pull.head )! } ) )
 		.sort( ( a, b ) => a.part - b.part );
 
+	const openHeads = new Set( pulls.map( pull => pull.head ) );
+
 	for ( const [ index, pull ] of pulls.entries() ) {
 		const expectedBase = index ? pulls[ index - 1 ]!.head : base;
 
 		if ( pull.base !== expectedBase ) {
+			// A part based on a part that is not open any more holds its commits. They may land only if it was merged.
+			const isClosedPart = getReportBranchPart( firstBranch, pull.base ) !== null && !openHeads.has( pull.base );
+
+			if ( isClosedPart && !await github.wasMerged( { slug, head: pull.base } ) ) {
+				throw new Error(
+					`The report pull request ${ pull.html_url } is based on "${ pull.base }", whose pull request was closed without ` +
+					`merging. Merging ${ pull.html_url } would land its changes too. Close ${ pull.html_url } as well, ` +
+					'or change its base by hand.'
+				);
+			}
+
 			await github.updatePullRequest( { slug, number: pull.number, base: expectedBase } );
 			log( `  Changed the base of ${ pull.html_url } from "${ pull.base }" to "${ expectedBase }".` );
 

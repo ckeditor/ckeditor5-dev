@@ -151,6 +151,7 @@ describe( 'runTasks()', () => {
 	it( 'checks the checkout and creates the GitHub client for a published run', async () => {
 		const client: GitHubClient = {
 			listOpenPullRequests: vi.fn(),
+			wasMerged: vi.fn(),
 			createPullRequest: vi.fn(),
 			updatePullRequest: vi.fn(),
 			createComment: vi.fn()

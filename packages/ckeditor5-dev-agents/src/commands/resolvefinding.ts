@@ -71,6 +71,11 @@ export type ResolvedFinding = {
 	revertedFiles: Array<string>;
 
 	/**
+	 * The ref the files were restored from, when they were.
+	 */
+	restoredFrom?: string;
+
+	/**
 	 * The files of the fix that were not restored, because they had no uncommitted changes to revert.
 	 */
 	unrevertedFiles: Array<string>;
@@ -194,6 +199,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		finding,
 		decisionFile,
 		revertedFiles,
+		...( revertedFiles.length ? { restoredFrom: restoreRef } : {} ),
 		unrevertedFiles: canRestore ? [] : fixFiles,
 		reopened: others.map( item => item.finding )
 	};
@@ -217,7 +223,9 @@ export function renderResolvedFinding( result: ResolvedFinding ): string {
 			'If the fix is committed, revert it by hand.'
 		);
 	} else if ( result.revertedFiles.length ) {
-		lines.push( `  Reverted  ${ result.revertedFiles.join( ', ' ) }` );
+		const source = result.restoredFrom ? ` (from ${ result.restoredFrom })` : '';
+
+		lines.push( `  Reverted  ${ result.revertedFiles.join( ', ' ) }${ source }` );
 	} else {
 		lines.push( '  Reverted  nothing (the finding had no fix)' );
 	}
