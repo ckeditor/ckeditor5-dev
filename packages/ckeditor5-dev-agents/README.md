@@ -16,7 +16,7 @@ For every target and every task enabled in it:
 4. **Check.** Only files matching `writes` may change. `verify()`, if defined, runs first and must pass. The harness then hashes all units and judges every affected unit again. This must not introduce findings or undo an earlier accepted fix, and at least one finding of the fixed unit must be gone. Otherwise, the harness restores the files and Git staging state from before the fix. An affected unit skipped by the baseline or deferred by `maxUnits` is judged before and after the fix; these extra checks do not advance its baseline.
 5. Findings that are already open, or rejected by a human decision that still holds, are dropped. The rest are recorded, and the state is written to `<target root>/.ai-tasks/<task>/`.
 
-Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on a new report branch per task: it commits and pushes once, opens a report pull request stacked on the ones still open, comments with a summary, tells Slack if configured, and checks out the base branch again. A run that finds nothing new pushes nothing.
+Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on a new report branch per task: it commits and pushes once, opens a report pull request stacked on the ones still open, comments with a summary, tells Slack if configured, and checks out the base branch again. A run without new findings or fixes opens no new part: it adds its commit to the top open report pull request, or, when none is open, opens one with only the state. A run that changes nothing pushes nothing.
 
 A human is involved only in the pull request, after everything was judged, fixed and checked. Findings never fail a run. A run fails when a task or a unit could not be processed, or publishing failed. A publishing failure preserves the task summary and does not stop the remaining tasks.
 
@@ -59,12 +59,13 @@ AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 | `AI_TASKS_GITHUB_TOKEN` | Published runs only. A token that can open pull requests and comment on them. Pushing uses the credentials of the checkout. |
 | `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | Optional. Override the author of the commits of published runs. By default, the commits use the git configuration of the checkout: its `user.name`, `user.email` and signing setup. |
 | `AI_TASKS_BUILD_URL` | Optional. A link to the CI build, added to the run comments. |
-| `AI_TASKS_SLACK_WEBHOOK_URL` | Optional, published runs only. A Slack incoming webhook. Every new report pull request is posted there, with its numbers. A failed notification is reported as a problem and does not fail the run. |
+| `AI_TASKS_SLACK_WEBHOOK_URL` | Optional, published runs only. A Slack incoming webhook. Every new report pull request with new findings or fixes is posted there, with its numbers. A pull request with only the state is not. A failed notification is reported as a problem and does not fail the run. |
 
 The report pull requests of a published run target the checked-out branch. Publishing fails with a clear message, and does not try to fix it, when:
 
 * `HEAD` is detached: check out the base branch.
 * The working tree has uncommitted changes: publishing switches branches.
+* The checked-out branch ends with `--<number>`, like the parts of a stack: its report branches would be mistaken for the ones of another branch. Use another name.
 * The checkout is shallow: merging the base branch into the open report branches needs the history. Configure the checkout in CI to fetch the whole history.
 * The git configuration of the checkout has no `user.name` or `user.email`, and the environment does not override them. Configure the bot in CI, together with commit signing if the repository requires it.
 * A `.gitignore` file ignores the state of a task in `<target root>/.ai-tasks/`: publishing commits it.
@@ -272,7 +273,8 @@ Report branches are named `ai-tasks/<task>/<target>/<branch>`, and the next part
 * The bottom pull request is based on the base branch, every next one on the one below it.
 * Before a run, the base branch is merged into the bottom branch, and every branch into the next one. The run starts at the top, so no unit is judged twice. Conflicts in the state of the task, for example after a rejection in a lower part, are resolved automatically: `open.json` and `baseline.json` are merged, and `report.md` is rendered again. A conflict in any other file fails the task, to be resolved by hand.
 * Merge the pull requests from the bottom up, with a merge commit, not a squash or a rebase: the next branches contain the commits of the merged one. GitHub then bases the next pull request on the base branch. If it does not, for example because the merged branch was kept, the next run does it.
-* A run that finds nothing new opens no pull request.
+* A run without new findings or fixes opens no new part. It adds its commit to the top part, or opens a pull request with only the state when no part is open. A run that changes nothing pushes nothing.
+* A part based on a part that was closed without merging stops the run, because merging it would land the closed part too. Close it and the parts above it; the next run opens a new part.
 
 ## Reviewing a report pull request
 
