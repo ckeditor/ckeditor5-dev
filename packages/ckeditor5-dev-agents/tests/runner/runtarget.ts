@@ -418,6 +418,28 @@ describe( 'runTarget()', () => {
 			expectBackOnTheBase();
 		} );
 
+		it( 'adds the state of a run without new findings or fixes to the top of the stack, without a new pull request', async () => {
+			await publish( [ [ 'meta', true ] ] );
+
+			openPullRequests( [ 1, 'ai-tasks/meta/x/stable', 'stable' ] );
+			github.createPullRequest.mockClear();
+			github.createComment.mockClear();
+
+			// The new guide is fine: it is judged, so the baseline changes, but nothing is found.
+			await pushFiles( seed, { 'docs/c.md': 'Fine.\n' } );
+			await newCheckout();
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ] ).toMatchObject( { pullRequestUrl: 'https://pr/1', summary: { judged: 1, newFindings: 0, fixed: 0 } } );
+			expect( github.createPullRequest ).not.toHaveBeenCalled();
+			expect( github.createComment ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( { number: 1 } ) );
+			expect( log ).toHaveBeenCalledWith( '  Nothing new to review. Added the state to the open report pull request: https://pr/1' );
+			expect( Object.keys( JSON.parse( readRemote( 'ai-tasks/meta/x/stable', '.ai-tasks/meta/baseline.json' ) ) ) ).toContain( 'docs/c.md' );
+			expect( () => git( remote, 'rev-parse', '--verify', 'ai-tasks/meta/x/stable--2' ) ).toThrow();
+			expectBackOnTheBase();
+		} );
+
 		it( 'bases a stacked pull request on the one below it again when that one was merged', async () => {
 			await publish( [ [ 'meta', true ] ] );
 
@@ -456,6 +478,23 @@ describe( 'runTarget()', () => {
 				text: '*Task meta* (x, `stable`) opened <https://pr/ai-tasks/meta/x/stable|#1>: 1 new finding, 1 fixed, 0 open.'
 			} );
 			expect( results[ 0 ]!.summary!.problems ).toEqual( [] );
+		} );
+
+		it( 'does not tell Slack about a report pull request without new findings or fixes', async () => {
+			const fetchMock = vi.fn( async () => new Response( 'ok' ) );
+
+			vi.stubGlobal( 'fetch', fetchMock );
+			await pushFiles( seed, { 'docs/b.md': 'Fine.\n' } );
+			await newCheckout();
+
+			await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			expect( github.createPullRequest ).toHaveBeenCalledOnce();
+			expect( fetchMock ).not.toHaveBeenCalled();
 		} );
 
 		it( 'reports a failed Slack notification as a problem, not as a failure', async () => {

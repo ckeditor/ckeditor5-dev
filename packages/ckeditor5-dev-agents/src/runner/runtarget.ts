@@ -188,7 +188,22 @@ async function publishTask(
 		const message = `${ task.title }: ${ summary.judged } ${ plural( summary.judged, 'unit' ) } judged.`;
 		const committed = await workspace.commit( paths, message );
 
-		if ( committed ) {
+		// A run that only judged units, without new findings or fixes, has nothing to review. Its state goes to the top
+		// of the stack instead of a new part.
+		const hasNews = summary.newFindings > 0 || summary.fixed > 0;
+
+		if ( committed && parent && !hasNews ) {
+			await workspace.push( { onto: parent.head } );
+
+			pullRequest = parent;
+			log( `  Nothing new to review. Added the state to the open report pull request: ${ parent.html_url }` );
+
+			await github.createComment( {
+				slug: target.slug,
+				number: parent.number,
+				body: renderRunComment( { today, buildUrl, summary } )
+			} );
+		} else if ( committed ) {
 			await workspace.push();
 
 			pullRequest = await github.createPullRequest( {
@@ -207,7 +222,7 @@ async function publishTask(
 			} );
 
 			// A missed notification does not undo the pull request, so it is reported as a problem, not as a failure.
-			if ( slackWebhookUrl ) {
+			if ( slackWebhookUrl && hasNews ) {
 				try {
 					await postSlackMessage( slackWebhookUrl, renderSlackMessage( { task, target, branch, pullRequest, summary } ) );
 				} catch ( error ) {

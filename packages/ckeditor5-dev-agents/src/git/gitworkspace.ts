@@ -49,9 +49,10 @@ export type GitWorkspace = {
 
 	/**
 	 * Pushes the report branch with the credentials of the checkout, together with the branches of the stack that got
-	 * a merge. The first push of a replaced report branch is forced, every later push is not.
+	 * a merge. The first push of a replaced report branch is forced, every later push is not. With `onto`, the commits
+	 * go to that branch of the stack instead: the report branch starts at its top, so the push only adds to it.
 	 */
-	push(): Promise<void>;
+	push( options?: { onto?: string } ): Promise<void>;
 
 	/**
 	 * Drops anything a failed task left behind on the report branch and checks out the base branch again.
@@ -227,10 +228,17 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 			return true;
 		},
 
-		async push() {
+		async push( { onto } = {} ) {
 			// The parents first, so the pull request of the new branch never compares with an outdated parent.
 			for ( const member of restackedBranches ) {
 				await git.push( 'origin', member );
+			}
+
+			if ( onto ) {
+				await git.push( 'origin', `HEAD:refs/heads/${ onto }` );
+				restackedBranches = [];
+
+				return;
 			}
 
 			// A run that pushed the same branch meanwhile changed it, so the lease fails instead of overwriting that run.
