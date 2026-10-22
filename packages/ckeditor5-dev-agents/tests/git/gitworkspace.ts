@@ -85,6 +85,14 @@ describe( 'openWorkspace()', () => {
 			);
 		} );
 
+		it( 'throws for a base branch whose name ends like a part of a stack', async () => {
+			git( path, 'checkout', '--quiet', '-b', 'release--2' );
+
+			await expect( ( await open() ).assertPublishable( [] ) ).rejects.toThrow(
+				'Publishing cannot start at the "release--2" branch: report branches use the "--<number>" ending for the parts of a stack'
+			);
+		} );
+
 		it( 'throws for a shallow checkout', async () => {
 			await pushFiles( seed, { 'README.md': 'Changed\n' } );
 

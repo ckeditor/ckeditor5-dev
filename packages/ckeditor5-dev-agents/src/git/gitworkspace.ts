@@ -199,6 +199,15 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 				throw new Error( 'Publishing needs a checked-out branch, but HEAD is detached. Check out the base branch first.' );
 			}
 
+			// The parts of a stack add `--<part>` to the name of their base branch, so such a base would be read as a part.
+			if ( /--[1-9]\d*$/.test( branch ) ) {
+				throw new Error(
+					`Publishing cannot start at the "${ branch }" branch: report branches use the "--<number>" ending for the parts ` +
+					'of a stack, so the report branches of this base would be mistaken for the ones of another. Use a branch ' +
+					'with another name.'
+				);
+			}
+
 			if ( ( await git.raw( [ 'rev-parse', '--is-shallow-repository' ] ) ).trim() === 'true' ) {
 				throw new Error(
 					'Publishing needs the full history of the checkout, but it is shallow. ' +
