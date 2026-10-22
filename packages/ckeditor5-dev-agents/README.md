@@ -270,7 +270,7 @@ A finding is identified by its fingerprint: `task|unit|rule|discriminator`, with
 Report branches are named `ai-tasks/<task>/<target>/<branch>`, and the next parts of a stack add `--<part>`: `ai-tasks/<task>/<target>/<branch>--2`. While report pull requests are open, every run that finds something new opens one more, stacked on top of them, so each pull request is small and shows only the changes of its run:
 
 * The bottom pull request is based on the base branch, every next one on the one below it.
-* Before a run, the base branch is merged into the bottom branch, and every branch into the next one. The run starts at the top, so no unit is judged twice.
+* Before a run, the base branch is merged into the bottom branch, and every branch into the next one. The run starts at the top, so no unit is judged twice. Conflicts in the state of the task, for example after a rejection in a lower part, are resolved automatically: `open.json` and `baseline.json` are merged, and `report.md` is rendered again. A conflict in any other file fails the task, to be resolved by hand.
 * Merge the pull requests from the bottom up, with a merge commit, not a squash or a rebase: the next branches contain the commits of the merged one. GitHub then bases the next pull request on the base branch. If it does not, for example because the merged branch was kept, the next run does it.
 * A run that finds nothing new opens no pull request.
 

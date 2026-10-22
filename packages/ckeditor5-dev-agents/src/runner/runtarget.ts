@@ -4,15 +4,18 @@
  */
 
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import upath from 'upath';
 import { REPORT_BRANCH_PREFIX, STATE_DIRECTORY } from '../constants.js';
 import { renderPullRequestBody, renderRunComment, renderSlackMessage } from '../report/renderpullrequest.js';
 import { postSlackMessage } from '../notify/postslackmessage.js';
+import { renderReport } from '../report/renderreport.js';
+import { mergeBaseline, mergeOpenFindings } from '../state/mergestate.js';
 import { getErrorMessage, plural } from '../utils/strings.js';
 import { runTask, type RunTaskResult } from './runtask.js';
-import type { GitWorkspace } from '../git/gitworkspace.js';
+import type { ConflictedFile, GitWorkspace } from '../git/gitworkspace.js';
 import type { GitHubClient, OpenPullRequest } from '../github/githubclient.js';
-import type { Target, TaskInstance, TaskSummary } from '../types.js';
+import type { Finding, Target, TaskInstance, TaskSummary } from '../types.js';
 
 export type TaskResult = {
 	task: string;
@@ -171,7 +174,11 @@ async function publishTask(
 		const part = parent ? parent.part + 1 : 1;
 		const reportBranch = getReportBranch( task.id, target, branch, part );
 
-		await workspace.checkoutReportBranch( { name: reportBranch, stack: stack.map( pull => pull.head ) } );
+		await workspace.checkoutReportBranch( {
+			name: reportBranch,
+			stack: stack.map( pull => pull.head ),
+			resolveConflicts: conflicts => resolveStateConflicts( conflicts, { instance, target, branch, workspace } )
+		} );
 		log( parent ?
 			`  Stacking the "${ reportBranch }" report branch on the open report pull request: ${ parent.html_url }` :
 			`  Starting the "${ reportBranch }" report branch at "${ branch }".`
@@ -247,6 +254,57 @@ async function publishTask(
 	}
 
 	return saved ? { summary: saved.summary, failure, pullRequestUrl: pullRequest?.html_url } : { failure };
+}
+
+/**
+ * Resolves the conflicts of merging a part of the stack into the next one, when all of them are in the state of the task.
+ * Both parts change the state: a run adds to it, `reject` and `dismiss` remove from it. So `open.json` and `baseline.json`
+ * are merged per finding and per unit, and `report.md` is rendered again from the result, also when it had no conflict.
+ * A conflict anywhere else is left to a human.
+ */
+async function resolveStateConflicts(
+	conflicts: Array<ConflictedFile>,
+	{ instance, target, branch, workspace }: { instance: TaskInstance; target: Target; branch: string; workspace: GitWorkspace }
+): Promise<Map<string, string> | null> {
+	const { task } = instance;
+	const statePath = upath.join( target.root, STATE_DIRECTORY, task.id );
+	const files = { open: `${ statePath }/open.json`, baseline: `${ statePath }/baseline.json`, report: `${ statePath }/report.md` };
+
+	if ( conflicts.some( conflict => !Object.values( files ).includes( conflict.path ) ) ) {
+		return null;
+	}
+
+	const resolved = new Map<string, string>();
+	const toJson = ( value: unknown ) => JSON.stringify( value, null, '\t' ) + '\n';
+
+	// A file without a conflict was merged by git already. Its working tree content is the result.
+	const read = async <T>( file: string, merge: ( base: T, ours: T, theirs: T ) => T, empty: T ): Promise<T> => {
+		const conflict = conflicts.find( item => item.path === file );
+
+		if ( !conflict ) {
+			return JSON.parse( await readFile( upath.join( workspace.path, file ), 'utf8' ).catch( () => toJson( empty ) ) ) as T;
+		}
+
+		const parse = ( content: string | null ) => content === null ? empty : JSON.parse( content ) as T;
+		const merged = merge( parse( conflict.base ), parse( conflict.ours ), parse( conflict.theirs ) );
+
+		resolved.set( file, toJson( merged ) );
+
+		return merged;
+	};
+
+	try {
+		const open = await read<Array<Finding>>( files.open, mergeOpenFindings, [] );
+
+		await read<Record<string, string>>( files.baseline, mergeBaseline, {} );
+
+		resolved.set( files.report, renderReport( { task, target, branch, open } ) );
+	} catch {
+		// A state file that is not valid JSON is left to a human.
+		return null;
+	}
+
+	return resolved;
 }
 
 /**

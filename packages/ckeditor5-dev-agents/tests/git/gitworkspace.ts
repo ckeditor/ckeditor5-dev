@@ -352,6 +352,60 @@ describe( 'openWorkspace()', () => {
 		expect( existsSync( upath.join( checkout, '.git/MERGE_HEAD' ) ) ).toBe( false );
 	} );
 
+	describe( 'resolving the conflicts of a merge', () => {
+		const second = () => `${ reportBranch }--2`;
+
+		// The report branch and the base branch change the same line of `open.json`.
+		beforeEach( async () => {
+			const first = await open();
+
+			await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': 'report\n' } );
+			await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+			await first.push();
+			await first.returnToBase();
+			await pushFiles( seed, { 'projects/cs/.ai-tasks/t/open.json': 'base\n' } );
+		} );
+
+		it( 'passes every conflicted file with its three versions, and commits the merge with the resolved files', async () => {
+			const checkout = await createCheckout( remote );
+			const workspace = await open( checkout );
+			const resolveConflicts = vi.fn( async () => new Map( [
+				[ 'projects/cs/.ai-tasks/t/open.json', 'resolved\n' ],
+				[ 'projects/cs/.ai-tasks/t/report.md', 'Rendered again.\n' ]
+			] ) );
+
+			await workspace.checkoutReportBranch( { name: second(), stack: [ reportBranch ], resolveConflicts } );
+
+			expect( resolveConflicts ).toHaveBeenCalledExactlyOnceWith( [
+				{ path: 'projects/cs/.ai-tasks/t/open.json', base: null, ours: 'report\n', theirs: 'base\n' }
+			] );
+			expect( git( checkout, 'log', '-1', '--format=%s|%P' ).trim() ).toMatch( new RegExp( `^Merge stable into ${ reportBranch }\\.\\|\\S+ \\S+$` ) );
+			expect( git( checkout, 'show', 'HEAD:projects/cs/.ai-tasks/t/open.json' ) ).toBe( 'resolved\n' );
+			expect( git( checkout, 'show', 'HEAD:projects/cs/.ai-tasks/t/report.md' ) ).toBe( 'Rendered again.\n' );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+
+			await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': 'next\n' } );
+			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'Next.' );
+			await workspace.push();
+
+			expect( git( remote, 'show', `${ reportBranch }:projects/cs/.ai-tasks/t/open.json` ) ).toBe( 'resolved\n' );
+		} );
+
+		it.each( [
+			[ 'cannot resolve them', null ],
+			[ 'leaves a conflicted file out', new Map( [ [ 'projects/cs/.ai-tasks/t/report.md', 'x' ] ] ) ]
+		] )( 'aborts the merge and throws when the resolver %s', async ( _, result ) => {
+			const checkout = await createCheckout( remote );
+			const workspace = await open( checkout );
+
+			await expect( workspace.checkoutReportBranch( { name: second(), stack: [ reportBranch ], resolveConflicts: async () => result } ) )
+				.rejects.toThrow( `Merging "stable" into "${ reportBranch }" failed.` );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			expect( existsSync( upath.join( checkout, '.git/MERGE_HEAD' ) ) ).toBe( false );
+		} );
+	} );
+
 	it( 'throws when the merge cannot even start', async () => {
 		// A report branch with an unrelated history cannot be merged, and there is no merge to abort.
 		git( seed, 'checkout', '--quiet', '--orphan', 'unrelated' );

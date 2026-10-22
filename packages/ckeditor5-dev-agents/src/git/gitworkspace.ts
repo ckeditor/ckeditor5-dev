@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { realpath, rm } from 'node:fs/promises';
+import { realpath, rm, writeFile } from 'node:fs/promises';
 import upath from 'upath';
 import { simpleGit, type SimpleGit } from 'simple-git';
 
@@ -40,7 +40,17 @@ export type GitWorkspace = {
 	 * and every pull request still shows only its own changes. A regular merge commit keeps review comments anchored.
 	 * Then the new branch starts at the top of the stack, or at the base branch when the stack is empty.
 	 */
-	checkoutReportBranch( options: { name: string; stack: Array<string> } ): Promise<void>;
+	checkoutReportBranch( options: {
+		name: string;
+		stack: Array<string>;
+
+		/**
+		 * Resolves the conflicts of a merge, given every conflicted file (relative to the repository root) with its three
+		 * versions. Returns the content of every one of them, and of any other file the merge commit should change, or `null`
+		 * when it cannot resolve them, and the merge fails as without it.
+		 */
+		resolveConflicts?: ( conflicts: Array<ConflictedFile> ) => Promise<Map<string, string> | null>;
+	} ): Promise<void>;
 
 	/**
 	 * Commits the given paths (relative to the repository root). Returns `false` when there was nothing to commit.
@@ -93,6 +103,17 @@ export type GitWorkspace = {
 };
 
 /**
+ * A file with a conflict in a merge: its content in the common ancestor, on the branch, and in the merged branch.
+ * `null` when the file does not exist there.
+ */
+export type ConflictedFile = {
+	path: string;
+	base: string | null;
+	ours: string | null;
+	theirs: string | null;
+};
+
+/**
  * Overrides of the commit author. Without them, the commits use the git configuration of the checkout: its author,
  * and its signing setup.
  */
@@ -132,6 +153,41 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 	// The commit of a leftover branch that the report branch replaces, so the push overwrites only that commit.
 	let replacedCommit: string | undefined;
 	let restackedBranches: Array<string> = [];
+
+	// Resolves the conflicts of the merge in progress and commits it. Returns `false`, changing nothing, when there are none
+	// to resolve, or when the resolver cannot resolve them.
+	const resolveMerge = async (
+		message: string,
+		resolveConflicts: ( conflicts: Array<ConflictedFile> ) => Promise<Map<string, string> | null>
+	): Promise<boolean> => {
+		const paths = ( await git.raw( [ 'diff', '--name-only', '--diff-filter=U' ] ) ).split( '\n' ).filter( Boolean );
+
+		if ( !paths.length ) {
+			return false;
+		}
+
+		const version = ( stage: number, file: string ) => git.raw( [ 'show', `:${ stage }:${ file }` ] ).catch( () => null );
+		const conflicts = await Promise.all( paths.map( async file => ( {
+			path: file,
+			base: await version( 1, file ),
+			ours: await version( 2, file ),
+			theirs: await version( 3, file )
+		} ) ) );
+		const resolved = await resolveConflicts( conflicts );
+
+		if ( !resolved || paths.some( file => !resolved.has( file ) ) ) {
+			return false;
+		}
+
+		for ( const [ file, content ] of resolved ) {
+			await writeFile( upath.join( path, file ), content );
+		}
+
+		await git.add( [ '--', ...resolved.keys() ] );
+		await git.raw( [ 'commit', '--quiet', '-m', message ] );
+
+		return true;
+	};
 
 	return {
 		path,
@@ -176,7 +232,7 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 			}
 		},
 
-		async checkoutReportBranch( { name, stack } ) {
+		async checkoutReportBranch( { name, stack, resolveConflicts } ) {
 			let parent = baseCommit;
 			let parentName = branch;
 
@@ -189,9 +245,19 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 
 				const before = await git.revparse( [ 'HEAD' ] );
 
+				const message = `Merge ${ parentName } into ${ member }.`;
+
 				try {
-					await git.merge( [ '--no-edit', '-m', `Merge ${ parentName } into ${ member }.`, parent ] );
+					await git.merge( [ '--no-edit', '-m', message, parent ] );
 				} catch ( error ) {
+					if ( resolveConflicts && await resolveMerge( message, resolveConflicts ) ) {
+						restackedBranches.push( member );
+						parent = member;
+						parentName = member;
+
+						continue;
+					}
+
 					await git.merge( [ '--abort' ] ).catch( () => {} );
 
 					throw new Error(

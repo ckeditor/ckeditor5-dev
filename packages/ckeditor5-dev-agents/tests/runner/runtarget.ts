@@ -441,6 +441,50 @@ describe( 'runTarget()', () => {
 			expectBackOnTheBase();
 		} );
 
+		it( 'merges the state of a part into the next one when both changed it, for example after a rejection below', async () => {
+			const first = 'ai-tasks/meta/x/stable';
+			const second = 'ai-tasks/meta/x/stable--2';
+
+			await publish( [ [ 'meta', true ] ] );
+			openPullRequests( [ 1, first, 'stable' ] );
+			await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
+			await newCheckout();
+			await publish( [ [ 'meta', true ] ] );
+
+			// A human rejects the finding of `docs/b.md` in the first part: its fix is reverted, and it leaves the state.
+			git( seed, 'fetch', '--quiet', 'origin' );
+			git( seed, 'checkout', '--quiet', '-B', first, `origin/${ first }` );
+
+			const open = JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/open.json' ) ) as Array<Finding>;
+			const baseline = JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/baseline.json' ) ) as Record<string, string>;
+
+			delete baseline[ 'docs/b.md' ];
+			await pushFiles( seed, {
+				'docs/b.md': 'BAD\n',
+				'.ai-tasks/meta/open.json': JSON.stringify( open.filter( finding => finding.unit !== 'docs/b.md' ), null, '\t' ) + '\n',
+				'.ai-tasks/meta/baseline.json': JSON.stringify( baseline, null, '\t' ) + '\n',
+				'.ai-tasks/meta/report.md': 'The report after the rejection.\n'
+			}, first );
+			git( seed, 'checkout', '--quiet', 'stable' );
+
+			openPullRequests( [ 1, first, 'stable' ], [ 2, second, first ] );
+			await pushFiles( seed, { 'docs/d.md': 'BAD too\n' } );
+			await newCheckout();
+
+			const results = await publish( [ [ 'meta', true ] ] );
+			const secondOpen = JSON.parse( readRemote( second, '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
+			const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
+
+			expect( results[ 0 ]!.failure ).toBeUndefined();
+			expect( git( remote, 'log', '-1', '--format=%s', second ).trim() ).toBe( `Merge ${ first } into ${ second }.` );
+			expect( secondOpen.map( finding => finding.unit ) ).toEqual( [ 'docs/c.md' ] );
+			expect( Object.keys( JSON.parse( readRemote( second, '.ai-tasks/meta/baseline.json' ) ) ) ).not.toContain( 'docs/b.md' );
+			expect( secondReport ).not.toContain( '<<<<<<<' );
+			expect( secondReport ).toContain( 'docs/c.md' );
+			expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( { head: 'ai-tasks/meta/x/stable--3', base: second } ) );
+			expectBackOnTheBase();
+		} );
+
 		it( 'bases a stacked pull request on the one below it again when that one was merged', async () => {
 			await publish( [ [ 'meta', true ] ] );
 
