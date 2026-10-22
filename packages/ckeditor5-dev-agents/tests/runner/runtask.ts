@@ -575,7 +575,7 @@ describe( 'runTask()', () => {
 				fragment: fileHash( 'This is BAD.\n' ),
 				fix: { files: [ 'docs/b.md' ], fragment: fileHash( 'This is GOOD.\n' ), fixedAt: TODAY }
 			} );
-			expect( await readText( upath.join( statePath, 'report.md' ) ) ).toContain( '## Fixed in the report pull request' );
+			expect( await readText( upath.join( statePath, 'report.md' ) ) ).toContain( '## Fixed in the report pull requests' );
 		} );
 
 		it( 'judges the units in parallel, then fixes them one at a time', async () => {

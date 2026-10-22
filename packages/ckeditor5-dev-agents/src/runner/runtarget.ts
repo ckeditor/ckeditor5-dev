@@ -72,9 +72,10 @@ type StackedPullRequest = OpenPullRequest & {
  * Runs the selected tasks against one target, in the working tree of the checkout.
  *
  * Both flows judge, fix, and write the state in the checkout. Kept fixes and the state stay in the files. A local run
- * stops there: nothing is committed or pushed. A published run does every task on its own report branch: it continues
- * the open report pull request or starts a new branch at the base branch, commits and pushes once, opens or updates
- * the pull request, and checks out the base branch again.
+ * stops there: nothing is committed or pushed. A published run does every task on a new report branch: it starts at
+ * the top of the stack of open report pull requests, or at the base branch, commits and pushes once, opens a pull request
+ * stacked on the open ones, and checks out the base branch again. A run without new findings or fixes adds its commit
+ * to the top of the stack instead.
  */
 export async function runTarget( options: RunTargetOptions ): Promise<Array<TaskResult>> {
 	const { target, workspace, github, log } = options;

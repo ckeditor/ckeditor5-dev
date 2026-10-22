@@ -37,7 +37,7 @@ export type RunTasksOptions = {
 
 	/**
 	 * Set for a published run: a GitHub token that can open pull requests and comment on them in every target.
-	 * The run commits and pushes the state and the fixes, and opens or updates the report pull requests. Without it,
+	 * The run commits and pushes the state and the fixes, and opens the report pull requests. Without it,
 	 * everything stays in the working tree. Pushing uses the credentials of the checkout.
 	 */
 	token?: string;

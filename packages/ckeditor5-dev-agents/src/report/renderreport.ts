@@ -38,12 +38,13 @@ export function renderReport( { task, target, branch, open }: {
 
 	lines.push(
 		`**${ unresolved.length }** open ${ plural( unresolved.length, 'finding' ) }, ` +
-			`**${ fixed.length }** fixed in the report pull request.`,
+			`**${ fixed.length }** fixed in the report pull requests.`,
 		'',
 		'Resolve each finding in one of these ways, using the ID in its heading:',
 		'',
-		'* Keep it: keep the proposed fix, or fix it yourself in the report pull request.',
-		'* Reject it: check out the report branch and run `ckeditor5-dev-agents reject <id> --reason "…"`. It records why ' +
+		'* Keep it: keep the proposed fix, or fix it yourself in its report pull request.',
+		'* Reject it: check out the report branch of the pull request that fixed it, or of the top one for a finding without a fix, ' +
+			'and run `ckeditor5-dev-agents reject <id> --reason "…"`. It records why ' +
 			`the finding is wrong in \`${ upath.join( target.root, taskStatePath ) }/decisions/\`, removes it from \`open.json\`, ` +
 			'and reverts its fix. The decision holds until the judged content changes. Commit and push the result.',
 		'* Dismiss it: `ckeditor5-dev-agents dismiss <id>` does the same without a decision, so it may be reported again once the judged ' +
@@ -107,7 +108,7 @@ export function renderReport( { task, target, branch, open }: {
 		}
 	};
 
-	renderFindings( 'Fixed in the report pull request', fixed );
+	renderFindings( 'Fixed in the report pull requests', fixed );
 	renderFindings( 'Open', unresolved );
 
 	return lines.join( '\n' );

@@ -25,7 +25,7 @@ const COMMON_OPTIONS = {
  * * `--cwd <path>`: a directory inside the checkout to run in. Default: the current directory.
  * * `--target <name>`: the targets to run (repeatable or comma-separated). Default: the targets of the checkout.
  * * `--task <id>`: the tasks to run (repeatable or comma-separated). Default: the tasks each target enables.
- * * `--publish`: commit and push the state and the fixes, and open or update the report pull requests.
+ * * `--publish`: commit and push the state and the fixes, and open the report pull requests.
  *
  * Paths are relative to the current directory.
  */
