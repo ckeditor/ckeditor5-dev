@@ -331,10 +331,12 @@ async function getStack(
 			const isClosedPart = getReportBranchPart( firstBranch, pull.base ) !== null && !openHeads.has( pull.base );
 
 			if ( isClosedPart && !await github.wasMerged( { slug, head: pull.base } ) ) {
+				const above = pulls.slice( index ).map( item => item.html_url );
+				const toClose = above.length > 1 ? `it and the parts above it (${ above.join( ', ' ) })` : 'it';
+
 				throw new Error(
 					`The report pull request ${ pull.html_url } is based on "${ pull.base }", whose pull request was closed without ` +
-					`merging. Merging ${ pull.html_url } would land its changes too. Close ${ pull.html_url } as well, ` +
-					'or change its base by hand.'
+					`merging, so merging it would land those changes too. Close ${ toClose }: the next run opens a new part.`
 				);
 			}
 

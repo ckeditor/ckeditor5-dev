@@ -508,13 +508,14 @@ describe( 'runTarget()', () => {
 
 		it( 'fails the task, and changes nothing, when a part is based on a part closed without merging', async () => {
 			github.wasMerged.mockResolvedValue( false );
-			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ], [ 6, 'ai-tasks/meta/x/stable--3', 'ai-tasks/meta/x/stable--2' ] );
 
 			const results = await publish( [ [ 'meta', true ] ] );
 
 			expect( results[ 0 ]!.failure ).toBe(
-				'The report pull request https://pr/5 is based on "ai-tasks/meta/x/stable", whose pull request was closed without merging. ' +
-				'Merging https://pr/5 would land its changes too. Close https://pr/5 as well, or change its base by hand.'
+				'The report pull request https://pr/5 is based on "ai-tasks/meta/x/stable", whose pull request was closed without merging, ' +
+				'so merging it would land those changes too. Close it and the parts above it (https://pr/5, https://pr/6): ' +
+				'the next run opens a new part.'
 			);
 			expect( github.updatePullRequest ).not.toHaveBeenCalled();
 			expect( github.createPullRequest ).not.toHaveBeenCalled();

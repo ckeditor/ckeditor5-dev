@@ -34,7 +34,8 @@ export type GitHubClient = {
 	createPullRequest( options: { slug: string; head: string; base: string; title: string; body: string } ): Promise<PullRequest>;
 
 	/**
-	 * Whether a pull request from the branch of the repository was merged.
+	 * Whether the pull request from the branch of the repository that was closed last was merged. Report branches
+	 * are reused by later stacks, so an older pull request from the same branch says nothing about the last one.
 	 */
 	wasMerged( options: { slug: string; head: string } ): Promise<boolean>;
 
@@ -86,7 +87,9 @@ export function createGitHubClient( token: string ): GitHubClient {
 			const query = { owner, repo, state: 'closed' as const, head: `${ owner }:${ head }`, per_page: 100 };
 			const pulls = await octokit.paginate( octokit.pulls.list, query );
 
-			return pulls.some( pull => pull.merged_at );
+			const [ last ] = pulls.toSorted( ( a, b ) => ( b.closed_at ?? '' ).localeCompare( a.closed_at ?? '' ) );
+
+			return Boolean( last?.merged_at );
 		},
 
 		async createPullRequest( { slug, head, base, title, body } ) {
