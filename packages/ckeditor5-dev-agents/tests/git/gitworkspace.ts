@@ -315,6 +315,21 @@ describe( 'openWorkspace()', () => {
 		expect( git( remote, 'log', '--format=%s', reportBranch ).trim().split( '\n' ) ).toEqual( [ 'Newer state.', 'New state.', 'More changes.', 'Initial commit.' ] );
 	} );
 
+	it( 'does not replace a leftover branch that another run pushed meanwhile', async () => {
+		await pushFiles( seed, { 'README.md': 'Leftover\n' }, reportBranch );
+
+		const workspace = await open();
+
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
+		await pushFiles( seed, { 'README.md': 'Another run\n' }, reportBranch );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+		await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+
+		await expect( workspace.push() ).rejects.toThrow( /stale info|rejected/ );
+		expect( git( remote, 'log', '-1', '--format=%s', reportBranch ).trim() ).toBe( 'More changes.' );
+		expect( git( remote, 'show', `${ reportBranch }:README.md` ) ).toBe( 'Another run\n' );
+	} );
+
 	it( 'aborts a conflicting merge and throws with the cause', async () => {
 		const first = await open();
 

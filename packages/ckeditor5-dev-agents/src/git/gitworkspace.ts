@@ -128,7 +128,8 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 	const baseCommit = ( await git.revparse( [ 'HEAD' ] ) ).trim();
 
 	let reportBranch: string | undefined;
-	let needsForcePush = false;
+	// The commit of a leftover branch that the report branch replaces, so the push overwrites only that commit.
+	let replacedCommit: string | undefined;
 	let restackedBranches: Array<string> = [];
 
 	return {
@@ -208,7 +209,7 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 			}
 
 			// A leftover branch of a merged or closed pull request is replaced. Nobody reviews it any more.
-			needsForcePush = Boolean( ( await git.raw( [ 'ls-remote', '--heads', 'origin', name ] ) ).trim() );
+			replacedCommit = ( await git.raw( [ 'ls-remote', '--heads', 'origin', name ] ) ).trim().split( /\s/ )[ 0 ] || undefined;
 
 			await git.checkout( [ '-B', name, parent ] );
 		},
@@ -232,10 +233,13 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 				await git.push( 'origin', member );
 			}
 
-			await git.push( 'origin', reportBranch!, needsForcePush ? [ '--force' ] : [] );
+			// A run that pushed the same branch meanwhile changed it, so the lease fails instead of overwriting that run.
+			const lease = replacedCommit ? [ `--force-with-lease=refs/heads/${ reportBranch }:${ replacedCommit }` ] : [];
+
+			await git.push( 'origin', reportBranch!, lease );
 
 			restackedBranches = [];
-			needsForcePush = false;
+			replacedCommit = undefined;
 		},
 
 		async returnToBase() {
