@@ -6,7 +6,7 @@
 /* eslint-disable @stylistic/max-len */
 
 import { describe, it, expect } from 'vitest';
-import { renderPullRequestBody, renderRunComment } from '../../src/report/renderpullrequest.js';
+import { renderPullRequestBody, renderRunComment, renderSlackMessage } from '../../src/report/renderpullrequest.js';
 import type { TaskSummary } from '../../src/types.js';
 
 describe( 'pull request rendering', () => {
@@ -42,11 +42,34 @@ describe( 'pull request rendering', () => {
 
 		expect( body ).toContain( 'the "Meta description" task (`meta`)' );
 		expect( body ).toContain( 'It covers `cs` at `stable`.' );
-		expect( body ).toContain( '**1** open finding, **2** fixed in this pull request.' );
+		expect( body ).toContain( '**1** open finding in total, **2** fixed in this pull request.' );
 		expect( body ).toContain( 'See [report.md](https://github.com/owner/repo/blob/ai-tasks/meta/cs/stable/projects/cs/.ai-tasks/meta/report.md) ' +
 			'for the findings and how to review them.' );
-		expect( body ).toContain( 'Merge this pull request to record the state on `stable`.' );
+		expect( body ).toContain( 'Merge this pull request, with a merge commit, to record the state on `stable`.' );
+		expect( body ).toContain( 'every run that finds something new opens another pull request on top of it' );
 		expect( renderPullRequestBody( { task, target, branch: 'stable', reportBranch: 'x', open: 3, fixed: 0 } ) ).toContain( '**3** open findings' );
+	} );
+
+	it( 'renderPullRequestBody() says which pull request a stacked one is based on', () => {
+		const body = renderPullRequestBody( {
+			task, target, branch: 'stable', reportBranch: 'ai-tasks/meta/cs/stable--2', parent: { number: 7 }, open: 1, fixed: 1
+		} );
+
+		expect( body ).toContain( 'It is stacked on #7, so it shows only the changes of this run. Merge #7 first, with a merge commit. ' +
+			'GitHub then bases this pull request on `stable`.' );
+		expect( body ).not.toContain( 'to record the state on' );
+	} );
+
+	it( 'renderSlackMessage() links the pull request and escapes the names', () => {
+		const message = renderSlackMessage( {
+			task: { title: 'Docs <BLUF> & more' },
+			target,
+			branch: 'stable',
+			pullRequest: { number: 12, html_url: 'https://pr/12' },
+			summary: { ...summary, newFindings: 1, fixed: 0, open: 3 }
+		} );
+
+		expect( message ).toBe( '*Docs &lt;BLUF&gt; &amp; more* (cs, `stable`) opened <https://pr/12|#12>: 1 new finding, 0 fixed, 3 open.' );
 	} );
 
 	it( 'renderRunComment() renders the summary table and the problems', () => {

@@ -4,14 +4,18 @@
  */
 
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import upath from 'upath';
 import { REPORT_BRANCH_PREFIX, STATE_DIRECTORY } from '../constants.js';
-import { renderPullRequestBody, renderRunComment } from '../report/renderpullrequest.js';
+import { renderPullRequestBody, renderRunComment, renderSlackMessage } from '../report/renderpullrequest.js';
+import { postSlackMessage } from '../notify/postslackmessage.js';
+import { renderReport } from '../report/renderreport.js';
+import { mergeBaseline, mergeOpenFindings } from '../state/mergestate.js';
 import { getErrorMessage, plural } from '../utils/strings.js';
 import { runTask, type RunTaskResult } from './runtask.js';
-import type { GitWorkspace } from '../git/gitworkspace.js';
-import type { GitHubClient } from '../github/githubclient.js';
-import type { Target, TaskInstance, TaskSummary } from '../types.js';
+import type { ConflictedFile, GitWorkspace } from '../git/gitworkspace.js';
+import type { GitHubClient, OpenPullRequest } from '../github/githubclient.js';
+import type { Finding, Target, TaskInstance, TaskSummary } from '../types.js';
 
 export type TaskResult = {
 	task: string;
@@ -50,15 +54,28 @@ export type RunTargetOptions = {
 	 * Published run: linked from the run comment.
 	 */
 	buildUrl?: string;
+
+	/**
+	 * Published run: a Slack incoming webhook that is told about every new report pull request.
+	 */
+	slackWebhookUrl?: string;
+};
+
+/**
+ * An open report pull request of a task, with its part of the stack.
+ */
+type StackedPullRequest = OpenPullRequest & {
+	part: number;
 };
 
 /**
  * Runs the selected tasks against one target, in the working tree of the checkout.
  *
  * Both flows judge, fix, and write the state in the checkout. Kept fixes and the state stay in the files. A local run
- * stops there: nothing is committed or pushed. A published run does every task on its own report branch: it continues
- * the open report pull request or starts a new branch at the base branch, commits and pushes once, opens or updates
- * the pull request, and checks out the base branch again.
+ * stops there: nothing is committed or pushed. A published run does every task on a new report branch: it starts at
+ * the top of the stack of open report pull requests, or at the base branch, commits and pushes once, opens a pull request
+ * stacked on the open ones, and checks out the base branch again. A run without new findings or fixes adds its commit
+ * to the top of the stack instead.
  */
 export async function runTarget( options: RunTargetOptions ): Promise<Array<TaskResult>> {
 	const { target, workspace, github, log } = options;
@@ -109,8 +126,27 @@ export async function runTarget( options: RunTargetOptions ): Promise<Array<Task
 	return results;
 }
 
-export function getReportBranch( taskId: string, target: Pick<Target, 'name'>, branch: string ): string {
-	return `${ REPORT_BRANCH_PREFIX }/${ taskId }/${ target.name }/${ branch }`;
+/**
+ * Returns the report branch of the task in the target for the base branch. The first part of a stack uses it as it is,
+ * the next parts add `--<part>`: `ai-tasks/<task>/<target>/<branch>--2`.
+ */
+export function getReportBranch( taskId: string, target: Pick<Target, 'name'>, branch: string, part = 1 ): string {
+	const name = `${ REPORT_BRANCH_PREFIX }/${ taskId }/${ target.name }/${ branch }`;
+
+	return part > 1 ? `${ name }--${ part }` : name;
+}
+
+/**
+ * Returns the part of the stack that the branch is, or `null` when it is not a part of the stack of the report branch.
+ */
+export function getReportBranchPart( reportBranch: string, branch: string ): number | null {
+	if ( branch === reportBranch ) {
+		return 1;
+	}
+
+	const part = branch.startsWith( `${ reportBranch }--` ) ? branch.slice( reportBranch.length + 2 ) : '';
+
+	return /^[1-9]\d*$/.test( part ) ? Number( part ) : null;
 }
 
 function executeTask( options: RunTargetOptions, root: string, instance: TaskInstance, pruneFixed: boolean ): Promise<RunTaskResult> {
@@ -125,54 +161,83 @@ async function publishTask(
 	root: string,
 	instance: TaskInstance
 ): Promise<Omit<TaskResult, 'task' | 'title' | 'durationMs'>> {
-	const { target, workspace, today, buildUrl, log } = options;
+	const { target, workspace, today, buildUrl, slackWebhookUrl, log } = options;
 	const { task } = instance;
 	const { branch } = workspace;
-	const reportBranch = getReportBranch( task.id, target, branch );
-	let pullRequest = await github.findOpenPullRequest( { slug: target.slug, head: reportBranch } );
+	const firstBranch = getReportBranch( task.id, target, branch );
+	let pullRequest: { number: number; html_url: string } | undefined;
 	let saved: RunTaskResult | undefined;
 	let failure: string | undefined;
 
 	try {
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: Boolean( pullRequest ) } );
-		log( pullRequest ?
-			`  Continuing the open report pull request: ${ pullRequest.html_url }` :
+		const stack = await getStack( github, { slug: target.slug, firstBranch, base: branch, log } );
+		const parent = stack.at( -1 );
+		const part = parent ? parent.part + 1 : 1;
+		const reportBranch = getReportBranch( task.id, target, branch, part );
+
+		await workspace.checkoutReportBranch( {
+			name: reportBranch,
+			stack: stack.map( pull => pull.head ),
+			resolveConflicts: conflicts => resolveStateConflicts( conflicts, { instance, target, branch, workspace } )
+		} );
+		log( parent ?
+			`  Stacking the "${ reportBranch }" report branch on the open report pull request: ${ parent.html_url }` :
 			`  Starting the "${ reportBranch }" report branch at "${ branch }".`
 		);
 
-		saved = await executeTask( options, root, instance, !pullRequest );
+		// Findings fixed in a reviewed report pull request are dropped. While a part of the stack is open, they stay.
+		saved = await executeTask( options, root, instance, !parent );
 
 		const paths = [
 			upath.join( target.root, STATE_DIRECTORY, task.id ),
 			...saved.files.map( file => upath.relative( workspace.path, file ) )
 		];
-		const judged = saved.summary.judged;
-		const committed = await workspace.commit( paths, `${ task.title }: ${ judged } ${ plural( judged, 'unit' ) } judged.` );
+		const { summary } = saved;
+		const message = `${ task.title }: ${ summary.judged } ${ plural( summary.judged, 'unit' ) } judged.`;
+		const committed = await workspace.commit( paths, message );
 
-		if ( committed ) {
+		// A run that only judged units, without new findings or fixes, has nothing to review. Its state goes to the top
+		// of the stack instead of a new part.
+		const hasNews = summary.newFindings > 0 || summary.fixed > 0;
+
+		if ( committed && parent && !hasNews ) {
+			await workspace.push( { onto: parent.head } );
+
+			pullRequest = parent;
+			log( `  Nothing new to review. Added the state to the open report pull request: ${ parent.html_url }` );
+
+			await github.createComment( {
+				slug: target.slug,
+				number: parent.number,
+				body: renderRunComment( { today, buildUrl, summary } )
+			} );
+		} else if ( committed ) {
 			await workspace.push();
 
-			const fixed = saved.open.filter( finding => finding.fix ).length;
-			const body = renderPullRequestBody( { task, target, branch, reportBranch, open: saved.open.length - fixed, fixed } );
-
-			if ( pullRequest ) {
-				await github.updatePullRequest( { slug: target.slug, number: pullRequest.number, body } );
-			} else {
-				pullRequest = await github.createPullRequest( {
-					slug: target.slug,
-					head: reportBranch,
-					base: branch,
-					title: `${ task.title }: ${ target.name } (${ branch })`,
-					body
-				} );
-				log( `  Opened the report pull request: ${ pullRequest.html_url }` );
-			}
+			pullRequest = await github.createPullRequest( {
+				slug: target.slug,
+				head: reportBranch,
+				base: parent?.head ?? branch,
+				title: `${ task.title }: ${ target.name } (${ branch })${ part > 1 ? `, part ${ part }` : '' }`,
+				body: renderPullRequestBody( { task, target, branch, reportBranch, parent, open: summary.open, fixed: summary.fixed } )
+			} );
+			log( `  Opened the report pull request: ${ pullRequest.html_url }` );
 
 			await github.createComment( {
 				slug: target.slug,
 				number: pullRequest.number,
-				body: renderRunComment( { today, buildUrl, summary: saved.summary } )
+				body: renderRunComment( { today, buildUrl, summary } )
 			} );
+
+			// A missed notification does not undo the pull request, so it is reported as a problem, not as a failure.
+			if ( slackWebhookUrl && hasNews ) {
+				try {
+					await postSlackMessage( slackWebhookUrl, renderSlackMessage( { task, target, branch, pullRequest, summary } ) );
+				} catch ( error ) {
+					summary.problems.push( { message: `Notifying Slack failed: ${ getErrorMessage( error ) }` } );
+					log( `  Notifying Slack failed: ${ getErrorMessage( error ) }` );
+				}
+			}
 		} else {
 			log( '  Nothing new. Nothing was pushed.' );
 		}
@@ -190,4 +255,97 @@ async function publishTask(
 	}
 
 	return saved ? { summary: saved.summary, failure, pullRequestUrl: pullRequest?.html_url } : { failure };
+}
+
+/**
+ * Resolves the conflicts of merging a part of the stack into the next one, when all of them are in the state of the task.
+ * Both parts change the state: a run adds to it, `reject` and `dismiss` remove from it. So `open.json` and `baseline.json`
+ * are merged per finding and per unit, and `report.md` is rendered again from the result, also when it had no conflict.
+ * A conflict anywhere else is left to a human.
+ */
+async function resolveStateConflicts(
+	conflicts: Array<ConflictedFile>,
+	{ instance, target, branch, workspace }: { instance: TaskInstance; target: Target; branch: string; workspace: GitWorkspace }
+): Promise<Map<string, string> | null> {
+	const { task } = instance;
+	const statePath = upath.join( target.root, STATE_DIRECTORY, task.id );
+	const files = { open: `${ statePath }/open.json`, baseline: `${ statePath }/baseline.json`, report: `${ statePath }/report.md` };
+
+	if ( conflicts.some( conflict => !Object.values( files ).includes( conflict.path ) ) ) {
+		return null;
+	}
+
+	const resolved = new Map<string, string>();
+	const toJson = ( value: unknown ) => JSON.stringify( value, null, '\t' ) + '\n';
+
+	// A file without a conflict was merged by git already. Its working tree content is the result.
+	const read = async <T>( file: string, merge: ( base: T, ours: T, theirs: T ) => T, empty: T ): Promise<T> => {
+		const conflict = conflicts.find( item => item.path === file );
+
+		if ( !conflict ) {
+			return JSON.parse( await readFile( upath.join( workspace.path, file ), 'utf8' ) ) as T;
+		}
+
+		const parse = ( content: string | null ) => content === null ? empty : JSON.parse( content ) as T;
+		const merged = merge( parse( conflict.base ), parse( conflict.ours ), parse( conflict.theirs ) );
+
+		resolved.set( file, toJson( merged ) );
+
+		return merged;
+	};
+
+	try {
+		const open = await read<Array<Finding>>( files.open, mergeOpenFindings, [] );
+
+		await read<Record<string, string>>( files.baseline, mergeBaseline, {} );
+
+		resolved.set( files.report, renderReport( { task, target, branch, open } ) );
+	} catch {
+		// A state file that is missing or is not valid JSON is left to a human.
+		return null;
+	}
+
+	return resolved;
+}
+
+/**
+ * Returns the open report pull requests of the task, from the bottom of the stack to the top. Each of them must be
+ * based on the one below it, and the bottom one on the base branch. A pull request whose base changed, for example
+ * because the one below it was merged or closed, is based on the right branch again.
+ */
+async function getStack(
+	github: GitHubClient,
+	{ slug, firstBranch, base, log }: { slug: string; firstBranch: string; base: string; log: ( message: string ) => void }
+): Promise<Array<StackedPullRequest>> {
+	const pulls = ( await github.listOpenPullRequests( { slug, filter: head => getReportBranchPart( firstBranch, head ) !== null } ) )
+		.map( pull => ( { ...pull, part: getReportBranchPart( firstBranch, pull.head )! } ) )
+		.sort( ( a, b ) => a.part - b.part );
+
+	const openHeads = new Set( pulls.map( pull => pull.head ) );
+
+	for ( const [ index, pull ] of pulls.entries() ) {
+		const expectedBase = index ? pulls[ index - 1 ]!.head : base;
+
+		if ( pull.base !== expectedBase ) {
+			// A part based on a part that is not open any more holds its commits. They may land only if it was merged.
+			const isClosedPart = getReportBranchPart( firstBranch, pull.base ) !== null && !openHeads.has( pull.base );
+
+			if ( isClosedPart && !await github.wasMerged( { slug, head: pull.base } ) ) {
+				const above = pulls.slice( index ).map( item => item.html_url );
+				const toClose = above.length > 1 ? `it and the parts above it (${ above.join( ', ' ) })` : 'it';
+
+				throw new Error(
+					`The report pull request ${ pull.html_url } is based on "${ pull.base }", whose pull request was closed without ` +
+					`merging, so merging it would land those changes too. Close ${ toClose }: the next run opens a new part.`
+				);
+			}
+
+			await github.updatePullRequest( { slug, number: pull.number, base: expectedBase } );
+			log( `  Changed the base of ${ pull.html_url } from "${ pull.base }" to "${ expectedBase }".` );
+
+			pull.base = expectedBase;
+		}
+	}
+
+	return pulls;
 }

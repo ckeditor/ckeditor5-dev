@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, it, expect, vi, type Mock } from 'vitest';
 import upath from 'upath';
-import { getReportBranch, runTarget, type RunTargetOptions } from '../../src/runner/runtarget.js';
+import { getReportBranch, getReportBranchPart, runTarget, type RunTargetOptions } from '../../src/runner/runtarget.js';
 import type { LoadedTask } from '../../src/config/loadtasks.js';
 import { openWorkspace, type GitWorkspace } from '../../src/git/gitworkspace.js';
 import { readJson, readText, removeTempDirectories } from '../_utils/files.js';
@@ -95,6 +95,27 @@ function createTarget( entries: Array<[ string, boolean ] | TaskInstance>, root 
 describe( 'getReportBranch()', () => {
 	it( 'returns the branch of the task, target and base branch', () => {
 		expect( getReportBranch( 'meta', { name: 'cs' }, 'stable' ) ).toBe( 'ai-tasks/meta/cs/stable' );
+	} );
+
+	it( 'adds the part of the stack from the second part on', () => {
+		expect( getReportBranch( 'meta', { name: 'cs' }, 'stable', 1 ) ).toBe( 'ai-tasks/meta/cs/stable' );
+		expect( getReportBranch( 'meta', { name: 'cs' }, 'release/v1', 12 ) ).toBe( 'ai-tasks/meta/cs/release/v1--12' );
+	} );
+} );
+
+describe( 'getReportBranchPart()', () => {
+	it.each( [
+		[ 'ai-tasks/meta/cs/stable', 1 ],
+		[ 'ai-tasks/meta/cs/stable--2', 2 ],
+		[ 'ai-tasks/meta/cs/stable--10', 10 ],
+		[ 'ai-tasks/meta/cs/stable--0', null ],
+		[ 'ai-tasks/meta/cs/stable--02', null ],
+		[ 'ai-tasks/meta/cs/stable--x', null ],
+		[ 'ai-tasks/meta/cs/stable-2', null ],
+		[ 'ai-tasks/meta/cs/stable/next', null ],
+		[ 'ai-tasks/other/cs/stable', null ]
+	] )( 'reads "%s" as part %s', ( branch, part ) => {
+		expect( getReportBranchPart( 'ai-tasks/meta/cs/stable', branch ) ).toBe( part );
 	} );
 } );
 
@@ -260,7 +281,8 @@ describe( 'runTarget()', () => {
 
 		beforeEach( () => {
 			github = {
-				findOpenPullRequest: vi.fn( async () => null ),
+				listOpenPullRequests: vi.fn( async () => [] ),
+				wasMerged: vi.fn( async () => true ),
 				createPullRequest: vi.fn( async ( { head }: { head: string } ) => ( { number: head.includes( 'meta' ) ? 1 : 2, html_url: `https://pr/${ head }` } ) ),
 				updatePullRequest: vi.fn( async () => ( {} ) ),
 				createComment: vi.fn( async () => ( {} ) )
@@ -316,18 +338,18 @@ describe( 'runTarget()', () => {
 			expect( JSON.parse( readRemote( 'ai-tasks/plain/x/stable', '.ai-tasks/plain/open.json' ) ) ).toHaveLength( 1 );
 			expect( () => readRemote( 'ai-tasks/plain/x/stable', '.ai-tasks/meta/open.json' ) ).toThrow();
 
-			expect( github.findOpenPullRequest ).toHaveBeenCalledWith( { slug: 'owner/repo', head: 'ai-tasks/meta/x/stable' } );
+			expect( github.listOpenPullRequests ).toHaveBeenCalledWith( { slug: 'owner/repo', filter: expect.any( Function ) } );
 			expect( github.createPullRequest ).toHaveBeenCalledWith( expect.objectContaining( {
 				slug: 'owner/repo',
 				head: 'ai-tasks/meta/x/stable',
 				base: 'stable',
 				title: 'Task meta: x (stable)',
-				body: expect.stringContaining( '**0** open findings, **1** fixed in this pull request.' )
+				body: expect.stringContaining( '**0** open findings in total, **1** fixed in this pull request.' )
 			} ) );
 
 			expect( github.createPullRequest ).toHaveBeenCalledWith( expect.objectContaining( {
 				head: 'ai-tasks/plain/x/stable',
-				body: expect.stringContaining( '**1** open finding, **0** fixed in this pull request.' )
+				body: expect.stringContaining( '**1** open finding in total, **0** fixed in this pull request.' )
 			} ) );
 			expect( github.updatePullRequest ).not.toHaveBeenCalled();
 			expect( github.createComment ).toHaveBeenCalledWith( {
@@ -347,12 +369,18 @@ describe( 'runTarget()', () => {
 			expect( await readText( upath.join( checkout, 'docs/b.md' ) ) ).toBe( 'BAD\n' );
 		} );
 
-		it( 'continues an open pull request, keeps its fixed findings and pushes nothing when nothing is new', async () => {
+		// The open report pull requests, from the given heads with the given bases.
+		const openPullRequests = ( ...pulls: Array<[ number, string, string ]> ) => {
+			github.listOpenPullRequests.mockImplementation( async ( { filter }: { filter: ( head: string ) => boolean } ) => {
+				return pulls.filter( ( [ , head ] ) => filter( head ) ).map( ( [ number, head, base ] ) => ( { number, html_url: `https://pr/${ number }`, head, base } ) );
+			} );
+		};
+
+		it( 'stacks a new pull request on the open one, keeps its fixed findings and pushes nothing when nothing is new', async () => {
 			await publish( [ [ 'meta', true ] ] );
 
-			github.findOpenPullRequest.mockResolvedValue( { number: 1, html_url: 'https://pr/1' } );
+			openPullRequests( [ 1, 'ai-tasks/meta/x/stable', 'stable' ], [ 9, 'ai-tasks/other/x/stable', 'stable' ], [ 8, 'ai-tasks/meta/x/stable-fix', 'stable' ] );
 			github.createPullRequest.mockClear();
-			github.updatePullRequest.mockClear();
 			github.createComment.mockClear();
 			log.mockClear();
 
@@ -361,27 +389,228 @@ describe( 'runTarget()', () => {
 			const results = await publish( [ [ 'meta', true ] ] );
 
 			expect( results ).toEqual( [ expect.objectContaining( { task: 'meta' } ) ] );
-			expect( results[ 0 ]!.pullRequestUrl ).toBe( 'https://pr/1' );
+			expect( results[ 0 ]!.pullRequestUrl ).toBeUndefined();
 			expect( github.createPullRequest ).not.toHaveBeenCalled();
 			expect( github.updatePullRequest ).not.toHaveBeenCalled();
 			expect( github.createComment ).not.toHaveBeenCalled();
-			expect( log ).toHaveBeenCalledWith( '  Continuing the open report pull request: https://pr/1' );
+			expect( log ).toHaveBeenCalledWith( '  Stacking the "ai-tasks/meta/x/stable--2" report branch on the open report pull request: https://pr/1' );
 			expect( log ).toHaveBeenLastCalledWith( '  Nothing new. Nothing was pushed.' );
+			expect( () => git( remote, 'rev-parse', '--verify', 'ai-tasks/meta/x/stable--2' ) ).toThrow();
 			expectBackOnTheBase();
 
-			// A change on the base branch is merged in and judged.
+			// A change on the base branch is merged into the open branch, and the new run opens a pull request on top of it.
 			await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
 			await newCheckout();
 
 			const next = await publish( [ [ 'meta', true ] ] );
-			const open = JSON.parse( readRemote( 'ai-tasks/meta/x/stable', '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
+			const open = JSON.parse( readRemote( 'ai-tasks/meta/x/stable--2', '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
 
-			expect( next[ 0 ]!.pullRequestUrl ).toBe( 'https://pr/1' );
-			expect( github.createPullRequest ).not.toHaveBeenCalled();
-			expect( github.updatePullRequest ).toHaveBeenCalledOnce();
+			expect( next[ 0 ]!.pullRequestUrl ).toBe( 'https://pr/ai-tasks/meta/x/stable--2' );
+			expect( github.createPullRequest ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+				head: 'ai-tasks/meta/x/stable--2',
+				base: 'ai-tasks/meta/x/stable',
+				title: 'Task meta: x (stable), part 2',
+				body: expect.stringContaining( 'It is stacked on #1, so it shows only the changes of this run.' )
+			} ) );
 			expect( open.map( finding => [ finding.unit, Boolean( finding.fix ) ] ) ).toEqual( [ [ 'docs/b.md', true ], [ 'docs/c.md', true ] ] );
-			expect( git( remote, 'log', '--format=%s', 'ai-tasks/meta/x/stable' ) ).toContain( 'Merge stable into ai-tasks/meta/x/stable.' );
+			expect( git( remote, 'log', '-1', '--format=%s', 'ai-tasks/meta/x/stable' ).trim() ).toBe( 'Merge stable into ai-tasks/meta/x/stable.' );
+			expect( git( remote, 'diff', '--name-only', 'ai-tasks/meta/x/stable', 'ai-tasks/meta/x/stable--2' ).trim().split( '\n' ) )
+				.toEqual( [ '.ai-tasks/meta/baseline.json', '.ai-tasks/meta/open.json', '.ai-tasks/meta/report.md', 'docs/c.md' ] );
 			expectBackOnTheBase();
+		} );
+
+		it( 'adds the state of a run without new findings or fixes to the top of the stack, without a new pull request', async () => {
+			await publish( [ [ 'meta', true ] ] );
+
+			openPullRequests( [ 1, 'ai-tasks/meta/x/stable', 'stable' ] );
+			github.createPullRequest.mockClear();
+			github.createComment.mockClear();
+
+			// The new guide is fine: it is judged, so the baseline changes, but nothing is found.
+			await pushFiles( seed, { 'docs/c.md': 'Fine.\n' } );
+			await newCheckout();
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ] ).toMatchObject( { pullRequestUrl: 'https://pr/1', summary: { judged: 1, newFindings: 0, fixed: 0 } } );
+			expect( github.createPullRequest ).not.toHaveBeenCalled();
+			expect( github.createComment ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( { number: 1 } ) );
+			expect( log ).toHaveBeenCalledWith( '  Nothing new to review. Added the state to the open report pull request: https://pr/1' );
+			expect( Object.keys( JSON.parse( readRemote( 'ai-tasks/meta/x/stable', '.ai-tasks/meta/baseline.json' ) ) ) ).toContain( 'docs/c.md' );
+			expect( () => git( remote, 'rev-parse', '--verify', 'ai-tasks/meta/x/stable--2' ) ).toThrow();
+			expectBackOnTheBase();
+		} );
+
+		describe( 'when a part and the next one both changed the same files', () => {
+			const first = 'ai-tasks/meta/x/stable';
+			const second = 'ai-tasks/meta/x/stable--2';
+
+			// Two parts are open. Then a human changes the first one, and the base branch gets a new guide.
+			const stackWithChangeBelow = async ( change: ( state: { open: Array<Finding>; baseline: Record<string, string> } ) => Record<string, string> ) => {
+				await publish( [ [ 'meta', true ] ] );
+				openPullRequests( [ 1, first, 'stable' ] );
+				await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
+				await newCheckout();
+				await publish( [ [ 'meta', true ] ] );
+
+				git( seed, 'fetch', '--quiet', 'origin' );
+				git( seed, 'checkout', '--quiet', '-B', first, `origin/${ first }` );
+				await pushFiles( seed, change( {
+					open: JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/open.json' ) ),
+					baseline: JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/baseline.json' ) )
+				} ), first );
+				git( seed, 'checkout', '--quiet', 'stable' );
+
+				openPullRequests( [ 1, first, 'stable' ], [ 2, second, first ] );
+				await pushFiles( seed, { 'docs/d.md': 'BAD too\n' } );
+				await newCheckout();
+
+				return publish( [ [ 'meta', true ] ] );
+			};
+
+			it( 'merges the state, for example after a rejection below, and renders the report again', async () => {
+				// A human rejects the finding of `docs/b.md` in the first part: its fix is reverted, and it leaves the state.
+				const results = await stackWithChangeBelow( ( { open, baseline } ) => {
+					delete baseline[ 'docs/b.md' ];
+
+					return {
+						'docs/b.md': 'BAD\n',
+						'.ai-tasks/meta/open.json': JSON.stringify( open.filter( finding => finding.unit !== 'docs/b.md' ), null, '\t' ) + '\n',
+						'.ai-tasks/meta/baseline.json': JSON.stringify( baseline, null, '\t' ) + '\n',
+						'.ai-tasks/meta/report.md': 'The report after the rejection.\n'
+					};
+				} );
+				const secondOpen = JSON.parse( readRemote( second, '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
+				const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
+
+				expect( results[ 0 ]!.failure ).toBeUndefined();
+				expect( git( remote, 'log', '-1', '--format=%s', second ).trim() ).toBe( `Merge ${ first } into ${ second }.` );
+				expect( secondOpen.map( finding => finding.unit ) ).toEqual( [ 'docs/c.md' ] );
+				expect( Object.keys( JSON.parse( readRemote( second, '.ai-tasks/meta/baseline.json' ) ) ) ).not.toContain( 'docs/b.md' );
+				expect( secondReport ).not.toContain( '<<<<<<<' );
+				expect( secondReport ).toContain( 'docs/c.md' );
+				expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( { head: 'ai-tasks/meta/x/stable--3', base: second } ) );
+				expectBackOnTheBase();
+			} );
+
+			it( 'renders the report again from the state that git merged, when only the report has a conflict', async () => {
+				const results = await stackWithChangeBelow( () => ( { '.ai-tasks/meta/report.md': 'Edited by hand.\n' } ) );
+				const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
+
+				expect( results[ 0 ]!.failure ).toBeUndefined();
+				expect( secondReport ).not.toContain( 'Edited by hand.' );
+				expect( secondReport ).toContain( 'docs/b.md' );
+				expect( secondReport ).toContain( 'docs/c.md' );
+			} );
+
+			it( 'fails the task when a file outside the state has a conflict too', async () => {
+				const results = await stackWithChangeBelow( ( { open } ) => ( {
+					'docs/c.md': 'Changed by hand.\n',
+					'.ai-tasks/meta/open.json': JSON.stringify( open.slice( 1 ), null, '\t' ) + '\n'
+				} ) );
+
+				expect( results[ 0 ]!.failure ).toContain( `Merging "${ first }" into "${ second }" failed.` );
+				expectBackOnTheBase();
+			} );
+		} );
+
+		it( 'bases a stacked pull request on the one below it again when that one was merged', async () => {
+			await publish( [ [ 'meta', true ] ] );
+
+			// Part 1 was merged. Part 2 is still open.
+			git( remote, 'branch', 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
+			await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
+			await newCheckout();
+
+			await publish( [ [ 'meta', true ] ] );
+
+			expect( github.wasMerged ).toHaveBeenCalledExactlyOnceWith( { slug: 'owner/repo', head: 'ai-tasks/meta/x/stable' } );
+			expect( github.updatePullRequest ).toHaveBeenCalledExactlyOnceWith( { slug: 'owner/repo', number: 5, base: 'stable' } );
+			expect( log ).toHaveBeenCalledWith( '  Changed the base of https://pr/5 from "ai-tasks/meta/x/stable" to "stable".' );
+			expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( {
+				head: 'ai-tasks/meta/x/stable--3',
+				base: 'ai-tasks/meta/x/stable--2',
+				title: 'Task meta: x (stable), part 3'
+			} ) );
+		} );
+
+		it( 'tells to close the part when it is the only one above a part closed without merging', async () => {
+			github.wasMerged.mockResolvedValue( false );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ]!.failure ).toContain( 'so merging it would land those changes too. Close it: the next run opens a new part.' );
+		} );
+
+		it( 'fails the task, and changes nothing, when a part is based on a part closed without merging', async () => {
+			github.wasMerged.mockResolvedValue( false );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ], [ 6, 'ai-tasks/meta/x/stable--3', 'ai-tasks/meta/x/stable--2' ] );
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ]!.failure ).toBe(
+				'The report pull request https://pr/5 is based on "ai-tasks/meta/x/stable", whose pull request was closed without merging, ' +
+				'so merging it would land those changes too. Close it and the parts above it (https://pr/5, https://pr/6): ' +
+				'the next run opens a new part.'
+			);
+			expect( github.updatePullRequest ).not.toHaveBeenCalled();
+			expect( github.createPullRequest ).not.toHaveBeenCalled();
+			expectBackOnTheBase();
+		} );
+
+		it( 'tells Slack about a new report pull request', async () => {
+			const fetchMock = vi.fn( async () => new Response( 'ok' ) );
+
+			vi.stubGlobal( 'fetch', fetchMock );
+
+			const results = await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			const [ url, init ] = fetchMock.mock.calls[ 0 ] as unknown as [ string, RequestInit ];
+
+			expect( url ).toBe( 'https://hooks.slack/x' );
+			expect( JSON.parse( init.body as string ) ).toEqual( {
+				text: '*Task meta* (x, `stable`) opened <https://pr/ai-tasks/meta/x/stable|#1>: 1 new finding, 1 fixed, 0 open.'
+			} );
+			expect( results[ 0 ]!.summary!.problems ).toEqual( [] );
+		} );
+
+		it( 'does not tell Slack about a report pull request without new findings or fixes', async () => {
+			const fetchMock = vi.fn( async () => new Response( 'ok' ) );
+
+			vi.stubGlobal( 'fetch', fetchMock );
+			await pushFiles( seed, { 'docs/b.md': 'Fine.\n' } );
+			await newCheckout();
+
+			await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			expect( github.createPullRequest ).toHaveBeenCalledOnce();
+			expect( fetchMock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'reports a failed Slack notification as a problem, not as a failure', async () => {
+			vi.stubGlobal( 'fetch', vi.fn( async () => new Response( 'invalid_token', { status: 403 } ) ) );
+
+			const results = await runTarget( {
+				...baseOptions( createTarget( [ [ 'meta', true ] ] ) ),
+				github: github as unknown as GitHubClient,
+				slackWebhookUrl: 'https://hooks.slack/x'
+			} );
+
+			expect( results[ 0 ]!.failure ).toBeUndefined();
+			expect( results[ 0 ]!.summary!.problems ).toEqual( [
+				{ message: 'Notifying Slack failed: The Slack webhook responded with status 403: invalid_token' }
+			] );
+			expect( log ).toHaveBeenCalledWith( '  Notifying Slack failed: The Slack webhook responded with status 403: invalid_token' );
 		} );
 
 		it( 'prunes the fixed findings when a new report branch starts after a merge', async () => {
@@ -405,7 +634,7 @@ describe( 'runTarget()', () => {
 			await pushFiles( seed, { '.ai-tasks/meta/open.json': 'conflict\n' } );
 			await newCheckout();
 
-			github.findOpenPullRequest.mockImplementation( async ( { head }: { head: string } ) => ( { number: 1, html_url: `https://pr/${ head }` } ) );
+			openPullRequests( [ 1, 'ai-tasks/meta/x/stable', 'stable' ], [ 2, 'ai-tasks/plain/x/stable', 'stable' ] );
 
 			const results = await publish( [ [ 'meta', true ], [ 'plain', true ] ] );
 
@@ -506,19 +735,27 @@ describe( 'runTarget()', () => {
 			expectBackOnTheBase();
 		} );
 
-		it.each( [ 'updatePullRequest', 'createComment' ] as const )(
-			'keeps the completed summary and continues with the next task when %s fails', async method => {
-				github.findOpenPullRequest.mockResolvedValue( { number: 7, html_url: 'https://pr/7' } );
-				github[ method ].mockRejectedValueOnce( new Error( 'API unavailable.' ) );
+		it( 'keeps the completed summary and continues with the next task when createComment fails', async () => {
+			github.createComment.mockRejectedValueOnce( new Error( 'API unavailable.' ) );
 
-				const results = await publish( [ [ 'meta', true ], [ 'plain', true ] ] );
+			const results = await publish( [ [ 'meta', true ], [ 'plain', true ] ] );
 
-				expect( results[ 0 ] ).toMatchObject( {
-					failure: 'API unavailable.', summary: { judged: 2 }, pullRequestUrl: 'https://pr/7'
-				} );
-				expect( results[ 1 ] ).toMatchObject( { task: 'plain', summary: { judged: 2 } } );
-				expectBackOnTheBase();
-			}
-		);
+			expect( results[ 0 ] ).toMatchObject( {
+				failure: 'API unavailable.', summary: { judged: 2 }, pullRequestUrl: 'https://pr/ai-tasks/meta/x/stable'
+			} );
+			expect( results[ 1 ] ).toMatchObject( { task: 'plain', summary: { judged: 2 } } );
+			expectBackOnTheBase();
+		} );
+
+		it( 'records a failure to read or fix the stack as a failure of the task, before anything runs', async () => {
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'gone' ] );
+			github.updatePullRequest.mockRejectedValueOnce( new Error( 'API unavailable.' ) );
+
+			const results = await publish( [ [ 'meta', true ], [ 'plain', true ] ] );
+
+			expect( results[ 0 ] ).toEqual( { task: 'meta', title: 'Task meta', failure: 'API unavailable.', durationMs: expect.any( Number ) } );
+			expect( results[ 1 ] ).toMatchObject( { task: 'plain', summary: { judged: 2 } } );
+			expectBackOnTheBase();
+		} );
 	} );
 } );

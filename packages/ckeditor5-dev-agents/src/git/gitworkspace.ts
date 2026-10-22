@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { realpath, rm } from 'node:fs/promises';
+import { realpath, rm, writeFile } from 'node:fs/promises';
 import upath from 'upath';
 import { simpleGit, type SimpleGit } from 'simple-git';
 
@@ -32,13 +32,25 @@ export type GitWorkspace = {
 	assertPublishable( paths: Array<string> ): Promise<void>;
 
 	/**
-	 * Checks out the report branch of a task.
+	 * Checks out a new report branch of a task, on top of the open report branches of its `stack`.
 	 *
-	 * When the report pull request is open, it continues that branch and merges the base branch into it first, so
-	 * decisions and fixes merged to the base branch meanwhile are taken into account. A regular merge commit keeps
-	 * review comments anchored. When there is no open pull request, a fresh branch starts at the base branch.
+	 * The `stack` lists the branches of the open report pull requests of the task, from the bottom (based on the base
+	 * branch) to the top. Each of them gets its parent merged in first: the base branch into the bottom one, then every
+	 * branch into the next one. So the decisions and fixes merged to the base branch meanwhile are taken into account,
+	 * and every pull request still shows only its own changes. A regular merge commit keeps review comments anchored.
+	 * Then the new branch starts at the top of the stack, or at the base branch when the stack is empty.
 	 */
-	checkoutReportBranch( options: { name: string; continueExisting: boolean } ): Promise<void>;
+	checkoutReportBranch( options: {
+		name: string;
+		stack: Array<string>;
+
+		/**
+		 * Resolves the conflicts of a merge, given every conflicted file (relative to the repository root) with its three
+		 * versions. Returns the content of every one of them, and of any other file the merge commit should change, or `null`
+		 * when it cannot resolve them, and the merge fails as without it.
+		 */
+		resolveConflicts?: ( conflicts: Array<ConflictedFile> ) => Promise<Map<string, string> | null>;
+	} ): Promise<void>;
 
 	/**
 	 * Commits the given paths (relative to the repository root). Returns `false` when there was nothing to commit.
@@ -46,10 +58,11 @@ export type GitWorkspace = {
 	commit( paths: Array<string>, message: string ): Promise<boolean>;
 
 	/**
-	 * Pushes the report branch with the credentials of the checkout. The first push of a replaced branch is forced,
-	 * every later push is not.
+	 * Pushes the report branch with the credentials of the checkout, together with the branches of the stack that got
+	 * a merge. The first push of a replaced report branch is forced, every later push is not. With `onto`, the commits
+	 * go to that branch of the stack instead: the report branch starts at its top, so the push only adds to it.
 	 */
-	push(): Promise<void>;
+	push( options?: { onto?: string } ): Promise<void>;
 
 	/**
 	 * Drops anything a failed task left behind on the report branch and checks out the base branch again.
@@ -57,9 +70,25 @@ export type GitWorkspace = {
 	returnToBase(): Promise<void>;
 
 	/**
+	 * Fetches the branches that exist on `origin` into their remote-tracking refs. Returns the names of those that exist
+	 * there. It throws when `origin` cannot be reached.
+	 */
+	fetchBranches( names: Array<string> ): Promise<Array<string>>;
+
+	/**
 	 * Whether the ref (a branch, a remote branch, or a commit) exists.
 	 */
 	refExists( ref: string ): Promise<boolean>;
+
+	/**
+	 * Whether the commit of the `ref` is in the history of the `of` ref, for example because it was merged.
+	 */
+	isAncestor( ref: string, of: string ): Promise<boolean>;
+
+	/**
+	 * Whether any of the files (relative to the repository root) differs between the working tree and the ref.
+	 */
+	differsFrom( paths: Array<string>, ref: string ): Promise<boolean>;
 
 	/**
 	 * Whether any of the files (relative to the repository root) has uncommitted changes, or is untracked.
@@ -74,17 +103,36 @@ export type GitWorkspace = {
 };
 
 /**
- * Opens the checkout that contains `cwd`. The checkout is prepared by whoever runs the framework: cloned, with
- * the dependencies installed, and with the base branch checked out. The `author` is needed only to commit.
+ * A file with a conflict in a merge: its content in the common ancestor, on the branch, and in the merged branch.
+ * `null` when the file does not exist there.
  */
-export async function openWorkspace( { cwd, author }: { cwd: string; author?: { name: string; email: string } } ): Promise<GitWorkspace> {
+export type ConflictedFile = {
+	path: string;
+	base: string | null;
+	ours: string | null;
+	theirs: string | null;
+};
+
+/**
+ * Overrides of the commit author. Without them, the commits use the git configuration of the checkout: its author,
+ * and its signing setup.
+ */
+export type CommitAuthor = {
+	name?: string;
+	email?: string;
+};
+
+/**
+ * Opens the checkout that contains `cwd`. The checkout is prepared by whoever runs the framework: cloned, with
+ * the dependencies installed, with the base branch checked out, and with the git configuration of the bot that commits.
+ */
+export async function openWorkspace( { cwd, author = {} }: { cwd: string; author?: CommitAuthor } ): Promise<GitWorkspace> {
 	const allowEnvironment = getAllowedEnvironment();
 	const gitOptions = {
 		allowEnvironment,
 		config: [
-			...( author ? [ `user.name=${ author.name }`, `user.email=${ author.email }` ] : [] ),
-			// The commits are made by a bot. They must not depend on a signing setup of whoever runs it.
-			'commit.gpgsign=false'
+			...( author.name ? [ `user.name=${ author.name }` ] : [] ),
+			...( author.email ? [ `user.email=${ author.email }` ] : [] )
 		]
 	};
 
@@ -102,7 +150,44 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 	const baseCommit = ( await git.revparse( [ 'HEAD' ] ) ).trim();
 
 	let reportBranch: string | undefined;
-	let needsForcePush = false;
+	// The commit of a leftover branch that the report branch replaces, so the push overwrites only that commit.
+	let replacedCommit: string | undefined;
+	let restackedBranches: Array<string> = [];
+
+	// Resolves the conflicts of the merge in progress and commits it. Returns `false`, changing nothing, when there are none
+	// to resolve, or when the resolver cannot resolve them.
+	const resolveMerge = async (
+		message: string,
+		resolveConflicts: ( conflicts: Array<ConflictedFile> ) => Promise<Map<string, string> | null>
+	): Promise<boolean> => {
+		const paths = ( await git.raw( [ 'diff', '--name-only', '--diff-filter=U' ] ) ).split( '\n' ).filter( Boolean );
+
+		if ( !paths.length ) {
+			return false;
+		}
+
+		const version = ( stage: number, file: string ) => git.raw( [ 'show', `:${ stage }:${ file }` ] ).catch( () => null );
+		const conflicts = await Promise.all( paths.map( async file => ( {
+			path: file,
+			base: await version( 1, file ),
+			ours: await version( 2, file ),
+			theirs: await version( 3, file )
+		} ) ) );
+		const resolved = await resolveConflicts( conflicts );
+
+		if ( !resolved || paths.some( file => !resolved.has( file ) ) ) {
+			return false;
+		}
+
+		for ( const [ file, content ] of resolved ) {
+			await writeFile( upath.join( path, file ), content );
+		}
+
+		await git.add( [ '--', ...resolved.keys() ] );
+		await git.raw( [ 'commit', '--quiet', '-m', message ] );
+
+		return true;
+	};
 
 	return {
 		path,
@@ -114,11 +199,31 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 				throw new Error( 'Publishing needs a checked-out branch, but HEAD is detached. Check out the base branch first.' );
 			}
 
+			// The parts of a stack add `--<part>` to the name of their base branch, so such a base would be read as a part.
+			if ( /--[1-9]\d*$/.test( branch ) ) {
+				throw new Error(
+					`Publishing cannot start at the "${ branch }" branch: report branches use the "--<number>" ending for the parts ` +
+					'of a stack, so the report branches of this base would be mistaken for the ones of another. Use a branch ' +
+					'with another name.'
+				);
+			}
+
 			if ( ( await git.raw( [ 'rev-parse', '--is-shallow-repository' ] ) ).trim() === 'true' ) {
 				throw new Error(
 					'Publishing needs the full history of the checkout, but it is shallow. ' +
 					'Configure the checkout in CI to fetch the whole history.'
 				);
+			}
+
+			// Without an explicit author, git would make one up from the user and the host name of the machine.
+			for ( const key of [ 'user.name', 'user.email' ] ) {
+				// simple-git resolves a failure without an error message, so a missing key reads as an empty value.
+				if ( !( await git.raw( [ 'config', '--get', key ] ) ).trim() ) {
+					throw new Error(
+						`Publishing needs the author of the commits, but \`${ key }\` is not set in the git configuration. ` +
+						'Configure the git identity of the bot in the checkout, or set "AI_TASKS_GIT_NAME" and "AI_TASKS_GIT_EMAIL".'
+					);
+				}
 			}
 
 			if ( ( await git.raw( [ 'status', '--porcelain' ] ) ).trim() ) {
@@ -136,36 +241,53 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 			}
 		},
 
-		async checkoutReportBranch( { name, continueExisting } ) {
-			const existsRemotely = Boolean( ( await git.raw( [ 'ls-remote', '--heads', 'origin', name ] ) ).trim() );
+		async checkoutReportBranch( { name, stack, resolveConflicts } ) {
+			let parent = baseCommit;
+			let parentName = branch;
 
 			reportBranch = name;
+			restackedBranches = [];
 
-			if ( !continueExisting || !existsRemotely ) {
-				// A leftover branch of a merged or closed pull request is replaced. Nobody reviews it any more.
-				needsForcePush = existsRemotely;
+			for ( const member of stack ) {
+				await git.fetch( 'origin', `+refs/heads/${ member }:refs/remotes/origin/${ member }` );
+				await git.checkout( [ '-B', member, `origin/${ member }` ] );
 
-				await git.checkout( [ '-B', name, baseCommit ] );
+				const before = await git.revparse( [ 'HEAD' ] );
 
-				return;
+				const message = `Merge ${ parentName } into ${ member }.`;
+
+				try {
+					await git.merge( [ '--no-edit', '-m', message, parent ] );
+				} catch ( error ) {
+					if ( resolveConflicts && await resolveMerge( message, resolveConflicts ) ) {
+						restackedBranches.push( member );
+						parent = member;
+						parentName = member;
+
+						continue;
+					}
+
+					await git.merge( [ '--abort' ] ).catch( () => {} );
+
+					throw new Error(
+						`Merging "${ parentName }" into "${ member }" failed. Resolve the conflict in its report pull request by hand. ` +
+						`Details: ${ ( error as Error ).message }`,
+						{ cause: error }
+					);
+				}
+
+				if ( await git.revparse( [ 'HEAD' ] ) !== before ) {
+					restackedBranches.push( member );
+				}
+
+				parent = member;
+				parentName = member;
 			}
 
-			needsForcePush = false;
+			// A leftover branch of a merged or closed pull request is replaced. Nobody reviews it any more.
+			replacedCommit = ( await git.raw( [ 'ls-remote', '--heads', 'origin', name ] ) ).trim().split( /\s/ )[ 0 ] || undefined;
 
-			await git.fetch( 'origin', `+refs/heads/${ name }:refs/remotes/origin/${ name }` );
-			await git.checkout( [ '-B', name, `origin/${ name }` ] );
-
-			try {
-				await git.merge( [ '--no-edit', '-m', `Merge ${ branch } into ${ name }.`, baseCommit ] );
-			} catch ( error ) {
-				await git.merge( [ '--abort' ] ).catch( () => {} );
-
-				throw new Error(
-					`Merging "${ branch }" into "${ name }" failed. Resolve the conflict in the report pull request by hand. ` +
-					`Details: ${ ( error as Error ).message }`,
-					{ cause: error }
-				);
-			}
+			await git.checkout( [ '-B', name, parent ] );
 		},
 
 		async commit( paths, message ) {
@@ -181,10 +303,26 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 			return true;
 		},
 
-		async push() {
-			await git.push( 'origin', reportBranch!, needsForcePush ? [ '--force' ] : [] );
+		async push( { onto } = {} ) {
+			// The parents first, so the pull request of the new branch never compares with an outdated parent.
+			for ( const member of restackedBranches ) {
+				await git.push( 'origin', member );
+			}
 
-			needsForcePush = false;
+			if ( onto ) {
+				await git.push( 'origin', `HEAD:refs/heads/${ onto }` );
+				restackedBranches = [];
+
+				return;
+			}
+
+			// A run that pushed the same branch meanwhile changed it, so the lease fails instead of overwriting that run.
+			const lease = replacedCommit ? [ `--force-with-lease=refs/heads/${ reportBranch }:${ replacedCommit }` ] : [];
+
+			await git.push( 'origin', reportBranch!, lease );
+
+			restackedBranches = [];
+			replacedCommit = undefined;
 		},
 
 		async returnToBase() {
@@ -193,9 +331,36 @@ export async function openWorkspace( { cwd, author }: { cwd: string; author?: { 
 			await git.checkout( branch );
 		},
 
+		async fetchBranches( names ) {
+			const heads = ( await git.raw( [ 'ls-remote', '--heads', 'origin', ...names.map( name => `refs/heads/${ name }` ) ] ) )
+				.split( '\n' )
+				.map( line => line.split( '\t' )[ 1 ] );
+			const existing = names.filter( name => heads.includes( `refs/heads/${ name }` ) );
+
+			if ( existing.length ) {
+				const refspecs = existing.map( name => `+refs/heads/${ name }:refs/remotes/origin/${ name }` );
+
+				await git.raw( [ 'fetch', '--quiet', 'origin', ...refspecs ] );
+			}
+
+			return existing;
+		},
+
 		async refExists( ref ) {
 			// Without `--quiet`: simple-git treats a failure without an error message as a success.
 			return succeeds( () => git.raw( [ 'rev-parse', '--verify', `${ ref }^{commit}` ] ) );
+		},
+
+		async isAncestor( ref, of ) {
+			// Not `merge-base --is-ancestor`: it answers with the exit code only, which simple-git does not report. Without
+			// a common ancestor, `merge-base` fails without a message, which simple-git resolves with an empty output.
+			const mergeBase = await git.raw( [ 'merge-base', ref, of ] );
+
+			return mergeBase.trim() === ( await git.revparse( [ ref ] ) ).trim();
+		},
+
+		async differsFrom( paths, ref ) {
+			return Boolean( ( await git.raw( [ 'diff', '--name-only', ref, '--', ...paths ] ) ).trim() );
 		},
 
 		async hasChanges( paths ) {

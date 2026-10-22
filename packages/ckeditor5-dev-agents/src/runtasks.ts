@@ -7,7 +7,7 @@ import upath from 'upath';
 import { loadConfig } from './config/loadconfig.js';
 import { selectTargets } from './config/selecttargets.js';
 import { STATE_DIRECTORY } from './constants.js';
-import { openWorkspace } from './git/gitworkspace.js';
+import { openWorkspace, type CommitAuthor } from './git/gitworkspace.js';
 import { createGitHubClient } from './github/githubclient.js';
 import { runTarget, type TaskResult } from './runner/runtarget.js';
 import { getErrorMessage } from './utils/strings.js';
@@ -37,16 +37,26 @@ export type RunTasksOptions = {
 
 	/**
 	 * Set for a published run: a GitHub token that can open pull requests and comment on them in every target.
-	 * The run commits and pushes the state and the fixes, and opens or updates the report pull requests. Without it,
+	 * The run commits and pushes the state and the fixes, and opens the report pull requests. Without it,
 	 * everything stays in the working tree. Pushing uses the credentials of the checkout.
 	 */
 	token?: string;
-	author: { name: string; email: string };
+
+	/**
+	 * Overrides of the author of the commits of a published run. Without them, the git configuration of the checkout
+	 * decides the author and the signing.
+	 */
+	author?: CommitAuthor;
 
 	/**
 	 * Linked from the comments of published runs.
 	 */
 	buildUrl?: string;
+
+	/**
+	 * Published run: a Slack incoming webhook that is told about every new report pull request.
+	 */
+	slackWebhookUrl?: string;
 
 	/**
 	 * Receives the progress of the run, the tool calls of the agent, and the messages of `log()` in the hooks.
@@ -103,6 +113,7 @@ export async function runTasks( options: RunTasksOptions ): Promise<{ ok: boolea
 					github,
 					today,
 					buildUrl: options.buildUrl,
+					slackWebhookUrl: options.slackWebhookUrl,
 					log: message => log( `  ${ message }` )
 				} )
 			} );

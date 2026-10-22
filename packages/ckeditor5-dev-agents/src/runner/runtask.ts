@@ -40,8 +40,8 @@ export type RunTaskOptions = {
 	today: string;
 
 	/**
-	 * Whether findings fixed in an earlier report pull request are dropped. They are when a published run starts
-	 * a new report branch, because the previous pull request was already reviewed.
+	 * Whether findings fixed in an earlier report pull request are dropped. They are when a published run starts a new
+	 * stack, because the pull requests of the previous one were already reviewed.
 	 */
 	pruneFixed: boolean;
 

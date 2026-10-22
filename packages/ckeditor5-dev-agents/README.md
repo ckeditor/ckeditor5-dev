@@ -16,7 +16,7 @@ For every target and every task enabled in it:
 4. **Check.** Only files matching `writes` may change. `verify()`, if defined, runs first and must pass. The harness then hashes all units and judges every affected unit again. This must not introduce findings or undo an earlier accepted fix, and at least one finding of the fixed unit must be gone. Otherwise, the harness restores the files and Git staging state from before the fix. An affected unit skipped by the baseline or deferred by `maxUnits` is judged before and after the fix; these extra checks do not advance its baseline.
 5. Findings that are already open, or rejected by a human decision that still holds, are dropped. The rest are recorded, and the state is written to `<target root>/.ai-tasks/<task>/`.
 
-Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on its own report branch per task: it commits and pushes once, opens or updates the report pull request, comments with a summary, and checks out the base branch again.
+Kept fixes and the state stay in the working tree. That is where a **local run** ends: nothing is committed or pushed, and `git diff` shows the result. A **published run** (`--publish`) goes on, on a new report branch per task: it commits and pushes once, opens a report pull request stacked on the ones still open, comments with a summary, tells Slack if configured, and checks out the base branch again. A run without new findings or fixes opens no new part: it adds its commit to the top open report pull request, or, when none is open, opens one with only the state. A run that changes nothing pushes nothing.
 
 A human is involved only in the pull request, after everything was judged, fixed and checked. Findings never fail a run. A run fails when a task or a unit could not be processed, or publishing failed. A publishing failure preserves the task summary and does not stop the remaining tasks.
 
@@ -42,7 +42,7 @@ ckeditor5-dev-agents --config ai-tasks
 # Local run of one task (even if the target disables it).
 ckeditor5-dev-agents --config ai-tasks --task my-task
 
-# Published run: commit, push, and open or update the report pull requests.
+# Published run: commit, push, and open the report pull requests.
 AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 ```
 
@@ -52,19 +52,22 @@ AI_TASKS_GITHUB_TOKEN=… ckeditor5-dev-agents --config ai-tasks --publish
 | `--cwd <path>` | A directory inside the checkout to run in. Default: the current directory. |
 | `--target <name>` | The targets to run, repeatable or comma-separated. Default: the targets whose `slug` matches the `origin` of the checkout. |
 | `--task <id>` | The tasks to run, repeatable or comma-separated. Default: the tasks each target enables. |
-| `--publish` | Commit and push the state and the fixes, and open or update the report pull requests. |
+| `--publish` | Commit and push the state and the fixes, and open the report pull requests. |
 
 | Environment variable | Description |
 | --- | --- |
 | `AI_TASKS_GITHUB_TOKEN` | Published runs only. A token that can open pull requests and comment on them. Pushing uses the credentials of the checkout. |
-| `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | The author of the commits of published runs. Default: `CKEditor AI Tasks <ai-tasks@users.noreply.github.com>`. |
+| `AI_TASKS_GIT_NAME`, `AI_TASKS_GIT_EMAIL` | Optional. Override the author of the commits of published runs. By default, the commits use the git configuration of the checkout: its `user.name`, `user.email` and signing setup. |
 | `AI_TASKS_BUILD_URL` | Optional. A link to the CI build, added to the run comments. |
+| `AI_TASKS_SLACK_WEBHOOK_URL` | Optional, published runs only. A Slack incoming webhook. Every new report pull request with new findings or fixes is posted there, with its numbers. A pull request with only the state is not. A failed notification is reported as a problem and does not fail the run. |
 
 The report pull requests of a published run target the checked-out branch. Publishing fails with a clear message, and does not try to fix it, when:
 
 * `HEAD` is detached: check out the base branch.
 * The working tree has uncommitted changes: publishing switches branches.
-* The checkout is shallow: merging the base branch into an open report branch needs the history. Configure the checkout in CI to fetch the whole history.
+* The checked-out branch ends with `--<number>`, like the parts of a stack: its report branches would be mistaken for the ones of another branch. Use another name.
+* The checkout is shallow: merging the base branch into the open report branches needs the history. Configure the checkout in CI to fetch the whole history.
+* The git configuration of the checkout has no `user.name` or `user.email`, and the environment does not override them. Configure the bot in CI, together with commit signing if the repository requires it.
 * A `.gitignore` file ignores the state of a task in `<target root>/.ai-tasks/`: publishing commits it.
 
 To undo a local run, reset the working tree from the repository root: `git checkout -- .`, and `git clean -fd -- <root>/.ai-tasks` for the `root` of every target.
@@ -263,22 +266,28 @@ Every task keeps its state in the target repository, in `<target root>/.ai-tasks
 | `report.md` | The human-readable report, generated from `open.json` on every run. Do not edit it. |
 | `decisions/*.yml` | Rejected findings, one per file. |
 
-A finding is identified by its fingerprint: `task|unit|rule|discriminator`, with literal pipes and backslashes escaped, where `task` is the name of the instance. A finding with the same fingerprint as an open one is never reported twice. Its 12-character `id`, shown in `report.md` and stored next to the fingerprint in `open.json`, is derived from it. A fixed finding stays in `open.json` with its `fix` until the report pull request is merged, and the next report branch starts without it. After a local run, it stays until you commit or reset the working tree.
+A finding is identified by its fingerprint: `task|unit|rule|discriminator`, with literal pipes and backslashes escaped, where `task` is the name of the instance. A finding with the same fingerprint as an open one is never reported twice. Its 12-character `id`, shown in `report.md` and stored next to the fingerprint in `open.json`, is derived from it. A fixed finding stays in `open.json` with its `fix` until every report pull request of the task is merged, and the next stack starts without it. After a local run, it stays until you commit or reset the working tree.
 
-Report branches are named `ai-tasks/<task>/<target>/<branch>`. While the report pull request is open, the next runs continue its branch and merge the base branch into it first.
+Report branches are named `ai-tasks/<task>/<target>/<branch>`, and the next parts of a stack add `--<part>`: `ai-tasks/<task>/<target>/<branch>--2`. While report pull requests are open, every run that finds something new opens one more, stacked on top of them, so each pull request is small and shows only the changes of its run:
+
+* The bottom pull request is based on the base branch, every next one on the one below it.
+* Before a run, the base branch is merged into the bottom branch, and every branch into the next one. The run starts at the top, so no unit is judged twice. Conflicts in the state of the task, for example after a rejection in a lower part, are resolved automatically: `open.json` and `baseline.json` are merged, and `report.md` is rendered again. A conflict in any other file fails the task, to be resolved by hand.
+* Merge the pull requests from the bottom up, with a merge commit, not a squash or a rebase: the next branches contain the commits of the merged one. GitHub then bases the next pull request on the base branch. If it does not, for example because the merged branch was kept, the next run does it.
+* A run without new findings or fixes opens no new part. It adds its commit to the top part, or opens a pull request with only the state when no part is open. A run that changes nothing pushes nothing.
+* A part based on a part that was closed without merging stops the run, because merging it would land the closed part too. Close it and the parts above it; the next run opens a new part.
 
 ## Reviewing a report pull request
 
 Every finding in `report.md` has a short ID, for example `[3fdb55a802c1]`. Longer prefixes of the full finding hash are also accepted; an ambiguous prefix produces a list of full IDs to choose from. For every finding:
 
 * **Keep the fix** if it is right. Edit it in the pull request if it needs a change.
-* **Reject the finding** if it is wrong. Check out the report branch and run:
+* **Reject the finding** if it is wrong. Check out the report branch of the pull request that fixed it and run:
 
   ```bash
   ckeditor5-dev-agents reject 3fdb55a802c1 --reason "This is intended."
   ```
 
-  It writes a decision file to `.ai-tasks/<task>/decisions/`, removes the finding from `open.json`, restores every file of its fix from the base branch, and regenerates `report.md`. Commit and push the result. The decision holds for as long as the unit hashes to its `fragment`, and expires by itself when the judged content changes. If the finding comes back then, the report shows the previous claim and the answer. Every decision about a unit is also passed to `judge()`.
+  It writes a decision file to `.ai-tasks/<task>/decisions/`, removes the finding from `open.json`, restores every file of its fix from the branch its pull request is based on (the part below it in the stack, or the base branch), and regenerates `report.md`. On a part of a stack, the command fetches the parts below it from `origin` first, so a checkout of one stacked pull request is enough. A part of the stack also lists the findings fixed in the parts below it; for those, the command says which pull request to use. Commit and push the result. The decision holds for as long as the unit hashes to its `fragment`, and expires by itself when the judged content changes. If the finding comes back then, the report shows the previous claim and the answer. Every decision about a unit is also passed to `judge()`.
 * **Dismiss the finding**: `ckeditor5-dev-agents dismiss 3fdb55a802c1` does the same, without a decision. The finding may be reported again once the judged content changes. Reverting its fix changes the content, so the next run judges and fixes a dismissed finding with a fix again.
 
 A fix may share files with other fixes, for example when the fixes of two units changed the same file. Restoring those files undoes the other fixes too, so the command stops, lists them, and asks to re-run with `--force`. With `--force`, every affected fix is undone completely: its findings stay open, and the next run judges and fixes them again.

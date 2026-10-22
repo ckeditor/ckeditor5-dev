@@ -57,14 +57,15 @@ describe( 'renderReport()', () => {
 			]
 		} );
 
-		expect( report ).toContain( '**3** open findings, **1** fixed in the report pull request.' );
+		expect( report ).toContain( '**3** open findings, **1** fixed in the report pull requests.' );
 		expect( report ).toContain( 'Resolve each finding in one of these ways, using the ID in its heading:' );
-		expect( report ).toContain( '* Reject it: check out the report branch and run `ckeditor5-dev-agents reject <id> --reason "…"`. ' +
+		expect( report ).toContain( '* Reject it: check out the report branch of the pull request that fixed it, or of the top one for a finding ' +
+			'without a fix, and run `ckeditor5-dev-agents reject <id> --reason "…"`. ' +
 			'It records why the finding is wrong in `projects/cs/.ai-tasks/meta/decisions/`, removes it from `open.json`, ' +
 			'and reverts its fix. The decision holds until the judged content changes. Commit and push the result.' );
 		expect( report ).toContain( '* Dismiss it: `ckeditor5-dev-agents dismiss <id>` does the same without a decision' );
 
-		const fixedIndex = report.indexOf( '## Fixed in the report pull request' );
+		const fixedIndex = report.indexOf( '## Fixed in the report pull requests' );
 		const openIndex = report.indexOf( '## Open' );
 		const unitA = report.indexOf( '### [`docs/a.md`](https://github.com/owner/repo/blob/stable/projects/cs/docs/a.md)' );
 		const unitB = report.indexOf( '### [`docs/b.md`]' );

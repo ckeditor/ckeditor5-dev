@@ -20,15 +20,27 @@ describe( 'createGitHubClient()', () => {
 
 	const client = createGitHubClient( 'secret' );
 
-	it( 'findOpenPullRequest() queries open pull requests from the branch of the owner, into any base', async () => {
-		fetchMock.mockResolvedValueOnce( jsonResponse( [ { number: 7, html_url: 'https://pr/7' } ] ) );
+	it( 'listOpenPullRequests() returns the open pull requests from matching branches of the repository itself', async () => {
+		const pull = ( number: number, head: string, base: string, repoId = 1 ) => ( {
+			number, html_url: `https://pr/${ number }`, head: { ref: head, repo: { id: repoId } }, base: { ref: base, repo: { id: 1 } }
+		} );
 
-		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) )
-			.toEqual( { number: 7, html_url: 'https://pr/7' } );
+		fetchMock.mockResolvedValueOnce( jsonResponse( [
+			pull( 1, 'ai-tasks/t/x/stable', 'stable' ),
+			pull( 2, 'feature', 'stable' ),
+			pull( 3, 'ai-tasks/t/x/stable--2', 'ai-tasks/t/x/stable' ),
+			pull( 4, 'ai-tasks/t/x/stable', 'stable', 2 ),
+			{ ...pull( 5, 'ai-tasks/t/x/stable', 'stable' ), head: { ref: 'ai-tasks/t/x/stable', repo: null } }
+		] ) );
+
+		expect( await client.listOpenPullRequests( { slug: 'Owner/Repo', filter: head => head.startsWith( 'ai-tasks/' ) } ) ).toEqual( [
+			{ number: 1, html_url: 'https://pr/1', head: 'ai-tasks/t/x/stable', base: 'stable' },
+			{ number: 3, html_url: 'https://pr/3', head: 'ai-tasks/t/x/stable--2', base: 'ai-tasks/t/x/stable' }
+		] );
 
 		const [ url, init ] = fetchMock.mock.calls[ 0 ]!;
 
-		expect( url ).toBe( 'https://api.github.com/repos/owner/repo/pulls?state=open&head=owner%3Aai-tasks%2Ft%2Fx%2Fstable' );
+		expect( url ).toBe( 'https://api.github.com/repos/Owner/Repo/pulls?state=open&per_page=100' );
 		expect( init.method ).toBe( 'GET' );
 		expect( init.signal ).toBeInstanceOf( AbortSignal );
 		expect( init.headers ).toMatchObject( {
@@ -37,10 +49,37 @@ describe( 'createGitHubClient()', () => {
 		} );
 	} );
 
-	it( 'findOpenPullRequest() returns `null` when there is none', async () => {
+	it( 'wasMerged() tells whether the pull request from the branch that was closed last was merged', async () => {
+		fetchMock.mockResolvedValueOnce( jsonResponse( [
+			{ merged_at: null, closed_at: '2026-10-20T10:00:00Z' },
+			{ merged_at: '2026-10-21T10:00:00Z', closed_at: '2026-10-21T10:00:00Z' }
+		] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( true );
+		expect( fetchMock.mock.calls[ 0 ]![ 0 ] ).toBe(
+			'https://api.github.com/repos/owner/repo/pulls?state=closed&head=owner%3Aai-tasks%2Ft%2Fx%2Fstable&per_page=100'
+		);
+
+		// The branch was merged in an earlier stack, and closed without merging in this one.
+		fetchMock.mockResolvedValueOnce( jsonResponse( [
+			{ merged_at: '2026-10-01T10:00:00Z', closed_at: '2026-10-01T10:00:00Z' },
+			{ merged_at: null, closed_at: '2026-10-22T10:00:00Z' }
+		] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( false );
+
 		fetchMock.mockResolvedValueOnce( jsonResponse( [] ) );
 
-		expect( await client.findOpenPullRequest( { slug: 'owner/repo', head: 'h' } ) ).toBeNull();
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( false );
+
+		// A pull request without a closing date sorts as the oldest.
+		fetchMock.mockResolvedValueOnce( jsonResponse( [
+			{ merged_at: null, closed_at: null },
+			{ merged_at: '2026-10-21T10:00:00Z', closed_at: '2026-10-21T10:00:00Z' },
+			{ merged_at: null, closed_at: null }
+		] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( true );
 	} );
 
 	it( 'createPullRequest() posts the pull request', async () => {
@@ -53,6 +92,12 @@ describe( 'createGitHubClient()', () => {
 		expect( init.method ).toBe( 'POST' );
 		expect( init.headers[ 'content-type' ] ).toBe( 'application/json; charset=utf-8' );
 		expect( JSON.parse( init.body ) ).toEqual( { head: 'h', base: 'b', title: 'T', body: 'B' } );
+	} );
+
+	it( 'updatePullRequest() patches the base branch', async () => {
+		await client.updatePullRequest( { slug: 'owner/repo', number: 3, base: 'stable' } );
+
+		expect( JSON.parse( fetchMock.mock.calls[ 0 ]![ 1 ].body ) ).toEqual( { base: 'stable' } );
 	} );
 
 	it( 'updatePullRequest() patches the description', async () => {
