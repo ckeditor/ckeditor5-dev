@@ -42,7 +42,7 @@ describe( 'pull request rendering', () => {
 
 		expect( body ).toContain( 'the "Meta description" task (`meta`)' );
 		expect( body ).toContain( 'It covers `cs` at `stable`.' );
-		expect( body ).toContain( '**1** open finding, **2** fixed in this pull request.' );
+		expect( body ).toContain( '**1** open finding in total, **2** fixed in this pull request.' );
 		expect( body ).toContain( 'See [report.md](https://github.com/owner/repo/blob/ai-tasks/meta/cs/stable/projects/cs/.ai-tasks/meta/report.md) ' +
 			'for the findings and how to review them.' );
 		expect( body ).toContain( 'Merge this pull request, with a merge commit, to record the state on `stable`.' );

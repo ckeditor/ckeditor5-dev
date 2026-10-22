@@ -344,12 +344,12 @@ describe( 'runTarget()', () => {
 				head: 'ai-tasks/meta/x/stable',
 				base: 'stable',
 				title: 'Task meta: x (stable)',
-				body: expect.stringContaining( '**0** open findings, **1** fixed in this pull request.' )
+				body: expect.stringContaining( '**0** open findings in total, **1** fixed in this pull request.' )
 			} ) );
 
 			expect( github.createPullRequest ).toHaveBeenCalledWith( expect.objectContaining( {
 				head: 'ai-tasks/plain/x/stable',
-				body: expect.stringContaining( '**1** open finding, **0** fixed in this pull request.' )
+				body: expect.stringContaining( '**1** open finding in total, **0** fixed in this pull request.' )
 			} ) );
 			expect( github.updatePullRequest ).not.toHaveBeenCalled();
 			expect( github.createComment ).toHaveBeenCalledWith( {

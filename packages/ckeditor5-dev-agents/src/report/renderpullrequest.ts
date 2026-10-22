@@ -31,7 +31,7 @@ export function renderPullRequestBody( { task, target, branch, reportBranch, par
 		`This pull request is maintained by the "${ task.title }" task (\`${ task.id }\`) of \`@ckeditor/ckeditor5-dev-agents\`. ` +
 			`It covers \`${ target.name }\` at \`${ branch }\`.`,
 		'',
-		`**${ open }** open ${ plural( open, 'finding' ) }, **${ fixed }** fixed in this pull request. ` +
+		`**${ open }** open ${ plural( open, 'finding' ) } in total, **${ fixed }** fixed in this pull request. ` +
 			`See [report.md](${ reportUrl }) for the findings and how to review them.`,
 		'',
 		parent ?
