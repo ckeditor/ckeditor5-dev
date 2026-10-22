@@ -21,26 +21,26 @@ describe( 'createGitHubClient()', () => {
 	const client = createGitHubClient( 'secret' );
 
 	it( 'listOpenPullRequests() returns the open pull requests from matching branches of the repository itself', async () => {
-		const pull = ( number: number, head: string, base: string, repo = 'owner/repo' ) => ( {
-			number, html_url: `https://pr/${ number }`, head: { ref: head, repo: { full_name: repo } }, base: { ref: base }
+		const pull = ( number: number, head: string, base: string, repoId = 1 ) => ( {
+			number, html_url: `https://pr/${ number }`, head: { ref: head, repo: { id: repoId } }, base: { ref: base, repo: { id: 1 } }
 		} );
 
 		fetchMock.mockResolvedValueOnce( jsonResponse( [
 			pull( 1, 'ai-tasks/t/x/stable', 'stable' ),
 			pull( 2, 'feature', 'stable' ),
 			pull( 3, 'ai-tasks/t/x/stable--2', 'ai-tasks/t/x/stable' ),
-			pull( 4, 'ai-tasks/t/x/stable', 'stable', 'fork/repo' ),
+			pull( 4, 'ai-tasks/t/x/stable', 'stable', 2 ),
 			{ ...pull( 5, 'ai-tasks/t/x/stable', 'stable' ), head: { ref: 'ai-tasks/t/x/stable', repo: null } }
 		] ) );
 
-		expect( await client.listOpenPullRequests( { slug: 'owner/repo', filter: head => head.startsWith( 'ai-tasks/' ) } ) ).toEqual( [
+		expect( await client.listOpenPullRequests( { slug: 'Owner/Repo', filter: head => head.startsWith( 'ai-tasks/' ) } ) ).toEqual( [
 			{ number: 1, html_url: 'https://pr/1', head: 'ai-tasks/t/x/stable', base: 'stable' },
 			{ number: 3, html_url: 'https://pr/3', head: 'ai-tasks/t/x/stable--2', base: 'ai-tasks/t/x/stable' }
 		] );
 
 		const [ url, init ] = fetchMock.mock.calls[ 0 ]!;
 
-		expect( url ).toBe( 'https://api.github.com/repos/owner/repo/pulls?state=open&per_page=100' );
+		expect( url ).toBe( 'https://api.github.com/repos/Owner/Repo/pulls?state=open&per_page=100' );
 		expect( init.method ).toBe( 'GET' );
 		expect( init.signal ).toBeInstanceOf( AbortSignal );
 		expect( init.headers ).toMatchObject( {

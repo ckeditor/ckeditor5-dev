@@ -71,7 +71,8 @@ export function createGitHubClient( token: string ): GitHubClient {
 			const pulls = await octokit.paginate( octokit.pulls.list, { owner, repo, state: 'open', per_page: 100 } );
 
 			return pulls
-				.filter( pull => pull.head.repo?.full_name === slug && filter( pull.head.ref ) )
+				// By the ID, not the name: the slug of a target may differ from the one on GitHub in case.
+				.filter( pull => pull.head.repo?.id === pull.base.repo.id && filter( pull.head.ref ) )
 				.map( pull => ( { number: pull.number, html_url: pull.html_url, head: pull.head.ref, base: pull.base.ref } ) );
 		},
 
