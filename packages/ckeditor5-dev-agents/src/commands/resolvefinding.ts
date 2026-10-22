@@ -161,10 +161,14 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 
 	// A part of the stack also holds the fixed findings of the parts below it. Their fixes are reverted there.
 	if ( reportBranch && reportBranch.part > 1 && fixFiles.length && !await workspace.differsFrom( fixFiles, restoreRef ) ) {
+		const below = restoreRef.replace( /^origin\//, '' );
+		const isPartBelow = parseReportBranch( below ) !== undefined;
+
 		throw new Error(
-			`The fix of [${ finding.id }] was made in a pull request below "${ workspace.branch }" in the stack. ` +
-			`Nothing was changed. Check out the report branch of that pull request (it is based on "${ restoreRef }" or below) ` +
-			'and reject the finding there.'
+			`The fix of [${ finding.id }] was made in a pull request below "${ workspace.branch }" in the stack. Nothing was changed. ` +
+			( isPartBelow ?
+				`Check out "${ below }", or the report branch below it that made the fix, and reject the finding there.` :
+				`That pull request is already merged into "${ baseBranch }", so revert the fix there by hand if it is wrong.` )
 		);
 	}
 

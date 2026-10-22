@@ -479,10 +479,21 @@ describe( 'resolveFinding()', () => {
 				git( checkout, 'update-ref', '-d', `refs/remotes/origin/${ firstPart }` );
 
 				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
-					`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] was made in a pull request below "${ secondPart }" in the stack. Nothing was changed.`
+					`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] was made in a pull request below "${ secondPart }" in the stack. Nothing was changed. ` +
+					`Check out "${ firstPart }", or the report branch below it that made the fix, and reject the finding there.`
 				);
 				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
 				expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			} );
+
+			it( 'says the fix is already merged when it was made in a part merged into the base branch', async () => {
+				// The first part was merged, and its branch deleted.
+				git( remote, 'update-ref', 'refs/heads/stable', firstPart );
+				git( remote, 'branch', '--quiet', '-D', firstPart );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
+					'Nothing was changed. That pull request is already merged into "stable", so revert the fix there by hand if it is wrong.'
+				);
 			} );
 
 			it( 'throws and changes nothing when the parts below cannot be fetched', async () => {
