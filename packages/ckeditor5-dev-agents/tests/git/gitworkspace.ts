@@ -364,6 +364,24 @@ describe( 'openWorkspace()', () => {
 		expect( existsSync( upath.join( path, 'projects/cs/docs/untracked.md' ) ) ).toBe( false );
 		expect( git( path, 'status', '--porcelain' ).trim() ).toBe( '' );
 	} );
+	describe( 'fetchBranches()', () => {
+		it( 'fetches the branches that exist on `origin` into their remote-tracking refs, and returns them', async () => {
+			const workspace = await open();
+
+			git( seed, 'push', '--quiet', 'origin', 'HEAD:other' );
+			await pushFiles( seed, { 'README.md': 'Changed\n' } );
+
+			expect( await workspace.fetchBranches( [ 'stable', 'other', 'gone' ] ) ).toEqual( [ 'stable', 'other' ] );
+			expect( git( path, 'rev-parse', 'origin/stable' ).trim() ).toBe( git( remote, 'rev-parse', 'stable' ).trim() );
+			expect( git( path, 'rev-parse', 'origin/other' ).trim() ).toBe( git( remote, 'rev-parse', 'other' ).trim() );
+			expect( await workspace.refExists( 'origin/gone' ) ).toBe( false );
+		} );
+
+		it( 'fetches nothing when none of the branches exists', async () => {
+			expect( await ( await open() ).fetchBranches( [ 'gone' ] ) ).toEqual( [] );
+		} );
+	} );
+
 	describe( 'isAncestor()', () => {
 		it( 'tells whether a commit is in the history of another one', async () => {
 			const workspace = await open();

@@ -59,6 +59,12 @@ export type GitWorkspace = {
 	returnToBase(): Promise<void>;
 
 	/**
+	 * Fetches the branches that exist on `origin` into their remote-tracking refs. Returns the names of those that exist
+	 * there. It throws when `origin` cannot be reached.
+	 */
+	fetchBranches( names: Array<string> ): Promise<Array<string>>;
+
+	/**
 	 * Whether the ref (a branch, a remote branch, or a commit) exists.
 	 */
 	refExists( ref: string ): Promise<boolean>;
@@ -236,6 +242,21 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 			await git.raw( [ 'reset', '--hard', '--quiet' ] );
 			await git.raw( [ 'clean', '-fd', '--quiet' ] );
 			await git.checkout( branch );
+		},
+
+		async fetchBranches( names ) {
+			const heads = ( await git.raw( [ 'ls-remote', '--heads', 'origin', ...names.map( name => `refs/heads/${ name }` ) ] ) )
+				.split( '\n' )
+				.map( line => line.split( '\t' )[ 1 ] );
+			const existing = names.filter( name => heads.includes( `refs/heads/${ name }` ) );
+
+			if ( existing.length ) {
+				const refspecs = existing.map( name => `+refs/heads/${ name }:refs/remotes/origin/${ name }` );
+
+				await git.raw( [ 'fetch', '--quiet', 'origin', ...refspecs ] );
+			}
+
+			return existing;
 		},
 
 		async refExists( ref ) {

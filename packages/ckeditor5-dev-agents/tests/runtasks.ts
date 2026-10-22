@@ -76,6 +76,7 @@ describe( 'runTasks()', () => {
 			commit: vi.fn(),
 			push: vi.fn(),
 			returnToBase: vi.fn(),
+			fetchBranches: vi.fn(),
 			refExists: vi.fn(),
 			isAncestor: vi.fn(),
 			differsFrom: vi.fn(),

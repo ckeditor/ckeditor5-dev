@@ -15,6 +15,7 @@ import { getDecisionFileName, renderDecision } from '../state/decisions.js';
 import { readTaskState, writeTaskState, type TaskState } from '../state/statestore.js';
 import { getReportBranch } from '../runner/runtarget.js';
 import { getFindingId } from '../runner/validatefindings.js';
+import { getErrorMessage } from '../utils/strings.js';
 import type { Finding, Target, Task } from '../types.js';
 
 export type ResolveFindingOptions = {
@@ -314,20 +315,41 @@ function parseReportBranch( branch: string ): { task: string; target: string; ba
 
 /**
  * Returns the branch the pull request of the report branch is based on: the closest part below it in the stack that
- * is not merged yet, or the base branch.
+ * is not merged yet, or the base branch. For a part of a stack, the parts below it and the base branch are fetched
+ * first: a checkout of one stacked pull request often lacks them, or has them outdated, and restoring from the base
+ * branch instead would also revert the fixes of the parts below.
  */
 async function getRestoreRef(
 	workspace: GitWorkspace,
 	entry: TaskStateEntry,
 	{ base, part }: { base: string; part: number }
 ): Promise<string> {
+	if ( part === 1 ) {
+		return getBaseRef( workspace, base );
+	}
+
+	const partsBelow = Array.from( { length: part - 1 }, ( _, index ) => {
+		return getReportBranch( entry.task.id, entry.target, base, part - 1 - index );
+	} );
+	let existing: Array<string>;
+
+	try {
+		existing = await workspace.fetchBranches( [ base, ...partsBelow ] );
+	} catch ( error ) {
+		throw new Error(
+			`Fetching the report branches below "${ workspace.branch }" in the stack failed, so it is not known which one ` +
+			'the fix is a change against. Nothing was changed. Check the connection to "origin" and try again. ' +
+			`Details: ${ getErrorMessage( error ) }`,
+			{ cause: error }
+		);
+	}
+
 	const baseRef = await getBaseRef( workspace, base );
 
-	for ( let below = part - 1; below >= 1; below-- ) {
-		const ref = `origin/${ getReportBranch( entry.task.id, entry.target, base, below ) }`;
-
-		if ( await workspace.refExists( ref ) && !await workspace.isAncestor( ref, baseRef ) ) {
-			return ref;
+	// A part whose branch is gone was merged or closed. Its changes are in the base branch, or nowhere.
+	for ( const name of partsBelow ) {
+		if ( existing.includes( name ) && !await workspace.isAncestor( `origin/${ name }`, baseRef ) ) {
+			return `origin/${ name }`;
 		}
 	}
 
