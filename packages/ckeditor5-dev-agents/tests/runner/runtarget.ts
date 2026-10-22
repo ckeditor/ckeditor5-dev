@@ -441,48 +441,77 @@ describe( 'runTarget()', () => {
 			expectBackOnTheBase();
 		} );
 
-		it( 'merges the state of a part into the next one when both changed it, for example after a rejection below', async () => {
+		describe( 'when a part and the next one both changed the same files', () => {
 			const first = 'ai-tasks/meta/x/stable';
 			const second = 'ai-tasks/meta/x/stable--2';
 
-			await publish( [ [ 'meta', true ] ] );
-			openPullRequests( [ 1, first, 'stable' ] );
-			await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
-			await newCheckout();
-			await publish( [ [ 'meta', true ] ] );
+			// Two parts are open. Then a human changes the first one, and the base branch gets a new guide.
+			const stackWithChangeBelow = async ( change: ( state: { open: Array<Finding>; baseline: Record<string, string> } ) => Record<string, string> ) => {
+				await publish( [ [ 'meta', true ] ] );
+				openPullRequests( [ 1, first, 'stable' ] );
+				await pushFiles( seed, { 'docs/c.md': 'Also BAD\n' } );
+				await newCheckout();
+				await publish( [ [ 'meta', true ] ] );
 
-			// A human rejects the finding of `docs/b.md` in the first part: its fix is reverted, and it leaves the state.
-			git( seed, 'fetch', '--quiet', 'origin' );
-			git( seed, 'checkout', '--quiet', '-B', first, `origin/${ first }` );
+				git( seed, 'fetch', '--quiet', 'origin' );
+				git( seed, 'checkout', '--quiet', '-B', first, `origin/${ first }` );
+				await pushFiles( seed, change( {
+					open: JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/open.json' ) ),
+					baseline: JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/baseline.json' ) )
+				} ), first );
+				git( seed, 'checkout', '--quiet', 'stable' );
 
-			const open = JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/open.json' ) ) as Array<Finding>;
-			const baseline = JSON.parse( git( seed, 'show', 'HEAD:.ai-tasks/meta/baseline.json' ) ) as Record<string, string>;
+				openPullRequests( [ 1, first, 'stable' ], [ 2, second, first ] );
+				await pushFiles( seed, { 'docs/d.md': 'BAD too\n' } );
+				await newCheckout();
 
-			delete baseline[ 'docs/b.md' ];
-			await pushFiles( seed, {
-				'docs/b.md': 'BAD\n',
-				'.ai-tasks/meta/open.json': JSON.stringify( open.filter( finding => finding.unit !== 'docs/b.md' ), null, '\t' ) + '\n',
-				'.ai-tasks/meta/baseline.json': JSON.stringify( baseline, null, '\t' ) + '\n',
-				'.ai-tasks/meta/report.md': 'The report after the rejection.\n'
-			}, first );
-			git( seed, 'checkout', '--quiet', 'stable' );
+				return publish( [ [ 'meta', true ] ] );
+			};
 
-			openPullRequests( [ 1, first, 'stable' ], [ 2, second, first ] );
-			await pushFiles( seed, { 'docs/d.md': 'BAD too\n' } );
-			await newCheckout();
+			it( 'merges the state, for example after a rejection below, and renders the report again', async () => {
+				// A human rejects the finding of `docs/b.md` in the first part: its fix is reverted, and it leaves the state.
+				const results = await stackWithChangeBelow( ( { open, baseline } ) => {
+					delete baseline[ 'docs/b.md' ];
 
-			const results = await publish( [ [ 'meta', true ] ] );
-			const secondOpen = JSON.parse( readRemote( second, '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
-			const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
+					return {
+						'docs/b.md': 'BAD\n',
+						'.ai-tasks/meta/open.json': JSON.stringify( open.filter( finding => finding.unit !== 'docs/b.md' ), null, '\t' ) + '\n',
+						'.ai-tasks/meta/baseline.json': JSON.stringify( baseline, null, '\t' ) + '\n',
+						'.ai-tasks/meta/report.md': 'The report after the rejection.\n'
+					};
+				} );
+				const secondOpen = JSON.parse( readRemote( second, '.ai-tasks/meta/open.json' ) ) as Array<Finding>;
+				const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
 
-			expect( results[ 0 ]!.failure ).toBeUndefined();
-			expect( git( remote, 'log', '-1', '--format=%s', second ).trim() ).toBe( `Merge ${ first } into ${ second }.` );
-			expect( secondOpen.map( finding => finding.unit ) ).toEqual( [ 'docs/c.md' ] );
-			expect( Object.keys( JSON.parse( readRemote( second, '.ai-tasks/meta/baseline.json' ) ) ) ).not.toContain( 'docs/b.md' );
-			expect( secondReport ).not.toContain( '<<<<<<<' );
-			expect( secondReport ).toContain( 'docs/c.md' );
-			expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( { head: 'ai-tasks/meta/x/stable--3', base: second } ) );
-			expectBackOnTheBase();
+				expect( results[ 0 ]!.failure ).toBeUndefined();
+				expect( git( remote, 'log', '-1', '--format=%s', second ).trim() ).toBe( `Merge ${ first } into ${ second }.` );
+				expect( secondOpen.map( finding => finding.unit ) ).toEqual( [ 'docs/c.md' ] );
+				expect( Object.keys( JSON.parse( readRemote( second, '.ai-tasks/meta/baseline.json' ) ) ) ).not.toContain( 'docs/b.md' );
+				expect( secondReport ).not.toContain( '<<<<<<<' );
+				expect( secondReport ).toContain( 'docs/c.md' );
+				expect( github.createPullRequest ).toHaveBeenLastCalledWith( expect.objectContaining( { head: 'ai-tasks/meta/x/stable--3', base: second } ) );
+				expectBackOnTheBase();
+			} );
+
+			it( 'renders the report again from the state that git merged, when only the report has a conflict', async () => {
+				const results = await stackWithChangeBelow( () => ( { '.ai-tasks/meta/report.md': 'Edited by hand.\n' } ) );
+				const secondReport = readRemote( second, '.ai-tasks/meta/report.md' );
+
+				expect( results[ 0 ]!.failure ).toBeUndefined();
+				expect( secondReport ).not.toContain( 'Edited by hand.' );
+				expect( secondReport ).toContain( 'docs/b.md' );
+				expect( secondReport ).toContain( 'docs/c.md' );
+			} );
+
+			it( 'fails the task when a file outside the state has a conflict too', async () => {
+				const results = await stackWithChangeBelow( ( { open } ) => ( {
+					'docs/c.md': 'Changed by hand.\n',
+					'.ai-tasks/meta/open.json': JSON.stringify( open.slice( 1 ), null, '\t' ) + '\n'
+				} ) );
+
+				expect( results[ 0 ]!.failure ).toContain( `Merging "${ first }" into "${ second }" failed.` );
+				expectBackOnTheBase();
+			} );
 		} );
 
 		it( 'bases a stacked pull request on the one below it again when that one was merged', async () => {
@@ -504,6 +533,15 @@ describe( 'runTarget()', () => {
 				base: 'ai-tasks/meta/x/stable--2',
 				title: 'Task meta: x (stable), part 3'
 			} ) );
+		} );
+
+		it( 'tells to close the part when it is the only one above a part closed without merging', async () => {
+			github.wasMerged.mockResolvedValue( false );
+			openPullRequests( [ 5, 'ai-tasks/meta/x/stable--2', 'ai-tasks/meta/x/stable' ] );
+
+			const results = await publish( [ [ 'meta', true ] ] );
+
+			expect( results[ 0 ]!.failure ).toContain( 'so merging it would land those changes too. Close it: the next run opens a new part.' );
 		} );
 
 		it( 'fails the task, and changes nothing, when a part is based on a part closed without merging', async () => {

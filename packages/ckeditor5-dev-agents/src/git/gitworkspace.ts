@@ -218,7 +218,7 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 			// Without an explicit author, git would make one up from the user and the host name of the machine.
 			for ( const key of [ 'user.name', 'user.email' ] ) {
 				// simple-git resolves a failure without an error message, so a missing key reads as an empty value.
-				if ( !( await git.raw( [ 'config', '--get', key ] ).catch( () => '' ) ).trim() ) {
+				if ( !( await git.raw( [ 'config', '--get', key ] ) ).trim() ) {
 					throw new Error(
 						`Publishing needs the author of the commits, but \`${ key }\` is not set in the git configuration. ` +
 						'Configure the git identity of the bot in the checkout, or set "AI_TASKS_GIT_NAME" and "AI_TASKS_GIT_EMAIL".'
@@ -352,8 +352,9 @@ export async function openWorkspace( { cwd, author = {} }: { cwd: string; author
 		},
 
 		async isAncestor( ref, of ) {
-			// Not `merge-base --is-ancestor`: it answers with the exit code only, which simple-git does not report.
-			const mergeBase = await git.raw( [ 'merge-base', ref, of ] ).catch( () => '' );
+			// Not `merge-base --is-ancestor`: it answers with the exit code only, which simple-git does not report. Without
+			// a common ancestor, `merge-base` fails without a message, which simple-git resolves with an empty output.
+			const mergeBase = await git.raw( [ 'merge-base', ref, of ] );
 
 			return mergeBase.trim() === ( await git.revparse( [ ref ] ) ).trim();
 		},

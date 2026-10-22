@@ -71,6 +71,15 @@ describe( 'createGitHubClient()', () => {
 		fetchMock.mockResolvedValueOnce( jsonResponse( [] ) );
 
 		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( false );
+
+		// A pull request without a closing date sorts as the oldest.
+		fetchMock.mockResolvedValueOnce( jsonResponse( [
+			{ merged_at: null, closed_at: null },
+			{ merged_at: '2026-10-21T10:00:00Z', closed_at: '2026-10-21T10:00:00Z' },
+			{ merged_at: null, closed_at: null }
+		] ) );
+
+		expect( await client.wasMerged( { slug: 'owner/repo', head: 'ai-tasks/t/x/stable' } ) ).toBe( true );
 	} );
 
 	it( 'createPullRequest() posts the pull request', async () => {

@@ -424,9 +424,11 @@ describe( 'openWorkspace()', () => {
 		git( seed, 'push', '--quiet', 'origin', `HEAD:${ reportBranch }` );
 
 		const workspace = await open();
+		const resolveConflicts = vi.fn( async () => new Map() );
 
-		await expect( workspace.checkoutReportBranch( { name: `${ reportBranch }--2`, stack: [ reportBranch ] } ) )
+		await expect( workspace.checkoutReportBranch( { name: `${ reportBranch }--2`, stack: [ reportBranch ], resolveConflicts } ) )
 			.rejects.toThrow( `Merging "stable" into "${ reportBranch }" failed.` );
+		expect( resolveConflicts ).not.toHaveBeenCalled();
 	} );
 
 	it( 'drops what a task left behind and checks out the base branch again', async () => {
@@ -468,6 +470,15 @@ describe( 'openWorkspace()', () => {
 
 			expect( await workspace.isAncestor( 'stable', 'origin/stable' ) ).toBe( true );
 			expect( await workspace.isAncestor( 'origin/stable', 'stable' ) ).toBe( false );
+		} );
+
+		it( 'returns `false` for commits without a common ancestor', async () => {
+			git( path, 'checkout', '--quiet', '--orphan', 'unrelated' );
+			git( path, 'commit', '--quiet', '--allow-empty', '--message', 'Unrelated.' );
+
+			const workspace = await open();
+
+			expect( await workspace.isAncestor( 'unrelated', 'stable' ) ).toBe( false );
 		} );
 	} );
 

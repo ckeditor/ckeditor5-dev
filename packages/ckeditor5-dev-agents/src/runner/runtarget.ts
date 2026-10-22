@@ -283,7 +283,7 @@ async function resolveStateConflicts(
 		const conflict = conflicts.find( item => item.path === file );
 
 		if ( !conflict ) {
-			return JSON.parse( await readFile( upath.join( workspace.path, file ), 'utf8' ).catch( () => toJson( empty ) ) ) as T;
+			return JSON.parse( await readFile( upath.join( workspace.path, file ), 'utf8' ) ) as T;
 		}
 
 		const parse = ( content: string | null ) => content === null ? empty : JSON.parse( content ) as T;
@@ -301,7 +301,7 @@ async function resolveStateConflicts(
 
 		resolved.set( files.report, renderReport( { task, target, branch, open } ) );
 	} catch {
-		// A state file that is not valid JSON is left to a human.
+		// A state file that is missing or is not valid JSON is left to a human.
 		return null;
 	}
 
