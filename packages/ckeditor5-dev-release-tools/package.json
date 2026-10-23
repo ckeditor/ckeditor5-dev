@@ -35,7 +35,7 @@
   "devDependencies": {
     "date-fns": "^4.1.0",
     "memfs": "^4.80.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   },
   "scripts": {
     "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-release-tools"

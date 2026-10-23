@@ -34,7 +34,7 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   },
   "scripts": {
     "test": "vitest run --config ../../vitest.config.js --project ckeditor5-dev-stale-bot"
