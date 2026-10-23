@@ -5,8 +5,9 @@
 
 /* eslint-disable @stylistic/max-len */
 
-import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { existsSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import upath from 'upath';
 import { renderResolvedFinding, resolveFinding, type ResolveFindingOptions, type ResolvedFinding } from '../../src/commands/resolvefinding.js';
 import { runTasks } from '../../src/runtasks.js';
@@ -418,6 +419,101 @@ describe( 'resolveFinding()', () => {
 			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
 		} );
 
+		// The fake `ssh` is a POSIX shell script that serves `owner/repo.git` from the local remote, so it does not run on Windows.
+		describe.skipIf( process.platform === 'win32' )( 'in a stack', () => {
+			const firstPart = 'ai-tasks/t/repo/stable';
+			const secondPart = 'ai-tasks/t/repo/stable--2';
+
+			// `origin` points to GitHub, so the target matches. A fake `ssh` serves it from the local remote.
+			const useSsh = async ( script: string ) => {
+				const ssh = upath.join( await createTempDirectory(), 'ssh' );
+
+				await writeFile( ssh, `#!/bin/sh\n${ script }\n`, { mode: 0o755 } );
+				vi.stubEnv( 'GIT_SSH_COMMAND', ssh );
+			};
+
+			// The first part is pushed. The second part starts on top of it, the way a published run stacks it.
+			beforeEach( async () => {
+				await useSsh( `for last; do :; done\nexec sh -c "$(printf '%s' "$last" | sed "s|'owner/repo.git'|'${ remote }'|")"` );
+				git( checkout, 'push', '--quiet', 'origin', `HEAD:${ firstPart }` );
+				git( checkout, 'checkout', '--quiet', '-b', secondPart );
+			} );
+
+			const fixInSecondPart = async () => {
+				await writeFiles( checkout, { 'docs/d.md': 'This is BAD.\n' } );
+				await runIn( checkout );
+				git( checkout, 'add', '--all' );
+				git( checkout, 'commit', '--quiet', '--message', 'Task t: 1 unit judged.' );
+			};
+
+			// `gh pr checkout` of the second part fetches only its own branch. An older checkout has an outdated one.
+			it.each( [
+				[ 'fetched', () => {} ],
+				[ 'not fetched', () => git( checkout, 'update-ref', '-d', `refs/remotes/origin/${ firstPart }` ) ],
+				[ 'outdated', () => git( checkout, 'update-ref', `refs/remotes/origin/${ firstPart }`, 'origin/stable' ) ]
+			] )( 'restores the files of a fix from the part below when that part is %s locally', async ( _, prepare ) => {
+				await fixInSecondPart();
+				prepare();
+
+				// The fixes of the test task share `log.md`, so the fix of `docs/a.md` in the first part counts as affected.
+				const resolved = await resolve( { action: 'dismiss', id: idOf( 'docs/d.md', 'R1' ), cwd: checkout, force: true } );
+
+				expect( resolved.restoredFrom ).toBe( `origin/${ firstPart }` );
+				expect( existsSync( upath.join( checkout, 'docs/d.md' ) ) ).toBe( false );
+				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
+				expect( await readText( upath.join( checkout, 'log.md' ) ) ).toBe( 'Log:\nt docs/a.md\n' );
+			} );
+
+			it( 'restores from the base branch when the branch of the part below is gone', async () => {
+				await fixInSecondPart();
+				git( remote, 'branch', '--quiet', '-D', firstPart );
+
+				await resolve( { action: 'dismiss', id: idOf( 'docs/d.md', 'R1' ), cwd: checkout, force: true } );
+
+				expect( existsSync( upath.join( checkout, 'docs/d.md' ) ) ).toBe( false );
+				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is BAD.\n' );
+				expect( await readText( upath.join( checkout, 'log.md' ) ) ).toBe( 'Log:\n' );
+			} );
+
+			it( 'throws and changes nothing when the fix was made in a part below', async () => {
+				git( checkout, 'update-ref', '-d', `refs/remotes/origin/${ firstPart }` );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
+					`The fix of [${ idOf( 'docs/a.md', 'R1' ) }] was made in a pull request below "${ secondPart }" in the stack. Nothing was changed. ` +
+					`Check out "${ firstPart }", or the report branch below it that made the fix, and reject the finding there.`
+				);
+				expect( await readText( upath.join( checkout, 'docs/a.md' ) ) ).toBe( 'This is GOOD.\n' );
+				expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			} );
+
+			it( 'says the fix is already merged when it was made in a part merged into the base branch', async () => {
+				// The first part was merged, and its branch deleted.
+				git( remote, 'update-ref', 'refs/heads/stable', firstPart );
+				git( remote, 'branch', '--quiet', '-D', firstPart );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
+					'Nothing was changed. That pull request is already merged into "stable", so revert the fix there by hand if it is wrong.'
+				);
+			} );
+
+			it( 'throws and changes nothing when the parts below cannot be fetched', async () => {
+				await useSsh( 'echo "ssh: Could not resolve hostname github.com" >&2\nexit 255' );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) ).rejects.toThrow(
+					`Fetching the report branches below "${ secondPart }" in the stack failed, so it is not known which one the fix is ` +
+					'a change against. Nothing was changed. Check the connection to "origin" and try again. Details: '
+				);
+				expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			} );
+
+			it( 'names the same part of the stack when another task\'s report branch is checked out', async () => {
+				git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/u/repo/stable--2' );
+
+				await expect( resolve( { action: 'dismiss', id: idOf( 'docs/a.md', 'R1' ), cwd: checkout } ) )
+					.rejects.toThrow( `Check out "${ secondPart }" first.` );
+			} );
+		} );
+
 		it( 'throws when the base branch does not exist at all', async () => {
 			git( checkout, 'branch', '--quiet', '-m', 'ai-tasks/t/repo/gone' );
 
@@ -559,6 +655,11 @@ describe( 'renderResolvedFinding()', () => {
 			'',
 			'Nothing was committed. Review the changes with "git status" and "git diff HEAD", then commit them.'
 		].join( '\n' ) );
+	} );
+
+	it( 'says which ref the files were restored from', () => {
+		expect( renderResolvedFinding( result( { restoredFrom: 'origin/ai-tasks/t/repo/stable' } ) ) )
+			.toContain( '  Reverted  docs/a.md, log.md (from origin/ai-tasks/t/repo/stable)' );
 	} );
 
 	it( 'renders a dismissal of a finding without a fix', () => {

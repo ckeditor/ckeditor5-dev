@@ -25,7 +25,7 @@ const COMMON_OPTIONS = {
  * * `--cwd <path>`: a directory inside the checkout to run in. Default: the current directory.
  * * `--target <name>`: the targets to run (repeatable or comma-separated). Default: the targets of the checkout.
  * * `--task <id>`: the tasks to run (repeatable or comma-separated). Default: the tasks each target enables.
- * * `--publish`: commit and push the state and the fixes, and open or update the report pull requests.
+ * * `--publish`: commit and push the state and the fixes, and open the report pull requests.
  *
  * Paths are relative to the current directory.
  */
@@ -49,10 +49,11 @@ export function parseArguments(
 		...resolveCommonArguments( values, cwd ),
 		token: values.publish ? env.AI_TASKS_GITHUB_TOKEN : undefined,
 		author: {
-			name: env.AI_TASKS_GIT_NAME || 'CKEditor AI Tasks',
-			email: env.AI_TASKS_GIT_EMAIL || 'ai-tasks@users.noreply.github.com'
+			...( env.AI_TASKS_GIT_NAME ? { name: env.AI_TASKS_GIT_NAME } : {} ),
+			...( env.AI_TASKS_GIT_EMAIL ? { email: env.AI_TASKS_GIT_EMAIL } : {} )
 		},
-		buildUrl: env.AI_TASKS_BUILD_URL
+		buildUrl: env.AI_TASKS_BUILD_URL,
+		slackWebhookUrl: values.publish ? env.AI_TASKS_SLACK_WEBHOOK_URL : undefined
 	};
 }
 

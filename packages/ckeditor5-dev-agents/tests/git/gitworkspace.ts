@@ -85,6 +85,14 @@ describe( 'openWorkspace()', () => {
 			);
 		} );
 
+		it( 'throws for a base branch whose name ends like a part of a stack', async () => {
+			git( path, 'checkout', '--quiet', '-b', 'release--2' );
+
+			await expect( ( await open() ).assertPublishable( [] ) ).rejects.toThrow(
+				'Publishing cannot start at the "release--2" branch: report branches use the "--<number>" ending for the parts of a stack'
+			);
+		} );
+
 		it( 'throws for a shallow checkout', async () => {
 			await pushFiles( seed, { 'README.md': 'Changed\n' } );
 
@@ -125,7 +133,7 @@ describe( 'openWorkspace()', () => {
 	it( 'starts a fresh report branch at the base, commits only the given paths as the author and pushes it', async () => {
 		const workspace = await open();
 
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n', 'projects/cs/docs/a.md': 'Fixed\n', 'projects/cs/docs/b.md': 'Unrelated\n' } );
 
 		expect( git( path, 'rev-parse', '--abbrev-ref', 'HEAD' ).trim() ).toBe( reportBranch );
@@ -142,7 +150,7 @@ describe( 'openWorkspace()', () => {
 	it( 'does not commit files staged outside of the given paths', async () => {
 		const workspace = await open();
 
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n', 'README.md': 'Staged\n' } );
 		git( path, 'add', 'README.md' );
 
@@ -153,12 +161,18 @@ describe( 'openWorkspace()', () => {
 		expect( git( path, 'status', '--porcelain' ).trim() ).toBe( 'M  README.md' );
 	} );
 
-	it( 'continues an existing report branch, merges the base branch into it, and pushes without force', async () => {
+	it( 'stacks a new report branch on the open ones, merges every parent into its child, and pushes them without force', async () => {
 		const first = await open();
+		const second = `${ reportBranch }--2`;
+		const third = `${ reportBranch }--3`;
 
-		await first.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
-		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
-		await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+		await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[ 1 ]\n' } );
+		await first.commit( [ 'projects/cs/.ai-tasks' ], 'First.' );
+		await first.push();
+		await first.checkoutReportBranch( { name: second, stack: [ reportBranch ] } );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[ 1, 2 ]\n' } );
+		await first.commit( [ 'projects/cs/.ai-tasks' ], 'Second.' );
 		await first.push();
 		await first.returnToBase();
 
@@ -166,37 +180,128 @@ describe( 'openWorkspace()', () => {
 
 		// CI prepares a new checkout of the base branch for every run.
 		const checkout = await createCheckout( remote );
-		const second = await open( checkout );
+		const next = await open( checkout );
 
-		await second.checkoutReportBranch( { name: reportBranch, continueExisting: true } );
+		await next.checkoutReportBranch( { name: third, stack: [ reportBranch, second ] } );
 
-		expect( existsSync( upath.join( checkout, 'projects/cs/.ai-tasks/t/open.json' ) ) ).toBe( true );
+		expect( git( checkout, 'rev-parse', '--abbrev-ref', 'HEAD' ).trim() ).toBe( third );
+		expect( await readText( upath.join( checkout, 'projects/cs/.ai-tasks/t/open.json' ) ) ).toBe( '[ 1, 2 ]\n' );
 		expect( existsSync( upath.join( checkout, 'projects/cs/docs/b.md' ) ) ).toBe( true );
-		expect( git( checkout, 'log', '-1', '--format=%s' ).trim() ).toBe( `Merge stable into ${ reportBranch }.` );
 
-		await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': '[ 1 ]\n' } );
-		await second.commit( [ 'projects/cs/.ai-tasks' ], 'More state.' );
-		await second.push();
+		await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': '[ 1, 2, 3 ]\n' } );
+		await next.commit( [ 'projects/cs/.ai-tasks' ], 'Third.' );
+		await next.push();
 
-		const log = git( remote, 'log', '--format=%s', reportBranch ).trim().split( '\n' );
+		const subjects = ( branch: string, count: number ) => git( remote, 'log', '--first-parent', `-${ count }`, '--format=%s', branch ).trim().split( '\n' );
 
-		expect( log.slice( 0, 2 ) ).toEqual( [ 'More state.', `Merge stable into ${ reportBranch }.` ] );
-		expect( log ).toContain( 'More changes.' );
+		expect( subjects( reportBranch, 2 ) ).toEqual( [ `Merge stable into ${ reportBranch }.`, 'First.' ] );
+		expect( subjects( second, 2 ) ).toEqual( [ `Merge ${ reportBranch } into ${ second }.`, 'Second.' ] );
+		expect( subjects( third, 3 ) ).toEqual( [ 'Third.', `Merge ${ reportBranch } into ${ second }.`, 'Second.' ] );
+
+		// Each branch shows only its own change against its parent.
+		expect( git( remote, 'diff', '--name-only', reportBranch, second ).trim() ).toBe( 'projects/cs/.ai-tasks/t/open.json' );
+		expect( git( remote, 'diff', '--name-only', 'stable', reportBranch ).trim() ).toBe( 'projects/cs/.ai-tasks/t/open.json' );
 	} );
 
-	it( 'starts at the base branch when it should continue a branch that does not exist', async () => {
-		const workspace = await open();
+	it( 'pushes only the branches of the stack that got a merge', async () => {
+		const first = await open();
+		const second = `${ reportBranch }--2`;
 
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: true } );
+		await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[ 1 ]\n' } );
+		await first.commit( [ 'projects/cs/.ai-tasks' ], 'First.' );
+		await first.push();
 
-		expect( git( path, 'rev-parse', '--abbrev-ref', 'HEAD' ).trim() ).toBe( reportBranch );
-		expect( git( path, 'rev-parse', 'HEAD' ).trim() ).toBe( git( remote, 'rev-parse', 'stable' ).trim() );
+		const pushed = git( remote, 'rev-parse', reportBranch ).trim();
+		const checkout = await createCheckout( remote );
+		const next = await open( checkout );
+
+		await next.checkoutReportBranch( { name: second, stack: [ reportBranch ] } );
+		await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': '[ 1, 2 ]\n' } );
+		await next.commit( [ 'projects/cs/.ai-tasks' ], 'Second.' );
+		await next.push();
+
+		expect( git( remote, 'rev-parse', reportBranch ).trim() ).toBe( pushed );
+		expect( git( remote, 'log', '-1', '--format=%s', second ).trim() ).toBe( 'Second.' );
+	} );
+
+	describe( 'the git configuration of the checkout', () => {
+		let signer: string;
+		let signerLog: string;
+
+		// A stand-in for GPG: it records its arguments and returns a signature git accepts.
+		beforeEach( async () => {
+			const directory = await createTempDirectory();
+
+			signer = upath.join( directory, 'gpg' );
+			signerLog = upath.join( directory, 'gpg.log' );
+
+			await writeFile( signer, [
+				'#!/bin/sh',
+				`echo "$@" >> "${ signerLog }"`,
+				'cat > /dev/null',
+				'echo "[GNUPG:] SIG_CREATED D 1 8 00 0 FAKE" >&2',
+				'printf -- "-----BEGIN PGP SIGNATURE-----\\n\\nZmFrZQ==\\n-----END PGP SIGNATURE-----\\n"'
+			].join( '\n' ), { mode: 0o755 } );
+		} );
+
+		const configureBot = ( checkout: string ) => {
+			git( checkout, 'config', 'user.name', 'CKEditorBot' );
+			git( checkout, 'config', 'user.email', 'bot@ckeditor.com' );
+			git( checkout, 'config', 'user.signingkey', 'ABCDEF0123456789' );
+			git( checkout, 'config', 'commit.gpgsign', 'true' );
+			git( checkout, 'config', 'gpg.program', signer );
+		};
+
+		it.skipIf( process.platform === 'win32' )( 'commits as its author and signs the commits and the merges', async () => {
+			configureBot( path );
+
+			const first = await openWorkspace( { cwd: path } );
+
+			await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+			await first.push();
+			await first.returnToBase();
+			await pushFiles( seed, { 'projects/cs/docs/b.md': 'B\n' } );
+
+			const checkout = await createCheckout( remote );
+
+			configureBot( checkout );
+
+			await ( await openWorkspace( { cwd: checkout } ) ).checkoutReportBranch( { name: `${ reportBranch }--2`, stack: [ reportBranch ] } );
+
+			expect( git( checkout, 'log', '-2', '--first-parent', '--format=%an|%ae' ).trim().split( '\n' ) )
+				.toEqual( [ 'CKEditorBot|bot@ckeditor.com', 'CKEditorBot|bot@ckeditor.com' ] );
+			expect( git( checkout, 'cat-file', 'commit', 'HEAD' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
+			expect( git( checkout, 'cat-file', 'commit', 'HEAD^1' ) ).toContain( 'gpgsig -----BEGIN PGP SIGNATURE-----' );
+			expect( await readText( signerLog ) ).toContain( 'ABCDEF0123456789' );
+		} );
+
+		it( 'lets the given author override the one of the configuration', async () => {
+			git( path, 'config', 'user.name', 'CKEditorBot' );
+			git( path, 'config', 'user.email', 'bot@ckeditor.com' );
+
+			const workspace = await openWorkspace( { cwd: path, author: { name: 'Bot' } } );
+
+			await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+
+			expect( git( path, 'log', '-1', '--format=%an|%ae' ).trim() ).toBe( 'Bot|bot@ckeditor.com' );
+		} );
+
+		it( 'cannot be published from without an author', async () => {
+			await expect( openWorkspace( { cwd: path } ).then( workspace => workspace.assertPublishable( [] ) ) ).rejects.toThrow(
+				'Publishing needs the author of the commits, but `user.name` is not set in the git configuration.'
+			);
+		} );
 	} );
 
 	it( 'replaces a leftover branch with a forced push, and pushes normally after that', async () => {
 		const first = await open();
 
-		await first.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': 'old\n' } );
 		await first.commit( [ 'projects/cs/.ai-tasks' ], 'Old state.' );
 		await first.push();
@@ -206,7 +311,7 @@ describe( 'openWorkspace()', () => {
 		const checkout = await createCheckout( remote );
 		const second = await open( checkout );
 
-		await second.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await second.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': 'new\n' } );
 		await second.commit( [ 'projects/cs/.ai-tasks' ], 'New state.' );
 		await second.push();
@@ -218,10 +323,25 @@ describe( 'openWorkspace()', () => {
 		expect( git( remote, 'log', '--format=%s', reportBranch ).trim().split( '\n' ) ).toEqual( [ 'Newer state.', 'New state.', 'More changes.', 'Initial commit.' ] );
 	} );
 
+	it( 'does not replace a leftover branch that another run pushed meanwhile', async () => {
+		await pushFiles( seed, { 'README.md': 'Leftover\n' }, reportBranch );
+
+		const workspace = await open();
+
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
+		await pushFiles( seed, { 'README.md': 'Another run\n' }, reportBranch );
+		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
+		await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+
+		await expect( workspace.push() ).rejects.toThrow( /stale info|rejected/ );
+		expect( git( remote, 'log', '-1', '--format=%s', reportBranch ).trim() ).toBe( 'More changes.' );
+		expect( git( remote, 'show', `${ reportBranch }:README.md` ) ).toBe( 'Another run\n' );
+	} );
+
 	it( 'aborts a conflicting merge and throws with the cause', async () => {
 		const first = await open();
 
-		await first.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': 'report\n' } );
 		await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
 		await first.push();
@@ -230,14 +350,68 @@ describe( 'openWorkspace()', () => {
 
 		const checkout = await createCheckout( remote );
 		const second = await open( checkout );
-		const error = await second.checkoutReportBranch( { name: reportBranch, continueExisting: true } ).catch( ( error: Error ) => error );
+		const error = await second.checkoutReportBranch( { name: `${ reportBranch }--2`, stack: [ reportBranch ] } ).catch( ( error: Error ) => error );
 
 		expect( ( error as Error ).message ).toMatch(
-			new RegExp( `^Merging "stable" into "${ reportBranch }" failed\\. Resolve the conflict in the report pull request by hand\\. Details: ` )
+			new RegExp( `^Merging "stable" into "${ reportBranch }" failed\\. Resolve the conflict in its report pull request by hand\\. Details: ` )
 		);
 		expect( ( error as Error ).cause ).toBeInstanceOf( Error );
 		expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
 		expect( existsSync( upath.join( checkout, '.git/MERGE_HEAD' ) ) ).toBe( false );
+	} );
+
+	describe( 'resolving the conflicts of a merge', () => {
+		const second = () => `${ reportBranch }--2`;
+
+		// The report branch and the base branch change the same line of `open.json`.
+		beforeEach( async () => {
+			const first = await open();
+
+			await first.checkoutReportBranch( { name: reportBranch, stack: [] } );
+			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': 'report\n' } );
+			await first.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
+			await first.push();
+			await first.returnToBase();
+			await pushFiles( seed, { 'projects/cs/.ai-tasks/t/open.json': 'base\n' } );
+		} );
+
+		it( 'passes every conflicted file with its three versions, and commits the merge with the resolved files', async () => {
+			const checkout = await createCheckout( remote );
+			const workspace = await open( checkout );
+			const resolveConflicts = vi.fn( async () => new Map( [
+				[ 'projects/cs/.ai-tasks/t/open.json', 'resolved\n' ],
+				[ 'projects/cs/.ai-tasks/t/report.md', 'Rendered again.\n' ]
+			] ) );
+
+			await workspace.checkoutReportBranch( { name: second(), stack: [ reportBranch ], resolveConflicts } );
+
+			expect( resolveConflicts ).toHaveBeenCalledExactlyOnceWith( [
+				{ path: 'projects/cs/.ai-tasks/t/open.json', base: null, ours: 'report\n', theirs: 'base\n' }
+			] );
+			expect( git( checkout, 'log', '-1', '--format=%s|%P' ).trim() ).toMatch( new RegExp( `^Merge stable into ${ reportBranch }\\.\\|\\S+ \\S+$` ) );
+			expect( git( checkout, 'show', 'HEAD:projects/cs/.ai-tasks/t/open.json' ) ).toBe( 'resolved\n' );
+			expect( git( checkout, 'show', 'HEAD:projects/cs/.ai-tasks/t/report.md' ) ).toBe( 'Rendered again.\n' );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+
+			await writeFiles( checkout, { 'projects/cs/.ai-tasks/t/open.json': 'next\n' } );
+			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'Next.' );
+			await workspace.push();
+
+			expect( git( remote, 'show', `${ reportBranch }:projects/cs/.ai-tasks/t/open.json` ) ).toBe( 'resolved\n' );
+		} );
+
+		it.each( [
+			[ 'cannot resolve them', null ],
+			[ 'leaves a conflicted file out', new Map( [ [ 'projects/cs/.ai-tasks/t/report.md', 'x' ] ] ) ]
+		] )( 'aborts the merge and throws when the resolver %s', async ( _, result ) => {
+			const checkout = await createCheckout( remote );
+			const workspace = await open( checkout );
+
+			await expect( workspace.checkoutReportBranch( { name: second(), stack: [ reportBranch ], resolveConflicts: async () => result } ) )
+				.rejects.toThrow( `Merging "stable" into "${ reportBranch }" failed.` );
+			expect( git( checkout, 'status', '--porcelain' ).trim() ).toBe( '' );
+			expect( existsSync( upath.join( checkout, '.git/MERGE_HEAD' ) ) ).toBe( false );
+		} );
 	} );
 
 	it( 'throws when the merge cannot even start', async () => {
@@ -250,15 +424,17 @@ describe( 'openWorkspace()', () => {
 		git( seed, 'push', '--quiet', 'origin', `HEAD:${ reportBranch }` );
 
 		const workspace = await open();
+		const resolveConflicts = vi.fn( async () => new Map() );
 
-		await expect( workspace.checkoutReportBranch( { name: reportBranch, continueExisting: true } ) )
+		await expect( workspace.checkoutReportBranch( { name: `${ reportBranch }--2`, stack: [ reportBranch ], resolveConflicts } ) )
 			.rejects.toThrow( `Merging "stable" into "${ reportBranch }" failed.` );
+		expect( resolveConflicts ).not.toHaveBeenCalled();
 	} );
 
 	it( 'drops what a task left behind and checks out the base branch again', async () => {
 		const workspace = await open();
 
-		await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+		await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
 		await writeFiles( path, { 'projects/cs/docs/a.md': 'Half-way\n', 'projects/cs/docs/untracked.md': 'x' } );
 		await workspace.returnToBase();
 
@@ -267,6 +443,58 @@ describe( 'openWorkspace()', () => {
 		expect( existsSync( upath.join( path, 'projects/cs/docs/untracked.md' ) ) ).toBe( false );
 		expect( git( path, 'status', '--porcelain' ).trim() ).toBe( '' );
 	} );
+	describe( 'fetchBranches()', () => {
+		it( 'fetches the branches that exist on `origin` into their remote-tracking refs, and returns them', async () => {
+			const workspace = await open();
+
+			git( seed, 'push', '--quiet', 'origin', 'HEAD:other' );
+			await pushFiles( seed, { 'README.md': 'Changed\n' } );
+
+			expect( await workspace.fetchBranches( [ 'stable', 'other', 'gone' ] ) ).toEqual( [ 'stable', 'other' ] );
+			expect( git( path, 'rev-parse', 'origin/stable' ).trim() ).toBe( git( remote, 'rev-parse', 'stable' ).trim() );
+			expect( git( path, 'rev-parse', 'origin/other' ).trim() ).toBe( git( remote, 'rev-parse', 'other' ).trim() );
+			expect( await workspace.refExists( 'origin/gone' ) ).toBe( false );
+		} );
+
+		it( 'fetches nothing when none of the branches exists', async () => {
+			expect( await ( await open() ).fetchBranches( [ 'gone' ] ) ).toEqual( [] );
+		} );
+	} );
+
+	describe( 'isAncestor()', () => {
+		it( 'tells whether a commit is in the history of another one', async () => {
+			const workspace = await open();
+
+			await pushFiles( seed, { 'README.md': 'Changed\n' } );
+			git( path, 'fetch', '--quiet', 'origin' );
+
+			expect( await workspace.isAncestor( 'stable', 'origin/stable' ) ).toBe( true );
+			expect( await workspace.isAncestor( 'origin/stable', 'stable' ) ).toBe( false );
+		} );
+
+		it( 'returns `false` for commits without a common ancestor', async () => {
+			git( path, 'checkout', '--quiet', '--orphan', 'unrelated' );
+			git( path, 'commit', '--quiet', '--allow-empty', '--message', 'Unrelated.' );
+
+			const workspace = await open();
+
+			expect( await workspace.isAncestor( 'unrelated', 'stable' ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'differsFrom()', () => {
+		it( 'tells whether any of the files differs between the working tree and the ref', async () => {
+			const workspace = await open();
+
+			expect( await workspace.differsFrom( [ 'README.md', 'projects/cs/docs/a.md' ], 'HEAD' ) ).toBe( false );
+
+			await writeFiles( path, { 'README.md': 'Changed\n' } );
+
+			expect( await workspace.differsFrom( [ 'README.md' ], 'HEAD' ) ).toBe( true );
+			expect( await workspace.differsFrom( [ 'projects/cs/docs/a.md' ], 'HEAD' ) ).toBe( false );
+		} );
+	} );
+
 	describe( 'refExists()', () => {
 		it( 'tells whether a branch, a remote branch or a commit exists', async () => {
 			const workspace = await open();
@@ -346,7 +574,7 @@ describe( 'openWorkspace()', () => {
 
 			const workspace = await open();
 
-			await workspace.checkoutReportBranch( { name: reportBranch, continueExisting: false } );
+			await workspace.checkoutReportBranch( { name: reportBranch, stack: [] } );
 			await writeFiles( path, { 'projects/cs/.ai-tasks/t/open.json': '[]\n' } );
 			await workspace.commit( [ 'projects/cs/.ai-tasks' ], 'State.' );
 			await workspace.push();

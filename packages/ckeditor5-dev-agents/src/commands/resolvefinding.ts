@@ -15,6 +15,7 @@ import { getDecisionFileName, renderDecision } from '../state/decisions.js';
 import { readTaskState, writeTaskState, type TaskState } from '../state/statestore.js';
 import { getReportBranch } from '../runner/runtarget.js';
 import { getFindingId } from '../runner/validatefindings.js';
+import { getErrorMessage } from '../utils/strings.js';
 import type { Finding, Target, Task } from '../types.js';
 
 export type ResolveFindingOptions = {
@@ -68,6 +69,11 @@ export type ResolvedFinding = {
 	 * The files restored, relative to the repository root.
 	 */
 	revertedFiles: Array<string>;
+
+	/**
+	 * The ref the files were restored from, when they were.
+	 */
+	restoredFrom?: string;
 
 	/**
 	 * The files of the fix that were not restored, because they had no uncommitted changes to revert.
@@ -128,7 +134,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		throw new Error(
 			`The [${ finding.id }] finding belongs to the "${ entry.task.id }" task in the "${ entry.target.name }" target, ` +
 			`but the "${ workspace.branch }" report branch is checked out. ` +
-			`Check out "${ getReportBranch( entry.task.id, entry.target, reportBranch.base ) }" first.`
+			`Check out "${ getReportBranch( entry.task.id, entry.target, reportBranch.base, reportBranch.part ) }" first.`
 		);
 	}
 
@@ -146,10 +152,25 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		].join( '\n' ) );
 	}
 
-	// On a report branch, the fix is a change against its base branch, which the report links to. Anywhere else
-	// (a local run), the fix is not committed, so `HEAD` has the content from before it.
+	// On a report branch, the fix is a change against the branch its pull request is based on: the report branch below it
+	// in the stack, or the base branch, which the report links to. Anywhere else (a local run), the fix is not committed,
+	// so `HEAD` has the content from before it.
 	const baseBranch = reportBranch?.base;
 	const fixFiles = [ ...new Set( affected.flatMap( item => item.files ) ) ].sort();
+	const restoreRef = reportBranch && fixFiles.length ? await getRestoreRef( workspace, entry, reportBranch ) : 'HEAD';
+
+	// A part of the stack also holds the fixed findings of the parts below it. Their fixes are reverted there.
+	if ( reportBranch && reportBranch.part > 1 && fixFiles.length && !await workspace.differsFrom( fixFiles, restoreRef ) ) {
+		const below = restoreRef.replace( /^origin\//, '' );
+		const isPartBelow = parseReportBranch( below ) !== undefined;
+
+		throw new Error(
+			`The fix of [${ finding.id }] was made in a pull request below "${ workspace.branch }" in the stack. Nothing was changed. ` +
+			( isPartBelow ?
+				`Check out "${ below }", or the report branch below it that made the fix, and reject the finding there.` :
+				`That pull request is already merged into "${ baseBranch }", so revert the fix there by hand if it is wrong.` )
+		);
+	}
 
 	// Restoring from `HEAD` reverts nothing when the files have no uncommitted changes: the fix was undone by hand,
 	// or it is committed, for example in a report branch checked out as a detached `HEAD`. The finding is still resolved,
@@ -158,7 +179,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 	const revertedFiles = canRestore ? fixFiles : [];
 
 	if ( revertedFiles.length ) {
-		await workspace.restore( revertedFiles, baseBranch ? await getRestoreRef( workspace, baseBranch ) : 'HEAD' );
+		await workspace.restore( revertedFiles, restoreRef );
 	}
 
 	for ( const item of affected ) {
@@ -182,6 +203,7 @@ export async function resolveFinding( options: ResolveFindingOptions ): Promise<
 		finding,
 		decisionFile,
 		revertedFiles,
+		...( revertedFiles.length ? { restoredFrom: restoreRef } : {} ),
 		unrevertedFiles: canRestore ? [] : fixFiles,
 		reopened: others.map( item => item.finding )
 	};
@@ -205,7 +227,9 @@ export function renderResolvedFinding( result: ResolvedFinding ): string {
 			'If the fix is committed, revert it by hand.'
 		);
 	} else if ( result.revertedFiles.length ) {
-		lines.push( `  Reverted  ${ result.revertedFiles.join( ', ' ) }` );
+		const source = result.restoredFrom ? ` (from ${ result.restoredFrom })` : '';
+
+		lines.push( `  Reverted  ${ result.revertedFiles.join( ', ' ) }${ source }` );
 	} else {
 		lines.push( '  Reverted  nothing (the finding had no fix)' );
 	}
@@ -286,15 +310,65 @@ function getAffectedFixes( entries: Array<TaskStateEntry>, finding: Finding ): A
 }
 
 /**
- * Splits the name of a report branch, `ai-tasks/<task>/<target>/<base branch>`, into its parts.
+ * Splits the name of a report branch, `ai-tasks/<task>/<target>/<base branch>`, with an optional `--<part>` of
+ * the stack, into its parts.
  */
-function parseReportBranch( branch: string ): { task: string; target: string; base: string } | undefined {
-	const [ prefix, task, target, ...base ] = branch.split( '/' );
+function parseReportBranch( branch: string ): { task: string; target: string; base: string; part: number } | undefined {
+	const [ prefix, task, target, ...rest ] = branch.split( '/' );
 
-	return prefix === REPORT_BRANCH_PREFIX && task && target && base.length ? { task, target, base: base.join( '/' ) } : undefined;
+	if ( prefix !== REPORT_BRANCH_PREFIX || !task || !target || !rest.length ) {
+		return undefined;
+	}
+
+	const [ , base = rest.join( '/' ), part = '1' ] = rest.join( '/' ).match( /^(.+)--([1-9]\d*)$/ ) ?? [];
+
+	return { task, target, base, part: Number( part ) };
 }
 
-async function getRestoreRef( workspace: GitWorkspace, baseBranch: string ): Promise<string> {
+/**
+ * Returns the branch the pull request of the report branch is based on: the closest part below it in the stack that
+ * is not merged yet, or the base branch. For a part of a stack, the parts below it and the base branch are fetched
+ * first: a checkout of one stacked pull request often lacks them, or has them outdated, and restoring from the base
+ * branch instead would also revert the fixes of the parts below.
+ */
+async function getRestoreRef(
+	workspace: GitWorkspace,
+	entry: TaskStateEntry,
+	{ base, part }: { base: string; part: number }
+): Promise<string> {
+	if ( part === 1 ) {
+		return getBaseRef( workspace, base );
+	}
+
+	const partsBelow = Array.from( { length: part - 1 }, ( _, index ) => {
+		return getReportBranch( entry.task.id, entry.target, base, part - 1 - index );
+	} );
+	let existing: Array<string>;
+
+	try {
+		existing = await workspace.fetchBranches( [ base, ...partsBelow ] );
+	} catch ( error ) {
+		throw new Error(
+			`Fetching the report branches below "${ workspace.branch }" in the stack failed, so it is not known which one ` +
+			'the fix is a change against. Nothing was changed. Check the connection to "origin" and try again. ' +
+			`Details: ${ getErrorMessage( error ) }`,
+			{ cause: error }
+		);
+	}
+
+	const baseRef = await getBaseRef( workspace, base );
+
+	// A part whose branch is gone was merged or closed. Its changes are in the base branch, or nowhere.
+	for ( const name of partsBelow ) {
+		if ( existing.includes( name ) && !await workspace.isAncestor( `origin/${ name }`, baseRef ) ) {
+			return `origin/${ name }`;
+		}
+	}
+
+	return baseRef;
+}
+
+async function getBaseRef( workspace: GitWorkspace, baseBranch: string ): Promise<string> {
 	for ( const ref of [ `origin/${ baseBranch }`, baseBranch ] ) {
 		if ( await workspace.refExists( ref ) ) {
 			return ref;
