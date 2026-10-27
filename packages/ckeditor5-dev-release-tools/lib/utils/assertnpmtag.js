@@ -15,7 +15,8 @@ const ALLOWED_NPM_LATEST_TAGS = [
 
 /**
  * Checks if the npm tag matches the tag calculated from the package version. Verification takes place for all packages.
- * Stable versions can additionally use `latest-v{major}` where `{major}` matches the version major.
+ * Stable versions can additionally use `latest-v{major}` where `{major}` matches the version major,
+ * and `staging-v{version}` where `{version}` is the exact package version.
  *
  * @param {Array.<string>} packagePaths
  * @param {string} npmTag
@@ -47,6 +48,10 @@ export default async function assertNpmTag( packagePaths, npmTag, options = {} )
 			}
 
 			if ( isValidLatestMajorTag( packageJson.version, npmTag ) ) {
+				continue;
+			}
+
+			if ( npmTag === `staging-v${ packageJson.version }` ) {
 				continue;
 			}
 		}
