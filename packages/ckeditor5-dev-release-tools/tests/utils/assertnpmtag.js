@@ -78,6 +78,15 @@ describe( 'assertNpmTag()', () => {
 		await assertNpmTag( [ 'ckeditor5-foo' ], 'latest-v1' );
 	} );
 
+	it( 'should not throw if version tag (latest) matches npm tag (staging-v{version})', async () => {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
+		} ) );
+
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'staging-v1.0.0' );
+	} );
+
 	it( 'should not throw if publishing as latest is disallowed but npm tag is not latest', async () => {
 		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
 			name: 'ckeditor5-foo',
@@ -144,6 +153,16 @@ describe( 'assertNpmTag()', () => {
 			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "latest-v".' );
 	} );
 
+	it( 'should throw if version tag (latest) does not match npm tag (staging-v{other version})', async () => {
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
+		} ) );
+
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging-v1.0.1' ) )
+			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "staging-v1.0.1".' );
+	} );
+
 	it( 'should throw if pre-release version is tagged as latest-v{X}', async () => {
 		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
 
@@ -188,6 +207,18 @@ describe( 'assertNpmTag()', () => {
 
 		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging' ) )
 			.rejects.toThrow( 'The version tag "nightly" from "ckeditor5-foo" package does not match the npm tag "staging".' );
+	} );
+
+	it( 'should throw if pre-release version is tagged as staging-v{version}', async () => {
+		vi.mocked( getNpmTagFromVersion ).mockReturnValue( 'alpha' );
+
+		vi.mocked( fs ).readFile.mockResolvedValue( JSON.stringify( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0-alpha.0'
+		} ) );
+
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging-v1.0.0-alpha.0' ) )
+			.rejects.toThrow( 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "staging-v1.0.0-alpha.0".' );
 	} );
 
 	it( 'should throw if version tag (alpha) does not match npm tag (next)', async () => {
