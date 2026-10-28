@@ -16,8 +16,9 @@ const execPromise = promisify( exec );
  * Runs an `npm dist-tag` command for each package in parallel. The common part of `reassignNpmTags()` and `removeNpmTags()`.
  *
  * Each command is retried up to 3 times in case of failure. A package is reported as skipped when npm answers that
- * nothing needs to change for it. When the command failed for at least one package, the returned promise rejects
- * after all packages have been processed, so the caller does not treat a partial update as a success.
+ * nothing needs to change for it. Such an answer is final, so the command is not retried then. When the command failed
+ * for at least one package, the returned promise rejects after all packages have been processed, so the caller does not
+ * treat a partial update as a success.
  *
  * @param {object} options
  * @param {string} [options.npmOwner] User that is authorized to release packages. Required unless `useOidc` is enabled.
@@ -49,6 +50,7 @@ export default async function updateNpmTags( options ) {
 
 	await assertNpmAuthorization( npmOwner, { useOidc } );
 
+	const isSkipped = error => skipMessages.some( message => error.message.includes( message ) );
 	const counter = tools.createSpinner( spinnerTitle, { total: packages.length } );
 	counter.start();
 
@@ -61,7 +63,7 @@ export default async function updateNpmTags( options ) {
 
 			// The calls run in parallel, so the fresh token is passed only to this npm process.
 			return execPromise( command, { env: { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() } } );
-		} );
+		}, { shouldRetry: error => !isSkipped( error ) } );
 		await updateTagRetryable()
 			.then( response => {
 				if ( response.stdout ) {
@@ -71,7 +73,7 @@ export default async function updateNpmTags( options ) {
 				}
 			} )
 			.catch( error => {
-				if ( skipMessages.some( message => error.message.includes( message ) ) ) {
+				if ( isSkipped( error ) ) {
 					packagesSkipped.push( packageName );
 				} else {
 					packagesFailed.push( packageName );
@@ -115,15 +117,17 @@ function trimErrorMessage( message ) {
 
 /**
  * @param {function} callback
- * @param {number} times
+ * @param {object} [options]
+ * @param {number} [options.times=3]
+ * @param {function(Error):boolean} [options.shouldRetry] Returns `false` for errors that another attempt cannot fix.
  * @returns {RetryCallback}
  */
-function retry( callback, times = 3 ) {
+function retry( callback, { times = 3, shouldRetry = () => true } = {} ) {
 	return ( ...args ) => Promise.resolve()
 		.then( () => callback( ...args ) )
 		.catch( err => {
-			if ( times > 0 ) {
-				return retry( callback, times - 1 )( ...args );
+			if ( times > 0 && shouldRetry( err ) ) {
+				return retry( callback, { times: times - 1, shouldRetry } )( ...args );
 			}
 
 			throw err;
