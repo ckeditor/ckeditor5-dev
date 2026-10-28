@@ -582,11 +582,27 @@ describe( 'versions', () => {
 		} );
 
 		it( 'should return null if npm tag is not published yet', async () => {
-			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+			vi.mocked( npm.manifest ).mockRejectedValue( Object.assign( new Error( 'No matching version found' ), { code: 'ETARGET' } ) );
 
 			const result = await getVersionForTag( 'package-name', 'latest' );
 
 			expect( result ).to.equal( null );
+		} );
+
+		it( 'should return null if the package is not published yet', async () => {
+			vi.mocked( npm.manifest ).mockRejectedValue( Object.assign( new Error( 'Not Found' ), { code: 'E404' } ) );
+
+			const result = await getVersionForTag( 'package-name', 'latest' );
+
+			expect( result ).to.equal( null );
+		} );
+
+		it( 'should rethrow an error that does not tell whether the tag exists', async () => {
+			const error = Object.assign( new Error( 'connect ECONNREFUSED' ), { code: 'ECONNREFUSED' } );
+
+			vi.mocked( npm.manifest ).mockRejectedValue( error );
+
+			await expect( getVersionForTag( 'package-name', 'latest' ) ).rejects.toBe( error );
 		} );
 	} );
 
@@ -630,7 +646,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'should return true if "latest" npm tag is not published yet', async () => {
-			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+			vi.mocked( npm.manifest ).mockRejectedValue( Object.assign( new Error( 'No matching version found' ), { code: 'ETARGET' } ) );
 
 			const result = await isLatestOrNextStableVersion( 'package-name', '1.0.0' );
 
@@ -672,7 +688,7 @@ describe( 'versions', () => {
 		} );
 
 		it( 'should return true if given npm tag is not published yet', async () => {
-			vi.mocked( npm.manifest ).mockRejectedValue( 'E404' );
+			vi.mocked( npm.manifest ).mockRejectedValue( Object.assign( new Error( 'No matching version found' ), { code: 'ETARGET' } ) );
 
 			const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
 
