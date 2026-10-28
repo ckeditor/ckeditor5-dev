@@ -44,7 +44,7 @@ export default async function reassignNpmTags( options ) {
 		useOidc,
 		packages,
 		getCommand: packageName => `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`,
-		skipMessage: 'is already set to version',
+		skipMessages: [ 'is already set to version' ],
 		spinnerTitle: 'Reassigning npm tags...',
 		updatedTitle: '✨ Tags updated:',
 		errorMessage: `Could not assign the "${ npmTag }" npm dist-tag to version "${ version }" for the following packages: `
