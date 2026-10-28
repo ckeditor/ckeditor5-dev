@@ -8,6 +8,7 @@ import updateDependencies from '../lib/tasks/updatedependencies.js';
 import commitAndTag from '../lib/tasks/commitandtag.js';
 import createGithubRelease from '../lib/tasks/creategithubrelease.js';
 import reassignNpmTags from '../lib/tasks/reassignnpmtags.js';
+import removeNpmTags from '../lib/tasks/removenpmtags.js';
 import prepareRepository from '../lib/tasks/preparerepository.js';
 import push from '../lib/tasks/push.js';
 import publishPackages from '../lib/tasks/publishpackages.js';
@@ -43,6 +44,7 @@ vi.mock( '../lib/tasks/updatedependencies' );
 vi.mock( '../lib/tasks/commitandtag' );
 vi.mock( '../lib/tasks/creategithubrelease' );
 vi.mock( '../lib/tasks/reassignnpmtags' );
+vi.mock( '../lib/tasks/removenpmtags' );
 vi.mock( '../lib/tasks/preparerepository' );
 vi.mock( '../lib/tasks/push' );
 vi.mock( '../lib/tasks/publishpackages' );
@@ -82,6 +84,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( reassignNpmTags ).to.be.a( 'function' );
 			expect( index.reassignNpmTags ).to.equal( reassignNpmTags );
+		} );
+	} );
+
+	describe( 'removeNpmTags()', () => {
+		it( 'should be a function', () => {
+			expect( removeNpmTags ).to.be.a( 'function' );
+			expect( index.removeNpmTags ).to.equal( removeNpmTags );
 		} );
 	} );
 
