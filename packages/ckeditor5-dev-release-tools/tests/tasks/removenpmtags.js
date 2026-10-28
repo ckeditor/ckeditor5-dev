@@ -132,6 +132,8 @@ describe( 'removeNpmTags()', () => {
 		await expect( removeNpmTags( { npmOwner: 'authorized-user', packages: [ 'package1', 'package2' ], npmTag: 'staging-v1.0.1' } ) )
 			.resolves.toBeUndefined();
 
+		// A missing tag is a final answer, so it is not retried.
+		expect( stubs.exec ).toHaveBeenCalledTimes( 2 );
 		expect( console.log ).toHaveBeenCalledWith( '✨ Tags removed:' );
 		expect( console.log ).toHaveBeenCalledWith( 'package1' );
 		expect( console.log ).toHaveBeenCalledWith( '⬇️ Packages skipped:' );
@@ -144,6 +146,7 @@ describe( 'removeNpmTags()', () => {
 		await expect( removeNpmTags( { npmOwner: 'authorized-user', packages: [ 'package1' ], npmTag: 'staging-v1.0.1' } ) )
 			.resolves.toBeUndefined();
 
+		expect( stubs.exec ).toHaveBeenCalledTimes( 1 );
 		expect( console.log ).toHaveBeenCalledWith( '⬇️ Packages skipped:' );
 		expect( console.log ).not.toHaveBeenCalledWith( '🐛 Errors found:' );
 	} );
