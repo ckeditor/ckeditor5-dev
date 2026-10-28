@@ -167,6 +167,9 @@ export function getDateIdentifier() {
  * Returns the latest version of the package on the npm tag.
  * If the package does not have any version on that tag yet, `null` is returned.
  *
+ * Any other error (for example, the registry cannot be reached) is rethrown. Treating it as a missing tag
+ * could, for example, make an older release look like the newest one.
+ *
  * @param {string} packageName
  * @param {string} npmTag
  * @returns {Promise.<string|null>}
@@ -174,7 +177,14 @@ export function getDateIdentifier() {
 export function getVersionForTag( packageName, npmTag ) {
 	return npm.manifest( `${ packageName }@${ npmTag }` )
 		.then( result => result.version )
-		.catch( () => null );
+		.catch( error => {
+			// `ETARGET`: the package has no such tag. `E404`: the package does not exist.
+			if ( [ 'ETARGET', 'E404' ].includes( error?.code ) ) {
+				return null;
+			}
+
+			throw error;
+		} );
 }
 
 /**
