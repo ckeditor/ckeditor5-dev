@@ -1,6 +1,50 @@
 Changelog
 =========
 
+## [54.10.0](https://github.com/ckeditor/ckeditor5-dev/compare/v54.9.1...v54.10.0) (October 28, 2026)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: `publishPackages()` accepts the `staging-v{version}` npm tag for a stable release when `{version}` is the exact package version, for example `staging-v1.2.3` for v1.2.3. It lets several release lines stage their packages at the same time without moving one shared `staging` tag.
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added the `removeNpmTags()` function. It removes an npm dist-tag from all given packages, for example, a temporary tag used to stage a release. It works like `reassignNpmTags()`: it supports npm Trusted Publishing (OIDC), retries failed packages, and rejects after all packages have been processed when any of them failed. Packages that do not have the tag are reported as skipped, so it can be run again after a partial failure.
+
+### Bug fixes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `reassignNpmTags()` task now rejects when the npm dist-tag could not be changed for at least one package. Before, the task only listed the errors in the output and resolved successfully, so release automation reported a success even though the tag was not moved.
+
+  The task still processes all packages, retries each failed call, and prints the list of errors. Packages whose tag already points to the requested version are still reported as skipped and do not cause a rejection. The error message lists the packages that failed.
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: `getVersionForTag()` no longer returns `null` when the npm registry cannot answer, for example, when it cannot be reached. It returns `null` only when the registry says that the tag or the package does not exist, and it rethrows any other error. Before, a network error looked like a missing tag. Then `isLatestOrNextStableVersion()` treated any version as the newest one, so a script could move the `latest` tag to an older release line.
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: `npm.checkVersionAvailability()` no longer reports a version as available when the npm registry cannot answer, for example, when it cannot be reached. It resolves to `true` only when the registry says that the version or the package does not exist, and it rethrows any other error. Before, a network error made an already published version look available. `publishPackages()` and the changelog version prompt use this check, so they now fail with the network error instead of continuing.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/54.10.0): v54.9.1 => v54.10.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.10.0): v54.9.1 => v54.10.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.10.0): v54.9.1 => v54.10.0
+</details>
+
+
 ## [54.9.1](https://github.com/ckeditor/ckeditor5-dev/compare/v54.9.0...v54.9.1) (October 1, 2026)
 
 ### Bug fixes
@@ -144,38 +188,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.7.4): v54.7.3 => v54.7.4
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.7.4): v54.7.3 => v54.7.4
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.7.4): v54.7.3 => v54.7.4
-</details>
-
-
-## [54.7.3](https://github.com/ckeditor/ckeditor5-dev/compare/v54.7.2...v54.7.3) (May 27, 2026)
-
-### Other changes
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Added `ckeditor5-dev-ci-notify-github-actions-status`, a GitHub Actions equivalent of `ckeditor5-dev-ci-notify-circle-status` that posts a Slack notification summarizing a failed workflow. See [ckeditor/ckeditor5-internal#4450](https://github.com/ckeditor/ckeditor5-internal/issues/4450).
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/54.7.3): v54.7.2 => v54.7.3
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/54.7.3): v54.7.2 => v54.7.3
 </details>
 
 ---
