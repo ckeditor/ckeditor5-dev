@@ -24,7 +24,7 @@ const execPromise = promisify( exec );
  * @param {boolean} [options.useOidc=false] Whether to authorize using npm Trusted Publishing (OIDC).
  * @param {Array.<string>} options.packages Names of the packages to process.
  * @param {function(string):string} options.getCommand Returns the `npm dist-tag` command for a package name.
- * @param {string} options.skipMessage A part of the npm error message meaning that nothing needs to change for the package.
+ * @param {Array.<string>} options.skipMessages Parts of npm error messages meaning that nothing needs to change for the package.
  * @param {string} options.spinnerTitle
  * @param {string} options.updatedTitle A title of the list of packages that the command changed.
  * @param {string} options.errorMessage The start of the error message. The names of the failed packages are appended to it.
@@ -36,7 +36,7 @@ export default async function updateNpmTags( options ) {
 		useOidc = false,
 		packages,
 		getCommand,
-		skipMessage,
+		skipMessages,
 		spinnerTitle,
 		updatedTitle,
 		errorMessage
@@ -71,7 +71,7 @@ export default async function updateNpmTags( options ) {
 				}
 			} )
 			.catch( error => {
-				if ( error.message.includes( skipMessage ) ) {
+				if ( skipMessages.some( message => error.message.includes( message ) ) ) {
 					packagesSkipped.push( packageName );
 				} else {
 					packagesFailed.push( packageName );

@@ -11,8 +11,9 @@ import updateNpmTags from '../utils/updatenpmtags.js';
 /**
  * Used to remove a dist-tag from all packages from the given set, for example, a temporary tag used to stage a release.
  * Each operation will be retried up to 3 times in case of failure. Packages that do not have the tag are reported
- * as skipped, so the function can be run again after a partial failure. When the tag could not be removed from at least
- * one package, the returned promise rejects after all packages have been processed.
+ * as skipped (also when a package has no dist-tags at all), so the function can be run again after a partial failure.
+ * When the tag could not be removed from at least one package, the returned promise rejects after all packages
+ * have been processed.
  *
  * When using npm Trusted Publishing (`useOidc`), the `npm whoami` check is replaced by verifying that the `NPM_ID_TOKEN`
  * environment variable is set, as `npm whoami` does not reflect OIDC authentication. It requires npm 11.21.0 or newer
@@ -45,8 +46,9 @@ export default async function removeNpmTags( options ) {
 		useOidc,
 		packages,
 		getCommand: packageName => `npm dist-tag rm ${ shellEscape( [ packageName ] ) } ${ shellEscape( [ npmTag ] ) }`,
-		// npm checks the tags of the package before removing one.
-		skipMessage: 'is not a dist-tag on',
+		// npm checks the tags of the package before removing one. When the package has no tags at all,
+		// npm reports it before looking for the requested tag.
+		skipMessages: [ 'is not a dist-tag on', 'No dist-tags found for' ],
 		spinnerTitle: 'Removing npm tags...',
 		updatedTitle: '✨ Tags removed:',
 		errorMessage: `Could not remove the "${ npmTag }" npm dist-tag from the following packages: `
