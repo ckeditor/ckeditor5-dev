@@ -5,24 +5,21 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { styleText, promisify } from 'node:util';
-import columns from 'cli-columns';
 import shellEscape from 'shell-escape';
-import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
-import getNpmIdToken from '../utils/getnpmidtoken.js';
-import { exec } from 'node:child_process';
-
-const execPromise = promisify( exec );
+import updateNpmTags from '../utils/updatenpmtags.js';
 
 /**
  * Used to assign a dist-tag to a specified version for all packages from the release set.
  * It supports built-in tags (e.g. `latest`, `staging`, `next`) and custom tags (e.g. `latest-v{X}`).
- * Each operation will be retried up to 3 times in case of failure.
+ * Each operation will be retried up to 3 times in case of failure. Packages whose tag already points to the requested
+ * version are reported as skipped. When the tag could not be changed for at least one package, the returned promise
+ * rejects after all packages have been processed, so the caller does not treat a partial update as a success.
  *
  * When using npm Trusted Publishing (`useOidc`), the `npm whoami` check is replaced by verifying that the `NPM_ID_TOKEN`
  * environment variable is set, as `npm whoami` does not reflect OIDC authentication. It requires npm 11.21.0 or newer
  * and a trusted publisher that allows the `npm dist-tag` command.
+ *
+ * See also `removeNpmTags()`.
  *
  * @param {object} options
  * @param {string} [options.npmOwner] User that is authorized to release packages. Required unless `useOidc` is enabled.
@@ -31,7 +28,7 @@ const execPromise = promisify( exec );
  * @param {string} options.version Specifies the version of packages to reassign the tags for.
  * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
  * @param {string} [options.npmTag='latest'] Npm dist-tag to assign.
- * @returns {Promise}
+ * @returns {Promise} Rejects when the tag could not be changed for at least one package.
  */
 export default async function reassignNpmTags( options ) {
 	const {
@@ -42,92 +39,14 @@ export default async function reassignNpmTags( options ) {
 		npmTag = 'latest'
 	} = options;
 
-	const errors = [];
-	const packagesSkipped = [];
-	const packagesUpdated = [];
-
-	await assertNpmAuthorization( npmOwner, { useOidc } );
-
-	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
-	counter.start();
-
-	const updateTagPromises = packages.map( async packageName => {
-		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`;
-		const updateLatestTagRetryable = retry( async () => {
-			if ( !useOidc ) {
-				return execPromise( command );
-			}
-
-			// The calls run in parallel, so the fresh token is passed only to this npm process.
-			return execPromise( command, { env: { ...process.env, NPM_ID_TOKEN: await getNpmIdToken() } } );
-		} );
-		await updateLatestTagRetryable()
-			.then( response => {
-				if ( response.stdout ) {
-					packagesUpdated.push( packageName );
-				} else if ( response.stderr ) {
-					throw new Error( response.stderr );
-				}
-			} )
-			.catch( error => {
-				if ( error.message.includes( 'is already set to version' ) ) {
-					packagesSkipped.push( packageName );
-				} else {
-					errors.push( trimErrorMessage( error.message ) );
-				}
-			} )
-			.finally( () => {
-				counter.increase();
-			} );
+	return updateNpmTags( {
+		npmOwner,
+		useOidc,
+		packages,
+		getCommand: packageName => `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`,
+		skipMessages: [ 'is already set to version' ],
+		spinnerTitle: 'Reassigning npm tags...',
+		updatedTitle: '✨ Tags updated:',
+		errorMessage: `Could not assign the "${ npmTag }" npm dist-tag to version "${ version }" for the following packages: `
 	} );
-
-	await Promise.allSettled( updateTagPromises );
-
-	counter.finish();
-
-	if ( packagesUpdated.length ) {
-		console.log( styleText( [ 'green', 'bold' ], '✨ Tags updated:' ) );
-		console.log( columns( packagesUpdated ) );
-	}
-
-	if ( packagesSkipped.length ) {
-		console.log( styleText( [ 'yellow', 'bold' ], '⬇️ Packages skipped:' ) );
-		console.log( columns( packagesSkipped ) );
-	}
-
-	if ( errors.length ) {
-		console.log( styleText( [ 'red', 'bold' ], '🐛 Errors found:' ) );
-		errors.forEach( msg => console.log( `* ${ msg }` ) );
-	}
 }
-
-/**
- * @param {string} message
- * @returns {string}
- */
-function trimErrorMessage( message ) {
-	return message.replace( /npm ERR!.*\n/g, '' ).trim();
-}
-
-/**
- * @param {function} callback
- * @param {number} times
- * @returns {RetryCallback}
- */
-function retry( callback, times = 3 ) {
-	return ( ...args ) => Promise.resolve()
-		.then( () => callback( ...args ) )
-		.catch( err => {
-			if ( times > 0 ) {
-				return retry( callback, times - 1 )( ...args );
-			}
-
-			throw err;
-		} );
-}
-
-/**
- * @callback RetryCallback
- * @param {...*} args
- * @returns {Promise}
- */
