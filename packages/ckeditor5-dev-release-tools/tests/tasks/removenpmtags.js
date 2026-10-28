@@ -138,6 +138,16 @@ describe( 'removeNpmTags()', () => {
 		expect( console.log ).toHaveBeenCalledWith( 'package2' );
 	} );
 
+	it( 'should report a package without any dist-tags as skipped', async () => {
+		stubs.exec.mockRejectedValue( new Error( 'npm error No dist-tags found for package1' ) );
+
+		await expect( removeNpmTags( { npmOwner: 'authorized-user', packages: [ 'package1' ], npmTag: 'staging-v1.0.1' } ) )
+			.resolves.toBeUndefined();
+
+		expect( console.log ).toHaveBeenCalledWith( '⬇️ Packages skipped:' );
+		expect( console.log ).not.toHaveBeenCalledWith( '🐛 Errors found:' );
+	} );
+
 	it( 'should process all packages before rejecting and list only the failed ones in the error', async () => {
 		mockExecPerPackage( {
 			package1: new Error( 'E403 Forbidden' ),
