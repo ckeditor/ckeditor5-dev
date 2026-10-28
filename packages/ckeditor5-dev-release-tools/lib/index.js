@@ -7,6 +7,7 @@ export { default as updateDependencies } from './tasks/updatedependencies.js';
 export { default as commitAndTag } from './tasks/commitandtag.js';
 export { default as createGithubRelease } from './tasks/creategithubrelease.js';
 export { default as reassignNpmTags } from './tasks/reassignnpmtags.js';
+export { default as removeNpmTags } from './tasks/removenpmtags.js';
 export { default as prepareRepository } from './tasks/preparerepository.js';
 export { default as push } from './tasks/push.js';
 export { default as publishPackages } from './tasks/publishpackages.js';
