@@ -26,7 +26,7 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "glob": "^13.0.6",
+    "glob": "^14.0.3",
     "rolldown": "^1.2.6",
     "typedoc": "^0.28.20",
     "typedoc-plugin-rename-defaults": "^0.7.3",
