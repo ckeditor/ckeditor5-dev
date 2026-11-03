@@ -9,9 +9,10 @@ allowBuilds:
   'snyk': true
 
 overrides:
-  '@puppeteer/browsers@^2': '^3.0.6'
+  '@tufjs/models>minimatch@^10': '^11.0.3'
   'diff@^7': '^8.0.3'
-  'esbuild@^0.27': '^0.28.1'
+  'glob@^13': '^14.0.3'
+  'ignore-walk>minimatch@^10': '^11.0.3'
   'js-yaml@^3': '^4.3.1'
   'lodash@^4': '^4.18.1'
   'minimatch@^9': '^9.0.7'
@@ -19,7 +20,7 @@ overrides:
   # `raw-loader` still asks for the 3.x line, which pulls `ajv@6` together with its old URI parser.
   # The 4.x line moves to `ajv@8`, which relies on `fast-uri` instead.
   'schema-utils@^3': '^4.5.0'
-  'serialize-javascript@^6': '^7.1.2'
+  'serialize-javascript@^6': '^7.1.3'
   'uuid@^8': '^14.0.0'
   'ws@^8': '^8.21.1'
 
@@ -28,7 +29,6 @@ minimumReleaseAgeExclude:
   - '@ckeditor/*'
   - '@cksource/*'
   - '*ckeditor5*'
-  - 'fast-uri' # Remove after 2026-10-22.
 
 shellEmulator: true
 shamefullyHoist: true

@@ -6,13 +6,14 @@
  */
 
 import { cpus } from 'node:os';
+import type { PageEvents } from 'puppeteer';
 
 export interface ErrorType {
 
 	/**
 	 * The event name emitted by Puppeteer.
 	 */
-	event?: string;
+	event?: keyof PageEvents;
 
 	/**
 	 * Human-readable description of the error.

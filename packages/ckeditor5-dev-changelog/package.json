@@ -31,7 +31,7 @@
     "@11ty/gray-matter": "^2.1.0",
     "@ckeditor/ckeditor5-dev-utils": "workspace:*",
     "date-fns": "^4.0.0",
-    "glob": "^13.0.0",
+    "glob": "^14.0.3",
     "inquirer": "^12.5.2",
     "semver": "^7.6.3",
     "upath": "^2.0.1"

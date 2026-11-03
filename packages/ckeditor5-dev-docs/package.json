@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "@ckeditor/typedoc-plugins": "workspace:*",
-    "glob": "^13.0.0",
+    "glob": "^14.0.3",
     "typedoc": "^0.28.14",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "upath": "^2.0.1"
