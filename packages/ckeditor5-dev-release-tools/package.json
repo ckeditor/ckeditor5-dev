@@ -28,7 +28,6 @@
     "glob": "^13.0.6",
     "inquirer": "^12.11.1",
     "semver": "^7.7.4",
-    "shell-escape": "^0.2.0",
     "simple-git": "^3.36.0",
     "upath": "^2.0.1"
   },
