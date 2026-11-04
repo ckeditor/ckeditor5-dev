@@ -6,7 +6,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
 import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 import reassignNpmTags from '../../lib/tasks/reassignnpmtags.js';
@@ -40,15 +39,12 @@ vi.mock( 'node:util', () => ( {
 	styleText: stubs.styleText,
 	promisify: vi.fn( () => stubs.exec )
 } ) );
-vi.mock( 'shell-escape' );
 vi.mock( 'cli-columns' );
-vi.mock( 'shell-escape' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/getnpmidtoken.js' );
 
 describe( 'reassignNpmTags()', () => {
 	beforeEach( () => {
-		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
 		vi.mocked( assertNpmAuthorization ).mockResolvedValue( true );
 		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
 	} );
@@ -253,13 +249,50 @@ describe( 'reassignNpmTags()', () => {
 		expect( stubs.exec ).toHaveBeenCalledTimes( 4 );
 	} );
 
-	it( 'should escape arguments passed to a shell command', async () => {
-		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+	it( 'should pass a scoped package name, the version, and the tag to npm without quotes', async () => {
+		await reassignNpmTags( {
+			npmOwner: 'authorized-user',
+			version: '1.0.1-alpha.0',
+			packages: [ '@ckeditor/ckeditor5-core' ],
+			npmTag: 'alpha'
+		} );
 
-		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
+		// On Windows, the command runs in `cmd.exe`, which would pass the quotes to npm as a part of the values.
+		expect( stubs.exec ).toHaveBeenCalledExactlyOnceWith( 'npm dist-tag add @ckeditor/ckeditor5-core@1.0.1-alpha.0 alpha' );
+	} );
 
-		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ 'package1' ] );
-		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ '1.0.1' ] );
+	it.each( [
+		[ 'a missing version', undefined ],
+		[ 'an incomplete version', '1.0' ],
+		[ 'a version with a prefix', 'v1.0.1' ],
+		[ 'a version with a space', ' 1.0.1' ],
+		[ 'a version followed by an option', '1.0.1 --force' ]
+	] )( 'should throw an error before running npm when the version is invalid (checking %s)', async ( _description, version ) => {
+		await expect( reassignNpmTags( { npmOwner: 'authorized-user', version, packages: [ 'package1' ] } ) )
+			.rejects.toThrow( `Invalid version: "${ version }".` );
+
+		expect( assertNpmAuthorization ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw an error before running npm when a package name is invalid', async () => {
+		await expect( reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package 2' ] } ) )
+			.rejects.toThrow( 'Invalid package name: "package 2".' );
+
+		expect( assertNpmAuthorization ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw an error before running npm when the npm tag is invalid', async () => {
+		await expect( reassignNpmTags( {
+			npmOwner: 'authorized-user',
+			version: '1.0.1',
+			packages: [ 'package1' ],
+			npmTag: 'latest --force'
+		} ) ).rejects.toThrow( 'Invalid npm tag: "latest --force".' );
+
+		expect( assertNpmAuthorization ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
 	} );
 
 	describe( 'UX', () => {
