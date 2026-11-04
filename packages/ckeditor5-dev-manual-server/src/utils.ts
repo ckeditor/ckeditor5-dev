@@ -5,6 +5,11 @@
 
 import { relative, isAbsolute } from 'node:path';
 
+/**
+ * The file name suffix of manual test pages.
+ */
+export const MANUAL_TEST_SUFFIX = '.manual.html';
+
 export interface CachedValue<T> {
 	get(): T;
 	invalidate(): void;

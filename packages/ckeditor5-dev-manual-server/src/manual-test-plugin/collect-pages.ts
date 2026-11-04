@@ -5,11 +5,10 @@
 
 import { globSync } from 'node:fs';
 import { basename } from 'node:path';
-import { toPosixPath, toPublicSpecifier } from '../utils.js';
+import { MANUAL_TEST_SUFFIX, toPosixPath, toPublicSpecifier } from '../utils.js';
 import type { ManualPageEntry } from './types.js';
 
 const MANUAL_TESTS_DIRECTORY = 'manual/';
-const MANUAL_TEST_SUFFIX = '.manual.html';
 
 /**
  * Discovers manual test pages. A manual test is a single full HTML document named
