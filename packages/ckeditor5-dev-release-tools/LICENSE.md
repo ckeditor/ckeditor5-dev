@@ -23,7 +23,6 @@ The following libraries are included in CKEditor under the [MIT license](https:/
 * @octokit/rest - Copyright (c) 2012 Cloud9 IDE, Inc. (Mike de Boer) and Copyright (c) 2017-2018 Octokit contributors.
 * cli-columns - Copyright (c) Shannon Moeller <me@shannonmoeller.com> (shannonmoeller.com).
 * inquirer - Copyright (c) 2025 Simon Boudrias.
-* shell-escape - Copyright (c) Martin PANEL (https://github.com/xxorax).
 * simple-git - Copyright (c) 2025 Steve King.
 * upath - Copyright(c) 2014-2020 Angelos Pikoulas (agelos.pikoulas@gmail.com).
 
