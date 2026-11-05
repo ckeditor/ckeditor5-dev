@@ -5,7 +5,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import shellEscape from 'shell-escape';
 import updateNpmTags from '../utils/updatenpmtags.js';
 
 /**
@@ -14,6 +13,9 @@ import updateNpmTags from '../utils/updatenpmtags.js';
  * as skipped (also when a package has no dist-tags at all), so the function can be run again after a partial failure.
  * When the tag could not be removed from at least one package, the returned promise rejects after all packages
  * have been processed.
+ *
+ * Package names (with an optional scope) and the tag may contain only letters, digits, and the `.`, `_`, and `-` characters,
+ * because they are passed to npm without quotes. Other values make the function throw an error before it runs npm.
  *
  * When using npm Trusted Publishing (`useOidc`), the `npm whoami` check is replaced by verifying that the `NPM_ID_TOKEN`
  * environment variable is set, as `npm whoami` does not reflect OIDC authentication. It requires npm 11.21.0 or newer
@@ -27,7 +29,7 @@ import updateNpmTags from '../utils/updatenpmtags.js';
  * the `npm whoami` authorization check is skipped and the `NPM_ID_TOKEN` environment variable must be set instead.
  * @param {Array.<string>} options.packages Array of packages' names to remove the tag from.
  * @param {string} options.npmTag Npm dist-tag to remove.
- * @returns {Promise} Rejects when the tag could not be removed from at least one package.
+ * @returns {Promise} Rejects when an option is invalid or when the tag could not be removed from at least one package.
  */
 export default async function removeNpmTags( options ) {
 	const {
@@ -45,7 +47,8 @@ export default async function removeNpmTags( options ) {
 		npmOwner,
 		useOidc,
 		packages,
-		getCommand: packageName => `npm dist-tag rm ${ shellEscape( [ packageName ] ) } ${ shellEscape( [ npmTag ] ) }`,
+		npmTag,
+		getCommand: packageName => `npm dist-tag rm ${ packageName } ${ npmTag }`,
 		// npm checks the tags of the package before removing one. When the package has no tags at all,
 		// npm reports it before looking for the requested tag.
 		skipMessages: [ 'is not a dist-tag on', 'No dist-tags found for' ],

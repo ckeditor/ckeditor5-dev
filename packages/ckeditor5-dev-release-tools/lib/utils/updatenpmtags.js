@@ -12,9 +12,16 @@ import { exec } from 'node:child_process';
 
 const execPromise = promisify( exec );
 
+// Single quotes do not work on Windows: the command runs in `cmd.exe`, which, unlike POSIX shells, passes them to npm
+// as a part of the values. Hence, the patterns allow only characters that no shell treats specially, and no "-" at the start,
+// so npm does not read a value as an option.
+const PACKAGE_NAME_PATTERN = /^(@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i;
+const NPM_TAG_PATTERN = /^[a-z0-9][a-z0-9._-]*$/i;
+
 /**
  * Runs an `npm dist-tag` command for each package in parallel. The common part of `reassignNpmTags()` and `removeNpmTags()`.
  *
+ * The package names and the npm tag are validated before any npm command runs, as they are passed to npm without quotes.
  * Each command is retried up to 3 times in case of failure. A package is reported as skipped when npm answers that
  * nothing needs to change for it. Such an answer is final, so the command is not retried then. When the command failed
  * for at least one package, the returned promise rejects after all packages have been processed, so the caller does not
@@ -24,24 +31,29 @@ const execPromise = promisify( exec );
  * @param {string} [options.npmOwner] User that is authorized to release packages. Required unless `useOidc` is enabled.
  * @param {boolean} [options.useOidc=false] Whether to authorize using npm Trusted Publishing (OIDC).
  * @param {Array.<string>} options.packages Names of the packages to process.
- * @param {function(string):string} options.getCommand Returns the `npm dist-tag` command for a package name.
+ * @param {string} options.npmTag The npm dist-tag that the command adds or removes.
+ * @param {function(string):string} options.getCommand Returns the `npm dist-tag` command for a package name. Values
+ * in the command other than the package name and the npm tag must be validated by the caller.
  * @param {Array.<string>} options.skipMessages Parts of npm error messages meaning that nothing needs to change for the package.
  * @param {string} options.spinnerTitle
  * @param {string} options.updatedTitle A title of the list of packages that the command changed.
  * @param {string} options.errorMessage The start of the error message. The names of the failed packages are appended to it.
- * @returns {Promise} Rejects when the command failed for at least one package.
+ * @returns {Promise} Rejects when a package name or the npm tag is invalid, or when the command failed for at least one package.
  */
 export default async function updateNpmTags( options ) {
 	const {
 		npmOwner,
 		useOidc = false,
 		packages,
+		npmTag,
 		getCommand,
 		skipMessages,
 		spinnerTitle,
 		updatedTitle,
 		errorMessage
 	} = options;
+
+	assertValidArguments( packages, npmTag );
 
 	const errors = [];
 	const packagesFailed = [];
@@ -104,6 +116,24 @@ export default async function updateNpmTags( options ) {
 		errors.forEach( msg => console.log( `* ${ msg }` ) );
 
 		throw new Error( errorMessage + packagesFailed.join( ', ' ) + '.' );
+	}
+}
+
+/**
+ * @param {Array.<string>} packages
+ * @param {string} npmTag
+ */
+function assertValidArguments( packages, npmTag ) {
+	const errors = packages
+		.filter( packageName => !PACKAGE_NAME_PATTERN.test( packageName ) )
+		.map( packageName => `Invalid package name: "${ packageName }".` );
+
+	if ( !NPM_TAG_PATTERN.test( npmTag ) ) {
+		errors.push( `Invalid npm tag: "${ npmTag }".` );
+	}
+
+	if ( errors.length ) {
+		throw new Error( errors.join( '\n' ) );
 	}
 }
 

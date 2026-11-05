@@ -59,7 +59,6 @@ validateLicenseFiles( {
 	}, {
 		packageName: '@ckeditor/ckeditor5-dev-release-tools',
 		dependencies: [
-			{ license: 'MIT', name: 'shell-escape', copyright: 'Copyright (c) Martin PANEL (https://github.com/xxorax).' },
 			simpleGitOverride
 		]
 	}, {
