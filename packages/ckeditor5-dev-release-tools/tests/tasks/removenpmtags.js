@@ -6,7 +6,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import shellEscape from 'shell-escape';
 import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
 import getNpmIdToken from '../../lib/utils/getnpmidtoken.js';
 import removeNpmTags from '../../lib/tasks/removenpmtags.js';
@@ -40,14 +39,12 @@ vi.mock( 'node:util', () => ( {
 	styleText: stubs.styleText,
 	promisify: vi.fn( () => stubs.exec )
 } ) );
-vi.mock( 'shell-escape' );
 vi.mock( 'cli-columns' );
 vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 vi.mock( '../../lib/utils/getnpmidtoken.js' );
 
 describe( 'removeNpmTags()', () => {
 	beforeEach( () => {
-		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
 		vi.mocked( assertNpmAuthorization ).mockResolvedValue( true );
 		stubs.exec.mockResolvedValue( { stdout: '-staging-v1.0.1: package1@1.0.1' } );
 	} );
@@ -97,11 +94,37 @@ describe( 'removeNpmTags()', () => {
 		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag rm package2 staging-v1.0.1' );
 	} );
 
-	it( 'should escape arguments passed to a shell command', async () => {
-		await removeNpmTags( { npmOwner: 'authorized-user', packages: [ 'package1' ], npmTag: 'staging-v1.0.1' } );
+	it( 'should pass a scoped package name and the tag to npm without quotes', async () => {
+		await removeNpmTags( { npmOwner: 'authorized-user', packages: [ '@ckeditor/ckeditor5-core' ], npmTag: 'staging-v1.0.1' } );
 
-		expect( shellEscape ).toHaveBeenCalledWith( [ 'package1' ] );
-		expect( shellEscape ).toHaveBeenCalledWith( [ 'staging-v1.0.1' ] );
+		// On Windows, the command runs in `cmd.exe`, which would pass the quotes to npm as a part of the values.
+		expect( stubs.exec ).toHaveBeenCalledExactlyOnceWith( 'npm dist-tag rm @ckeditor/ckeditor5-core staging-v1.0.1' );
+	} );
+
+	it( 'should throw an error listing all invalid package names before running npm', async () => {
+		await expect( removeNpmTags( {
+			npmOwner: 'authorized-user',
+			packages: [ 'package1', 'package 2', '-package3', '@scope/package&4' ],
+			npmTag: 'staging-v1.0.1'
+		} ) ).rejects.toThrow(
+			'Invalid package name: "package 2".\n' +
+			'Invalid package name: "-package3".\n' +
+			'Invalid package name: "@scope/package&4".'
+		);
+
+		expect( assertNpmAuthorization ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should throw an error before running npm when the npm tag is invalid', async () => {
+		await expect( removeNpmTags( {
+			npmOwner: 'authorized-user',
+			packages: [ 'package1' ],
+			npmTag: 'staging-v1.0.1 --force'
+		} ) ).rejects.toThrow( 'Invalid npm tag: "staging-v1.0.1 --force".' );
+
+		expect( assertNpmAuthorization ).not.toHaveBeenCalled();
+		expect( stubs.exec ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should pass a fresh OIDC token only to the npm process when using OIDC', async () => {

@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import shellEscape from 'shell-escape';
+import semver from 'semver';
 import updateNpmTags from '../utils/updatenpmtags.js';
 
 /**
@@ -14,6 +14,10 @@ import updateNpmTags from '../utils/updatenpmtags.js';
  * Each operation will be retried up to 3 times in case of failure. Packages whose tag already points to the requested
  * version are reported as skipped. When the tag could not be changed for at least one package, the returned promise
  * rejects after all packages have been processed, so the caller does not treat a partial update as a success.
+ *
+ * Package names (with an optional scope) and the tag may contain only letters, digits, and the `.`, `_`, and `-` characters,
+ * and the version must be a valid version, for example, `1.0.0` or `1.0.0-alpha.0`, because they are passed to npm without
+ * quotes. Other values make the function throw an error before it runs npm.
  *
  * When using npm Trusted Publishing (`useOidc`), the `npm whoami` check is replaced by verifying that the `NPM_ID_TOKEN`
  * environment variable is set, as `npm whoami` does not reflect OIDC authentication. It requires npm 11.21.0 or newer
@@ -28,7 +32,7 @@ import updateNpmTags from '../utils/updatenpmtags.js';
  * @param {string} options.version Specifies the version of packages to reassign the tags for.
  * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
  * @param {string} [options.npmTag='latest'] Npm dist-tag to assign.
- * @returns {Promise} Rejects when the tag could not be changed for at least one package.
+ * @returns {Promise} Rejects when an option is invalid or when the tag could not be changed for at least one package.
  */
 export default async function reassignNpmTags( options ) {
 	const {
@@ -39,11 +43,18 @@ export default async function reassignNpmTags( options ) {
 		npmTag = 'latest'
 	} = options;
 
+	// Comparing with the input also rejects the values that `semver.valid()` accepts only after normalizing them,
+	// such as " 1.0.0" or "v1.0.0".
+	if ( semver.valid( version ) !== version ) {
+		throw new Error( `Invalid version: "${ version }".` );
+	}
+
 	return updateNpmTags( {
 		npmOwner,
 		useOidc,
 		packages,
-		getCommand: packageName => `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } ${ npmTag }`,
+		npmTag,
+		getCommand: packageName => `npm dist-tag add ${ packageName }@${ version } ${ npmTag }`,
 		skipMessages: [ 'is already set to version' ],
 		spinnerTitle: 'Reassigning npm tags...',
 		updatedTitle: '✨ Tags updated:',
