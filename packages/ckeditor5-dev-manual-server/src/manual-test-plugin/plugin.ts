@@ -12,7 +12,15 @@ import {
 	MANUAL_TRANSLATIONS_VIRTUAL_ID,
 	RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID
 } from './translations.js';
-import { cacheValue, createPackageNameFilter, stripLeadingSlash, toPosixPath, toPublicFilePath, toPublicSpecifier } from '../utils.js';
+import {
+	MANUAL_TEST_SUFFIX,
+	cacheValue,
+	createPackageNameFilter,
+	stripLeadingSlash,
+	toPosixPath,
+	toPublicFilePath,
+	toPublicSpecifier
+} from '../utils.js';
 import type { Plugin, HtmlTagDescriptor } from 'vite';
 import type { ManualPageEntry } from './types.js';
 
@@ -31,7 +39,6 @@ export interface ManualTestsPluginOptions {
 // The custom element that opts a page into the test chrome. The component script and its data
 // are injected only when the page source contains this marker.
 const MANUAL_HEADER_ELEMENT = 'ck-manual-header';
-const MANUAL_TEST_SUFFIX = '.manual.html';
 const MANUAL_TESTS_DIRECTORY = '/manual/';
 const THEME_ENTRY_FILE_PATHS = [ 'theme/index-editor.css', 'theme/index-content.css' ];
 const MANUAL_ENTRIES_VIRTUAL_ID = 'virtual:ckeditor5-manual-entries';

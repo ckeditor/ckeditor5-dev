@@ -21,10 +21,18 @@
 // them, `configureServer` throws at server startup — update this plugin together with
 // Vite. Delete the patch once Vite exposes an HMR plugin extension point for the
 // bundled dev client payloads.
+//
+// The plugin also refreshes inline styles and scripts after manual test HTML edits (see `transform`).
 
+import { MANUAL_TEST_SUFFIX } from '../utils.js';
 import type { Plugin, HotPayload, HotChannelClient } from 'vite';
 
 export const MANUAL_REFRESH_EVENT_NAME = 'ckeditor5-manual:refresh-available';
+
+// Matches manual test HTML ids, but not the ids of their inline modules, which end with a query.
+const MANUAL_TEST_HTML_REGEXP = new RegExp( `${ MANUAL_TEST_SUFFIX.replaceAll( '.', '\\.' ) }$` );
+const HTML_PROXY_QUERY = '?html-proxy&';
+const HTML_REVISION_QUERY_PARAM = 'html-rev';
 
 /**
  * The `BundledDev` members this plugin patches. They exist at runtime but are declared
@@ -42,6 +50,9 @@ interface BundledDevInternals {
 const wrappedClients = new WeakSet<HotChannelClient>();
 
 export function refreshPlugin(): Plugin {
+	// The revision of each manual test HTML file, keyed by its module id.
+	const htmlRevisions = new Map<string, number>();
+
 	return {
 		name: 'ckeditor5-manual-refresh',
 		apply: 'serve',
@@ -52,11 +63,39 @@ export function refreshPlugin(): Plugin {
 			wrapBundledDevClientSend( bundledDev );
 		},
 
-		// The page body is not part of the HTML module's JS render, so body-only edits render
-		// byte-identical and the dev engine drops them without notifying any client. Returning
-		// the affected modules force-ships them, which ends in an automatic full reload.
+		// The bundled dev server does not rebuild the inline style and script modules (`?html-proxy&…`)
+		// of an edited page. Based on the fix proposed in https://github.com/vitejs/vite/pull/23194, this
+		// hook adds a changing value to their ids, so they are rebuilt. Unlike that PR, it:
+		// - uses a revision instead of a content hash, so reverting an edit refreshes the page too,
+		// - puts the value before `html-proxy`, where Vite accepts it without changes to its id regex.
+		// Remove once https://github.com/vitejs/vite/issues/23179 is fixed.
+		transform: {
+			order: 'post',
+			filter: {
+				id: MANUAL_TEST_HTML_REGEXP
+			},
+
+			handler( code, id ) {
+				if ( !code.includes( HTML_PROXY_QUERY ) ) {
+					return;
+				}
+
+				const revision = ( htmlRevisions.get( id ) ?? 0 ) + 1;
+
+				htmlRevisions.set( id, revision );
+
+				return {
+					code: code.replaceAll( HTML_PROXY_QUERY, `?${ HTML_REVISION_QUERY_PARAM }=${ revision }&html-proxy&` ),
+					map: null
+				};
+			}
+		},
+
+		// The page body is not part of the HTML module's JS render, so on pages without inline modules
+		// body-only edits render byte-identical and the dev engine drops them without notifying any
+		// client. Returning the affected modules force-ships them, which ends in an automatic full reload.
 		hotUpdate( { file, modules } ) {
-			if ( file.endsWith( '.manual.html' ) ) {
+			if ( file.endsWith( MANUAL_TEST_SUFFIX ) ) {
 				return modules;
 			}
 		}
