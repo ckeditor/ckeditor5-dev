@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [63.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v63.1.2...v63.1.3) (November 9, 2026)
+
+### Other changes
+
+* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Upgraded Pi (`@earendil-works/pi-ai` and `@earendil-works/pi-coding-agent`) to v1.5.0.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/63.1.3): v63.1.2 => v63.1.3
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/63.1.3): v63.1.2 => v63.1.3
+</details>
+
+
 ## [63.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v63.1.1...v63.1.2) (November 6, 2026)
 
 ### Bug fixes
@@ -159,43 +191,6 @@ Major releases (contain major breaking changes):
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/63.0.0): v62.5.0 => v63.0.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/63.0.0): v62.5.0 => v63.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/63.0.0): v62.5.0 => v63.0.0
-</details>
-
-
-## [62.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/v62.4.0...v62.5.0) (October 13, 2026)
-
-### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents), [release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools), [utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Upgraded `simple-git` to v4. It removes the ambient `GIT_*` variables, and also `EDITOR`, `PAGER`, `PREFIX`, `SSH_ASKPASS`, and `VISUAL`, from the environment of git, unless the caller lists them in `allowEnvironment`.
-
-  Thus `tools.commit()`, `push()`, `commitAndTag()`, and `validateRepositoryToRelease()` ignore variables such as `GIT_AUTHOR_NAME`, `GIT_SSH_COMMAND`, or `GIT_CONFIG_GLOBAL`. Give the identity, the signing key, and the credentials to git through its configuration or the SSH agent instead. The git commands of `ckeditor5-dev-agents` still get the git configuration, askpass, and SSH variables.
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Minor releases (contain minor breaking changes):
-
-* [@ckeditor/ckeditor5-dev-agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/62.5.0): v62.4.0 => v62.5.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/62.5.0): v62.4.0 => v62.5.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/62.5.0): v62.4.0 => v62.5.0
 </details>
 
 ---
