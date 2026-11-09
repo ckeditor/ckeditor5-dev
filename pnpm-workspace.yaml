@@ -12,11 +12,9 @@ allowBuilds:
   'protobufjs': false
 
 overrides:
-  '@earendil-works/pi-coding-agent>minimatch@^10': '^11.0.3'
   '@tufjs/models>minimatch@^10': '^11.0.3'
   'glob@^13': '^14.0.3'
   'ignore-walk>minimatch@^10': '^11.0.3'
-  'undici@^8': '^8.12.2'
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
