@@ -103,6 +103,46 @@ describe( 'manualTestsPlugin()', () => {
 		expect( config.build.rolldownOptions ).toMatchObject( rolldownOptions );
 	} );
 
+	it( 'excludes dependency and repository directories from the dev server watcher and keeps the configured excludes', async () => {
+		const config = await resolveConfig( {
+			configFile: false,
+			root: workspaceRoot,
+			plugins: [ manualTestsPlugin( { paths: [ 'packages/*' ] } ) ],
+			server: { watch: { exclude: [ '**/build/**' ] } }
+		}, 'serve' );
+
+		expect( config.server.watch!.exclude ).to.have.members( [ '**/build/**', '**/node_modules/**', '**/.git/**' ] );
+	} );
+
+	it( 'does not enable a disabled dev server watcher', async () => {
+		const config = await resolveConfig( {
+			configFile: false,
+			root: workspaceRoot,
+			plugins: [ manualTestsPlugin( { paths: [ 'packages/*' ] } ) ],
+			server: { watch: null }
+		}, 'serve' );
+
+		expect( config.server.watch ).to.equal( null );
+	} );
+
+	it( 'generates the translations module again after the configuration is resolved', async () => {
+		const plugin = manualTestsPlugin( { paths: [ 'packages/*' ], language: 'pl' } );
+		const load = plugin.load as ( id: string ) => string | null;
+
+		( plugin.config as ConfigHook )( {}, { command: 'serve' } );
+		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
+
+		expect( load( `\0${ MANUAL_TRANSLATIONS_VIRTUAL_ID }` ) ).not.to.contain( 'ckeditor5-foo' );
+
+		await createFile( workspaceRoot, 'packages/ckeditor5-foo/lang/translations/pl.ts' );
+
+		expect( load( `\0${ MANUAL_TRANSLATIONS_VIRTUAL_ID }` ) ).not.to.contain( 'ckeditor5-foo' );
+
+		( plugin.configResolved as ConfigResolvedHook )( { root: workspaceRoot, base: './' } );
+
+		expect( load( `\0${ MANUAL_TRANSLATIONS_VIRTUAL_ID }` ) ).to.contain( '/packages/ckeditor5-foo/lang/translations/pl.ts' );
+	} );
+
 	it( 'uses provided package root globs for page entries', async () => {
 		await Promise.all( [
 			createFile( workspaceRoot, 'packages/ckeditor5-foo/manual/foo.manual.html' ),

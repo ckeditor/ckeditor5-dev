@@ -12,6 +12,7 @@ import {
 	MANUAL_TRANSLATIONS_VIRTUAL_ID,
 	RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID
 } from './translations.js';
+import { getWatchWorkaroundConfig } from './watch-workaround.js';
 import {
 	MANUAL_TEST_SUFFIX,
 	cacheValue,
@@ -93,7 +94,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 		slug: entry.slug
 	} ) );
 	const getManualEntriesJson = () => JSON.stringify( getClientEntries(), null, 2 );
-	const translationsModuleCode = options.language ? createManualTranslationsModule( options.paths, options.language ) : null;
+	const translationsModuleCache = cacheValue( () => createManualTranslationsModule( options.paths, options.language!, workspaceRoot ) );
 
 	return {
 		name: 'ckeditor5-manual-tests',
@@ -102,6 +103,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			workspaceRoot = resolve( config.root || process.cwd() );
 
 			return {
+				...getWatchWorkaroundConfig( config ),
 				input: getManualBuildInputs(),
 				// Shared chunks speed up crawling built pages, but slow down bundled development.
 				build: command == 'build' ? {
@@ -128,6 +130,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 			base = config.base || '/';
 
 			manualPagesCache.invalidate();
+			translationsModuleCache.invalidate();
 			packageThemeEntryCache.clear();
 		},
 
@@ -144,7 +147,7 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				return resolvedVirtualModuleId;
 			}
 
-			if ( source == MANUAL_TRANSLATIONS_VIRTUAL_ID && translationsModuleCode ) {
+			if ( source == MANUAL_TRANSLATIONS_VIRTUAL_ID && options.language ) {
 				return RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID;
 			}
 
@@ -160,8 +163,8 @@ export function manualTestsPlugin( options: ManualTestsPluginOptions ): Plugin {
 				return `export const manualTestEntries = ${ getManualEntriesJson() };`;
 			}
 
-			if ( id == RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID ) {
-				return translationsModuleCode;
+			if ( id == RESOLVED_MANUAL_TRANSLATIONS_VIRTUAL_ID && options.language ) {
+				return translationsModuleCache.get();
 			}
 
 			if ( toPosixPath( id ) == toPosixPath( getManualCatalogBuildInputFilePath() ) ) {
