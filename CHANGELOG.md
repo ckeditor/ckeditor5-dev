@@ -1,6 +1,40 @@
 Changelog
 =========
 
+## [63.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/v63.1.3...v63.1.4) (November 12, 2026)
+
+### Bug fixes
+
+* **[manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server)**: The manual test server starts and rebuilds on Linux again. With Rolldown 1.2.13 or newer, the bundled development server watched the whole workspace, because the module that loads translations used one glob import for all package directories. On Linux, the server then tried to register every directory, including the `node_modules` directories that link to each other in a pnpm workspace. It did not finish, so the server never became ready.
+
+  The translation files are now imported one by one, and the `node_modules` and `.git` directories are excluded from the watcher. A translation file added while the server is running is loaded after a server restart.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/63.1.4): v63.1.3 => v63.1.4
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/63.1.4): v63.1.3 => v63.1.4
+</details>
+
+
 ## [63.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v63.1.2...v63.1.3) (November 9, 2026)
 
 ### Other changes
@@ -139,58 +173,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/63.1.0): v63.0.0 => v63.1.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/63.1.0): v63.0.0 => v63.1.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/63.1.0): v63.0.0 => v63.1.0
-</details>
-
-
-## [63.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v62.5.0...v63.0.0) (October 23, 2026)
-
-### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents), [build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools), [bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year), [changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog), [ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci), [docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs), [license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker), [manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server), [release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools), [stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot), [translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations), [utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils), [web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler), [typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Upgraded the required version of Node.js to 26.10.0.
-
-### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
-
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Published runs now commit with the git configuration of the checkout: its author and its signing setup, for example the bot configured in CI. `AI_TASKS_GIT_NAME` and `AI_TASKS_GIT_EMAIL` still override the author. Publishing fails with a clear message when no author is configured. See [ckeditor/ckeditor5-internal#4687](https://github.com/ckeditor/ckeditor5-internal/issues/4687).
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Published runs now stack their report pull requests. While report pull requests of a task are open, every run that finds something new opens one more, based on the one below it, so each pull request shows only the changes of its run. Previously, every run added its commits to the one open pull request. Before a run, the base branch is merged into the bottom branch and every branch into the next one, and a pull request whose base was merged is based on the right branch again. The next parts of a stack are named `ai-tasks/<task>/<target>/<branch>--<part>`. Merge the report pull requests from the bottom up, with a merge commit. Publishing from a base branch whose name ends with `--<number>` now fails, because its report branches would be mistaken for the parts of another stack. On a part of a stack, `reject` and `dismiss` fetch the parts below it from `origin` and revert a fix against the right one. See [ckeditor/ckeditor5-internal#4687](https://github.com/ckeditor/ckeditor5-internal/issues/4687).
-
-### Features
-
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Published runs can tell Slack about every new report pull request. Set `AI_TASKS_SLACK_WEBHOOK_URL` to a Slack incoming webhook. A failed notification is reported as a problem of the run and does not fail it. See [ckeditor/ckeditor5-internal#4687](https://github.com/ckeditor/ckeditor5-internal/issues/4687).
-
-### Bug fixes
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: The `ckeditor5-dev-ci-circle-disable-auto-cancel-builds` and `ckeditor5-dev-ci-circle-enable-auto-cancel-builds` scripts now fail with a clear error message when CircleCI rejects the request with a non-2xx response. Previously, the scripts reported success even when the "Auto-cancel redundant workflows" option was not updated, which allowed a new push to cancel a running release workflow.
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `reassignNpmTags()` task now rejects when the npm dist-tag could not be changed for at least one package. Before, the task only listed the errors in the output and resolved successfully, so release automation reported a success even though the tag was not moved.
-
-  The task still processes all packages, retries each failed call, and prints the list of errors. Packages whose tag already points to the requested version are still reported as skipped and do not cause a rejection. The error message lists the packages that failed.
-
-### Other changes
-
-* **[agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents)**: Upgraded Pi (`@earendil-works/pi-ai` and `@earendil-works/pi-coding-agent`) to v1.3.0. See [ckeditor/ckeditor5-internal#4687](https://github.com/ckeditor/ckeditor5-internal/issues/4687).
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Major releases (contain major breaking changes):
-
-* [@ckeditor/ckeditor5-dev-agents](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-agents/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-changelog](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-changelog/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-license-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-license-checker/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-manual-server](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-manual-server/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/63.0.0): v62.5.0 => v63.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/63.0.0): v62.5.0 => v63.0.0
 </details>
 
 ---
