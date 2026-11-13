@@ -100,6 +100,11 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				}
 			} );
 
+			// The order of `glob()` results is not guaranteed. The files are merged in this order, so sort them to make
+			// the output the same in every build: the order of the messages, and the value used when files define the same message.
+			// The default comparison does not depend on the locale.
+			filePaths.sort();
+
 			// Group the translation files by the language code.
 			const grouped = groupBy( filePaths, path => parse( path ).name );
 
