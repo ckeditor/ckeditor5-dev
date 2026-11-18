@@ -40,6 +40,7 @@ describe( 'createCrawlerCluster()', () => {
 		await createCrawlerCluster( {
 			timeout: 2000,
 			concurrency: 4,
+			reuseTabs: false,
 			disableBrowserSandbox: true,
 			ignoreHTTPSErrors: true,
 			silent: true,
@@ -74,6 +75,7 @@ describe( 'createCrawlerCluster()', () => {
 		await createCrawlerCluster( {
 			timeout: 2000,
 			concurrency: 2,
+			reuseTabs: false,
 			disableBrowserSandbox: false,
 			ignoreHTTPSErrors: false,
 			silent: false,
@@ -95,6 +97,7 @@ describe( 'createCrawlerCluster()', () => {
 		await createCrawlerCluster( {
 			timeout: 2000,
 			concurrency: 2,
+			reuseTabs: false,
 			disableBrowserSandbox: false,
 			ignoreHTTPSErrors: false,
 			silent: false,
@@ -122,6 +125,7 @@ describe( 'createCrawlerCluster()', () => {
 		await createCrawlerCluster( {
 			timeout: 2000,
 			concurrency: 2,
+			reuseTabs: false,
 			disableBrowserSandbox: false,
 			ignoreHTTPSErrors: false,
 			silent: false,

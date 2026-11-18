@@ -11,10 +11,12 @@ import {
 	ERROR_TYPES
 } from '../constants.js';
 import type { CrawlerError, QueueData } from '../types.js';
+import { ReusedPageConcurrency } from './reused-page-concurrency.js';
 
 interface CreateCrawlerClusterOptions {
 	timeout: number;
 	concurrency: number;
+	reuseTabs: boolean;
 	disableBrowserSandbox: boolean;
 	ignoreHTTPSErrors: boolean;
 	silent: boolean;
@@ -27,13 +29,14 @@ interface CreateCrawlerClusterOptions {
 export async function createCrawlerCluster( {
 	timeout,
 	concurrency,
+	reuseTabs,
 	disableBrowserSandbox,
 	ignoreHTTPSErrors,
 	silent,
 	onError
 }: CreateCrawlerClusterOptions ): Promise<Cluster<QueueData, void>> {
 	const cluster: Cluster<QueueData, void> = await Cluster.launch( {
-		concurrency: Cluster.CONCURRENCY_PAGE,
+		concurrency: reuseTabs ? ReusedPageConcurrency : Cluster.CONCURRENCY_PAGE,
 		timeout,
 		retryLimit: DEFAULT_RETRIES,
 		retryDelay: DEFAULT_RETRY_DELAY,

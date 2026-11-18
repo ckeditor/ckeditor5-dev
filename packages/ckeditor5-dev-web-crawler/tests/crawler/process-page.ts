@@ -20,7 +20,8 @@ vi.mock( '../../src/crawler/get-links-from-page.js' );
 function createPageMock( gotoImpl?: () => Promise<void> ): Page {
 	return {
 		setRequestInterception: vi.fn().mockResolvedValue( undefined ),
-		goto: vi.fn().mockImplementation( gotoImpl || ( () => Promise.resolve() ) )
+		goto: vi.fn().mockImplementation( gotoImpl || ( () => Promise.resolve() ) ),
+		waitForNetworkIdle: vi.fn().mockResolvedValue( undefined )
 	} as unknown as Page;
 }
 
@@ -78,7 +79,8 @@ describe( 'processPage()', () => {
 		} );
 
 		expect( page.setRequestInterception ).toHaveBeenCalledWith( true );
-		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/start', { waitUntil: 'networkidle0' } );
+		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/start', { waitUntil: 'load' } );
+		expect( page.waitForNetworkIdle ).toHaveBeenCalledWith( { idleTime: 250 } );
 		expect( vi.mocked( getLinksFromPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			page,
 			baseUrl: 'https://ckeditor.com/docs/',
@@ -133,6 +135,7 @@ describe( 'processPage()', () => {
 		} );
 
 		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/api/module', { waitUntil: 'load' } );
+		expect( page.waitForNetworkIdle ).not.toHaveBeenCalled();
 	} );
 
 	it( 'throws retryable error when page errors remain after filtering', async () => {

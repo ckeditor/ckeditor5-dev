@@ -68,6 +68,11 @@ export const DEFAULT_RETRIES = 3;
 
 export const DEFAULT_RETRY_DELAY = 1000;
 
+/**
+ * How long the network must be idle after the `load` event before the crawler considers a page loaded.
+ */
+export const NETWORK_IDLE_TIME = 250;
+
 export const ERROR_TYPES: ErrorTypes = {
 	PAGE_CRASH: {
 		event: 'error',

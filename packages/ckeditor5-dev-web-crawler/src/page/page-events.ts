@@ -20,12 +20,18 @@ interface PageEventHandlersOptions {
  */
 export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHandlersOptions ): () => void {
 	const onRequest = async ( request: HTTPRequest ): Promise<void> => {
-		if ( shouldAbortRequest( request ) ) {
-			await request.abort( REQUEST_ABORT_REASON );
-			return;
-		}
+		// A rejection here would be unhandled and would end the whole crawler process. It happens when the request
+		// was already handled, or when the page was closed or reset in the meantime.
+		try {
+			if ( shouldAbortRequest( request ) ) {
+				await request.abort( REQUEST_ABORT_REASON );
+				return;
+			}
 
-		await request.continue();
+			await request.continue();
+		} catch {
+			// Nothing to do: the request no longer needs a decision.
+		}
 	};
 
 	const onDialog = async ( dialog: Dialog ): Promise<void> => {

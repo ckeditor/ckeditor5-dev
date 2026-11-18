@@ -14,6 +14,7 @@ import { getBaseUrl } from '../utils.js';
 import type { CrawlerOptions } from '../types.js';
 import { createCrawlerCluster } from './create-cluster.js';
 import { processPage } from './process-page.js';
+import { busyPages } from './reused-page-concurrency.js';
 
 /**
  * Crawls the provided URL and all links found on the page. It uses Puppeteer to open the links in a headless browser and checks for errors.
@@ -27,6 +28,7 @@ export async function runCrawler( options: CrawlerOptions ): Promise<void> {
 		exclusions = [],
 		timeout = DEFAULT_TIMEOUT,
 		concurrency = DEFAULT_CONCURRENCY,
+		reuseTabs = true,
 		disableBrowserSandbox = false,
 		ignoreHTTPSErrors = false,
 		silent = false
@@ -40,6 +42,7 @@ export async function runCrawler( options: CrawlerOptions ): Promise<void> {
 	const cluster = await createCrawlerCluster( {
 		timeout,
 		concurrency,
+		reuseTabs,
 		disableBrowserSandbox,
 		ignoreHTTPSErrors,
 		silent,
@@ -47,14 +50,20 @@ export async function runCrawler( options: CrawlerOptions ): Promise<void> {
 	} );
 
 	await cluster.task( async ( { page, data } ) => {
-		await processPage( {
-			page,
-			data,
-			cluster,
-			baseUrl,
-			discoveredLinks,
-			exclusions
-		} );
+		busyPages.add( page );
+
+		try {
+			await processPage( {
+				page,
+				data,
+				cluster,
+				baseUrl,
+				discoveredLinks,
+				exclusions
+			} );
+		} finally {
+			busyPages.delete( page );
+		}
 	} );
 
 	// Queue the first link to be crawled.

@@ -55,6 +55,13 @@ export interface CrawlerOptions {
 	ignoreHTTPSErrors?: boolean;
 
 	/**
+	 * Whether to reuse browser tabs for consecutive pages instead of opening a new tab for every page.
+	 *
+	 * @default true
+	 */
+	reuseTabs?: boolean;
+
+	/**
 	 * Whether to display the current progress or only the result.
 	 *
 	 * @default false

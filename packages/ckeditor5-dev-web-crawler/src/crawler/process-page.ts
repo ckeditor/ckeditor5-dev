@@ -5,7 +5,7 @@
 
 import type { Cluster } from 'puppeteer-cluster';
 import type { Page } from 'puppeteer';
-import { ERROR_TYPES } from '../constants.js';
+import { ERROR_TYPES, NETWORK_IDLE_TIME } from '../constants.js';
 import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../errors/ignore-patterns.js';
 import { attachPageEventHandlers } from '../page/page-events.js';
 import { areSameUrl } from '../utils.js';
@@ -67,10 +67,15 @@ export async function processPage( { page, data, cluster, baseUrl, discoveredLin
 
 async function getNavigationError( page: Page, pageUrl: string ): Promise<CrawlerError | null> {
 	try {
-		// `networkidle0` forces loading CKEditor snippets. API pages to not contain them, so let's speed up.
-		const waitUntil = pageUrl.includes( '/api/' ) ? 'load' : 'networkidle0';
+		await page.goto( pageUrl, { waitUntil: 'load' } );
 
-		await page.goto( pageUrl, { waitUntil } );
+		// Waiting for the network to be idle lets CKEditor snippets load. API pages do not contain them, so let's speed up.
+		// Unlike `waitUntil: 'networkidle0'`, which Chrome reports about 700 ms after the `load` event even on pages
+		// that load nothing more, this wait ends shortly after the last request. Puppeteer treats a request as finished
+		// once its response headers arrive.
+		if ( !pageUrl.includes( '/api/' ) ) {
+			await page.waitForNetworkIdle( { idleTime: NETWORK_IDLE_TIME } );
+		}
 
 		return null;
 	} catch ( error: any ) {
