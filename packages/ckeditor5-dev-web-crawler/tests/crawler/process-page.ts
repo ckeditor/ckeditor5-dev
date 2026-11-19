@@ -8,12 +8,14 @@ import type { Page } from 'puppeteer';
 import type { Cluster } from 'puppeteer-cluster';
 import { processPage } from '../../src/crawler/process-page.js';
 import { attachPageEventHandlers } from '../../src/page/page-events.js';
+import { trackNetworkIdle } from '../../src/page/network-idle.js';
 import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../../src/errors/ignore-patterns.js';
 import { getLinksFromPage } from '../../src/crawler/get-links-from-page.js';
 import { ERROR_TYPES } from '../../src/constants.js';
 import type { CrawlerError, QueueData, RetryableCrawlerError } from '../../src/types.js';
 
 vi.mock( '../../src/page/page-events.js' );
+vi.mock( '../../src/page/network-idle.js' );
 vi.mock( '../../src/errors/ignore-patterns.js' );
 vi.mock( '../../src/crawler/get-links-from-page.js' );
 
@@ -53,6 +55,10 @@ describe( 'processPage()', () => {
 		vi.clearAllMocks();
 
 		vi.mocked( attachPageEventHandlers ).mockReturnValue( vi.fn() );
+		vi.mocked( trackNetworkIdle ).mockReturnValue( {
+			waitForIdle: vi.fn().mockResolvedValue( undefined ),
+			stop: vi.fn()
+		} );
 		vi.mocked( getErrorIgnorePatternsFromPage ).mockResolvedValue( new Map() );
 		vi.mocked( markErrorsAsIgnored ).mockImplementation( () => {} );
 		vi.mocked( getLinksFromPage ).mockResolvedValue( [] );
@@ -78,7 +84,15 @@ describe( 'processPage()', () => {
 		} );
 
 		expect( page.setRequestInterception ).toHaveBeenCalledWith( true );
-		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/start', { waitUntil: 'networkidle0' } );
+		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/start', { waitUntil: 'load' } );
+
+		const networkIdle = vi.mocked( trackNetworkIdle ).mock.results[ 0 ]!.value;
+
+		expect( vi.mocked( trackNetworkIdle ) ).toHaveBeenCalledWith( page );
+		expect( vi.mocked( trackNetworkIdle ).mock.invocationCallOrder[ 0 ] )
+			.toBeLessThan( vi.mocked( page.goto ).mock.invocationCallOrder[ 0 ]! );
+		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250 );
+		expect( networkIdle.stop ).toHaveBeenCalledTimes( 1 );
 		expect( vi.mocked( getLinksFromPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			page,
 			baseUrl: 'https://ckeditor.com/docs/',
@@ -133,6 +147,7 @@ describe( 'processPage()', () => {
 		} );
 
 		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/api/module', { waitUntil: 'load' } );
+		expect( trackNetworkIdle ).not.toHaveBeenCalled();
 	} );
 
 	it( 'throws retryable error when page errors remain after filtering', async () => {
@@ -201,6 +216,7 @@ describe( 'processPage()', () => {
 
 		expect( thrownError.crawlerErrors ).toHaveLength( 1 );
 		expect( thrownError.crawlerErrors[ 0 ]!.type ).toBe( ERROR_TYPES.REQUEST_FAILURE );
+		expect( vi.mocked( trackNetworkIdle ).mock.results[ 0 ]!.value.stop ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'resolves when all discovered errors are marked as ignored', async () => {

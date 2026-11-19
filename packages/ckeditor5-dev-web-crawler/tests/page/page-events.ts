@@ -113,6 +113,34 @@ describe( 'attachPageEventHandlers()', () => {
 		expect( page.offSpy ).toHaveBeenCalledTimes( 7 );
 	} );
 
+	it( 'ignores requests that can no longer be aborted or continued', async () => {
+		const pageErrors: Array<CrawlerError> = [];
+		const page = createPageMock();
+
+		attachPageEventHandlers( { page, data, pageErrors } );
+
+		const blockedRequest = createRequest( {
+			url: () => 'https://ckeditor.com/docs/a',
+			abort: vi.fn().mockRejectedValue( new Error( 'Request is already handled!' ) )
+		} );
+
+		const allowedRequest = createRequest( {
+			url: () => 'https://ckeditor.com/docs/b',
+			continue: vi.fn().mockRejectedValue( new Error( 'Request is already handled!' ) )
+		} );
+
+		vi.mocked( shouldAbortRequest )
+			.mockReturnValueOnce( true )
+			.mockReturnValueOnce( false );
+
+		await expect( page.emitEvent( 'request', blockedRequest ) ).resolves.toBeUndefined();
+		await expect( page.emitEvent( 'request', allowedRequest ) ).resolves.toBeUndefined();
+
+		expect( blockedRequest.abort ).toHaveBeenCalledTimes( 1 );
+		expect( allowedRequest.continue ).toHaveBeenCalledTimes( 1 );
+		expect( pageErrors ).toEqual( [] );
+	} );
+
 	it( 'collects page crash and uncaught exception errors', async () => {
 		const pageErrors: Array<CrawlerError> = [];
 		const page = createPageMock();
@@ -225,5 +253,32 @@ describe( 'attachPageEventHandlers()', () => {
 		expect( pageErrors ).toHaveLength( 1 );
 		expect( pageErrors[ 0 ]!.type ).toBe( ERROR_TYPES.CONSOLE_ERROR );
 		expect( pageErrors[ 0 ]!.message ).toBe( 'Main error' );
+	} );
+
+	it( 'uses the console message text when its arguments cannot be read', async () => {
+		const pageErrors: Array<CrawlerError> = [];
+		const page = createPageMock();
+
+		attachPageEventHandlers( { page, data, pageErrors } );
+
+		const consoleError = {
+			type: () => 'error',
+			text: () => 'JSHandle@object',
+			args: () => [
+				{
+					remoteObject: () => ( { type: 'object' } ),
+					jsonValue: () => Promise.reject( new Error( 'Execution context was destroyed.' ) )
+				}
+			]
+		} as unknown as ConsoleMessage;
+
+		await page.emitEvent( 'console', consoleError );
+
+		expect( pageErrors ).toEqual( [
+			expect.objectContaining( {
+				type: ERROR_TYPES.CONSOLE_ERROR,
+				message: 'JSHandle@object'
+			} )
+		] );
 	} );
 } );

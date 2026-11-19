@@ -11,6 +11,7 @@ import {
 	ERROR_TYPES
 } from '../constants.js';
 import type { CrawlerError, QueueData } from '../types.js';
+import { ReusedPageConcurrency } from './reused-page-concurrency.js';
 
 interface CreateCrawlerClusterOptions {
 	timeout: number;
@@ -33,7 +34,7 @@ export async function createCrawlerCluster( {
 	onError
 }: CreateCrawlerClusterOptions ): Promise<Cluster<QueueData, void>> {
 	const cluster: Cluster<QueueData, void> = await Cluster.launch( {
-		concurrency: Cluster.CONCURRENCY_PAGE,
+		concurrency: ReusedPageConcurrency,
 		timeout,
 		retryLimit: DEFAULT_RETRIES,
 		retryDelay: DEFAULT_RETRY_DELAY,
@@ -86,9 +87,13 @@ function createPuppeteerOptions( {
 			'--disable-translate', // Disables built-in translation features.
 			'--disable-infobars', // Hides infobars (e.g., automation warnings).
 			'--no-first-run', // Skips first run tasks and setup dialogs.
-			'--no-default-browser-check' // Prevents default browser check at startup.
+			'--no-default-browser-check', // Prevents default browser check at startup.
+			// To keep the previous page in the back/forward cache, the full Chrome browser can start a new renderer process
+			// for every navigation of a reused page, which takes a lot of CPU.
+			'--disable-back-forward-cache'
 		],
-		headless: true,
+		// `chrome-headless-shell` is a separate, lighter Chrome build for automation, which uses noticeably less CPU.
+		headless: 'shell',
 		acceptInsecureCerts: ignoreHTTPSErrors
 	} satisfies LaunchOptions;
 

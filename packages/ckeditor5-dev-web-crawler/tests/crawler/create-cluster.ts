@@ -6,6 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Cluster } from 'puppeteer-cluster';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
+import { ReusedPageConcurrency } from '../../src/crawler/reused-page-concurrency.js';
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, ERROR_TYPES } from '../../src/constants.js';
 
 vi.mock( 'puppeteer-cluster' );
@@ -47,7 +48,7 @@ describe( 'createCrawlerCluster()', () => {
 		} );
 
 		expect( vi.mocked( Cluster.launch ) ).toHaveBeenCalledWith( expect.objectContaining( {
-			concurrency: Cluster.CONCURRENCY_PAGE,
+			concurrency: ReusedPageConcurrency,
 			timeout: 2000,
 			retryLimit: DEFAULT_RETRIES,
 			retryDelay: DEFAULT_RETRY_DELAY,
@@ -58,7 +59,8 @@ describe( 'createCrawlerCluster()', () => {
 
 		const options = vi.mocked( Cluster.launch ).mock.calls[ 0 ]![ 0 ];
 
-		expect( options.puppeteerOptions.headless ).toBe( true );
+		expect( options.puppeteerOptions.headless ).toBe( 'shell' );
+		expect( options.puppeteerOptions.args ).toContain( '--disable-back-forward-cache' );
 		expect( options.puppeteerOptions.acceptInsecureCerts ).toBe( true );
 		expect( options.puppeteerOptions.args ).toContain( '--no-sandbox' );
 		expect( options.puppeteerOptions.args ).toContain( '--disable-setuid-sandbox' );
