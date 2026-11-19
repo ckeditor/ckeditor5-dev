@@ -29,6 +29,10 @@ describe( 'setUpManualInspector()', () => {
 		await window.enableCKEditorInspector();
 		expect( inspector.attach ).toHaveBeenCalledExactlyOnceWith( editor, undefined );
 		expect( window.CKEditorInspector ).to.equal( inspector );
+
+		window.editor = null;
+		expect( window.editor ).to.be.null;
+		expect( inspector.attach ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'preserves named registrations and options before, during and after activation', async () => {
