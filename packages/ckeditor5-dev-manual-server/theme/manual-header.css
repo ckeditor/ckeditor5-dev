@@ -58,13 +58,31 @@
 	outline-offset: 1px;
 }
 
-.divider {
-	flex-shrink: 0;
-	align-self: center;
+.divider,
+.bar > .label ~ *::before {
 	width: 1px;
 	height: 16px;
 	background: rgb(0 0 0 / 10%);
+}
+
+.divider {
+	flex-shrink: 0;
+	align-self: center;
 	margin: 0 2px;
+}
+
+.bar > .label ~ * {
+	position: relative;
+	margin-inline-start: 5px;
+}
+
+.bar > .label ~ *::before {
+	content: "";
+	position: absolute;
+	inset-inline-start: -3px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
 }
 
 .label {

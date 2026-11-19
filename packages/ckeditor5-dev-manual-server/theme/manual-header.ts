@@ -31,7 +31,6 @@ const TEMPLATE = /* html */ `
 			<span class="label__name" data-field="name"></span>
 			<span class="label__package" data-field="package"></span>
 		</span>
-		<span class="divider" aria-hidden="true"></span>
 		<button type="button" class="pill" data-action="inspector" aria-pressed="false">Inspector</button>
 		<button type="button" class="pill instructions-only" data-action="toggle" aria-expanded="false">
 			Instructions
