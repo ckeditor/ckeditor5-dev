@@ -8,6 +8,12 @@ Used to extend Vite to create a manual test server for CKEditor 5.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
+## Enabling the Inspector
+
+Click **Inspector** next to **Instructions** to inspect the editors on a manual test page. On pages without a header, run `await window.enableCKEditorInspector()` in the browser console. Reloading the page resets this choice.
+
+Assign your editor to `window.editor` or register named instances with `CKEditorInspector.attach( { header: headerEditor, footer: footerEditor } )`. Before activation, `attach()` is the only method on `window.CKEditorInspector`. It records registrations without returning generated names. After activation, `window.CKEditorInspector` exposes the Inspector API and new editors attach immediately. Manuals that import the Inspector package directly bypass this opt-in.
+
 ## Loading translations
 
 Pass a language code to `manualTestsPlugin()` to load and combine that language's TypeScript translation files from the configured package paths. The selected language becomes the default UI and content language for editors and contexts created by manual tests.

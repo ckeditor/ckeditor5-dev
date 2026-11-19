@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!--
+ @license Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
+ For licensing, see LICENSE.md.
+-->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Inspector pill activation and retry</title>
+	<script type="module" src="../../../theme/manual-header.ts"></script>
+</head>
+<body>
+	<ck-manual-header><p>Inspector should precede Instructions.</p></ck-manual-header>
+	<ol>
+		<li>Tab to Inspector. It should be unpressed and come before Instructions.</li>
+		<li>Press Enter. Attempt 1 fails. The pill should keep its focus, text, background and unpressed state.</li>
+		<li>Press Enter again. Attempt 2 succeeds. Only the pill background should change. Its name should still be Inspector and it should be pressed.</li>
+		<li>Press Enter or click Inspector again. The attempt count should stay at 2 and the pill should stay pressed.</li>
+	</ol>
+	<p>Activation attempts: <output>0</output></p>
+	<script type="module">
+		let attempts = 0;
+
+		window.enableCKEditorInspector = async () => {
+			document.querySelector( 'output' ).textContent = String( ++attempts );
+
+			if ( attempts === 1 ) {
+				throw new Error( 'Simulated Inspector load failure' );
+			}
+		};
+	</script>
+</body>
+</html>
