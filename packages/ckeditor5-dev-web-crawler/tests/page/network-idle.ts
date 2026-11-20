@@ -141,6 +141,17 @@ describe( 'trackNetworkIdle()', () => {
 		);
 	} );
 
+	it( 'resolves after the timeout when no request is in flight, even if the idle time has not passed', async () => {
+		const tracker = trackNetworkIdle( page as unknown as Page );
+
+		tracker.waitForIdle( IDLE_TIME, 0 ).then( () => {
+			isIdle = true;
+		} );
+
+		await vi.advanceTimersByTimeAsync( 0 );
+		expect( isIdle ).toBe( true );
+	} );
+
 	it( 'rejects when the page is closed while waiting', async () => {
 		const tracker = trackNetworkIdle( page as unknown as Page );
 		const idle = tracker.waitForIdle( IDLE_TIME, TIMEOUT );

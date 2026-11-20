@@ -12,7 +12,7 @@ interface NetworkIdleTracker {
 
 /**
  * Starts tracking the requests of the page. `waitForIdle()` resolves once no request has been in flight for `idleTime`,
- * and rejects if that does not happen within `timeout`.
+ * but not later than after `timeout`. Then, it rejects if requests are still in flight, or resolves otherwise.
  *
  * Unlike in `page.waitForNetworkIdle()`, which counts a request as finished once its response headers arrive, a request
  * counts as in flight until its response body has loaded or the request has failed, like in Chrome's `networkidle0`.
@@ -66,6 +66,10 @@ export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 			};
 
 			maxWaitTimeoutId = setTimeout( () => {
+				if ( !inflightRequests.size ) {
+					return resolve();
+				}
+
 				const pendingUrls = Array.from( inflightRequests, request => request.url() ).join( ', ' );
 
 				reject( new Error( `The network was not idle within ${ timeout } ms. Pending requests: ${ pendingUrls }` ) );
