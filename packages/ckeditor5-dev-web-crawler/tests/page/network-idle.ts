@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { trackNetworkIdle } from '../../src/page/network-idle.js';
 
 const IDLE_TIME = 250;
+const TIMEOUT = 5000;
 
 function createRequest( failure: { errorText: string } | null = null ): HTTPRequest {
 	return { failure: () => failure } as unknown as HTTPRequest;
@@ -30,7 +31,7 @@ describe( 'trackNetworkIdle()', () => {
 	} );
 
 	function waitForIdle( tracker: ReturnType<typeof trackNetworkIdle> ): Promise<void> {
-		return tracker.waitForIdle( IDLE_TIME ).then( () => {
+		return tracker.waitForIdle( IDLE_TIME, TIMEOUT ).then( () => {
 			isIdle = true;
 		} );
 	}
@@ -122,9 +123,22 @@ describe( 'trackNetworkIdle()', () => {
 		expect( isIdle ).toBe( true );
 	} );
 
+	it( 'resolves after the timeout when a request never finishes', async () => {
+		const tracker = trackNetworkIdle( page as unknown as Page );
+
+		page.emit( 'request', createRequest() );
+		waitForIdle( tracker );
+
+		await vi.advanceTimersByTimeAsync( TIMEOUT - 1 );
+		expect( isIdle ).toBe( false );
+
+		await vi.advanceTimersByTimeAsync( 1 );
+		expect( isIdle ).toBe( true );
+	} );
+
 	it( 'rejects when the page is closed while waiting', async () => {
 		const tracker = trackNetworkIdle( page as unknown as Page );
-		const idle = tracker.waitForIdle( IDLE_TIME );
+		const idle = tracker.waitForIdle( IDLE_TIME, TIMEOUT );
 
 		page.emit( 'request', createRequest() );
 		page.emit( 'close' );
@@ -138,7 +152,7 @@ describe( 'trackNetworkIdle()', () => {
 		page.emit( 'close' );
 		Object.assign( page, { isClosed: () => true } );
 
-		await expect( tracker.waitForIdle( IDLE_TIME ) ).rejects.toThrow(
+		await expect( tracker.waitForIdle( IDLE_TIME, TIMEOUT ) ).rejects.toThrow(
 			'The page was closed while waiting for the network to be idle.'
 		);
 	} );

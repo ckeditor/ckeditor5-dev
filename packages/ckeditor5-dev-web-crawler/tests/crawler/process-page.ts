@@ -91,7 +91,7 @@ describe( 'processPage()', () => {
 		expect( vi.mocked( trackNetworkIdle ) ).toHaveBeenCalledWith( page );
 		expect( vi.mocked( trackNetworkIdle ).mock.invocationCallOrder[ 0 ] )
 			.toBeLessThan( vi.mocked( page.goto ).mock.invocationCallOrder[ 0 ]! );
-		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250 );
+		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250, 5000 );
 		expect( networkIdle.stop ).toHaveBeenCalledTimes( 1 );
 		expect( vi.mocked( getLinksFromPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			page,

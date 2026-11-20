@@ -6,12 +6,13 @@
 import type { HTTPRequest, Page } from 'puppeteer';
 
 interface NetworkIdleTracker {
-	waitForIdle: ( idleTime: number ) => Promise<void>;
+	waitForIdle: ( idleTime: number, timeout: number ) => Promise<void>;
 	stop: () => void;
 }
 
 /**
- * Starts tracking the requests of the page. `waitForIdle()` resolves once no request has been in flight for `idleTime`.
+ * Starts tracking the requests of the page. `waitForIdle()` resolves once no request has been in flight for `idleTime`,
+ * or after `timeout` at the latest.
  *
  * Unlike in `page.waitForNetworkIdle()`, which counts a request as finished once its response headers arrive, a request
  * counts as in flight until its response body has loaded or the request has failed, like in Chrome's `networkidle0`.
@@ -20,6 +21,7 @@ interface NetworkIdleTracker {
 export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 	const inflightRequests = new Set<HTTPRequest>();
 	let timeoutId: ReturnType<typeof setTimeout> | undefined;
+	let maxWaitTimeoutId: ReturnType<typeof setTimeout> | undefined;
 	let onChange = (): void => {};
 	let onClose = (): void => {};
 
@@ -47,10 +49,9 @@ export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 	page.on( 'close', onPageClose );
 
 	return {
-		// Puppeteer emits no `requestfinished` or `requestfailed` event for a few intercepted requests that Chrome does not
-		// report to its network domain. Such a request keeps the wait pending until the crawler's task times out and closes
-		// the page, like a request that never finishes.
-		waitForIdle: idleTime => new Promise( ( resolve, reject ) => {
+		// Puppeteer emits no `requestfinished` or `requestfailed` event for a few intercepted requests. The `timeout` caps
+		// the wait, so the crawler's task does not time out and still reports the page errors.
+		waitForIdle: ( idleTime, timeout ) => new Promise( ( resolve, reject ) => {
 			onClose = () => reject( new Error( 'The page was closed while waiting for the network to be idle.' ) );
 
 			if ( page.isClosed() ) {
@@ -65,11 +66,13 @@ export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 				}
 			};
 
+			maxWaitTimeoutId = setTimeout( resolve, timeout );
 			onChange();
 		} ),
 
 		stop: () => {
 			clearTimeout( timeoutId );
+			clearTimeout( maxWaitTimeoutId );
 			page.off( 'request', onRequest );
 			page.off( 'requestfinished', onRequestDone );
 			page.off( 'requestfailed', onRequestDone );

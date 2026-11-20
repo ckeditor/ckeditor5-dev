@@ -73,6 +73,11 @@ export const DEFAULT_RETRY_DELAY = 1000;
  */
 export const NETWORK_IDLE_TIME = 250;
 
+/**
+ * The maximum time to wait for the network to be idle after the `load` event. After it, the crawler checks the page anyway.
+ */
+export const NETWORK_IDLE_TIMEOUT = 5000;
+
 export const ERROR_TYPES: ErrorTypes = {
 	PAGE_CRASH: {
 		event: 'error',

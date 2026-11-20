@@ -5,7 +5,7 @@
 
 import type { Cluster } from 'puppeteer-cluster';
 import type { Page } from 'puppeteer';
-import { ERROR_TYPES, NETWORK_IDLE_TIME } from '../constants.js';
+import { ERROR_TYPES, NETWORK_IDLE_TIME, NETWORK_IDLE_TIMEOUT } from '../constants.js';
 import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../errors/ignore-patterns.js';
 import { attachPageEventHandlers } from '../page/page-events.js';
 import { trackNetworkIdle } from '../page/network-idle.js';
@@ -74,7 +74,7 @@ async function getNavigationError( page: Page, pageUrl: string ): Promise<Crawle
 
 	try {
 		await page.goto( pageUrl, { waitUntil: 'load' } );
-		await networkIdle?.waitForIdle( NETWORK_IDLE_TIME );
+		await networkIdle?.waitForIdle( NETWORK_IDLE_TIME, NETWORK_IDLE_TIMEOUT );
 
 		return null;
 	} catch ( error: any ) {
