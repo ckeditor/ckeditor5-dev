@@ -9,6 +9,7 @@ import { runCrawler } from '../../src/crawler/run-crawler.js';
 import { createCrawlerCluster } from '../../src/crawler/create-cluster.js';
 import { processPage } from '../../src/crawler/process-page.js';
 import { logErrors } from '../../src/errors/reporter.js';
+import { busyPages } from '../../src/crawler/reused-page-concurrency.js';
 import { DEFAULT_CONCURRENCY, DEFAULT_TIMEOUT, ERROR_TYPES } from '../../src/constants.js';
 import type { QueueData } from '../../src/types.js';
 
@@ -69,7 +70,8 @@ describe( 'runCrawler()', () => {
 
 		expect( vi.mocked( processPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			baseUrl: 'https://ckeditor.com/docs/start',
-			exclusions: []
+			exclusions: [],
+			timeout: DEFAULT_TIMEOUT
 		} ) );
 
 		expect( cluster.queue ).toHaveBeenCalledWith( {
@@ -81,6 +83,54 @@ describe( 'runCrawler()', () => {
 		expect( cluster.close ).toHaveBeenCalledTimes( 1 );
 		expect( vi.mocked( logErrors ) ).toHaveBeenCalledTimes( 1 );
 		expect( process.exit ).toHaveBeenCalledWith( 0 );
+	} );
+
+	it( 'marks the page as busy while the page is being processed', async () => {
+		const cluster = createClusterMock();
+		let wasBusy = false;
+
+		vi.mocked( createCrawlerCluster ).mockResolvedValue( cluster as unknown as Cluster<QueueData, void> );
+		vi.mocked( processPage ).mockImplementation( async ( { page } ) => {
+			wasBusy = busyPages.has( page );
+		} );
+
+		await runCrawler( {
+			url: 'https://ckeditor.com/docs/start'
+		} );
+
+		const { page } = vi.mocked( processPage ).mock.calls[ 0 ]![ 0 ];
+
+		expect( wasBusy ).toBe( true );
+		expect( busyPages.has( page ) ).toBe( false );
+	} );
+
+	it( 'stops marking the page as busy when processing the page fails', async () => {
+		const cluster = createClusterMock();
+		let taskPromise: Promise<void> | undefined;
+
+		cluster.task.mockImplementation( taskCallback => {
+			taskPromise = taskCallback( {
+				page: { id: 'page' },
+				data: {
+					url: 'https://ckeditor.com/docs/start',
+					parentUrl: '(none)',
+					remainingNestedLevels: 1
+				}
+			} );
+		} );
+
+		vi.mocked( createCrawlerCluster ).mockResolvedValue( cluster as unknown as Cluster<QueueData, void> );
+		vi.mocked( processPage ).mockRejectedValue( new Error( 'Navigation failed' ) );
+
+		await runCrawler( {
+			url: 'https://ckeditor.com/docs/start'
+		} );
+
+		await expect( taskPromise ).rejects.toThrow( 'Navigation failed' );
+
+		const { page } = vi.mocked( processPage ).mock.calls[ 0 ]![ 0 ];
+
+		expect( busyPages.has( page ) ).toBe( false );
 	} );
 
 	it( 'passes provided options and exits with code 1 when errors were collected', async () => {

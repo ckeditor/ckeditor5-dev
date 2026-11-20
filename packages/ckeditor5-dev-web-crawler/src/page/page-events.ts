@@ -20,12 +20,18 @@ interface PageEventHandlersOptions {
  */
 export function attachPageEventHandlers( { page, data, pageErrors }: PageEventHandlersOptions ): () => void {
 	const onRequest = async ( request: HTTPRequest ): Promise<void> => {
-		if ( shouldAbortRequest( request ) ) {
-			await request.abort( REQUEST_ABORT_REASON );
-			return;
-		}
+		// A rejection here would be unhandled and would end the whole crawler process. It happens when the request
+		// was already handled, or when the page was closed or reset in the meantime.
+		try {
+			if ( shouldAbortRequest( request ) ) {
+				await request.abort( REQUEST_ABORT_REASON );
+				return;
+			}
 
-		await request.continue();
+			await request.continue();
+		} catch {
+			// Nothing to do: the request no longer needs a decision.
+		}
 	};
 
 	const onDialog = async ( dialog: Dialog ): Promise<void> => {
@@ -156,19 +162,26 @@ async function getConsoleError( message: ConsoleMessage, data: QueueData ): Prom
 		return null;
 	}
 
-	const serializedMessage = await Promise.all( message.args().map( arg => {
-		const remoteObject = arg.remoteObject();
+	let serializedMessage: Array<unknown>;
 
-		if ( remoteObject.type === 'string' ) {
-			return remoteObject.value;
-		}
+	try {
+		serializedMessage = await Promise.all( message.args().map( arg => {
+			const remoteObject = arg.remoteObject();
 
-		if ( remoteObject.type === 'object' && remoteObject.subtype === 'error' ) {
-			return remoteObject.description;
-		}
+			if ( remoteObject.type === 'string' ) {
+				return remoteObject.value;
+			}
 
-		return arg.jsonValue();
-	} ) );
+			if ( remoteObject.type === 'object' && remoteObject.subtype === 'error' ) {
+				return remoteObject.description;
+			}
+
+			return arg.jsonValue();
+		} ) );
+	} catch {
+		// The arguments cannot be read once the page navigated away or was closed.
+		serializedMessage = [ message.text() ];
+	}
 
 	const text = serializedMessage.join( ' ' ).trim();
 

@@ -5,9 +5,10 @@
 
 import type { Cluster } from 'puppeteer-cluster';
 import type { Page } from 'puppeteer';
-import { ERROR_TYPES } from '../constants.js';
+import { ERROR_TYPES, NETWORK_IDLE_TIME, NETWORK_IDLE_TIMEOUT_MARGIN } from '../constants.js';
 import { getErrorIgnorePatternsFromPage, markErrorsAsIgnored } from '../errors/ignore-patterns.js';
 import { attachPageEventHandlers } from '../page/page-events.js';
+import { trackNetworkIdle } from '../page/network-idle.js';
 import { areSameUrl } from '../utils.js';
 import type { CrawlerError, QueueData, RetryableCrawlerError } from '../types.js';
 import { getLinksFromPage } from './get-links-from-page.js';
@@ -19,19 +20,30 @@ interface ProcessPageOptions {
 	baseUrl: string;
 	discoveredLinks: Set<string>;
 	exclusions: Array<string>;
+	timeout: number;
 }
 
 /**
  * Crawls a single page, reports all discovered errors and queues new links.
  */
-export async function processPage( { page, data, cluster, baseUrl, discoveredLinks, exclusions }: ProcessPageOptions ): Promise<void> {
+export async function processPage( {
+	page,
+	data,
+	cluster,
+	baseUrl,
+	discoveredLinks,
+	exclusions,
+	timeout
+}: ProcessPageOptions ): Promise<void> {
+	const networkIdleDeadline = Date.now() + timeout - NETWORK_IDLE_TIMEOUT_MARGIN;
+
 	await page.setRequestInterception( true );
 
 	const pageErrors: Array<CrawlerError> = [];
 	const detachPageEventHandlers = attachPageEventHandlers( { page, data, pageErrors } );
 
 	try {
-		const pendingNavigationError = await getNavigationError( page, data.url );
+		const pendingNavigationError = await getNavigationError( page, data.url, networkIdleDeadline );
 
 		if ( pendingNavigationError && !hasNavigationRequestFailure( pageErrors, data.url ) ) {
 			pageErrors.push( pendingNavigationError );
@@ -65,12 +77,15 @@ export async function processPage( { page, data, cluster, baseUrl, discoveredLin
 	}
 }
 
-async function getNavigationError( page: Page, pageUrl: string ): Promise<CrawlerError | null> {
-	try {
-		// `networkidle0` forces loading CKEditor snippets. API pages to not contain them, so let's speed up.
-		const waitUntil = pageUrl.includes( '/api/' ) ? 'load' : 'networkidle0';
+async function getNavigationError( page: Page, pageUrl: string, networkIdleDeadline: number ): Promise<CrawlerError | null> {
+	// Waiting for the network to be idle lets CKEditor snippets load. API pages do not contain them, so they skip it.
+	// After the `load` event, it waits until no request has been in flight for 250 ms, which is shorter than the 500 ms
+	// that `waitUntil: 'networkidle0'` needs.
+	const networkIdle = pageUrl.includes( '/api/' ) ? null : trackNetworkIdle( page );
 
-		await page.goto( pageUrl, { waitUntil } );
+	try {
+		await page.goto( pageUrl, { waitUntil: 'load' } );
+		await networkIdle?.waitForIdle( NETWORK_IDLE_TIME, Math.max( 0, networkIdleDeadline - Date.now() ) );
 
 		return null;
 	} catch ( error: any ) {
@@ -81,6 +96,8 @@ async function getNavigationError( page: Page, pageUrl: string ): Promise<Crawle
 			type: ERROR_TYPES.NAVIGATION_ERROR,
 			message
 		};
+	} finally {
+		networkIdle?.stop();
 	}
 }
 

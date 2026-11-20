@@ -68,6 +68,17 @@ export const DEFAULT_RETRIES = 3;
 
 export const DEFAULT_RETRY_DELAY = 1000;
 
+/**
+ * How long the network must be idle after the `load` event before the crawler considers a page loaded.
+ */
+export const NETWORK_IDLE_TIME = 250;
+
+/**
+ * How long before the crawler's task times out the wait for the network to be idle gives up with an error. It leaves time
+ * to collect the links and report the page errors, which the cluster would replace with a timeout error otherwise.
+ */
+export const NETWORK_IDLE_TIMEOUT_MARGIN = 500;
+
 export const ERROR_TYPES: ErrorTypes = {
 	PAGE_CRASH: {
 		event: 'error',
@@ -90,8 +101,8 @@ export const ERROR_TYPES: ErrorTypes = {
 		description: 'Console error'
 	},
 	NAVIGATION_ERROR: {
-		// Navigation error does not have the `event` property, because this error is not emitted by page.on() method as
-		// event, but it is thrown as exception from page.goto() method.
+		// Navigation error does not have the `event` property, because it is not emitted by `page.on()`, but thrown while
+		// the page loads, by `page.goto()` or while waiting for the network to be idle.
 		description: 'Navigation error'
 	}
 };
