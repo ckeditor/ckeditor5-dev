@@ -12,7 +12,7 @@ const IDLE_TIME = 250;
 const TIMEOUT = 5000;
 
 function createRequest( failure: { errorText: string } | null = null ): HTTPRequest {
-	return { failure: () => failure } as unknown as HTTPRequest;
+	return { failure: () => failure, url: () => 'https://example.com/script.js' } as unknown as HTTPRequest;
 }
 
 describe( 'trackNetworkIdle()', () => {
@@ -123,17 +123,22 @@ describe( 'trackNetworkIdle()', () => {
 		expect( isIdle ).toBe( true );
 	} );
 
-	it( 'resolves after the timeout when a request never finishes', async () => {
+	it( 'rejects with the pending requests when the network is not idle within the timeout', async () => {
 		const tracker = trackNetworkIdle( page as unknown as Page );
+		let error: Error | undefined;
 
 		page.emit( 'request', createRequest() );
-		waitForIdle( tracker );
+		tracker.waitForIdle( IDLE_TIME, TIMEOUT ).catch( err => {
+			error = err;
+		} );
 
 		await vi.advanceTimersByTimeAsync( TIMEOUT - 1 );
-		expect( isIdle ).toBe( false );
+		expect( error ).toBeUndefined();
 
 		await vi.advanceTimersByTimeAsync( 1 );
-		expect( isIdle ).toBe( true );
+		expect( error?.message ).toBe(
+			'The network was not idle within 5000 ms. Pending requests: https://example.com/script.js'
+		);
 	} );
 
 	it( 'rejects when the page is closed while waiting', async () => {

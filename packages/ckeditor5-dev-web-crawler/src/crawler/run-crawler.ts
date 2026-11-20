@@ -57,7 +57,8 @@ export async function runCrawler( options: CrawlerOptions ): Promise<void> {
 				cluster,
 				baseUrl,
 				discoveredLinks,
-				exclusions
+				exclusions,
+				timeout
 			} );
 		} finally {
 			busyPages.delete( page );

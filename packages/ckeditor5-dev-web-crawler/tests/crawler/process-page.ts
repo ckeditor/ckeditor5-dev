@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Page } from 'puppeteer';
 import type { Cluster } from 'puppeteer-cluster';
 import { processPage } from '../../src/crawler/process-page.js';
@@ -18,6 +18,8 @@ vi.mock( '../../src/page/page-events.js' );
 vi.mock( '../../src/page/network-idle.js' );
 vi.mock( '../../src/errors/ignore-patterns.js' );
 vi.mock( '../../src/crawler/get-links-from-page.js' );
+
+const TIMEOUT = 20000;
 
 function createPageMock( gotoImpl?: () => Promise<void> ): Page {
 	return {
@@ -53,6 +55,7 @@ async function expectRetryableError( callback: () => Promise<void> ): Promise<Re
 describe( 'processPage()', () => {
 	beforeEach( () => {
 		vi.clearAllMocks();
+		vi.useFakeTimers( { toFake: [ 'Date' ] } );
 
 		vi.mocked( attachPageEventHandlers ).mockReturnValue( vi.fn() );
 		vi.mocked( trackNetworkIdle ).mockReturnValue( {
@@ -62,6 +65,10 @@ describe( 'processPage()', () => {
 		vi.mocked( getErrorIgnorePatternsFromPage ).mockResolvedValue( new Map() );
 		vi.mocked( markErrorsAsIgnored ).mockImplementation( () => {} );
 		vi.mocked( getLinksFromPage ).mockResolvedValue( [] );
+	} );
+
+	afterEach( () => {
+		vi.useRealTimers();
 	} );
 
 	it( 'queues newly discovered links when depth is greater than 0', async () => {
@@ -80,7 +87,8 @@ describe( 'processPage()', () => {
 			cluster,
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks,
-			exclusions: [ '/api/' ]
+			exclusions: [ '/api/' ],
+			timeout: TIMEOUT
 		} );
 
 		expect( page.setRequestInterception ).toHaveBeenCalledWith( true );
@@ -91,7 +99,7 @@ describe( 'processPage()', () => {
 		expect( vi.mocked( trackNetworkIdle ) ).toHaveBeenCalledWith( page );
 		expect( vi.mocked( trackNetworkIdle ).mock.invocationCallOrder[ 0 ] )
 			.toBeLessThan( vi.mocked( page.goto ).mock.invocationCallOrder[ 0 ]! );
-		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250, 5000 );
+		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250, TIMEOUT - 500 );
 		expect( networkIdle.stop ).toHaveBeenCalledTimes( 1 );
 		expect( vi.mocked( getLinksFromPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			page,
@@ -117,6 +125,26 @@ describe( 'processPage()', () => {
 		expect( vi.mocked( getErrorIgnorePatternsFromPage ) ).not.toHaveBeenCalled();
 	} );
 
+	it( 'waits for the network to be idle only until shortly before the task times out', async () => {
+		const page = createPageMock( async () => {
+			vi.setSystemTime( Date.now() + 2000 );
+		} );
+
+		await processPage( {
+			page,
+			data: createQueueData(),
+			cluster: createClusterMock(),
+			baseUrl: 'https://ckeditor.com/docs/',
+			discoveredLinks: new Set(),
+			exclusions: [],
+			timeout: TIMEOUT
+		} );
+
+		const networkIdle = vi.mocked( trackNetworkIdle ).mock.results[ 0 ]!.value;
+
+		expect( networkIdle.waitForIdle ).toHaveBeenCalledWith( 250, TIMEOUT - 2000 - 500 );
+	} );
+
 	it( 'does not collect links when depth limit is reached', async () => {
 		const page = createPageMock();
 		const cluster = createClusterMock();
@@ -127,7 +155,8 @@ describe( 'processPage()', () => {
 			cluster,
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks: new Set(),
-			exclusions: []
+			exclusions: [],
+			timeout: TIMEOUT
 		} );
 
 		expect( vi.mocked( getLinksFromPage ) ).not.toHaveBeenCalled();
@@ -143,7 +172,8 @@ describe( 'processPage()', () => {
 			cluster: createClusterMock(),
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks: new Set(),
-			exclusions: []
+			exclusions: [],
+			timeout: TIMEOUT
 		} );
 
 		expect( page.goto ).toHaveBeenCalledWith( 'https://ckeditor.com/docs/api/module', { waitUntil: 'load' } );
@@ -173,7 +203,8 @@ describe( 'processPage()', () => {
 			cluster: createClusterMock(),
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks: new Set(),
-			exclusions: []
+			exclusions: [],
+			timeout: TIMEOUT
 		} ) );
 
 		expect( thrownError.message ).toContain( 'found 1 page error' );
@@ -211,7 +242,8 @@ describe( 'processPage()', () => {
 			cluster: createClusterMock(),
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks: new Set(),
-			exclusions: []
+			exclusions: [],
+			timeout: TIMEOUT
 		} ) );
 
 		expect( thrownError.crawlerErrors ).toHaveLength( 1 );
@@ -245,7 +277,8 @@ describe( 'processPage()', () => {
 			cluster: createClusterMock(),
 			baseUrl: 'https://ckeditor.com/docs/',
 			discoveredLinks: new Set(),
-			exclusions: []
+			exclusions: [],
+			timeout: TIMEOUT
 		} ) ).resolves.toBeUndefined();
 	} );
 } );

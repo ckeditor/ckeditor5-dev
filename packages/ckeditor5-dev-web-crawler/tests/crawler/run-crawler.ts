@@ -70,7 +70,8 @@ describe( 'runCrawler()', () => {
 
 		expect( vi.mocked( processPage ) ).toHaveBeenCalledWith( expect.objectContaining( {
 			baseUrl: 'https://ckeditor.com/docs/start',
-			exclusions: []
+			exclusions: [],
+			timeout: DEFAULT_TIMEOUT
 		} ) );
 
 		expect( cluster.queue ).toHaveBeenCalledWith( {

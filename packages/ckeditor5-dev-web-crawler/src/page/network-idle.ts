@@ -12,7 +12,7 @@ interface NetworkIdleTracker {
 
 /**
  * Starts tracking the requests of the page. `waitForIdle()` resolves once no request has been in flight for `idleTime`,
- * or after `timeout` at the latest.
+ * and rejects if that does not happen within `timeout`.
  *
  * Unlike in `page.waitForNetworkIdle()`, which counts a request as finished once its response headers arrive, a request
  * counts as in flight until its response body has loaded or the request has failed, like in Chrome's `networkidle0`.
@@ -49,8 +49,7 @@ export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 	page.on( 'close', onPageClose );
 
 	return {
-		// Puppeteer emits no `requestfinished` or `requestfailed` event for a few intercepted requests. The `timeout` caps
-		// the wait, so the crawler's task does not time out and still reports the page errors.
+		// Failing before the crawler's task times out reports the pending requests together with the other page errors.
 		waitForIdle: ( idleTime, timeout ) => new Promise( ( resolve, reject ) => {
 			onClose = () => reject( new Error( 'The page was closed while waiting for the network to be idle.' ) );
 
@@ -66,7 +65,11 @@ export function trackNetworkIdle( page: Page ): NetworkIdleTracker {
 				}
 			};
 
-			maxWaitTimeoutId = setTimeout( resolve, timeout );
+			maxWaitTimeoutId = setTimeout( () => {
+				const pendingUrls = Array.from( inflightRequests, request => request.url() ).join( ', ' );
+
+				reject( new Error( `The network was not idle within ${ timeout } ms. Pending requests: ${ pendingUrls }` ) );
+			}, timeout );
 			onChange();
 		} ),
 
