@@ -15,7 +15,7 @@ interface Inspector {
 
 declare global {
 	interface Window {
-		editor?: ManualEditor | Element | null;
+		editor?: ManualEditor | null;
 		CKEditorInspector: Inspector;
 		enableCKEditorInspector(): Promise<void>;
 	}
@@ -55,8 +55,9 @@ export function setUpManualInspector( loadInspector: () => Promise<Inspector> ):
 		return activation;
 	};
 
-	// id="editor" creates a named DOM property, not an editor instance.
-	let editor = window.editor instanceof Element ? null : window.editor;
+	// Elements with id="editor" or name="editor" are exposed through the window's prototype chain, not as own properties.
+	// Don't read them: a cross-origin iframe throws on property access.
+	let editor = Object.hasOwn( window, 'editor' ) ? window.editor : null;
 
 	Object.defineProperty( window, 'editor', {
 		configurable: true,

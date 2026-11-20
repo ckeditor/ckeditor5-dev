@@ -9,11 +9,15 @@ import { setUpManualInspector } from '../../theme/manual-inspector.js';
 describe( 'setUpManualInspector()', () => {
 	beforeEach( () => {
 		vi.stubGlobal( 'window', {} );
-		vi.stubGlobal( 'Element', class {} );
 	} );
 
 	it( 'replaces the named DOM property but keeps window.editor readable and writable without loading the inspector', async () => {
-		window.editor = new Element();
+		// Browsers expose named DOM properties through the prototype chain. Reading this one throws, like a cross-origin iframe.
+		vi.stubGlobal( 'window', Object.create( {
+			get editor() {
+				throw new Error( 'SecurityError' );
+			}
+		} ) );
 		const editor = { state: 'ready' };
 		const inspector = { attach: vi.fn() };
 		const load = vi.fn().mockResolvedValue( inspector );
