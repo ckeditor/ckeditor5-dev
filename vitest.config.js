@@ -80,7 +80,8 @@ export default defineConfig( {
 				'packages/*/src/**',
 				'packages/*/lib/**',
 				'packages/ckeditor5-dev-manual-server/theme/catalog-favorites.ts',
-				'packages/ckeditor5-dev-manual-server/theme/catalog-search.ts'
+				'packages/ckeditor5-dev-manual-server/theme/catalog-search.ts',
+				'packages/ckeditor5-dev-manual-server/theme/manual-inspector.ts'
 			],
 			exclude: [
 				// The package has no tests.
