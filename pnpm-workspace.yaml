@@ -18,14 +18,6 @@ overrides:
 
 minimumReleaseAge: 4320 # 3 days
 minimumReleaseAgeExclude:
-  - '@earendil-works/pi-agent-core@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-ai@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-codemode@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-coding-agent@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-mcp@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-schema@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-telemetry@1.6.0' # Remove after 2026-11-23.
-  - '@earendil-works/pi-tui@1.6.0' # Remove after 2026-11-23.
   # Company-owned scopes - every release comes from our own pipelines.
   - '@ckeditor/*'
   - '@cksource/*'
