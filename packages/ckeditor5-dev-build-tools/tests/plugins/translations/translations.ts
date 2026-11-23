@@ -6,11 +6,14 @@
 import upath from 'upath';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { rolldown, type RolldownOutput } from 'rolldown';
+import { glob } from 'glob';
 import { verifyChunk } from '../../_utils/utils.js';
 
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
+
+vi.mock( 'glob', { spy: true } );
 
 // eslint-disable-next-line @stylistic/max-len
 const ALL_POLISH_TRANSLATIONS = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]}';
@@ -142,6 +145,44 @@ describe( 'translations()', () => {
 		}
 	} );
 } );
+
+describe( 'translations() - output order', () => {
+	it( 'merges the translation files in the order of their paths, regardless of the order returned by glob', async () => {
+		const temporaryDirectory = await mkdtemp( upath.join( tmpdir(), 'ckeditor5-translations-' ) );
+
+		try {
+			const firstPath = upath.join( temporaryDirectory, 'a/lang/translations/en.ts' );
+			const secondPath = upath.join( temporaryDirectory, 'b/lang/translations/en.ts' );
+
+			await writeTranslationFiles( temporaryDirectory, {
+				'a/lang/translations/en.ts': { 'First': 'First', 'Shared': 'From a' },
+				'b/lang/translations/en.ts': { 'Second': 'Second', 'Shared': 'From b' }
+			} );
+
+			vi.mocked( glob ).mockResolvedValueOnce( [ secondPath, firstPath ] );
+			const reversedOutput = await generateBundle();
+
+			vi.mocked( glob ).mockResolvedValueOnce( [ firstPath, secondPath ] );
+			const sortedOutput = await generateBundle();
+
+			const expected = 'export default {"en":{"dictionary":{"First":"First","Shared":"From b","Second":"Second"}';
+
+			verifyChunk( reversedOutput, 'translations/en.js', expected );
+			verifyChunk( sortedOutput, 'translations/en.js', expected );
+		} finally {
+			await rm( temporaryDirectory, { recursive: true, force: true } );
+		}
+	} );
+} );
+
+async function writeTranslationFiles( rootPath: string, files: Record<string, Record<string, string>> ): Promise<void> {
+	for ( const [ relativePath, dictionary ] of Object.entries( files ) ) {
+		const filePath = upath.join( rootPath, relativePath );
+
+		await mkdir( upath.dirname( filePath ), { recursive: true } );
+		await writeFile( filePath, `export default { en: { dictionary: ${ JSON.stringify( dictionary ) } } };` );
+	}
+}
 
 async function writeTranslationFile( rootPath: string, relativePath: string, message: string ): Promise<void> {
 	const filePath = upath.join( rootPath, relativePath );
