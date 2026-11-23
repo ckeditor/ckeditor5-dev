@@ -4,7 +4,9 @@
  */
 
 import { createHash } from 'node:crypto';
+import { relative } from 'node:path';
 import type { Plugin } from 'vite';
+import { toPublicSpecifier } from '../utils.js';
 
 const INJECTED_CSS_VIRTUAL_ID_PREFIX = '\0virtual:ckeditor5-preserve-css-import-order:';
 const INJECTED_CSS_VIRTUAL_ID_SUFFIX = '.js';
@@ -89,7 +91,7 @@ export function preserveCssImportOrderPlugin(): Plugin {
 				}
 
 				return {
-					code: createCssInjectionModule( cssFilePath ),
+					code: createCssInjectionModule( cssFilePath, this.environment.config.root ),
 					moduleSideEffects: true
 				};
 			}
@@ -97,11 +99,15 @@ export function preserveCssImportOrderPlugin(): Plugin {
 	};
 }
 
-function createCssInjectionModule( cssFilePath: string ): string {
+function createCssInjectionModule( cssFilePath: string, root: string ): string {
+	// Shadow DOM manuals use Vite's style IDs to forward only the selected stylesheets into each root.
+	const styleId = toPublicSpecifier( relative( root, cssFilePath ) );
+
 	return `
 import css from ${ JSON.stringify( `${ cssFilePath }?inline` ) };
 
 const style = document.createElement( 'style' );
+style.dataset.viteDevId = ${ JSON.stringify( styleId ) };
 style.textContent = css;
 document.head.appendChild( style );
 `;

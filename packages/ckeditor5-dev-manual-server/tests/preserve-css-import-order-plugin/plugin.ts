@@ -136,7 +136,7 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 
 		const firstId = await resolveId.handler.call( context, './theme.css', '/entry.js', IMPORT_OPTIONS );
 		const secondId = await resolveId.handler.call( context, './theme.css', '/entry.js', IMPORT_OPTIONS );
-		const loadedModule = load.handler( firstId! );
+		const loadedModule = load.handler.call( { environment: { config: { root: workspaceRoot } } }, firstId! );
 
 		expect( secondId ).to.equal( firstId );
 		expect( firstId ).to.match( /^\0virtual:ckeditor5-preserve-css-import-order:[a-f\d]{64}\.js$/ );
@@ -210,23 +210,28 @@ describe( 'preserveCssImportOrderPlugin()', () => {
 		const htmlFilePath = join( workspaceRoot, 'build/packages/ckeditor5-foo/manual/foo.manual.html' );
 		const html = readFileSync( htmlFilePath, 'utf8' );
 		const entryPath = /<script type="module" crossorigin src="([^"]+)"><\/script>/.exec( html )![ 1 ]!;
-		const injectedStyles: Array<string> = [];
+		const injectedStyles: Array<HTMLStyleElement> = [];
 
 		vi.stubGlobal( 'document', {
 			createElement: () => ( {
-				textContent: ''
+				textContent: '',
+				dataset: {}
 			} ),
 			head: {
-				appendChild: ( style: { textContent: string } ) => injectedStyles.push( style.textContent )
+				appendChild: ( style: HTMLStyleElement ) => injectedStyles.push( style )
 			}
 		} );
 
 		await import( pathToFileURL( resolve( workspaceRoot, 'build', stripLeadingSlash( entryPath ) ) ).href );
 
-		expect( injectedStyles ).to.have.length( 3 );
-		expect( injectedStyles[ 0 ] ).to.contain( '.order-shared' );
-		expect( injectedStyles[ 1 ] ).to.contain( '.order-first' );
-		expect( injectedStyles[ 2 ] ).to.contain( '.order-theme' );
+		expect( injectedStyles.map( style => style.dataset.viteDevId ) ).to.deep.equal( [
+			'/packages/ckeditor5-foo/manual/shared.css',
+			'/packages/ckeditor5-foo/manual/first.css',
+			'/packages/ckeditor5-foo/theme/index-editor.css'
+		] );
+		expect( injectedStyles[ 0 ]!.textContent ).to.contain( '.order-shared' );
+		expect( injectedStyles[ 1 ]!.textContent ).to.contain( '.order-first' );
+		expect( injectedStyles[ 2 ]!.textContent ).to.contain( '.order-theme' );
 	} );
 } );
 
