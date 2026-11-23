@@ -31,7 +31,7 @@ const TEMPLATE = /* html */ `
 			<span class="label__name" data-field="name"></span>
 			<span class="label__package" data-field="package"></span>
 		</span>
-		<span class="divider instructions-only" aria-hidden="true"></span>
+		<button type="button" class="pill" data-action="inspector" aria-pressed="false">Inspector</button>
 		<button type="button" class="pill instructions-only" data-action="toggle" aria-expanded="false">
 			Instructions
 		</button>
@@ -138,8 +138,8 @@ class ManualHeaderElement extends HTMLElement {
 	}
 
 	private _setUpActions( shadow: ShadowRoot ): void {
-		shadow.addEventListener( 'click', event => {
-			const trigger = ( event.target as Element ).closest<HTMLElement>( '[data-action]' );
+		shadow.addEventListener( 'click', async event => {
+			const trigger = ( event.target as Element ).closest<HTMLButtonElement>( '[data-action]' );
 
 			if ( !trigger ) {
 				return;
@@ -149,6 +149,20 @@ class ManualHeaderElement extends HTMLElement {
 				this._toggleFavorite();
 			} else if ( trigger.dataset.action == 'toggle' ) {
 				this._toggleInstructions( !this._panel.classList.contains( 'panel--open' ) );
+			} else if ( trigger.dataset.action == 'inspector' ) {
+				if ( trigger.ariaDisabled === 'true' ) {
+					return;
+				}
+
+				trigger.ariaDisabled = 'true';
+
+				try {
+					await window.enableCKEditorInspector();
+					trigger.ariaPressed = 'true';
+				} catch ( error ) {
+					trigger.ariaDisabled = null;
+					console.error( error );
+				}
 			} else if ( trigger.dataset.action == 'close' ) {
 				this._toggleInstructions( false );
 			}

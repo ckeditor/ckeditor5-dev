@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
-
+import { setUpManualInspector } from './manual-inspector.js';
 import promptStyles from './manual-bootstrap.css?inline';
 
 declare const LICENSE_KEY: string;
@@ -22,44 +21,18 @@ const globalTarget = window as any;
  * (`*.manual.html`), with or without the `<ck-manual-header>` chrome:
  *
  * - sets the global license key so tests do not have to pass `licenseKey` explicitly;
- * - resets the `window.editor` named DOM property and auto-attaches the CKEditor inspector;
+ * - registers editors for the on-demand CKEditor Inspector;
  * - renders the "source changed" refresh prompt driven by the dev server (`refreshPlugin`).
  *
  * The refresh prompt is part of the dev-server contract, not test chrome, so it belongs here.
  */
 
-// In direct HTML manual tests, `id="editor"` creates `window.editor` as a named DOM property.
-// Reset it so manual tests can safely reuse `window.editor` for the editor instance.
-if ( globalTarget.editor instanceof Element ) {
-	globalTarget.editor = null;
-}
-
-globalTarget.CKEditorInspector ||= CKEditorInspector;
-
 if ( typeof LICENSE_KEY != 'undefined' ) {
 	globalTarget.CKEDITOR_GLOBAL_LICENSE_KEY ||= LICENSE_KEY;
 }
 
-autoAttachInspector();
+setUpManualInspector( async () => ( await import( './inspector-api.js' ) ).CKEditorInspector );
 setUpRefreshPrompt();
-
-function autoAttachInspector(): void {
-	let editor = globalTarget.editor;
-
-	Object.defineProperty( globalTarget, 'editor', {
-		configurable: true,
-		set( value ) {
-			editor = value;
-
-			if ( editor ) {
-				CKEditorInspector.attach( editor );
-			}
-		},
-		get() {
-			return editor;
-		}
-	} );
-}
 
 /**
  * Shows a refresh prompt when the dev server reports source changes (see `refreshPlugin`).
