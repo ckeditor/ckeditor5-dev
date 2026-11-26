@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import upath from 'upath';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createMissingPackageTranslations from '../../lib/utils/createmissingpackagetranslations.js';
 import synchronizeTranslationsBasedOnContext from '../../lib/utils/synchronizetranslationsbasedoncontext.js';
 import { serializeTranslationFile } from '../../lib/utils/translationfile.js';
@@ -17,6 +17,10 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 	let packagePath;
 	let emptyPackagePath;
 	let coreRootPath;
+
+	beforeEach( () => {
+		vi.mocked( createMissingPackageTranslations ).mockReturnValue( [] );
+	} );
 
 	afterEach( () => {
 		if ( packagePath ) {
@@ -80,7 +84,8 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( {
 			packagePath,
 			contexts,
-			skipLicenseHeader: true
+			skipLicenseHeader: true,
+			dryRun: false
 		} );
 		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( serializeTranslationFile( {
 			language: 'en',
@@ -280,5 +285,91 @@ describe( 'synchronizeTranslationsBasedOnContext()', () => {
 
 		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( originalFile );
 		expect( writeFileSpy ).not.toHaveBeenCalled();
+	} );
+
+	it( 'returns the paths to the missing and outdated translation files', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		const missingFilePath = upath.join( translationsPath, 'de.ts' );
+
+		vi.mocked( createMissingPackageTranslations ).mockReturnValue( [ missingFilePath ] );
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: 'Message' },
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+		fs.writeFileSync( upath.join( translationsPath, 'pl.ts' ), serializeTranslationFile( {
+			language: 'pl',
+			dictionary: {},
+			contexts,
+			skipLicenseHeader: true
+		} ) );
+
+		const result = await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			skipLicenseHeader: true
+		} );
+
+		expect( result ).toEqual( {
+			missingFilePaths: [ missingFilePath ],
+			outdatedFilePaths: [ upath.join( translationsPath, 'pl.ts' ) ]
+		} );
+	} );
+
+	it( 'does not change any file in the dry run', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		const originalFile = serializeTranslationFile( {
+			language: 'en',
+			dictionary: { Message: 'Old message' },
+			contexts,
+			skipLicenseHeader: true
+		} );
+
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'en.ts' ), originalFile );
+		const writeFileSpy = vi.spyOn( fs, 'writeFileSync' );
+
+		const result = await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'New message' } ],
+			skipLicenseHeader: true,
+			dryRun: true
+		} );
+
+		expect( createMissingPackageTranslations ).toHaveBeenCalledWith( expect.objectContaining( { dryRun: true } ) );
+		expect( writeFileSpy ).not.toHaveBeenCalled();
+		expect( fs.readFileSync( upath.join( translationsPath, 'en.ts' ), 'utf-8' ) ).toBe( originalFile );
+		expect( result.outdatedFilePaths ).toEqual( [ upath.join( translationsPath, 'en.ts' ) ] );
+	} );
+
+	it( 'uses an empty English dictionary in the dry run when the English file is missing', async () => {
+		packagePath = fs.mkdtempSync( upath.join( os.tmpdir(), 'ckeditor5-foo-' ) );
+		const translationsPath = upath.join( packagePath, 'lang', 'translations' );
+		const contexts = { Message: 'Message context.' };
+		const originalFile = serializeTranslationFile( {
+			language: 'pl',
+			dictionary: { Message: 'Wiadomość' },
+			contexts,
+			skipLicenseHeader: true
+		} );
+
+		fs.mkdirSync( translationsPath, { recursive: true } );
+		fs.writeFileSync( upath.join( translationsPath, 'pl.ts' ), originalFile );
+
+		const result = await synchronizeTranslationsBasedOnContext( {
+			packageContexts: [ { packagePath, contextContent: contexts } ],
+			sourceMessages: [ { id: 'Message', string: 'Message' } ],
+			skipLicenseHeader: true,
+			dryRun: true
+		} );
+
+		expect( result.outdatedFilePaths ).toEqual( [] );
+		expect( fs.readFileSync( upath.join( translationsPath, 'pl.ts' ), 'utf-8' ) ).toBe( originalFile );
 	} );
 } );

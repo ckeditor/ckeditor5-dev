@@ -19,6 +19,9 @@ import synchronizeTranslationsBasedOnContext from './utils/synchronizetranslatio
  *   * missing translation entries are added with empty string as the message translation,
  *   * missing translation files are created for languages that do not have own "*.ts" file yet.
  *
+ * In the validation mode (`validateOnly`), no file is updated. Instead, the validation also reports the translation files that the
+ * synchronization would create or change.
+ *
  * @param {SynchronizeTranslationsOptions} options
  * @returns {Promise<void>}
  */
@@ -49,6 +52,18 @@ export default async function synchronizeTranslations( options ) {
 		...assertAllContextUsed( { packageContexts, sourceMessages, corePackagePath, ignoreUnusedCorePackageContexts } ),
 		...assertNoRepeatedContext( { packageContexts } )
 	);
+
+	// The synchronization needs valid contexts. Thus, the translation files are validated only when the contexts have no errors.
+	if ( validateOnly && !errors.length ) {
+		log.info( '📍 Validating translations files...' );
+		errors.push( ...await assertTranslationFilesSynchronized( {
+			packageContexts,
+			sourceMessages,
+			corePackagePath,
+			skipLicenseHeader,
+			translationsTypeImportSource
+		} ) );
+	}
 
 	if ( errors.length ) {
 		log.error( '🔥 The following errors have been found:' );
@@ -179,6 +194,26 @@ function assertNoRepeatedContext( { packageContexts } ) {
 }
 
 /**
+ * Returns an error for each translation file that the synchronization would create or change. It does not change any file.
+ *
+ * @param {object} options
+ * @param {Array.<TranslationsContext>} options.packageContexts An array of language contexts.
+ * @param {Array.<TranslatableEntry>} options.sourceMessages An array of i18n source messages.
+ * @param {string} options.corePackagePath A path to the `@ckeditor/ckeditor5-core` package.
+ * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
+ * @param {string} options.translationsTypeImportSource Module from which generated translation files import the `Translations` type.
+ * @returns {Promise<Array.<string>>}
+ */
+async function assertTranslationFilesSynchronized( options ) {
+	const { missingFilePaths, outdatedFilePaths } = await synchronizeTranslationsBasedOnContext( { ...options, dryRun: true } );
+
+	return [
+		...missingFilePaths.map( filePath => `Missing translation file "${ filePath }".` ),
+		...outdatedFilePaths.map( filePath => `Outdated translation file "${ filePath }".` )
+	];
+}
+
+/**
  * @param {SynchronizeTranslationsOptions} options
  */
 function normalizeOptions( options ) {
@@ -219,8 +254,9 @@ function normalizeOptions( options ) {
  * @property {string} [cwd=process.cwd()] Current working directory used to resolve paths to packages and source files.
  * @property {boolean} [ignoreUnusedCorePackageContexts=false] Whether to skip unused context errors related to the
  * `@ckeditor/ckeditor5-core` package.
- * @property {boolean} [validateOnly=false] If set, only validates the translations contexts against the source messages without
- * synchronizing the translations.
+ * @property {boolean} [validateOnly=false] If set, validates the translations without synchronizing them. The validation checks the
+ * translations contexts against the source messages and reports the translation files that the synchronization would create or
+ * change.
  * @property {boolean} [skipLicenseHeader=false] Whether to skip adding the license header to newly created translation files.
  * @property {string} [translationsTypeImportSource='@ckeditor/ckeditor5-utils'] Module from which generated translation files import
  * the `Translations` type.

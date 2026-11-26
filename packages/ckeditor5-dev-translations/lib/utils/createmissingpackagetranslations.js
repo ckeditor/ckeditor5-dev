@@ -17,20 +17,30 @@ import { serializeTranslationFile } from './translationfile.js';
  * @param {string} [options.corePackagePath] Path to the core package. If omitted, the package basename is used for backwards compatibility.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  * @param {string} options.translationsTypeImportSource Module from which generated translation files import the `Translations` type.
+ * @param {boolean} [options.dryRun=false] Whether to only find the missing translation files, without creating them.
+ * @returns {Array.<string>} Paths to the missing translation files.
  */
 export default function createMissingPackageTranslations( {
 	packagePath,
 	contexts,
 	corePackagePath,
 	skipLicenseHeader,
-	translationsTypeImportSource
+	translationsTypeImportSource,
+	dryRun = false
 } ) {
 	const isCorePackage = corePackagePath ? packagePath === corePackagePath : upath.basename( packagePath ) === 'ckeditor5-core';
+	const missingFilePaths = [];
 
 	for ( const { languageCode, languageFileName } of getLanguages() ) {
 		const translationFilePath = upath.join( packagePath, TRANSLATION_FILES_PATH, `${ languageFileName }.ts` );
 
 		if ( fs.existsSync( translationFilePath ) ) {
+			continue;
+		}
+
+		missingFilePaths.push( translationFilePath );
+
+		if ( dryRun ) {
 			continue;
 		}
 
@@ -46,4 +56,6 @@ export default function createMissingPackageTranslations( {
 		fs.mkdirSync( upath.dirname( translationFilePath ), { recursive: true } );
 		fs.writeFileSync( translationFilePath, content, 'utf-8' );
 	}
+
+	return missingFilePaths;
 }

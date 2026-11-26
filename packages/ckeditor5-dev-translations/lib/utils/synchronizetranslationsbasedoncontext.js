@@ -20,35 +20,46 @@ import { readTranslationFile, serializeTranslationFile } from './translationfile
  * @param {string} [options.corePackagePath] Path to the core package. If omitted, the package basename is used for backwards compatibility.
  * @param {boolean} options.skipLicenseHeader Whether to skip adding the license header to newly created translation files.
  * @param {string} options.translationsTypeImportSource Module from which generated translation files import the `Translations` type.
+ * @param {boolean} [options.dryRun=false] Whether to only find the missing and outdated translation files, without changing any file.
+ * @returns {Promise<{ missingFilePaths: Array.<string>, outdatedFilePaths: Array.<string> }>} Paths to the translation files that did not
+ * exist and to the translation files that were not synchronized before the call.
  */
 export default async function synchronizeTranslationsBasedOnContext( {
 	packageContexts,
 	sourceMessages,
 	corePackagePath,
 	skipLicenseHeader,
-	translationsTypeImportSource
+	translationsTypeImportSource,
+	dryRun = false
 } ) {
 	const languages = getLanguages();
+	const missingFilePaths = [];
+	const outdatedFilePaths = [];
 
 	for ( const { packagePath, contextContent } of packageContexts ) {
 		if ( Object.keys( contextContent ).length === 0 ) {
 			continue;
 		}
 
-		createMissingPackageTranslations( {
+		missingFilePaths.push( ...createMissingPackageTranslations( {
 			packagePath,
 			contexts: contextContent,
 			corePackagePath,
 			skipLicenseHeader,
-			translationsTypeImportSource
-		} );
+			translationsTypeImportSource,
+			dryRun
+		} ) );
 
 		const sourceMessagesForPackage = Object.keys( contextContent )
 			.map( messageId => sourceMessages.find( message => message.id === messageId ) )
 			.filter( Boolean );
-		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.ts' ) );
+		const translationFilePaths = glob.sync( upath.join( packagePath, TRANSLATION_FILES_PATH, '*.ts' ) ).sort();
 		const englishTranslationFilePath = translationFilePaths.find( filePath => filePath.endsWith( 'en.ts' ) );
-		const { dictionary: englishTranslations } = await readTranslationFile( englishTranslationFilePath );
+
+		// In the dry run, the English file can be missing. The synchronization would create it with an empty dictionary.
+		const { dictionary: englishTranslations } = englishTranslationFilePath ?
+			await readTranslationFile( englishTranslationFilePath ) :
+			{ dictionary: {} };
 		const changedEnglishTranslations = getChangedEnglishTranslations( englishTranslations, sourceMessagesForPackage );
 		const isCorePackage = corePackagePath ? packagePath === corePackagePath : upath.basename( packagePath ) === 'ckeditor5-core';
 
@@ -104,11 +115,19 @@ export default async function synchronizeTranslationsBasedOnContext( {
 				translationsTypeImportSource
 			} );
 
-			if ( originalFile !== updatedFile ) {
+			if ( originalFile === updatedFile ) {
+				continue;
+			}
+
+			outdatedFilePaths.push( translationFilePath );
+
+			if ( !dryRun ) {
 				fs.writeFileSync( translationFilePath, updatedFile, 'utf-8' );
 			}
 		}
 	}
+
+	return { missingFilePaths, outdatedFilePaths };
 }
 
 function getChangedEnglishTranslations( englishTranslations, sourceMessagesForPackage ) {
