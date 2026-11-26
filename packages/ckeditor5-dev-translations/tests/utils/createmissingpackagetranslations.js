@@ -30,7 +30,7 @@ describe( 'createMissingPackageTranslations()', () => {
 			skipLicenseHeader: true
 		} ) );
 
-		createMissingPackageTranslations( {
+		const missingFilePaths = createMissingPackageTranslations( {
 			packagePath: temporaryDirectory,
 			contexts: { Message: 'A message context.' },
 			skipLicenseHeader: true
@@ -40,6 +40,24 @@ describe( 'createMissingPackageTranslations()', () => {
 			Existing: 'Existing'
 		} );
 		expect( ( await readTranslationFile( upath.join( translationsDirectory, 'pl.ts' ) ) ).dictionary ).toEqual( {} );
+		expect( missingFilePaths ).toContain( upath.join( translationsDirectory, 'pl.ts' ) );
+		expect( missingFilePaths ).not.toContain( upath.join( translationsDirectory, 'en.ts' ) );
+	} );
+
+	it( 'only finds the missing translation files in the dry run', () => {
+		temporaryDirectory = fs.mkdtempSync( upath.join( os.tmpdir(), 'cke5-translations-' ) );
+		const translationsDirectory = upath.join( temporaryDirectory, 'lang', 'translations' );
+
+		const missingFilePaths = createMissingPackageTranslations( {
+			packagePath: temporaryDirectory,
+			contexts: { Message: 'A message context.' },
+			skipLicenseHeader: true,
+			dryRun: true
+		} );
+
+		expect( missingFilePaths ).toContain( upath.join( translationsDirectory, 'en.ts' ) );
+		expect( missingFilePaths ).toContain( upath.join( translationsDirectory, 'pl.ts' ) );
+		expect( fs.existsSync( translationsDirectory ) ).toBe( false );
 	} );
 
 	it( 'adds plural forms to files created for the core package', async () => {

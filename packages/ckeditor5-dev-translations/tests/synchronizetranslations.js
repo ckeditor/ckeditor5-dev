@@ -46,6 +46,7 @@ describe( 'synchronizeTranslations()', () => {
 
 		vi.mocked( getPackageContexts ).mockReturnValue( [] );
 		vi.mocked( getSourceMessages ).mockReturnValue( [] );
+		vi.mocked( synchronizeTranslationsBasedOnContext ).mockResolvedValue( { missingFilePaths: [], outdatedFilePaths: [] } );
 
 		vi.spyOn( process, 'exit' ).mockImplementation( () => {} );
 		vi.spyOn( process, 'cwd' ).mockReturnValue( '/absolute/path/to' );
@@ -165,12 +166,60 @@ describe( 'synchronizeTranslations()', () => {
 		} );
 	} );
 
-	it( 'should not synchronize translations files when validation mode is enabled', async () => {
-		defaultOptions.validateOnly = true;
-		await synchronizeTranslations( defaultOptions );
+	describe( 'validation mode', () => {
+		beforeEach( () => {
+			defaultOptions.validateOnly = true;
+		} );
 
-		expect( synchronizeTranslationsBasedOnContext ).not.toHaveBeenCalled();
-		expect( stubs.logger.info ).toHaveBeenCalledWith( '✨ No errors found.' );
+		it( 'should find the translations files to create or change without changing them', async () => {
+			await synchronizeTranslations( defaultOptions );
+
+			expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledTimes( 1 );
+			expect( synchronizeTranslationsBasedOnContext ).toHaveBeenCalledWith( {
+				packageContexts: [],
+				sourceMessages: [],
+				corePackagePath: '/absolute/path/to/packages/ckeditor5-core',
+				skipLicenseHeader: false,
+				translationsTypeImportSource: '@ckeditor/ckeditor5-utils',
+				dryRun: true
+			} );
+
+			expect( stubs.logger.info ).toHaveBeenCalledWith( '📍 Validating translations files...' );
+			expect( stubs.logger.info ).not.toHaveBeenCalledWith( '📍 Synchronizing translations files...' );
+			expect( stubs.logger.info ).toHaveBeenCalledWith( '✨ No errors found.' );
+			expect( process.exit ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should return errors for the missing and outdated translations files', async () => {
+			vi.mocked( synchronizeTranslationsBasedOnContext ).mockResolvedValue( {
+				missingFilePaths: [ '/absolute/path/to/packages/ckeditor5-foo/lang/translations/de.ts' ],
+				outdatedFilePaths: [ '/absolute/path/to/packages/ckeditor5-foo/lang/translations/pl.ts' ]
+			} );
+
+			await synchronizeTranslations( defaultOptions );
+
+			expect( stubs.logger.error ).toHaveBeenCalledWith( '🔥 The following errors have been found:' );
+			expect( stubs.logger.error ).toHaveBeenCalledWith(
+				'   - Missing translation file "/absolute/path/to/packages/ckeditor5-foo/lang/translations/de.ts".'
+			);
+			expect( stubs.logger.error ).toHaveBeenCalledWith(
+				'   - Outdated translation file "/absolute/path/to/packages/ckeditor5-foo/lang/translations/pl.ts".'
+			);
+			expect( process.exit ).toHaveBeenCalledWith( 1 );
+		} );
+
+		it( 'should not validate translations files when the translations contexts have errors', async () => {
+			vi.mocked( getSourceMessages ).mockImplementation( ( { onErrorCallback } ) => {
+				onErrorCallback( 'Example error when loading messages from source files.' );
+
+				return [];
+			} );
+
+			await synchronizeTranslations( defaultOptions );
+
+			expect( synchronizeTranslationsBasedOnContext ).not.toHaveBeenCalled();
+			expect( process.exit ).toHaveBeenCalledWith( 1 );
+		} );
 	} );
 
 	describe( 'validation', () => {
